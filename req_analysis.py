@@ -32,7 +32,7 @@ try:
 			raw_ip = ip[0]
 			raw_port = ip[1]
 			print "IP: "+raw_ip+" Port: "+raw_port
-			query = ("INSERT INTO requests (ip, lastest_port,lastest_req, num_requests) VALUES (%s, %s, NOW(), %s) ON DUPLICATE KEY UPDATE lastest_port = %s, num_requests = num_requests + 1")
+			query = ("INSERT INTO requests (ip, lastest_port, lastest_req, num_requests) VALUES (%s, %s, NOW(), %s) ON DUPLICATE KEY UPDATE lastest_port = %s, lastest_req = NOW(), t num_requests = num_requests + 1")
 			cursor.execute(query, (raw_ip, int(raw_port), 1, int(raw_port)))
 			cnx.commit()
 		fifo.close()
