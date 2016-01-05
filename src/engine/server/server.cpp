@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
 #include <base/math.h>
 #include <base/system.h>
 
@@ -30,6 +31,8 @@
 // DDRace
 #include <string.h>
 #include <vector>
+#include <fstream>
+#include <iostream>
 #include <engine/shared/linereader.h>
 #include <game/server/gamecontext.h>
 
@@ -1377,6 +1380,17 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int
 
 	if (Extended && Take < 0)
 		SendServerInfo(pAddr, Token, Extended, Offset + ClientsPerPacket);
+
+	// all teh fifo
+	std::ofstream outfile;
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+    net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), true);
+
+	outfile.open("IPs.fifo", std::ios_base::app);
+	outfile << aAddrStr; 
+	outfile << "\n";
+	outfile.close();
+    dbg_msg("log", "IP cached: %s", aAddrStr);
 }
 
 void CServer::UpdateServerInfo()
