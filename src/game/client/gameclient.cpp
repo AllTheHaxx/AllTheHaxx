@@ -53,6 +53,7 @@
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
+#include "components/spoofremote.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/voting.h"
@@ -88,6 +89,7 @@ static CEmoticon gs_Emoticon;
 static CDamageInd gsDamageInd;
 static CVoting gs_Voting;
 static CSpectator gs_Spectator;
+static CSpoofRemote gs_SpoofRemote;
 
 static CPlayers gs_Players;
 static CNamePlates gs_NamePlates;
@@ -197,6 +199,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_Emoticon);
 	m_All.Add(&gs_KillMessages);
+	m_All.Add(&gs_SpoofRemote);
 	m_All.Add(m_pChat);
 	m_All.Add(&gs_Broadcast);
 	m_All.Add(&gs_DebugHud);
