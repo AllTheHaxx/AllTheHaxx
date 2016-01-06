@@ -326,6 +326,8 @@ public:
 	void DemolistPopulate();
 	bool m_Dummy;
 
+	int64 m_RefreshTimer;
+
 	// Ghost
 	struct CGhostItem
 	{

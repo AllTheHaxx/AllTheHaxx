@@ -3,6 +3,8 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
+#include "db_sqlite3.h"
+
 class CGraph
 {
 public:
@@ -46,6 +48,10 @@ public:
 
 	void UpdateInt(int64 Target);
 	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
+};
+
+class CQueryNames : public CQuery
+{
 };
 
 
@@ -194,6 +200,9 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 	char m_aDDNetSrvListToken[4];
 	bool m_DDNetSrvListTokenSet;
+
+	// - SQL
+	CSql *m_pDatabase;
 
 public:
 	IEngine *Engine() { return m_pEngine; }

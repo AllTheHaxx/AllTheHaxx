@@ -542,6 +542,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	str_format(aBuf, sizeof(aBuf), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
 	Status3.VSplitRight(TextRender()->TextWidth(0, 14.0f, aBuf, -1), 0, &Status3);
 	UI()->DoLabelScaled(&Status3, aBuf, 14.0f, -1);
+
+	// auto-refresh
+	if(g_Config.m_ClAutoRefresh && time_get() > m_RefreshTimer + time_freq() * g_Config.m_ClAutoRefresh)
+	{
+		m_RefreshTimer = time_get();
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+	}
 }
 
 void CMenus::RenderServerbrowserFilters(CUIRect View)
@@ -1361,6 +1368,17 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		{
 			Client()->Connect(g_Config.m_UiServerAddress);
 			m_EnterPressed = false;
+		}
+
+		if(g_Config.m_ClAutoRefresh)
+		{
+			ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);
+			ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
+			Button.VMargin(20.0f, &Button);
+
+			str_format(aBuf, sizeof(aBuf), Localize("Next refresh: %ds"), ((m_RefreshTimer - time_get()) / time_freq() + g_Config.m_ClAutoRefresh));
+			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 
 		// address info

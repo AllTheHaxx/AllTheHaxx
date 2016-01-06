@@ -345,6 +345,18 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 		m_LastDummyConnectTime = 0;
 
 	m_DDNetSrvListTokenSet = false;
+
+	m_pDatabase = new CSql();
+
+	char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS names (" \
+		"id INTEGER, " \
+		"name TEXT NOT NULL, " \
+		"clan TEXT NOT NULL, " \
+        "last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " \
+        "PRIMARY KEY (id, name));");
+	CQueryNames *pQuery = new CQueryNames();
+	pQuery->Query(m_pDatabase, pQueryBuf);
+	sqlite3_free(pQueryBuf);
 }
 
 // ----- send functions -----
@@ -1383,6 +1395,13 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Info.m_aClients[i].m_Country = str_toint(Up.GetString());
 			Info.m_aClients[i].m_Score = str_toint(Up.GetString());
 			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0 ? true : false;
+
+			// add the name to the database
+			char *pQueryBuf = sqlite3_mprintf("INSERT OR REPLACE INTO names (name, clan) VALUES ('%q', '%q');", Info.m_aClients[i].m_aName, Info.m_aClients[i].m_aClan);
+			CQueryNames *pQuery = new CQueryNames();
+			pQuery->Query(m_pDatabase, pQueryBuf);
+			sqlite3_free(pQueryBuf);
+			//dbg_msg("dbg", "%s", Info.m_aClients[i].m_aName);
 		}
 
 		if(!Up.Error())

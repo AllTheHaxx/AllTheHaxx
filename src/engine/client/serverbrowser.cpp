@@ -196,7 +196,6 @@ void CServerBrowser::Filter()
 				// match against player country
 				for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
 				{
-					dbg_msg("dbg", "%s", m_ppServerlist[i]->m_Info.m_aClients[p].m_aName);
 					if(m_ppServerlist[i]->m_Info.m_aClients[p].m_Country == g_Config.m_BrFilterCountryIndex)
 					{
 						Filtered = 0;
