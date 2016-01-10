@@ -19,6 +19,7 @@
 
 #include <cstring>
 #include <cstdio>
+#include <string>
 
 #include <game/client/ui.h>
 
@@ -175,10 +176,10 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			Handled = true;
 		}
 	}
-	if(Event.m_Flags&IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
+	if((Event.m_Flags&IInput::FLAG_RELEASE) && Event.m_Key == KEY_LSHIFT)
 	{
-	m_ReverseTAB = false;
-	Handled = true;
+		m_ReverseTAB = false;
+		Handled = true;
 	}
 
 	if(!Handled)
@@ -191,6 +192,24 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			m_CompletionChosen = -1;
 			str_copy(m_aCompletionBuffer, m_Input.GetString(), sizeof(m_aCompletionBuffer));
 		}
+
+		std::string line(m_Input.GetString());
+		std::size_t pos = line.find("$ADDR");
+		if(pos != std::string::npos && pos < line.length()-4)
+		{
+			// prepare address
+			std::string addr(g_Config.m_UiServerAddress);
+			for(size_t i = 0; i < addr.length(); i++)
+				if(addr[i] == ':') addr[i] = ' ';
+
+			// insert the address
+			std::string right = line.substr(pos+5, line.length());
+			std::string left= line.substr(0, pos);
+			std::string newstr = left + addr + right;
+
+			m_Input.Set(newstr.c_str());
+		}
+
 
 		// find the current command
 		{
