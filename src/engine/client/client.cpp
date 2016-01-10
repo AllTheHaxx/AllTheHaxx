@@ -1396,11 +1396,14 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0 ? true : false;
 
 			// add the name to the database
-			char *pQueryBuf = sqlite3_mprintf("INSERT OR REPLACE INTO names (name, clan) VALUES ('%q', '%q');", Info.m_aClients[i].m_aName, Info.m_aClients[i].m_aClan);
-			CQueryNames *pQuery = new CQueryNames();
-			pQuery->Query(m_pDatabase, pQueryBuf);
-			sqlite3_free(pQueryBuf);
-			//dbg_msg("dbg", "%s", Info.m_aClients[i].m_aName);
+			if(g_Config.m_ClUsernameFetching)
+			{
+				char *pQueryBuf = sqlite3_mprintf("INSERT OR REPLACE INTO names (name, clan) VALUES ('%q', '%q');", Info.m_aClients[i].m_aName, Info.m_aClients[i].m_aClan);
+				CQueryNames *pQuery = new CQueryNames();
+				pQuery->Query(m_pDatabase, pQueryBuf);
+				sqlite3_free(pQueryBuf);
+				//dbg_msg("dbg", "%s", Info.m_aClients[i].m_aName);
+			}
 		}
 
 		if(!Up.Error())

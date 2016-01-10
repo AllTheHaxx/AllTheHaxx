@@ -10,7 +10,10 @@
 
 class CSpoofRemote : public CComponent
 {
+	bool m_IsConnected;
+	int m_SpoofRemoteID;
 	void *m_pListenerThread;
+	void *m_pWorkerThread;
 #if defined(CONF_FAMILY_UNIX)
 	int m_Socket;
 	struct sockaddr_in m_Info;
@@ -20,9 +23,11 @@ class CSpoofRemote : public CComponent
 	SOCKADDR_IN info;
 #endif
 
-	void Init(const char *pAddr, int Port);
-	void CreateThread(void* pUser);
+	void Connect(const char *pAddr, int Port);
+	void Disconnect();
+	void CreateThreads(void* pUser);
 	static void Listener(void *pUserData);
+	static void Worker(void *pUserData);
 
 	static void ConConnect(IConsole::IResult *pResult, void *pUserData);
 	static void ConDisconnect(IConsole::IResult *pResult, void *pUserData);
@@ -32,6 +37,7 @@ public:
 	CSpoofRemote();
 	~CSpoofRemote();
 
+	bool IsConnected() { return m_IsConnected; }
 	void OnConsoleInit();
 	void SendCommand(const char *pCommand);
 };

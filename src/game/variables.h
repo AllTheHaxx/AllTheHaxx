@@ -123,6 +123,7 @@ MACRO_CONFIG_INT(ClHTTPLowSpeedLimit, cl_http_low_speed_limit, 500, 0, 100000, C
 MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFLAG_CLIENT, "HTTP downloads: Set low speed limit time period (0 to disable)")
 
 // haxx
+MACRO_CONFIG_INT(ClUsernameFetching, cl_fetch_names, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Get rich! #namefreestyle")
 MACRO_CONFIG_INT(ClAutoRefresh, cl_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT, "Time in secs to refresh the serverbrowser when active (0 disables)")
 
 // server
