@@ -8,7 +8,7 @@
 	#include <sys/socket.h>    //socket
 	#include <arpa/inet.h> //inet_addr
 	#include <netdb.h> //hostent
-	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s':\n", __FILE__, __LINE__, msg); perror(msg)
+	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s'\n", __FILE__, __LINE__, msg);
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -25,17 +25,24 @@
 
 CSpoofRemote::CSpoofRemote()
 {
-	m_pListenerThread = 0;
-	m_pWorkerThread = 0;
-	m_Socket = -1;
-	m_SpoofRemoteID = -1;
-	m_LastAck = 0;
+	Reset();
 }
 
 CSpoofRemote::~CSpoofRemote()
 {
 	if(IsConnected())
 		SendCommand("exit");
+}
+
+void CSpoofRemote::Reset()
+{
+	m_pListenerThread = 0;
+	m_pWorkerThread = 0;
+	m_Socket = -1;
+	m_SpoofRemoteID = -1;
+	m_LastAck = 0;
+	m_ErrorTime = 0;
+	m_IsConnected = false;
 }
 
 void CSpoofRemote::OnConsoleInit()
@@ -92,20 +99,9 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 
 void CSpoofRemote::Disconnect()
 {
-	if(!IsConnected())
-		return;
-
 	Console()->Print(0, "spoofremote", "disconnecting from zervor!", false);
-	Console()->Print(0, "spoofremote", "sending request...", false);
-	Console()->Print(0, "spoofremote", "closing listener thread...", false);
-	if(m_pListenerThread) thread_destroy(m_pListenerThread);
-	m_pListenerThread = 0;
-	Console()->Print(0, "spoofremote", "closing worker thread...", false);
-	if(m_pWorkerThread) thread_destroy(m_pWorkerThread);
-	m_pListenerThread = 0;
-	m_SpoofRemoteID = -1;
-	m_IsConnected = false;
-	m_LastAck = 0;
+	Console()->Print(0, "spoofremote", "requesting threads to terminate...", false);
+	Reset();
 	Console()->Print(0, "spoofremote", "closing socket...", false);
 #if defined(CONF_FAMILY_UNIX)
 	close(m_Socket);
@@ -128,17 +124,36 @@ void CSpoofRemote::Listener(void *pUserData)
 
 	while(1)
 	{
+		if(!pSelf->IsConnected())
+		{
+			pSelf->Console()->Print(0, "spoofremote", "closing listener thread...", false);
+			return;
+		}
+
 		// receive
 		char rBuffer[256];
 		memset(&rBuffer, 0, sizeof(rBuffer));
-
-		if(recv(pSelf->m_Socket, rBuffer, sizeof(rBuffer), 0) < 0)
+		int ret = recv(pSelf->m_Socket, rBuffer, sizeof(rBuffer), 0);
+		if(ret <= 0 || str_comp(rBuffer, "") == 0)
 		{
-			pSelf->Console()->Print(0, "spoofremote", "error in recv", false);
-			RAISE_ERROR("Error while receiving");
+			if(pSelf->m_ErrorTime == 0)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "connecting problems... (%d) zervor might be down, disconnecting in 10 seconds.", ret);
+				pSelf->Console()->Print(0, "spoofremote", aBuf, false);
+				RAISE_ERROR("Error while receiving");
+				pSelf->m_ErrorTime = time(NULL);
+			}
+			else if(time(NULL) > pSelf->m_ErrorTime + 10)
+			{
+				pSelf->Console()->Print(0, "spoofremote", "disconnected due to connection problems", false);
+				pSelf->Disconnect();
+			}
 		}
 		else
 		{
+			pSelf->m_ErrorTime = 0;
+
 			if(pSelf->m_SpoofRemoteID < 0)
 				pSelf->m_SpoofRemoteID = atoi(rBuffer);
 
@@ -160,7 +175,7 @@ void CSpoofRemote::Listener(void *pUserData)
 				pSelf->Disconnect();
 			}
 			else
-				pSelf->Console()->Print(0, "spoofremote", rBuffer, true);
+				pSelf->Console()->Print(0, "spoofremotemsg", rBuffer, true);
 		}
 	}
 }
@@ -171,6 +186,12 @@ void CSpoofRemote::Worker(void *pUserData)
 
 	while(1)
 	{
+		if(!pSelf->IsConnected())
+		{
+			pSelf->Console()->Print(0, "spoofremote", "closing worker thread...", false);
+			return;
+		}
+
 		if(pSelf->m_SpoofRemoteID < 0)
 			continue;
 
@@ -193,18 +214,22 @@ void CSpoofRemote::Worker(void *pUserData)
 			pSelf->Disconnect();
 		}
 
+		static time_t LastAck = time(NULL);
+		if(time(NULL) < LastAck + 15)
+			continue;
+
 		// keep alive every 15 seconds
 		char aBuf[32];
 		snprintf(aBuf, sizeof(aBuf), "\x16 %d", pSelf->m_SpoofRemoteID);
-		send(pSelf->m_Socket, aBuf, sizeof(aBuf), 0);
-		thread_sleep(15000);
+		pSelf->SendCommand(aBuf);
+		LastAck = time(NULL);
 	}
 
 }
 
 void CSpoofRemote::SendCommand(const char *pCommand)
 {
-	if(!pCommand || !IsConnected())
+	if(!pCommand || !IsConnected() || m_ErrorTime)
 		return;
 
 	if(send(m_Socket, pCommand, strlen(pCommand), 0) < 0)

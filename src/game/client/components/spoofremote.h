@@ -14,7 +14,7 @@ class CSpoofRemote : public CComponent
 	int m_SpoofRemoteID;
 	void *m_pListenerThread;
 	void *m_pWorkerThread;
-	long int m_LastAck;
+	time_t m_LastAck, m_ErrorTime;
 #if defined(CONF_FAMILY_UNIX)
 	int m_Socket;
 	struct sockaddr_in m_Info;
@@ -24,6 +24,7 @@ class CSpoofRemote : public CComponent
 	SOCKADDR_IN info;
 #endif
 
+	void Reset();
 	void Connect(const char *pAddr, int Port);
 	void Disconnect();
 	void CreateThreads(void* pUser);
