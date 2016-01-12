@@ -27,7 +27,7 @@ class CSpoofRemote : public CComponent
 	void Reset();
 	void Connect(const char *pAddr, int Port);
 	void Disconnect();
-	void CreateThreads(void* pUser);
+	static void CreateThreads(void *pUserData);
 	static void Listener(void *pUserData);
 	static void Worker(void *pUserData);
 

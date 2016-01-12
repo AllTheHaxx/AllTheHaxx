@@ -125,6 +125,7 @@ MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFL
 // haxx
 MACRO_CONFIG_INT(ClUsernameFetching, cl_fetch_names, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Get rich! #namefreestyle")
 MACRO_CONFIG_INT(ClAutoRefresh, cl_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT, "Time in secs to refresh the serverbrowser when active (0 disables)")
+MACRO_CONFIG_INT(ClChatShowIPs, cl_chat_show_ips, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Hide IP when they are told in chat, just save 'em")
 
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")

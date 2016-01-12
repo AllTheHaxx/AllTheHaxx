@@ -81,20 +81,9 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 		return;
 	}
 
-	Console()->Print(0, "spoofremote", "Connecting to zervor...", false);
-
-	// Connect
-	if (connect(m_Socket, (struct sockaddr*)&m_Info, sizeof(m_Info)) < 0)
-	{
-		RAISE_ERROR("connect");
-		Console()->Print(0, "spoofremote", "error while connecting", false);
-		return;
-	}
+	// Connect in a thread so that the game doesn't get hung
 	m_LastAck = time(NULL);
-	m_IsConnected = true;
-
-	Console()->Print(0, "spoofremote", "creating threads...", false);
-	CreateThreads((void *)this);
+	thread_init(CSpoofRemote::CreateThreads, (void *)this);
 }
 
 void CSpoofRemote::Disconnect()
@@ -112,16 +101,31 @@ void CSpoofRemote::Disconnect()
 #endif
 }
 
-void CSpoofRemote::CreateThreads(void *pUser)
+void CSpoofRemote::CreateThreads(void *pUserData)
 {
-	m_pWorkerThread = thread_init(CSpoofRemote::Worker, pUser);
-	m_pListenerThread = thread_init(CSpoofRemote::Listener, pUser);
+	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
+
+	pSelf->Console()->Print(0, "spoofremote", "Connecting to zervor...", false);
+	if (connect(pSelf->m_Socket, (struct sockaddr*)&pSelf->m_Info, sizeof(m_Info)) < 0)
+	{
+		RAISE_ERROR("connect");
+		pSelf->Console()->Print(0, "spoofremote", "error while connecting", false);
+		return;
+	}
+	pSelf->m_IsConnected = true;
+
+	pSelf->Console()->Print(0, "spoofremote", "connected, creating threads...", false);
+
+	pSelf->m_pWorkerThread = thread_init(CSpoofRemote::Worker, pUserData);
+	pSelf->m_pListenerThread = thread_init(CSpoofRemote::Listener, pUserData);
+	return;
 }
 
 void CSpoofRemote::Listener(void *pUserData)
 {
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
+	pSelf->Console()->Print(0, "spoofremote", "opening listener thread...", false);
 	while(1)
 	{
 		if(!pSelf->IsConnected())
@@ -184,6 +188,7 @@ void CSpoofRemote::Worker(void *pUserData)
 {
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
+	pSelf->Console()->Print(0, "spoofremote", "opening worker thread...", false);
 	while(1)
 	{
 		if(!pSelf->IsConnected())
@@ -202,7 +207,7 @@ void CSpoofRemote::Worker(void *pUserData)
 			pSelf->Console()->Print(0, "spoofremote", "Warning: disconnecting 60 seconds!", true);
 			HasWarned = true;
 		}
-		else if(HasWarned)
+		else if(HasWarned && time(0) < pSelf->m_LastAck + 2)
 		{
 			pSelf->Console()->Print(0, "spoofremote", "Yey, teh zervor has just came back alive :P", true);
 			HasWarned = false;
