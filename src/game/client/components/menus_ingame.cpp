@@ -252,9 +252,14 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Cursor.m_LineWidth = Player.w;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aName, -1);
 
-		TextRender()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, Button.x/2.0f,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s   %s", m_pClient->m_aClients[Index].m_aClan, m_pClient->m_aClients[Index].m_Addr);
+		TextRender()->TextEx(&Cursor, aBuf, -1);
+
+		// haxx address aber bitte nizze!
+
 
 		//TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		//Cursor.m_LineWidth = Button.w;

@@ -254,8 +254,10 @@ public:
 		void Reset();
 
 		// DDRace
-
 		int m_Score;
+
+		// haxx
+		char m_Addr[22];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
