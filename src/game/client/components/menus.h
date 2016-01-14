@@ -148,6 +148,9 @@ class CMenus : public CComponent
 	char m_aCallvoteReason[VOTE_REASON_LENGTH];
 	char m_aFilterString[25];
 
+	// for teh haxx
+	int m_SpoofSelectedPlayer;
+
 	// demo
 	struct CDemoItem
 	{
@@ -254,6 +257,10 @@ class CMenus : public CComponent
 	void RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
 	void RenderServerControlServer(CUIRect MainView);
 
+	void RenderSpoofing(CUIRect MainView);
+	void RenderSpoofingGeneral(CUIRect MainView);
+	void RenderSpoofingPlayers(CUIRect MainView);
+
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
 	int m_DoubleClickIndex;
@@ -307,6 +314,7 @@ public:
 		PAGE_PLAYERS,
 		PAGE_SERVER_INFO,
 		PAGE_CALLVOTE,
+		PAGE_SPOOFING,
 		PAGE_INTERNET,
 		PAGE_LAN,
 		PAGE_FAVORITES,

@@ -153,6 +153,7 @@ void CGameClient::OnConsoleInit()
 	m_pControls = &::gs_Controls;
 	m_pEffects = &::gs_Effects;
 	m_pSounds = &::gs_Sounds;
+	m_pSpoofRemote = &::gs_SpoofRemote;
 	m_pMotd = &::gs_Motd;
 	m_pDamageind = &::gsDamageInd;
 	m_pMapimages = &::gs_MapImages;
@@ -179,6 +180,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pControls);
 	m_All.Add(m_pCamera);
 	m_All.Add(m_pSounds);
+	m_All.Add(m_pSpoofRemote);
 	m_All.Add(m_pVoting);
 	m_All.Add(m_pParticles); // doesn't render anything, just updates all the particles
 	m_All.Add(m_pRaceDemo);
@@ -1827,6 +1829,10 @@ void CGameClient::CClientData::Reset()
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
 	m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
 	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
+
+	// haxx
+	m_Addr[0] = 0;
+	m_Spoofable = false;
 	UpdateRenderInfo();
 }
 

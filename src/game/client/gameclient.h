@@ -257,6 +257,7 @@ public:
 		int m_Score;
 
 		// haxx
+		bool m_Spoofable;
 		char m_Addr[22];
 	};
 
@@ -340,6 +341,7 @@ public:
 	class CControls *m_pControls;
 	class CEffects *m_pEffects;
 	class CSounds *m_pSounds;
+	class CSpoofRemote *m_pSpoofRemote;
 	class CMotd *m_pMotd;
 	class CMapImages *m_pMapimages;
 	class CVoting *m_pVoting;

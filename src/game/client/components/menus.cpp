@@ -673,10 +673,15 @@ int CMenus::RenderMenubar(CUIRect r)
 			NewPage = PAGE_DDRace;
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
-		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_CallVoteButton=0;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, 0))
 			NewPage = PAGE_CALLVOTE;
+
+		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(4.0f, 0, &Box);
+		static int s_SpoofingButton=0;
+		if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
+			NewPage = PAGE_SPOOFING;
 	}
 
 	/*
@@ -959,6 +964,8 @@ int CMenus::Render()
 				RenderInGameDDRace(MainView);
 			else if(m_GamePage == PAGE_CALLVOTE)
 				RenderServerControl(MainView);
+			else if(m_GamePage == PAGE_SPOOFING)
+				RenderSpoofing(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
 			else if(m_GamePage == PAGE_GHOST)

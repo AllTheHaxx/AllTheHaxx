@@ -22,6 +22,7 @@
 
 #include "menus.h"
 #include "motd.h"
+#include "spoofremote.h"
 #include "voting.h"
 
 #include <base/tl/string.h>
@@ -755,6 +756,212 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				static float s_OffsetCmd = 0.0f;
 				DoEditBox(&s_aVoteCommand, &Button, s_aVoteCommand, sizeof(s_aVoteCommand), 14.0f, &s_OffsetCmd, false, CUI::CORNER_ALL);
 			}
+		}
+	}
+}
+
+void CMenus::RenderSpoofingGeneral(CUIRect MainView)
+{
+	// TODO: this
+	CUIRect Button;
+	static int s_FetchButton = 0;
+	if(DoButton_Menu(&s_FetchButton, Localize("Fetch IPs"), 0, &Button))
+	{
+		char aCmd[256];
+		str_format(aCmd, sizeof(aCmd), "fetchips");
+		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+	}
+}
+
+void CMenus::RenderSpoofingPlayers(CUIRect MainView)
+{
+	int NumOptions = 0;
+	int Selected = -1;
+	static int aPlayerIDs[MAX_CLIENTS];
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_pClient->m_Snap.m_paInfoByName[i])
+			continue;
+
+		int Index = m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID;
+		if(Index == m_pClient->m_Snap.m_LocalClientID)
+			continue;
+
+		// skip the players we can't spoof anyways
+		//if(!m_pClient->m_aClients[Index].m_Spoofable)
+		//	continue;
+
+		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
+			continue;
+
+		if(m_SpoofSelectedPlayer == Index)
+			Selected = NumOptions;
+		aPlayerIDs[NumOptions++] = Index;
+	}
+
+	static int s_PlayerList = 0;
+	static float s_ScrollValue = 0;
+	CUIRect List = MainView;
+#if defined(__ANDROID__)
+	UiDoListboxStart(&s_PlayerList, &List, 50.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
+#else
+	UiDoListboxStart(&s_PlayerList, &List, 24.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
+#endif
+
+	for(int i = 0; i < NumOptions; i++)
+	{
+		CListboxItem Item = UiDoListboxNextItem(&aPlayerIDs[i]);
+
+		if(Item.m_Visible)
+		{
+			CTeeRenderInfo Info = m_pClient->m_aClients[aPlayerIDs[i]].m_RenderInfo;
+			Info.m_Size = Item.m_Rect.h;
+			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1,0), vec2(Item.m_Rect.x+Item.m_Rect.h/2, Item.m_Rect.y+Item.m_Rect.h/2));
+			Item.m_Rect.x +=Info.m_Size;
+			UI()->DoLabelScaled(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, -1);
+		}
+	}
+
+	Selected = UiDoListboxEnd(&s_ScrollValue, 0);
+	m_SpoofSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
+}
+
+void CMenus::RenderSpoofing(CUIRect MainView)
+{
+	static int s_ControlPage = 0;
+
+	// render background
+	CUIRect Bottom, Extended, TabBar, Button;
+#if defined(__ANDROID__)
+	MainView.HSplitTop(50.0f, &Bottom, &MainView);
+#else
+	MainView.HSplitTop(20.0f, &Bottom, &MainView);
+#endif
+	RenderTools()->DrawUIRect(&Bottom, ms_ColorTabbarActive, CUI::CORNER_T, 10.0f);
+#if defined(__ANDROID__)
+	MainView.HSplitTop(50.0f, &TabBar, &MainView);
+#else
+	MainView.HSplitTop(20.0f, &TabBar, &MainView);
+#endif
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	MainView.Margin(10.0f, &MainView);
+#if defined(__ANDROID__)
+	MainView.HSplitBottom(10.0f, &MainView, &Extended);
+#else
+	MainView.HSplitBottom(90.0f, &MainView, &Extended);
+#endif
+
+	// tab bar
+	{
+		// general stuff, fetching IPs, kicking everyone, votebot etc.
+		TabBar.VSplitLeft(TabBar.w/2, &Button, &TabBar);
+		static int s_Button0 = 0;
+		if(DoButton_MenuTab(&s_Button0, Localize("General"), s_ControlPage == 0, &Button, 0))
+			s_ControlPage = 0;
+
+		// control specific players
+		TabBar.VSplitRight(0, &Button, &TabBar);
+		static int s_Button1 = 0;
+		if(DoButton_MenuTab(&s_Button1, Localize("Players"), s_ControlPage == 1, &Button, 0))
+			s_ControlPage = 1;
+	}
+
+	// render page
+	MainView.HSplitBottom(ms_ButtonHeight + 5*2, &MainView, &Bottom);
+	Bottom.HMargin(5.0f, &Bottom);
+
+	if(s_ControlPage == 0)
+		RenderSpoofingGeneral(MainView);
+	else if(s_ControlPage == 1)
+		RenderSpoofingPlayers(MainView);
+
+	// spoofing menu
+	{
+		CUIRect Button;
+
+		CServerInfo CurrentServerInfo;
+		Client()->GetServerInfo(&CurrentServerInfo);
+
+		// addresses and stuff
+		char aServerAddr[64];
+		char aClientAddr[64];
+
+		str_copy(aServerAddr, CurrentServerInfo.m_aAddress, sizeof(aServerAddr));
+		str_copy(aClientAddr, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aClientAddr));
+
+		for(int i = 0; aServerAddr[i] != '\0'; i++)
+		{
+			if(aServerAddr[i] == ':')
+				aServerAddr[i] = ' ';
+		}
+
+		for(int i = 0; aClientAddr[i] != '\0'; i++)
+		{
+			if(aClientAddr[i] == ':')
+				aClientAddr[i] = ' ';
+		}
+
+		// all deh laz0rs
+		if(s_ControlPage == 1)
+		{
+			// background
+			Extended.Margin(10.0f, &Extended);
+			Extended.HSplitTop(20.0f, &Bottom, &Extended);
+			Extended.HSplitTop(5.0f, 0, &Extended);
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+			static int s_KillButton = 0;
+			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
+			{
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "kill %s %s", aServerAddr, aClientAddr);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			}
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+			static int s_DCButton = 0;
+			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button))
+			{
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aClientAddr);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			}
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+			static int s_StressingButton = 0;
+			if(DoButton_Menu(&s_StressingButton, Localize("Stressing"), 0, &Button))
+			{
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "stressing %s %s", aServerAddr, aClientAddr);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			}
+
+			// add vote
+			Extended.HSplitTop(20.0f, &Bottom, &Extended);
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
+			UI()->DoLabelScaled(&Button, Localize("Chat message:"), 14.0f, -1);
+
+			static char s_aChatMessage[128] = {0};
+			Extended.HSplitTop(20.0f, &Bottom, &Extended);
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
+			static int s_SendChatButton = 0;
+			if(DoButton_Menu(&s_SendChatButton, Localize("Send"), 0, &Button))
+			{
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "chat %s %s %s", aServerAddr, aClientAddr, s_aChatMessage);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			}
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
+			static float s_OffsetDesc = 0.0f;
+			DoEditBox(&s_aChatMessage, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetDesc, false, CUI::CORNER_ALL);
 		}
 	}
 }
