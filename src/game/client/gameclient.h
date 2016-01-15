@@ -258,7 +258,7 @@ public:
 
 		// haxx
 		bool m_Spoofable;
-		char m_Addr[22];
+		char m_Addr[NETADDR_MAXSTRSIZE];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];

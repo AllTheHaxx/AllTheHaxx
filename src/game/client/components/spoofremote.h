@@ -10,8 +10,10 @@
 
 class CSpoofRemote : public CComponent
 {
-	bool m_IsConnected;
-	int m_SpoofRemoteID;
+	bool m_IsConnected; // whether we are connected to teh zervor
+	char m_LastMessage[256]; // the last message from zervor
+	float m_LastMessageTime;
+	int m_SpoofRemoteID; // our id at teh zervor
 	void *m_pListenerThread;
 	void *m_pWorkerThread;
 	time_t m_LastAck, m_ErrorTime;
@@ -33,13 +35,16 @@ class CSpoofRemote : public CComponent
 
 	static void ConConnect(IConsole::IResult *pResult, void *pUserData);
 	static void ConDisconnect(IConsole::IResult *pResult, void *pUserData);
+	static void ConForceClose(IConsole::IResult *pResult, void *pUserData);
 	static void ConCommand(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CSpoofRemote();
 	~CSpoofRemote();
 
-	bool IsConnected() { return m_IsConnected; }
+	inline bool IsConnected() const { return m_IsConnected; }
+	inline const char *LastMessage() const { return m_LastMessage; }
+	inline float LastMessageTime() const { return m_LastMessageTime; }
 	void OnConsoleInit();
 	void SendCommand(const char *pCommand);
 };

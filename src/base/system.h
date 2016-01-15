@@ -565,6 +565,9 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 */
 int net_addr_from_str(NETADDR *addr, const char *string);
 
+/* split addr and port*/
+void net_addr_split(char *pAddr, int max_length);
+
 /* Group: Network UDP */
 
 /*

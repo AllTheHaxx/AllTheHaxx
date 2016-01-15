@@ -43,12 +43,15 @@ void CSpoofRemote::Reset()
 	m_LastAck = 0;
 	m_ErrorTime = 0;
 	m_IsConnected = false;
+	mem_zero(m_LastMessage, sizeof(m_LastMessage));
+	m_LastMessageTime = -1.0f;
 }
 
 void CSpoofRemote::OnConsoleInit()
 {
 	Console()->Register("spf_connect", "", CFGFLAG_CLIENT, ConConnect, (void *)this, "connect to teh zervor 4 h4xX0r");
 	Console()->Register("spf_disconnect", "", CFGFLAG_CLIENT, ConDisconnect, (void *)this, "disconnect from teh zervor 4 h4xX0r");
+	Console()->Register("spf_forceclose", "s", CFGFLAG_CLIENT, ConForceClose, (void *)this, "force-close the connection");
 	Console()->Register("spf", "s", CFGFLAG_CLIENT, ConCommand, (void *)this, "3X3CUT3 C0MM4ND!");
 }
 
@@ -125,12 +128,12 @@ void CSpoofRemote::Listener(void *pUserData)
 {
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
-	pSelf->Console()->Print(0, "spfrmt", "opening listener thread...", false);
+	pSelf->Console()->Print(0, "spfrmt", "started listener thread", false);
 	while(1)
 	{
 		if(!pSelf->IsConnected())
 		{
-			pSelf->Console()->Print(0, "spfrmt", "closing listener thread...", false);
+			pSelf->Console()->Print(0, "spfrmt", "closed listener thread", false);
 			return;
 		}
 
@@ -179,7 +182,11 @@ void CSpoofRemote::Listener(void *pUserData)
 				pSelf->Disconnect();
 			}
 			else
-				pSelf->Console()->Print(0, "spoofremotemsg", rBuffer, true);
+			{
+				pSelf->Console()->Print(0, "spfrmtmsg", rBuffer, true);
+				str_copy(pSelf->m_LastMessage, rBuffer, sizeof(pSelf->m_LastMessage));
+				pSelf->m_LastMessageTime = pSelf->Client()->LocalTime();
+			}
 		}
 	}
 }
@@ -188,19 +195,19 @@ void CSpoofRemote::Worker(void *pUserData)
 {
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
-	pSelf->Console()->Print(0, "spfrmt", "opening worker thread...", false);
+	pSelf->Console()->Print(0, "spfrmt", "started worker thread", false);
 	while(1)
 	{
 		if(!pSelf->IsConnected())
 		{
-			pSelf->Console()->Print(0, "spfrmt", "closing worker thread...", false);
+			pSelf->Console()->Print(0, "spfrmt", "closed worker thread", false);
 			return;
 		}
 
 		if(pSelf->m_SpoofRemoteID < 0)
 			continue;
 
-		static bool HasWarned = false;
+	/*	static bool HasWarned = false;
 		if(!HasWarned && time(0) > pSelf->m_LastAck + 1*60) // after one minute: warning
 		{
 			pSelf->Console()->Print(0, "spfrmt", "Warning: zervor hasn't responded for a minute!", true);
@@ -218,7 +225,7 @@ void CSpoofRemote::Worker(void *pUserData)
 			pSelf->Console()->Print(0, "spfrmt", "Warning: it most likely won't come back, disconnecting!", true);
 			pSelf->Disconnect();
 		}
-
+	*/
 		static time_t LastAck = time(NULL);
 		if(time(NULL) < LastAck + 15)
 			continue;
@@ -228,6 +235,7 @@ void CSpoofRemote::Worker(void *pUserData)
 		snprintf(aBuf, sizeof(aBuf), "\x16 %d", pSelf->m_SpoofRemoteID);
 		pSelf->SendCommand(aBuf);
 		LastAck = time(NULL);
+		thread_sleep(1);
 	}
 
 }
@@ -267,6 +275,13 @@ void CSpoofRemote::ConDisconnect(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(0, "spfrmt", "No need to disconnect, you are not connected!", false);
 	else
 		pSelf->SendCommand("exit");
+}
+
+void CSpoofRemote::ConForceClose(IConsole::IResult *pResult, void *pUserData)
+{
+	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
+	pSelf->Console()->Print(0, "spfrmt", "Force-closing connection, resetting spfrmt!", false);
+	pSelf->Disconnect();
 }
 
 void CSpoofRemote::ConCommand(IConsole::IResult *pResult, void *pUserData)
