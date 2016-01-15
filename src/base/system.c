@@ -796,7 +796,8 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 
 void net_addr_split(char *pAddr, int max_length)
 {
-	for(int i = 0; pAddr[i] != '\0' && i < max_length; i++)
+	int i;
+	for(i = 0; pAddr[i] != '\0' && i < max_length; i++)
 	{
 		if(pAddr[i] == ':')
 			pAddr[i] = ' ';
