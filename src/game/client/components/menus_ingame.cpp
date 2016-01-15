@@ -848,7 +848,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	}
 
 	Box.HSplitTop(25.0f, 0, &Box);
-	Box.HSplitTop(25.0f, &Button, 0);
+	Box.HSplitTop(25.5f, &Button, 0);
 	static int s_ButtonDummies = 0;
 	{
 		char aBuf[64];
@@ -868,8 +868,8 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		}
 	}
 
-	Box.HSplitTop(40.0f, 0, &Box);
-	Box.HSplitTop(25.0f, &Button, 0);
+	Box.HSplitTop(43.0f, 0, &Box);
+	Box.HSplitTop(20.0f, &Button, 0);
 	static int s_ButtonVoteYes = 0;
 	if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot yes"), 0, &Button))
 	{
@@ -878,8 +878,8 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 	}
 
-	Box.HSplitTop(40.0f, 0, &Box);
-	Box.HSplitTop(25.0f, &Button, 0);
+	Box.HSplitTop(25.0f, 0, &Box);
+	Box.HSplitTop(20.0f, &Button, 0);
 	static int s_ButtonVoteNo = 0;
 	if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot no"), 0, &Button))
 	{
@@ -1032,7 +1032,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			//Extended.HSplitTop(5.0f, 0, &Extended);
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
 
 			static int s_AllCheckbox = 0;
 			static int s_DoForAll = 0;
@@ -1054,7 +1054,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
 			static int s_KillButton = 0;
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
@@ -1117,6 +1117,27 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			//RenderTools()->DrawUIRect(&Bottom, vec4(0.5f, 0.5f, 0.5f, 0.3f), CUI::CORNER_ALL, 5.0f);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
+			static int s_VoteYesButton = 0;
+			if(DoButton_Menu(&s_VoteYesButton, Localize("Vote Yes"), 0, &Button))
+			{
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "va %s 1", aClientAddr, aServerAddr);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			}
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
+			static int s_VoteNoButton = 0;
+			if(DoButton_Menu(&s_VoteNoButton, Localize("Vote No"), 0, &Button))
+			{
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "va %s 0", aServerAddr);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			}
+
 			// add vote
 			Extended.HSplitTop(20.0f, &Bottom, &Extended);
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
@@ -1129,7 +1150,23 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(300.0f, &Button, &Bottom);
 			static float s_OffsetDesc = 0.0f;
-			DoEditBox(&s_aChatMessage, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetDesc, false, CUI::CORNER_ALL);
+			Button.w -= Button.h;
+			DoEditBox(&s_aChatMessage, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetDesc, false, CUI::CORNER_L);
+			// hacky clear button
+			{
+				CUIRect ClrBt;
+				ClrBt.x = Button.x + Button.w;
+				ClrBt.y = Button.y;
+				ClrBt.w = Button.h;
+				ClrBt.h = Button.h;
+				static int s_ClearButton = 0;
+				if(DoButton_Menu(&s_ClearButton, "x", 0, &ClrBt, CUI::CORNER_R))
+				{
+					s_OffsetDesc = 0.0f;
+					mem_zero(s_aChatMessage, sizeof(s_aChatMessage));
+				}
+			}
+			Button.w += Button.h;
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
@@ -1145,7 +1182,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			if(m_SpoofDummiesConnected)
 			{
 				static int s_SendChatDummiesButton = 0;
