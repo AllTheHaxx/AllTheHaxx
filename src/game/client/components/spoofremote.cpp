@@ -234,7 +234,13 @@ void CSpoofRemote::Worker(void *pUserData)
 
 void CSpoofRemote::SendCommand(const char *pCommand)
 {
-	if(!pCommand || !IsConnected() || m_ErrorTime)
+	if(!IsConnected())
+	{
+		Console()->Print(0, "spoofremote", "not connected. Use spf_connect first!", false);
+		return;
+	}
+
+	if(!pCommand || m_ErrorTime)
 		return;
 
 	if(send(m_Socket, pCommand, strlen(pCommand), 0) < 0)
@@ -266,8 +272,5 @@ void CSpoofRemote::ConDisconnect(IConsole::IResult *pResult, void *pUserData)
 void CSpoofRemote::ConCommand(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
-	if(!pSelf->IsConnected())
-		pSelf->Console()->Print(0, "spoofremote", "not connected. Use spf_connect first!", false);
-	else
-		pSelf->SendCommand(pResult->GetString(0));
+	pSelf->SendCommand(pResult->GetString(0));
 }
