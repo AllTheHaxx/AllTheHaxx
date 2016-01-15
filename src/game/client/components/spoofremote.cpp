@@ -60,7 +60,7 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 	if(WSAStartup(MAKEWORD(2, 0), &data) != 0)
 	{
 		RAISE_ERROR("WSAStartup");
-		Console()->Print(0, "spoofremote", "error while starting WSA", false);
+		Console()->Print(0, "spfrmt", "error while starting WSA", false);
 		WSAGetLastError();
 		return;
 	}
@@ -72,12 +72,12 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 	m_Info.sin_port = htons(Port);
 
 	// Socket
-	Console()->Print(0, "spoofremote", "opening socket...", false);
+	Console()->Print(0, "spfrmt", "opening socket...", false);
 	m_Socket = socket(AF_INET , SOCK_STREAM , 0);
 	if (m_Socket == -1)
 	{
 		RAISE_ERROR("socket");
-		Console()->Print(0, "spoofremote", "error while creating socket", false);
+		Console()->Print(0, "spfrmt", "error while creating socket", false);
 		return;
 	}
 
@@ -88,10 +88,10 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 
 void CSpoofRemote::Disconnect()
 {
-	Console()->Print(0, "spoofremote", "disconnecting from zervor!", false);
-	Console()->Print(0, "spoofremote", "requesting threads to terminate...", false);
+	Console()->Print(0, "spfrmt", "disconnecting from zervor!", false);
+	Console()->Print(0, "spfrmt", "requesting threads to terminate...", false);
 	Reset();
-	Console()->Print(0, "spoofremote", "closing socket...", false);
+	Console()->Print(0, "spfrmt", "closing socket...", false);
 #if defined(CONF_FAMILY_UNIX)
 	close(m_Socket);
 	m_Socket = -1;
@@ -105,16 +105,16 @@ void CSpoofRemote::CreateThreads(void *pUserData)
 {
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
-	pSelf->Console()->Print(0, "spoofremote", "Connecting to zervor...", false);
+	pSelf->Console()->Print(0, "spfrmt", "Connecting to zervor...", false);
 	if (connect(pSelf->m_Socket, (struct sockaddr*)&pSelf->m_Info, sizeof(m_Info)) < 0)
 	{
 		RAISE_ERROR("connect");
-		pSelf->Console()->Print(0, "spoofremote", "error while connecting", false);
+		pSelf->Console()->Print(0, "spfrmt", "error while connecting", false);
 		return;
 	}
 	pSelf->m_IsConnected = true;
 
-	pSelf->Console()->Print(0, "spoofremote", "connected, creating threads...", false);
+	pSelf->Console()->Print(0, "spfrmt", "connected, creating threads...", false);
 
 	pSelf->m_pWorkerThread = thread_init(CSpoofRemote::Worker, pUserData);
 	pSelf->m_pListenerThread = thread_init(CSpoofRemote::Listener, pUserData);
@@ -125,12 +125,12 @@ void CSpoofRemote::Listener(void *pUserData)
 {
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
-	pSelf->Console()->Print(0, "spoofremote", "opening listener thread...", false);
+	pSelf->Console()->Print(0, "spfrmt", "opening listener thread...", false);
 	while(1)
 	{
 		if(!pSelf->IsConnected())
 		{
-			pSelf->Console()->Print(0, "spoofremote", "closing listener thread...", false);
+			pSelf->Console()->Print(0, "spfrmt", "closing listener thread...", false);
 			return;
 		}
 
@@ -144,13 +144,13 @@ void CSpoofRemote::Listener(void *pUserData)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "connecting problems... (%d) zervor might be down, disconnecting in 10 seconds.", ret);
-				pSelf->Console()->Print(0, "spoofremote", aBuf, false);
+				pSelf->Console()->Print(0, "spfrmt", aBuf, false);
 				RAISE_ERROR("Error while receiving");
 				pSelf->m_ErrorTime = time(NULL);
 			}
 			else if(time(NULL) > pSelf->m_ErrorTime + 10)
 			{
-				pSelf->Console()->Print(0, "spoofremote", "disconnected due to connection problems", false);
+				pSelf->Console()->Print(0, "spfrmt", "disconnected due to connection problems", false);
 				pSelf->Disconnect();
 			}
 		}
@@ -167,14 +167,14 @@ void CSpoofRemote::Listener(void *pUserData)
 			}
 			else if(rBuffer[0] == '\x04') // EOT
 			{
-				pSelf->Console()->Print(0, "spoofremote", "End of transmission: ", true);
+				pSelf->Console()->Print(0, "spfrmt", "End of transmission: ", true);
 
 				if(rBuffer[1] == '\x06')
-					pSelf->Console()->Print(0, "spoofremote", "Disconneted from teh zervor.", true); // maybe leave these message to the server?
+					pSelf->Console()->Print(0, "spfrmt", "Disconneted from teh zervor.", true); // maybe leave these message to the server?
 				else if(rBuffer[1] == '\x15')
-					pSelf->Console()->Print(0, "spoofremote", "Ack timeout.", true);
+					pSelf->Console()->Print(0, "spfrmt", "Ack timeout.", true);
 				else
-					pSelf->Console()->Print(0, "spoofremote", "No reason given.", true);
+					pSelf->Console()->Print(0, "spfrmt", "No reason given.", true);
 
 				pSelf->Disconnect();
 			}
@@ -188,12 +188,12 @@ void CSpoofRemote::Worker(void *pUserData)
 {
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
-	pSelf->Console()->Print(0, "spoofremote", "opening worker thread...", false);
+	pSelf->Console()->Print(0, "spfrmt", "opening worker thread...", false);
 	while(1)
 	{
 		if(!pSelf->IsConnected())
 		{
-			pSelf->Console()->Print(0, "spoofremote", "closing worker thread...", false);
+			pSelf->Console()->Print(0, "spfrmt", "closing worker thread...", false);
 			return;
 		}
 
@@ -203,19 +203,19 @@ void CSpoofRemote::Worker(void *pUserData)
 		static bool HasWarned = false;
 		if(!HasWarned && time(0) > pSelf->m_LastAck + 1*60) // after one minute: warning
 		{
-			pSelf->Console()->Print(0, "spoofremote", "Warning: zervor hasn't responded for a minute!", true);
-			pSelf->Console()->Print(0, "spoofremote", "Warning: disconnecting 60 seconds!", true);
+			pSelf->Console()->Print(0, "spfrmt", "Warning: zervor hasn't responded for a minute!", true);
+			pSelf->Console()->Print(0, "spfrmt", "Warning: disconnecting 60 seconds!", true);
 			HasWarned = true;
 		}
 		else if(HasWarned && time(0) < pSelf->m_LastAck + 2)
 		{
-			pSelf->Console()->Print(0, "spoofremote", "Yey, teh zervor has just came back alive :P", true);
+			pSelf->Console()->Print(0, "spfrmt", "Yey, teh zervor has just came back alive :P", true);
 			HasWarned = false;
 		}
 		if(time(0) > pSelf->m_LastAck + 2*60) // after two minutes: disconenct
 		{
-			pSelf->Console()->Print(0, "spoofremote", "Warning: zervor hasn't responded for two minutes!", true);
-			pSelf->Console()->Print(0, "spoofremote", "Warning: it most likely won't come back, disconnecting!", true);
+			pSelf->Console()->Print(0, "spfrmt", "Warning: zervor hasn't responded for two minutes!", true);
+			pSelf->Console()->Print(0, "spfrmt", "Warning: it most likely won't come back, disconnecting!", true);
 			pSelf->Disconnect();
 		}
 
@@ -236,7 +236,7 @@ void CSpoofRemote::SendCommand(const char *pCommand)
 {
 	if(!IsConnected())
 	{
-		Console()->Print(0, "spoofremote", "not connected. Use spf_connect first!", false);
+		Console()->Print(0, "spfrmt", "not connected. Use spf_connect first!", false);
 		return;
 	}
 
@@ -245,7 +245,7 @@ void CSpoofRemote::SendCommand(const char *pCommand)
 
 	if(send(m_Socket, pCommand, strlen(pCommand), 0) < 0)
 	{
-		Console()->Print(0, "spoofremote", "error while sending", false);
+		Console()->Print(0, "spfrmt", "error while sending", false);
 		RAISE_ERROR("Error while sending");
 	}
 }
@@ -255,7 +255,7 @@ void CSpoofRemote::ConConnect(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
 	if(pSelf->IsConnected())
-		pSelf->Console()->Print(0, "spoofremote", "Disconnect first before opening a new connection!", false);
+		pSelf->Console()->Print(0, "spfrmt", "Disconnect first before opening a new connection!", false);
 	else
 		pSelf->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
 }
@@ -264,7 +264,7 @@ void CSpoofRemote::ConDisconnect(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
 	if(!pSelf->IsConnected())
-		pSelf->Console()->Print(0, "spoofremote", "No need to disconnect, you are not connected!", false);
+		pSelf->Console()->Print(0, "spfrmt", "No need to disconnect, you are not connected!", false);
 	else
 		pSelf->SendCommand("exit");
 }
