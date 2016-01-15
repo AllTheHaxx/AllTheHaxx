@@ -916,7 +916,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "kill %s %s", aServerAddr, aClientAddr);
+				str_format(aCmd, sizeof(aCmd), "kill %s %s", aClientAddr, aServerAddr);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
@@ -926,7 +926,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aClientAddr);
+				str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aClientAddr, aServerAddr);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
@@ -936,7 +936,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_StressingButton, Localize("Stressing"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "stressing %s %s", aServerAddr, aClientAddr);
+				str_format(aCmd, sizeof(aCmd), "stressing %s %s", aClientAddr, aServerAddr);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
