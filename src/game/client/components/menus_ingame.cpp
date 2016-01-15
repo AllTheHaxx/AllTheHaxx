@@ -788,8 +788,8 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 			continue;
 
 		// skip the players we can't spoof anyways
-		//if(!m_pClient->m_aClients[Index].m_Spoofable)
-		//	continue;
+		if(!m_pClient->m_aClients[Index].m_Spoofable)
+			continue;
 
 		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
 			continue;
