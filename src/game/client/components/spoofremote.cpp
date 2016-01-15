@@ -47,7 +47,7 @@ void CSpoofRemote::Reset()
 
 void CSpoofRemote::OnConsoleInit()
 {
-	Console()->Register("spf_connect", "si", CFGFLAG_CLIENT, ConConnect, (void *)this, "connect to teh zervor 4 h4xX0r");
+	Console()->Register("spf_connect", "", CFGFLAG_CLIENT, ConConnect, (void *)this, "connect to teh zervor 4 h4xX0r");
 	Console()->Register("spf_disconnect", "", CFGFLAG_CLIENT, ConDisconnect, (void *)this, "disconnect from teh zervor 4 h4xX0r");
 	Console()->Register("spf", "s", CFGFLAG_CLIENT, ConCommand, (void *)this, "3X3CUT3 C0MM4ND!");
 }
@@ -251,7 +251,7 @@ void CSpoofRemote::ConConnect(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->IsConnected())
 		pSelf->Console()->Print(0, "spoofremote", "Disconnect first before opening a new connection!", false);
 	else
-		pSelf->Connect(pResult->GetString(0), pResult->GetInteger(1));
+		pSelf->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
 }
 
 void CSpoofRemote::ConDisconnect(IConsole::IResult *pResult, void *pUserData)
