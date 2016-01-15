@@ -819,7 +819,9 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1,0), vec2(Item.m_Rect.x+Item.m_Rect.h/2, Item.m_Rect.y+Item.m_Rect.h/2));
 			Item.m_Rect.x +=Info.m_Size;
-			UI()->DoLabelScaled(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, -1);
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%s   [%s]", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
+			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 		}
 	}
 
@@ -911,7 +913,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Extended.HSplitTop(5.0f, 0, &Extended);
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_KillButton = 0;
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
@@ -921,7 +923,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_DCButton = 0;
 			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button))
 			{
@@ -931,7 +933,18 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
+			static int s_TimeoutButton = 0;
+			if(DoButton_Menu(&s_TimeoutButton, Localize("Timeout"), 0, &Button))
+			{
+				// glitchy! found by accident :D
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aClientAddr);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			}
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_StressingButton = 0;
 			if(DoButton_Menu(&s_StressingButton, Localize("Stressing"), 0, &Button))
 			{
@@ -954,7 +967,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_SendChatButton, Localize("Send"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "chat %s %s %s", aServerAddr, aClientAddr, s_aChatMessage);
+				str_format(aCmd, sizeof(aCmd), "chat %s %s %s", aClientAddr, aServerAddr, s_aChatMessage);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
