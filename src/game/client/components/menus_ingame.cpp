@@ -781,13 +781,22 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	}
 
 	MainView.Margin(10.0f, &MainView);
-
 	MainView.HSplitBottom(25.0f, &MainView, &Box);
-	MainView.VSplitLeft(200.0f, &Box, &MainView);
-	//Box.Margin(10.0f, &Box);
 
-	Box.HSplitTop(25.0f, &Button, 0);
+	// ----------- zervor tools
+
+	MainView.VSplitLeft(200.0f, &Box, &MainView);
+
+	// window
+	Box.HSplitTop(22.4f, &Button, &Box);
+	RenderTools()->DrawUIRect(&Button, vec4(0, 0.6f, 0.17f, 0.6f), CUI::CORNER_T, 5.0f);
+	UI()->DoLabel(&Button, Localize("Z3RV0R T00LZ"), 17.0f, 0);
+	RenderTools()->DrawUIRect(&Box, vec4(0, 0.7f, 0.1f, 0.6f), 0, 0);
+
 	static int s_ButtonFetch = 0;
+	Box.VMargin(10.0f, &Box);
+	Box.HSplitTop(25.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, &Box);
 	if(DoButton_Menu(&s_ButtonFetch, Localize("Test connection"), 0, &Button))
 	{
 		m_pClient->m_pSpoofRemote->SendCommand("status");
@@ -811,17 +820,74 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 	}
 
-	Box.HSplitTop(40.0f, 0, &Box);
+
+	// ----------- dummy tools
+
+	MainView.VSplitLeft(70.0f, &Box, &MainView);
+	MainView.VSplitLeft(200.0f, &Box, &MainView);
+
+	// window
+	Box.HSplitTop(22.4f, &Button, &Box);
+	RenderTools()->DrawUIRect(&Button, vec4(0.17f, 0, 0.6f, 0.6f), CUI::CORNER_T, 5.0f);
+	UI()->DoLabel(&Button, Localize("DUMMY T00LZ"), 17.0f, 0);
+	RenderTools()->DrawUIRect(&Box, vec4(0.2f, 0, 0.7f, 0.6f), 0, 0);
+
+	Box.VMargin(10.0f, &Box);
+	Box.HSplitTop(20.0f, 0, &Box);
+	Box.HSplitTop(15.0f, &Button, 0);
+	static int s_ScrollbarDummy = 0;
+	static int s_ScrollValue = 0.0f;
+	s_ScrollValue = round_to_int(63.0f * (DoScrollbarH(&s_ScrollbarDummy, &Button, s_ScrollValue / 63.0f)));
+
+	Box.HSplitTop(20.0f, 0, &Box);
+	Box.HSplitTop(15.0f, &Button, 0);
+	{
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "Dummies: %d", s_ScrollValue+1);
+		UI()->DoLabelScaled(&Button, aBuf, 10.5f, -1, Button.w);
+	}
+
+	Box.HSplitTop(25.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
-	static int s_ButtonTest3 = 0;
-	if(DoButton_Menu(&s_ButtonTest3, Localize("test1"), 0, &Button))
-		;
+	static int s_ButtonDummies = 0;
+	{
+		char aBuf[64];
+		if(!m_SpoofDummiesConnected)
+			str_format(aBuf, sizeof(aBuf), Localize("Connect dummies"), s_ScrollValue+1);
+		else
+			str_format(aBuf, sizeof(aBuf), Localize("Disconnect dummies"), s_ScrollValue+1);
+		if(DoButton_Menu(&s_ButtonDummies, aBuf, 0, &Button))
+		{
+			char aCmd[256];
+			if(!m_SpoofDummiesConnected)
+				str_format(aCmd, sizeof(aCmd), "dum %s %i", aServerAddr, s_ScrollValue+1);
+			else
+				str_format(aCmd, sizeof(aCmd), "dcdum", aServerAddr, s_ScrollValue+1);
+			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			m_SpoofDummiesConnected ^= true;
+		}
+	}
 
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
-	static int s_ButtonTest4 = 0;
-	if(DoButton_Menu(&s_ButtonTest4, Localize("test2"), 0, &Button))
-		;
+	static int s_ButtonVoteYes = 0;
+	if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot yes"), 0, &Button))
+	{
+		char aCmd[256];
+		str_format(aCmd, sizeof(aCmd), "vb %s %d 1", aServerAddr, s_ScrollValue);
+		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+	}
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonVoteNo = 0;
+	if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot no"), 0, &Button))
+	{
+		char aCmd[256];
+		str_format(aCmd, sizeof(aCmd), "vb %s %d 0", aServerAddr, s_ScrollValue);
+		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+	}
+
 }
 
 void CMenus::RenderSpoofingPlayers(CUIRect MainView)
@@ -945,15 +1011,11 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 		net_addr_split(aServerAddr, sizeof(aServerAddr));
 		net_addr_split(aClientAddr, sizeof(aClientAddr));
 
-		// always render the last message
+		// always render the last message and a fancy box
 		{
 			CUIRect Box;
 			const float HighlightTime = 2.0f; // highlight the box for 2 seconds
 			Extended.HSplitBottom(18.5f, &Extended, &Box);
-			//vec4 Color(0.3f + max(0.0f, (sinf(pi*(max(0.0f, (pi/4.0f-pi/8.0f)+m_pClient->m_pSpoofRemote->LastMessageTime()-Client()->LocalTime())*0.7f)))), 0.3f, 0.3f, 0.45f);
-
-			//vec4 Color(0.3f + max(0.0f, m_pClient->m_pSpoofRemote->LastMessageTime()+HighlightTime-Client()->LocalTime())/HighlightTime, 0.3f, 0.3f, 0.45f);
-
 			float x = max(0-(pi/4), m_pClient->m_pSpoofRemote->LastMessageTime()+HighlightTime-Client()->LocalTime())/HighlightTime;
 			float y = sin(pi*(pi/4)*x+(pi/4));
 			vec4 Color(0.3 + clamp(y*0.7f, 0.0f, 0.7f), 0.3f, 0.3f, 0.45f);
@@ -1063,6 +1125,12 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 
 			static char s_aChatMessage[128] = {0};
 			Extended.HSplitTop(20.0f, &Bottom, &Extended);
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(300.0f, &Button, &Bottom);
+			static float s_OffsetDesc = 0.0f;
+			DoEditBox(&s_aChatMessage, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetDesc, false, CUI::CORNER_ALL);
+
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
 			static int s_SendChatButton = 0;
@@ -1077,9 +1145,17 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-			static float s_OffsetDesc = 0.0f;
-			DoEditBox(&s_aChatMessage, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetDesc, false, CUI::CORNER_ALL);
+			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
+			if(m_SpoofDummiesConnected)
+			{
+				static int s_SendChatDummiesButton = 0;
+				if(DoButton_Menu(&s_SendChatDummiesButton, Localize("Chatdummies"), 0, &Button))
+				{
+					char aCmd[256];
+					str_format(aCmd, sizeof(aCmd), "chatdum %s %s", aServerAddr, s_aChatMessage);
+					m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+				}
+			}
 		}
 	}
 }

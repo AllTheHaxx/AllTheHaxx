@@ -91,6 +91,9 @@ CMenus::CMenus()
 
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
+
+	m_SpoofSelectedPlayer = -1;
+	m_SpoofDummiesConnected = false;
 }
 
 vec4 CMenus::ButtonColorMul(const void *pID)
