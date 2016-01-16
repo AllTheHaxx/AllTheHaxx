@@ -1160,7 +1160,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				ClrBt.w = Button.h;
 				ClrBt.h = Button.h;
 				static int s_ClearButton = 0;
-				if(DoButton_Menu(&s_ClearButton, "x", 0, &ClrBt, CUI::CORNER_R))
+				if(DoButton_Menu(&s_ClearButton, "×", 0, &ClrBt, CUI::CORNER_R))
 				{
 					s_OffsetDesc = 0.0f;
 					mem_zero(s_aChatMessage, sizeof(s_aChatMessage));

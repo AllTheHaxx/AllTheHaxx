@@ -678,17 +678,14 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_CallVoteButton=0;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, m_pClient->m_pSpoofRemote->IsConnected() ? 0 : CUI::CORNER_TR))
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, 0)
 			NewPage = PAGE_CALLVOTE;
 
-		if(m_pClient->m_pSpoofRemote->IsConnected() || 1) // TODO: XXX: REMOVE THE "or 1", JUST FOR TESTING!!
-		{
-			Box.VSplitLeft(100.0f, &Button, &Box);
-			Box.VSplitLeft(4.0f, 0, &Box);
-			static int s_SpoofingButton=0;
-			if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
-				NewPage = PAGE_SPOOFING;
-		}
+		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(4.0f, 0, &Box);
+		static int s_SpoofingButton=0;
+		if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
+			NewPage = PAGE_SPOOFING;
 	}
 
 	/*
