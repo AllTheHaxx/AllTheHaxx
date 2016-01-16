@@ -678,7 +678,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_CallVoteButton=0;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, 0)
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, 0))
 			NewPage = PAGE_CALLVOTE;
 
 		Box.VSplitLeft(100.0f, &Button, &Box);

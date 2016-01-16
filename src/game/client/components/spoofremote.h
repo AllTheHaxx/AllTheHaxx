@@ -27,8 +27,7 @@ class CSpoofRemote : public CComponent
 #endif
 
 	void Reset();
-	void Connect(const char *pAddr, int Port);
-	void Disconnect();
+
 	static void CreateThreads(void *pUserData);
 	static void Listener(void *pUserData);
 	static void Worker(void *pUserData);
@@ -45,6 +44,10 @@ public:
 	inline bool IsConnected() const { return m_IsConnected; }
 	inline const char *LastMessage() const { return m_LastMessage; }
 	inline float LastMessageTime() const { return m_LastMessageTime; }
+
+	void Connect(const char *pAddr, int Port);
+	void Disconnect();
+
 	void OnConsoleInit();
 	void SendCommand(const char *pCommand);
 };

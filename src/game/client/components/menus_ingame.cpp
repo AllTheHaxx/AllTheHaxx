@@ -783,8 +783,54 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	MainView.Margin(10.0f, &MainView);
 	MainView.HSplitBottom(25.0f, &MainView, &Box);
 
+	// ----------- misc stuff
+
+	MainView.VSplitLeft(200.0f, &Box, &MainView);
+
+	// window
+	Box.HSplitTop(22.4f, &Button, &Box);
+	RenderTools()->DrawUIRect(&Button, vec4(0.6f, 0.17f, 0.17f, 0.6f), CUI::CORNER_T, 5.0f);
+	UI()->DoLabel(&Button, Localize("M15C 5TUFF"), 17.0f, 0);
+	RenderTools()->DrawUIRect(&Box, vec4(0.7f, 0.1f, 0.1f, 0.6f), 0, 0);
+
+	Box.VMargin(10.0f, &Box);
+	Box.HSplitTop(25.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonConnect = 0;
+	if(DoButton_Menu(&s_ButtonConnect, Localize("Connect to server"), 0, &Button))
+	{
+		if(!m_pClient->m_pSpoofRemote->IsConnected())
+			m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+	}
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonTest = 0;
+	if(DoButton_Menu(&s_ButtonTest, Localize("Test connection"), 0, &Button))
+	{
+		m_pClient->m_pSpoofRemote->SendCommand("status");
+	}
+
+	Box.HSplitTop(70.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonDC= 0;
+	if(DoButton_Menu(&s_ButtonDC, Localize("Disconnect"), 0, &Button))
+	{
+		if(m_pClient->m_pSpoofRemote->IsConnected())
+			m_pClient->m_pSpoofRemote->SendCommand("exit");
+	}
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonForceDC = 0;
+	if(DoButton_Menu(&s_ButtonForceDC, Localize("Force disconnect"), 0, &Button))
+	{
+		m_pClient->m_pSpoofRemote->Disconnect();
+	}
+
 	// ----------- zervor tools
 
+	MainView.VSplitLeft(70.0f, &Box, &MainView);
 	MainView.VSplitLeft(200.0f, &Box, &MainView);
 
 	// window
@@ -793,19 +839,11 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	UI()->DoLabel(&Button, Localize("Z3RV0R T00LZ"), 17.0f, 0);
 	RenderTools()->DrawUIRect(&Box, vec4(0, 0.7f, 0.1f, 0.6f), 0, 0);
 
-	static int s_ButtonFetch = 0;
 	Box.VMargin(10.0f, &Box);
 	Box.HSplitTop(25.0f, 0, &Box);
-	Box.HSplitTop(25.0f, &Button, &Box);
-	if(DoButton_Menu(&s_ButtonFetch, Localize("Test connection"), 0, &Button))
-	{
-		m_pClient->m_pSpoofRemote->SendCommand("status");
-	}
-
-	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
-	static int s_ButtonTest2 = 0;
-	if(DoButton_Menu(&s_ButtonTest2, Localize("Fetch IPs"), 0, &Button))
+	static int s_ButtonFetch = 0;
+	if(DoButton_Menu(&s_ButtonFetch, Localize("Fetch IPs"), 0, &Button))
 	{
 		m_pClient->m_pSpoofRemote->SendCommand("fetchips");
 	}
