@@ -11,12 +11,13 @@
 class CSpoofRemote : public CComponent
 {
 	bool m_IsConnected; // whether we are connected to teh zervor
-	char m_LastMessage[256]; // the last message from zervor
+	char m_aLastMessage[256]; // the last message from zervor
+	char m_aLastCommand[256]; // last message we've sent
 	float m_LastMessageTime;
 	int m_SpoofRemoteID; // our id at teh zervor
 	void *m_pListenerThread;
 	void *m_pWorkerThread;
-	time_t m_LastAck, m_ErrorTime;
+	time_t m_LastAck;
 #if defined(CONF_FAMILY_UNIX)
 	int m_Socket;
 	struct sockaddr_in m_Info;
@@ -42,8 +43,9 @@ public:
 	~CSpoofRemote();
 
 	inline bool IsConnected() const { return m_IsConnected; }
-	inline const char *LastMessage() const { return m_LastMessage; }
+	inline const char *LastMessage() const { return m_aLastMessage; }
 	inline float LastMessageTime() const { return m_LastMessageTime; }
+	inline const char *LastCommand() const { return m_aLastCommand; }
 
 	void Connect(const char *pAddr, int Port);
 	void Disconnect();

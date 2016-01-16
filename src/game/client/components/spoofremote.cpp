@@ -8,7 +8,7 @@
 	#include <sys/socket.h>    //socket
 	#include <arpa/inet.h> //inet_addr
 	#include <netdb.h> //hostent
-	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s'\n", __FILE__, __LINE__, msg);
+	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s'\n", __FILE__, __LINE__, msg); perror(":");
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -41,9 +41,9 @@ void CSpoofRemote::Reset()
 	m_Socket = -1;
 	m_SpoofRemoteID = -1;
 	m_LastAck = 0;
-	m_ErrorTime = 0;
 	m_IsConnected = false;
-	mem_zero(m_LastMessage, sizeof(m_LastMessage));
+	mem_zero(m_aLastMessage, sizeof(m_aLastMessage));
+	mem_zero(m_aLastCommand, sizeof(m_aLastCommand));
 	m_LastMessageTime = -1.0f;
 }
 
@@ -143,24 +143,12 @@ void CSpoofRemote::Listener(void *pUserData)
 		int ret = recv(pSelf->m_Socket, rBuffer, sizeof(rBuffer), 0);
 		if(ret <= 0 || str_comp(rBuffer, "") == 0)
 		{
-			if(pSelf->m_ErrorTime == 0)
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "connecting problems... (%d) zervor might be down, disconnecting in 10 seconds.", ret);
-				pSelf->Console()->Print(0, "spfrmt", aBuf, false);
-				RAISE_ERROR("Error while receiving");
-				pSelf->m_ErrorTime = time(NULL);
-			}
-			else if(time(NULL) > pSelf->m_ErrorTime + 10)
-			{
-				pSelf->Console()->Print(0, "spfrmt", "disconnected due to connection problems", false);
-				pSelf->Disconnect();
-			}
+			RAISE_ERROR("Error while receiving");
+			pSelf->Console()->Print(0, "spfrmt", "disconnected due to connection problems", false);
+			pSelf->Disconnect();
 		}
 		else
 		{
-			pSelf->m_ErrorTime = 0;
-
 			if(pSelf->m_SpoofRemoteID < 0)
 				pSelf->m_SpoofRemoteID = atoi(rBuffer);
 
@@ -184,7 +172,7 @@ void CSpoofRemote::Listener(void *pUserData)
 			else
 			{
 				pSelf->Console()->Print(0, "spfrmtmsg", rBuffer, true);
-				str_copy(pSelf->m_LastMessage, rBuffer, sizeof(pSelf->m_LastMessage));
+				str_copy(pSelf->m_aLastMessage, rBuffer, sizeof(pSelf->m_aLastMessage));
 				pSelf->m_LastMessageTime = pSelf->Client()->LocalTime();
 			}
 		}
@@ -242,19 +230,25 @@ void CSpoofRemote::Worker(void *pUserData)
 
 void CSpoofRemote::SendCommand(const char *pCommand)
 {
+	if(!pCommand)
+		return;
+
+	// save the command, but no control messages
+	if(str_length(pCommand) > 4)
+		str_copy(m_aLastCommand, pCommand, sizeof(m_aLastCommand));
+
 	if(!IsConnected())
 	{
 		Console()->Print(0, "spfrmt", "not connected. Use spf_connect first!", false);
+		str_copy(m_aLastMessage, "[Local] not connected. Use spf_connect first!", sizeof(m_aLastMessage));
 		return;
 	}
-
-	if(!pCommand || m_ErrorTime)
-		return;
 
 	if(send(m_Socket, pCommand, strlen(pCommand), 0) < 0)
 	{
 		Console()->Print(0, "spfrmt", "error while sending", false);
 		RAISE_ERROR("Error while sending");
+		Disconnect();
 	}
 }
 

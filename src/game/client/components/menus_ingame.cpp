@@ -861,6 +861,15 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	// ----------- dummy tools
 
+	// parse the server messages concerning dummies
+	if(!m_SpoofDummiesConnected &&
+			str_comp_nocase("[Server]: Dummies connected!", m_pClient->m_pSpoofRemote->LastMessage()) == 0)
+		m_SpoofDummiesConnected = true;
+
+	if(m_SpoofDummiesConnected &&
+			str_comp_nocase("[Server]: Dummies disconnected.", m_pClient->m_pSpoofRemote->LastMessage()) == 0)
+		m_SpoofDummiesConnected = false;
+
 	MainView.VSplitLeft(70.0f, &Box, &MainView);
 	MainView.VSplitLeft(200.0f, &Box, &MainView);
 
@@ -909,21 +918,26 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(43.0f, 0, &Box);
 	Box.HSplitTop(20.0f, &Button, 0);
 	static int s_ButtonVoteYes = 0;
-	if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot yes"), 0, &Button))
+	if(!m_SpoofDummiesConnected)
 	{
-		char aCmd[256];
-		str_format(aCmd, sizeof(aCmd), "vb %s %d 1", aServerAddr, s_ScrollValue);
-		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
-	}
+		if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot yes"), 0, &Button))
+		{
+			char aCmd[256];
+			str_format(aCmd, sizeof(aCmd), "vb %s %d 1", aServerAddr, s_ScrollValue);
+			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			m_SpoofDummiesConnected = true;
+		}
 
-	Box.HSplitTop(25.0f, 0, &Box);
-	Box.HSplitTop(20.0f, &Button, 0);
-	static int s_ButtonVoteNo = 0;
-	if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot no"), 0, &Button))
-	{
-		char aCmd[256];
-		str_format(aCmd, sizeof(aCmd), "vb %s %d 0", aServerAddr, s_ScrollValue);
-		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+		Box.HSplitTop(25.0f, 0, &Box);
+		Box.HSplitTop(20.0f, &Button, 0);
+		static int s_ButtonVoteNo = 0;
+		if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot no"), 0, &Button))
+		{
+			char aCmd[256];
+			str_format(aCmd, sizeof(aCmd), "vb %s %d 0", aServerAddr, s_ScrollValue);
+			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+			m_SpoofDummiesConnected = true;
+		}
 	}
 
 }
@@ -1051,14 +1065,22 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 
 		// always render the last message and a fancy box
 		{
-			CUIRect Box;
+			CUIRect Left, Right;
 			const float HighlightTime = 2.0f; // highlight the box for 2 seconds
-			Extended.HSplitBottom(18.5f, &Extended, &Box);
+			Extended.HSplitBottom(18.5f, &Extended, &Left);
 			float x = max(0-(pi/4), m_pClient->m_pSpoofRemote->LastMessageTime()+HighlightTime-Client()->LocalTime())/HighlightTime;
 			float y = sin(pi*(pi/4)*x+(pi/4));
 			vec4 Color(0.3 + clamp(y*0.7f, 0.0f, 0.7f), 0.3f, 0.3f, 0.45f);
-			RenderTools()->DrawUIRect(&Box, Color, CUI::CORNER_ALL, 2.3f);
-			UI()->DoLabelScaled(&Box, m_pClient->m_pSpoofRemote->LastMessage(), 12.0f, -1, Extended.w*0.95f);
+			Left.VSplitMid(&Left, &Right);
+			// inbox
+			RenderTools()->DrawUIRect(&Left, Color, CUI::CORNER_ALL, 2.3f);
+			Left.VSplitLeft(3.0f, 0, &Left);
+			UI()->DoLabelScaled(&Left, m_pClient->m_pSpoofRemote->LastMessage(), 12.0f, -1, Extended.w*0.95f);
+			// outbox
+			Right.VSplitLeft(5.0f, 0, &Right);
+			RenderTools()->DrawUIRect(&Right, vec4(0.3f, 0.33f, 0.3f, 0.45f), CUI::CORNER_ALL, 2.3f);
+			Right.VSplitLeft(3.0f, 0, &Right);
+			UI()->DoLabelScaled(&Right, m_pClient->m_pSpoofRemote->LastCommand(), 12.0f, -1, Extended.w*0.95f);
 		}
 
 		// all deh laz0rs
@@ -1128,7 +1150,10 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				{
 					for(int i = 0; i < MAX_CLIENTS; i++)
 					{
-						char aBuf[NETADDR_MAXSTRSIZE];
+						if(!m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Spoofable)
+							continue;
+
+						char aBuf[NETADDR_MAXSTRSIZE] = {0};
 						str_copy(aBuf, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aBuf));
 						net_addr_split(aBuf, sizeof(aBuf));
 						str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aBuf);
@@ -1187,9 +1212,9 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(300.0f, &Button, &Bottom);
-			static float s_OffsetDesc = 0.0f;
+			static float s_OffsetChatMsg = 0.0f;
 			Button.w -= Button.h;
-			DoEditBox(&s_aChatMessage, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetDesc, false, CUI::CORNER_L);
+			DoEditBox(&s_aChatMessage, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetChatMsg, false, CUI::CORNER_L);
 			// hacky clear button
 			{
 				CUIRect ClrBt;
@@ -1200,7 +1225,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				static int s_ClearButton = 0;
 				if(DoButton_Menu(&s_ClearButton, "×", 0, &ClrBt, CUI::CORNER_R))
 				{
-					s_OffsetDesc = 0.0f;
+					s_OffsetChatMsg = 0.0f;
 					mem_zero(s_aChatMessage, sizeof(s_aChatMessage));
 				}
 			}
@@ -1227,8 +1252,50 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				if(DoButton_Menu(&s_SendChatDummiesButton, Localize("Chatdummies"), 0, &Button))
 				{
 					char aCmd[256];
-					str_format(aCmd, sizeof(aCmd), "chatdum %s %s", aServerAddr, s_aChatMessage);
+					str_format(aCmd, sizeof(aCmd), "chatdum %s", s_aChatMessage);
 					m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+				}
+			}
+
+			Bottom.VSplitLeft(7.5f, 0, &Bottom);
+			Bottom.VSplitLeft(150.0f, &Button, &Bottom);
+			{
+				NETADDR Addr;
+				char aBuf[NETADDR_MAXSTRSIZE] = {0};
+				static char s_aCustomAddr[NETADDR_MAXSTRSIZE] = {0};
+				static int s_CustomAddrState = 0x0; // 0x1 = valid, 0x2 = use
+
+				str_copy(aBuf, s_aCustomAddr, sizeof(aBuf));
+				net_addr_split(aBuf, sizeof(aBuf));
+
+				if(str_comp(aClientAddr, s_aCustomAddr) != 0 && (s_CustomAddrState&2))
+					s_CustomAddrState &= ~2;
+
+				if(net_addr_from_str(&Addr, s_aCustomAddr) == 0)
+					s_CustomAddrState |= 1; // valid
+				else
+					s_CustomAddrState &= ~1;
+
+				// nice colored background for the IP box
+				RenderTools()->DrawUIRect(&Button, vec4(0, s_CustomAddrState&1 ? 1.0f : 0.0f, s_CustomAddrState&2 ? 1.0f : 0.0f, 0.8f), CUI::CORNER_ALL, 5.0f);
+
+				static float s_OffsetCustomAddr = 0.0f;
+				DoEditBox(&s_aCustomAddr, &Button, s_aCustomAddr, sizeof(s_aCustomAddr), 14.0f, &s_OffsetCustomAddr,
+						false, CUI::CORNER_ALL, "Enter custom IP here");
+
+				Bottom.VSplitLeft(5.0f, 0, &Bottom);
+				Bottom.VSplitLeft(75.0f, &Button, &Bottom);
+				static int s_UseCustomAddrButton = 0;
+				if((s_CustomAddrState&1) && !(s_CustomAddrState&2)) // display button only if valid and not in use
+				{
+					if(DoButton_Menu(&s_UseCustomAddrButton, Localize("Use"), 0, &Button))
+					{
+						s_CustomAddrState |= 2; // use
+						m_SpoofSelectedPlayer = -1;
+						s_DoForAll = 0;
+						str_copy(aClientAddr, s_aCustomAddr, sizeof(aClientAddr));
+						net_addr_split(aClientAddr, sizeof(aClientAddr));
+					}
 				}
 			}
 		}
