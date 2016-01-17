@@ -862,8 +862,9 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	// ----------- dummy tools
 
 	// parse the server messages concerning dummies
-	if(!m_SpoofDummiesConnected &&
-			str_comp_nocase("[Server]: Dummies connected!", m_pClient->m_pSpoofRemote->LastMessage()) == 0)
+	if(!m_SpoofDummiesConnected && (
+			str_comp_nocase("[Server]: Dummies connected!", m_pClient->m_pSpoofRemote->LastMessage()) == 0 ||
+			str_comp_nocase("[Server]: Dummies connected (voting...)!", m_pClient->m_pSpoofRemote->LastMessage()) == 0))
 		m_SpoofDummiesConnected = true;
 
 	if(m_SpoofDummiesConnected &&
@@ -934,7 +935,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot no"), 0, &Button))
 		{
 			char aCmd[256];
-			str_format(aCmd, sizeof(aCmd), "vb %s %d 0", aServerAddr, s_ScrollValue);
+			str_format(aCmd, sizeof(aCmd), "vb %s %d -1", aServerAddr, s_ScrollValue);
 			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			m_SpoofDummiesConnected = true;
 		}
