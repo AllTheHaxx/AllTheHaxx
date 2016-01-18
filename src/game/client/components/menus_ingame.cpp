@@ -861,7 +861,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	// ----------- dummy tools
 
-	// parse the server messages concerning dummies
+	// ~~~ parse the server messages concerning dummies
 	if(!m_SpoofDummiesConnected && (
 			str_comp_nocase("[Server]: Dummies connected!", m_pClient->m_pSpoofRemote->LastMessage()) == 0 ||
 			str_comp_nocase("[Server]: Dummies connected (voting...)!", m_pClient->m_pSpoofRemote->LastMessage()) == 0))
@@ -870,6 +870,15 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	if(m_SpoofDummiesConnected &&
 			str_comp_nocase("[Server]: Dummies disconnected.", m_pClient->m_pSpoofRemote->LastMessage()) == 0)
 		m_SpoofDummiesConnected = false;
+
+	if(!m_DSStarted &&
+			str_comp_nocase("[Server]: Dummyspam started!", m_pClient->m_pSpoofRemote->LastMessage()) == 0)
+		m_DSStarted = true;
+
+	if(m_DSStarted &&
+			str_comp_nocase("[Server]: Dummyspam stopped!", m_pClient->m_pSpoofRemote->LastMessage()) == 0)
+		m_DSStarted = false;
+	// ~~~ end of parsing
 
 	MainView.VSplitLeft(70.0f, &Box, &MainView);
 	MainView.VSplitLeft(200.0f, &Box, &MainView);
@@ -901,26 +910,43 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	{
 		char aBuf[64];
 		if(!m_SpoofDummiesConnected)
-			str_format(aBuf, sizeof(aBuf), Localize("Connect dummies"), s_ScrollValue+1);
+			str_format(aBuf, sizeof(aBuf), Localize("Connect dummies"));
 		else
-			str_format(aBuf, sizeof(aBuf), Localize("Disconnect dummies"), s_ScrollValue+1);
+			str_format(aBuf, sizeof(aBuf), Localize("Disconnect dummies"));
 		if(DoButton_Menu(&s_ButtonDummies, aBuf, 0, &Button))
 		{
 			char aCmd[256];
 			if(!m_SpoofDummiesConnected)
 				str_format(aCmd, sizeof(aCmd), "dum %s %i", aServerAddr, s_ScrollValue+1);
 			else
-				str_format(aCmd, sizeof(aCmd), "dcdum", aServerAddr, s_ScrollValue+1);
+				str_format(aCmd, sizeof(aCmd), "dcdum");
 			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
-			m_SpoofDummiesConnected ^= true;
 		}
 	}
 
-	Box.HSplitTop(43.0f, 0, &Box);
-	Box.HSplitTop(20.0f, &Button, 0);
-	static int s_ButtonVoteYes = 0;
+	Box.HSplitTop(32.0f, 0, &Box);
+	Box.HSplitTop(25.5f, &Button, 0);
+	static int s_ButtonDummySpam = 0;
+	{
+		char aBuf[64];
+		if(!m_DSStarted)
+			str_format(aBuf, sizeof(aBuf), Localize("Start flooding"));
+		else
+			str_format(aBuf, sizeof(aBuf), Localize("Stop flooding"));
+		if(DoButton_Menu(&s_ButtonDummySpam, aBuf, 0, &Button))
+		{
+			char aCmd[256];
+			str_format(aCmd, sizeof(aCmd), "ds %s %i", aServerAddr, s_ScrollValue+1);
+			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+		}
+	}
+
+	// this stuff is only active when there are no dummies connected
 	if(!m_SpoofDummiesConnected)
 	{
+		Box.HSplitTop(43.0f, 0, &Box);
+		Box.HSplitTop(20.0f, &Button, 0);
+		static int s_ButtonVoteYes = 0;
 		if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot yes"), 0, &Button))
 		{
 			char aCmd[256];

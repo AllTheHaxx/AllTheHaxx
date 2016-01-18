@@ -151,6 +151,7 @@ class CMenus : public CComponent
 	// for teh haxx
 	int m_SpoofSelectedPlayer;
 	bool m_SpoofDummiesConnected;
+	bool m_DSStarted;
 
 	// demo
 	struct CDemoItem
