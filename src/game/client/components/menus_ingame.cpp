@@ -886,7 +886,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	// window
 	Box.HSplitTop(22.4f, &Button, &Box);
 	RenderTools()->DrawUIRect(&Button, vec4(0.17f, 0, 0.6f, 0.6f), CUI::CORNER_T, 5.0f);
-	UI()->DoLabel(&Button, Localize("DUMMY T00LZ"), 17.0f, 0);
+	UI()->DoLabel(&Button, Localize("DUMMY SH1T"), 17.0f, 0);
 	RenderTools()->DrawUIRect(&Box, vec4(0.2f, 0, 0.7f, 0.6f), 0, 0);
 
 	Box.VMargin(10.0f, &Box);
@@ -947,7 +947,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		Box.HSplitTop(43.0f, 0, &Box);
 		Box.HSplitTop(20.0f, &Button, 0);
 		static int s_ButtonVoteYes = 0;
-		if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot yes"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot 'Yes'"), 0, &Button))
 		{
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd), "vb %s %d 1", aServerAddr, s_ScrollValue);
@@ -958,7 +958,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		Box.HSplitTop(25.0f, 0, &Box);
 		Box.HSplitTop(20.0f, &Button, 0);
 		static int s_ButtonVoteNo = 0;
-		if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot no"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot 'No'"), 0, &Button))
 		{
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd), "vb %s %d -1", aServerAddr, s_ScrollValue);
@@ -1016,7 +1016,7 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1,0), vec2(Item.m_Rect.x+Item.m_Rect.h/2, Item.m_Rect.y+Item.m_Rect.h/2));
 			Item.m_Rect.x +=Info.m_Size;
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s   [%s]", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
+			str_format(aBuf, sizeof(aBuf), "%s [[%s]]", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 		}
 	}
@@ -1055,13 +1055,13 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 		// general stuff, fetching IPs, kicking everyone, votebot etc.
 		TabBar.VSplitLeft(TabBar.w/2, &Button, &TabBar);
 		static int s_Button0 = 0;
-		if(DoButton_MenuTab(&s_Button0, Localize("General"), s_ControlPage == 0, &Button, 0))
+		if(DoButton_MenuTab(&s_Button0, Localize("General queries"), s_ControlPage == 0, &Button, 0))
 			s_ControlPage = 0;
 
 		// control specific players
 		TabBar.VSplitRight(0, &Button, &TabBar);
 		static int s_Button1 = 0;
-		if(DoButton_MenuTab(&s_Button1, Localize("Players"), s_ControlPage == 1, &Button, 0))
+		if(DoButton_MenuTab(&s_Button1, Localize("Tee controlling related"), s_ControlPage == 1, &Button, 0))
 			s_ControlPage = 1;
 	}
 
@@ -1177,11 +1177,12 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				{
 					for(int i = 0; i < MAX_CLIENTS; i++)
 					{
-						if(!m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Spoofable)
+						// please don't do drugs while coding... thank you.
+						if(!m_pClient->m_aClients[i].m_Spoofable)
 							continue;
 
 						char aBuf[NETADDR_MAXSTRSIZE] = {0};
-						str_copy(aBuf, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aBuf));
+						str_copy(aBuf, m_pClient->m_aClients[i].m_Addr, sizeof(aBuf));
 						net_addr_split(aBuf, sizeof(aBuf));
 						str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aBuf);
 						m_pClient->m_pSpoofRemote->SendCommand(aCmd);
@@ -1211,7 +1212,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			//RenderTools()->DrawUIRect(&Bottom, vec4(0.5f, 0.5f, 0.5f, 0.3f), CUI::CORNER_ALL, 5.0f);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_VoteYesButton = 0;
-			if(DoButton_Menu(&s_VoteYesButton, Localize("Vote Yes"), 0, &Button))
+			if(DoButton_Menu(&s_VoteYesButton, Localize("Vote 'Yes'"), 0, &Button))
 			{
 				char aCmd[256];
 				str_format(aCmd, sizeof(aCmd), "va %s 1", aClientAddr, aServerAddr);
@@ -1221,10 +1222,10 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_VoteNoButton = 0;
-			if(DoButton_Menu(&s_VoteNoButton, Localize("Vote No"), 0, &Button))
+			if(DoButton_Menu(&s_VoteNoButton, Localize("Vote 'No'"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "va %s 0", aServerAddr);
+				str_format(aCmd, sizeof(aCmd), "va %s -1", aServerAddr); // ITS FRIGGIN' -1 NOT 0
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
@@ -1272,11 +1273,11 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			}
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(110.0f, &Button, &Bottom);
 			if(m_SpoofDummiesConnected)
 			{
 				static int s_SendChatDummiesButton = 0;
-				if(DoButton_Menu(&s_SendChatDummiesButton, Localize("Chatdummies"), 0, &Button))
+				if(DoButton_Menu(&s_SendChatDummiesButton, Localize("Send (Dummies)"), 0, &Button))
 				{
 					char aCmd[256];
 					str_format(aCmd, sizeof(aCmd), "chatdum %s", s_aChatMessage);

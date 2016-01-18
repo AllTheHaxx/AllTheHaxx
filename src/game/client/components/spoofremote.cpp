@@ -240,7 +240,7 @@ void CSpoofRemote::SendCommand(const char *pCommand)
 	if(!IsConnected())
 	{
 		Console()->Print(0, "spfrmt", "not connected. Use spf_connect first!", false);
-		str_copy(m_aLastMessage, "[Local] not connected. Use spf_connect first!", sizeof(m_aLastMessage));
+		str_copy(m_aLastMessage, "[Local]: not connected. Use spf_connect first!", sizeof(m_aLastMessage));
 		return;
 	}
 
