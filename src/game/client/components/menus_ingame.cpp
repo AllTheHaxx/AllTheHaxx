@@ -1172,7 +1172,6 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_TimeoutButton, Localize("Timeout"), 0, &Button))
 			{
 				// glitchy! found by accident :D
-				char aCmd[256];
 				if(s_DoForAll)
 				{
 					for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1184,12 +1183,14 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 						char aBuf[NETADDR_MAXSTRSIZE] = {0};
 						str_copy(aBuf, m_pClient->m_aClients[i].m_Addr, sizeof(aBuf));
 						net_addr_split(aBuf, sizeof(aBuf));
+						char aCmd[256];
 						str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aBuf);
 						m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 					}
 				}
 				else
 				{
+					char aCmd[256];
 					str_format(aCmd, sizeof(aCmd), "disconnect %s %s", aServerAddr, aClientAddr);
 					m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 				}
