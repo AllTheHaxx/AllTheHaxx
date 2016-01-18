@@ -41,7 +41,7 @@ void CSpoofRemote::Reset()
 	m_Socket = -1;
 	m_SpoofRemoteID = -1;
 	m_LastAck = 0;
-	m_IsConnected = false;
+	m_State = 0;
 	mem_zero(m_aLastMessage, sizeof(m_aLastMessage));
 	mem_zero(m_aLastCommand, sizeof(m_aLastCommand));
 	m_LastMessageTime = -1.0f;
@@ -115,13 +115,34 @@ void CSpoofRemote::CreateThreads(void *pUserData)
 		pSelf->Console()->Print(0, "spfrmt", "error while connecting", false);
 		return;
 	}
-	pSelf->m_IsConnected = true;
+	pSelf->m_State |= SPOOF_STATE_CONNECTED;
 
 	pSelf->Console()->Print(0, "spfrmt", "connected, creating threads...", false);
 
 	pSelf->m_pWorkerThread = thread_init(CSpoofRemote::Worker, pUserData);
 	pSelf->m_pListenerThread = thread_init(CSpoofRemote::Listener, pUserData);
 	return;
+}
+
+void CSpoofRemote::ParseZervorMessage(const char *pMessage)
+{
+	// ~~~ concerning dummies
+	if(!IsState(SPOOF_STATE_DUMMIES) && (
+			str_comp_nocase("[Server]: Dummies connected!", pMessage) == 0 ||
+			str_comp_nocase("[Server]: Dummies connected (voting...)!", pMessage) == 0))
+		m_State |= SPOOF_STATE_DUMMIES;
+
+	if(IsState(SPOOF_STATE_DUMMIES) &&
+			str_comp_nocase("[Server]: Dummies disconnected.", pMessage) == 0)
+		m_State &= ~SPOOF_STATE_DUMMIES;
+
+	if(!IsState(SPOOF_STATE_DUMMYSPAM) &&
+			str_comp_nocase("[Server]: Dummyspam started!", pMessage) == 0)
+		m_State |= SPOOF_STATE_DUMMYSPAM;
+
+	if(IsState(SPOOF_STATE_DUMMYSPAM) &&
+			str_comp_nocase("[Server]: Dummyspam stopped!", pMessage) == 0)
+		m_State &= ~SPOOF_STATE_DUMMYSPAM;
 }
 
 void CSpoofRemote::Listener(void *pUserData)
@@ -174,6 +195,8 @@ void CSpoofRemote::Listener(void *pUserData)
 				pSelf->Console()->Print(0, "spfrmtmsg", rBuffer, true);
 				str_copy(pSelf->m_aLastMessage, rBuffer, sizeof(pSelf->m_aLastMessage));
 				pSelf->m_LastMessageTime = pSelf->Client()->LocalTime();
+
+				pSelf->ParseZervorMessage(rBuffer);
 			}
 		}
 	}
