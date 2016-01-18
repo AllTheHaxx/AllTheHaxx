@@ -672,7 +672,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		// render kick reason
 		CUIRect Reason;
 		Bottom.VSplitRight(40.0f, &Bottom, 0);
-		Bottom.VSplitRight(160.0f, &Bottom, &Reason);
+		Bottom.VSplitRight(160.0f*2.0f, &Bottom, &Reason);
 		Reason.HSplitTop(5.0f, 0, &Reason);
 		const char *pLabel = Localize("Reason:");
 		UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
@@ -796,15 +796,17 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.VMargin(10.0f, &Box);
 	Box.HSplitTop(25.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
-	static int s_ButtonConnect = 0;
-	if(DoButton_Menu(&s_ButtonConnect, Localize("Connect to server"), 0, &Button))
-	{
-		if(!m_pClient->m_pSpoofRemote->IsConnected())
-			m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
-	}
-
 	if(!m_pClient->m_pSpoofRemote->IsConnected())
+	{
+		static int s_ButtonConnect = 0;
+		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect to server"), 0, &Button))
+		{
+			if(!m_pClient->m_pSpoofRemote->IsConnected())
+				m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+		}
+
 		return;
+	}
 
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
