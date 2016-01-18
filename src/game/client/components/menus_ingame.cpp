@@ -861,6 +861,14 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 	}
 
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonKickAll = 0;
+	if(DoButton_Menu(&s_ButtonKickAll, Localize("Vote-kick all"), 0, &Button))
+	{
+		m_pClient->m_SpfKickAll = true;
+	}
+
 
 	// ----------- dummy tools
 

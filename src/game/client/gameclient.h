@@ -373,6 +373,8 @@ public:
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade; }
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
 
+	bool m_SpfKickAll;
+
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];

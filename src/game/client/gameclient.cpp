@@ -632,6 +632,58 @@ void CGameClient::OnRender()
 				m_CheckInfo[1]--;
 		}
 	}
+
+	// nevar forgetti moms spaghetti
+	if(m_SpfKickAll)
+	{
+		static int64 LastKickTime;
+		static int CurClientID = 0;
+		static bool Step = false;
+
+		if(time_get()-LastKickTime > time_freq()/4)
+		{
+			if(Step)
+			{
+				CServerInfo CurrentServerInfo;
+				char aServerAddr[64];
+				Client()->GetServerInfo(&CurrentServerInfo);
+				str_copy(aServerAddr, CurrentServerInfo.m_aAddress, sizeof(aServerAddr));
+				net_addr_split(aServerAddr, sizeof(aServerAddr));
+
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "vb %s 48 1", aServerAddr);
+				m_pSpoofRemote->SendCommand(aCmd);
+
+				LastKickTime = time_get();
+				Step = false;
+			}
+			else
+			{
+				m_pSpoofRemote->SendCommand("dcdum");
+
+				while(CurClientID < MAX_CLIENTS && 
+						!m_aClients[CurClientID].m_Active && 
+						CurClientID != Client()->m_LocalIDs[0] &&
+						CurClientID != Client()->m_LocalIDs[1])
+					CurClientID++;
+
+				dbg_msg("dbg", "%i", CurClientID);
+
+				m_pVoting->CallvoteKick(CurClientID, "keck");
+				Step = true;
+
+				LastKickTime = time_get();
+				CurClientID++;
+			}
+		}
+
+		if(CurClientID > MAX_CLIENTS)
+		{
+			m_SpfKickAll = false;
+			LastKickTime = 0;
+			CurClientID = 0;
+		}
+	}
 }
 
 void CGameClient::OnDummyDisconnect()
