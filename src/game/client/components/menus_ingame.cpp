@@ -833,6 +833,15 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		m_pClient->m_pSpoofRemote->Disconnect();
 	}
 
+	Box.HSplitTop(70.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
+	static int s_ButtonRestart= 0;
+	if(DoButton_Menu(&s_ButtonRestart, Localize("Restart"), 0, &Button))
+	{
+		if(m_pClient->m_pSpoofRemote->IsConnected())
+			m_pClient->m_pSpoofRemote->SendCommand("restart");
+	}
+
 	// ----------- zervor tools
 
 	MainView.VSplitLeft(70.0f, &Box, &MainView);
