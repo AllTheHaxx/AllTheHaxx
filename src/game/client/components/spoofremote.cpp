@@ -16,10 +16,12 @@
 	#pragma comment(lib, "ws2_32.lib")
 	#include <WinSock2.h>
 	#include <Windows.h>
-	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s':\n", __FILE__, __LINE__, msg); WSAGetLastError()
+	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s' (%i):\n", __FILE__, __LINE__, msg, WSAGetLastError())
 #endif
 
 #include <engine/shared/config.h>
+#include <engine/serverbrowser.h>
+#include "voting.h"
 #include "spoofremote.h"
 
 
@@ -53,6 +55,61 @@ void CSpoofRemote::OnConsoleInit()
 	Console()->Register("spf_disconnect", "", CFGFLAG_CLIENT, ConDisconnect, (void *)this, "disconnect from teh zervor 4 h4xX0r");
 	Console()->Register("spf_forceclose", "s", CFGFLAG_CLIENT, ConForceClose, (void *)this, "force-close the connection");
 	Console()->Register("spf", "s", CFGFLAG_CLIENT, ConCommand, (void *)this, "3X3CUT3 C0MM4ND!");
+}
+
+void CSpoofRemote::OnRender()
+{
+	// nevar forgetti moms spaghetti
+	if(IsState(SPOOF_STATE_VOTEKICKALL))
+	{
+		static int64 LastKickTime;
+		static int CurClientID = 0;
+		static bool Step = false;
+
+		if(time_get()-LastKickTime > time_freq()/4)
+		{
+			if(Step)
+			{
+				CServerInfo CurrentServerInfo;
+				char aServerAddr[64];
+				Client()->GetServerInfo(&CurrentServerInfo);
+				str_copy(aServerAddr, CurrentServerInfo.m_aAddress, sizeof(aServerAddr));
+				net_addr_split(aServerAddr, sizeof(aServerAddr));
+
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "vb %s 48 1", aServerAddr);
+				SendCommand(aCmd);
+
+				LastKickTime = time_get();
+				Step = false;
+			}
+			else
+			{
+				SendCommand("dcdum");
+
+				while(CurClientID < MAX_CLIENTS &&
+						!m_pClient->m_aClients[CurClientID].m_Active &&
+						CurClientID != Client()->m_LocalIDs[0] &&
+						CurClientID != Client()->m_LocalIDs[1])
+					CurClientID++;
+
+				dbg_msg("dbg", "%i", CurClientID);
+
+				m_pClient->m_pVoting->CallvoteKick(CurClientID, "keck");
+				Step = true;
+
+				LastKickTime = time_get();
+				CurClientID++;
+			}
+		}
+
+		if(CurClientID > MAX_CLIENTS)
+		{
+			m_State &= ~SPOOF_STATE_VOTEKICKALL;
+			LastKickTime = 0;
+			CurClientID = 0;
+		}
+	}
 }
 
 void CSpoofRemote::Connect(const char *pAddr, int Port)

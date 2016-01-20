@@ -877,7 +877,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	static int s_ButtonKickAll = 0;
 	if(DoButton_Menu(&s_ButtonKickAll, Localize("Vote-kick all"), 0, &Button))
 	{
-		m_pClient->m_SpfKickAll = true;
+		m_pClient->m_pSpoofRemote->VotekickAll();
 	}
 
 

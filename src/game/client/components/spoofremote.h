@@ -13,9 +13,10 @@ class CSpoofRemote : public CComponent
 public:
 	enum
 		{
-			SPOOF_STATE_CONNECTED = 0x1,
-			SPOOF_STATE_DUMMIES = 0x2,
-			SPOOF_STATE_DUMMYSPAM = 0x4,
+			SPOOF_STATE_CONNECTED   = 1 << 0,
+			SPOOF_STATE_DUMMIES     = 1 << 1,
+			SPOOF_STATE_DUMMYSPAM   = 1 << 2,
+			SPOOF_STATE_VOTEKICKALL = 1 << 3,
 		};
 
 private:
@@ -63,10 +64,13 @@ public:
 	inline float LastMessageTime() const { return m_LastMessageTime; }
 	inline const char *LastCommand() const { return m_aLastCommand; }
 
+	inline void VotekickAll() { m_State |= SPOOF_STATE_VOTEKICKALL; }
+
 	void Connect(const char *pAddr, int Port);
 	void Disconnect();
 
 	void OnConsoleInit();
+	void OnRender();
 	void SendCommand(const char *pCommand);
 };
 
