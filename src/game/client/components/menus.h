@@ -145,7 +145,7 @@ class CMenus : public CComponent
 	// for call vote
 	int m_CallvoteSelectedOption;
 	int m_CallvoteSelectedPlayer;
-	char m_aCallvoteReason[VOTE_REASON_LENGTH*2];
+	char m_aCallvoteReason[VOTE_REASON_LENGTH<<4];
 	char m_aFilterString[25];
 
 	// for teh haxx
