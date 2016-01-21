@@ -945,7 +945,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	}
 
 	// this stuff is only active when there are no dummies connected
-	if(!m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
+	//if(!m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
 	{
 		Box.HSplitTop(43.0f, 0, &Box);
 		Box.HSplitTop(20.0f, &Button, 0);
@@ -1059,11 +1059,16 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 		if(DoButton_MenuTab(&s_Button0, Localize("General queries"), s_ControlPage == 0, &Button, 0))
 			s_ControlPage = 0;
 
-		// control specific players
-		TabBar.VSplitRight(0, &Button, &TabBar);
-		static int s_Button1 = 0;
-		if(DoButton_MenuTab(&s_Button1, Localize("Tee controlling related"), s_ControlPage == 1, &Button, 0))
-			s_ControlPage = 1;
+			// control specific players
+			TabBar.VSplitRight(0, &Button, &TabBar);
+			static int s_Button1 = 0;
+			if(m_pClient->m_pSpoofRemote->IsConnected())
+			{
+				if(DoButton_MenuTab(&s_Button1, Localize("Tee controlling related"), s_ControlPage == 1, &Button, 0))
+					s_ControlPage = 1;
+			}
+			else
+				RenderTools()->DrawUIRect(&Button, ms_ColorTabbarActive, 0, 0);
 	}
 
 	// render page
