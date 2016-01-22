@@ -84,6 +84,9 @@ MACRO_CONFIG_INT(ClDefaultZoom, cl_default_zoom, 10, 0, 20, CFGFLAG_CLIENT|CFGFL
 MACRO_CONFIG_INT(ClPlayerUseCustomColor, player_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
 MACRO_CONFIG_INT(ClPlayerColorBody, player_color_body, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player body color")
 MACRO_CONFIG_INT(ClPlayerColorFeet, player_color_feet, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player feet color")
+MACRO_CONFIG_INT(ClPlayerColorBodyRainbow, player_color_body_rainbow, 0, 0, 100, CFGFLAG_CLIENT, "Player body color rainbow")
+MACRO_CONFIG_INT(ClPlayerColorFeetRainbow, player_color_feet_rainbow, 0, 0, 100, CFGFLAG_CLIENT, "Player feet color rainbow")
+
 MACRO_CONFIG_STR(ClPlayerSkin, player_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin")
 
 MACRO_CONFIG_INT(UiPage, ui_page, 6, 0, 11, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
@@ -128,6 +131,7 @@ MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 2016, 0, 64000, CFGFLAG_CLIEN
 MACRO_CONFIG_INT(ClUsernameFetching, cl_fetch_names, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Get rich! #namefreestyle")
 MACRO_CONFIG_INT(ClAutoRefresh, cl_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT, "Time in secs to refresh the serverbrowser when active (0 disables)")
 MACRO_CONFIG_INT(ClChatShowIPs, cl_chat_show_ips, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Hide IP when they are told in chat, just save 'em")
+MACRO_CONFIG_INT(ClSendInfoExploit, cl_sendinfo_exploit, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Old DDNet server? Fast rainbow?")
 
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")

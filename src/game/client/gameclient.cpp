@@ -63,6 +63,7 @@
 #include "components/ghost.h"
 #include <base/tl/sorted_array.h>
 
+
 CGameClient g_GameClient;
 
 // instanciate all systems
@@ -575,6 +576,88 @@ void CGameClient::OnRender()
 
 	return;*/
 
+	// fancy rainbow
+	//g_Config.m_ClPlayerColorBody += 0x010000;
+	//if((g_Config.m_ClPlayerColorBody&0xFF0000) >= 0xFF0000) g_Config.m_ClPlayerColorBody = g_Config.m_ClPlayerColorBody&0x00FFFF;
+
+	if(g_Config.m_ClPlayerColorBodyRainbow || g_Config.m_ClPlayerColorFeetRainbow)
+	{
+		static int bcolor = g_Config.m_ClPlayerColorBody;
+		bcolor += 0x010000*g_Config.m_ClPlayerColorBodyRainbow;
+		if((bcolor&0xFF0000) >= 0xFF0000)
+			bcolor = bcolor&0x00FFFF;
+
+		static int fcolor = g_Config.m_ClPlayerColorFeet;
+		bcolor += 0x010000*g_Config.m_ClPlayerColorFeetRainbow;
+		if((fcolor&0xFF0000) >= 0xFF0000)
+			fcolor = bcolor&0x00FFFF;
+
+		if(g_Config.m_ClSendInfoExploit)
+		{
+			CNetMsg_Cl_StartInfo Msg;
+			Msg.m_pName = g_Config.m_PlayerName;
+			Msg.m_pClan = g_Config.m_PlayerClan;
+			Msg.m_Country = g_Config.m_PlayerCountry;
+			Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+			Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+			Msg.m_ColorBody = bcolor;
+			Msg.m_ColorFeet = fcolor;
+			CMsgPacker Packer(Msg.MsgID());
+			Msg.Pack(&Packer);
+			Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+		}
+		else
+		{
+			CNetMsg_Cl_ChangeInfo Msg;
+			Msg.m_pName = g_Config.m_PlayerName;
+			Msg.m_pClan = g_Config.m_PlayerClan;
+			Msg.m_Country = g_Config.m_PlayerCountry;
+			Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+			Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+			Msg.m_ColorBody = bcolor;
+			Msg.m_ColorFeet = fcolor;
+			CMsgPacker Packer(Msg.MsgID());
+			Msg.Pack(&Packer);
+			Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+		}
+	}
+
+// first try...
+/*	if(g_Config.m_ClPlayerColorBodyRainbow || g_Config.m_ClPlayerColorFeetRainbow)
+	{
+		static int nBody = g_Config.m_ClPlayerColorBodyRainbow;
+		static int nFeet = g_Config.m_ClPlayerColorFeetRainbow;
+		static int BodyHue = g_Config.m_ClPlayerColorBody&0xFF0000;
+		static int FeetHue = g_Config.m_ClPlayerColorFeet&0xFF0000;
+
+		CNetMsg_Cl_StartInfo Msg;
+		Msg.m_pName = g_Config.m_PlayerName;
+		Msg.m_pClan = g_Config.m_PlayerClan;
+		Msg.m_Country = g_Config.m_PlayerCountry;
+		Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+		Msg.m_UseCustomColor = 1;
+		Msg.m_ColorBody = BodyHue<<4|(g_Config.m_ClPlayerColorBody&0x00FFFF);
+		Msg.m_ColorFeet = FeetHue<<4|(g_Config.m_ClPlayerColorFeet&0x00FFFF);
+		CMsgPacker Packer(Msg.MsgID());
+		Msg.Pack(&Packer);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+
+		if(--nBody <= 0)
+		{
+			nBody = g_Config.m_ClPlayerColorBodyRainbow;
+			if(BodyHue++ > 0xFF) BodyHue = 0x00;
+		}
+		if(--nFeet <= 0)
+		{
+			nFeet = g_Config.m_ClPlayerColorFeetRainbow;
+			if(FeetHue++ > 0xFF) FeetHue = 0x00;
+		}
+
+		//if(BodyHue += g_Config.m_ClPlayerColorBodyRainbow/100.0f > 360.0f) BodyHue = RgbToHsl(vec3(1,0,0)).h;
+		//if(FeetHue += g_Config.m_ClPlayerColorFeetRainbow/100.0f > 360.0f) FeetHue = RgbToHsl(vec3(1,0,0)).h;
+
+	}
+*/
 	// update the local character and spectate position
 	UpdatePositions();
 

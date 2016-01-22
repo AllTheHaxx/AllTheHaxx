@@ -1222,7 +1222,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(DoButton_Menu(&s_VoteYesButton, Localize("Vote 'Yes'"), 0, &Button))
 			{
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "va %s 1", aClientAddr, aServerAddr);
+				str_format(aCmd, sizeof(aCmd), "va %s 1", aServerAddr);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
