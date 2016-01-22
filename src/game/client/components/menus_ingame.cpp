@@ -874,6 +874,19 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
+	if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
+	{
+		static int s_ButtonGetDum = 0;
+		if(DoButton_Menu(&s_ButtonGetDum, Localize("Grab dummy IPs"), 0, &Button))
+		{
+			char aCmd[256];
+			str_format(aCmd, sizeof(aCmd), "ipspamdummies %s", aServerAddr);
+			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+		}
+	}
+
+	Box.HSplitTop(40.0f, 0, &Box);
+	Box.HSplitTop(25.0f, &Button, 0);
 	static int s_ButtonKickAll = 0;
 	if(DoButton_Menu(&s_ButtonKickAll, Localize("Vote-kick all"), 0, &Button))
 	{
@@ -1017,7 +1030,13 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1,0), vec2(Item.m_Rect.x+Item.m_Rect.h/2, Item.m_Rect.y+Item.m_Rect.h/2));
 			Item.m_Rect.x +=Info.m_Size;
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s [[%s]]", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
+			NETADDR temp_addr;
+			net_addr_from_str(&temp_addr, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
+		///	if(temp_addr.port == 1337)
+		///		str_format(aBuf, sizeof(aBuf), "\\\\-D-\\\\ %s", );
+		///	else
+		///		str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[aPlayerIDs[i]].m_aName);
+			str_format(aBuf, sizeof(aBuf), "%s%s [[%s]]", temp_addr.port == 1337 ? "\\\\-D-\\\\  " : "", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 		}
 	}
@@ -1059,11 +1078,11 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 		if(DoButton_MenuTab(&s_Button0, Localize("General queries"), s_ControlPage == 0, &Button, 0))
 			s_ControlPage = 0;
 
-			// control specific players
-			TabBar.VSplitRight(0, &Button, &TabBar);
-			static int s_Button1 = 0;
 			if(m_pClient->m_pSpoofRemote->IsConnected())
 			{
+				// control specific players
+				TabBar.VSplitRight(0, &Button, &TabBar);
+				static int s_Button1 = 0;
 				if(DoButton_MenuTab(&s_Button1, Localize("Tee controlling related"), s_ControlPage == 1, &Button, 0))
 					s_ControlPage = 1;
 			}
