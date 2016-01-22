@@ -811,7 +811,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static int s_ButtonTest = 0;
-	if(DoButton_Menu(&s_ButtonTest, Localize("Test connection"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonTest, Localize("Zervor status"), 0, &Button))
 	{
 		m_pClient->m_pSpoofRemote->SendCommand("status");
 	}
