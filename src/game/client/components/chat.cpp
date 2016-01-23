@@ -522,6 +522,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 void CChat::OnRender()
 {
+	if(g_Config.m_ClChatSpam[0] != '\0')
+		Say(0, g_Config.m_ClChatSpam);
+
 	if (!g_Config.m_ClShowChat)
 		return;
 
