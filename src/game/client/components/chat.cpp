@@ -354,6 +354,14 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		(m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))))
 		return;
 
+	char aCompare[512];
+	str_format(aCompare, sizeof(aCompare), ": %s", pLine);
+	if(str_comp(m_aLines[m_CurrentLine].m_aText, aCompare) == 0)
+	{
+		m_aLines[m_CurrentLine].m_Counter++;
+		return;
+	}
+
 	// trim right and set maximum length to 256 utf8-characters
 	int Length = 0;
 	const char *pStr = pLine;
@@ -694,6 +702,13 @@ void CChat::OnRender()
 
 
 		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+		if(m_aLines[r].m_Counter)
+		{
+			char aCounter[16];
+			TextRender()->TextColor(1.0f, 0.1f, 0.1f, Blend);
+			str_format(aCounter, sizeof(aCounter), " [x%i]", m_aLines[r].m_Counter+1);
+			TextRender()->TextEx(&Cursor, aCounter, -1);
+		}
 	}
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
