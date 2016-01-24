@@ -151,7 +151,7 @@ void CServerBrowser::Filter()
 		else if(g_Config.m_BrFilterFull && ((g_Config.m_BrFilterSpectators && m_ppServerlist[i]->m_Info.m_NumPlayers == m_ppServerlist[i]->m_Info.m_MaxPlayers) ||
 				m_ppServerlist[i]->m_Info.m_NumClients == m_ppServerlist[i]->m_Info.m_MaxClients))
 			Filtered = 1;
-		else if(g_Config.m_BrFilterPw && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PASSWORD)
+		else if(g_Config.m_BrFilterPw && (m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PASSWORD))
 			Filtered = 1;
 		else if(g_Config.m_BrFilterPure &&
 			(str_comp(m_ppServerlist[i]->m_Info.m_aGameType, "DM") != 0 &&
@@ -187,6 +187,10 @@ void CServerBrowser::Filter()
 		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = 1;
 		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterVersionStrict && g_Config.m_BrFilterVersion[0] && str_comp_nocase(m_ppServerlist[i]->m_Info.m_aVersion, g_Config.m_BrFilterVersion))
+			Filtered = 1;
+		else if(!g_Config.m_BrFilterVersionStrict && g_Config.m_BrFilterVersion[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aVersion, g_Config.m_BrFilterVersion))
 			Filtered = 1;
 		else
 		{
@@ -291,8 +295,9 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterPure<<11;
 	i |= g_Config.m_BrFilterPureMap<<12;
 	i |= g_Config.m_BrFilterGametypeStrict<<13;
-	i |= g_Config.m_BrFilterCountry<<14;
-	i |= g_Config.m_BrFilterPing<<15;
+	i |= g_Config.m_BrFilterVersionStrict<<14;
+	i |= g_Config.m_BrFilterCountry<<15;
+	i |= g_Config.m_BrFilterPing<<16;
 	return i;
 }
 
@@ -752,10 +757,10 @@ void CServerBrowser::Update(bool ForceResort)
 			//	dbg_msg("client_srvbrowse", "ServerCount2: %d", m_MasterServerCount);
 			//}
 	}
-	if(m_MasterServerCount > m_NumRequests  + m_LastPacketTick)
+	if(m_MasterServerCount > m_NumRequests + m_LastPacketTick)
 	{
 		++m_LastPacketTick;
-		return; //wait for more packets
+		return; // wait for more packets
 	}
 	pEntry = m_pFirstReqServer;
 	Count = 0;

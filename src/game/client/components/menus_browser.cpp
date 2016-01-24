@@ -604,14 +604,26 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterGametypeStrict, Localize("Strict gametype filter"), g_Config.m_BrFilterGametypeStrict, &Button))
 		g_Config.m_BrFilterGametypeStrict ^= 1;
 
+	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterVersionStrict, Localize("Strict version filter"), g_Config.m_BrFilterVersionStrict, &Button))
+		g_Config.m_BrFilterVersionStrict ^= 1;
+
 	ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
 
 	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
 	UI()->DoLabelScaled(&Button, Localize("Game types:"), FontSize, -1);
 	Button.VSplitRight(60.0f, 0, &Button);
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
-	static float Offset = 0.0f;
-	if(DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &Offset))
+	static float GametypeOffset = 0.0f;
+	if(DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &GametypeOffset))
+		Client()->ServerBrowserUpdate();
+
+	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
+	UI()->DoLabelScaled(&Button, Localize("Version:"), FontSize, -1);
+	Button.VSplitRight(60.0f, 0, &Button);
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+	static float VersionOffset = 0.0f;
+	if(DoEditBox(&g_Config.m_BrFilterVersion, &Button, g_Config.m_BrFilterVersion, sizeof(g_Config.m_BrFilterVersion), FontSize, &VersionOffset))
 		Client()->ServerBrowserUpdate();
 
 	{
@@ -828,6 +840,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterPing = 999;
 		g_Config.m_BrFilterGametype[0] = 0;
 		g_Config.m_BrFilterGametypeStrict = 0;
+		g_Config.m_BrFilterVersion[0] = 0;
+		g_Config.m_BrFilterVersionStrict = 0;
 		g_Config.m_BrFilterServerAddress[0] = 0;
 		g_Config.m_BrFilterPure = 0;
 		g_Config.m_BrFilterPureMap = 0;
