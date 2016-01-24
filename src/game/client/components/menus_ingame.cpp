@@ -1102,7 +1102,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 					s_ControlPage = 1;
 			}
 			else
-				RenderTools()->DrawUIRect(&Button, ms_ColorTabbarActive, 0, 0);
+				RenderTools()->DrawUIRect(&TabBar, ms_ColorTabbarActive, 0, 0);
 	}
 
 	// render page
