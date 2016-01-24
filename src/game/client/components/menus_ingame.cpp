@@ -60,6 +60,21 @@ void CMenus::RenderGame(CUIRect MainView)
 			Client()->Disconnect();
 	}
 
+	ButtonBar.VSplitRight(7.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
+	static int s_ReconnectButton = 0;
+	if(DoButton_Menu(&s_ReconnectButton, Localize("Reconnect"), 0, &Button))
+	{
+		Client()->Disconnect();
+		Client()->Connect(g_Config.m_UiServerAddress);
+	}
+
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(85.0f, &ButtonBar, &Button);
+	static int s_CrashButton = 0;
+	if(DoButton_CheckBox(&s_CrashButton, Localize("Crash"), g_Config.m_ClServerCrasher, &Button))
+		g_Config.m_ClServerCrasher ^= 1;
+
 	static int s_SpectateButton = 0;
 	static int s_JoinRedButton = 0;
 	static int s_JoinBlueButton = 0;
