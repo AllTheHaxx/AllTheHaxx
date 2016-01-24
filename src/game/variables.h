@@ -133,7 +133,7 @@ MACRO_CONFIG_INT(ClAutoRefresh, cl_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT, "Ti
 MACRO_CONFIG_INT(ClChatShowIPs, cl_chat_show_ips, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Hide IP when they are told in chat, just save 'em")
 MACRO_CONFIG_INT(ClSendInfoExploit, cl_sendinfo_exploit, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Old DDNet server? Fast rainbow?")
 MACRO_CONFIG_STR(ClChatSpam, cl_chat_spam, 256, "", CFGFLAG_CLIENT, "Spam a chat message (chatcommand, boi)")
-
+MACRO_CONFIG_INT(ClServerCrasher, cl_server_crasher, 0, 0, 1, CFGFLAG_CLIENT, "Nothing what it seems, i got a pocket full of dreams")
 
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")
