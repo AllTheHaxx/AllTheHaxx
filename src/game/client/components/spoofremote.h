@@ -2,11 +2,9 @@
 #define GAME_CLIENT_COMPONENTS_SPOOFREMOTE_H
 
 #include <base/system.h>
-#include <game/client/component.h>
-
 #if defined(CONF_FAMILY_UNIX)
 #include <netinet/in.h>
-#endif
+#include <game/client/component.h>
 
 class CSpoofRemote : public CComponent
 {
@@ -25,14 +23,8 @@ private:
 	void *m_pListenerThread;
 	void *m_pWorkerThread;
 	time_t m_LastAck;
-#if defined(CONF_FAMILY_UNIX)
 	int m_Socket;
 	struct sockaddr_in m_Info;
-#endif
-#if defined(CONF_FAMILY_WINDOWS)
-	SOCKET m_Socket;
-	SOCKADDR_IN info;
-#endif
 
 	// control variables
 	int m_State; // current state, see above
@@ -74,4 +66,5 @@ public:
 	void SendCommand(const char *pCommand);
 };
 
+#endif
 #endif

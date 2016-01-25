@@ -1,28 +1,20 @@
+#include <base/system.h>
+#if defined(CONF_FAMILY_UNIX)
+
 #include <stdio.h> //perror
 #include <string.h>    //strlen
 #include <ctime> // time
-#include <base/system.h>
-
-#if defined(CONF_FAMILY_UNIX)
-	#include <unistd.h>
-	#include <sys/socket.h>    //socket
-	#include <arpa/inet.h> //inet_addr
-	#include <netdb.h> //hostent
-	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s'\n", __FILE__, __LINE__, msg); perror(":");
-#endif
-
-#if defined(CONF_FAMILY_WINDOWS)
-	#include "stdafx.h"
-	#pragma comment(lib, "ws2_32.lib")
-	#include <WinSock2.h>
-	#include <Windows.h>
-	#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s' (%i):\n", __FILE__, __LINE__, msg, WSAGetLastError())
-#endif
+#include <unistd.h>
+#include <sys/socket.h>    //socket
+#include <arpa/inet.h> //inet_addr
+#include <netdb.h> //hostent
 
 #include <engine/shared/config.h>
 #include <engine/serverbrowser.h>
 #include "voting.h"
 #include "spoofremote.h"
+
+#define RAISE_ERROR(msg) printf("At %s(%i) occurred error '%s'\n", __FILE__, __LINE__, msg); perror(":");
 
 
 CSpoofRemote::CSpoofRemote()
@@ -114,18 +106,6 @@ void CSpoofRemote::OnRender()
 
 void CSpoofRemote::Connect(const char *pAddr, int Port)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	// WSA
-	WSADATA data;
-	if(WSAStartup(MAKEWORD(2, 0), &data) != 0)
-	{
-		RAISE_ERROR("WSAStartup");
-		Console()->Print(0, "spfrmt", "error while starting WSA", false);
-		WSAGetLastError();
-		return;
-	}
-#endif
-
 	// Info
 	m_Info.sin_addr.s_addr = inet_addr(pAddr);
 	m_Info.sin_family = AF_INET;
@@ -152,13 +132,8 @@ void CSpoofRemote::Disconnect()
 	Console()->Print(0, "spfrmt", "requesting threads to terminate...", false);
 	Reset();
 	Console()->Print(0, "spfrmt", "closing socket...", false);
-#if defined(CONF_FAMILY_UNIX)
 	close(m_Socket);
 	m_Socket = -1;
-#else
-	closesocket(m_Socket);
-	WSACleanup();
-#endif
 }
 
 void CSpoofRemote::CreateThreads(void *pUserData)
@@ -363,3 +338,5 @@ void CSpoofRemote::ConCommand(IConsole::IResult *pResult, void *pUserData)
 	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
 	pSelf->SendCommand(pResult->GetString(0));
 }
+
+#endif
