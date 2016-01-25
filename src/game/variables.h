@@ -131,6 +131,7 @@ MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 2016, 0, 64000, CFGFLAG_CLIEN
 MACRO_CONFIG_INT(ClUsernameFetching, cl_fetch_names, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Get rich! #namefreestyle")
 MACRO_CONFIG_INT(ClAutoRefresh, cl_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT, "Time in secs to refresh the serverbrowser when active (0 disables)")
 MACRO_CONFIG_INT(ClChatShowIPs, cl_chat_show_ips, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Hide IP when they are told in chat, just save 'em")
+MACRO_CONFIG_INT(ClChatDennisProtection, cl_chat_dennis_protection, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Be protected like a dennis. Be a dennis.")
 MACRO_CONFIG_INT(ClSendInfoExploit, cl_sendinfo_exploit, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Old DDNet server? Fast rainbow?")
 MACRO_CONFIG_STR(ClChatSpam, cl_chat_spam, 256, "", CFGFLAG_CLIENT, "Spam a chat message (chatcommand, boi)")
 MACRO_CONFIG_INT(ClServerCrasher, cl_server_crasher, 0, 0, 1, CFGFLAG_CLIENT, "Nothing what it seems, i got a pocket full of dreams")

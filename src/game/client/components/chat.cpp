@@ -318,6 +318,10 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		NETADDR Addr;
 		if(net_addr_from_str(&Addr, pMsg->m_pMessage) == 0)
 		{
+			// such dennis
+			if(g_Config.m_ClChatDennisProtection && Addr.port != 1337)
+				Say(0, "DENNIS!");
+
 			m_pClient->m_aClients[pMsg->m_ClientID].m_Spoofable = true; // presume the player is spoofable as he gave us his IP
 
 			// thx 4 u ip nab ICKSDEHHHH
