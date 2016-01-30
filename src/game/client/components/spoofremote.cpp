@@ -49,6 +49,12 @@ void CSpoofRemote::OnConsoleInit()
 	Console()->Register("spf", "s", CFGFLAG_CLIENT, ConCommand, (void *)this, "3X3CUT3 C0MM4ND!");
 }
 
+void CSpoofRemote::OnInit()
+{
+	if(!IsState(SPOOF_STATE_CONNECTING) && !IsConnected() && g_Config.m_ClSpoofAutoconnect)
+		Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+}
+
 void CSpoofRemote::OnRender()
 {
 	// nevar forgetti moms spaghetti
@@ -106,6 +112,8 @@ void CSpoofRemote::OnRender()
 
 void CSpoofRemote::Connect(const char *pAddr, int Port)
 {
+	m_State |= SPOOF_STATE_CONNECTING;
+
 	// Info
 	m_Info.sin_addr.s_addr = inet_addr(pAddr);
 	m_Info.sin_family = AF_INET;
@@ -147,6 +155,7 @@ void CSpoofRemote::CreateThreads(void *pUserData)
 		pSelf->Console()->Print(0, "spfrmt", "error while connecting", false);
 		return;
 	}
+	pSelf->m_State &= ~SPOOF_STATE_CONNECTING;
 	pSelf->m_State |= SPOOF_STATE_CONNECTED;
 
 	pSelf->Console()->Print(0, "spfrmt", "connected, creating threads...", false);

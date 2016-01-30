@@ -128,7 +128,8 @@ MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFL
 // haxx
 MACRO_CONFIG_STR(ClSpoofSrvIP, cl_spoofsrv_ip, 32, "127.0.0.1", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IP of the spoofing server")
 MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 2016, 0, 64000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Port of the spoofing server")
-MACRO_CONFIG_INT(ClUsernameFetching, cl_fetch_names, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Get rich! #namefreestyle")
+MACRO_CONFIG_INT(ClSpoofAutoconnect, cl_spoof_autoconnect, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to zervor on startup automatically")
+MACRO_CONFIG_INT(ClUsernameFetching, cl_fetch_names, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Get rich! #namefreestyle")
 MACRO_CONFIG_INT(ClAutoRefresh, cl_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT, "Time in secs to refresh the serverbrowser when active (0 disables)")
 MACRO_CONFIG_INT(ClChatShowIPs, cl_chat_show_ips, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Hide IP when they are told in chat, just save 'em")
 MACRO_CONFIG_INT(ClChatDennisProtection, cl_chat_dennis_protection, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Be protected like a dennis. Be a dennis.")

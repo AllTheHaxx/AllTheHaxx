@@ -11,10 +11,11 @@ class CSpoofRemote : public CComponent
 public:
 	enum
 		{
-			SPOOF_STATE_CONNECTED   = 1 << 0,
-			SPOOF_STATE_DUMMIES     = 1 << 1,
-			SPOOF_STATE_DUMMYSPAM   = 1 << 2,
-			SPOOF_STATE_VOTEKICKALL = 1 << 3,
+			SPOOF_STATE_CONNECTING  = 1 << 0,
+			SPOOF_STATE_CONNECTED   = 1 << 1,
+			SPOOF_STATE_DUMMIES     = 1 << 2,
+			SPOOF_STATE_DUMMYSPAM   = 1 << 3,
+			SPOOF_STATE_VOTEKICKALL = 1 << 4,
 		};
 
 private:
@@ -62,6 +63,7 @@ public:
 	void Disconnect();
 
 	void OnConsoleInit();
+	void OnInit();
 	void OnRender();
 	void SendCommand(const char *pCommand);
 };
