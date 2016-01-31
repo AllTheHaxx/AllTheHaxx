@@ -1427,6 +1427,21 @@ void CGameClient::OnPredict()
 		g_GameClient.m_aClients[i].m_Predicted.m_ActiveWeapon = m_Snap.m_aCharacters[i].m_Cur.m_Weapon;
 	}
 
+	// teh suckers will never get us down! KATZE!
+	static bool WarnedCrash = false;
+	if(!World.m_apCharacters[m_Snap.m_LocalClientID])
+	{
+		if(!WarnedCrash)
+		{
+			WarnedCrash = true;
+			for(int n = 0; n < 5; n++)
+				Console()->Print(0, "+++ WARNING +++", "!!! The server just tried to crash your client, I recommand fcking them hard !!!", true);
+			Console()->Print(0, "+++ WARNING +++", "!!! --> Things are messed up from now on, please reconnect or turn off prediction <-- !!!", true);
+		}
+		return;
+
+	}
+
 	CServerInfo Info;
 	Client()->GetServerInfo(&Info);
 	const int MaxProjectiles = 128;

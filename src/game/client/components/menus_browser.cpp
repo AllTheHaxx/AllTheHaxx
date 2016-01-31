@@ -544,10 +544,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	UI()->DoLabelScaled(&Status3, aBuf, 14.0f, -1);
 
 	// auto-refresh
-	if(g_Config.m_ClAutoRefresh && time_get() > m_RefreshTimer + time_freq() * g_Config.m_ClAutoRefresh)
+	if(g_Config.m_ClAutoRefresh && !ServerBrowser()->IsRefreshing())
 	{
+		if(time_get() > m_RefreshTimer + time_freq() * g_Config.m_ClAutoRefresh && ServerBrowser()->UpgradeProgression() == 100)
+			ServerBrowser()->Refresh(-1, 1);
+		else if((m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_ClAutoRefresh < 0 && ServerBrowser()->UpgradeProgression() == 100 && !ServerBrowser()->IsRefreshing())
+			m_RefreshTimer = time_get();
+	}
+	if(g_Config.m_ClAutoRefresh && (ServerBrowser()->IsRefreshing() || ServerBrowser()->UpgradeProgression() < 100))
 		m_RefreshTimer = time_get();
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+
+	// upgrade queue
+	static int64 s_LastUpgrade = time_get();
+	if(time_get() > s_LastUpgrade + time_freq()/10)
+	{
+		s_LastUpgrade = time_get();
+		ServerBrowser()->Refresh(-1, 2);
 	}
 }
 
@@ -1377,6 +1389,23 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
+
+		static int s_UpdateButton = 0;
+		if(ServerBrowser()->UpgradeProgression() < 100)
+			str_format(aBuf, sizeof(aBuf), "%s (%i%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
+		else if (g_Config.m_ClAutoRefresh)
+			str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_ClAutoRefresh));
+		else
+			str_copy(aBuf, Localize("Update"), sizeof(aBuf));
+		if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button) && !ServerBrowser()->IsRefreshing())
+		{
+			ServerBrowser()->Refresh(-1, 1);
+		}
+
+		ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);
+		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
+		Button.VMargin(20.0f, &Button);
+
 		static int s_JoinButton = 0;
 		if(DoButton_Menu(&s_JoinButton, Localize("Connect"), 0, &Button) || m_EnterPressed)
 		{
@@ -1384,7 +1413,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			m_EnterPressed = false;
 		}
 
-		if(g_Config.m_ClAutoRefresh)
+	/*	if(g_Config.m_ClAutoRefresh)
 		{
 			ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);
 			ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
@@ -1393,7 +1422,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), Localize("Next refresh: %ds"), ((m_RefreshTimer - time_get()) / time_freq() + g_Config.m_ClAutoRefresh));
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		}
+		}*/
 
 		// address info
 		StatusBox.VSplitLeft(20.0f, 0, &StatusBox);

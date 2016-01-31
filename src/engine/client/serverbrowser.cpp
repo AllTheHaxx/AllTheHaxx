@@ -46,6 +46,7 @@ CServerBrowser::CServerBrowser()
 	m_NumRequests = 0;
 
 	m_NeedRefresh = 0;
+	m_NeedUpgrade = 0;
 
 	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
@@ -509,8 +510,17 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 	Sort();
 }
 
-void CServerBrowser::Refresh(int Type)
+void CServerBrowser::Refresh(int Type, int NoReload)
 {
+	if(NoReload || Type < 0)
+	{
+		if(NoReload == 1 && !IsRefreshing())
+			m_NeedUpgrade = true;
+		if(NoReload == 2 && m_NeedUpgrade)
+			Upgrade();
+		return;
+	}
+
 	// clear out everything
 	m_ServerlistHeap.Reset();
 	m_NumServers = 0;
@@ -525,6 +535,7 @@ void CServerBrowser::Refresh(int Type)
 
 	//
 	m_ServerlistType = Type;
+	m_NeedUpgrade = false;
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
@@ -826,6 +837,41 @@ void CServerBrowser::Update(bool ForceResort)
 		Sort();
 }
 
+void CServerBrowser::Upgrade()
+{
+	if(IsRefreshing())
+		return;
+
+	const int64 Now = time_get();
+	const int Length = NumServers();
+	const int PartLen = g_Config.m_BrMaxRequests;
+	const int NumParts = Length/PartLen;
+
+	// request the infos for all existing entries partwise
+	static int CurrPart = 0;
+	if(CurrPart < NumParts)
+	{
+		//dbg_msg("browser", "upgrading part %i/%i", CurrPart+1, NumParts);
+		m_UpgradeProgression = (float)(CurrPart+1.0f)/(float)NumParts;
+		for(int i = CurrPart*PartLen; i < (CurrPart+1)*PartLen; i++)
+		{
+			if(!m_ppServerlist[i]) continue;
+			m_ppServerlist[i]->m_RequestTime = Now;
+			m_ppServerlist[i]->m_GotInfo = 0;
+			if(m_ppServerlist[i]->m_Is64)
+				RequestImpl64(m_ppServerlist[i]->m_Addr, 0);
+			else
+				RequestImpl(m_ppServerlist[i]->m_Addr, 0);
+		}
+		CurrPart++;
+	}
+	else
+	{
+		m_NeedUpgrade = false;
+		CurrPart = 0;
+	}
+}
+
 
 bool CServerBrowser::IsFavorite(const NETADDR &Addr) const
 {
@@ -996,6 +1042,14 @@ int CServerBrowser::LoadingProgression() const
 	int Servers = m_NumServers;
 	int Loaded = m_NumServers-m_NumRequests;
 	return 100.0f * Loaded/Servers;
+}
+
+int CServerBrowser::UpgradeProgression() const
+{
+	if(m_NumServers == 0 || !m_NeedUpgrade)
+		return 100;
+
+	return round_to_int(100.0f * m_UpgradeProgression);
 }
 
 

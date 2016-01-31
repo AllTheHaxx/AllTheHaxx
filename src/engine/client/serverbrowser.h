@@ -58,10 +58,11 @@ public:
 	CServerBrowser();
 
 	// interface functions
-	void Refresh(int Type);
+	void Refresh(int Type, int NoReload=false);
 	bool IsRefreshing() const;
 	bool IsRefreshingMasters() const;
 	int LoadingProgression() const;
+	int UpgradeProgression() const;
 
 	int NumServers() const { return m_NumServers; }
 
@@ -88,6 +89,7 @@ public:
 
 	//
 	void Update(bool ForceResort);
+	void Upgrade(); // only re-request all the infos
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
 	void Request(const NETADDR &Addr) const;
 
@@ -131,10 +133,12 @@ private:
 	int m_LastPacketTick;
 
 	int m_NeedRefresh;
+	bool m_NeedUpgrade;
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
 	int m_NumServers;
+	float m_UpgradeProgression;
 	int m_NumServerCapacity;
 
 	int m_Sorthash;

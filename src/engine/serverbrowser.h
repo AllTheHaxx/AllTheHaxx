@@ -92,10 +92,11 @@ public:
 		SET_TOKEN
 	};
 
-	virtual void Refresh(int Type) = 0;
+	virtual void Refresh(int Type, int NoReload=0) = 0;
 	virtual bool IsRefreshing() const = 0;
 	virtual bool IsRefreshingMasters() const = 0;
 	virtual int LoadingProgression() const = 0;
+	virtual int UpgradeProgression() const = 0;
 
 	virtual int NumServers() const = 0;
 
