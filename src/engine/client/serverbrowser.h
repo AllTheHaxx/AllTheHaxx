@@ -59,6 +59,8 @@ public:
 
 	// interface functions
 	void Refresh(int Type, int NoReload=false);
+	void SaveCache();
+	void LoadCache();
 	bool IsRefreshing() const;
 	bool IsRefreshingMasters() const;
 	int LoadingProgression() const;

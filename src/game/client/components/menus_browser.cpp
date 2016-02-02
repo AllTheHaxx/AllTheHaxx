@@ -1406,11 +1406,25 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
-		static int s_JoinButton = 0;
-		if(DoButton_Menu(&s_JoinButton, Localize("Connect"), 0, &Button) || m_EnterPressed)
 		{
-			Client()->Connect(g_Config.m_UiServerAddress);
+			CUIRect Right;
+			Button.VSplitMid(&Button, &Right);
+			static int s_SaveButton = 0;
+			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, CUI::CORNER_L))
+			{
+				ServerBrowser()->SaveCache();
+			}
+			static int s_LoadButton = 0;
+			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, CUI::CORNER_R))
+			{
+				ServerBrowser()->LoadCache();
+			}
+		}
+
+		if(m_EnterPressed)
+		{
 			m_EnterPressed = false;
+			Client()->Connect(g_Config.m_UiServerAddress);
 		}
 
 	/*	if(g_Config.m_ClAutoRefresh)

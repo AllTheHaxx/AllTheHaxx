@@ -595,6 +595,72 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 		}
 	}
 }
+#include <cstdio> // TODO: XXX
+void CServerBrowser::SaveCache()
+{
+	FILE *f = fopen("cache.svl", "wb");
+	char v = 1; fwrite(&v, 1, 1, f); // save version of cachefile
+	fwrite(&m_NumServers, sizeof(int), 1, f); // save number of servers
+	fwrite(&m_NumServerCapacity, sizeof(int), 1, f); // save length of array
+	for(int i = 0; i < m_NumServerCapacity; i++) // save every element of the array
+		fwrite(&(*m_ppServerlist[i]), sizeof(CServerEntry), 1, f);
+	if(fclose(f) == EOF)
+		dbg_msg("browser", "saving serverlist file failed (n=%i)", m_NumServers);
+	else
+		dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
+}
+
+void CServerBrowser::LoadCache()
+{
+	// clear out everything
+			m_ServerlistHeap.Reset();
+			m_NumServers = 0;
+			m_NumSortedServers = 0;
+			mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
+			m_pFirstReqServer = 0;
+			m_pLastReqServer = 0;
+			m_NumRequests = 0;
+			m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+			// next token
+			m_CurrentToken = (m_CurrentToken+1)&0xff;
+
+
+	FILE *f = fopen("cache.svl", "rb");
+
+	// get version
+	{
+		char v; fread(&v, 1, 1, f);
+		dbg_msg("browser", "serverlist cache file version: %i", v);
+	}
+
+	// get number of servers
+	fread(&m_NumServers, sizeof(int), 1, f);
+	dbg_msg("browser", "serverlist cache entries: %i", m_NumServers);
+
+	// get length of array
+	fread(&m_NumServerCapacity, sizeof(int), 1, f);
+
+	// get rid of current serverlist and create a new one
+	mem_free(m_ppServerlist);
+	m_ppServerlist = (CServerEntry **)mem_alloc(m_NumServerCapacity*sizeof(CServerEntry*), 1); // (array of pointers!)
+
+	// read the data from the file into the serverlist
+	for(int i = 0; i < m_NumServerCapacity; i++)
+	{
+		CServerEntry NewEntry;
+		fread(&NewEntry, sizeof(CServerEntry), 1, f);
+		mem_copy(m_ppServerlist[i], &NewEntry, sizeof(CServerEntry));
+	}
+
+	//for(int i = 0; i < 10; i++)
+	//	dbg_msg("browser", "'%s' ('%s')", m_ppServerlist[i]->m_Info.m_aName, m_ppServerlist[i]->m_Info.m_aAddress);
+
+	if(fclose(f) == EOF)
+		dbg_msg("browser", "loading serverlist file failed (n=%i)", m_NumServers);
+	else
+		dbg_msg("browser", "successfully loaded serverlist with %i entries", m_NumServers);
+
+}
 
 void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const
 {
