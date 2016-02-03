@@ -60,7 +60,8 @@ public:
 	// interface functions
 	void Refresh(int Type, int NoReload=false);
 	void SaveCache();
-	void LoadCache();
+	bool LoadCache();
+	bool CacheExists() const { return m_CacheExists; }
 	bool IsRefreshing() const;
 	bool IsRefreshingMasters() const;
 	int LoadingProgression() const;
@@ -136,6 +137,7 @@ private:
 
 	int m_NeedRefresh;
 	bool m_NeedUpgrade;
+	bool m_CacheExists;  // TODO: HIERFÜR NEN GETTER MACHEN!!
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;

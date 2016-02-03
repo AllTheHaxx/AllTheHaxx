@@ -53,5 +53,6 @@ bam.exe
 *.dll
 *.db
 *.db-journal 
+cache.svl
 
 DDNet*

@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <cstdio> // file io  TODO: remove this, use tw's own storage system instead
 #include <algorithm> // sort  TODO: remove this
 
 #include <base/math.h>
@@ -47,6 +48,7 @@ CServerBrowser::CServerBrowser()
 
 	m_NeedRefresh = 0;
 	m_NeedUpgrade = 0;
+	m_CacheExists = true; // let's just assume this
 
 	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
@@ -565,7 +567,16 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "broadcasting for servers");
 	}
 	else if(Type == IServerBrowser::TYPE_INTERNET)
-		m_NeedRefresh = 1;
+	{
+		static bool AutoUncached = false;
+		if(g_Config.m_BrAutoCache && m_CacheExists && !AutoUncached)
+		{
+			AutoUncached = true;
+			LoadCache();
+		}
+		else
+			m_NeedRefresh = 1;
+	}
 	else if(Type == IServerBrowser::TYPE_FAVORITES)
 	{
 		for(int i = 0; i < m_NumFavoriteServers; i++)
@@ -595,11 +606,17 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 		}
 	}
 }
-#include <cstdio> // TODO: XXX
+
 void CServerBrowser::SaveCache()
 {
 	// open file TODO: Use teeworlds's storage for this!
 	FILE *f = fopen("cache.svl", "wb");
+	if(!f)
+	{
+		dbg_msg("browser", "failed to open cache file for writing");
+		m_CacheExists = false;
+		return;
+	}
 
 	// save version of serverlist cache file
 	{ char v = CACHE_VERSION; fwrite(&v, 1, 1, f); } // save version of cachefile
@@ -622,13 +639,19 @@ void CServerBrowser::SaveCache()
 		NumServers++;
 	}
 	if(fclose(f) == EOF)
+	{
 		dbg_msg("browser", "saving serverlist file failed (n=%i)", m_NumServers);
+		m_CacheExists = false;
+	}
 	else
+	{
 		dbg_msg("browser", "successfully saved serverlist with %i entries (total %i, unloaded %i)",
 				NumServers, m_NumServers, m_NumServers-NumServers);
+		m_CacheExists = true;
+	}
 }
 
-void CServerBrowser::LoadCache()
+bool CServerBrowser::LoadCache()
 {
 	// clear out everything
 	m_ServerlistHeap.Reset();
@@ -643,6 +666,12 @@ void CServerBrowser::LoadCache()
 
 	// open file TODO: Use teeworlds's storage for this!
 	FILE *f = fopen("cache.svl", "rb");
+	if(!f)
+	{
+		dbg_msg("browser", "opening cache file failed.");
+		m_CacheExists = false;
+		return false;
+	}
 
 	// get version
 	{
@@ -680,7 +709,12 @@ void CServerBrowser::LoadCache()
 	if(fclose(f) == EOF)
 		dbg_msg("browser", "loading serverlist file errored (n=%i)", m_NumServers);
 	else
+	{
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers);
+		//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
+		return true;
+	}
+	return false;
 
 }
 

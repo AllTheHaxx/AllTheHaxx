@@ -544,14 +544,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	UI()->DoLabelScaled(&Status3, aBuf, 14.0f, -1);
 
 	// auto-refresh
-	if(g_Config.m_ClAutoRefresh && !ServerBrowser()->IsRefreshing())
+	if(g_Config.m_BrAutoRefresh && !ServerBrowser()->IsRefreshing())
 	{
-		if(time_get() > m_RefreshTimer + time_freq() * g_Config.m_ClAutoRefresh && ServerBrowser()->UpgradeProgression() == 100)
+		if(time_get() > m_RefreshTimer + time_freq() * g_Config.m_BrAutoRefresh && ServerBrowser()->UpgradeProgression() == 100)
 			ServerBrowser()->Refresh(-1, 1);
-		else if((m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_ClAutoRefresh < 0 && ServerBrowser()->UpgradeProgression() == 100 && !ServerBrowser()->IsRefreshing())
+		else if((m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh < 0 && ServerBrowser()->UpgradeProgression() == 100 && !ServerBrowser()->IsRefreshing())
 			m_RefreshTimer = time_get();
 	}
-	if(g_Config.m_ClAutoRefresh && (ServerBrowser()->IsRefreshing() || ServerBrowser()->UpgradeProgression() < 100))
+	if(g_Config.m_BrAutoRefresh && (ServerBrowser()->IsRefreshing() || ServerBrowser()->UpgradeProgression() < 100))
 		m_RefreshTimer = time_get();
 
 	// upgrade queue
@@ -1371,7 +1371,11 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
+			{
+				if(g_Config.m_BrAutoCache)
+					ServerBrowser()->SaveCache();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			}
 			else if(g_Config.m_UiPage == PAGE_LAN)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			else if(g_Config.m_UiPage == PAGE_FAVORITES)
@@ -1393,13 +1397,15 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		static int s_UpdateButton = 0;
 		if(ServerBrowser()->UpgradeProgression() < 100)
 			str_format(aBuf, sizeof(aBuf), "%s (%i%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
-		else if (g_Config.m_ClAutoRefresh)
-			str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_ClAutoRefresh));
+		else if (g_Config.m_BrAutoRefresh)
+			str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
 		else
 			str_copy(aBuf, Localize("Update"), sizeof(aBuf));
 		if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button) && !ServerBrowser()->IsRefreshing())
 		{
 			ServerBrowser()->Refresh(-1, 1);
+			if(g_Config.m_BrAutoCache)
+				ServerBrowser()->SaveCache();
 		}
 
 		ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);
@@ -1417,7 +1423,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			static int s_LoadButton = 0;
 			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, CUI::CORNER_R))
 			{
-				ServerBrowser()->LoadCache();
+				if(!ServerBrowser()->LoadCache())
+					Console()->Print(0, "browser", "failed to load cache file", false);
 			}
 		}
 
@@ -1427,13 +1434,13 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			Client()->Connect(g_Config.m_UiServerAddress);
 		}
 
-	/*	if(g_Config.m_ClAutoRefresh)
+	/*	if(g_Config.m_BrAutoRefresh)
 		{
 			ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);
 			ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 			Button.VMargin(20.0f, &Button);
 
-			str_format(aBuf, sizeof(aBuf), Localize("Next refresh: %ds"), ((m_RefreshTimer - time_get()) / time_freq() + g_Config.m_ClAutoRefresh));
+			str_format(aBuf, sizeof(aBuf), Localize("Next refresh: %ds"), ((m_RefreshTimer - time_get()) / time_freq() + g_Config.m_BrAutoRefresh));
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}*/
