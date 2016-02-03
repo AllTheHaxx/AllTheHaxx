@@ -382,11 +382,11 @@ function build(settings)
 	end
 
 	-- build client, server, version server and master server
-	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
+	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
 		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3)
 
-	server_exe = Link(server_settings, "DDNet-Server", engine, server,
+	server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)
 
 	serverlaunch = {}
