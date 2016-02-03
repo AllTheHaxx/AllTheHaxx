@@ -773,7 +773,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 void CClient::Disconnect()
 {
 	if(m_DummyConnected)
-		DummyDisconnect(0);
+		DummyDisconnect("> AllTheHaxx < ");
 	DisconnectWithReason("> AllTheHaxx < ");
 }
 
@@ -2905,7 +2905,7 @@ void CClient::Con_DummyConnect(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_DummyDisconnect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DummyDisconnect(0);
+	pSelf->DummyDisconnect("> AllTheHaxx < ");
 }
 
 void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData)
