@@ -315,9 +315,9 @@ void CHud::RenderFps()
 		// calculate avg. fps
 		float FPS = 1.0f / Client()->RenderFrameTime();
 		m_AverageFPS = (m_AverageFPS*(1.0f-(1.0f/m_AverageFPS))) + (FPS*(1.0f/m_AverageFPS));
-		char Buf[512];
-		str_format(Buf, sizeof(Buf), "%d", (int)m_AverageFPS);
-		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1), 5, 12, Buf, -1);
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "%d", (int)m_AverageFPS); //
+		TextRender()->Text(0, m_Width-5-TextRender()->TextWidth(0, 9, aBuf, -1), m_Height-14*UI()->Scale(), 9, aBuf, -1);
 	}
 }
 
