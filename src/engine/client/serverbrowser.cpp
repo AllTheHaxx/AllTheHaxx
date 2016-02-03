@@ -598,67 +598,89 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 #include <cstdio> // TODO: XXX
 void CServerBrowser::SaveCache()
 {
+	// open file TODO: Use teeworlds's storage for this!
 	FILE *f = fopen("cache.svl", "wb");
-	char v = 1; fwrite(&v, 1, 1, f); // save version of cachefile
-	fwrite(&m_NumServers, sizeof(int), 1, f); // save number of servers
-	fwrite(&m_NumServerCapacity, sizeof(int), 1, f); // save length of array
-	for(int i = 0; i < m_NumServerCapacity; i++) // save every element of the array
-		fwrite(&(*m_ppServerlist[i]), sizeof(CServerEntry), 1, f);
+
+	// save version of serverlist cache file
+	{ char v = CACHE_VERSION; fwrite(&v, 1, 1, f); } // save version of cachefile
+
+	// save number of servers
+	fwrite(&m_NumServers, sizeof(m_NumServers), 1, f); // save number of servers
+
+	// save array length
+	fwrite(&m_NumServerCapacity, sizeof(m_NumServerCapacity), 1, f); // save length of array
+
+	// save all the infos
+	int NumServers = 0;
+	for(int i = 0; i < m_NumServers; i++)
+	{
+		const CServerInfo *pInfo = SortedGet(i);
+		if(!pInfo) continue; // no info from non-loaded addresses...
+
+		//dbg_msg("browser", "saving entry %i %s %s", i, pInfo->m_aAddress, pInfo->m_aName);
+		fwrite(pInfo, sizeof(CServerInfo), 1, f);
+		NumServers++;
+	}
 	if(fclose(f) == EOF)
 		dbg_msg("browser", "saving serverlist file failed (n=%i)", m_NumServers);
 	else
-		dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
+		dbg_msg("browser", "successfully saved serverlist with %i entries (total %i, unloaded %i)",
+				NumServers, m_NumServers, m_NumServers-NumServers);
 }
 
 void CServerBrowser::LoadCache()
 {
 	// clear out everything
-			m_ServerlistHeap.Reset();
-			m_NumServers = 0;
-			m_NumSortedServers = 0;
-			mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
-			m_pFirstReqServer = 0;
-			m_pLastReqServer = 0;
-			m_NumRequests = 0;
-			m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-			// next token
-			m_CurrentToken = (m_CurrentToken+1)&0xff;
+	m_ServerlistHeap.Reset();
+	m_NumServers = 0;
+	m_NumSortedServers = 0;
+	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
+	m_pFirstReqServer = 0;
+	m_pLastReqServer = 0;
+	m_NumRequests = 0;
+	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+	m_CurrentToken = (m_CurrentToken+1)&0xff;
 
-
+	// open file TODO: Use teeworlds's storage for this!
 	FILE *f = fopen("cache.svl", "rb");
 
 	// get version
 	{
 		char v; fread(&v, 1, 1, f);
-		dbg_msg("browser", "serverlist cache file version: %i", v);
+		dbg_msg("browser", "loading serverlist from cache...");
+		if(v != CACHE_VERSION)
+			dbg_msg("cache", "file version doesn't match, we may fail! (%i != %i)", v, CACHE_VERSION);
 	}
 
 	// get number of servers
-	fread(&m_NumServers, sizeof(int), 1, f);
-	dbg_msg("browser", "serverlist cache entries: %i", m_NumServers);
+	int NumServers = 0;
+	fread(&NumServers, sizeof(NumServers), 1, f);
+	//dbg_msg("browser", "serverlist cache entries: %i", NumServers);
+
+	mem_zero(m_ppServerlist, m_NumServerCapacity);
 
 	// get length of array
-	fread(&m_NumServerCapacity, sizeof(int), 1, f);
+	fread(&m_NumServerCapacity, sizeof(m_NumServerCapacity), 1, f);
 
 	// get rid of current serverlist and create a new one
 	mem_free(m_ppServerlist);
 	m_ppServerlist = (CServerEntry **)mem_alloc(m_NumServerCapacity*sizeof(CServerEntry*), 1); // (array of pointers!)
 
 	// read the data from the file into the serverlist
-	for(int i = 0; i < m_NumServerCapacity; i++)
+	for(int i = 0; i < NumServers; i++)
 	{
-		CServerEntry NewEntry;
-		fread(&NewEntry, sizeof(CServerEntry), 1, f);
-		mem_copy(m_ppServerlist[i], &NewEntry, sizeof(CServerEntry));
+		CServerInfo Info; NETADDR Addr;
+		net_addr_from_str(&Addr, Info.m_aAddress);
+
+		fread(&Info, sizeof(CServerInfo), 1, f);
+		//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
+		Set(Addr, IServerBrowser::SET_TOKEN, m_CurrentToken, &Info);
 	}
 
-	//for(int i = 0; i < 10; i++)
-	//	dbg_msg("browser", "'%s' ('%s')", m_ppServerlist[i]->m_Info.m_aName, m_ppServerlist[i]->m_Info.m_aAddress);
-
 	if(fclose(f) == EOF)
-		dbg_msg("browser", "loading serverlist file failed (n=%i)", m_NumServers);
+		dbg_msg("browser", "loading serverlist file errored (n=%i)", m_NumServers);
 	else
-		dbg_msg("browser", "successfully loaded serverlist with %i entries", m_NumServers);
+		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers);
 
 }
 

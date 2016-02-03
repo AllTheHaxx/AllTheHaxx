@@ -70,6 +70,8 @@ public:
 		SORT_NUMPLAYERS - Sort after how many players there are on the server.
 	*/
 	enum{
+		CACHE_VERSION = 1,
+
 		SORT_NAME = 0,
 		SORT_PING,
 		SORT_MAP,
