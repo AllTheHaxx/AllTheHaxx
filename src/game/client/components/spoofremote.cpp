@@ -1,14 +1,14 @@
 #include <base/system.h>
-#if defined(CONF_FAMILY_UNIX)
 
 #include <stdio.h> //perror
 #include <string.h>    //strlen
 #include <ctime> // time
+#if defined(CONF_FAMILY_UNIX)
 #include <unistd.h>
 #include <sys/socket.h>    //socket
 #include <arpa/inet.h> //inet_addr
 #include <netdb.h> //hostent
-
+#endif
 #include <engine/shared/config.h>
 #include <engine/serverbrowser.h>
 #include "voting.h"
@@ -30,11 +30,13 @@ CSpoofRemote::~CSpoofRemote()
 
 void CSpoofRemote::Reset()
 {
+#if defined(CONF_FAMILY_UNIX)
 	m_pListenerThread = 0;
 	m_pWorkerThread = 0;
 	m_Socket = -1;
-	m_SpoofRemoteID = -1;
 	m_LastAck = 0;
+#endif
+	m_SpoofRemoteID = -1;
 	m_State = 0;
 	mem_zero(m_aLastMessage, sizeof(m_aLastMessage));
 	mem_zero(m_aLastCommand, sizeof(m_aLastCommand));
@@ -43,20 +45,25 @@ void CSpoofRemote::Reset()
 
 void CSpoofRemote::OnConsoleInit()
 {
+#if defined(CONF_FAMILY_UNIX)
 	Console()->Register("spf_connect", "", CFGFLAG_CLIENT, ConConnect, (void *)this, "connect to teh zervor 4 h4xX0r");
 	Console()->Register("spf_disconnect", "", CFGFLAG_CLIENT, ConDisconnect, (void *)this, "disconnect from teh zervor 4 h4xX0r");
 	Console()->Register("spf_forceclose", "s", CFGFLAG_CLIENT, ConForceClose, (void *)this, "force-close the connection");
 	Console()->Register("spf", "s", CFGFLAG_CLIENT, ConCommand, (void *)this, "3X3CUT3 C0MM4ND!");
+#endif
 }
 
 void CSpoofRemote::OnInit()
 {
+#if defined(CONF_FAMILY_UNIX)
 	if(!IsState(SPOOF_STATE_CONNECTING) && !IsConnected() && g_Config.m_ClSpoofAutoconnect)
 		Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+#endif
 }
 
 void CSpoofRemote::OnRender()
 {
+#if defined(CONF_FAMILY_UNIX)
 	// nevar forgetti moms spaghetti
 	if(IsState(SPOOF_STATE_VOTEKICKALL))
 	{
@@ -108,10 +115,12 @@ void CSpoofRemote::OnRender()
 			CurClientID = 0;
 		}
 	}
+#endif
 }
 
 void CSpoofRemote::Connect(const char *pAddr, int Port)
 {
+#if defined(CONF_FAMILY_UNIX)
 	m_State |= SPOOF_STATE_CONNECTING;
 
 	// Info
@@ -132,20 +141,24 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 	// Connect in a thread so that the game doesn't get hung
 	m_LastAck = time(NULL);
 	thread_init(CSpoofRemote::CreateThreads, (void *)this);
+#endif
 }
 
 void CSpoofRemote::Disconnect()
 {
+#if defined(CONF_FAMILY_UNIX)
 	Console()->Print(0, "spfrmt", "disconnecting from zervor!", false);
 	Console()->Print(0, "spfrmt", "requesting threads to terminate...", false);
 	Reset();
 	Console()->Print(0, "spfrmt", "closing socket...", false);
 	close(m_Socket);
 	m_Socket = -1;
+#endif
 }
 
 void CSpoofRemote::CreateThreads(void *pUserData)
 {
+#if defined(CONF_FAMILY_UNIX)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(0, "spfrmt", "Connecting to zervor...", false);
@@ -163,6 +176,7 @@ void CSpoofRemote::CreateThreads(void *pUserData)
 	pSelf->m_pWorkerThread = thread_init(CSpoofRemote::Worker, pUserData);
 	pSelf->m_pListenerThread = thread_init(CSpoofRemote::Listener, pUserData);
 	return;
+#endif
 }
 
 void CSpoofRemote::ParseZervorMessage(const char *pMessage)
@@ -188,6 +202,7 @@ void CSpoofRemote::ParseZervorMessage(const char *pMessage)
 
 void CSpoofRemote::Listener(void *pUserData)
 {
+#if defined(CONF_FAMILY_UNIX)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(0, "spfrmt", "started listener thread", false);
@@ -241,10 +256,12 @@ void CSpoofRemote::Listener(void *pUserData)
 			}
 		}
 	}
+#endif
 }
 
 void CSpoofRemote::Worker(void *pUserData)
 {
+#if defined(CONF_FAMILY_UNIX)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(0, "spfrmt", "started worker thread", false);
@@ -289,11 +306,12 @@ void CSpoofRemote::Worker(void *pUserData)
 		LastAck = time(NULL);
 		thread_sleep(1);
 	}
-
+#endif
 }
 
 void CSpoofRemote::SendCommand(const char *pCommand)
 {
+#if defined(CONF_FAMILY_UNIX)
 	if(!pCommand)
 		return;
 
@@ -314,16 +332,19 @@ void CSpoofRemote::SendCommand(const char *pCommand)
 		RAISE_ERROR("Error while sending");
 		Disconnect();
 	}
+#endif
 }
 
 
 void CSpoofRemote::ConConnect(IConsole::IResult *pResult, void *pUserData)
 {
+#if defined(CONF_FAMILY_UNIX)
 	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
 	if(pSelf->IsConnected())
 		pSelf->Console()->Print(0, "spfrmt", "Disconnect first before opening a new connection!", false);
 	else
 		pSelf->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+#endif
 }
 
 void CSpoofRemote::ConDisconnect(IConsole::IResult *pResult, void *pUserData)
@@ -348,4 +369,3 @@ void CSpoofRemote::ConCommand(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendCommand(pResult->GetString(0));
 }
 
-#endif

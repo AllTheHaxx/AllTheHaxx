@@ -807,6 +807,8 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.VMargin(10.0f, &Box);
 	Box.HSplitTop(25.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
+#if defined(CONF_FAMILY_UNIX)
+
 	if(!m_pClient->m_pSpoofRemote->IsConnected())
 	{
 		static int s_ButtonConnect = 0;
@@ -815,9 +817,9 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 			if(!m_pClient->m_pSpoofRemote->IsConnected())
 				m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
 		}
-
 		return;
 	}
+#endif
 
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);

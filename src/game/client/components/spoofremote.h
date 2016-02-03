@@ -4,6 +4,7 @@
 #include <base/system.h>
 #if defined(CONF_FAMILY_UNIX)
 #include <netinet/in.h>
+#endif
 #include <game/client/component.h>
 
 class CSpoofRemote : public CComponent
@@ -19,14 +20,14 @@ public:
 		};
 
 private:
-
+#if defined(CONF_FAMILY_UNIX)
 	// engine variables
 	void *m_pListenerThread;
 	void *m_pWorkerThread;
 	time_t m_LastAck;
 	int m_Socket;
 	struct sockaddr_in m_Info;
-
+#endif
 	// control variables
 	int m_State; // current state, see above
 	int m_SpoofRemoteID; // our id at teh zervor
@@ -68,5 +69,4 @@ public:
 	void SendCommand(const char *pCommand);
 };
 
-#endif
 #endif
