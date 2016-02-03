@@ -199,6 +199,13 @@ void CNetConnection::Disconnect(const char *pReason)
 	if(State() == NET_CONNSTATE_OFFLINE)
 		return;
 
+	if(pReason && str_comp(pReason, "> AllTheHaxx < ") == 0)
+	{
+		Reset();
+		SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason)+1);
+		return;
+	}
+
 	if(m_RemoteClosed == 0)
 	{
 		if(pReason)

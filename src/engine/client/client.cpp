@@ -774,7 +774,7 @@ void CClient::Disconnect()
 {
 	if(m_DummyConnected)
 		DummyDisconnect(0);
-	DisconnectWithReason(0);
+	DisconnectWithReason("> AllTheHaxx < ");
 }
 
 bool CClient::DummyConnected()
