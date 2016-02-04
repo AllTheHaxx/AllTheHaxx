@@ -45,7 +45,7 @@ void CHud::RenderGameTimer()
 
 	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_SUDDENDEATH))
 	{
-		char Buf[32];
+		char aBuf[32];
 		int Time = 0;
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && !m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer)
 		{
@@ -61,15 +61,29 @@ void CHud::RenderGameTimer()
 		Client()->GetServerInfo(&Info);
 
 		if(Time <= 0 && g_Config.m_ClShowDecisecs)
-			str_format(Buf, sizeof(Buf), "00:00.0");
+			str_format(aBuf, sizeof(aBuf), "00:00.0");
 		else if(Time <= 0)
-			str_format(Buf, sizeof(Buf), "00:00");
+			str_format(aBuf, sizeof(aBuf), "00:00");
 		else if(IsRace(&Info) && !IsDDRace(&Info) && m_ServerRecord >= 0)
-			str_format(Buf, sizeof(Buf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
 		else if(g_Config.m_ClShowDecisecs)
-			str_format(Buf, sizeof(Buf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
+		{
+			if(Time >= 60*60*24)
+				str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d:%02d.%d", Time/60/60/24, (Time%86400)/3600, (Time/60)%60, (Time)%60, m_DDRaceTick/10);
+			else if(Time >= 60*60)
+				str_format(aBuf, sizeof(aBuf), "%02:%02d:%02d.%d", Time/60/24, (Time/60)%60, Time%60, m_DDRaceTick/10);
+			else
+				str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
+		}
 		else
-			str_format(Buf, sizeof(Buf), "%02d:%02d", Time/60, Time%60);
+		{
+			if(Time >= 60*60*24)
+				str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d:%02d", Time/60/60/24, (Time%86400)/3600, (Time/60)%60, (Time)%60);
+			else if(Time >= 60*60)
+				str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time/60/24, (Time/60)%60, Time%60);
+			else
+				str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time/60, Time%60);
+		}
 		float FontSize = 10.0f;
 		float w;
 		if(g_Config.m_ClShowDecisecs)
@@ -82,7 +96,7 @@ void CHud::RenderGameTimer()
 			float Alpha = Time <= 10 && (2*time_get()/time_freq()) % 2 ? 0.5f : 1.0f;
 			TextRender()->TextColor(1.0f, 0.25f, 0.25f, Alpha);
 		}
-		TextRender()->Text(0, Half-w/2, 2, FontSize, Buf, -1);
+		TextRender()->Text(0, Half-w/2, 2, FontSize, aBuf, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
