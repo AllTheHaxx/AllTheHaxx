@@ -37,6 +37,7 @@ void CHud::OnReset()
 	m_DDRaceTimeReceived = false;
 	m_ServerRecord = -1.0f;
 	m_PlayerRecord = -1.0f;
+	m_Notifications.hint_size(MAX_NOTIFICATIONS>>1);
 }
 
 void CHud::RenderGameTimer()
@@ -362,6 +363,51 @@ void CHud::RenderTeambalanceWarning()
 	}
 }
 
+void CHud::PushNotification(const char *pMsg)
+{
+	// make sure we do not exceed limit
+	while(m_Notifications.size() >= MAX_NOTIFICATIONS)
+		m_Notifications.remove_index(m_Notifications.size()-1);
+
+	// setup a new notification
+	CNotification n;
+	str_copy(n.m_aMsg, pMsg, sizeof(n.m_aMsg));
+	n.m_SpawnTime = Client()->LocalTime();
+	n.m_xOffset = 10.0f;
+
+	// push it onto our stack
+	m_Notifications.add(n);
+	m_Notifications.sort_range();
+}
+
+void CHud::RenderNotifications()
+{
+	const float NOTIFICATION_LIFETIME = 10.0f; // in seconds
+
+	// render all the notifications
+	float offset = 0.0f;
+	for(int i = 0; i < m_Notifications.size(); i++)
+	{
+		CNotification *n = &m_Notifications[i];
+		float FadeVal = (n->m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME;
+		//float RedVal = min(1.0f, (float)exp(-3-1*(n->m_SpawnTime + NOTIFICATION_LIFETIME/2-Client()->LocalTime()) / NOTIFICATION_LIFETIME/2)/10.0f);
+
+		// remove if faded out
+		if(FadeVal < 0.03f)
+			m_Notifications.remove_index(i);
+
+		if(n->m_xOffset > 0.08f)
+			TextRender()->TextColor(1,0.5f,0.5f,1);
+		else
+		{
+			n->m_xOffset = 0.0f;
+			TextRender()->TextColor(1,1,1,FadeVal);
+		}
+		TextRender()->Text(0, 7+(n->m_xOffset-=n->m_xOffset/15), m_Height/1.5f-(offset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
+	}
+	TextRender()->TextColor(1,1,1,1);
+}
+
 
 void CHud::RenderVoting()
 {
@@ -448,10 +494,16 @@ void CHud::RenderVoting()
 	const char *pNoKey = m_pClient->m_pBinds->GetKey("vote no");
 	str_format(aBuf, sizeof(aBuf), "%s - %s", pYesKey, Localize("Vote yes"));
 	Base.y += Base.h+1;
+	if(g_Config.m_ClColorfulClient && m_pClient->m_pVoting->TakenChoice() == 1)
+		TextRender()->TextColor(0,0.756f,0,1);
 	UI()->DoLabel(&Base, aBuf, 6.0f, -1);
+	TextRender()->TextColor(1,1,1,1);
 
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), pNoKey);
+	if(g_Config.m_ClColorfulClient && m_pClient->m_pVoting->TakenChoice() == -1)
+		TextRender()->TextColor(0.756f,0,0,1);
 	UI()->DoLabel(&Base, aBuf, 6.0f, 1);
+	TextRender()->TextColor(1,1,1,1);
 #endif
 }
 
@@ -578,6 +630,7 @@ void CHud::OnRender()
 			RenderConnectionWarning();
 		RenderTeambalanceWarning();
 		RenderVoting();
+		RenderNotifications();
 		if (g_Config.m_ClShowRecord)
 			RenderRecord();
 	}

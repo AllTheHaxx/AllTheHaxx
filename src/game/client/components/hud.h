@@ -2,10 +2,25 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_HUD_H
 #define GAME_CLIENT_COMPONENTS_HUD_H
+#include <base/tl/sorted_array.h>
 #include <game/client/component.h>
 
 class CHud : public CComponent
 {
+	struct CNotification
+	{
+		char m_aMsg[256];
+		float m_SpawnTime;
+		float m_xOffset;
+
+		bool operator<(CNotification& other) { return this->m_SpawnTime > other.m_SpawnTime; }
+	};
+
+	enum
+	{
+		MAX_NOTIFICATIONS=15
+	};
+
 	float m_Width, m_Height;
 	float m_AverageFPS;
 
@@ -14,6 +29,7 @@ class CHud : public CComponent
 	void RenderFps();
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
+	void RenderNotifications();
 	void RenderVoting();
 	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);
 	void RenderGameTimer();
@@ -24,6 +40,7 @@ class CHud : public CComponent
 	void RenderWarmupTimer();
 
 	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
+
 public:
 	CHud();
 
@@ -31,11 +48,11 @@ public:
 	virtual void OnRender();
 
 	// DDRace
-
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 
-private:
+	void PushNotification(const char *pMsg);
 
+private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
 	float m_CheckpointDiff;
@@ -47,6 +64,7 @@ private:
 	int m_DDRaceTick;
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
+	sorted_array<CNotification> m_Notifications;
 };
 
 #endif

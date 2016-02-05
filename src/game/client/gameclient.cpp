@@ -146,6 +146,7 @@ void CGameClient::OnConsoleInit()
 	m_pGameConsole = &::gs_GameConsole;
 	m_pParticles = &::gs_Particles;
 	m_pMenus = &::gs_Menus;
+	m_pHud = &::gs_Hud;
 	m_pSkins = &::gs_Skins;
 	m_pCountryFlags = &::gs_CountryFlags;
 	m_pChat = &::gs_Chat;
@@ -198,7 +199,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_NamePlates);
 	m_All.Add(&m_pParticles->m_RenderGeneral);
 	m_All.Add(m_pDamageind);
-	m_All.Add(&gs_Hud);
+	m_All.Add(m_pHud);
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_Emoticon);
 	m_All.Add(&gs_KillMessages);
