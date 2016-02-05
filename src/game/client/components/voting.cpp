@@ -293,10 +293,11 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 	if(m_Total)
 	{
 		CUIRect PassArea = Bars;
+		static float YesVal = 0.0f, NoVal = 0.0f;
 		if(m_Yes)
 		{
 			CUIRect YesArea = Bars;
-			static float YesVal = 0.0f;
+
 			if(YesVal < m_Yes || YesVal > m_Yes) YesVal += (m_Yes - YesVal)/100;
 			YesArea.w *= YesVal/(float)m_Total;
 			RenderTools()->DrawUIRect(&YesArea, vec4(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
@@ -311,11 +312,12 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			PassArea.x += YesArea.w;
 			PassArea.w -= YesArea.w;
 		}
+		else
+			YesVal = 0.0f;
 
 		if(m_No)
 		{
 			CUIRect NoArea = Bars;
-			static float NoVal = 0.0f;
 			if(NoVal < m_No || NoVal > m_No) NoVal += (m_No - NoVal)/100;
 			NoArea.w *= NoVal/(float)m_Total;
 			NoArea.x = (Bars.x + Bars.w)-NoArea.w;
@@ -330,6 +332,8 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 
 			PassArea.w -= NoArea.w;
 		}
+		else
+			NoVal = 0.0f;
 
 		if(Text && m_Pass)
 		{
