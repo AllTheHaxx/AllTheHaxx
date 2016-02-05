@@ -15,4 +15,4 @@ dependencies:
 test:
   override:
     - |
-        ../bam/bam release
+        ../bam/bam -j 4 release
