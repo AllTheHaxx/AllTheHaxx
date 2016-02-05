@@ -417,14 +417,55 @@ void CHud::RenderNotifications()
 
 void CHud::RenderVoting()
 {
-	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice()) || !m_pClient->m_pVoting->IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	CUIRect Rect;
+	Rect.x = 0;
+	Rect.y = 60-2;
+	Rect.w = 100+4+5;
+	Rect.h = 46;
+
+	static float Offset = Rect.w;
+	static bool ShouldRender = false;
+	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice())
+			|| !m_pClient->m_pVoting->IsVoting()
+			|| Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	{
+		// do not render
+		ShouldRender = false;
+	}
+	else
+	{
+		// render
+		if(!ShouldRender) Offset = Rect.w; // set offset to completely invisible
+		ShouldRender = true;
+	}
+
+
+	if(ShouldRender)
+	{
+		// decrease offset to make it visible
+		if(Offset < Rect.w*0.05f)
+			Offset = 0;
+		else
+			Offset -= Offset/10.0f;
+	}
+	else
+	{
+		// increase offset to make it invisible
+		if(Offset > Rect.w*0.95f)
+			Offset = Rect.w;
+		else
+			Offset += (Rect.w-Offset)/10.0f;
+	}
+
+
+	if(Offset == Rect.w && !ShouldRender)
 		return;
 
+
+#if defined(__ANDROID__)
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.40f);
-
-#if defined(__ANDROID__)
 	static const float TextX = 265;
 	static const float TextY = 1;
 	static const float TextW = 200;
@@ -432,10 +473,12 @@ void CHud::RenderVoting()
 	RenderTools()->DrawRoundRect(TextX-5, TextY, TextW+15, TextH, 5.0f);
 	RenderTools()->DrawRoundRect(TextX-5, TextY+TextH+2, TextW/2-10, 20, 5.0f);
 	RenderTools()->DrawRoundRect(TextX+TextW/2+20, TextY+TextH+2, TextW/2-10, 20, 5.0f);
-#else
-	RenderTools()->DrawRoundRect(-10, 60-2, 100+10+4+5, 46, 5.0f);
-#endif
 	Graphics()->QuadsEnd();
+#else
+	Rect.x -= Offset;
+	RenderTools()->DrawUIRect(&Rect, vec4(0,0,0,0.40f), CUI::CORNER_R, 5.0f);
+	Rect.x += Offset;
+#endif
 
 	TextRender()->TextColor(1,1,1,1);
 
@@ -447,7 +490,7 @@ void CHud::RenderVoting()
 	TextRender()->SetCursor(&Cursor, TextX+TextW-tw, 0.0f, 10.0f, TEXTFLAG_RENDER);
 #else
 	float tw = TextRender()->TextWidth(0x0, 6, aBuf, -1);
-	TextRender()->SetCursor(&Cursor, 5.0f+100.0f-tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
+	TextRender()->SetCursor(&Cursor, 5.0f+100.0f-tw-Offset, 60.0f, 6.0f, TEXTFLAG_RENDER);
 #endif
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
@@ -455,7 +498,7 @@ void CHud::RenderVoting()
 	TextRender()->SetCursor(&Cursor, TextX, 0.0f, 10.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = TextW-tw;
 #else
-	TextRender()->SetCursor(&Cursor, 5.0f, 60.0f, 6.0f, TEXTFLAG_RENDER);
+	TextRender()->SetCursor(&Cursor, 5.0f-Offset, 60.0f, 6.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = 100.0f-tw;
 #endif
 	Cursor.m_MaxLines = 3;
@@ -466,7 +509,7 @@ void CHud::RenderVoting()
 #if defined(__ANDROID__)
 	TextRender()->SetCursor(&Cursor, TextX, 23.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 #else
-	TextRender()->SetCursor(&Cursor, 5.0f, 79.0f, 6.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	TextRender()->SetCursor(&Cursor, 5.0f-Offset, 79.0f, 6.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 #endif
 	Cursor.m_LineWidth = 100.0f;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -474,7 +517,7 @@ void CHud::RenderVoting()
 #if defined(__ANDROID__)
 	CUIRect Base = {TextX, TextH - 8, TextW, 4};
 #else
-	CUIRect Base = {5, 88, 100, 4};
+	CUIRect Base = {5-Offset, 88, 100, 4};
 #endif
 	m_pClient->m_pVoting->RenderBars(Base, false);
 
