@@ -420,7 +420,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 999));
 		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER);
-		if(g_Config.m_ClScoreboardColor)
+		if(g_Config.m_ClColorfulClient)
 		{
 			if(i == 0) TextRender()->TextColor(1, 0.843f, 0, 1);
 			if(i == 1) TextRender()->TextColor(0.744f, 0.744f, 0.744f, 1);
@@ -462,7 +462,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			TextRender()->TextEx(&Cursor, aId, -1);
 		}
 		Cursor.m_LineWidth += NameLength;
-		if(g_Config.m_ClScoreboardColor && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[pInfo->m_ClientID].m_aName, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, true))
+		if(g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[pInfo->m_ClientID].m_aName, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, true))
 			TextRender()->TextColor(0,0.7f,0,1);
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 		TextRender()->TextColor(1,1,1,1);
@@ -471,7 +471,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
 		TextRender()->SetCursor(&Cursor, ClanOffset+ClanLength/2-tw/2, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ClanLength;
-		if(g_Config.m_ClScoreboardColor && str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, g_Config.m_PlayerClan) == 0)
+		if(g_Config.m_ClColorfulClient && str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, g_Config.m_PlayerClan) == 0)
 			TextRender()->TextColor(0,0.7f,0,1);
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
 		TextRender()->TextColor(1,1,1,1);
@@ -486,7 +486,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->SetCursor(&Cursor, PingOffset+PingLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
-		if(g_Config.m_ClScoreboardColor)
+		if(g_Config.m_ClColorfulClient)
 			TextRender()->TextColor(clamp(pInfo->m_Latency, 0, 1000)/200.0f, 250.0f/clamp(pInfo->m_Latency, 0, 1000), 0, 0.75f);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 		TextRender()->TextColor(1,1,1,1);
