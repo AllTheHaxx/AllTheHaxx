@@ -293,7 +293,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 	if(m_Total)
 	{
 		CUIRect PassArea = Bars;
-		static float YesVal = 0.0f, NoVal = 0.0f;
+		static float YesVal = 1.0f, NoVal = 1.0f;
 		if(m_Yes)
 		{
 			CUIRect YesArea = Bars;
@@ -333,7 +333,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			PassArea.w -= NoArea.w;
 		}
 		else
-			NoVal = 0.0f;
+			NoVal = 1.0f;
 
 		if(Text && m_Pass)
 		{
