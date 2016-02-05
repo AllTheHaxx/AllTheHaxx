@@ -6,7 +6,7 @@
 #include <base/vmath.h>
 #include <game/client/render.h>
 #include "voting.h"
-
+#include "hud.h"
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
 	CVoting *pSelf = (CVoting*)pUserData;

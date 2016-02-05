@@ -22,6 +22,7 @@
 #include <osx/notification.h>
 #endif
 
+#include "hud.h"
 #include "chat.h"
 
 
@@ -314,13 +315,19 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
+		bool HideChat = false;
 
 		if(g_Config.m_ClNotifications)
 		{
+
 			if( str_comp_nocase(pMsg->m_pMessage, "You are now in a solo part.") == 0 ||
 				str_comp_nocase(pMsg->m_pMessage, "You are now out of the solo part.") == 0
 				)
-				return;
+			{
+				if(str_comp(m_pClient->m_pHud->GetNotification(0), pMsg->m_pMessage) != 0)
+					m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
+				HideChat = true;
+			}
 		}
 
 		NETADDR Addr;
@@ -334,12 +341,12 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 			// thx 4 u ip nab ICKSDEHHHH
 			str_copy(m_pClient->m_aClients[pMsg->m_ClientID].m_Addr, pMsg->m_pMessage, sizeof(m_pClient->m_aClients[pMsg->m_ClientID].m_Addr));
-			if(g_Config.m_ClChatShowIPs)
-				AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
-			return;
+			if(!g_Config.m_ClChatShowIPs)
+				HideChat = true;
 		}
 
-		AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+		if(!HideChat)
+			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
 }
 

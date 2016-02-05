@@ -51,6 +51,7 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 
 	void PushNotification(const char *pMsg);
+	const char *GetNotification(int index);
 
 private:
 	void RenderRecord();

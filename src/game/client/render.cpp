@@ -197,7 +197,7 @@ void CRenderTools::DrawCircle(float x, float y, float r, int Segments)
 		Graphics()->QuadsDrawFreeform(Array, NumItems);
 }
 
-void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool Alpha)
+void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool UseTeeAlpha, float AlphaLimit)
 {
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
@@ -224,8 +224,8 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 				Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle*pi*2);
 
 				// draw body
-				if(Alpha)
-					Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
+				if(UseTeeAlpha)
+					Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, min(pInfo->m_ColorBody.a, AlphaLimit));
 				else
 					Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, 1.0f);
 
@@ -288,8 +288,8 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			}
 
 
-			if(Alpha)
-				Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, pInfo->m_ColorFeet.a*cs);
+			if(UseTeeAlpha)
+				Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, min(pInfo->m_ColorFeet.a*cs, AlphaLimit));
 			else
 				Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, 1.0f);
 			IGraphics::CQuadItem QuadItem(Position.x+pFoot->m_X*AnimScale, Position.y+pFoot->m_Y*AnimScale, w, h);

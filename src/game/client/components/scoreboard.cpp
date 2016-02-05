@@ -456,7 +456,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// avatar
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset+TeeLength/2, y+LineHeight/2), m_FadeVal);
+		if(m_FadeVal>0.1f)
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset+TeeLength/2, y+LineHeight/2), true, m_FadeVal);
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
@@ -582,8 +583,9 @@ void CScoreboard::RenderRecordingNotification(float x)
 	RenderTools()->DrawRoundRect(x+20, 15.0f, 20.0f, 20.0f, 10.0f);
 	Graphics()->QuadsEnd();
 
-	TextRender()->TextColor(1,1,1,1);
+	TextRender()->TextColor(1,1,1,m_FadeVal);
 	TextRender()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
+	TextRender()->TextColor(1,1,1,1);
 }
 
 void CScoreboard::OnRender()

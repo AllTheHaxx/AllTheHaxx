@@ -384,10 +384,17 @@ void CHud::PushNotification(const char *pMsg)
 	m_Notifications.sort_range();
 }
 
+const char* CHud::GetNotification(int index)
+{
+	if(index < m_Notifications.size())
+		return m_Notifications[0].m_aMsg;
+	return 0;
+}
+
 void CHud::RenderNotifications()
 {
 	if(!g_Config.m_ClNotifications)
-			return;
+		return;
 
 	const float NOTIFICATION_LIFETIME = 10.0f; // in seconds
 
