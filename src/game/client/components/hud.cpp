@@ -37,6 +37,7 @@ void CHud::OnReset()
 	m_DDRaceTimeReceived = false;
 	m_ServerRecord = -1.0f;
 	m_PlayerRecord = -1.0f;
+	m_Notifications.delete_all();
 	m_Notifications.hint_size(MAX_NOTIFICATIONS>>1);
 }
 
@@ -385,6 +386,9 @@ void CHud::PushNotification(const char *pMsg)
 
 void CHud::RenderNotifications()
 {
+	if(!g_Config.m_ClNotifications)
+			return;
+
 	const float NOTIFICATION_LIFETIME = 10.0f; // in seconds
 
 	// render all the notifications
