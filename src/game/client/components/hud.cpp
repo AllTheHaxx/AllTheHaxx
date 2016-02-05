@@ -37,7 +37,7 @@ void CHud::OnReset()
 	m_DDRaceTimeReceived = false;
 	m_ServerRecord = -1.0f;
 	m_PlayerRecord = -1.0f;
-	m_Notifications.delete_all();
+	m_Notifications.clear();
 	m_Notifications.hint_size(MAX_NOTIFICATIONS>>1);
 }
 
