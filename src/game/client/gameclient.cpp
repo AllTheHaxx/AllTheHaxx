@@ -537,27 +537,30 @@ void CGameClient::UpdatePositions()
 	}
 
 	// some notifications TODO: DO THIS
-/*	if(m_Snap.m_pLocalCharacter)
 	{
 		static bool IsSolo = false;
-		int x = m_LocalCharacterPos.x;
-		int y = m_LocalCharacterPos.y;
-		dbg_msg("KATZE!", "(%i?) %i", TILE_SOLO_START, Collision()->GetIndex(x, y));//XXX
-
-		// enter solo
-		if(!IsSolo && Collision()->GetIndex(x, y) == TILE_SOLO_START)
+		if(m_Snap.m_pLocalCharacter)
 		{
-			m_pHud->PushNotification(Localize("You are now in a solo part."));
-			IsSolo = true;
+			int x = m_LocalCharacterPos.x/32;
+			int y = m_LocalCharacterPos.y/32;
+
+			// enter solo
+			if(!IsSolo && Collision()->GetIndex(x, y) == TILE_SOLO_START)
+			{
+				m_pHud->PushNotification(Localize("You are now in a solo part."));
+				IsSolo = true;
+			}
+
+			// leave solo
+			if(IsSolo && Collision()->GetIndex(x, y) == TILE_SOLO_END)
+			{
+				m_pHud->PushNotification(Localize("You are now out of solo part."));
+				IsSolo = false;
+			}
 		}
-
-		// leave solo
-		if(IsSolo && Collision()->GetIndex(x, y) == TILE_SOLO_END)
-		{
-			m_pHud->PushNotification(Localize("You are now out of solo part."));
+		else
 			IsSolo = false;
-		}
-	}*/
+	}
 }
 
 
