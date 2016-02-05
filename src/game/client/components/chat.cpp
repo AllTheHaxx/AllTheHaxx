@@ -315,6 +315,14 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
+		if(g_Config.m_ClNotifications)
+		{
+			if( str_comp_nocase(pMsg->m_pMessage, "You are now in a solo part.") == 0 ||
+				str_comp_nocase(pMsg->m_pMessage, "You are now out of the solo part.") == 0
+				)
+				return;
+		}
+
 		NETADDR Addr;
 		if(net_addr_from_str(&Addr, pMsg->m_pMessage) == 0)
 		{
@@ -328,9 +336,10 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			str_copy(m_pClient->m_aClients[pMsg->m_ClientID].m_Addr, pMsg->m_pMessage, sizeof(m_pClient->m_aClients[pMsg->m_ClientID].m_Addr));
 			if(g_Config.m_ClChatShowIPs)
 				AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+			return;
 		}
-		else
-			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+
+		AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
 }
 

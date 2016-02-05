@@ -554,7 +554,7 @@ void CGameClient::UpdatePositions()
 			// leave solo
 			if(IsSolo && Collision()->GetIndex(x, y) == TILE_SOLO_END)
 			{
-				m_pHud->PushNotification(Localize("You are now out of solo part."));
+				m_pHud->PushNotification(Localize("You are now out of the solo part."));
 				IsSolo = false;
 			}
 		}
