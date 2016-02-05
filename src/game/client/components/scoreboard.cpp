@@ -40,6 +40,7 @@ void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 void CScoreboard::OnReset()
 {
 	m_Active = false;
+	m_FadeVal = 0.0f;
 	m_ServerRecord = -1.0f;
 }
 
@@ -70,12 +71,13 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.5f);
+	Graphics()->SetColor(0,0,0,0.5f*m_FadeVal);
 	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
 	Graphics()->QuadsEnd();
 
 	// render goals
 	y += 10.0f;
+	TextRender()->TextColor(1,1,1,m_FadeVal);
 	if(m_pClient->m_Snap.m_pGameInfoObj)
 	{
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit)
@@ -98,6 +100,7 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 			TextRender()->Text(0, x+w-tw-10.0f, y, 20.0f, aBuf, -1);
 		}
 	}
+	TextRender()->TextColor(1,1,1,1);
 }
 
 void CScoreboard::RenderSpectators(float x, float y, float w)
@@ -108,12 +111,13 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.5f);
+	Graphics()->SetColor(0,0,0,0.5f*m_FadeVal);
 	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
 	Graphics()->QuadsEnd();
 
 	// Headline
 	y += 10.0f;
+	TextRender()->TextColor(1,1,1,m_FadeVal);
 	TextRender()->Text(0, x+10.0f, y, 28.0f, Localize("Spectators"), w-20.0f);
 
 	// spectator names
@@ -143,6 +147,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	Cursor.m_LineWidth = w-20.0f;
 	Cursor.m_MaxLines = 4;
 	TextRender()->TextEx(&Cursor, aBuffer, -1);
+	TextRender()->TextColor(1,1,1,1);
 }
 
 void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle)
@@ -179,7 +184,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.5f);
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.5f*m_FadeVal);
 	if(upper16 || upper32 || upper24)
 		RenderTools()->DrawRoundRectExt(x, y, w, h, 17.0f/2, 10);
 	else if(lower16 || lower32 || lower24)
@@ -197,6 +202,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 			pTitle = Localize("Score board");
 	}
+	TextRender()->TextColor(1,1,1,m_FadeVal);
 	TextRender()->Text(0, x+20.0f, y, TitleFontsize, pTitle, -1);
 
 	char aBuf[128] = {0};
@@ -285,6 +291,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float ClanOffset = x+370.0f, ClanLength = 230.0f-CountryLength;
 
 	// render headlines
+	TextRender()->TextColor(1,1,1,m_FadeVal);
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
 	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Score"), -1);
@@ -360,7 +367,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
 			vec3 rgb = HslToRgb(vec3(DDTeam / 64.0f, 1.0f, 0.5f));
-			Graphics()->SetColor(rgb.r, rgb.g, rgb.b, 0.5f);
+			Graphics()->SetColor(rgb.r, rgb.g, rgb.b, 0.5f*m_FadeVal);
 
 			int Corners = 0;
 
@@ -400,7 +407,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		{
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f*m_FadeVal);
 			RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, RoundRadius);
 			Graphics()->QuadsEnd();
 		}
@@ -422,12 +429,12 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER);
 		if(g_Config.m_ClColorfulClient)
 		{
-			if(i == 0) TextRender()->TextColor(1, 0.843f, 0, 1);
-			if(i == 1) TextRender()->TextColor(0.744f, 0.744f, 0.744f, 1);
-			if(i == 2) TextRender()->TextColor(0.804f, 0.498f, 0.196f, 1);
+			if(i == 0) TextRender()->TextColor(1, 0.843f, 0, m_FadeVal);
+			if(i == 1) TextRender()->TextColor(0.744f, 0.744f, 0.744f, m_FadeVal);
+			if(i == 2) TextRender()->TextColor(0.804f, 0.498f, 0.196f, m_FadeVal);
 		}
 		TextRender()->TextEx(&Cursor, aBuf, -1);
-		TextRender()->TextColor(1,1,1,1);
+		TextRender()->TextColor(1,1,1,m_FadeVal);
 
 		// flag
 		if((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS) &&
@@ -449,7 +456,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// avatar
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset+TeeLength/2, y+LineHeight/2));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset+TeeLength/2, y+LineHeight/2), m_FadeVal);
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
@@ -463,21 +470,21 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 		Cursor.m_LineWidth += NameLength;
 		if(g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[pInfo->m_ClientID].m_aName, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, true))
-			TextRender()->TextColor(0,0.7f,0,1);
+			TextRender()->TextColor(0,0.7f,0,m_FadeVal);
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
-		TextRender()->TextColor(1,1,1,1);
+		TextRender()->TextColor(1,1,1,m_FadeVal);
 
 		// clan
 		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
 		TextRender()->SetCursor(&Cursor, ClanOffset+ClanLength/2-tw/2, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ClanLength;
 		if(g_Config.m_ClColorfulClient && str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, g_Config.m_PlayerClan) == 0)
-			TextRender()->TextColor(0,0.7f,0,1);
+			TextRender()->TextColor(0,0.7f,0,m_FadeVal);
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
-		TextRender()->TextColor(1,1,1,1);
+		TextRender()->TextColor(1,1,1,m_FadeVal);
 
 		// country flag
-		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
+		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f*m_FadeVal);
 		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
 											CountryOffset, y+(Spacing+TeeSizeMod*5.0f)/2.0f, CountryLength, LineHeight-Spacing-TeeSizeMod*5.0f);
 
@@ -487,9 +494,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->SetCursor(&Cursor, PingOffset+PingLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
 		if(g_Config.m_ClColorfulClient)
-			TextRender()->TextColor(clamp(pInfo->m_Latency, 0, 1000)/200.0f, 250.0f/clamp(pInfo->m_Latency, 0, 1000), 0, 0.75f);
+			TextRender()->TextColor(clamp(pInfo->m_Latency, 0, 1000)/150.0f, 200.0f/clamp(pInfo->m_Latency, 0, 1000), 0, 0.75f*m_FadeVal);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
-		TextRender()->TextColor(1,1,1,1);
+		TextRender()->TextColor(1,1,1,m_FadeVal);
 
 		y += LineHeight+Spacing;
 		if (lower32 || upper32) {
@@ -500,6 +507,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			if (rendered == 16) break;
 		}
 	}
+	TextRender()->TextColor(1,1,1,1);
 }
 
 void CScoreboard::RenderLocalTime(float x)
@@ -508,7 +516,7 @@ void CScoreboard::RenderLocalTime(float x)
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f*m_FadeVal);
 	RenderTools()->DrawRoundRectExt(x-120.0f, 0.0f, 100.0f, 50.0f, 15.0f, CUI::CORNER_B);
 	Graphics()->QuadsEnd();
 
@@ -520,7 +528,9 @@ void CScoreboard::RenderLocalTime(float x)
 	//draw the text
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+	TextRender()->TextColor(1,1,1,m_FadeVal);
 	TextRender()->Text(0, x-100.0f, 10.0f, 20.0f, aBuf, -1);
+	TextRender()->TextColor(1,1,1,1);
 }
 
 void CScoreboard::RenderRecordingNotification(float x)
@@ -562,23 +572,57 @@ void CScoreboard::RenderRecordingNotification(float x)
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f*m_FadeVal);
 	RenderTools()->DrawRoundRectExt(x, 0.0f, w+60.0f, 50.0f, 15.0f, CUI::CORNER_B);
 	Graphics()->QuadsEnd();
 
 	//draw the red dot
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+	Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f*m_FadeVal);
 	RenderTools()->DrawRoundRect(x+20, 15.0f, 20.0f, 20.0f, 10.0f);
 	Graphics()->QuadsEnd();
 
+	TextRender()->TextColor(1,1,1,1);
 	TextRender()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
 }
 
 void CScoreboard::OnRender()
 {
+	static bool ShouldRender = false;
+
 	if(!Active())
+	{
+		// do not render
+		ShouldRender = false;
+	}
+	else
+	{
+		// render
+		if(!ShouldRender) m_FadeVal = 0; // set offset to completely invisible
+		ShouldRender = true;
+	}
+
+
+	if(ShouldRender)
+	{
+		// increase alpha
+		if(m_FadeVal > 0.95f)
+			m_FadeVal = 1.0f;
+		else
+			m_FadeVal += (1.0f-m_FadeVal)/5.0f;
+	}
+	else
+	{
+		// decrease alpha
+		if(m_FadeVal < 0.1f)
+			m_FadeVal = 0.0f;
+		else
+			m_FadeVal -= m_FadeVal/5.0f;
+	}
+
+	if(m_FadeVal == 0 && !ShouldRender)
 		return;
+
 
 	// if the score board is active, then we should clear the motd message aswell
 	if(m_pClient->m_pMotd->IsActive())
@@ -618,8 +662,9 @@ void CScoreboard::OnRender()
 			const char *pRedClanName = GetClanName(TEAM_RED);
 			const char *pBlueClanName = GetClanName(TEAM_BLUE);
 
-			if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER && m_pClient->m_Snap.m_pGameDataObj)
+			if((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER) && m_pClient->m_Snap.m_pGameDataObj)
 			{
+				m_FadeVal = 1.0f;
 				char aText[256];
 				str_copy(aText, Localize("Draw!"), sizeof(aText));
 
@@ -666,12 +711,18 @@ bool CScoreboard::Active()
 	{
 		// we are not a spectator, check if we are dead
 		if(!m_pClient->m_Snap.m_pLocalCharacter && g_Config.m_ClScoreboardOnDeath)
+		{
+			m_FadeVal = 1.0f;
 			return true;
+		}
 	}
 
 	// if the game is over
 	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
+	{
+		m_FadeVal = 1.0f;
 		return true;
+	}
 
 	return false;
 }

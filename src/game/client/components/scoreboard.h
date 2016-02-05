@@ -17,6 +17,7 @@ class CScoreboard : public CComponent
 	const char *GetClanName(int Team);
 
 	bool m_Active;
+	float m_FadeVal;
 
 public:
 	CScoreboard();
