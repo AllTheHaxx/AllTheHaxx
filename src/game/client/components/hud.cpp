@@ -365,6 +365,9 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::PushNotification(const char *pMsg)
 {
+	if(!g_Config.m_ClNotifications)
+		return;
+
 	// make sure we do not exceed limit
 	while(m_Notifications.size() >= MAX_NOTIFICATIONS)
 		m_Notifications.remove_index(m_Notifications.size()-1);
@@ -390,7 +393,6 @@ void CHud::RenderNotifications()
 	{
 		CNotification *n = &m_Notifications[i];
 		float FadeVal = (n->m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME;
-		//float RedVal = min(1.0f, (float)exp(-3-1*(n->m_SpawnTime + NOTIFICATION_LIFETIME/2-Client()->LocalTime()) / NOTIFICATION_LIFETIME/2)/10.0f);
 
 		// remove if faded out
 		if(FadeVal < 0.03f)

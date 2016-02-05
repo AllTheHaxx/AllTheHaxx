@@ -138,8 +138,9 @@ MACRO_CONFIG_STR(ClChatSpam, cl_chat_spam, 256, "", CFGFLAG_CLIENT, "Spam a chat
 MACRO_CONFIG_INT(ClChatDennisProtection, cl_chat_dennis_protection, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Be protected like a dennis. Be a dennis.")
 MACRO_CONFIG_INT(ClSendInfoExploit, cl_sendinfo_exploit, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Old DDNet server? Fast rainbow?")
 MACRO_CONFIG_INT(ClServerCrasher, cl_server_crasher, 0, 0, 1, CFGFLAG_CLIENT, "Nothing what it seems, i got a pocket full of dreams")
-//
 MACRO_CONFIG_INT(ClColorfulClient, cl_colorful_client, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Colorize everything!")
+MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show notifications")
+
 
 
 // server
