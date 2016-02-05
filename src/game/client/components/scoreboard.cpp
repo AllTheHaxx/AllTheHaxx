@@ -456,8 +456,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// avatar
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
-		if(m_FadeVal>0.1f)
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset+TeeLength/2, y+LineHeight/2), true, m_FadeVal);
+		if(m_FadeVal > 0.1f)
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset+TeeLength/2, y+LineHeight/2), true, m_FadeVal);
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
@@ -465,7 +465,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			str_format(aId, sizeof(aId),"%d: ", pInfo->m_ClientID);
+			if (pInfo->m_ClientID >= 10)
+				str_format(aId, sizeof(aId),"%d: ", pInfo->m_ClientID);
+			else
+				str_format(aId, sizeof(aId)," %d: ", pInfo->m_ClientID);
 			Cursor.m_LineWidth = TextRender()->TextWidth(0, FontSize, aId, sizeof(aId));
 			TextRender()->TextEx(&Cursor, aId, -1);
 		}
