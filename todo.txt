@@ -9,8 +9,8 @@
 
 [f]	Ingame texture switching
 [f]	Aimlines ...I can't play without :o
-[f]	print use of 'f1 -> toggle' to notifications
-[ ]	.
+[f]	Print use of 'f1 -> toggle' to notifications
+[i]	Nice color for lines in f1
 [ ]	.
 
 

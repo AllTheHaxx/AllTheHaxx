@@ -1,4 +1,5 @@
 #include <base/math.h>
+#include <base/tl/array.h>
 
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -21,11 +22,21 @@
 CAStar::CAStar()
 {
 	m_pField = NULL;
+	m_PathFound = false;
+	m_MapReloaded = false;
+	OnReset();
 }
 
 CAStar::~CAStar()
 {
 
+}
+
+void CAStar::OnReset() // is being called right after OnMapLoad()
+{
+	m_Path.clear();
+	m_LineItems.clear();
+	m_PathFound = false;
 }
 
 void CAStar::OnPlayerDeath()
@@ -36,7 +47,7 @@ void CAStar::OnPlayerDeath()
 	// fitness calculation
 	int ClosestNode = 1337*1337;
 	int ClosestID = -1;
-	for(int i = (int)m_Path.size(); i >= 0; i--)
+	for(int i = m_Path.size(); i >= 0; i--)
 	{
 		// better make a SAFE CAAAAAAALLLL
 		if(distance(m_Path[i], m_LastPos) < ClosestNode && !Collision()->IntersectLine(m_Path[i], m_LastPos, 0x0, 0x0, false))
@@ -56,24 +67,49 @@ void CAStar::OnPlayerDeath()
 
 void CAStar::OnRender()
 {
+	// find the path one second after joining to be buffered
+	{
+		static int64 activationTime = 0;
+		if(m_MapReloaded)
+		{
+			activationTime = time_get();
+		}
+
+		if(activationTime && time_get() > activationTime+time_freq())
+		{
+			FillGrid(true);
+			BuildPath();
+			activationTime = 0;
+		}
+		else
+			m_MapReloaded = false;
+	}
+
 	const CNetObj_Character * pPlayerChar = m_pClient->m_Snap.m_pLocalCharacter;
 	const CNetObj_Character * pPrevChar = m_pClient->m_Snap.m_pLocalPrevCharacter;
 
 	if (pPlayerChar && pPrevChar)
 		m_LastPos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
 
-	static int64 s_LastRender = 0;
 	if(Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	// my dong is strong
+	static int64 s_LastRender = 0;
 	if(time_get()-s_LastRender < time_freq()*0.19f)
 		return;
 
 	// visualize the path
-	for(int i = 0; i < (int)m_Path.size(); i++)
+	for(int i = 0; i < m_Path.size(); i++)
 		m_pClient->m_pEffects->BulletTrail(m_Path[i]); // TODO: redo this nicer
 
+/*	TODO: implement lines
+	Graphics()->LinesBegin();
+
+	Graphics()->SetColor(1,0,0,1);
+	Graphics()->LinesDraw(m_LineItems.base_ptr(), m_LineItems.size());
+	Graphics()->LinesEnd();
+*/
 	s_LastRender = time_get();
 }
 
@@ -121,24 +157,20 @@ int CAStar::GetFinish()
 
 void CAStar::BuildPath()
 {
-	m_Path.clear();
-	m_PathFound = false;
-
 	int Start = GetStart();
 	int Finish = GetFinish();
 	int SolutionLength = 0;
 	int *pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
 	dbg_msg("path", "start=%i finish=%i solution length=%i", Start, Finish, SolutionLength);
 
-	bool NoFreeze = true;
-	if(SolutionLength == -1) // try again ignoreing freeze
+	bool NoFreeze = true; // avoid freeze?
+	if(SolutionLength == -1) // try again ignoring freeze
 	{
 		FillGrid(false);
 		pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
 		bool NoFreeze = false;
 	}
 
-	// TODO: this is not displayed at all xD
 	if(g_Config.m_ClNotifications)
 	{
 		if(SolutionLength != -1)
@@ -156,10 +188,19 @@ void CAStar::BuildPath()
 		if(SolutionLength > 0)
 		{
 			m_PathFound = true;
+
 			for(int i = 0; i < SolutionLength; i++)
+				m_Path.add(Collision()->GetPos(pSolution[i]));
+
+		/*	for(int i = 0; i < m_Path.size()-1; i++) // TODO: how to get screenpos from mappos?
 			{
-				m_Path.push_back(Collision()->GetPos(pSolution[i]));
-			}
+				IGraphics::CLineItem l;
+				l.m_X0 = m_Path[i].x;
+				l.m_X1 = m_Path[i+1].x;
+				l.m_Y0 = m_Path[i].y;
+				l.m_Y1 = m_Path[i+1].y;
+				m_LineItems.add(l);
+			}*/
 		}
 		free(pSolution);
 	}
@@ -185,6 +226,5 @@ void CAStar::FillGrid(bool NoFreeze)
 
 void CAStar::OnMapLoad()
 {
-	FillGrid(true);
-	BuildPath();
+	m_MapReloaded = true;
 }
