@@ -49,7 +49,7 @@ void CAStar::OnPlayerDeath()
 	if(g_Config.m_ClNotifications && ClosestID != -1)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i", m_Path.size()-ClosestID);
+		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i (%.2f%%)", m_Path.size()-ClosestID, (((float)m_Path.size()-(float)ClosestID)/(float)m_Path.size())*100.0f);
 		m_pClient->m_pHud->PushNotification(aBuf);
 	}
 }
