@@ -396,10 +396,22 @@ void CHud::RenderNotifications()
 	if(!g_Config.m_ClNotifications)
 		return;
 
-	const float NOTIFICATION_LIFETIME = 10.0f; // in seconds
+	const float NOTIFICATION_LIFETIME = 15.0f; // in seconds
+	const float Y_BOTTOM = m_Height/1.7f;
+
+	// render background
+	if(m_Notifications.size())
+	{
+		float ybottom = Y_BOTTOM + 6.3f/2;
+		float ytop = ybottom - m_Notifications.size()*6.3f - 6.3f/2;
+		float height = ybottom-ytop;
+		CUIRect r;
+		r.x = 0; r.y = ytop; r.w = m_Width/4.3f + 2.0f; r.h = height;
+		RenderTools()->DrawUIRect(&r, vec4(0,0,0,m_Notifications.size()>1?0.5f:min(0.5f,(float)(m_Notifications[0].m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME)), CUI::CORNER_R, 3.5f);
+	}
 
 	// render all the notifications
-	float offset = 0.0f;
+	float yOffset = 0.0f;
 	for(int i = 0; i < m_Notifications.size(); i++)
 	{
 		CNotification *n = &m_Notifications[i];
@@ -407,17 +419,21 @@ void CHud::RenderNotifications()
 
 		// remove if faded out
 		if(FadeVal < 0.03f)
+		{
 			m_Notifications.remove_index(i);
+			continue;
+		}
 
 		if(n->m_xOffset > 0.08f)
-			TextRender()->TextColor(1,0.5f,0.5f,1);
+			TextRender()->TextColor(1,0.2f,0.2f,1);
 		else
 		{
 			n->m_xOffset = 0.0f;
 			TextRender()->TextColor(1,1,1,FadeVal);
 		}
-		TextRender()->Text(0, 7+(n->m_xOffset-=n->m_xOffset/15), m_Height/1.5f-(offset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
+		TextRender()->Text(0, 7+(n->m_xOffset-=n->m_xOffset/15), Y_BOTTOM-(yOffset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
 	}
+
 	TextRender()->TextColor(1,1,1,1);
 }
 
