@@ -95,11 +95,48 @@ void CAStar::OnRender()
 		return;
 
 	// visualize the path
-	Graphics()->LinesBegin();
-	Graphics()->BlendNone();
-	Graphics()->SetColor(1,1,1,1);
-	Graphics()->LinesDraw(m_LineItems.base_ptr(), m_LineItems.size());
-	Graphics()->LinesEnd();
+	Graphics()->BlendNormal();
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
+	for(int i = 0; i < m_Path.size()-1; i++)
+	{
+		vec3 RGB;
+		vec2 Pos = vec2(m_Path[i+1].x, m_Path[i+1].y);
+		vec2 From = vec2(m_Path[i].x, m_Path[i].y);
+		vec2 Dir = normalize(Pos-From);
+
+		vec2 Out, Border;
+
+		//vec4 inner_color(0.15f,0.35f,0.75f,1.0f);
+		//vec4 outer_color(0.65f,0.85f,1.0f,1.0f);
+
+		// do outline
+		RGB = HslToRgb(vec3(g_Config.m_ClLaserOutlineHue / 255.0f, g_Config.m_ClLaserOutlineSat / 255.0f, g_Config.m_ClLaserOutlineLht / 255.0f));
+		vec4 OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
+		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
+		Out = vec2(Dir.y, -Dir.x) * (3.0f);
+
+		IGraphics::CFreeformItem Freeform(
+				From.x-Out.x, From.y-Out.y,
+				From.x+Out.x, From.y+Out.y,
+				Pos.x-Out.x, Pos.y-Out.y,
+				Pos.x+Out.x, Pos.y+Out.y);
+		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+
+		// do inner
+		RGB = HslToRgb(vec3(g_Config.m_ClLaserInnerHue / 255.0f, g_Config.m_ClLaserInnerSat / 255.0f, g_Config.m_ClLaserInnerLht / 255.0f));
+		vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
+		Out = vec2(Dir.y, -Dir.x) * (1.5f);
+		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
+
+		Freeform = IGraphics::CFreeformItem(
+				From.x-Out.x, From.y-Out.y,
+				From.x+Out.x, From.y+Out.y,
+				Pos.x-Out.x, Pos.y-Out.y,
+				Pos.x+Out.x, Pos.y+Out.y);
+		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+	}
+	Graphics()->QuadsEnd();
 }
 
 int CAStar::GetStart()
