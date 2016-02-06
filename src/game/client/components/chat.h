@@ -25,7 +25,6 @@ class CChat : public CComponent
 		char m_aName[64];
 		char m_aText[512];
 		bool m_Highlighted;
-		int m_Counter;
 	};
 
 	CLine m_aLines[MAX_LINES];
