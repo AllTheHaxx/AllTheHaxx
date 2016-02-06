@@ -95,11 +95,10 @@ void CAStar::OnRender()
 		return;
 
 	// visualize the path
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	for(int i = 0; i < m_Path.size(); i++)
-		RenderTools()->DrawRoundRect(m_Path[i].x, m_Path[i].y, 7, 7,4);
-	Graphics()->QuadsEnd();
+	Graphics()->LinesBegin();
+	Graphics()->SetColor(1,0,0,1);
+	Graphics()->LinesDraw(m_LineItems.base_ptr(), m_LineItems.size());
+	Graphics()->LinesEnd();
 }
 
 int CAStar::GetStart()
@@ -179,6 +178,15 @@ void CAStar::BuildPath()
 			m_PathFound = true;
 			for(int i = 0; i < SolutionLength; i++)
 				m_Path.add(Collision()->GetPos(pSolution[i]));
+			for(int i = 0; i < m_Path.size()-1; i++)
+			{
+				IGraphics::CLineItem l;
+				l.m_X0 = m_Path[i].x;
+				l.m_X1 = m_Path[i+1].x;
+				l.m_Y0 = m_Path[i].y;
+				l.m_Y1 = m_Path[i+1].y;
+				m_LineItems.add(l);
+			}
 		}
 		free(pSolution);
 	}
