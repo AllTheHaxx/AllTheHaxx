@@ -435,16 +435,9 @@ void CHud::RenderVoting()
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice())
 			|| !m_pClient->m_pVoting->IsVoting()
 			|| Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		// do not render
 		ShouldRender = false;
-	}
 	else
-	{
-		// render
-		if(!ShouldRender) Offset = Rect.w; // set offset to completely invisible
 		ShouldRender = true;
-	}
 
 
 	if(ShouldRender)
@@ -466,13 +459,13 @@ void CHud::RenderVoting()
 	else
 	{
 		// increase offset to make it invisible
-		if(Offset > Rect.w*0.95f)
+		if(Offset > Rect.w*0.97f)
 			Offset = Rect.w;
 		else
 			Offset += (Rect.w-Offset)/10.0f;
 	}
 
-
+	// completely invisible, nothing to render
 	if(Offset == Rect.w && !ShouldRender)
 		return;
 
