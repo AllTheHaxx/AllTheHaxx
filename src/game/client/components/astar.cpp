@@ -95,31 +95,17 @@ void CAStar::OnRender()
 		return;
 
 	// visualize the path
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
+	Graphics()->BlendAdditive();
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
 	Graphics()->QuadsBegin();
-	for(int i = 0; i < m_Path.size()-1; i++)
+	for(int i = 0; i < m_Path.size(); i++)
 	{
-		vec3 RGB;
-		vec2 Pos = vec2(m_Path[i+1].x, m_Path[i+1].y);
-		vec2 From = vec2(m_Path[i].x, m_Path[i].y);
-		vec2 Dir = normalize(Pos-From);
-
-		vec2 Out, Border;
-
-		//vec4 inner_color(0.15f,0.35f,0.75f,1.0f);
-		//vec4 outer_color(0.65f,0.85f,1.0f,1.0f);
-
-		// do outline
-		Graphics()->SetColor(0.95f, 0.05f, 0.1f, 0.55f);
-		Out = vec2(Dir.y, -Dir.x) * (3.0f);
-
-		IGraphics::CFreeformItem Freeform(
-				From.x-Out.x, From.y-Out.y,
-				From.x+Out.x, From.y+Out.y,
-				Pos.x-Out.x, Pos.y-Out.y,
-				Pos.x+Out.x, Pos.y+Out.y);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+		int aSprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
+		RenderTools()->SelectSprite(aSprites[i%3]);
+		//Graphics()->QuadsSetRotation(Client()->GameTick());
+		Graphics()->SetColor(0.9f, 0.9f, 0.9f, 0.85f);
+		IGraphics::CQuadItem QuadItem(m_Path[i].x, m_Path[i].y, 16, 16);
+		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 	Graphics()->QuadsEnd();
 }
