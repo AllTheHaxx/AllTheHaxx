@@ -641,13 +641,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			// clear button
 			{
 				static int s_ClearButton = 0;
-				RenderTools()->DrawUIRect(&Button2, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-				UI()->DoLabel(&Button2, "×", Button2.h*ms_FontmodHeight, 0);
-				if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button2))
+				if(DoButton_Menu(&s_ClearButton, "×", 0, &Button2, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 				{
 					m_aFilterString[0] = 0;
 					UI()->SetActiveItem(&m_aFilterString);
-					Client()->ServerBrowserUpdate();
+					//Client()->ServerBrowserUpdate(); // why dafuq should this be??
 				}
 			}
 		}
@@ -665,7 +663,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
 				{
 					m_pClient->m_pVoting->CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason);
-					SetActive(false);
+					//SetActive(false);
 				}
 			}
 			else if(s_ControlPage == 2)
@@ -674,23 +672,34 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
 				{
 					m_pClient->m_pVoting->CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason);
-					SetActive(false);
+					//SetActive(false);
 				}
 			}
-			m_aCallvoteReason[0] = 0;
+			//m_aCallvoteReason[0] = 0;
+			SetActive(false);
 		}
 
-		// render kick reason
-		CUIRect Reason;
-		Bottom.VSplitRight(40.0f, &Bottom, 0);
-		Bottom.VSplitRight(160.0f*2.0f, &Bottom, &Reason);
-		Reason.HSplitTop(5.0f, 0, &Reason);
-		const char *pLabel = Localize("Reason:");
-		UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
-		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1);
-		Reason.VSplitLeft(w+10.0f, 0, &Reason);
-		static float s_Offset = 0.0f;
-		DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_ALL);
+		// render reason
+		{
+			CUIRect Reason, ClearButton;
+			Bottom.VSplitRight(40.0f, &Bottom, 0);
+			Bottom.VSplitRight(160.0f*2.0f, &Bottom, &Reason);
+			Reason.HSplitTop(5.0f, 0, &Reason);
+			const char *pLabel = Localize("Reason:");
+			UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
+			float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1);
+			Reason.VSplitLeft(w+10.0f, 0, &Reason);
+			Reason.VSplitLeft(Reason.w-15.0f, &Reason, &ClearButton);
+			static float s_Offset = 0.0f;
+			DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_L);
+			// clear button
+			static int s_ClearButton = 0;
+			if(DoButton_Menu(&s_ClearButton, "×", 0, &ClearButton, CUI::CORNER_R, vec4(1,1,1,0.35f)))
+			{
+				m_aCallvoteReason[0] = 0;
+				UI()->SetActiveItem(&m_aCallvoteReason);
+			}
+		}
 
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())
