@@ -457,7 +457,7 @@ void CGameConsole::OnRender()
 					pPrompt = "ENTER PASSWORD> ";
 			}
 			else
-				pPrompt = "NOT CONNECTED> ";
+				pPrompt = "NOT CONNECTED!";
 		}
 		TextRender()->TextEx(&Cursor, pPrompt, -1);
 
@@ -504,7 +504,7 @@ void CGameConsole::OnRender()
 				{
 					if(pConsole->m_IsCommand)
 					{
-						char aBuf[512];
+						char aBuf[768];
 						str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_aCommandHelp);
 						TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 						TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1);
@@ -582,9 +582,12 @@ void CGameConsole::OnRender()
 		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
 
 		// render version
-		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
+		str_format(aBuf, sizeof(aBuf), "v%s - AllTheHaxx %s", GAME_VERSION, ALLTHEHAXX_VERSION);
 		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->Text(0, Screen.w-Width-10.0f, 0.0f, FontSize, aBuf, -1);
+		str_format(aBuf, sizeof(aBuf), "built on %s", BUILD_DATE);
+		Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+		TextRender()->Text(0, Screen.w-Width-10.0f, 10.0f, FontSize, aBuf, -1);
 	}
 }
 
