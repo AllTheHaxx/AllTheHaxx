@@ -196,6 +196,7 @@ void CGameClient::OnConsoleInit()
 
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&gs_MapLayersBackGround); // first to render
+	m_All.Add(m_pAStar); // <- this could be even more at the bottom
 	m_All.Add(&m_pParticles->m_RenderTrail);
 	m_All.Add(m_pItems);
 	m_All.Add(&gs_Players);

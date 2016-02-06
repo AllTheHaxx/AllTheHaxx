@@ -94,23 +94,12 @@ void CAStar::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE)
 		return;
 
-	// my dong is strong
-	static int64 s_LastRender = 0;
-	if(time_get()-s_LastRender < time_freq()*0.19f)
-		return;
-
 	// visualize the path
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
 	for(int i = 0; i < m_Path.size(); i++)
-		m_pClient->m_pEffects->BulletTrail(m_Path[i]); // TODO: redo this nicer
-
-/*	TODO: implement lines
-	Graphics()->LinesBegin();
-
-	Graphics()->SetColor(1,0,0,1);
-	Graphics()->LinesDraw(m_LineItems.base_ptr(), m_LineItems.size());
-	Graphics()->LinesEnd();
-*/
-	s_LastRender = time_get();
+		RenderTools()->DrawRoundRect(m_Path[i].x, m_Path[i].y, 7, 7,4);
+	Graphics()->QuadsEnd();
 }
 
 int CAStar::GetStart()
@@ -188,19 +177,8 @@ void CAStar::BuildPath()
 		if(SolutionLength > 0)
 		{
 			m_PathFound = true;
-
 			for(int i = 0; i < SolutionLength; i++)
 				m_Path.add(Collision()->GetPos(pSolution[i]));
-
-		/*	for(int i = 0; i < m_Path.size()-1; i++) // TODO: how to get screenpos from mappos?
-			{
-				IGraphics::CLineItem l;
-				l.m_X0 = m_Path[i].x;
-				l.m_X1 = m_Path[i+1].x;
-				l.m_Y0 = m_Path[i].y;
-				l.m_Y1 = m_Path[i+1].y;
-				m_LineItems.add(l);
-			}*/
 		}
 		free(pSolution);
 	}
