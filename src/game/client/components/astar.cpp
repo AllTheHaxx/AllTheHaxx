@@ -111,25 +111,10 @@ void CAStar::OnRender()
 		//vec4 outer_color(0.65f,0.85f,1.0f,1.0f);
 
 		// do outline
-		RGB = HslToRgb(vec3(g_Config.m_ClLaserOutlineHue / 255.0f, g_Config.m_ClLaserOutlineSat / 255.0f, g_Config.m_ClLaserOutlineLht / 255.0f));
-		vec4 OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
-		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
+		Graphics()->SetColor(0.95f, 0.05f, 0.1f, 0.55f);
 		Out = vec2(Dir.y, -Dir.x) * (3.0f);
 
 		IGraphics::CFreeformItem Freeform(
-				From.x-Out.x, From.y-Out.y,
-				From.x+Out.x, From.y+Out.y,
-				Pos.x-Out.x, Pos.y-Out.y,
-				Pos.x+Out.x, Pos.y+Out.y);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
-
-		// do inner
-		RGB = HslToRgb(vec3(g_Config.m_ClLaserInnerHue / 255.0f, g_Config.m_ClLaserInnerSat / 255.0f, g_Config.m_ClLaserInnerLht / 255.0f));
-		vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
-		Out = vec2(Dir.y, -Dir.x) * (1.5f);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
-
-		Freeform = IGraphics::CFreeformItem(
 				From.x-Out.x, From.y-Out.y,
 				From.x+Out.x, From.y+Out.y,
 				Pos.x-Out.x, Pos.y-Out.y,
