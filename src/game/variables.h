@@ -140,6 +140,8 @@ MACRO_CONFIG_INT(ClSendInfoExploit, cl_sendinfo_exploit, 0, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClServerCrasher, cl_server_crasher, 0, 0, 1, CFGFLAG_CLIENT, "Nothing what it seems, i got a pocket full of dreams")
 MACRO_CONFIG_INT(ClColorfulClient, cl_colorful_client, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Colorize everything!")
 MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show notifications")
+//
+MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Scoreboard fade time")
 
 
 

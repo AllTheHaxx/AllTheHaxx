@@ -610,19 +610,28 @@ void CScoreboard::OnRender()
 
 	if(ShouldRender)
 	{
-		// increase alpha
-		if(m_FadeVal > 0.95f)
+		if(g_Config.m_ClScoreboardFadeTime < 100)
 			m_FadeVal = 1.0f;
 		else
-			m_FadeVal += (1.0f-m_FadeVal)/5.0f;
+		{
+			// increase alpha
+			if(m_FadeVal > 0.95f)
+				m_FadeVal = 1.0f;
+			else
+				m_FadeVal += (1.0f-m_FadeVal)/((float)g_Config.m_ClScoreboardFadeTime/100.0f);
+		}
 	}
 	else
 	{
-		// decrease alpha
-		if(m_FadeVal < 0.1f)
+		if(g_Config.m_ClScoreboardFadeTime < 100)
 			m_FadeVal = 0.0f;
-		else
-			m_FadeVal -= m_FadeVal/5.0f;
+		{
+			// decrease alpha
+			if(m_FadeVal < 0.1f)
+				m_FadeVal = 0.0f;
+			else
+				m_FadeVal -= m_FadeVal/((float)g_Config.m_ClScoreboardFadeTime/100.0f);
+		}
 	}
 
 	if(m_FadeVal == 0 && !ShouldRender)
