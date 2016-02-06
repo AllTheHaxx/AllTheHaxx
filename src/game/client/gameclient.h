@@ -355,6 +355,8 @@ public:
 
 	class CMapSounds *m_pMapSounds;
 
+	class CAStar *m_pAStar;
+
 	// DDRace
 
 	class CRaceDemo *m_pRaceDemo;

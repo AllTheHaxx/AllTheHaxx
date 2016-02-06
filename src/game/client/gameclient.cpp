@@ -28,6 +28,7 @@
 
 #include "components/background.h"
 #include "components/binds.h"
+#include "components/astar.h"
 #include "components/broadcast.h"
 #include "components/camera.h"
 #include "components/chat.h"
@@ -103,6 +104,8 @@ static CBackground gs_BackGround;
 
 static CMapSounds gs_MapSounds;
 
+static CAStar gs_AStar;
+
 static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;
 
@@ -169,6 +172,8 @@ void CGameClient::OnConsoleInit()
 
 	m_pMapSounds = &::gs_MapSounds;
 
+	m_pAStar = &::gs_AStar;
+
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
@@ -187,6 +192,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pParticles); // doesn't render anything, just updates all the particles
 	m_All.Add(m_pRaceDemo);
 	m_All.Add(m_pMapSounds);
+	m_All.Add(m_pAStar);
 
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&gs_MapLayersBackGround); // first to render
@@ -1252,6 +1258,7 @@ void CGameClient::OnNewSnapshot()
 		{
 			// player died
 			m_pControls->OnPlayerDeath();
+			m_pAStar->OnPlayerDeath();
 		}
 	}
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
