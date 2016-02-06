@@ -2917,6 +2917,11 @@ void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0), sizeof(pSelf->m_aCmdConnect));
+	if (str_comp_nocase_num(pSelf->m_aCmdConnect, "tw://", 5) == 0)
+	{
+		str_copy(pSelf->m_aCmdConnect, pResult->GetString(0) + 5, sizeof(pSelf->m_aCmdConnect));
+		pSelf->m_aCmdConnect[str_length(pSelf->m_aCmdConnect) - 1] = 0;
+	}
 }
 
 void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
@@ -3420,7 +3425,17 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention
-		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
+	{
+		if(argv[1][0] == 't' && argv[1][1] == 'w' && argv[1][2] == ':' && argv[1][3] == '/' && argv[1][4] == '/' && argv[1][5])
+		{
+			char aBuf[NETADDR_MAXSTRSIZE+8];
+			str_copy(aBuf, &argv[1][5], sizeof(aBuf));
+			str_format(aBuf, sizeof(aBuf), "connect %s", aBuf);
+			pConsole->ExecuteLine(aBuf);
+		}
+		else
+			pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
+	}
 
 	pClient->Engine()->InitLogfile();
 
