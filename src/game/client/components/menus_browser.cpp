@@ -503,9 +503,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// clear button
 	{
 		static int s_ClearButton = 0;
-		RenderTools()->DrawUIRect(&Button, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-		UI()->DoLabel(&Button, "×", Button.h*ms_FontmodHeight, 0);
-		if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button))
+		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 		{
 			g_Config.m_BrFilterString[0] = 0;
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
@@ -529,9 +527,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// clear button
 	{
 		static int s_ClearButton = 0;
-		RenderTools()->DrawUIRect(&Button, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-		UI()->DoLabel(&Button, "×", Button.h*ms_FontmodHeight, 0);
-		if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button))
+		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 		{
 			g_Config.m_BrExcludeString[0] = 0;
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
@@ -544,6 +540,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	str_format(aBuf, sizeof(aBuf), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
 	Status3.VSplitRight(TextRender()->TextWidth(0, 14.0f, aBuf, -1), 0, &Status3);
 	UI()->DoLabelScaled(&Status3, aBuf, 14.0f, -1);
+
+	// auto-cache when refreshed
+	{
+		static bool HasCached = false;
+		if(g_Config.m_BrAutoCache)
+		{
+			if(!HasCached && !ServerBrowser()->IsRefreshing())
+			{
+				ServerBrowser()->SaveCache();
+				HasCached = true;
+			}
+			else if(HasCached && ServerBrowser()->IsRefreshing())
+			{
+				HasCached = false;
+			}
+		}
+	}
 
 	// auto-refresh
 	if(g_Config.m_BrAutoRefresh && !ServerBrowser()->IsRefreshing())
@@ -1373,11 +1386,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
-			{
-				if(g_Config.m_BrAutoCache)
-					ServerBrowser()->SaveCache();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			}
 			else if(g_Config.m_UiPage == PAGE_LAN)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			else if(g_Config.m_UiPage == PAGE_FAVORITES)
@@ -1395,19 +1404,18 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
-
-		static int s_UpdateButton = 0;
-		if(ServerBrowser()->UpgradeProgression() < 100)
-			str_format(aBuf, sizeof(aBuf), "%s (%i%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
-		else if (g_Config.m_BrAutoRefresh)
-			str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
-		else
-			str_copy(aBuf, Localize("Update"), sizeof(aBuf));
-		if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button) && !ServerBrowser()->IsRefreshing())
 		{
-			ServerBrowser()->Refresh(-1, 1);
-			if(g_Config.m_BrAutoCache)
-				ServerBrowser()->SaveCache();
+			static int s_UpdateButton = 0;
+			if(ServerBrowser()->UpgradeProgression() < 100)
+				str_format(aBuf, sizeof(aBuf), "%s (%i%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
+			else if (g_Config.m_BrAutoRefresh)
+				str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
+			else
+				str_copy(aBuf, Localize("Update"), sizeof(aBuf));
+			if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button) && !ServerBrowser()->IsRefreshing())
+			{
+				ServerBrowser()->Refresh(-1, 1);
+			}
 		}
 
 		ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);

@@ -628,16 +628,14 @@ void CServerBrowser::SaveCache()
 	fwrite(&m_NumServerCapacity, sizeof(m_NumServerCapacity), 1, f); // save length of array
 
 	// save all the infos
-	int NumServers = 0;
 	for(int i = 0; i < m_NumServers; i++)
 	{
-		const CServerInfo *pInfo = SortedGet(i);
-		if(!pInfo) continue; // no info from non-loaded addresses...
+		const CServerInfo Info = m_ppServerlist[i]->m_Info;
 
 		//dbg_msg("browser", "saving entry %i %s %s", i, pInfo->m_aAddress, pInfo->m_aName);
-		fwrite(pInfo, sizeof(CServerInfo), 1, f);
-		NumServers++;
+		fwrite(&Info, sizeof(CServerInfo), 1, f);
 	}
+
 	if(fclose(f) == EOF)
 	{
 		dbg_msg("browser", "saving serverlist file failed (n=%i)", m_NumServers);
@@ -645,8 +643,7 @@ void CServerBrowser::SaveCache()
 	}
 	else
 	{
-		dbg_msg("browser", "successfully saved serverlist with %i entries (total %i, unloaded %i)",
-				NumServers, m_NumServers, m_NumServers-NumServers);
+		dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
 		m_CacheExists = true;
 	}
 }
