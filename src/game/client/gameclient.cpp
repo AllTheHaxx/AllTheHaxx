@@ -542,8 +542,8 @@ void CGameClient::UpdatePositions()
 		}
 	}
 
-	// some notifications TODO: DO THIS
-	{
+	// some notifications (currently only handled though chat)
+/*	{
 		static bool IsSolo = false;
 		if(m_Snap.m_pLocalCharacter)
 		{
@@ -566,7 +566,7 @@ void CGameClient::UpdatePositions()
 		}
 		else
 			IsSolo = false;
-	}
+	}*/
 }
 
 

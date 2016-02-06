@@ -319,13 +319,22 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 		if(g_Config.m_ClNotifications)
 		{
-
+			// also tile based (currently not)
 			if( str_comp_nocase(pMsg->m_pMessage, "You are now in a solo part.") == 0 ||
 				str_comp_nocase(pMsg->m_pMessage, "You are now out of the solo part.") == 0
 				)
 			{
-				if(str_comp(m_pClient->m_pHud->GetNotification(0), pMsg->m_pMessage) != 0)
+				//if(str_comp(m_pClient->m_pHud->GetNotification(0), pMsg->m_pMessage) != 0)
 					m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
+				HideChat = true;
+			}
+
+			// chat-based only
+			if( str_comp_nocase(pMsg->m_pMessage, "Rescue is not enabled on this server") == 0 ||
+				str_comp_nocase(pMsg->m_pMessage, "You aren't freezed!") == 0 // TODO: is this the correct message?
+				)
+			{
+				m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
 				HideChat = true;
 			}
 		}
@@ -692,35 +701,24 @@ void CChat::OnRender()
 		else
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, Blend);
 
+		// friends always in green
+		if(g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aName, m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aClan, true))
+			TextRender()->TextColor(0,0.7f,0,Blend);
+
 		TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
 
 		// render line
+		vec3 rgb;
 		if (m_aLines[r].m_ClientID == -1)
-		{
-			//TextRender()->TextColor(1.0f, 1.0f, 0.5f, Blend); // system
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-		}
+			rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
 		else if (m_aLines[r].m_Highlighted)
-		{
-			//TextRender()->TextColor(1.0f, 0.5f, 0.5f, Blend); // highlighted
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-		}
+			rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 		else if (m_aLines[r].m_Team)
-		{
-			//TextRender()->TextColor(0.65f, 1.0f, 0.65f, Blend); // team message
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-		}
+			rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
 		else
-		{
-			//TextRender()->TextColor(1.0f, 1.0f, 1.0f, Blend);
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-		}
+			rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 
-
+		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
 		if(m_aLines[r].m_Counter)
 		{

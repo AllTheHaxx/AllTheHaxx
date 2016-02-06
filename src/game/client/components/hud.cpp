@@ -455,6 +455,14 @@ void CHud::RenderVoting()
 		else
 			Offset -= Offset/10.0f;
 	}
+	else if(!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice() && m_pClient->m_pVoting->IsVoting())
+	{
+		// increase offset to make it half-visible
+		if(Offset > Rect.w*0.75f)
+			Offset = Rect.w*0.75f;
+		else
+			Offset += (Rect.w*0.75f-Offset)/10.0f;
+	}
 	else
 	{
 		// increase offset to make it invisible
