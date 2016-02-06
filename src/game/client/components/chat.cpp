@@ -333,7 +333,8 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 			// chat-based only
 			if( str_comp_nocase(pMsg->m_pMessage, "Rescue is not enabled on this server") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "You aren't freezed!") == 0 // TODO: is this the correct message?
+				str_comp_nocase(pMsg->m_pMessage, "You aren't freezed!") == 0 ||
+				str_comp_nocase(pMsg->m_pMessage, "You are not freezed!") == 0
 				)
 			{
 				m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
