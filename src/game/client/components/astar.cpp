@@ -41,7 +41,7 @@ void CAStar::OnReset() // is being called right after OnMapLoad()
 
 void CAStar::OnPlayerDeath()
 {
-	if(!m_PathFound)
+	if(!m_PathFound || !g_Config.m_ClPathFinding)
 		return;
 
 	// fitness calculation
@@ -67,6 +67,9 @@ void CAStar::OnPlayerDeath()
 
 void CAStar::OnRender()
 {
+	if(!g_Config.m_ClPathFinding)
+		return;
+
 	// find the path one second after joining to be buffered
 	{
 		static int64 activationTime = 0;
@@ -168,7 +171,7 @@ void CAStar::BuildPath()
 		bool NoFreeze = false;
 	}
 
-	if(g_Config.m_ClNotifications)
+	if(g_Config.m_ClNotifications && g_Config.m_ClPathFinding)
 	{
 		if(SolutionLength != -1)
 		{
