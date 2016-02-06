@@ -86,7 +86,8 @@ int CAStar::GetStart()
 	{
 		for(int x = 0; x < Collision()->GetWidth(); x++)
 		{
-			if(Collision()->GetIndex(x, y) == TILE_BEGIN)
+			// hack. but apperently this can indeed happen
+			if(x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_BEGIN)
 				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
 		}
 	}
@@ -106,7 +107,8 @@ int CAStar::GetFinish()
 	{
 		for(int x = 0; x < Collision()->GetWidth(); x++)
 		{
-			if(Collision()->GetIndex(x, y) == TILE_END)
+			// hack. but apperently this can indeed happen
+			if(x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_END)
 				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
 		}
 	}
