@@ -763,7 +763,7 @@ void CMenus::RenderLoading()
 	Graphics()->QuadsEnd();
 
 
-	const char *pCaption = Localize("Loading DDNet Client");
+	const char *pCaption = Localize("Loading AllTheHaxx");
 
 	CUIRect r;
 	r.x = x;
@@ -774,7 +774,9 @@ void CMenus::RenderLoading()
 
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,0.75f);
+	Graphics()->SetColor(0,0,0,0.50f);
+	RenderTools()->DrawRoundRect(x+40, y+h-75, w-80, 25, 5.0f);
+	Graphics()->SetColor(1,1,1,0.50f);
 	RenderTools()->DrawRoundRect(x+40, y+h-75, (w-80)*Percent, 25, 5.0f);
 	Graphics()->QuadsEnd();
 
