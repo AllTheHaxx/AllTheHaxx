@@ -10,9 +10,11 @@
 [f]	Ingame texture switching
 [f]	Aimlines ...I can't play without :o
 [f]	Print use of 'f1 -> toggle' to notifications
-[i]	Nice color for lines in f1
+[i]	Colorize f1
+[f]	Alternate HUD (healthbar etc.)
 [ ]	.
-
+[ ] .
+[i] (task) do not forget to add config vars for various things!
 
 
 // TODO: Join the #AllTheHaxx@Quakenet IRC to be cool! KATZE!
