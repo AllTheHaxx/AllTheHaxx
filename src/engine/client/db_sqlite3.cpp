@@ -95,7 +95,7 @@ CSql::CSql()
 {
 	/*CALL_STACK_ADD();*/
 
-    sqlite3 *test;
+    //sqlite3 *test;
     int rc = sqlite3_open("data.db", &m_pDB);
     if (rc)
     {

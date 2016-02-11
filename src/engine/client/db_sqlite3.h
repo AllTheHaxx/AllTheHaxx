@@ -18,6 +18,8 @@ private:
     sqlite3_stmt *m_pStatement;
     virtual void OnData();
 public:
+    virtual ~CQuery() {}
+
     bool Next();
     int GetColumnCount() { return sqlite3_column_count(m_pStatement); }
     const char *GetName(int i) { return sqlite3_column_name(m_pStatement, i); }
