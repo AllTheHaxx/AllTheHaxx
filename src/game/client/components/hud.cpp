@@ -685,7 +685,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		if(Width > 5)
 		{
 			r.w = min(m_Width/2, Width);
-			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0, 0, 0.8f), CUI::CORNER_R, 3.0f);
+			RenderTools()->DrawUIRect(&r, vec4(g_Config.m_ClColorfulClient?1.0f-Width/120.0f:0.7f, g_Config.m_ClColorfulClient?Width/120.0f:0.0f, 0, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%i", pCharacter->m_Health);
