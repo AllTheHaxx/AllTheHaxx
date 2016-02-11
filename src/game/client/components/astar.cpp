@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <base/math.h>
 #include <base/tl/array.h>
 
@@ -157,6 +158,7 @@ int CAStar::GetFinish()
 
 void CAStar::BuildPath()
 {
+#if defined(CONF_FAMILY_UNIX)
 	int Start = GetStart();
 	int Finish = GetFinish();
 	int SolutionLength = 0;
@@ -205,6 +207,7 @@ void CAStar::BuildPath()
 		}
 		free(pSolution);
 	}
+#endif
 }
 
 void CAStar::FillGrid(bool NoFreeze)

@@ -1,3 +1,5 @@
+#include <base/system.h>
+#if defined(CONF_FAMILY_UNIX)
 #include "IndexPriorityQueue.h"
 #include <stdlib.h>
 #include <string.h>
@@ -174,3 +176,4 @@ void freeQueue (queue* q)
 	free (q);
 }
 
+#endif

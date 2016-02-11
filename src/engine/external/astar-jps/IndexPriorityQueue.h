@@ -1,6 +1,7 @@
 #ifndef PRIORITYQUEUE_H_
 #define PRIORITYQUEUE_H_
-
+#include <base/system.h>
+#if defined(CONF_FAMILY_UNIX)
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -30,5 +31,6 @@ void freeQueue (queue *q);
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

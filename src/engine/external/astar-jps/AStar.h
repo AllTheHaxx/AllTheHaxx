@@ -1,6 +1,7 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
-
+#include <base/system.h>
+#if defined(CONF_FAMILY_UNIX)
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -44,5 +45,6 @@ int astar_getIndexByWidth (int width, int x, int y);
 void astar_getCoordByWidth (int width, int node, int *x, int *y);
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

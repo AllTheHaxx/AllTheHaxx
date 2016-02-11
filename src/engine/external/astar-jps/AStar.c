@@ -1,3 +1,5 @@
+#include <base/system.h>
+#if defined(CONF_FAMILY_UNIX)
 #include "AStar.h"
 #include "IndexPriorityQueue.h"
 #include <stdlib.h>
@@ -569,3 +571,4 @@ int *astar_unopt_compute (const char *grid,
 	return NULL;
 }
 
+#endif
