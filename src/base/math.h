@@ -35,6 +35,30 @@ inline T mix(const T a, const T b, TB amount)
 
 inline float frandom() { return rand()/(float)(RAND_MAX); }
 
+/* smoothly sets the value to target, must be called every tick to do so;
+ * val is a pointer to a static float
+ * returns the newly calculated value */
+inline float smooth_set(float* val, float target, float delay, float snaprange = 0.00f)
+{
+	if(delay < 1.0f)
+		return *val;
+
+	if(snaprange)
+	{
+		if(*val > target * (1.0f - snaprange))
+			*val = target;
+		if(*val < target + snaprange)
+			*val = target;
+	}
+
+	if(*val < target)
+		*val += (target-*val)/delay;
+	if(*val > target)
+		*val -= (*val-target)/delay;
+
+	return *val;
+}
+
 // float to fixed
 inline int f2fx(float v) { return (int)(v*(float)(1<<10)); }
 inline float fx2f(int v) { return v*(1.0f/(1<<10)); }
