@@ -609,9 +609,12 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 
 void CServerBrowser::SaveCache()
 {
-	// open file TODO: Use teeworlds's storage for this!
-	FILE *f = fopen("cache.svl", "wb");
-	if(!f)
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+
+	// open file
+	pStorage->CreateFolder("tmp/cache", 0);
+	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!File)
 	{
 		dbg_msg("browser", "failed to open cache file for writing");
 		m_CacheExists = false;
@@ -619,13 +622,13 @@ void CServerBrowser::SaveCache()
 	}
 
 	// save version of serverlist cache file
-	{ char v = CACHE_VERSION; fwrite(&v, 1, 1, f); } // save version of cachefile
+	{ char v = CACHE_VERSION; io_write(File, &v, 1); } // save version of cachefile
 
 	// save number of servers
-	fwrite(&m_NumServers, sizeof(m_NumServers), 1, f); // save number of servers
+	io_write(File, &m_NumServers, sizeof(m_NumServers)); // save number of servers
 
 	// save array length
-	fwrite(&m_NumServerCapacity, sizeof(m_NumServerCapacity), 1, f); // save length of array
+	io_write(File, &m_NumServerCapacity, sizeof(m_NumServerCapacity)); // save length of array
 
 	// save all the infos
 	for(int i = 0; i < m_NumServers; i++)
@@ -633,23 +636,19 @@ void CServerBrowser::SaveCache()
 		const CServerInfo Info = m_ppServerlist[i]->m_Info;
 
 		//dbg_msg("browser", "saving entry %i %s %s", i, pInfo->m_aAddress, pInfo->m_aName);
-		fwrite(&Info, sizeof(CServerInfo), 1, f);
+		io_write(File, &Info, sizeof(CServerInfo));
 	}
 
-	if(fclose(f) == EOF)
-	{
-		dbg_msg("browser", "saving serverlist file failed (n=%i)", m_NumServers);
-		m_CacheExists = false;
-	}
-	else
-	{
-		dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
-		m_CacheExists = true;
-	}
+	io_close(File); // TODO: check if saving actually succeeded
+
+	dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
+	m_CacheExists = true;
 }
 
 bool CServerBrowser::LoadCache()
 {
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+
 	// clear out everything
 	m_ServerlistHeap.Reset();
 	m_NumServers = 0;
@@ -662,8 +661,8 @@ bool CServerBrowser::LoadCache()
 	m_CurrentToken = (m_CurrentToken+1)&0xff;
 
 	// open file TODO: Use teeworlds's storage for this!
-	FILE *f = fopen("cache.svl", "rb");
-	if(!f)
+	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
 	{
 		dbg_msg("browser", "opening cache file failed.");
 		m_CacheExists = false;
@@ -672,7 +671,7 @@ bool CServerBrowser::LoadCache()
 
 	// get version
 	{
-		char v; fread(&v, 1, 1, f);
+		char v; io_read(File, &v, 1);
 		dbg_msg("browser", "loading serverlist from cache...");
 		if(v != CACHE_VERSION)
 			dbg_msg("cache", "file version doesn't match, we may fail! (%i != %i)", v, CACHE_VERSION);
@@ -680,17 +679,17 @@ bool CServerBrowser::LoadCache()
 
 	// get number of servers
 	int NumServers = 0;
-	fread(&NumServers, sizeof(NumServers), 1, f);
+	io_read(File, &NumServers, sizeof(NumServers));
 	//dbg_msg("browser", "serverlist cache entries: %i", NumServers);
 
 	mem_zero(m_ppServerlist, m_NumServerCapacity);
 
 	// get length of array
-	fread(&m_NumServerCapacity, sizeof(m_NumServerCapacity), 1, f);
+	io_read(File, &m_NumServerCapacity, sizeof(m_NumServerCapacity));
 
 	// get rid of current serverlist and create a new one
 	mem_free(m_ppServerlist);
-	m_ppServerlist = (CServerEntry **)mem_alloc(m_NumServerCapacity*sizeof(CServerEntry*), 1); // (array of pointers!)
+	m_ppServerlist = (CServerEntry **)mem_alloc(m_NumServerCapacity*sizeof(CServerEntry*), 1);
 
 	// read the data from the file into the serverlist
 	for(int i = 0; i < NumServers; i++)
@@ -698,21 +697,16 @@ bool CServerBrowser::LoadCache()
 		CServerInfo Info; NETADDR Addr;
 		net_addr_from_str(&Addr, Info.m_aAddress);
 
-		fread(&Info, sizeof(CServerInfo), 1, f);
+		io_read(File, &Info, sizeof(CServerInfo));
 		//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
 		Set(Addr, IServerBrowser::SET_TOKEN, m_CurrentToken, &Info);
 	}
 
-	if(fclose(f) == EOF)
-		dbg_msg("browser", "loading serverlist file errored (n=%i)", m_NumServers);
-	else
-	{
-		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers);
-		//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
-		return true;
-	}
-	return false;
+	io_close(File);
 
+	dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers); // TODO: check if saving actually succeeded
+	//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
+	return true;
 }
 
 void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const
