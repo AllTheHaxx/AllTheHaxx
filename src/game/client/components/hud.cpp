@@ -630,9 +630,27 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
 
 		// bar
-		if(pCharacter->m_AmmoCount)
+		static float Width = 0.0f;
+		static int LastWeapon = -1;
+		if(pCharacter->m_Weapon != LastWeapon)
 		{
-			r.w = min(round_to_int(m_Width/2), 12 * pCharacter->m_AmmoCount);
+			Width = pCharacter->m_AmmoCount*12;
+			LastWeapon = pCharacter->m_Weapon;
+		}
+
+	/*	if(Width > pCharacter->m_AmmoCount*12 * 0.99f)
+			Width = pCharacter->m_AmmoCount*12;
+		if(Width < 0.01f)
+			Width = 0;
+*/
+		if(Width < pCharacter->m_AmmoCount*12)
+			Width += (pCharacter->m_AmmoCount*12-Width)/10.0f;
+		if(Width > pCharacter->m_AmmoCount*12)
+			Width -= (Width-pCharacter->m_AmmoCount*12)/10.0f;
+
+		if(Width > 5)
+		{
+			r.w = min(m_Width/2, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.7f, 0.7f, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 		char aBuf[16];
@@ -658,9 +676,15 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
 
 		// bar
-		if(pCharacter->m_Health)
+		static float Width = 0.0f;
+		if(Width < pCharacter->m_Health*12)
+			Width += (pCharacter->m_Health*12-Width)/10.0f;
+		if(Width > pCharacter->m_Health*12)
+			Width -= (Width-pCharacter->m_Health*12)/10.0f;
+		//Width += (float)pCharacter->m_AmmoCount*12.0f - Width/10.0f;
+		if(Width > 5)
 		{
-			r.w = min(round_to_int(m_Width/2), 12 * pCharacter->m_Health);
+			r.w = min(m_Width/2, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0, 0, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 		char aBuf[16];
@@ -696,9 +720,14 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
 
 		// bar
-		if(pCharacter->m_Armor)
+		static float Width = 0.0f;
+		if(Width < pCharacter->m_Armor*12)
+			Width += (pCharacter->m_Armor*12-Width)/10.0f;
+		if(Width > pCharacter->m_Armor*12)
+			Width -= (Width-pCharacter->m_Armor*12)/10.0f;
+		if(Width > 5)
 		{
-			r.w = min(round_to_int(m_Width/2), 12 * pCharacter->m_Armor);
+			r.w = min(m_Width/2, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.8f, 0, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 
