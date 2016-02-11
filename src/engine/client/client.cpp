@@ -3444,7 +3444,7 @@ int main(int argc, const char **argv) // ignore_convention
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
-	if(!g_Config.m_ClShowConsole)
+	if(g_Config.m_ClHideConsole)
 		FreeConsole();
 #endif
 
