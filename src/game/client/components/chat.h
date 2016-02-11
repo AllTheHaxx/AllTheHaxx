@@ -29,6 +29,7 @@ class CChat : public CComponent
 
 	CLine m_aLines[MAX_LINES];
 	int m_CurrentLine;
+	int64 m_LastLine;
 
 	// chat
 	enum
@@ -77,6 +78,8 @@ public:
 	CChat();
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
+	bool IsShown() const { return m_Show; }
+	float Blend() const { return time_get() > m_aLines[m_CurrentLine].m_Time+14*time_freq() && !m_Show ? 1.0f-(time_get()-m_aLines[m_CurrentLine].m_Time-14*time_freq())/(2.0f*time_freq()) : 1.0f; }
 
 	void AddLine(int ClientID, int Team, const char *pLine);
 

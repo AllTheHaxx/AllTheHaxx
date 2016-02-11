@@ -13,11 +13,12 @@
 #include <game/client/render.h>
 #include <game/client/components/scoreboard.h>
 
-#include "controls.h"
-#include "camera.h"
-#include "hud.h"
-#include "voting.h"
 #include "binds.h"
+#include "camera.h"
+#include "chat.h"
+#include "controls.h"
+#include "voting.h"
+#include "hud.h"
 
 CHud::CHud()
 {
@@ -437,6 +438,21 @@ void CHud::RenderNotifications()
 	TextRender()->TextColor(1,1,1,1);
 }
 
+void CHud::RenderChatBox()
+{
+	if (!g_Config.m_ClShowhudChatbox || !m_pClient->m_pChat->Blend())
+		return;
+
+	float LineWidth = m_pClient->m_pScoreboard->Active() ? 100.0f : 210.0f;
+	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 55.0f : m_pClient->m_pChat->IsShown() ? 165.0f : 85.0f;
+	float HeightStart = 280.0f - HeightLimit;
+
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, min(m_pClient->m_pChat->Blend(), (float)g_Config.m_ClShowhudChatbox/100.0f));
+	RenderTools()->DrawRoundRectExt(0.0f, HeightStart, LineWidth, HeightLimit, 5.0f, CUI::CORNER_R);
+	Graphics()->QuadsEnd();
+}
 
 void CHud::RenderVoting()
 {
@@ -638,16 +654,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 			LastWeapon = pCharacter->m_Weapon;
 		}
 
-	/*	if(Width > pCharacter->m_AmmoCount*12 * 0.99f)
-			Width = pCharacter->m_AmmoCount*12;
-		if(Width < 0.01f)
-			Width = 0;
-*/
-		if(Width < pCharacter->m_AmmoCount*12)
-			Width += (pCharacter->m_AmmoCount*12-Width)/10.0f;
-		if(Width > pCharacter->m_AmmoCount*12)
-			Width -= (Width-pCharacter->m_AmmoCount*12)/10.0f;
-
+		smooth_set(&Width, pCharacter->m_AmmoCount*12, 10);
 		if(Width > 5)
 		{
 			r.w = min(m_Width/2, Width);
@@ -677,12 +684,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(Width < pCharacter->m_Health*12)
-			Width += (pCharacter->m_Health*12-Width)/10.0f;
-		if(Width > pCharacter->m_Health*12)
-			Width -= (Width-pCharacter->m_Health*12)/10.0f;
-		//Width += (float)pCharacter->m_AmmoCount*12.0f - Width/10.0f;
-		if(Width > 5)
+		if(smooth_set(&Width, pCharacter->m_Health*12, 10.0f) > 5)
 		{
 			r.w = min(m_Width/2, Width);
 			RenderTools()->DrawUIRect(&r, vec4(g_Config.m_ClColorfulClient?1.0f-Width/120.0f:0.7f, g_Config.m_ClColorfulClient?Width/120.0f:0.0f, 0, 0.8f), CUI::CORNER_R, 3.0f);
@@ -721,11 +723,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(Width < pCharacter->m_Armor*12)
-			Width += (pCharacter->m_Armor*12-Width)/10.0f;
-		if(Width > pCharacter->m_Armor*12)
-			Width -= (Width-pCharacter->m_Armor*12)/10.0f;
-		if(Width > 5)
+		if(smooth_set(&Width, pCharacter->m_Armor*12, 10.0f) > 5)
 		{
 			r.w = min(m_Width/2, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.8f, 0, 0.8f), CUI::CORNER_R, 3.0f);
@@ -805,6 +803,7 @@ void CHud::OnRender()
 		if (g_Config.m_ClShowRecord)
 			RenderRecord();
 	}
+	RenderChatBox();
 	RenderCursor();
 }
 
