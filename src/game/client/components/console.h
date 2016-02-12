@@ -82,7 +82,7 @@ class CGameConsole : public CComponent
 
 	void Toggle(int Type);
 	void Dump(int Type);
-	void RenderIRCUserList();
+	void RenderIRCUserList(CUIRect MainView);
 
 	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
 	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted);

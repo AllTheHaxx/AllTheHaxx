@@ -27,6 +27,8 @@ public:
 
 class CMenus : public CComponent
 {
+	friend class CGameConsole; // need this for IRC GUI
+
 	static vec4 ms_GuiColor;
 	static vec4 ms_ColorTabbarInactiveOutgame;
 	static vec4 ms_ColorTabbarActiveOutgame;

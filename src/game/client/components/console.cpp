@@ -467,6 +467,13 @@ void CGameConsole::OnRender()
 		ConsoleHeight -= 22.0f;
 	}
 
+	if(m_ConsoleType == CONSOLETYPE_IRC)
+	{
+		CUIRect rect;
+		rect.x = 0; rect.y = 20.0f; rect.h = ConsoleHeight-10.0f-20.0f; rect.w = Screen.w;
+		RenderIRCUserList(rect);
+	}
+
 	CInstance *pConsole = CurrentConsole();
 
 	{
@@ -641,9 +648,6 @@ void CGameConsole::OnRender()
 
 	if(m_ConsoleType == CONSOLETYPE_IRC)
 	{
-		RenderIRCUserList();
-
-
 		// update the ui
 		CUIRect *pScreen = UI()->Screen();
 		float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
@@ -672,10 +676,20 @@ void CGameConsole::OnRender()
 	}
 }
 
-void CGameConsole::RenderIRCUserList()
+void CGameConsole::RenderIRCUserList(CUIRect MainView)
 {
+	CUIRect Pane, Button;
+	MainView.VSplitRight(50.0f, &MainView, &Pane);
 
+	Pane.Margin(5.0f, &Pane);
+	Pane.HSplitTop(10.0f, 0, &Pane);
+	Pane.HSplitTop(20.0f, &Button, &Pane);
+
+	static int s_TestButton = 0;
+	if(m_pClient->m_pMenus->DoButton_Menu(&s_TestButton, "Test Button", 0, &Button))
+		Client()->Quit();
 }
+
 
 void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
 {
