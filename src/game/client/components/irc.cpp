@@ -50,6 +50,27 @@ void CIRC::ListenIRCThread(void *pUser)
 	#endif
 }
 
+void CIRC::SendChat(const char* pMsg)
+{
+	char aBuf[510];
+	str_format(aBuf, sizeof(aBuf), "PRIVMSG #AllTheHaxx :%s", pMsg);
+	m_Connection.raw(aBuf);
+}
+
+void CIRC::SendRaw(const char* pMsg)
+{
+	char aBuf[510];
+	str_format(aBuf, sizeof(aBuf), "%s", pMsg+1);
+	m_Connection.raw(aBuf);
+}
+
+void CIRC::SendNickChange(const char *pNewNick)
+{
+	char aBuf[32];
+	str_format(aBuf, sizeof(aBuf), "%s", pNewNick);
+	m_Connection.nick(const_cast<char*>(aBuf));
+}
+
 void CIRC::OnConsoleInit()
 {
 	m_pIRCThread = thread_init(ListenIRCThread, this);

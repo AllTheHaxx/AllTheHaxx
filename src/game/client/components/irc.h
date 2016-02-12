@@ -15,6 +15,14 @@ private:
 public:
 	CIRC();
 
+	void SendChat(const char *pMsg);
+	void SendRaw(const char *pMsg);
+
+	void SendNickChange(const char *pNewNick);
+
+	char *CurrentNick() { return m_Connection.current_nick(); }
+	bool IsConnected() { return m_Connection.is_connected(); }
+
 	virtual void OnConsoleInit();
 	virtual void OnReset();
 
