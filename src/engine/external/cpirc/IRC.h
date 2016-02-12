@@ -44,7 +44,8 @@ struct irc_reply_data
 struct irc_command_hook
 {
 	char* irc_command;
-	int (*function)(char*, irc_reply_data*, void*);
+	int (*function)(char*, irc_reply_data*, void*, void*);
+	void *user;
 	irc_command_hook* next;
 };
 
@@ -77,18 +78,18 @@ public:
 	int nick(char* newnick);
 	int quit(char* quit_message);
 	int raw(char* data);
-	void hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*));
+	void hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*, void*), void* user);
 	int message_loop();
 	int is_op(char* channel, char* nick);
 	int is_voice(char* channel, char* nick);
 	char* current_nick();
 	bool is_connected() { return connected; }
 private:
-	void call_hook(char* irc_command, char*params, irc_reply_data* hostd);
+	void call_hook(char* irc_command, char* params, irc_reply_data* hostd);
 	/*void call_the_hook(irc_command_hook* hook, char* irc_command, char*params, irc_host_data* hostd);*/
 	void parse_irc_reply(char* data);
 	void split_to_replies(char* data);
-	void insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*));
+	void insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*, void*), void* user);
 	void delete_irc_command_hook(irc_command_hook* cmd_hook);
 	int irc_socket;
 	bool connected;

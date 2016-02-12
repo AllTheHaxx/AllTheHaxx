@@ -57,7 +57,7 @@ IRC::~IRC()
 		delete_irc_command_hook(hooks);
 }
 
-void IRC::insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*))
+void IRC::insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*, void*), void* user)
 {
 	if (hook->function)
 	{
@@ -65,20 +65,22 @@ void IRC::insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*
 		{
 			hook->next=new irc_command_hook;
 			hook->next->function=0;
+			hook->next->user=0;
 			hook->next->irc_command=0;
 			hook->next->next=0;
 		}
-		insert_irc_command_hook(hook->next, cmd_name, function_ptr);
+		insert_irc_command_hook(hook->next, cmd_name, function_ptr, user);
 	}
 	else
 	{
 		hook->function=function_ptr;
+		hook->user=user;
 		hook->irc_command=new char[strlen(cmd_name)+1];
 		strcpy(hook->irc_command, cmd_name);
 	}
 }
 
-void IRC::hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*))
+void IRC::hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*, void*), void* user)
 {
 	if (!hooks)
 	{
@@ -86,11 +88,11 @@ void IRC::hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_
 		hooks->function=0;
 		hooks->irc_command=0;
 		hooks->next=0;
-		insert_irc_command_hook(hooks, cmd_name, function_ptr);
+		insert_irc_command_hook(hooks, cmd_name, function_ptr, user);
 	}
 	else
 	{
-		insert_irc_command_hook(hooks, cmd_name, function_ptr);
+		insert_irc_command_hook(hooks, cmd_name, function_ptr, user);
 	}
 }
 
@@ -728,7 +730,7 @@ void IRC::call_hook(char* irc_command, char* params, irc_reply_data* hostd)
 	{
 		if (!strcmp(p->irc_command, irc_command))
 		{
-			(*(p->function))(params, hostd, this);
+			(*(p->function))(params, hostd, this, p->user);
 			p=0;
 		}
 		else

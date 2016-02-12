@@ -7,9 +7,10 @@
 
 #include "irc.h"
 
-int end_of_motd(char* params, irc_reply_data* hostd, void* conn) // our callback function
+int end_of_motd(char* params, irc_reply_data* hostd, void* conn, void* user) // our callback function
 {
 	IRC* irc_conn=(IRC*)conn;
+	CIRC *pData = (CIRC *)user;
 
 	if(g_Config.m_ClIRCQAuthName && g_Config.m_ClIRCQAuthPass)
 		irc_conn->auth(g_Config.m_ClIRCQAuthName, g_Config.m_ClIRCQAuthPass);
@@ -18,6 +19,8 @@ int end_of_motd(char* params, irc_reply_data* hostd, void* conn) // our callback
 		irc_conn->mode(g_Config.m_ClIRCModes);
 
 	irc_conn->join((char *)"#AllTheHaxx"); // join the channel #AllTheHaxx
+
+	pData->GameClient()->Console()->Print(0, "AS=DJAS)=DA)S(DJ", "ASDU)DASDNJAS(D)ASD", true);
 	return 0;
 }
 
@@ -64,8 +67,8 @@ void CIRC::ListenIRCThread(void *pUser)
 		}
 	#endif
 
-	pData->m_Connection.hook_irc_command((char *)"376", &end_of_motd); // hook the end of MOTD message
-	pData->m_Connection.start((char *)"irc.quakenet.org", 6667,
+	pData->m_Connection.hook_irc_command((char *)"376", &end_of_motd, pUser); // hook the end of MOTD message
+	pData->m_Connection.start((char *)"irc.quakenet.org", 6668,
 			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server
 	pData->m_Connection.message_loop();
 
