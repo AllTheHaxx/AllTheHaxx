@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <base/math.h>
 #include <engine/shared/config.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
