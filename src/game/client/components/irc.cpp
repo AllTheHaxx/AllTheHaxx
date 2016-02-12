@@ -31,7 +31,17 @@ int irchook_msg(char* params, irc_reply_data* hostd, void* conn, void* user)
 	CIRC *pData = (CIRC *)user;
 
 	//pData->GameClient()->Console()->Print(0, hostd->nick, ++params, true);
-	pData->AddLine(hostd->nick, ++params);
+	pData->AddLine(CIRC::IRC_LINETYPE_CHAT, hostd->nick, ++params);
+
+	return 0;
+}
+
+int irchook_notice(char* params, irc_reply_data* hostd, void* conn, void* user)
+{
+	IRC* irc_conn=(IRC*)conn;
+	CIRC *pData = (CIRC *)user;
+
+	pData->AddLine(CIRC::IRC_LINETYPE_NOTICE, hostd->nick, ++params);
 
 	return 0;
 }
@@ -90,8 +100,10 @@ void CIRC::ListenIRCThread(void *pUser)
 #endif
 
 	pData->m_Connection.hook_irc_command((char *)"376", &irchook_connected, pUser); // hook the end of MOTD message
-	pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &irchook_msg, pUser); // hook chatmessages
 	pData->m_Connection.hook_irc_command((char *)"352", &irchook_who, pUser); // hook WHO answer
+	pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &irchook_msg, pUser); // hook chatmessages
+	pData->m_Connection.hook_irc_command((char *)"NOTICE", &irchook_notice, pUser); // hook notice
+
 	pData->m_Connection.start((char *)"irc.quakenet.org", 6668,
 			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server
 	pData->m_Connection.message_loop();
@@ -101,7 +113,7 @@ void CIRC::ListenIRCThread(void *pUser)
 #endif
 }
 
-void CIRC::AddLine(const char *pNick, const char *pLine)
+void CIRC::AddLine(int Type, const char *pNick, const char *pLine)
 {
 	time_t rawtime;
 	struct tm *timeinfo;
@@ -109,10 +121,31 @@ void CIRC::AddLine(const char *pNick, const char *pLine)
 	timeinfo = localtime(&rawtime);
 
 	char aBuf[530];
-	str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d][%s]: %s",
-			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pNick, pLine);
+	if(Type == IRC_LINETYPE_CHAT)
+		str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d][%s]: %s", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pNick, pLine);
+	else if(Type == IRC_LINETYPE_NOTICE)
+	{
+		if(pNick)
+			str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d] -%s-: %s", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pNick, pLine);
+		else
+			str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d] %s", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pLine+5);
+	}
 	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);
 }
+
+void CIRC::AddLine(const char *pLine)
+{
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	char aBuf[530];
+	str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d] *** %s",
+			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pLine);
+	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);
+}
+
 
 void CIRC::SendChat(const char* pMsg)
 {
@@ -134,6 +167,7 @@ void CIRC::Connect()
 		return;
 
 	m_pIRCThread = thread_init(ListenIRCThread, this);
+	AddLine("connected");
 }
 
 void CIRC::Disconnect(char *pReason)
@@ -142,6 +176,7 @@ void CIRC::Disconnect(char *pReason)
 		return;
 
 	m_Connection.disconnect(pReason);
+	AddLine("disconnected");
 }
 
 void CIRC::SendRequestUserList()

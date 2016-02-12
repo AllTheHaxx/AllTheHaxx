@@ -81,14 +81,14 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		else
 			m_pGameConsole->Client()->RconAuth("", pLine);
 	}
-	else if(m_Type == CGameConsole::CONSOLETYPE_IRC)
+	else if(m_Type == CGameConsole::CONSOLETYPE_IRC && m_pGameConsole->m_pClient->m_pIRC->IsConnected())
 	{
 		if(pLine[0] == '/')
 			m_pGameConsole->m_pClient->m_pIRC->SendRaw(pLine);
 		else
 		{
 			m_pGameConsole->m_pClient->m_pIRC->SendChat(pLine);
-			m_pGameConsole->m_pClient->m_pIRC->AddLine(m_pGameConsole->m_pClient->m_pIRC->CurrentNick(), pLine);
+			m_pGameConsole->m_pClient->m_pIRC->AddLine(CIRC::IRC_LINETYPE_CHAT, m_pGameConsole->m_pClient->m_pIRC->CurrentNick(), pLine);
 		}
 	}
 }
@@ -506,14 +506,14 @@ void CGameConsole::OnRender()
 					pPrompt = "ENTER PASSWORD> ";
 			}
 			else
-				pPrompt = "NOT CONNECTED!";
+				pPrompt = "NOT CONNECTED! ";
 		}
 		else if(m_ConsoleType == CONSOLETYPE_IRC)
 		{
 			if(m_pClient->m_pIRC->IsConnected())
 				pPrompt = "Say: ";
 			else
-				pPrompt = "NOT CONNECTED!";
+				pPrompt = "NOT CONNECTED! ";
 		}
 		TextRender()->TextEx(&Cursor, pPrompt, -1);
 

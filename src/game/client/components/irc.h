@@ -25,6 +25,13 @@ public:
 		bool operator <(const CIRC::IRCUser& other) { return User[0] < other.User[0]; }
 	};
 
+	enum
+	{
+		IRC_LINETYPE_CHAT=0,
+		IRC_LINETYPE_NOTICE,
+		//IRC_LINETYPE_SYSTEM, // this one not (yet)
+	};
+
 private:
 	IRC m_Connection;
 
@@ -44,7 +51,8 @@ public:
 
 	void SendRequestUserList();
 	void SendNickChange(const char *pNewNick);
-	void AddLine(const char *pNick, const char *pLine);
+	void AddLine(int Type, const char *pNick, const char *pLine); // chat
+	void AddLine(const char *pLine); // system
 
 	char *CurrentNick() { return m_Connection.current_nick(); }
 	bool IsConnected() { return m_Connection.is_connected(); }
