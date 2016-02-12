@@ -62,7 +62,7 @@ public:
 	IRC();
 	~IRC();
 	int start(char* server, int port, char* nick, char* user, char* name, char* pass);
-	void disconnect();
+	void disconnect(char* reason);
 	int privmsg(char* target, char* message);
 	int privmsg(char* fmt, ...);
 	int notice(char* target, char* message);

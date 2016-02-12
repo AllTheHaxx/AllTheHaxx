@@ -155,21 +155,21 @@ int IRC::start(char* server, int port, char* nick, char* user, char* name, char*
 	strcpy(cur_nick, nick);
 
 	fprintf(dataout, "PASS %s\r\n", pass);
-	fprintf(dataout, "NICK %s\r\n", nick);
+	fprintf(dataout, "NICK %s\r\n", cur_nick);
 	fprintf(dataout, "USER %s * 0 :%s\r\n", user, name);
 	fflush(dataout);		
 
 	return 0;
 }
 
-void IRC::disconnect()
+void IRC::disconnect(char* reason)
 {
 	if (connected)
 	{
 		fclose(dataout);
 		printf("Disconnected from server.\n");
 		connected=false;
-		quit("Leaving");
+		quit(reason);
 		#ifdef WIN32
 		shutdown(irc_socket, 2);
 		#endif
@@ -220,7 +220,7 @@ void IRC::split_to_replies(char* data)
 {
 	char* p;
 
-	while (p=strstr(data, "\r\n"))
+	while ((p=strstr(data, "\r\n")))
 	{
 		*p='\0';
 		parse_irc_reply(data);
@@ -269,7 +269,7 @@ void IRC::parse_irc_reply(char* data)
 	char* hostd;
 	char* cmd;
 	char* params;
-	char buffer[514];
+	//char buffer[514];
 	irc_reply_data hostd_tmp;
 	channel_user* cup;
 	char* p;
@@ -749,7 +749,7 @@ int IRC::notice(char* target, char* message)
 int IRC::notice(char* fmt, ...)
 {
 	va_list argp;
-	char* target;
+	//char* target;
 	
 	if (!connected)
 		return 1;
@@ -772,7 +772,7 @@ int IRC::privmsg(char* target, char* message)
 int IRC::privmsg(char* fmt, ...)
 {
 	va_list argp;
-	char* target;
+	//char* target;
 	
 	if (!connected)
 		return 1;

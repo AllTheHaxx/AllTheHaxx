@@ -15,6 +15,7 @@ private:
 public:
 	CIRC();
 
+	virtual void OnConsoleInit();
 	virtual void OnReset();
 
 };

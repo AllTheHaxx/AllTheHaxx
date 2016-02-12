@@ -15,8 +15,14 @@ int end_of_motd(char* params, irc_reply_data* hostd, void* conn) // our callback
 	return 0;
 }
 
+int catch_431(char* params, irc_reply_data* hostd, void* conn) // no nickname given
+{
+	return 0;
+}
+
 CIRC::CIRC()
 {
+	m_pIRCThread = 0;
 	OnReset();
 }
 
@@ -34,7 +40,7 @@ void CIRC::ListenIRCThread(void *pUser)
 	#endif
 
 	pData->m_Connection.hook_irc_command((char *)"376", &end_of_motd); // hook the end of MOTD message
-	pData->m_Connection.start((char *)"irc.quakenet.org", 6668, (char *)"sogehts", (char *)"aberNichtMitVars", (char *)"fullname bla", (char *)"password"); // connect to the server
+	pData->m_Connection.start((char *)"irc.quakenet.org", 6667, g_Config.m_ClIRCNick, (char *)"allthehaxx", (char *)"fullname bla", (char *)""); // connect to the server
 	pData->m_Connection.message_loop();
 
 	#if defined(CONF_FAMILY_WINDOWS)
@@ -42,7 +48,11 @@ void CIRC::ListenIRCThread(void *pUser)
 	#endif
 }
 
-void CIRC::OnReset()
+void CIRC::OnConsoleInit()
 {
 	m_pIRCThread = thread_init(ListenIRCThread, this);
+}
+
+void CIRC::OnReset()
+{
 }
