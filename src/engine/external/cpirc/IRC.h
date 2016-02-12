@@ -67,6 +67,7 @@ public:
 	int privmsg(char* fmt, ...);
 	int notice(char* target, char* message);
 	int notice(char* fmt, ...);
+	int auth(char* name, char* pass);
 	int join(char* channel);
 	int part(char* channel);
 	int kick(char* channel, char* nick);

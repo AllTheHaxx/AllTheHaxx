@@ -154,7 +154,7 @@ int IRC::start(char* server, int port, char* nick, char* user, char* name, char*
 	cur_nick=new char[strlen(nick)+1];
 	strcpy(cur_nick, nick);
 
-	fprintf(dataout, "PASS %s\r\n", pass);
+	fprintf(dataout, "PASS %s\r\n", pass[0]!='\0'?pass:"nopwgiven");
 	fprintf(dataout, "NICK %s\r\n", cur_nick);
 	fprintf(dataout, "USER %s * 0 :%s\r\n", user, name);
 	fflush(dataout);		
@@ -784,6 +784,14 @@ int IRC::privmsg(char* fmt, ...)
 	return fflush(dataout);
 }
 
+
+int IRC::auth(char* name, char* pass)
+{
+	if (!connected)
+		return 1;
+	fprintf(dataout, "MSG Q@CServe.quakenet.org AUTH %s %s\r\n", name, pass);
+	return fflush(dataout);
+}
 
 int IRC::join(char* channel)
 {

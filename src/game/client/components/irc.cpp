@@ -11,12 +11,13 @@ int end_of_motd(char* params, irc_reply_data* hostd, void* conn) // our callback
 {
 	IRC* irc_conn=(IRC*)conn;
 
-	irc_conn->join((char *)"#AllTheHaxx"); // join the channel #AllTheHaxx
-	return 0;
-}
+	if(g_Config.m_ClIRCQAuthName && g_Config.m_ClIRCQAuthPass)
+		irc_conn->auth(g_Config.m_ClIRCQAuthName, g_Config.m_ClIRCQAuthPass);
 
-int catch_431(char* params, irc_reply_data* hostd, void* conn) // no nickname given
-{
+	if(g_Config.m_ClIRCModes)
+		irc_conn->mode(g_Config.m_ClIRCModes);
+
+	irc_conn->join((char *)"#AllTheHaxx"); // join the channel #AllTheHaxx
 	return 0;
 }
 
@@ -40,7 +41,8 @@ void CIRC::ListenIRCThread(void *pUser)
 	#endif
 
 	pData->m_Connection.hook_irc_command((char *)"376", &end_of_motd); // hook the end of MOTD message
-	pData->m_Connection.start((char *)"irc.quakenet.org", 6667, g_Config.m_ClIRCNick, (char *)"allthehaxx", (char *)"fullname bla", (char *)""); // connect to the server
+	pData->m_Connection.start((char *)"irc.quakenet.org", 6667,
+			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server
 	pData->m_Connection.message_loop();
 
 	#if defined(CONF_FAMILY_WINDOWS)

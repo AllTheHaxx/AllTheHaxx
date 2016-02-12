@@ -143,7 +143,14 @@ MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLA
 MACRO_CONFIG_INT(ClPathFinding, cl_path_finding, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")
 MACRO_CONFIG_INT(ClShowhudHealthAmmoBars, cl_showhud_healthammo_bars, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use bars for health and ammo")
 MACRO_CONFIG_INT(ClShowhudChatbox, cl_showhud_chatbox, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Nice background for the chat (alpha, 0-100)")
-MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 16, "AllTheHaxx-User", CFGFLAG_CLIENT, "IRC nick")
+MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
+MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
+MACRO_CONFIG_STR(ClIRCUser, cl_irc_user, 32, "allthehaxx", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC username")
+MACRO_CONFIG_STR(ClIRCPass, cl_irc_password, 16, "nopwset", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC password")
+MACRO_CONFIG_STR(ClIRCQAuthName, cl_irc_q_auth_name, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q name")
+MACRO_CONFIG_STR(ClIRCQAuthPass, cl_irc_q_auth_pass, 11, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q password")
+MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+i-w+x", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC modes")
+
 
 //
 MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Scoreboard fading time")
