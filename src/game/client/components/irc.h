@@ -18,6 +18,9 @@ public:
 	void SendChat(const char *pMsg);
 	void SendRaw(const char *pMsg);
 
+	void Connect();
+	void Disconnect(char *pReason);
+
 	void SendNickChange(const char *pNewNick);
 	void AddLine(const char *pNick, const char *pLine);
 
@@ -27,6 +30,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnReset();
 	virtual void OnRender();
+	virtual void OnShutdown();
 
 };
 #endif

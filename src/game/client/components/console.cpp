@@ -679,15 +679,22 @@ void CGameConsole::OnRender()
 void CGameConsole::RenderIRCUserList(CUIRect MainView)
 {
 	CUIRect Pane, Button;
-	MainView.VSplitRight(50.0f, &MainView, &Pane);
+	CIRC * const r = m_pClient->m_pIRC;
+	MainView.VSplitRight(MainView.w/5, &MainView, &Pane);
 
 	Pane.Margin(5.0f, &Pane);
 	Pane.HSplitTop(10.0f, 0, &Pane);
 	Pane.HSplitTop(20.0f, &Button, &Pane);
 
-	static int s_TestButton = 0;
-	if(m_pClient->m_pMenus->DoButton_Menu(&s_TestButton, "Test Button", 0, &Button))
-		Client()->Quit();
+	static int s_ConnectButton = 0;
+	if(m_pClient->m_pMenus->DoButton_Menu(&s_ConnectButton, r->IsConnected() ? "Disconnect" : "Connect", 0, &Button))
+	{
+		if(r->IsConnected())
+			r->Disconnect(g_Config.m_ClIRCLeaveMsg);
+		else
+			r->Connect();
+	}
+
 }
 
 

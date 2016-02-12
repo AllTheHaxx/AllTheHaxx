@@ -168,10 +168,10 @@ void IRC::disconnect(char* reason)
 {
 	if (connected)
 	{
+		quit(reason);
 		fclose(dataout);
 		printf("Disconnected from server.\n");
 		connected=false;
-		quit(reason);
 		#ifdef WIN32
 		shutdown(irc_socket, 2);
 		#endif
@@ -198,14 +198,14 @@ int IRC::message_loop()
 	char buffer[1024];
 	int ret_len;
 
-	if (!connected)
-	{
-		printf("Not connected!\n");
-		return 1;
-	}
-
 	while (1)
 	{
+		if (!connected)
+		{
+			printf("Not connected!\n");
+			break;
+		}
+
 		ret_len=recv(irc_socket, buffer, 1023, 0);
 		if (ret_len==SOCKET_ERROR || !ret_len)
 		{

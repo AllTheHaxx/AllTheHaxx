@@ -116,18 +116,39 @@ void CIRC::SendRaw(const char* pMsg)
 	m_Connection.raw(aBuf);
 }
 
+void CIRC::Connect()
+{
+	if(IsConnected())
+		return;
+
+	m_pIRCThread = thread_init(ListenIRCThread, this);
+}
+
+void CIRC::Disconnect(char *pReason)
+{
+	if(!IsConnected())
+		return;
+
+	m_Connection.disconnect(pReason);
+}
+
 void CIRC::SendNickChange(const char *pNewNick)
 {
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "%s", pNewNick);
-	m_Connection.nick(const_cast<char*>(aBuf));
+	m_Connection.nick(aBuf);
 }
 
 void CIRC::OnConsoleInit()
 {
-	m_pIRCThread = thread_init(ListenIRCThread, this);
+	Connect();
 }
 
 void CIRC::OnReset()
 {
+}
+
+void CIRC::OnShutdown()
+{
+	Disconnect(g_Config.m_ClIRCLeaveMsg);
 }

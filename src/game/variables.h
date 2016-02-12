@@ -150,6 +150,7 @@ MACRO_CONFIG_STR(ClIRCPass, cl_irc_password, 16, "nopwset", CFGFLAG_CLIENT|CFGFL
 MACRO_CONFIG_STR(ClIRCQAuthName, cl_irc_q_auth_name, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q name")
 MACRO_CONFIG_STR(ClIRCQAuthPass, cl_irc_q_auth_pass, 11, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q password")
 MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+i-w+x", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC modes")
+MACRO_CONFIG_STR(ClIRCLeaveMsg, cl_irc_leavemsg, 32, "Leaving", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC leave message")
 
 
 //
