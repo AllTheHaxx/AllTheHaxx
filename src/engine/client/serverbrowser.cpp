@@ -612,8 +612,7 @@ void CServerBrowser::SaveCache()
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 
 	// open file
-	pStorage->CreateFolder("tmp/cache", 0);
-	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!File)
 	{
 		dbg_msg("browser", "failed to open cache file for writing");
@@ -661,7 +660,7 @@ bool CServerBrowser::LoadCache()
 	m_CurrentToken = (m_CurrentToken+1)&0xff;
 
 	// open file TODO: Use teeworlds's storage for this!
-	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_READ, IStorage::TYPE_ALL);
 	if(!File)
 	{
 		dbg_msg("browser", "opening cache file failed.");
