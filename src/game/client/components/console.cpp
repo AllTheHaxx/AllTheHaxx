@@ -87,9 +87,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		else
 		{
 			m_pGameConsole->m_pClient->m_pIRC->SendChat(pLine);
-			char aBuf[530];
-			str_format(aBuf, sizeof(aBuf), "[%s]: %s", m_pGameConsole->m_pClient->m_pIRC->CurrentNick(), pLine);
-			PrintLine(aBuf, false);
+			m_pGameConsole->m_pClient->m_pIRC->AddLine(m_pGameConsole->m_pClient->m_pIRC->CurrentNick(), pLine);
 		}
 	}
 }

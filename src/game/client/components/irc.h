@@ -19,6 +19,7 @@ public:
 	void SendRaw(const char *pMsg);
 
 	void SendNickChange(const char *pNewNick);
+	void AddLine(const char *pNick, const char *pLine);
 
 	char *CurrentNick() { return m_Connection.current_nick(); }
 	bool IsConnected() { return m_Connection.is_connected(); }

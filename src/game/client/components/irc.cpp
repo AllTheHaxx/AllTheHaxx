@@ -5,12 +5,13 @@
 	#include <windows.h>
 #endif
 
+#include "console.h"
 #include "irc.h"
 
 int end_of_motd(char* params, irc_reply_data* hostd, void* conn, void* user) // our callback function
 {
 	IRC* irc_conn=(IRC*)conn;
-	CIRC *pData = (CIRC *)user;
+	//CIRC *pData = (CIRC *)user;
 
 	if(g_Config.m_ClIRCQAuthName && g_Config.m_ClIRCQAuthPass)
 		irc_conn->auth(g_Config.m_ClIRCQAuthName, g_Config.m_ClIRCQAuthPass);
@@ -20,7 +21,17 @@ int end_of_motd(char* params, irc_reply_data* hostd, void* conn, void* user) // 
 
 	irc_conn->join((char *)"#AllTheHaxx"); // join the channel #AllTheHaxx
 
-	pData->GameClient()->Console()->Print(0, "AS=DJAS)=DA)S(DJ", "ASDU)DASDNJAS(D)ASD", true);
+	return 0;
+}
+
+int got_chat(char* params, irc_reply_data* hostd, void* conn, void* user) // our callback function
+{
+	//IRC* irc_conn=(IRC*)conn;
+	CIRC *pData = (CIRC *)user;
+
+	//pData->GameClient()->Console()->Print(0, hostd->nick, ++params, true);
+	pData->AddLine(hostd->nick, ++params);
+
 	return 0;
 }
 
@@ -67,7 +78,8 @@ void CIRC::ListenIRCThread(void *pUser)
 		}
 	#endif
 
-	pData->m_Connection.hook_irc_command((char *)"376", &end_of_motd, pUser); // hook the end of MOTD message
+		pData->m_Connection.hook_irc_command((char *)"376", &end_of_motd, pUser); // hook the end of MOTD message
+		pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &got_chat, pUser); // hook chatmessages
 	pData->m_Connection.start((char *)"irc.quakenet.org", 6668,
 			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server
 	pData->m_Connection.message_loop();
@@ -75,6 +87,19 @@ void CIRC::ListenIRCThread(void *pUser)
 	#if defined(CONF_FAMILY_WINDOWS)
 		WSACleanup(); /* more winsock stuff */
 	#endif
+}
+
+void CIRC::AddLine(const char *pNick, const char *pLine)
+{
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	char aBuf[530];
+	str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d][%s]: %s",
+			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pNick, pLine);
+	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);
 }
 
 void CIRC::SendChat(const char* pMsg)
