@@ -8,7 +8,7 @@
 #include "console.h"
 #include "irc.h"
 
-int end_of_motd(char* params, irc_reply_data* hostd, void* conn, void* user) // our callback function
+int irchook_connected(char* params, irc_reply_data* hostd, void* conn, void* user)
 {
 	IRC* irc_conn=(IRC*)conn;
 	//CIRC *pData = (CIRC *)user;
@@ -24,13 +24,23 @@ int end_of_motd(char* params, irc_reply_data* hostd, void* conn, void* user) // 
 	return 0;
 }
 
-int got_chat(char* params, irc_reply_data* hostd, void* conn, void* user) // our callback function
+int irchook_msg(char* params, irc_reply_data* hostd, void* conn, void* user)
 {
 	//IRC* irc_conn=(IRC*)conn;
 	CIRC *pData = (CIRC *)user;
 
 	//pData->GameClient()->Console()->Print(0, hostd->nick, ++params, true);
 	pData->AddLine(hostd->nick, ++params);
+
+	return 0;
+}
+
+int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
+{
+	//IRC* irc_conn=(IRC*)conn;
+	//CIRC *pData = (CIRC *)user;
+
+	// TODO: parse params here!
 
 	return 0;
 }
@@ -69,24 +79,25 @@ void CIRC::ListenIRCThread(void *pUser)
 {
 	CIRC *pData = (CIRC *)pUser;
 
-	#if defined(CONF_FAMILY_WINDOWS)
-		WSADATA wsaData; /* winsock stuff, linux/unix/bsd users need not worry about this */
-	
-		if (WSAStartup(MAKEWORD(1, 1), &wsaData)) /* more winsock rubbish */
-		{
-			printf("Failed to initialise winsock!\n");
-		}
-	#endif
+#if defined(CONF_FAMILY_WINDOWS)
+	WSADATA wsaData; /* winsock stuff, linux/unix/bsd users need not worry about this */
 
-		pData->m_Connection.hook_irc_command((char *)"376", &end_of_motd, pUser); // hook the end of MOTD message
-		pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &got_chat, pUser); // hook chatmessages
+	if (WSAStartup(MAKEWORD(1, 1), &wsaData)) /* more winsock rubbish */
+	{
+		printf("Failed to initialise winsock!\n");
+	}
+#endif
+
+	pData->m_Connection.hook_irc_command((char *)"376", &irchook_connected, pUser); // hook the end of MOTD message
+	pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &irchook_msg, pUser); // hook chatmessages
+	pData->m_Connection.hook_irc_command((char *)"352", &irchook_who, pUser); // hook WHO answer
 	pData->m_Connection.start((char *)"irc.quakenet.org", 6668,
 			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server
 	pData->m_Connection.message_loop();
 
-	#if defined(CONF_FAMILY_WINDOWS)
-		WSACleanup(); /* more winsock stuff */
-	#endif
+#if defined(CONF_FAMILY_WINDOWS)
+	WSACleanup(); /* more winsock stuff */
+#endif
 }
 
 void CIRC::AddLine(const char *pNick, const char *pLine)
@@ -130,6 +141,11 @@ void CIRC::Disconnect(char *pReason)
 		return;
 
 	m_Connection.disconnect(pReason);
+}
+
+void CIRC::SendRequestUserList()
+{
+	m_Connection.raw((char*)"WHO #AllTheHaxx");
 }
 
 void CIRC::SendNickChange(const char *pNewNick)

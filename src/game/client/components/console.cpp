@@ -30,6 +30,7 @@
 #include <game/client/components/controls.h>
 #include <game/client/components/menus.h>
 
+#include "menus.h"
 #include "irc.h"
 #include "console.h"
 
@@ -680,6 +681,7 @@ void CGameConsole::RenderIRCUserList(CUIRect MainView)
 {
 	CUIRect Pane, Button;
 	CIRC * const r = m_pClient->m_pIRC;
+	CMenus * const m = m_pClient->m_pMenus;
 	MainView.VSplitRight(MainView.w/5, &MainView, &Pane);
 
 	Pane.Margin(5.0f, &Pane);
@@ -687,13 +689,22 @@ void CGameConsole::RenderIRCUserList(CUIRect MainView)
 	Pane.HSplitTop(20.0f, &Button, &Pane);
 
 	static int s_ConnectButton = 0;
-	if(m_pClient->m_pMenus->DoButton_Menu(&s_ConnectButton, r->IsConnected() ? "Disconnect" : "Connect", 0, &Button))
+	if(m->DoButton_Menu(&s_ConnectButton, r->IsConnected() ? "Disconnect" : "Connect", 0, &Button))
 	{
 		if(r->IsConnected())
 			r->Disconnect(g_Config.m_ClIRCLeaveMsg);
 		else
 			r->Connect();
 	}
+
+	//static int s_Listbox = 0; static float s_ScrollVal = 0.0f;
+	//m->UiDoListboxStart((void*)&s_Listbox, &Pane, 10.0f, "Clients", "", 3, 1, 0, &s_ScrollVal);
+
+	//for(int i = 0; i < 3; i++)
+	//{
+	//	CMenus::CListboxItem Item = m->UiDoListboxNextItem();
+
+	//m->UiDoListboxEnd(&s_ScrollVal, 0);
 
 }
 
