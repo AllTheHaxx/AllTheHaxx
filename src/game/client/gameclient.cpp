@@ -41,6 +41,7 @@
 #include "components/emoticon.h"
 #include "components/flow.h"
 #include "components/hud.h"
+#include "components/irc.h"
 #include "components/items.h"
 #include "components/killmessages.h"
 #include "components/mapimages.h"
@@ -105,6 +106,7 @@ static CBackground gs_BackGround;
 static CMapSounds gs_MapSounds;
 
 static CAStar gs_AStar;
+static CIRC gs_IRC;
 
 static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;
@@ -173,6 +175,7 @@ void CGameClient::OnConsoleInit()
 	m_pMapSounds = &::gs_MapSounds;
 
 	m_pAStar = &::gs_AStar;
+	m_pIRC = &::gs_IRC;
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
@@ -193,6 +196,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pRaceDemo);
 	m_All.Add(m_pMapSounds);
 	m_All.Add(m_pAStar);
+	m_All.Add(m_pIRC);
 
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&gs_MapLayersBackGround); // first to render
