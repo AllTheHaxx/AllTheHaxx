@@ -100,6 +100,29 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(const char *pStr,
 	pInstance->m_CompletionEnumerationCount++;
 }
 
+bool CGameConsole::OnMouseMove(float x, float y)
+{
+	//m_LastInput = time_get();
+
+	if(m_ConsoleType != CONSOLETYPE_IRC || (m_ConsoleState != CONSOLE_OPEN && m_ConsoleState != CONSOLE_OPENING))
+		return false;
+
+#if defined(__ANDROID__) // No relative mouse on Android
+	m_MousePos.x = x;
+	m_MousePos.y = y;
+#else
+	UI()->ConvertMouseMove(&x, &y);
+	m_MousePos.x += x;
+	m_MousePos.y += y;
+#endif
+	if(m_MousePos.x < 0) m_MousePos.x = 0;
+	if(m_MousePos.y < 0) m_MousePos.y = 0;
+	if(m_MousePos.x > Graphics()->ScreenWidth()) m_MousePos.x = Graphics()->ScreenWidth();
+	if(m_MousePos.y > Graphics()->ScreenHeight()) m_MousePos.y = Graphics()->ScreenHeight();
+
+	return true;
+}
+
 void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
@@ -377,8 +400,8 @@ void CGameConsole::OnRender()
 	if (m_ConsoleState == CONSOLE_CLOSED)
 		return;
 
-	if (m_ConsoleState == CONSOLE_OPEN)
-		Input()->MouseModeAbsolute();
+	//if (m_ConsoleState == CONSOLE_OPEN && m_ConsoleType != CONSOLETYPE_IRC)
+	//	Input()->MouseModeAbsolute();
 
 	float ConsoleHeightScale;
 
@@ -393,54 +416,56 @@ void CGameConsole::OnRender()
 
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
-	// do console shadow
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	IGraphics::CColorVertex Array[4] = {
-		IGraphics::CColorVertex(0, 0,0,0, 0.5f),
-		IGraphics::CColorVertex(1, 0,0,0, 0.5f),
-		IGraphics::CColorVertex(2, 0,0,0, 0.0f),
-		IGraphics::CColorVertex(3, 0,0,0, 0.0f)};
-	Graphics()->SetColorVertex(Array, 4);
-	IGraphics::CQuadItem QuadItem(0, ConsoleHeight, Screen.w, 10.0f);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	{
+		// do console shadow
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+		IGraphics::CColorVertex Array[4] = {
+			IGraphics::CColorVertex(0, 0,0,0, 0.5f),
+			IGraphics::CColorVertex(1, 0,0,0, 0.5f),
+			IGraphics::CColorVertex(2, 0,0,0, 0.0f),
+			IGraphics::CColorVertex(3, 0,0,0, 0.0f)};
+		Graphics()->SetColorVertex(Array, 4);
+		IGraphics::CQuadItem QuadItem(0, ConsoleHeight, Screen.w, 10.0f);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
 
-	// do background
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CONSOLE_BG].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.2f, 0.2f, 0.2f,0.9f);
-	if(m_ConsoleType == CONSOLETYPE_REMOTE)
-		Graphics()->SetColor(0.4f, 0.2f, 0.2f,0.9f);
-	if(m_ConsoleType == CONSOLETYPE_IRC)
-		Graphics()->SetColor(0.2f, 0.4f, 0.2f,0.9f);
-	Graphics()->QuadsSetSubset(0,-ConsoleHeight*0.075f,Screen.w*0.075f*0.5f,0);
-	QuadItem = IGraphics::CQuadItem(0, 0, Screen.w, ConsoleHeight);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+		// do background
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CONSOLE_BG].m_Id);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0.2f, 0.2f, 0.2f,0.9f);
+		if(m_ConsoleType == CONSOLETYPE_REMOTE)
+			Graphics()->SetColor(0.4f, 0.2f, 0.2f,0.9f);
+		if(m_ConsoleType == CONSOLETYPE_IRC)
+			Graphics()->SetColor(0.2f, 0.4f, 0.2f,0.9f);
+		Graphics()->QuadsSetSubset(0,-ConsoleHeight*0.075f,Screen.w*0.075f*0.5f,0);
+		QuadItem = IGraphics::CQuadItem(0, 0, Screen.w, ConsoleHeight);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
 
-	// do small bar shadow
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Array[0] = IGraphics::CColorVertex(0, 0,0,0, 0.0f);
-	Array[1] = IGraphics::CColorVertex(1, 0,0,0, 0.0f);
-	Array[2] = IGraphics::CColorVertex(2, 0,0,0, 0.25f);
-	Array[3] = IGraphics::CColorVertex(3, 0,0,0, 0.25f);
-	Graphics()->SetColorVertex(Array, 4);
-	QuadItem = IGraphics::CQuadItem(0, ConsoleHeight-20, Screen.w, 10);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+		// do small bar shadow
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+		Array[0] = IGraphics::CColorVertex(0, 0,0,0, 0.0f);
+		Array[1] = IGraphics::CColorVertex(1, 0,0,0, 0.0f);
+		Array[2] = IGraphics::CColorVertex(2, 0,0,0, 0.25f);
+		Array[3] = IGraphics::CColorVertex(3, 0,0,0, 0.25f);
+		Graphics()->SetColorVertex(Array, 4);
+		QuadItem = IGraphics::CQuadItem(0, ConsoleHeight-20, Screen.w, 10);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
 
-	// do the lower bar
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CONSOLE_BAR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.9f);
-	Graphics()->QuadsSetSubset(0,0.1f,Screen.w*0.015f,1-0.1f);
-	QuadItem = IGraphics::CQuadItem(0,ConsoleHeight-10.0f,Screen.w,10.0f);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+		// do the lower bar
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CONSOLE_BAR].m_Id);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.9f);
+		Graphics()->QuadsSetSubset(0,0.1f,Screen.w*0.015f,1-0.1f);
+		QuadItem = IGraphics::CQuadItem(0,ConsoleHeight-10.0f,Screen.w,10.0f);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
 
-	ConsoleHeight -= 22.0f;
+		ConsoleHeight -= 22.0f;
+	}
 
 	CInstance *pConsole = CurrentConsole();
 
@@ -612,6 +637,44 @@ void CGameConsole::OnRender()
 		Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->Text(0, Screen.w-Width-10.0f, 10.0f, FontSize, aBuf, -1);
 	}
+
+
+	if(m_ConsoleType == CONSOLETYPE_IRC)
+	{
+		RenderIRCUserList();
+
+
+		// update the ui
+		CUIRect *pScreen = UI()->Screen();
+		float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
+		float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
+		int Buttons = 0;
+		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
+		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
+		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+
+#if defined(__ANDROID__)
+		static int ButtonsOneFrameDelay = 0; // For Android touch input
+
+		UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
+		ButtonsOneFrameDelay = Buttons;
+#else
+		UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
+#endif
+
+		// render cursor
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(1,1,1,1);
+		IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+	}
+}
+
+void CGameConsole::RenderIRCUserList()
+{
+
 }
 
 void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
@@ -638,6 +701,14 @@ void CGameConsole::Toggle(int Type)
 	if(m_ConsoleType != Type && (m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING))
 	{
 		// don't toggle console, just switch what console to use
+		if(Type == CONSOLETYPE_IRC)
+		{
+			Input()->MouseModeRelative();
+			//m_pClient->OnRelease();
+		}
+		else
+			Input()->MouseModeAbsolute();
+
 	}
 	else
 	{
@@ -655,10 +726,10 @@ void CGameConsole::Toggle(int Type)
 
 		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
-			/*Input()->MouseModeAbsolute();
-			m_pClient->m_pMenus->UseMouseButtons(false);*/
+			Input()->MouseModeAbsolute();
+			m_pClient->m_pMenus->UseMouseButtons(false);
 			m_ConsoleState = CONSOLE_OPENING;
-			/*// reset controls
+			/*// reset controls - no don't do it because we want swag!
 			m_pClient->m_pControls->OnReset();*/
 		}
 		else
@@ -671,6 +742,22 @@ void CGameConsole::Toggle(int Type)
 	}
 
 	m_ConsoleType = Type;
+
+	if(m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING)
+	{
+		switch (m_ConsoleType) {
+		case CONSOLETYPE_LOCAL:
+		case CONSOLETYPE_REMOTE:
+			Input()->MouseModeAbsolute();
+		break;
+		case CONSOLETYPE_IRC:
+			Input()->MouseModeRelative();
+		break;
+		}
+	}
+
+	if(m_ConsoleState == CONSOLE_CLOSED)
+		Input()->MouseModeRelative();
 }
 
 void CGameConsole::Dump(int Type)

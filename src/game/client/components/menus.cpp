@@ -34,6 +34,7 @@
 #include <versionsrv/versionsrv.h>
 
 #include "countryflags.h"
+#include "console.h"
 #include "menus.h"
 #include "skins.h"
 #include "spoofremote.h"
@@ -1650,7 +1651,7 @@ bool CMenus::OnMouseMove(float x, float y)
 {
 	m_LastInput = time_get();
 
-	if(!m_MenuActive)
+	if(!m_MenuActive || !m_pClient->m_pGameConsole->IsClosed())
 		return false;
 
 #if defined(__ANDROID__) // No relative mouse on Android
@@ -1814,34 +1815,40 @@ void CMenus::OnRender()
 	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
 	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
 
-	int Buttons = 0;
-	if(m_UseMouseButtons)
+	if(m_pClient->m_pGameConsole->IsClosed())
 	{
-		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
-	}
+		int Buttons = 0;
+		if(m_UseMouseButtons)
+		{
+			if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
+			if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
+			if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+		}
 
 #if defined(__ANDROID__)
-	static int ButtonsOneFrameDelay = 0; // For Android touch input
+		static int ButtonsOneFrameDelay = 0; // For Android touch input
 
-	UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
-	ButtonsOneFrameDelay = Buttons;
+		UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
+		ButtonsOneFrameDelay = Buttons;
 #else
-	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
+		UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
 #endif
+	}
 
 	// render
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Render();
 
 	// render cursor
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,1);
-	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	if(m_pClient->m_pGameConsole->IsClosed())
+	{
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(1,1,1,1);
+		IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+	}
 
 	// render debug information
 	if(g_Config.m_Debug)

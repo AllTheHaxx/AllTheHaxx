@@ -78,8 +78,11 @@ class CGameConsole : public CComponent
 	float m_StateChangeEnd;
 	float m_StateChangeDuration;
 
+	vec2 m_MousePos;
+
 	void Toggle(int Type);
 	void Dump(int Type);
+	void RenderIRCUserList();
 
 	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
 	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted);
@@ -113,6 +116,7 @@ public:
 	virtual void OnRender();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Events);
+	virtual bool OnMouseMove(float x, float y);
 
 	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
 };
