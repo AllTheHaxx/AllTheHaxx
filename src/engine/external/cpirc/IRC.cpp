@@ -791,7 +791,7 @@ int IRC::auth(char* name, char* pass)
 {
 	if (!connected)
 		return 1;
-	fprintf(dataout, "MSG Q@CServe.quakenet.org AUTH %s %s\r\n", name, pass);
+	fprintf(dataout, "PRIVMSG Q@CServe.quakenet.org :AUTH %s %s\r\n", name, pass);
 	return fflush(dataout);
 }
 
