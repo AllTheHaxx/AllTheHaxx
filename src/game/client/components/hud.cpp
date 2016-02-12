@@ -473,29 +473,11 @@ void CHud::RenderVoting()
 
 
 	if(ShouldRender)
-	{
-		// decrease offset to make it visible
-		if(Offset < Rect.w*0.05f)
-			Offset = 0;
-		else
-			Offset -= Offset/10.0f;
-	}
+		smooth_set(&Offset, 0.0f, 10.0f, 0.03f); // visible
 	else if(!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice() && m_pClient->m_pVoting->IsVoting())
-	{
-		// increase offset to make it half-visible
-		if(Offset > Rect.w*0.75f)
-			Offset = Rect.w*0.75f;
-		else
-			Offset += (Rect.w*0.75f-Offset)/10.0f;
-	}
+		smooth_set(&Offset, Rect.w*0.75f, 10.0f); // only a bit visible
 	else
-	{
-		// increase offset to make it invisible
-		if(Offset > Rect.w*0.97f)
-			Offset = Rect.w;
-		else
-			Offset += (Rect.w-Offset)/10.0f;
-	}
+		smooth_set(&Offset, Rect.w, 10.0f, 0.02f); // invisible
 
 	// completely invisible, nothing to render
 	if(Offset == Rect.w && !ShouldRender)

@@ -40,7 +40,7 @@ inline float frandom() { return rand()/(float)(RAND_MAX); }
  * returns the newly calculated value */
 inline float smooth_set(float* val, float target, float delay, float snaprange = 0.00f)
 {
-	if(delay < 1.0f)
+	if(delay < 1.0f || *val == target)
 		return *val;
 
 	if(snaprange)
