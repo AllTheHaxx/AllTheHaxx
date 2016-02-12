@@ -609,6 +609,10 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 
 void CServerBrowser::SaveCache()
 {
+	// nothing to save
+	if(m_NumServers < 1)
+		return;
+
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 
 	// open file
