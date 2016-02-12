@@ -27,6 +27,30 @@ CIRC::CIRC()
 	OnReset();
 }
 
+void CIRC::OnRender()
+{
+	// update stuff first, doesn't render anything
+	{
+		const int64 Now = time_get();
+		static int64 LastServerChange = 0;
+		static char *pLastServer = g_Config.m_UiServerAddress;
+
+		if(str_comp(pLastServer, g_Config.m_UiServerAddress) != 0)
+			LastServerChange = Now;
+
+		if(LastServerChange && Now > LastServerChange + 30*time_freq())
+		{
+			// TODO: IMPORTANT: send an update about the server we are currently on!
+			LastServerChange = 0;
+		}
+	}
+
+	// render stuff
+	{
+
+	}
+}
+
 void CIRC::ListenIRCThread(void *pUser)
 {
 	CIRC *pData = (CIRC *)pUser;

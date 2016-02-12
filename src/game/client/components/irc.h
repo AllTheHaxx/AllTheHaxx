@@ -25,6 +25,7 @@ public:
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();
+	virtual void OnRender();
 
 };
 #endif
