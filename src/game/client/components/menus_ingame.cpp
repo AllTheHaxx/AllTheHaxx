@@ -944,21 +944,23 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	Box.HSplitTop(25.0f, 0, &Box);
 	Box.HSplitTop(25.5f, &Button, 0);
-	static int s_ButtonDummies = 0;
+	static int s_ButtonDummiesConnect = 0;
 	{
-		char aBuf[64];
-		if(!m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
-			str_format(aBuf, sizeof(aBuf), Localize("Connect dummies"));
-		else
-			str_format(aBuf, sizeof(aBuf), Localize("Disconnect dummies"));
-		if(DoButton_Menu(&s_ButtonDummies, aBuf, 0, &Button))
+		if(DoButton_Menu(&s_ButtonDummiesConnect, Localize("Connect dummies"), 0, &Button))
 		{
 			char aCmd[256];
-			if(!m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
 				str_format(aCmd, sizeof(aCmd), "dum %s %i", aServerAddr, s_ScrollValue+1);
-			else
-				str_format(aCmd, sizeof(aCmd), "dcdum");
 			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
+		}
+	}
+
+	Box.HSplitTop(32.0f, 0, &Box);
+	Box.HSplitTop(25.5f, &Button, 0);
+	static int s_ButtonDummiesDisconnect = 0;
+	{
+		if(DoButton_Menu(&s_ButtonDummiesDisconnect, Localize("Disconnect dummies"), 0, &Button))
+		{
+			m_pClient->m_pSpoofRemote->SendCommand("dcdum");
 		}
 	}
 
