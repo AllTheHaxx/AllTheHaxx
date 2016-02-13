@@ -10,103 +10,6 @@
 #include "hud.h"
 #include "irc.h"
 
-int irchook_connected(char* params, irc_reply_data* hostd, void* conn, void* user)
-{
-	IRC* irc_conn=(IRC*)conn;
-	//CIRC *pData = (CIRC *)user;
-
-	if(g_Config.m_ClIRCQAuthName && g_Config.m_ClIRCQAuthPass)
-		irc_conn->auth(g_Config.m_ClIRCQAuthName, g_Config.m_ClIRCQAuthPass);
-
-	if(g_Config.m_ClIRCModes)
-		irc_conn->mode(g_Config.m_ClIRCModes);
-
-	irc_conn->join((char *)"#AllTheHaxx"); // join the channel #AllTheHaxx
-	irc_conn->raw((char *)"WHO #AllTheHaxx");
-
-	return 0;
-}
-
-int irchook_msg(char* params, irc_reply_data* hostd, void* conn, void* user)
-{
-	//IRC* irc_conn=(IRC*)conn;
-	CIRC *pData = (CIRC *)user;
-
-	//pData->GameClient()->Console()->Print(0, hostd->nick, ++params, true);
-	pData->AddLine(CIRC::IRC_LINETYPE_CHAT, hostd->nick, ++params);
-
-	return 0;
-}
-
-int irchook_notice(char* params, irc_reply_data* hostd, void* conn, void* user)
-{
-	//IRC* irc_conn=(IRC*)conn;
-	CIRC *pData = (CIRC *)user;
-
-	pData->AddLine(CIRC::IRC_LINETYPE_NOTICE, hostd->nick, ++params);
-
-	return 0;
-}
-
-int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
-{
-	//IRC* irc_conn=(IRC*)conn;
-	CIRC *pData = (CIRC *)user;
-
-	// TODO: parse params here!
-	char aBuf[32];
-	dbg_msg("dbg", "WHO: %s", str_split(aBuf, params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
-
-	CIRC::IRCUser u;
-	u.m_User = str_split(aBuf, params, 1, ' ');
-	u.m_Domain = str_split(aBuf, params, 2, ' ');
-	u.m_Server = str_split(aBuf, params, 3, ' ');
-	u.m_Nick = str_split(aBuf, params, 4, ' ');
-	u.m_Modes = str_split(aBuf, params, 5, ' ');
-	u.m_Realname = str_split(aBuf, params, 6, ' '); // nogood
-
-	pData->m_UserList.add(u);
-	return 0;
-}
-
-int irchook_join(char* params, irc_reply_data* hostd, void* conn, void* user)
-{
-	//IRC* irc_conn=(IRC*)conn;
-	CIRC *pData = (CIRC *)user;
-
-	// notification
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "%s joined the chat", hostd->nick);
-	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
-
-	// request userdata
-	str_format(aBuf, sizeof(aBuf), "/WHO %s", hostd->nick);
-	pData->SendRaw(aBuf);
-
-	return 0;
-}
-
-int irchook_leave(char* params, irc_reply_data* hostd, void* conn, void* user) // serves for both QUIT and PART
-{
-	//IRC* irc_conn=(IRC*)conn;
-	CIRC *pData = (CIRC *)user;
-
-	// notification (maybe better not?)
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "%s left the chat (%s)", hostd->nick, ++params);
-	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
-
-	// remove from userlist
-	for(int i = 0; i < pData->m_UserList.size(); i++)
-	{
-		if(str_comp(hostd->nick, pData->m_UserList[i].m_Nick.c_str()) == 0)
-			pData->m_UserList.remove_index(i);
-	}
-
-	return 0;
-}
-
-
 CIRC::CIRC()
 {
 	m_pIRCThread = 0;
@@ -115,56 +18,12 @@ CIRC::CIRC()
 
 void CIRC::OnRender()
 {
-	// update stuff first, doesn't render anything
-	{
-		const int64 Now = time_get();
-		static int64 LastServerChange = 0;
-		static char *pLastServer = g_Config.m_UiServerAddress;
-
-		if(str_comp(pLastServer, g_Config.m_UiServerAddress) != 0)
-			LastServerChange = Now;
-
-		if(LastServerChange && Now > LastServerChange + 30*time_freq())
-		{
-			// TODO: IMPORTANT: send an update about the server we are currently on!
-			LastServerChange = 0;
-		}
-	}
-
-	// render stuff
-	{
-
-	}
 }
 
 void CIRC::ListenIRCThread(void *pUser)
 {
-	CIRC *pData = (CIRC *)pUser;
-
-#if defined(CONF_FAMILY_WINDOWS)
-	WSADATA wsaData; /* winsock stuff, linux/unix/bsd users need not worry about this */
-
-	if (WSAStartup(MAKEWORD(1, 1), &wsaData)) /* more winsock rubbish */
-	{
-		printf("Failed to initialise winsock!\n");
-	}
-#endif
-
-	pData->m_Connection.hook_irc_command((char *)"376", &irchook_connected, pUser); // hook the end of MOTD message
-	pData->m_Connection.hook_irc_command((char *)"352", &irchook_who, pUser); // hook WHO answer
-	pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &irchook_msg, pUser); // hook chatmessages
-	pData->m_Connection.hook_irc_command((char *)"NOTICE", &irchook_notice, pUser); // hook notice
-	pData->m_Connection.hook_irc_command((char *)"JOIN", &irchook_join, pUser); // hook join
-	pData->m_Connection.hook_irc_command((char *)"PART", &irchook_leave, pUser); // hook leave
-	pData->m_Connection.hook_irc_command((char *)"QUIT", &irchook_leave, pUser); // hook part
-
-	pData->m_Connection.start((char *)"irc.quakenet.org", 6668,
-			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server
-	pData->m_Connection.message_loop();
-
-#if defined(CONF_FAMILY_WINDOWS)
-	WSACleanup(); /* more winsock stuff */
-#endif
+	//CIRC *pData = (CIRC *)pUser;
+	return;
 }
 
 void CIRC::AddLine(int Type, const char *pNick, const char *pLine)
@@ -205,14 +64,14 @@ void CIRC::SendChat(const char* pMsg)
 {
 	char aBuf[510];
 	str_format(aBuf, sizeof(aBuf), "PRIVMSG #AllTheHaxx :%s", pMsg);
-	m_Connection.raw(aBuf);
+	// TODO!
 }
 
 void CIRC::SendRaw(const char* pMsg)
 {
 	char aBuf[510];
 	str_format(aBuf, sizeof(aBuf), "%s", pMsg+1);
-	m_Connection.raw(aBuf);
+	// TODO!
 }
 
 void CIRC::Connect()
@@ -220,8 +79,7 @@ void CIRC::Connect()
 	if(IsConnected())
 		return;
 
-	m_pIRCThread = thread_init(ListenIRCThread, this);
-	AddLine("connected");
+	// TODO!
 }
 
 void CIRC::Disconnect(char *pReason)
@@ -229,26 +87,25 @@ void CIRC::Disconnect(char *pReason)
 	if(!IsConnected())
 		return;
 
-	m_Connection.disconnect(pReason);
-	AddLine("disconnected");
+	// TODO!
 }
 
 void CIRC::SendRequestUserList()
 {
 	m_UserList.clear();
-	m_Connection.raw((char*)"WHO #AllTheHaxx");
+	// XXX!
 }
 
 void CIRC::SendNickChange(const char *pNewNick)
 {
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "%s", pNewNick);
-	m_Connection.nick(aBuf);
+	// TODO!
 }
 
 void CIRC::OnConsoleInit()
 {
-	Connect();
+	//Connect();
 }
 
 void CIRC::OnReset()

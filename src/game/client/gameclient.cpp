@@ -10,6 +10,7 @@
 #include <engine/storage.h>
 #include <engine/sound.h>
 #include <engine/serverbrowser.h>
+#include <engine/irc.h>
 #include <engine/updater.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/config.h>
@@ -148,6 +149,7 @@ void CGameClient::OnConsoleInit()
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
+	m_pIrc = Kernel()->RequestInterface<IIrc>();
 
 	// setup pointers
 	m_pBinds = &::gs_Binds;
@@ -774,6 +776,12 @@ void CGameClient::OnRelease()
 	// release all systems
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnRelease();
+}
+
+void CGameClient::OnMessageIrc(const char *pFrom, const char *pUser, const char *pText)
+{
+	for(int i = 0; i < m_All.m_Num; i++)
+		m_All.m_paComponents[i]->OnMessageIrc(pFrom, pUser, pText);
 }
 
 void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)

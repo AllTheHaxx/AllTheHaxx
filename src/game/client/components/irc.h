@@ -6,7 +6,6 @@
 
 #include <base/tl/sorted_array.h>
 
-#include <engine/external/cpirc/IRC.h>
 #include <game/client/component.h>
 
 class CIRC : public CComponent
@@ -33,7 +32,6 @@ public:
 	};
 
 private:
-	IRC m_Connection;
 
 	void *m_pIRCThread;
 	static void ListenIRCThread(void *pUser);
@@ -52,8 +50,8 @@ public:
 	void AddLine(int Type, const char *pNick, const char *pLine); // chat
 	void AddLine(const char *pLine); // system
 
-	char *CurrentNick() { return m_Connection.current_nick(); }
-	bool IsConnected() { return m_Connection.is_connected(); }
+	char *CurrentNick() { return (char*)"noname"; } // TODO
+	bool IsConnected() { return false; } // TODO
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();
