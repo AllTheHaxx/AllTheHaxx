@@ -54,7 +54,8 @@ int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
 	//CIRC *pData = (CIRC *)user;
 
 	// TODO: parse params here!
-	dbg_msg("dbg", "WHO: %s", str_split(params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
+	char aBuf[32];
+	dbg_msg("dbg", "WHO: %s", str_split(aBuf, params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
 	return 0;
 }
 
