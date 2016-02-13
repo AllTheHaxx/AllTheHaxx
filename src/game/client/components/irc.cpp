@@ -65,8 +65,8 @@ int irchook_join(char* params, irc_reply_data* hostd, void* conn, void* user)
 	CIRC *pData = (CIRC *)user;
 
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "[IRC] %s joined the chat", hostd->nick);
-	pData->GameClient()->m_pHud->PushNotification(aBuf);
+	str_format(aBuf, sizeof(aBuf), "%s joined the chat", hostd->nick);
+	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
 	return 0;
 }
 
@@ -76,8 +76,8 @@ int irchook_leave(char* params, irc_reply_data* hostd, void* conn, void* user) /
 	CIRC *pData = (CIRC *)user;
 
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "[IRC] %s left the chat (%s)", hostd->nick, ++params);
-	pData->GameClient()->m_pHud->PushNotification(aBuf);
+	str_format(aBuf, sizeof(aBuf), "%s left the chat (%s)", hostd->nick, ++params);
+	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
 	return 0;
 }
 

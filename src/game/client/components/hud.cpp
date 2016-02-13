@@ -427,13 +427,13 @@ void CHud::RenderNotifications()
 		}
 
 		if(n->m_xOffset > 0.08f)
-			TextRender()->TextColor(1,0.2f,0.2f,1);
+			TextRender()->TextColor(1,n->m_Color.g-n->m_xOffset/0.8,n->m_Color.b-n->m_xOffset/0.8,1);
 		else
 		{
 			n->m_xOffset = 0.0f;
 			TextRender()->TextColor(n->m_Color.r, n->m_Color.g, n->m_Color.b, min(FadeVal, n->m_Color.a));
 		}
-		TextRender()->Text(0, 7+(n->m_xOffset-=n->m_xOffset/15), Y_BOTTOM-(yOffset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
+		TextRender()->Text(0, 7.0f+(n->m_xOffset-=n->m_xOffset/15), Y_BOTTOM-(yOffset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
 	}
 
 	TextRender()->TextColor(1,1,1,1);
