@@ -874,7 +874,7 @@ char *str_skip_to_whitespace(char *str);
 */
 char *str_skip_whitespaces(char *str);
 
-char *str_split(const char *str, int split, char dilem);
+char *str_split(char *dst, const char *str, int split, char dilem);
 
 /*
 	Function: str_comp_nocase

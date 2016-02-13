@@ -12,6 +12,7 @@ class CHud : public CComponent
 		char m_aMsg[256];
 		float m_SpawnTime;
 		float m_xOffset;
+		vec4 m_Color;
 
 		bool operator<(CNotification& other) { return this->m_SpawnTime > other.m_SpawnTime; }
 	};
@@ -51,7 +52,7 @@ public:
 	// DDRace
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 
-	void PushNotification(const char *pMsg);
+	void PushNotification(const char *pMsg, vec4 Color = vec4(1,1,1,1));
 	const char *GetNotification(int index);
 
 private:

@@ -2009,7 +2009,7 @@ char *str_skip_whitespaces(char *str)
 	return str;
 }
 
-char *str_split(const char *str, int split, char dilem)
+char *str_split(char *dst, const char *str, int split, char dilem)
 {
 	char splits[512][256] = { { 0 } };
 	int cmd = 0;
@@ -2029,7 +2029,8 @@ char *str_split(const char *str, int split, char dilem)
 		char_++;
 	}
 
-	return (char *)splits[split];
+	str_copy(dst, splits[split], str_length(splits[split])+1);
+	return dst;
 }
 
 /* case */

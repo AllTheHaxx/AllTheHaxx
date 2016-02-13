@@ -7,6 +7,7 @@
 #endif
 
 #include "console.h"
+#include "hud.h"
 #include "irc.h"
 
 int irchook_connected(char* params, irc_reply_data* hostd, void* conn, void* user)
@@ -53,10 +54,33 @@ int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
 	//CIRC *pData = (CIRC *)user;
 
 	// TODO: parse params here!
-	dbg_msg("dbg", "WHO: %s", str_split(params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
-
+	char aBuf[32];
+	dbg_msg("dbg", "WHO: %s", str_split(aBuf, params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
 	return 0;
 }
+
+int irchook_join(char* params, irc_reply_data* hostd, void* conn, void* user)
+{
+	//IRC* irc_conn=(IRC*)conn;
+	CIRC *pData = (CIRC *)user;
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s joined the chat", hostd->nick);
+	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
+	return 0;
+}
+
+int irchook_leave(char* params, irc_reply_data* hostd, void* conn, void* user) // serves for both QUIT and PART
+{
+	//IRC* irc_conn=(IRC*)conn;
+	CIRC *pData = (CIRC *)user;
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s left the chat (%s)", hostd->nick, ++params);
+	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
+	return 0;
+}
+
 
 CIRC::CIRC()
 {
@@ -105,6 +129,9 @@ void CIRC::ListenIRCThread(void *pUser)
 	pData->m_Connection.hook_irc_command((char *)"352", &irchook_who, pUser); // hook WHO answer
 	pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &irchook_msg, pUser); // hook chatmessages
 	pData->m_Connection.hook_irc_command((char *)"NOTICE", &irchook_notice, pUser); // hook notice
+	pData->m_Connection.hook_irc_command((char *)"JOIN", &irchook_join, pUser); // hook join
+	pData->m_Connection.hook_irc_command((char *)"PART", &irchook_leave, pUser); // hook leave
+	pData->m_Connection.hook_irc_command((char *)"QUIT", &irchook_leave, pUser); // hook part
 
 	pData->m_Connection.start((char *)"irc.quakenet.org", 6668,
 			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server

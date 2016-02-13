@@ -195,15 +195,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	// render title
 	float TitleFontsize = 40.0f;
-	if(!pTitle)
-	{
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
-			pTitle = Localize("Game over");
-		else
-			pTitle = Localize("Score board");
-	}
-	TextRender()->TextColor(1,1,1,m_FadeVal);
-	TextRender()->Text(0, x+20.0f, y, TitleFontsize, pTitle, -1);
 
 	char aBuf[128] = {0};
 
@@ -214,6 +205,15 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			int Score = Team == TEAM_RED ? m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed : m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue;
 			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
+
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+		if(Team == TEAM_RED)
+			Graphics()->SetColor(0.9f, 0.0f, 0.0f, 0.5f*m_FadeVal);
+		else
+			Graphics()->SetColor(0.04f, 0.04f, 1.0f, 0.5f*m_FadeVal);
+		RenderTools()->DrawRoundRectExt(x, y, w, TitleFontsize+15.0f, 17.0f/2, CUI::CORNER_T);
+		Graphics()->QuadsEnd();
 	}
 	else
 	{
@@ -228,7 +228,24 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			int Score = m_pClient->m_Snap.m_pLocalInfo->m_Score;
 			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
+
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0.04f, 1.0f, 0.04f, 0.5f*m_FadeVal);
+		// muh brainfuck formula, lets leave this.
+		RenderTools()->DrawRoundRectExt(x, y, w, TitleFontsize+15.0f, 17.0f/2, upper16 || upper32 || upper24?CUI::CORNER_TR:lower16 || lower32 || lower24?CUI::CORNER_TL:CUI::CORNER_T);
+		Graphics()->QuadsEnd();
 	}
+
+	if(!pTitle)
+	{
+		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
+			pTitle = Localize("Game over");
+		else
+			pTitle = Localize("Score board");
+	}
+	TextRender()->TextColor(1,1,1,m_FadeVal);
+	TextRender()->Text(0, x+20.0f, y, TitleFontsize, pTitle, -1);
 
 	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 	{
