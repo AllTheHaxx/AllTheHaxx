@@ -261,6 +261,12 @@ int CControls::SnapInput(int *pData)
 		if(!m_InputDirectionLeft[g_Config.m_ClDummy] && m_InputDirectionRight[g_Config.m_ClDummy])
 			m_InputData[g_Config.m_ClDummy].m_Direction = 1;
 
+		// moonwalk, bitch please!
+		{
+			if(m_InputDirectionLeft[g_Config.m_ClDummy] && m_InputDirectionRight[g_Config.m_ClDummy])
+				m_InputData[g_Config.m_ClDummy].m_Direction = m_LastData[g_Config.m_ClDummy].m_Direction ? -m_LastData[g_Config.m_ClDummy].m_Direction : 1;
+		}
+
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)
 		{
