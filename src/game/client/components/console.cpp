@@ -105,7 +105,7 @@ bool CGameConsole::OnMouseMove(float x, float y)
 {
 	//m_LastInput = time_get();
 
-	if((m_ConsoleType != CONSOLETYPE_IRC || m_ConsoleType != CONSOLETYPE_LOCAL) || (m_ConsoleState != CONSOLE_OPEN && m_ConsoleState != CONSOLE_OPENING))
+	if((m_ConsoleState != CONSOLE_OPEN && m_ConsoleState != CONSOLE_OPENING))
 		return false;
 
 #if defined(__ANDROID__) // No relative mouse on Android
@@ -400,9 +400,6 @@ void CGameConsole::OnRender()
 
 	if (m_ConsoleState == CONSOLE_CLOSED)
 		return;
-
-	//if (m_ConsoleState == CONSOLE_OPEN && m_ConsoleType != CONSOLETYPE_IRC)
-	//	Input()->MouseModeAbsolute();
 
 	float ConsoleHeightScale;
 
@@ -731,35 +728,31 @@ void CGameConsole::OnRender()
 		TextRender()->Text(0, Screen.w-Width-10.0f, 10.0f, FontSize, aBuf, -1);
 	}
 
-
-	if(m_ConsoleType == CONSOLETYPE_IRC || m_ConsoleType == CONSOLETYPE_LOCAL)
-	{
-		// update the ui
-		CUIRect *pScreen = UI()->Screen();
-		float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
-		float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
-		int Buttons = 0;
-		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+	// update the ui
+	CUIRect *pScreen = UI()->Screen();
+	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
+	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
+	int Buttons = 0;
+	if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
+	if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
+	if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
 
 #if defined(__ANDROID__)
-		static int ButtonsOneFrameDelay = 0; // For Android touch input
+	static int ButtonsOneFrameDelay = 0; // For Android touch input
 
-		UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
-		ButtonsOneFrameDelay = Buttons;
+	UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
+	ButtonsOneFrameDelay = Buttons;
 #else
-		UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
+	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
 #endif
 
-		// render cursor
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1,1,1,1);
-		IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-		Graphics()->QuadsEnd();
-	}
+	// render cursor
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1,1,1,1);
+	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
 }
 
 void CGameConsole::RenderIRCUserList(CUIRect MainView)
@@ -816,17 +809,7 @@ bool CGameConsole::OnInput(IInput::CEvent Event)
 void CGameConsole::Toggle(int Type)
 {
 	if(m_ConsoleType != Type && (m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING))
-	{
-		// don't toggle console, just switch what console to use
-		if(Type == CONSOLETYPE_IRC)
-		{
 			Input()->MouseModeRelative();
-			//m_pClient->OnRelease();
-		}
-		else
-			Input()->MouseModeAbsolute();
-
-	}
 	else
 	{
 		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_OPEN)
@@ -862,17 +845,7 @@ void CGameConsole::Toggle(int Type)
 
 	if(m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING)
 	{
-		switch (m_ConsoleType) {
-		case CONSOLETYPE_LOCAL:
-			Input()->MouseModeRelative();
-		break;
-		case CONSOLETYPE_REMOTE:
-			Input()->MouseModeAbsolute();
-		break;
-		case CONSOLETYPE_IRC:
-			Input()->MouseModeRelative();
-		break;
-		}
+		Input()->MouseModeRelative();
 	}
 
 	if(m_ConsoleState == CONSOLE_CLOSED)
