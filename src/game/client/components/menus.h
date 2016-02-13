@@ -25,6 +25,17 @@ public:
 	virtual bool OnInput(IInput::CEvent Event);
 };
 
+class CMenusTooltip : public CComponent
+{
+	char m_aTooltip[64];
+
+public:
+	CMenusTooltip() { m_aTooltip[0] = 0; }
+	void SetTooltip(const char *pTooltip) { str_copy(m_aTooltip, pTooltip, sizeof(m_aTooltip)); }
+
+	virtual void OnRender();
+};
+
 class CMenus : public CComponent
 {
 	friend class CGameConsole; // need this for IRC GUI
@@ -43,7 +54,7 @@ class CMenus : public CComponent
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
-	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
+	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
 	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners);
 
 	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect);

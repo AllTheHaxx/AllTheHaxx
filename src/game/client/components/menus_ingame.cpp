@@ -641,7 +641,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			// clear button
 			{
 				static int s_ClearButton = 0;
-				if(DoButton_Menu(&s_ClearButton, "×", 0, &Button2, CUI::CORNER_R, vec4(1,1,1,0.35f)))
+				if(DoButton_Menu(&s_ClearButton, "×", 0, &Button2, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 				{
 					m_aFilterString[0] = 0;
 					UI()->SetActiveItem(&m_aFilterString);
@@ -694,7 +694,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_L);
 			// clear button
 			static int s_ClearButton = 0;
-			if(DoButton_Menu(&s_ClearButton, "×", 0, &ClearButton, CUI::CORNER_R, vec4(1,1,1,0.35f)))
+			if(DoButton_Menu(&s_ClearButton, "×", 0, &ClearButton, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 			{
 				m_aCallvoteReason[0] = 0;
 				UI()->SetActiveItem(&m_aCallvoteReason);
@@ -958,6 +958,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(25.5f, &Button, 0);
 	static int s_ButtonDummiesDisconnect = 0;
 	{
+		if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
 		if(DoButton_Menu(&s_ButtonDummiesDisconnect, Localize("Disconnect dummies"), 0, &Button))
 		{
 			m_pClient->m_pSpoofRemote->SendCommand("dcdum");
@@ -1301,7 +1302,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				ClrBt.w = Button.h;
 				ClrBt.h = Button.h;
 				static int s_ClearButton = 0;
-				if(DoButton_Menu(&s_ClearButton, "×", 0, &ClrBt, CUI::CORNER_R))
+				if(DoButton_Menu(&s_ClearButton, "×", 0, &ClrBt, 0, CUI::CORNER_R))
 				{
 					s_OffsetChatMsg = 0.0f;
 					mem_zero(s_aChatMessage, sizeof(s_aChatMessage));

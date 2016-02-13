@@ -679,8 +679,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			Button.VSplitLeft(135.0f, &Label, &Button);
 			UI()->DoLabel(&Label, Localize("Mouse sens."), 14.0f*UI()->Scale(), -1);
 			Button.HMargin(2.0f, &Button);
-			g_Config.m_InpMousesens = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/500.0f)*500.0f)+5;
-			//*key.key = ui_do_key_reader(key.key, &Button, *key.key);
+			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/995.0f)*995.0f)+5;
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
@@ -1012,7 +1011,9 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Sound volume"), 14.0f, -1);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s: %i%", Localize("Sound volume"), g_Config.m_SndVolume);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 		g_Config.m_SndVolume = (int)(DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume/100.0f)*100.0f);
 	}
 
@@ -1023,7 +1024,9 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Map sound volume"), 14.0f, -1);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s: %i%", Localize("Map sound volume"), g_Config.m_SndMapSoundVolume);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 		g_Config.m_SndMapSoundVolume = (int)(DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume/100.0f)*100.0f);
 	}
 }
@@ -1125,7 +1128,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 #if defined(__ANDROID__)
 	UiDoListboxStart(&s_LanguageList , &MainView, 50.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
 #else
-	UiDoListboxStart(&s_LanguageList , &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
+	UiDoListboxStart(&s_LanguageList , &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 2, s_SelectedLanguage, s_ScrollValue);
 #endif
 
 	for(sorted_array<CLanguage>::range r = s_Languages.all(); !r.empty(); r.pop_front())
@@ -1176,21 +1179,21 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("General"),
 		Localize("Player"),
 		("Tee"),
-		Localize("HUD"),
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDNet"),
 		("Haxx"),
+		Localize("HUD"),
 		Localize("Chat"),
 		Localize("Identities"),
+		Localize("DDNet"),
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
 
 	for(int i = 0; i < NumTabs; i++)
 	{
-		TabBar.HSplitTop(i==9?24:10, &Button, &TabBar);
+		TabBar.HSplitTop(i==7||i==11?24:10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(DoButton_MenuTab(aTabs[i], aTabs[i], s_SettingsPage == i, &Button, CUI::CORNER_R))
 			s_SettingsPage = i;
@@ -1207,21 +1210,22 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(s_SettingsPage == 3)
 		RenderSettingsTee(MainView);
 	else if(s_SettingsPage == 4)
-		RenderSettingsHUD(MainView);
-	else if(s_SettingsPage == 5)
 		RenderSettingsControls(MainView);
-	else if(s_SettingsPage == 6)
+	else if(s_SettingsPage == 5)
 		RenderSettingsGraphics(MainView);
-	else if(s_SettingsPage == 7)
+	else if(s_SettingsPage == 6)
 		RenderSettingsSound(MainView);
-	else if(s_SettingsPage == 8)
-		RenderSettingsDDRace(MainView);
-	else if(s_SettingsPage == 9)
+	else if(s_SettingsPage == 7)
 		RenderSettingsHaxx(MainView);
-	else if(s_SettingsPage == 10)
+	else if(s_SettingsPage == 8)
+		RenderSettingsHUD(MainView);
+	else if(s_SettingsPage == 9)
 		RenderSettingsIRC(MainView);
-	else if(s_SettingsPage == 11)
+	else if(s_SettingsPage == 10)
 		RenderSettingsIdent(MainView);
+	else if(s_SettingsPage == 11)
+		RenderSettingsDDRace(MainView);
+
 
 	if(m_NeedRestartUpdate)
 	{

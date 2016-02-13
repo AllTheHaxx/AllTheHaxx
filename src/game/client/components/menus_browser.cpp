@@ -503,7 +503,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// clear button
 	{
 		static int s_ClearButton = 0;
-		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, CUI::CORNER_R, vec4(1,1,1,0.35f)))
+		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 		{
 			g_Config.m_BrFilterString[0] = 0;
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
@@ -527,7 +527,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// clear button
 	{
 		static int s_ClearButton = 0;
-		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, CUI::CORNER_R, vec4(1,1,1,0.35f)))
+		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 		{
 			g_Config.m_BrExcludeString[0] = 0;
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
@@ -1426,12 +1426,12 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			CUIRect Right;
 			Button.VSplitMid(&Button, &Right);
 			static int s_SaveButton = 0;
-			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, CUI::CORNER_L))
+			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, 0, CUI::CORNER_L))
 			{
 				ServerBrowser()->SaveCache();
 			}
 			static int s_LoadButton = 0;
-			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, CUI::CORNER_R))
+			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, 0, CUI::CORNER_R))
 			{
 				if(!ServerBrowser()->LoadCache())
 					Console()->Print(0, "browser", "failed to load cache file", false);

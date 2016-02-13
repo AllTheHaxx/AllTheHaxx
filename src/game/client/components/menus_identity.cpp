@@ -46,7 +46,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		Button.VSplitRight(Button.h, 0, &Temp);
 		Temp.Margin(4.0f, &Temp);
-		if(DoButton_Menu(pEntry, Localize("X"), 0, &Temp))
+		if(DoButton_Menu(pEntry, "×", 0, &Temp, Localize("delete"), i < numID-1 ? CUI::CORNER_R: CUI::CORNER_ALL))
 			m_pClient->m_pIdentity->DeleteIdent(i);
 
 		if(i < numID-1)
@@ -54,7 +54,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
 			Temp.x -= 16.0f;
-			if(DoButton_Menu(&s_aDownIDs[i], Localize("↓"), 0, &Temp))
+			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, Localize("move down"), i > 0 ? 0 : CUI::CORNER_L))
 			{
 				m_pClient->m_pIdentity->SwapIdent(i, 1);
 			}
@@ -65,7 +65,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
 			Temp.x -= 32.0f;
-			if(DoButton_Menu(&s_aUpIDs[i], Localize("↑"), 0, &Temp))
+			if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, Localize("move up"), i < numID-1 ? CUI::CORNER_L : CUI::CORNER_ALL))
 			{
 				m_pClient->m_pIdentity->SwapIdent(i, -1);
 			}

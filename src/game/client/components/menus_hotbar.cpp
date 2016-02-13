@@ -71,7 +71,7 @@ void CMenus::RenderIdents(CUIRect MainView)
 		pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(pIdent->m_aSkin));
 
 		Button.VSplitLeft(80.0f, &Label, &Button);
-		if(DoButton_Menu(pIdent, "", 0, &Label, CUI::CORNER_ALL, vec4(pSkin->m_BloodColor.r, pSkin->m_BloodColor.g, pSkin->m_BloodColor.b, 1.0f)))
+		if(DoButton_Menu(pIdent, "", 0, &Label, 0, CUI::CORNER_ALL, vec4(pSkin->m_BloodColor.r, pSkin->m_BloodColor.g, pSkin->m_BloodColor.b, 1.0f)))
 		{
 			CIdentity::CIdentEntry *pIdent = m_pClient->m_pIdentity->GetIdent(i);
 			str_format(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), pIdent->m_aName);

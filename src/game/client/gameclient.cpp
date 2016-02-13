@@ -79,6 +79,7 @@ static CGameConsole gs_GameConsole;
 static CBinds gs_Binds;
 static CParticles gs_Particles;
 static CMenus gs_Menus;
+static CMenusTooltip gs_Tooltip;
 static CSkins gs_Skins;
 static CCountryFlags gs_CountryFlags;
 static CFlow gs_Flow;
@@ -153,6 +154,7 @@ void CGameClient::OnConsoleInit()
 	m_pGameConsole = &::gs_GameConsole;
 	m_pParticles = &::gs_Particles;
 	m_pMenus = &::gs_Menus;
+	m_pTooltip = &::gs_Tooltip;
 	m_pHud = &::gs_Hud;
 	m_pSkins = &::gs_Skins;
 	m_pCountryFlags = &::gs_CountryFlags;
@@ -226,6 +228,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Statboard);
 	m_All.Add(m_pMotd);
 	m_All.Add(m_pMenus);
+	m_All.Add(m_pTooltip);
 	m_All.Add(m_pGameConsole);
 
 	// build the input stack

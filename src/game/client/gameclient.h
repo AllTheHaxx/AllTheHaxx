@@ -332,6 +332,7 @@ public:
 	class CBinds *m_pBinds;
 	class CParticles *m_pParticles;
 	class CMenus *m_pMenus;
+	class CMenusTooltip *m_pTooltip;
 	class CHud *m_pHud;
 	class CSkins *m_pSkins;
 	class CCountryFlags *m_pCountryFlags;
