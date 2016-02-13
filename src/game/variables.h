@@ -129,6 +129,7 @@ MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFL
 // haxx
 MACRO_CONFIG_INT(BrAutoRefresh, br_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Time in secs to refresh the serverbrowser when active (0 disables)")
 MACRO_CONFIG_INT(BrAutoCache, br_auto_cache, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable automatic serverlist cache management (recommended)")
+MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show DDNet tab in serverbrowser")
 MACRO_CONFIG_STR(ClSpoofSrvIP, cl_spoofsrv_ip, 32, "127.0.0.1", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IP of the spoofing server")
 MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 0, 0, 64000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Port of the spoofing server")
 MACRO_CONFIG_INT(ClSpoofAutoconnect, cl_spoof_autoconnect, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to zervor on startup automatically")

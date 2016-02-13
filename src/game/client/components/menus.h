@@ -284,6 +284,8 @@ class CMenus : public CComponent
 	void RenderSettingsControls(CUIRect MainView);
 	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
+	void RenderSettingsHaxx(CUIRect MainView);
+	void RenderSettingsIRC(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 
 	// found in menus_identity.cpp

@@ -624,7 +624,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		//box.VSplitLeft(4.0f, 0, &box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_FavoritesButton=0;
-		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
+		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, CUI::CORNER_TR*(1-g_Config.m_BrShowDDNet)))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
@@ -633,14 +633,17 @@ int CMenus::RenderMenubar(CUIRect r)
 		}
 
 		//box.VSplitLeft(4.0f, 0, &box);
-		Box.VSplitLeft(100.0f, &Button, &Box);
-		static int s_DDNetButton=0;
-		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
+		if(g_Config.m_BrShowDDNet)
 		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-			NewPage = PAGE_DDNET;
-			m_DoubleClickIndex = -1;
+			Box.VSplitLeft(100.0f, &Button, &Box);
+			static int s_DDNetButton=0;
+			if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
+			{
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+				NewPage = PAGE_DDNET;
+				m_DoubleClickIndex = -1;
+			}
 		}
 
 		Box.VSplitLeft(10.0f, 0, &Box);
@@ -672,20 +675,31 @@ int CMenus::RenderMenubar(CUIRect r)
 			NewPage = PAGE_SERVER_INFO;
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
-		static int s_GhostButton=0;
-		if(DoButton_MenuTab(&s_GhostButton, "Network", m_ActivePage==PAGE_DDRace, &Button, 0))
-			NewPage = PAGE_DDRace;
-
-		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_CallVoteButton=0;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, 0))
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_CALLVOTE;
+
+		Box.VSplitLeft(30.0f, &Button, &Box);
+		Box.VSplitLeft(100.0f, &Button, &Box);
+		static int s_BrowserButton=0;
+		if(DoButton_MenuTab(&s_BrowserButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, CUI::CORNER_TL))
+			NewPage = PAGE_BROWSER;
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_SpoofingButton=0;
 		if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_SPOOFING;
+
+		CServerInfo tmp; Client()->GetServerInfo(&tmp);
+		if(IsDDNet(&tmp) || IsDDRace(&tmp))
+		{
+			Box.VSplitLeft(30.0f, &Button, &Box);
+			Box.VSplitLeft(90.0f, &Button, &Box);
+			static int s_GhostButton=0;
+			if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, CUI::CORNER_T))
+				NewPage = PAGE_GHOST;
+		}
 	}
 
 	/*
@@ -699,19 +713,19 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_QuitButton=0;
-	if(DoButton_MenuTab(&s_QuitButton, "×", 0, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_QuitButton, "×", 0, &Button, CUI::CORNER_TR))
 		m_Popup = POPUP_QUIT;
 
-	Box.VSplitRight(10.0f, &Box, &Button);
+	//Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_SettingsButton=0;
-	if(DoButton_MenuTab(&s_SettingsButton, "⚙", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_SettingsButton, "⚙", m_ActivePage==PAGE_SETTINGS, &Button, 0/*CUI::CORNER_T*/))
 		NewPage = PAGE_SETTINGS;
 
-	Box.VSplitRight(10.0f, &Box, &Button);
+	//Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_EditorButton=0;
-	if(DoButton_MenuTab(&s_EditorButton, Localize("✎"), 0, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_EditorButton, "✎", 0, &Button, CUI::CORNER_TL))
 	{
 		g_Config.m_ClEditor = 1;
 	}

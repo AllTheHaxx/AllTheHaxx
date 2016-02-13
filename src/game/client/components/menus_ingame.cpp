@@ -1378,7 +1378,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 	}
 }
 
-void CMenus::RenderInGameDDRace(CUIRect MainView)
+void CMenus::RenderInGameDDRace(CUIRect MainView) //XXX
 {
 	CUIRect Box = MainView;
 	CUIRect Button;
@@ -1429,12 +1429,18 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 	Box.HSplitTop(24.0f, &Box, &MainView);
 	Box.VMargin(20.0f, &Box);
 
+	Box.VSplitLeft(90.0f+90.0f+130.0f+100.0f+30.0f-100.0f, &Button, &Box);
 	Box.VSplitLeft(100.0f, &Button, &Box);
 	static int s_InternetButton=0;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_TL))
+	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, 0))
 	{
 		if (Page != PAGE_INTERNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		{
+			if(ServerBrowser()->CacheExists())
+				ServerBrowser()->LoadCache();
+			else
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		}
 		NewPage = PAGE_INTERNET;
 	}
 
@@ -1456,13 +1462,16 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 		NewPage  = PAGE_FAVORITES;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
-	static int s_DDNetButton=0;
-	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_TR))
+	if(g_Config.m_BrShowDDNet)
 	{
-		if (Page != PAGE_DDNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-		NewPage  = PAGE_DDNET;
+		Box.VSplitLeft(110.0f, &Button, &Box);
+		static int s_DDNetButton=0;
+		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, 0))
+		{
+			if (Page != PAGE_DDNET)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			NewPage  = PAGE_DDNET;
+		}
 	}
 
 	if(NewPage != -1)

@@ -1181,7 +1181,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Graphics"),
 		Localize("Sound"),
 		Localize("DDNet"),
-		("Identities")
+		("Haxx"),
+		Localize("Chat"),
+		Localize("Identities"),
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1215,6 +1217,10 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(s_SettingsPage == 8)
 		RenderSettingsDDRace(MainView);
 	else if(s_SettingsPage == 9)
+		RenderSettingsHaxx(MainView);
+	else if(s_SettingsPage == 10)
+		RenderSettingsIRC(MainView);
+	else if(s_SettingsPage == 11)
 		RenderSettingsIdent(MainView);
 
 	if(m_NeedRestartUpdate)
@@ -1937,4 +1943,14 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		static float s_OffsetCode = 0.0f;
 		DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode);
 	}
+}
+
+void CMenus::RenderSettingsHaxx(CUIRect MainView)
+{
+
+}
+
+void CMenus::RenderSettingsIRC(CUIRect MainView)
+{
+
 }
