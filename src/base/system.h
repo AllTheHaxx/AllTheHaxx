@@ -1395,6 +1395,8 @@ void secure_random_fill(void *bytes, size_t length);
 */
 int secure_rand();
 
+void open_default_browser(const char *url);
+
 #ifdef __cplusplus
 }
 #endif
