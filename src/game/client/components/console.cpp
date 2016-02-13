@@ -105,7 +105,7 @@ bool CGameConsole::OnMouseMove(float x, float y)
 {
 	//m_LastInput = time_get();
 
-	if(m_ConsoleType != CONSOLETYPE_IRC || (m_ConsoleState != CONSOLE_OPEN && m_ConsoleState != CONSOLE_OPENING))
+	if((m_ConsoleType != CONSOLETYPE_IRC || m_ConsoleType != CONSOLETYPE_LOCAL) || (m_ConsoleState != CONSOLE_OPEN && m_ConsoleState != CONSOLE_OPENING))
 		return false;
 
 #if defined(__ANDROID__) // No relative mouse on Android
@@ -732,7 +732,7 @@ void CGameConsole::OnRender()
 	}
 
 
-	if(m_ConsoleType == CONSOLETYPE_IRC)
+	if(m_ConsoleType == CONSOLETYPE_IRC || m_ConsoleType == CONSOLETYPE_LOCAL)
 	{
 		// update the ui
 		CUIRect *pScreen = UI()->Screen();
@@ -864,6 +864,8 @@ void CGameConsole::Toggle(int Type)
 	{
 		switch (m_ConsoleType) {
 		case CONSOLETYPE_LOCAL:
+			Input()->MouseModeRelative();
+		break;
 		case CONSOLETYPE_REMOTE:
 			Input()->MouseModeAbsolute();
 		break;
