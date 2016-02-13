@@ -1690,7 +1690,7 @@ bool CMenus::OnMouseMove(float x, float y)
 	if(!m_MenuActive && !m_HotbarActive)
 		return false;
 
-	if(!m_MenuActive || !m_pClient->m_pGameConsole->IsClosed())
+	if((!m_MenuActive && !m_HotbarActive) || !m_pClient->m_pGameConsole->IsClosed())
 		return false;
 
 #if defined(__ANDROID__) // No relative mouse on Android
