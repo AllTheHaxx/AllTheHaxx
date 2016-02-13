@@ -107,7 +107,7 @@ void IRC::delete_irc_command_hook(irc_command_hook* cmd_hook)
 
 int IRC::start(char* server, int port, char* nick, char* user, char* name, char* pass)
 {
-	#ifdef WIN32
+	#if defined(CONF_FAMILY_WINDOWS)
 	HOSTENT* resolv;
 	#else
 	hostent* resolv;
@@ -134,7 +134,7 @@ int IRC::start(char* server, int port, char* nick, char* user, char* name, char*
 
 	if (connect(irc_socket, (const sockaddr*)&rem, sizeof(rem))==SOCKET_ERROR)
 	{
-		#ifdef WIN32
+		#if defined(CONF_FAMILY_WINDOWS)
 		printf("Failed to connect: %d\n", WSAGetLastError());
 		#endif
 		closesocket(irc_socket);
@@ -172,7 +172,7 @@ void IRC::disconnect(char* reason)
 		fclose(dataout);
 		printf("Disconnected from server.\n");
 		connected=false;
-		#ifdef WIN32
+		#if defined(CONF_FAMILY_WINDOWS)
 		shutdown(irc_socket, 2);
 		#endif
 		closesocket(irc_socket);
