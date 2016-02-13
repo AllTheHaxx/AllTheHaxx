@@ -35,8 +35,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	TabBar.VSplitRight(2.0f, &TabBar, &Button);
 	RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.8f, 0.6f, 0.5f), 0, 0);
 	
-	int s_aUpIDs[numID];
-	int s_aDownIDs[numID];
+	int *s_aUpIDs = (int*)mem_alloc(sizeof(int)*numID, 0);
+	int *s_aDownIDs = (int*)mem_alloc(sizeof(int)*numID, 0);
 	for(int i = 0; i < numID; i++)
 	{
 		CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(i);
@@ -70,6 +70,9 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 				m_pClient->m_pIdentity->SwapIdent(i, -1);
 			}
 		}
+
+		mem_free(s_aUpIDs);
+		mem_free(s_aDownIDs);
 
 		Button.HSplitTop(Button.h*0.25f, 0, &Label);
 

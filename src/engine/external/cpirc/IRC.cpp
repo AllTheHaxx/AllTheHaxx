@@ -23,6 +23,7 @@
 	IRC:	#magpie @ irc.quakenet.org
 */
 
+#include <base/system.h>
 #include "IRC.h"
 #if defined(CONF_FAMILY_WINDOWS)
 #include <windows.h>
