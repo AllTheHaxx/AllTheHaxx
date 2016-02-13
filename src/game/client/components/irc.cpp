@@ -7,6 +7,7 @@
 #endif
 
 #include "console.h"
+#include "hud.h"
 #include "irc.h"
 
 int irchook_connected(char* params, irc_reply_data* hostd, void* conn, void* user)
@@ -60,18 +61,22 @@ int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
 int irchook_join(char* params, irc_reply_data* hostd, void* conn, void* user)
 {
 	//IRC* irc_conn=(IRC*)conn;
-	//CIRC *pData = (CIRC *)user;
+	CIRC *pData = (CIRC *)user;
 
-	dbg_msg("dbg", "JOIN: '%s'", hostd->nick);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "[IRC] %s joined the chat", hostd->nick);
+	pData->GameClient()->m_pHud->PushNotification(aBuf);
 	return 0;
 }
 
 int irchook_leave(char* params, irc_reply_data* hostd, void* conn, void* user) // serves for both QUIT and PART
 {
 	//IRC* irc_conn=(IRC*)conn;
-	//CIRC *pData = (CIRC *)user;
+	CIRC *pData = (CIRC *)user;
 
-	dbg_msg("dbg", "LEAVE: '%s', REASON='%s'", hostd->nick, ++params);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "[IRC] %s left the chat (%s)", hostd->nick, ++params);
+	pData->GameClient()->m_pHud->PushNotification(aBuf);
 	return 0;
 }
 
