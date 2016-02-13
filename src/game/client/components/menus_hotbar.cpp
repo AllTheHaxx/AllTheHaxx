@@ -137,14 +137,14 @@ void CMenus::RenderTrans(CUIRect MainView)
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(40.0f, &Button, 0);
 	Label.x += 4.0f;
-	Button.x += 6.0f;
+	Button.x += 10.0f;
 	UI()->DoLabelScaled(&Label, "In  Source:", 14.0, -1);
 	static float s_OffsetInSrc = 0.0f;
 	DoEditBox(&g_Config.m_ClTransInSrc, &Button, g_Config.m_ClTransInSrc, sizeof(g_Config.m_ClTransInSrc), 14.0f, &s_OffsetInSrc);
 
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(40.0f, &Button, 0);
-	Button.x += 100.0f;
+	Button.x += 102.0f;
 	Label.x += 64.0f;
 	UI()->DoLabelScaled(&Label, "In  Destination:", 14.0, -1);
 	static float s_OffsetInDst = 0.0f;
@@ -155,14 +155,14 @@ void CMenus::RenderTrans(CUIRect MainView)
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(40.0f, &Button, 0);
 	Label.x += 4.0f;
-	Button.x += 6.0f;
+	Button.x += 10.0f;
 	UI()->DoLabelScaled(&Label, "Out Source:", 14.0, -1);
 	static float s_OffsetOutSrc = 0.0f;
 	DoEditBox(&g_Config.m_ClTransOutSrc, &Button, g_Config.m_ClTransOutSrc, sizeof(g_Config.m_ClTransOutSrc), 14.0f, &s_OffsetOutSrc);
 
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(40.0f, &Button, 0);
-	Button.x += 100.0f;
+	Button.x += 102.0f;
 	Label.x += 64.0f;
 	UI()->DoLabelScaled(&Label, "Out Destination:", 14.0, -1);
 	static float s_OffsetOutDst = 0.0f;
