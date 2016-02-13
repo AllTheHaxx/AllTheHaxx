@@ -6,9 +6,11 @@
 
 #include <base/tl/sorted_array.h>
 
+#include <engine/client/irc.h>
+
 #include <game/client/component.h>
 
-class CIRC : public CComponent
+class CIrcBind : public CComponent
 {
 public:
 	struct IRCUser
@@ -21,7 +23,7 @@ public:
 		//std::string pNoIdeaHowToNameIt; // what is this? (:3 or :0)
 		std::string m_Realname;
 
-		bool operator <(const CIRC::IRCUser& other) { return m_User[0] < other.m_User[0]; }
+		bool operator <(const CIrcBind::IRCUser& other) { return m_User[0] < other.m_User[0]; }
 	};
 
 	enum
@@ -37,7 +39,7 @@ private:
 	static void ListenIRCThread(void *pUser);
 
 public:
-	CIRC();
+	CIrcBind();
 
 	void SendChat(const char *pMsg);
 	void SendRaw(const char *pMsg);
@@ -50,8 +52,8 @@ public:
 	void AddLine(int Type, const char *pNick, const char *pLine); // chat
 	void AddLine(const char *pLine); // system
 
-	char *CurrentNick() { return (char*)"noname"; } // TODO
-	bool IsConnected() { return false; } // TODO
+	const char *CurrentNick() { return m_pClient->Irc()->GetNick(); } // XXX this is depreciated and only for compatibility
+	bool IsConnected() { return m_pClient->Irc()->GetState()&IIrc::STATE_CONNECTED; }
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();

@@ -88,7 +88,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		else
 		{
 			m_pGameConsole->m_pClient->m_pIRC->SendChat(pLine);
-			m_pGameConsole->m_pClient->m_pIRC->AddLine(CIRC::IRC_LINETYPE_CHAT, m_pGameConsole->m_pClient->m_pIRC->CurrentNick(), pLine);
+			m_pGameConsole->m_pClient->m_pIRC->AddLine(CIrcBind::IRC_LINETYPE_CHAT, m_pGameConsole->m_pClient->m_pIRC->CurrentNick(), pLine);
 		}
 	}
 }
@@ -758,7 +758,7 @@ void CGameConsole::OnRender()
 void CGameConsole::RenderIRCUserList(CUIRect MainView)
 {
 	CUIRect Pane, Button;
-	CIRC * const r = m_pClient->m_pIRC;
+	CIrcBind * const r = m_pClient->m_pIRC;
 	CMenus * const m = m_pClient->m_pMenus;
 	MainView.VSplitRight(MainView.w/5, &MainView, &Pane);
 

@@ -1,32 +1,29 @@
 #include <base/system.h>
 #include <base/math.h>
 #include <engine/shared/config.h>
-
-#if defined(CONF_FAMILY_WINDOWS)
-	#include <windows.h>
-#endif
+#include <engine/client/irc.h>
 
 #include "console.h"
 #include "hud.h"
 #include "irc.h"
 
-CIRC::CIRC()
+CIrcBind::CIrcBind()
 {
 	m_pIRCThread = 0;
 	OnReset();
 }
 
-void CIRC::OnRender()
+void CIrcBind::OnRender()
 {
 }
 
-void CIRC::ListenIRCThread(void *pUser)
+void CIrcBind::ListenIRCThread(void *pUser)
 {
 	//CIRC *pData = (CIRC *)pUser;
 	return;
 }
 
-void CIRC::AddLine(int Type, const char *pNick, const char *pLine)
+void CIrcBind::AddLine(int Type, const char *pNick, const char *pLine)
 {
 	time_t rawtime;
 	struct tm *timeinfo;
@@ -46,7 +43,7 @@ void CIRC::AddLine(int Type, const char *pNick, const char *pLine)
 	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);
 }
 
-void CIRC::AddLine(const char *pLine)
+void CIrcBind::AddLine(const char *pLine)
 {
 	time_t rawtime;
 	struct tm *timeinfo;
@@ -60,59 +57,57 @@ void CIRC::AddLine(const char *pLine)
 }
 
 
-void CIRC::SendChat(const char* pMsg)
+void CIrcBind::SendChat(const char* pMsg)
 {
 	char aBuf[510];
 	str_format(aBuf, sizeof(aBuf), "PRIVMSG #AllTheHaxx :%s", pMsg);
 	// TODO!
 }
 
-void CIRC::SendRaw(const char* pMsg)
+void CIrcBind::SendRaw(const char* pMsg)
 {
 	char aBuf[510];
 	str_format(aBuf, sizeof(aBuf), "%s", pMsg+1);
 	// TODO!
 }
 
-void CIRC::Connect()
+void CIrcBind::Connect() // XXX this is depreciated and only for compatibility
 {
 	if(IsConnected())
 		return;
 
-	// TODO!
+	m_pClient->Irc()->StartConnection();
 }
 
-void CIRC::Disconnect(char *pReason)
+void CIrcBind::Disconnect(char *pReason) // XXX this is depreciated and only for compatibility
 {
 	if(!IsConnected())
 		return;
 
-	// TODO!
+	m_pClient->Irc()->EndConnection();
 }
 
-void CIRC::SendRequestUserList()
+void CIrcBind::SendRequestUserList()
 {
 	m_UserList.clear();
 	// XXX!
 }
 
-void CIRC::SendNickChange(const char *pNewNick)
+void CIrcBind::SendNickChange(const char *pNewNick) // XXX this is depreciated and only for compatibility
 {
-	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%s", pNewNick);
-	// TODO!
+	m_pClient->Irc()->SetNick(pNewNick);
 }
 
-void CIRC::OnConsoleInit()
+void CIrcBind::OnConsoleInit()
 {
 	//Connect();
 }
 
-void CIRC::OnReset()
+void CIrcBind::OnReset()
 {
 }
 
-void CIRC::OnShutdown()
+void CIrcBind::OnShutdown()
 {
 	Disconnect(g_Config.m_ClIRCLeaveMsg);
 }

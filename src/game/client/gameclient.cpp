@@ -110,7 +110,7 @@ static CBackground gs_BackGround;
 static CMapSounds gs_MapSounds;
 
 static CAStar gs_AStar;
-static CIRC gs_IRC;
+static CIrcBind gs_IRC;
 
 static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;

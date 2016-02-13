@@ -124,7 +124,7 @@ void CIrc::StartConnection()
     char aNetBuff[2048];
 
     m_State = STATE_CONNECTING;
-    //Lookup
+    // lookup
 	if(net_host_lookup("irc.quakenet.org", &m_HostAddress, NETTYPE_IPV4) != 0)
 	{
         dbg_msg("IRC","ERROR: Can't lookup Quakenet");
