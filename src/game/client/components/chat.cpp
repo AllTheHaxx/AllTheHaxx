@@ -339,7 +339,9 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 				str_comp_nocase(pMsg->m_pMessage, "You aren't freezed!") == 0 ||
 				str_comp_nocase(pMsg->m_pMessage, "You are not freezed!") == 0 ||
 				str_comp_nocase(pMsg->m_pMessage, "Please join a team before you start") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "Server admin requires you to be in a team and with other tees to start") == 0
+				str_comp_nocase(pMsg->m_pMessage, "Server admin requires you to be in a team and with other tees to start") == 0 ||
+				str_comp_nocase(pMsg->m_pMessage, "You have a jetpack gun") == 0 ||
+				str_comp_nocase(pMsg->m_pMessage, "You lost your jetpack gun") == 0
 				)
 			{
 				m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
