@@ -54,9 +54,27 @@ int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
 
 	// TODO: parse params here!
 	dbg_msg("dbg", "WHO: %s", str_split(params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
-
 	return 0;
 }
+
+int irchook_join(char* params, irc_reply_data* hostd, void* conn, void* user)
+{
+	//IRC* irc_conn=(IRC*)conn;
+	//CIRC *pData = (CIRC *)user;
+
+	dbg_msg("dbg", "JOIN: '%s'", hostd->nick);
+	return 0;
+}
+
+int irchook_leave(char* params, irc_reply_data* hostd, void* conn, void* user) // serves for both QUIT and PART
+{
+	//IRC* irc_conn=(IRC*)conn;
+	//CIRC *pData = (CIRC *)user;
+
+	dbg_msg("dbg", "LEAVE: '%s', REASON='%s'", hostd->nick, ++params);
+	return 0;
+}
+
 
 CIRC::CIRC()
 {
@@ -105,6 +123,9 @@ void CIRC::ListenIRCThread(void *pUser)
 	pData->m_Connection.hook_irc_command((char *)"352", &irchook_who, pUser); // hook WHO answer
 	pData->m_Connection.hook_irc_command((char *)"PRIVMSG", &irchook_msg, pUser); // hook chatmessages
 	pData->m_Connection.hook_irc_command((char *)"NOTICE", &irchook_notice, pUser); // hook notice
+	pData->m_Connection.hook_irc_command((char *)"JOIN", &irchook_join, pUser); // hook join
+	pData->m_Connection.hook_irc_command((char *)"PART", &irchook_leave, pUser); // hook leave
+	pData->m_Connection.hook_irc_command((char *)"QUIT", &irchook_leave, pUser); // hook part
 
 	pData->m_Connection.start((char *)"irc.quakenet.org", 6668,
 			g_Config.m_ClIRCNick, g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname, g_Config.m_ClIRCPass); // connect to the server
