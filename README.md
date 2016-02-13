@@ -1,11 +1,11 @@
-##AllTheHaxx
-###The better DDNet Client ~ VERKECKT! [![Circle CI](https://circleci.com/gh/Henningstone/AllTheHaxx/tree/master.svg?style=svg)](https://circleci.com/gh/Henningstone/AllTheHaxx/tree/master)
+##AllTheHaxx ~ _building:_ [![Circle CI](https://circleci.com/gh/Henningstone/AllTheHaxx/tree/master.svg?style=svg)](https://circleci.com/gh/Henningstone/AllTheHaxx/tree/master)
+###The better DDNet Client. Guaranteed to be 420% verkeckt!
 ================================
-Our own flavor of [DDNet](https://github.com/ddnet/ddnet) Client. See the [website](http:/henningstone.github.io) for more information.
+Our own flavor of [DDNet](https://github.com/ddnet/ddnet) Client. See the [website](http:/AllTheHaxx.tk/) for more information.
 
 Development discussions happen on #AllTheHaxx on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4)).
 
-You can get binary releases from [Bintray](https://dl.bintray.com/henningstone/tw_AllTheHaxx/).
+You can get binary releases from [our website](http://AllTheHaxx.tk/).
 
 Building
 --------
@@ -14,7 +14,7 @@ To compile AllTheHaxx yourself, you can follow the [instructions for compiling T
 Make sure you have all the requirements that are needed by DDNet Client (listed below)
 
 --------------------------
-DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). Instead you can install these libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default. You can install all required dependencies on Debian and Ubuntu like this:
+AllTheHaxx requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). Instead you can install these libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default. You can install all required dependencies on Debian and Ubuntu like this:
 
     apt-get install libsdl1.2-dev libfreetype6-dev libcurl4-openssl-dev libogg-dev libopus-dev libopusfile-dev
 
