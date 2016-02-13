@@ -51,11 +51,21 @@ int irchook_notice(char* params, irc_reply_data* hostd, void* conn, void* user)
 int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
 {
 	//IRC* irc_conn=(IRC*)conn;
-	//CIRC *pData = (CIRC *)user;
+	CIRC *pData = (CIRC *)user;
 
 	// TODO: parse params here!
 	char aBuf[32];
 	dbg_msg("dbg", "WHO: %s", str_split(aBuf, params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
+
+	CIRC::IRCUser u;
+	u.m_User = str_split(aBuf, params, 1, ' ');
+	u.m_Domain = str_split(aBuf, params, 2, ' ');
+	u.m_Server = str_split(aBuf, params, 3, ' ');
+	u.m_Nick = str_split(aBuf, params, 4, ' ');
+	u.m_Modes = str_split(aBuf, params, 5, ' ');
+	u.m_Realname = str_split(aBuf, params, 6, ' '); // nogood
+
+	pData->m_UserList.add(u);
 	return 0;
 }
 
@@ -64,9 +74,15 @@ int irchook_join(char* params, irc_reply_data* hostd, void* conn, void* user)
 	//IRC* irc_conn=(IRC*)conn;
 	CIRC *pData = (CIRC *)user;
 
+	// notification
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "%s joined the chat", hostd->nick);
 	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
+
+	// request userdata
+	str_format(aBuf, sizeof(aBuf), "/WHO %s", hostd->nick);
+	pData->SendRaw(aBuf);
+
 	return 0;
 }
 
@@ -75,9 +91,18 @@ int irchook_leave(char* params, irc_reply_data* hostd, void* conn, void* user) /
 	//IRC* irc_conn=(IRC*)conn;
 	CIRC *pData = (CIRC *)user;
 
+	// notification (maybe better not?)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "%s left the chat (%s)", hostd->nick, ++params);
 	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
+
+	// remove from userlist
+	for(int i = 0; i < pData->m_UserList.size(); i++)
+	{
+		if(str_comp(hostd->nick, pData->m_UserList[i].m_Nick.c_str()) == 0)
+			pData->m_UserList.remove_index(i);
+	}
+
 	return 0;
 }
 
@@ -210,6 +235,7 @@ void CIRC::Disconnect(char *pReason)
 
 void CIRC::SendRequestUserList()
 {
+	m_UserList.clear();
 	m_Connection.raw((char*)"WHO #AllTheHaxx");
 }
 
