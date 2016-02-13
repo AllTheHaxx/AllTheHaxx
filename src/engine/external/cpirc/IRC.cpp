@@ -24,7 +24,7 @@
 */
 
 #include "IRC.h"
-#ifdef WIN32
+#if defined(CONF_FAMILY_WINDOWS)
 #include <windows.h>
 #else
 #include <stdlib.h>
