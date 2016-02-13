@@ -1180,14 +1180,15 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDNet")
+		Localize("DDNet"),
+		("Identities")
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
 
 	for(int i = 0; i < NumTabs; i++)
 	{
-		TabBar.HSplitTop(10, &Button, &TabBar);
+		TabBar.HSplitTop(i==9?24:10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(DoButton_MenuTab(aTabs[i], aTabs[i], s_SettingsPage == i, &Button, CUI::CORNER_R))
 			s_SettingsPage = i;
@@ -1213,6 +1214,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsSound(MainView);
 	else if(s_SettingsPage == 8)
 		RenderSettingsDDRace(MainView);
+	else if(s_SettingsPage == 9)
+		RenderSettingsIdent(MainView);
 
 	if(m_NeedRestartUpdate)
 	{

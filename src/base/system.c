@@ -2197,6 +2197,8 @@ void gui_messagebox(const char *title, const char *message)
 
 int str_isspace(char c) { return c == ' ' || c == '\n' || c == '\t'; }
 
+int str_isdigit(char c) { return c > 47 && c < 58; }
+
 char str_uppercase(char c)
 {
 	if(c >= 'a' && c <= 'z')

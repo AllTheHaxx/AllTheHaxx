@@ -29,6 +29,9 @@
 CChat::CChat()
 {
 	OnReset();
+
+	m_pTranslator = new CTranslator();
+	m_pTranslator->Init();
 }
 
 void CChat::OnReset()
@@ -361,6 +364,12 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 		if(!HideChat)
 			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+
+		if(g_Config.m_ClTransIn &&
+			str_length(pMsg->m_pMessage) > 4 &&
+			pMsg->m_ClientID != m_pClient->m_Snap.m_LocalClientID &&
+			pMsg->m_ClientID != -1)
+			m_pTranslator->RequestTranslation(g_Config.m_ClTransInSrc, g_Config.m_ClTransInDst, pMsg->m_pMessage, true);
 	}
 }
 
@@ -382,7 +391,7 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
-	if(*pLine == 0 || (ClientID != -1 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
+	if(*pLine == 0 || (ClientID != -1 && ClientID != -1337 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
 		m_pClient->m_aClients[ClientID].m_ChatIgnore ||
 		(m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
 		(m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))))
@@ -465,6 +474,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		if(ClientID == -1) // server message
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
+			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
+		}
+		else if(ClientID == -1337)
+		{
+			str_copy(m_aLines[m_CurrentLine].m_aName, "[*Translator*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
 		}
 		else
@@ -558,6 +572,20 @@ void CChat::OnRender()
 {
 	if(g_Config.m_ClChatSpam[0] != '\0')
 		Say(0, g_Config.m_ClChatSpam);
+
+	if(m_pTranslator->GetTranslation())
+	{
+		char aBuf[512];
+		if(m_pTranslator->GetTranslation()->m_In)
+		{
+			str_format(aBuf, sizeof(aBuf), "'%s' (%s -> %s)", m_pTranslator->GetTranslation()->m_Text, m_pTranslator->GetTranslation()->m_SrcLang, m_pTranslator->GetTranslation()->m_DstLang);
+			AddLine(-1337, 0, aBuf);
+		}
+		else
+			Say(0, m_pTranslator->GetTranslation()->m_Text, true);
+
+		m_pTranslator->RemoveTranslation();
+	}
 
 	if (!g_Config.m_ClShowChat)
 		return;
@@ -708,6 +736,8 @@ void CChat::OnRender()
 		vec3 rgb;
 		if (m_aLines[r].m_ClientID == -1)
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
+		else if (m_aLines[r].m_ClientID == -1337)
+			TextRender()->TextColor(0.45f,0.45f,1.0f, Blend);
 		else if (m_aLines[r].m_Highlighted)
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 		else if (m_aLines[r].m_Team)
@@ -753,13 +783,90 @@ void CChat::OnRender()
 #endif
 }
 
-void CChat::Say(int Team, const char *pLine)
+void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	m_LastChatSend = time_get();
+	
+	char aMessage[1024];
+	str_copy(aMessage, pLine, sizeof(aMessage));
+
+	if(g_Config.m_ClTransChatCmds && pLine[0] == '!')
+	{
+		char aCmd[512][256] = {{0}};
+		mem_zero(&aCmd, sizeof(aCmd));
+		int Cmd = 0;
+		int Char = 0;
+
+		for(int i = 1; i < str_length(pLine); i++)
+		{
+			if(pLine[i] == ' ')
+			{
+				Cmd++;
+				Char = 0;
+				continue;
+			}
+
+			aCmd[Cmd][Char] = pLine[i];
+			Char++;
+		}
+
+		if(!str_comp_nocase(aCmd[0], "cmdlist"))
+		{
+			AddLine(-1337, 0, "~~~~ Commands ~~~~");
+			AddLine(-1337, 0, "'!tout <dst> <message>': Translate a message");
+			AddLine(-1337, 0, "'!tin <src> <ID>': Translate message in the chat (!tin 0 to translate the last message)");
+			return;
+		}
+		else if(!str_comp_nocase(aCmd[0], "tout"))
+		{
+			if(!aCmd[1][0] || !aCmd[2][0])
+			{
+				AddLine(-1337, 0, "Please use '!tout <dst> <message>'");
+				return;
+			}
+
+			int i = 2;
+			char aBuf[256];
+			char RawMsg[512];
+
+			mem_zero(&RawMsg, sizeof(RawMsg));
+
+			while(aCmd[i][0])
+			{
+				str_format(aBuf, sizeof(aBuf), "%s ", aCmd[i]);
+				str_append(RawMsg, aBuf, sizeof(RawMsg));
+				i++;
+			}
+
+			m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, aCmd[1], RawMsg, false);
+			return;
+		}
+		else if(!str_comp_nocase(aCmd[0], "tin"))
+		{
+			if(!aCmd[1][0] || !aCmd[2][0])
+			{
+				AddLine(-1337, 0, "Please use '!tin <src> <ID>'");
+				return;
+			}
+
+			int MsgID = str_toint(aCmd[2]);
+
+			m_pTranslator->RequestTranslation(aCmd[1], g_Config.m_ClTransInDst, m_aLines[m_CurrentLine-MsgID].m_aText, true);
+			return;
+		}
+
+		AddLine(-1337, 0, "Unknown command. Try '/cmdlist'!");
+		return;
+	}
+	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && !NoTrans)
+	{
+		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
+		return;
+	}
 
 	// send chat message
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;
-	Msg.m_pMessage = pLine;
+	Msg.m_pMessage = aMessage;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 }

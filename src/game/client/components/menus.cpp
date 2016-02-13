@@ -1651,6 +1651,9 @@ bool CMenus::OnMouseMove(float x, float y)
 {
 	m_LastInput = time_get();
 
+	if(!m_MenuActive && !m_HotbarActive)
+		return false;
+
 	if(!m_MenuActive || !m_pClient->m_pGameConsole->IsClosed())
 		return false;
 
@@ -1680,7 +1683,10 @@ bool CMenus::OnInput(IInput::CEvent e)
 		if(e.m_Key == KEY_ESCAPE)
 		{
 			m_EscapePressed = true;
-			SetActive(!IsActive());
+			if(m_HotbarActive)
+				m_HotbarActive = false;
+			else
+				SetActive(!IsActive());
 			return true;
 		}
 	}
@@ -1700,6 +1706,10 @@ bool CMenus::OnInput(IInput::CEvent e)
 			m_aInputEvents[m_NumInputEvents++] = e;
 		return true;
 	}
+
+	if(HotbarLockInput(e))
+		return true;
+
 	return false;
 }
 
@@ -1780,7 +1790,7 @@ void CMenus::OnRender()
 		m_Popup = POPUP_PURE;
 	}
 
-	if(!IsActive())
+	if(!IsActive() && !m_HotbarActive)
 	{
 		m_EscapePressed = false;
 		m_EnterPressed = false;
@@ -1836,7 +1846,9 @@ void CMenus::OnRender()
 	}
 
 	// render
-	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(m_HotbarActive)
+		RenderHotbar(*UI()->Screen());
+	else if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Render();
 
 	// render cursor

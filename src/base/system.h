@@ -1242,6 +1242,7 @@ int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
 float str_tofloat(const char *str);
 int str_isspace(char c);
+int str_isdigit(char c);
 char str_uppercase(char c);
 unsigned str_quickhash(const char *str);
 

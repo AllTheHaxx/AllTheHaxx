@@ -286,6 +286,18 @@ class CMenus : public CComponent
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 
+	// found in menus_identity.cpp
+	void RenderSettingsIdent(CUIRect MainView);
+
+	// found in menus_hotbar.cpp
+	bool m_HotbarActive;
+	bool m_HotbarWasActive;
+	void RenderHotbar(CUIRect MainView);
+	void RenderIdents(CUIRect MainView);
+	void RenderTrans(CUIRect MainView);
+	static void ConKeyShortcut(IConsole::IResult *pResult, void *pUserData);
+	bool HotbarLockInput(IInput::CEvent Event);
+
 	void SetActive(bool Active);
 public:
 	void RenderBackground();
@@ -299,9 +311,10 @@ public:
 	void RenderLoading();
 	void RenderUpdating(const char *pCaption, int current=0, int total=0);
 
-	bool IsActive() const { return m_MenuActive; }
+	bool IsActive() const { return m_MenuActive || m_HotbarActive; }
 
 	virtual void OnInit();
+	virtual void OnConsoleInit();
 
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnReset();

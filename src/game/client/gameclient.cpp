@@ -41,6 +41,7 @@
 #include "components/emoticon.h"
 #include "components/flow.h"
 #include "components/hud.h"
+#include "components/identity.h"
 #include "components/irc.h"
 #include "components/items.h"
 #include "components/killmessages.h"
@@ -93,6 +94,7 @@ static CDamageInd gsDamageInd;
 static CVoting gs_Voting;
 static CSpectator gs_Spectator;
 static CSpoofRemote gs_SpoofRemote;
+static CIdentity gs_Identity;
 
 static CPlayers gs_Players;
 static CNamePlates gs_NamePlates;
@@ -176,6 +178,7 @@ void CGameClient::OnConsoleInit()
 
 	m_pAStar = &::gs_AStar;
 	m_pIRC = &::gs_IRC;
+	m_pIdentity = &::gs_Identity;
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
@@ -197,6 +200,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pMapSounds);
 	m_All.Add(m_pAStar);
 	m_All.Add(m_pIRC);
+	m_All.Add(m_pIdentity);
 
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&gs_MapLayersBackGround); // first to render
@@ -953,6 +957,7 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 void CGameClient::OnShutdown()
 {
+	m_pIdentity->SaveIdents();
 	m_pRaceDemo->OnShutdown();
 	m_pIRC->OnShutdown();
 }

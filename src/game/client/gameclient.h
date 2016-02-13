@@ -357,6 +357,7 @@ public:
 
 	class CAStar *m_pAStar;
 	class CIRC *m_pIRC;
+	class CIdentity *m_pIdentity;
 
 	// DDRace
 

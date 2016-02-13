@@ -140,6 +140,8 @@ void CBinds::SetDefaults()
 	Bind('q', "say /pause");
 	Bind('p', "say /pause");
 
+	Bind(KEY_LCTRL, "+hotbar");
+
 	// DDRace
 
 	if(g_Config.m_ClDDRaceBinds)

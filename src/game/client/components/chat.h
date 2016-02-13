@@ -6,6 +6,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+#include "translator.h"
+
 class CChat : public CComponent
 {
 	CLineInput m_Input;
@@ -74,6 +76,8 @@ class CChat : public CComponent
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 
+	CTranslator *m_pTranslator;
+
 public:
 	CChat();
 
@@ -85,7 +89,7 @@ public:
 
 	void EnableMode(int Team);
 
-	void Say(int Team, const char *pLine);
+	void Say(int Team, const char *pLine, bool NoTrans = false);
 
 	virtual void OnReset();
 	virtual void OnConsoleInit();

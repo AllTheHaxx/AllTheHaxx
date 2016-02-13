@@ -152,11 +152,17 @@ MACRO_CONFIG_STR(ClIRCQAuthPass, cl_irc_q_auth_pass, 11, "", CFGFLAG_CLIENT|CFGF
 MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+i-w+x", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC modes")
 MACRO_CONFIG_STR(ClIRCLeaveMsg, cl_irc_leavemsg, 32, "Leaving", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC leave message")
 
+// translator stuff
+MACRO_CONFIG_INT(ClTransIn, cl_trans_in, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate incoming messages")
+MACRO_CONFIG_INT(ClTransOut, cl_trans_out, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate outgoing messages")
+MACRO_CONFIG_INT(ClTransChatCmds, cl_trans_chat_cmds, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable/disable client side traslation chat commands")
+MACRO_CONFIG_STR(ClTransInSrc, cl_trans_in_src, 32, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language are the incoming messages written in?")
+MACRO_CONFIG_STR(ClTransInDst, cl_trans_in_dest, 32, "en", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should incoming messages be translated?")
+MACRO_CONFIG_STR(ClTransOutSrc, cl_trans_out_src, 32, "en", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language are the outgoing messages written in?")
+MACRO_CONFIG_STR(ClTransOutDst, cl_trans_out_dest, 32, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should outgoing messages be translated?")
 
 //
 MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Scoreboard fading time")
-
-
 
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")
