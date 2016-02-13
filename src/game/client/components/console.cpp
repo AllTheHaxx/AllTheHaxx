@@ -606,7 +606,92 @@ void CGameConsole::OnRender()
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w-10.0f;
-					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					
+					const char *pCursor = pEntry->m_aText;
+					const char *pUrlBeginning = pEntry->m_aText;
+					const char *pUrlEnding;
+
+					char aUrl[64];
+					int urlSize;
+
+					CUIRect TextRect;
+
+					bool found = false;
+					bool one = true;
+
+					while (true)
+					{
+						if (!pUrlBeginning)
+							break;
+
+						memset(aUrl, 0, sizeof(aUrl));
+						urlSize = 0;
+
+						pUrlBeginning = str_find(pCursor, "http://");
+						if (!pUrlBeginning)
+							pUrlBeginning = str_find(pCursor, "https://");
+
+						if (pUrlBeginning) // found the link
+						{
+							found = true;
+
+							pUrlEnding = str_find(pUrlBeginning, " ");
+							if (!pUrlEnding) // the link is till the end
+								pUrlEnding = pUrlBeginning + str_length(pUrlBeginning);
+							else
+							{
+								one = false;
+								pUrlEnding++;
+							}
+
+							urlSize = pUrlEnding - pUrlBeginning;
+							str_copy(aUrl, pUrlBeginning, urlSize + 1);
+
+							//url rect
+							TextRect.x = TextRender()->TextWidth(0, FontSize, pEntry->m_aText, pUrlBeginning - pEntry->m_aText);
+							TextRect.y = y - OffsetY;
+							TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, urlSize);
+							TextRect.h = FontSize;
+
+							//render the first part
+							if (pUrlBeginning - pCursor > 0)
+							{
+								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+								TextRender()->TextEx(&Cursor, pCursor, pUrlBeginning - pCursor);
+							}
+
+							//set the color and check if pressed
+							if (UI()->MouseInside(&TextRect))
+							{
+								TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
+								if (UI()->MouseButtonClicked(0))
+									open_default_browser(aUrl);
+							}
+							else
+								TextRender()->TextColor(1.0f, 0.39f, 0.0f, 1.0f);
+
+							//render the link
+							TextRender()->TextEx(&Cursor, pUrlBeginning, urlSize);
+
+							//render the rest
+							if (one)
+							{
+								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+								TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
+							}
+							
+							pCursor = pUrlEnding;
+						}
+					}
+
+					if (!one)
+					{
+						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+						TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
+					}
+
+					if(!found)
+						TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 				}
 				pEntry = pConsole->m_Backlog.Prev(pEntry);
 

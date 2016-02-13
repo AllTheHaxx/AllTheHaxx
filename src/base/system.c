@@ -2584,6 +2584,29 @@ int secure_rand()
 	return (int)(i%RAND_MAX);
 }
 
+void open_default_browser(const char *url)
+{
+	if (!url || url[0] == 0)
+		return;
+
+	// Only read the first string before whitespace for prevent injection
+	char aUrl[255] = { 0 };
+	str_copy(aUrl, url, sizeof(aUrl));
+	str_skip_to_whitespace(aUrl);
+
+#if defined(CONF_FAMILY_WINDOWS)
+	ShellExecuteA(NULL, "open", aUrl, NULL, NULL, SW_SHOWNORMAL);
+#elif defined(CONF_PLATFORM_MACOSX)
+	CFURLRef cfurl = CFURLCreateWithBytes(NULL, (UInt8*)aUrl, str_length(aUrl), kCFStringEncodingASCII, NULL);
+	LSOpenCFURLRef(cfurl, 0);
+	CFRelease(cfurl);
+#elif defined(CONF_PLATFORM_LINUX)
+	//g_app_info_launch_default_for_uri(url, NULL, NULL);
+	if (fork() == 0)
+		execlp("xdg-open", "xdg-open", aUrl, NULL); // FIXME: Really dangerous, can crash if xdg-open don't exists :S
+#endif
+}
+
 #if defined(__cplusplus)
 }
 #endif
