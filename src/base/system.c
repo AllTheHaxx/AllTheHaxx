@@ -2603,7 +2603,7 @@ void open_default_browser(const char *url)
 #elif defined(CONF_PLATFORM_LINUX)
 	//g_app_info_launch_default_for_uri(url, NULL, NULL);
 	if (fork() == 0)
-		execlp("xdg-open", "xdg-open", aUrl, NULL); // FIXME: Really dangerous, can crash if xdg-open don't exists :S
+		execlp("xdg-open", "xdg-open", aUrl, NULL); // FIXME: Really dangerous, can crash if xdg-open doesn't exists :S
 #endif
 }
 
