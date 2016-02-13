@@ -21,6 +21,7 @@ int irchook_connected(char* params, irc_reply_data* hostd, void* conn, void* use
 		irc_conn->mode(g_Config.m_ClIRCModes);
 
 	irc_conn->join((char *)"#AllTheHaxx"); // join the channel #AllTheHaxx
+	irc_conn->raw((char *)"WHO #AllTheHaxx");
 
 	return 0;
 }
@@ -38,7 +39,7 @@ int irchook_msg(char* params, irc_reply_data* hostd, void* conn, void* user)
 
 int irchook_notice(char* params, irc_reply_data* hostd, void* conn, void* user)
 {
-	IRC* irc_conn=(IRC*)conn;
+	//IRC* irc_conn=(IRC*)conn;
 	CIRC *pData = (CIRC *)user;
 
 	pData->AddLine(CIRC::IRC_LINETYPE_NOTICE, hostd->nick, ++params);
@@ -52,6 +53,7 @@ int irchook_who(char* params, irc_reply_data* hostd, void* conn, void* user)
 	//CIRC *pData = (CIRC *)user;
 
 	// TODO: parse params here!
+	dbg_msg("dbg", "WHO: %s", str_split(params, 5, ' ')); // wanna think about filling our list more carefully first (update rate etc.)
 
 	return 0;
 }

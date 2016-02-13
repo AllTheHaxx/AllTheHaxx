@@ -2009,6 +2009,29 @@ char *str_skip_whitespaces(char *str)
 	return str;
 }
 
+char *str_split(const char *str, int split, char dilem)
+{
+	char splits[512][256] = { { 0 } };
+	int cmd = 0;
+	int char_ = 0;
+
+	unsigned int i;
+	for (i = 0; i < str_length(str); i++)
+	{
+		if (str[i] == dilem)
+		{
+			cmd++;
+			char_ = 0;
+			continue;
+		}
+
+		splits[cmd][char_] = str[i];
+		char_++;
+	}
+
+	return (char *)splits[split];
+}
+
 /* case */
 int str_comp_nocase(const char *a, const char *b)
 {
