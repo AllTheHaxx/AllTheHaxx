@@ -98,6 +98,20 @@ CMenus::CMenus()
 	m_SpoofSelectedPlayer = -1;
 }
 
+float *CMenus::ButtonFade(const void *pID, float Seconds, int Checked)
+{
+	float *pFade = (float*)pID;
+	if(UI()->HotItem() == pID || Checked)
+		*pFade = Seconds;
+	else if(*pFade > 0.0f)
+	{
+		*pFade -= Client()->RenderFrameTime();
+		if(*pFade < 0.0f)
+			*pFade = 0.0f;
+	}
+	return pFade;
+}
+
 void CMenusTooltip::OnRender()
 {
 	if(m_aTooltip[0])
@@ -165,7 +179,12 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 
 int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner, vec4 Color)
 {
-	RenderTools()->DrawUIRect(pRect, Color*ButtonColorMul(pID), Corner, 5.0f);
+	float Seconds = 0.6f; //  0.6 seconds for fade
+	float *pFade = ButtonFade(pID, Seconds, Checked);
+	float FadeVal = *pFade/Seconds;
+
+	vec4 FinalColor = mix(vec4(0.0f, 0.0f, 0.0f, 0.25f), Color, FadeVal);
+	RenderTools()->DrawUIRect(pRect, FinalColor, Corner, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(pRect->h>=20.0f?2.0f:1.0f, &Temp);
 #if defined(__ANDROID__)
@@ -173,7 +192,11 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	Temp.y += (Temp.h - TextH) / 2;
 	UI()->DoLabel(&Temp, pText, TextH*ms_FontmodHeight, 0);
 #else
+	TextRender()->TextColor(1.0f-FadeVal, 1.0f-FadeVal, 1.0f-FadeVal, 1.0f);
+	TextRender()->TextOutlineColor(0.0f+FadeVal, 0.0f+FadeVal, 0.0f+FadeVal, 0.25f);
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 #endif
 	if(UI()->HotItem() == pID && pTooltip)
 	{
@@ -185,10 +208,18 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
+	float Seconds = 0.6f; //  0.6 seconds for fade
+	float *pFade = ButtonFade(pID, Seconds, Checked);
+	float FadeVal = *pFade/Seconds;
+
+	RenderTools()->DrawUIRect(pRect, vec4(0.0f+FadeVal, 0.0f+FadeVal, 0.0f+FadeVal, 0.25f+FadeVal*0.5f), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
+	TextRender()->TextColor(1.0f-FadeVal, 1.0f-FadeVal, 1.0f-FadeVal, 1.0f);
+	TextRender()->TextOutlineColor(0.0f+FadeVal, 0.0f+FadeVal, 0.0f+FadeVal, 0.25f);
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 }
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive, vec4 ColorInactive)
@@ -226,9 +257,11 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
-int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip)
+int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip, bool Checked)
 //void CMenus::ui_draw_checkbox_common(const void *id, const char *text, const char *boxtext, const CUIRect *r, const void *extra)
 {
+	RenderTools()->DrawUIRect(pRect, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+
 	CUIRect c = *pRect;
 	CUIRect t = *pRect;
 	c.w = c.h;
@@ -237,10 +270,21 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	t.VSplitLeft(5.0f, 0, &t);
 
 	c.Margin(2.0f, &c);
-	RenderTools()->DrawUIRect(&c, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 3.0f);
-	c.y += 2;
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MENUICONS].m_Id);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, UI()->HotItem() == pID ? 1.0f : 0.6f);
+	if(Checked)
+		RenderTools()->SelectSprite(SPRITE_MENU_CHECKBOX_ACTIVE);
+	else
+		RenderTools()->SelectSprite(SPRITE_MENU_CHECKBOX_INACTIVE);
+	IGraphics::CQuadItem QuadItem(c.x, c.y, c.w, c.h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+
+	t.y += 2.0f; // lame fix
 	UI()->DoLabel(&c, pBoxText, pRect->h*ms_FontmodHeight*0.6f, 0);
 	UI()->DoLabel(&t, pText, pRect->h*ms_FontmodHeight*0.8f, -1);
+
 	if(UI()->HotItem() == pID && pTooltip)
 	{
 		m_pClient->m_pTooltip->SetTooltip(pTooltip);
@@ -251,7 +295,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 
 int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
 {
-	return DoButton_CheckBox_Common(pID, pText, Checked?"×":"", pRect, pTooltip);
+	return DoButton_CheckBox_Common(pID, pText, "", pRect, pTooltip, Checked);
 }
 
 

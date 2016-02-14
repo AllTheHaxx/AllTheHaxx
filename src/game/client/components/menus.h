@@ -48,6 +48,8 @@ class CMenus : public CComponent
 	static vec4 ms_ColorTabbarInactive;
 	static vec4 ms_ColorTabbarActive;
 
+	float *ButtonFade(const void *pID, float Seconds, int Checked=0);
+
 	vec4 ButtonColorMul(const void *pID);
 
 
@@ -57,7 +59,7 @@ class CMenus : public CComponent
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
 	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive = ms_ColorTabbarActive, vec4 ColorInactive = ms_ColorTabbarInactive);
 
-	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0);
+	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false);
 	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
