@@ -331,10 +331,11 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			s_DoScroll = true;
 			s_ScrollStart = UI()->MouseX();
 			int MxRel = (int)(UI()->MouseX() - pRect->x);
+			float dOffset = pRect->w/2.0f-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i) - *Offset > MxRel)
+				if(dOffset + TextRender()->TextWidth(0, FontSize, pStr, i) - *Offset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
