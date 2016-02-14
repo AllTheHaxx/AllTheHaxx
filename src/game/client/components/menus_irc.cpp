@@ -39,13 +39,13 @@ void CMenus::RenderIrc(CUIRect MainView)
 
 	Graphics()->BlendNormal();
 
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame, CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame-vec4(0.0f, 0.0f, 0.0f, 0.2f), CUI::CORNER_ALL, 5.0f);
 
 	MainView.HSplitTop(15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
 
 	MainView.Margin(5.0f, &MainView);
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame, CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame-vec4(0.0f, 0.0f, 0.0f, 0.2f), CUI::CORNER_ALL, 5.0f);
 
 	CUIRect MainIrc, EntryBox, Button;
 	MainView.Margin(10.0f, &MainIrc);
@@ -62,7 +62,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 		EntryBox.y = MainIrc.y + (MainIrc.h / 2.0f - 55.0f / 2.0f);
 		EntryBox.h = 55.0f;
 
-		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive-vec4(0.0f, 0.0f, 0.0f, 0.2f), CUI::CORNER_ALL, 10.0f);
 		EntryBox.Margin(5.0f, &EntryBox);
 
 		EntryBox.HSplitTop(18.0f, &Button, &EntryBox);
@@ -91,7 +91,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 		EntryBox.y = MainIrc.y + (MainIrc.h / 2.0f - 25.0f / 2.0f);
 		EntryBox.h = 25.0f;
 
-		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive-vec4(0.0f, 0.0f, 0.0f, 0.2f), CUI::CORNER_ALL, 10.0f);
 		EntryBox.Margin(5.0f, &EntryBox);
 		UI()->DoLabelScaled(&EntryBox, Localize("Connecting, please wait..."), 14.0f, -1);
 	}
