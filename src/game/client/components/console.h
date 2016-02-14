@@ -67,7 +67,6 @@ class CGameConsole : public CComponent
 
 	CInstance m_LocalConsole;
 	CInstance m_RemoteConsole;
-	CInstance m_IRCConsole;
 
 	CInstance *CurrentConsole();
 	float TimeNow();
@@ -82,19 +81,15 @@ class CGameConsole : public CComponent
 
 	void Toggle(int Type);
 	void Dump(int Type);
-	void RenderIRCUserList(CUIRect MainView);
 
 	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
 	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
-	static void ConToggleIRCConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData);
-	static void ConClearIRCConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
-	static void ConDumpIRCConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -103,7 +98,6 @@ public:
 	{
 		CONSOLETYPE_LOCAL=0,
 		CONSOLETYPE_REMOTE,
-		CONSOLETYPE_IRC,
 	};
 
 	CGameConsole();

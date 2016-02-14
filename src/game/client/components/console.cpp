@@ -81,16 +81,6 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		else
 			m_pGameConsole->Client()->RconAuth("", pLine);
 	}
-	else if(m_Type == CGameConsole::CONSOLETYPE_IRC && m_pGameConsole->m_pClient->m_pIrcBind->IsConnected())
-	{
-		if(pLine[0] == '/')
-			m_pGameConsole->m_pClient->m_pIrcBind->SendCommand(pLine);
-		else
-		{
-			m_pGameConsole->m_pClient->m_pIrcBind->SendChat(pLine);
-			m_pGameConsole->m_pClient->m_pIrcBind->AddLine(CIrcBind::IRC_LINETYPE_CHAT, m_pGameConsole->m_pClient->m_pIrcBind->CurrentNick(), pLine);
-		}
-	}
 }
 
 void CGameConsole::CInstance::PossibleCommandsCompleteCallback(const char *pStr, void *pUser)
@@ -285,7 +275,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 }
 
 CGameConsole::CGameConsole()
-: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE), m_IRCConsole(CONSOLETYPE_IRC)
+: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
 {
 	m_ConsoleType = CONSOLETYPE_LOCAL;
 	m_ConsoleState = CONSOLE_CLOSED;
@@ -301,11 +291,8 @@ float CGameConsole::TimeNow()
 
 CGameConsole::CInstance *CGameConsole::CurrentConsole()
 {
-	switch(m_ConsoleType)
-	{
-		case CONSOLETYPE_REMOTE: return &m_RemoteConsole;
-		case CONSOLETYPE_IRC: return &m_IRCConsole;
-	}
+	if(m_ConsoleType == CONSOLETYPE_REMOTE)
+		return &m_RemoteConsole;
 	return &m_LocalConsole;
 }
 
@@ -434,8 +421,6 @@ void CGameConsole::OnRender()
 		Graphics()->SetColor(0.2f, 0.2f, 0.2f,0.9f);
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 			Graphics()->SetColor(0.4f, 0.2f, 0.2f,0.9f);
-		if(m_ConsoleType == CONSOLETYPE_IRC)
-			Graphics()->SetColor(0.2f, 0.4f, 0.2f,0.9f);
 		Graphics()->QuadsSetSubset(0,-ConsoleHeight*0.075f,Screen.w*0.075f*0.5f,0);
 		QuadItem = IGraphics::CQuadItem(0, 0, Screen.w, ConsoleHeight);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
@@ -495,13 +480,6 @@ void CGameConsole::OnRender()
 				else
 					pPrompt = "ENTER PASSWORD> ";
 			}
-			else
-				pPrompt = "NOT CONNECTED! ";
-		}
-		else if(m_ConsoleType == CONSOLETYPE_IRC)
-		{
-			if(m_pClient->m_pIrcBind->IsConnected())
-				pPrompt = "Say: ";
 			else
 				pPrompt = "NOT CONNECTED! ";
 		}
@@ -721,13 +699,6 @@ void CGameConsole::OnRender()
 		TextRender()->Text(0, Screen.w-Width-10.0f, 10.0f, FontSize, aBuf, -1);
 	}
 
-	if(m_ConsoleType == CONSOLETYPE_IRC)
-	{
-		CUIRect rect;
-		rect.x = 0; rect.y = 20.0f; rect.h = Screen.h-rect.y/*ConsoleHeight-10.0f-20.0f*/; rect.w = Screen.w;
-		RenderIRCUserList(rect);
-	}
-
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
 	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
@@ -754,86 +725,6 @@ void CGameConsole::OnRender()
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 }
-
-void CGameConsole::RenderIRCUserList(CUIRect MainView)
-{
-	CUIRect Pane, Button;
-	CIrcBind * const r = m_pClient->m_pIrcBind;
-	CMenus * const m = m_pClient->m_pMenus;
-	MainView.VSplitRight(MainView.w/5, &MainView, &Pane);
-
-	Pane.Margin(5.0f, &Pane);
-	Pane.HSplitTop(10.0f, 0, &Pane);
-	Pane.HSplitTop(20.0f, &Button, &Pane);
-	Pane.h = 290; // console height
-
-	static int s_ConnectButton = 0;
-	if(m->DoButton_Menu(&s_ConnectButton, r->IsConnected() ? "Disconnect" : "Connect", 0, &Button))
-	{
-		if(r->IsConnected())
-			r->Disconnect(g_Config.m_ClIRCLeaveMsg);
-		else
-			r->Connect();
-	}
-
-	Pane.HSplitTop(6.0f, 0, &Pane);
-
-	CIrcCom *pCom = m_pClient->Irc()->GetActiveCom();
-	if(!pCom)
-		return;
-
-	if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
-	{
-		CComChan *pChan = static_cast<CComChan*>(pCom);
-
-		static int s_Listbox = 0; static float s_ScrollVal = 0.0f;
-
-		char aBuff[50];
-		str_format(aBuff, sizeof(aBuff), "Total: %d", pChan->m_Users.size());
-
-		int o = 0;
-		static int Selected = 0;
-		std::list<std::string>::iterator it = pChan->m_Users.begin();
-		m->UiDoListboxStart((void*)&s_Listbox, &Pane, 18.0f, "Clients", aBuff, pChan->m_Users.size(), 1, Selected, s_ScrollVal, CUI::CORNER_ALL);
-		while(it != pChan->m_Users.end())
-		{
-			CMenus::CListboxItem Item = m->UiDoListboxNextItem(&(*it));
-
-			if(Item.m_Visible)
-			{
-				if(Selected == o)
-				{
-					CUIRect Label, ButtonQS;
-					Item.m_Rect.VSplitRight(Item.m_Rect.h, &Label, &ButtonQS);
-					UI()->DoLabelScaled(&Label, (*it).c_str(), 12.0f, -1);
-					if(UI()->DoButtonLogic(&Item.m_Selected, "", Selected, &Label))
-					{
-						std::list<std::string>::iterator it = pChan->m_Users.begin();
-						std::advance(it, o);
-
-						m_pClient->Irc()->OpenQuery((*it).c_str());
-					}
-
-					if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
-					{
-						std::list<std::string>::iterator it = pChan->m_Users.begin();
-						std::advance(it, o);
-
-						m_pClient->Irc()->SendGetServer((*it).c_str());
-					}
-				}
-				else
-					UI()->DoLabelScaled(&Item.m_Rect, (*it).c_str(), 12.0f, -1);
-			}
-
-			o++;
-			it++;
-		}
-
-		Selected = m->UiDoListboxEnd(&s_ScrollVal, 0);
-	}
-}
-
 
 void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
 {
@@ -902,16 +793,18 @@ void CGameConsole::Toggle(int Type)
 
 void CGameConsole::Dump(int Type)
 {
-	CInstance *pConsole = Type == CONSOLETYPE_REMOTE ? &m_RemoteConsole : Type == CONSOLETYPE_IRC ? &m_IRCConsole : &m_LocalConsole;
+	CInstance *pConsole = Type == CONSOLETYPE_REMOTE ? &m_RemoteConsole : &m_LocalConsole;
 	char aFilename[128];
 	char aDate[20];
 
 	str_timestamp(aDate, sizeof(aDate));
-	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt", Type==CONSOLETYPE_REMOTE?"remote_console":Type==CONSOLETYPE_IRC?"irc_log":"local_console", aDate);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt",
+			Type == CONSOLETYPE_REMOTE ? "remote_console" : "local_console", aDate);
 	IOHANDLE io = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(io)
 	{
-		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry; pEntry = pConsole->m_Backlog.Next(pEntry))
+		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry;
+				pEntry = pConsole->m_Backlog.Next(pEntry))
 		{
 			io_write(io, pEntry->m_aText, str_length(pEntry->m_aText));
 			io_write_newline(io);
@@ -930,12 +823,6 @@ void CGameConsole::ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUse
 	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_REMOTE);
 }
 
-void CGameConsole::ConToggleIRCConsole(IConsole::IResult *pResult, void *pUserData)
-{
-	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_IRC);
-}
-
-
 void CGameConsole::ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->m_LocalConsole.ClearBacklog();
@@ -946,12 +833,6 @@ void CGameConsole::ConClearRemoteConsole(IConsole::IResult *pResult, void *pUser
 	((CGameConsole *)pUserData)->m_RemoteConsole.ClearBacklog();
 }
 
-void CGameConsole::ConClearIRCConsole(IConsole::IResult *pResult, void *pUserData)
-{
-	((CGameConsole *)pUserData)->m_IRCConsole.ClearBacklog();
-}
-
-
 void CGameConsole::ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_LOCAL);
@@ -961,12 +842,6 @@ void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserD
 {
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
 }
-
-void CGameConsole::ConDumpIRCConsole(IConsole::IResult *pResult, void *pUserData)
-{
-	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_IRC);
-}
-
 
 void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted)
 {
@@ -983,6 +858,7 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 	}
 }
 
+// TODO: This may be moved to elsewhere
 void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -993,12 +869,10 @@ void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUser
 
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
-	if(Type == CONSOLETYPE_LOCAL)
-		m_LocalConsole.PrintLine(pLine);
-	else if(Type == CONSOLETYPE_REMOTE)
+	if(Type == CONSOLETYPE_REMOTE)
 		m_RemoteConsole.PrintLine(pLine);
-	else if(Type == CONSOLETYPE_IRC)
-		m_IRCConsole.PrintLine(pLine);
+	else
+		m_LocalConsole.PrintLine(pLine);
 }
 
 void CGameConsole::OnConsoleInit()
@@ -1006,7 +880,6 @@ void CGameConsole::OnConsoleInit()
 	// init console instances
 	m_LocalConsole.Init(this);
 	m_RemoteConsole.Init(this);
-	m_IRCConsole.Init(this);
 
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
@@ -1015,16 +888,13 @@ void CGameConsole::OnConsoleInit()
 
 	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
 	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
-	Console()->Register("toggle_irc_console", "", CFGFLAG_CLIENT, ConToggleIRCConsole, this, "Toggle irc console");
 	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
 	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console");
-	Console()->Register("clear_irc_console", "", CFGFLAG_CLIENT, ConClearIRCConsole, this, "Clear irc console");
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
-	Console()->Register("dump_irc_console", "", CFGFLAG_CLIENT, ConDumpIRCConsole, this, "Dump irc console");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this);
+	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This may be moved to elsewhere
 
 }
 

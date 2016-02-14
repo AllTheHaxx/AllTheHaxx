@@ -24,9 +24,9 @@ void CIrcBind::ListenIRCThread(void *pUser)
 	return;
 }
 
-void CIrcBind::AddLine(int Type, const char *pNick, const char *pLine)
+void CIrcBind::AddLine(int Type, const char *pNick, const char *pLine) // TODO: reimplement!
 {
-	time_t rawtime;
+/*	time_t rawtime;
 	struct tm *timeinfo;
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
@@ -41,12 +41,12 @@ void CIrcBind::AddLine(int Type, const char *pNick, const char *pLine)
 		else
 			str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d] %s", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pLine+5);
 	}
-	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);
+	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);*/
 }
 
-void CIrcBind::AddLine(const char *pLine)
+void CIrcBind::AddLine(const char *pLine) // TODO: reimplement!
 {
-	time_t rawtime;
+/*	time_t rawtime;
 	struct tm *timeinfo;
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
@@ -54,7 +54,7 @@ void CIrcBind::AddLine(const char *pLine)
 	char aBuf[530];
 	str_format(aBuf, sizeof(aBuf), "[%02d:%02d:%02d] *** %s",
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, pLine);
-	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);
+	GameClient()->m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_IRC, aBuf);*/
 }
 
 
