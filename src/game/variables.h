@@ -146,7 +146,7 @@ MACRO_CONFIG_INT(ClShowhudHealthAmmoBars, cl_showhud_healthammo_bars, 1, 0, 1, C
 MACRO_CONFIG_INT(ClShowhudChatbox, cl_showhud_chatbox, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Nice background for the chat (alpha, 0-100)")
 MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to irc on startup automatically")
 MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
-MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
+//MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
 MACRO_CONFIG_STR(ClIRCUser, cl_irc_user, 32, "allthehaxx", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC username")
 MACRO_CONFIG_STR(ClIRCPass, cl_irc_password, 16, "nopwset", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC password")
 MACRO_CONFIG_STR(ClIRCQAuthName, cl_irc_q_auth_name, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q name")

@@ -176,7 +176,7 @@ void CIrc::StartConnection() // call this from a thread only!
 	// send request
 	SendRaw("CAP LS");
 	SendRaw("NICK %s", m_Nick.c_str());
-	SendRaw("USER %s 0 * :%s", g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname); // TODO: we have config vars for this
+	SendRaw("USER %s 0 * :%s", g_Config.m_ClIRCUser, g_Config.m_PlayerName);
 
     // status Tab
     CComQuery *pStatus = new CComQuery();
