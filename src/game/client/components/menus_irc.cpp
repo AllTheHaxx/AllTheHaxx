@@ -39,13 +39,13 @@ void CMenus::RenderIrc(CUIRect MainView)
 
 	Graphics()->BlendNormal();
 
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame, CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame, CUI::CORNER_ALL, 5.0f);
 
 	MainView.HSplitTop(15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
 
 	MainView.Margin(5.0f, &MainView);
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame, CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame, CUI::CORNER_ALL, 5.0f);
 
 	CUIRect MainIrc, EntryBox, Button;
 	MainView.Margin(10.0f, &MainIrc);
@@ -211,7 +211,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L);
 		static float s_ButtonSend = 0;
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
-				|| ((Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER))/* && m_ActivePage == PAGE_IRC*/))
+				|| m_EnterPressed)
 		{
 			if(aEntryText[0] == '/'/* || (m_pClient->Irc()->GetActiveCom()->GetType() == CIrcCom::TYPE_QUERY &&
 					str_comp_nocase(((CComQuery*)m_pClient->Irc()->GetActiveCom())->m_User, "@Status") == 0)*/)
@@ -312,7 +312,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 				CListboxItem Item = UiDoListboxNextItem(&pChan->m_Buffer[i]);
 
 				if(Item.m_Visible)
-					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 8.0f, -1);
+					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 10.0f, -1);
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
 		}
@@ -331,7 +331,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 				CListboxItem Item = UiDoListboxNextItem(&pQuery->m_Buffer[i]);
 
 				if(Item.m_Visible)
-					UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 8.0f, -1);
+					UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 10.0f, -1);
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
 
