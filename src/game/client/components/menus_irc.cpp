@@ -155,10 +155,10 @@ void CMenus::RenderIrc(CUIRect MainView)
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
 				char aTab[255];
-				if(pCom->m_UnreadMsg)
+				if(pCom->m_NumUnreadMsg)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->m_Channel, pCom->m_NumUnreadMsg);
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_UnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
 						m_pClient->Irc()->SetActiveCom(i);
 				}
 				else
@@ -183,10 +183,10 @@ void CMenus::RenderIrc(CUIRect MainView)
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
 				char aTab[255];
-				if(pCom->m_UnreadMsg)
+				if(pCom->m_NumUnreadMsg)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->m_User, pCom->m_NumUnreadMsg);
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_UnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
 						m_pClient->Irc()->SetActiveCom(i);
 				}
 				else

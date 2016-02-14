@@ -71,10 +71,7 @@ void CIrc::SetActiveCom(int index)
     m_ActiveCom = index;
     CIrcCom *pCom = GetCom(index);
     if (pCom)
-    {
-        pCom->m_UnreadMsg = false;
         pCom->m_NumUnreadMsg = 0;
-    }
 }
 
 void CIrc::SetActiveCom(CIrcCom *pCom)
@@ -85,9 +82,7 @@ void CIrc::SetActiveCom(CIrcCom *pCom)
 	std::list<CIrcCom*>::iterator it = std::find(m_IrcComs.begin(), m_IrcComs.end(), pCom);
 	if (it != m_IrcComs.end())
 	{
-		pCom->m_UnreadMsg = false;
         pCom->m_NumUnreadMsg = 0;
-		
 		m_ActiveCom = std::distance(m_IrcComs.begin(), it);
 	}
 }
@@ -362,7 +357,6 @@ void CIrc::StartConnection() // call this from a thread only!
                         if (aMsgFrom == m_Nick)
                         {
                             CComChan *pNewChan = new CComChan();
-                            pNewChan->m_UnreadMsg = false;
                             pNewChan->m_NumUnreadMsg = 0;
                             str_copy(pNewChan->m_Channel, aMsgChannel.c_str(), sizeof(pNewChan->m_Channel));
                             m_IrcComs.push_back(pNewChan);
@@ -555,7 +549,6 @@ void CIrc::StartConnection() // call this from a thread only!
 								if (!pCom)
 								{
 									CComQuery *pNewQuery = new CComQuery();
-									pNewQuery->m_UnreadMsg = true;
 									pNewQuery->m_NumUnreadMsg = 1;
 									str_copy(pNewQuery->m_User, aMsgFrom.c_str(), sizeof(pNewQuery->m_User));
 									m_IrcComs.push_back(pNewQuery);
@@ -569,10 +562,7 @@ void CIrc::StartConnection() // call this from a thread only!
 								else
 								{
 									if (pCom != GetActiveCom())
-									{
-										pCom->m_UnreadMsg = true;
 										pCom->m_NumUnreadMsg++;
-									}
 
 									if (MsgType == MSG_TYPE_ACTION)
 										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
@@ -594,10 +584,8 @@ void CIrc::StartConnection() // call this from a thread only!
 								if (pCom)
 								{
 									if (pCom != GetActiveCom())
-									{
-										pCom->m_UnreadMsg = true;
 										pCom->m_NumUnreadMsg++;
-									}
+
 									if (MsgType == MSG_TYPE_ACTION)
 										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
 									else
@@ -919,12 +907,8 @@ void CIrc::Part(const char *pReason, CIrcCom *pCom)
     if (pCom->GetType() == CIrcCom::TYPE_CHANNEL)
     {
         CComChan *pChan = static_cast<CComChan*>(pCom);
-        char aBuf[64];
         if(pReason && pReason[0])
-        {
-        	str_format(aBuf, sizeof(aBuf), "PART %s :%s", pChan->m_Channel, pReason);
-        	SendRaw(aBuf);
-        }
+        	SendRaw("PART %s :%s", pChan->m_Channel, pReason);
         else
         	SendRaw("PART %s %", pChan->m_Channel);
 
@@ -950,12 +934,8 @@ void CIrc::Disconnect(const char *pReason)
 {
     if (m_State != STATE_DISCONNECTED)
     {
-    	char aBuf[64];
 		if(pReason && pReason[0])
-		{
-			str_format(aBuf, sizeof(aBuf), "QUIT :%s", pReason);
-			SendRaw(aBuf);
-		}
+			SendRaw("QUIT :%s", pReason);
 		else
 			SendRaw("QUIT");
         m_State = STATE_DISCONNECTED;

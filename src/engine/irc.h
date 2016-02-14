@@ -8,38 +8,49 @@
 #include <string>
 #include <list>
 
-class CIrcCom {
+class CIrcCom
+{
 public:
-    enum {
-        TYPE_CHANNEL=0,
-        TYPE_QUERY
-    };
+	enum
+	{
+		TYPE_CHANNEL = 0,
+		TYPE_QUERY
+	};
 
-    CIrcCom(unsigned int type) { m_Type = type; m_UnreadMsg = false; m_NumUnreadMsg = 0; }
-    std::vector<std::string> m_Buffer;
-    bool m_UnreadMsg;
-    int m_NumUnreadMsg;
+	CIrcCom(unsigned int type)
+	{
+		m_Type = type;
+		m_NumUnreadMsg = 0;
+	}
 
-    unsigned int GetType() const { return m_Type; }
+	std::vector<std::string> m_Buffer;
+	int m_NumUnreadMsg;
+
+	unsigned int GetType() const { return m_Type; }
+
 protected:
-    unsigned int m_Type;
+	unsigned int m_Type;
 };
+
+
 class CComChan : public CIrcCom
 {
 public:
-    CComChan(): CIrcCom(CIrcCom::TYPE_CHANNEL) {}
+	CComChan() : CIrcCom(CIrcCom::TYPE_CHANNEL) { }
 
-    std::list<std::string> m_Users;
-    std::string m_Topic;
-    char m_Channel[25];
+	std::list<std::string> m_Users;
+	std::string m_Topic;
+	char m_Channel[25];
 };
+
+
 class CComQuery : public CIrcCom
 {
 public:
-    CComQuery(): CIrcCom(CIrcCom::TYPE_QUERY) {}
-
-    char m_User[25];
+	CComQuery() : CIrcCom(CIrcCom::TYPE_QUERY) { }
+	char m_User[25];
 };
+
 
 class IIrc : public IInterface
 {
