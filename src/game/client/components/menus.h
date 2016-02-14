@@ -314,7 +314,6 @@ class CMenus : public CComponent
 
 	// found in menus_irc.cpp
 	bool m_IRCActive;
-	bool m_IRCWasActive;
 	void RenderIrc(CUIRect MainView);
 	static void ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData);
 

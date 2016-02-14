@@ -23,15 +23,12 @@ void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 // stolen from H-Client :3
 void CMenus::RenderIrc(CUIRect MainView)
 {
-	static float YOffset = -500.0f;
+	static float YOffset = -500.0f; // dunno if a constant is optimal...
 	if(!m_IRCActive)
 	{
 		YOffset = -500.0f;
-		m_IRCWasActive = false;
 		return;
 	}
-
-	m_IRCWasActive = true;
 
 	smooth_set(&YOffset, 50.0f, (0.005f/Client()->RenderFrameTime())*35.0f, 0);
 	
