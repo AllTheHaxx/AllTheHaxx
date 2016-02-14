@@ -226,8 +226,11 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 {
 	if(Checked)
 		RenderTools()->DrawUIRect(pRect, ColorActive, Corners, 10.0f);
+	else if(UI()->MouseInside(pRect))
+		RenderTools()->DrawUIRect(pRect, mix(ColorInactive, ColorActive, 0.5f), Corners, 10.0f);
 	else
 		RenderTools()->DrawUIRect(pRect, ColorInactive, Corners, 10.0f);
+
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
 #if defined(__ANDROID__)
