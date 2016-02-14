@@ -838,7 +838,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxVsync, Localize("V-Sync"), g_Config.m_GfxVsync, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxVsync, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if you got performance problems")))
 	{
 		g_Config.m_GfxVsync ^= 1;
 		CheckSettings = true;

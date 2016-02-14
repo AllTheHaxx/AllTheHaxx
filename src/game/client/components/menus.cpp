@@ -226,7 +226,7 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
-int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip)
 //void CMenus::ui_draw_checkbox_common(const void *id, const char *text, const char *boxtext, const CUIRect *r, const void *extra)
 {
 	CUIRect c = *pRect;
@@ -241,12 +241,17 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	c.y += 2;
 	UI()->DoLabel(&c, pBoxText, pRect->h*ms_FontmodHeight*0.6f, 0);
 	UI()->DoLabel(&t, pText, pRect->h*ms_FontmodHeight*0.8f, -1);
+	if(UI()->HotItem() == pID && pTooltip)
+	{
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+	}
+
 	return UI()->DoButtonLogic(pID, pText, 0, pRect);
 }
 
-int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
 {
-	return DoButton_CheckBox_Common(pID, pText, Checked?"×":"", pRect);
+	return DoButton_CheckBox_Common(pID, pText, Checked?"×":"", pRect, pTooltip);
 }
 
 
