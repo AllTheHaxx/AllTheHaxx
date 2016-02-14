@@ -257,7 +257,6 @@ class CMenus : public CComponent
 	//void render_loading(float percent);
 	int RenderMenubar(CUIRect r);
 	void RenderNews(CUIRect MainView);
-	void RenderIrc(CUIRect MainView);
 
 	// found in menus_demo.cpp
 	void RenderDemoPlayer(CUIRect MainView);
@@ -310,9 +309,15 @@ class CMenus : public CComponent
 	void RenderIdents(CUIRect MainView);
 	void RenderTrans(CUIRect MainView);
 	static void ConKeyShortcut(IConsole::IResult *pResult, void *pUserData);
-	bool HotbarLockInput(IInput::CEvent Event);
+
+	// found in menus_irc.cpp
+	bool m_IRCActive;
+	bool m_IRCWasActive;
+	void RenderIrc(CUIRect MainView);
+	static void ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData);
 
 	void SetActive(bool Active);
+	bool LockInput(IInput::CEvent Event);
 public:
 	void RenderBackground();
 
@@ -325,7 +330,7 @@ public:
 	void RenderLoading();
 	void RenderUpdating(const char *pCaption, int current=0, int total=0);
 
-	bool IsActive() const { return m_MenuActive || m_HotbarActive; }
+	bool IsActive() const { return m_MenuActive || m_HotbarActive || m_IRCActive; }
 
 	virtual void OnInit();
 	virtual void OnConsoleInit();
