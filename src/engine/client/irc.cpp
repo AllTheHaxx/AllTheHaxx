@@ -198,7 +198,14 @@ void CIrc::StartConnection() // call this from a thread only!
     char LastPong[255]={0};
     while ((CurrentRecv = net_tcp_recv(m_Socket, aNetBuff, sizeof(aNetBuff))) >= 0 && m_State == STATE_CONNECTED)
     {
-    	ReplyData reply;
+    	ReplyData reply; char aTime[32];
+    	time_t rawtime;
+		struct tm *timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+
+
         for (int i=0; i < CurrentRecv; i++)
         {
             if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')
@@ -369,7 +376,7 @@ void CIrc::StartConnection() // call this from a thread only!
                                 pChan->m_Users.push_back(aMsgFrom);
                                 pChan->m_Users.sort();
                                 char aBuff[255];
-                                str_format(aBuff, sizeof(aBuff), "*** '%s' has joined %s", aMsgFrom.c_str(), aMsgChannel.c_str());
+                                str_format(aBuff, sizeof(aBuff), "%s*** '%s' has joined %s", aTime, aMsgFrom.c_str(), aMsgChannel.c_str());
                                 pChan->m_Buffer.push_back(aBuff);
                             }
                         }
@@ -406,7 +413,7 @@ void CIrc::StartConnection() // call this from a thread only!
                                 str_format(aBuff, sizeof(aBuff), "+%s", aMsgFrom.c_str());
                                 pChan->m_Users.remove(std::string(aBuff));
 
-                                str_format(aBuff, sizeof(aBuff), "*** '%s' part %s", aMsgFrom.c_str(), aMsgChannel.c_str());
+                                str_format(aBuff, sizeof(aBuff), "%s*** '%s' part %s", aTime, aMsgFrom.c_str(), aMsgChannel.c_str());
                                 pChan->m_Buffer.push_back(aBuff);
                             }
                         }
@@ -446,7 +453,7 @@ void CIrc::StartConnection() // call this from a thread only!
                                 str_format(aBuff, sizeof(aBuff), "+%s", aMsgFrom.c_str());
                                 pChan->m_Users.remove(std::string(aBuff));
 
-                                str_format(aBuff, sizeof(aBuff), "*** '%s' quit (%s)", aMsgFrom.c_str(), aMsgText.c_str());
+                                str_format(aBuff, sizeof(aBuff), "%s*** '%s' quit (%s)", aTime, aMsgFrom.c_str(), aMsgText.c_str());
                                 pChan->m_Buffer.push_back(aBuff);
 
                                 ++it;
@@ -471,7 +478,7 @@ void CIrc::StartConnection() // call this from a thread only!
                         if (pChan)
                         {
                             pChan->m_Topic = aMsgText;
-                            str_format(aBuff, sizeof(aBuff), "*** '%s' has changed topic to '%s'", aMsgFrom.c_str(), aMsgText.c_str());
+                            str_format(aBuff, sizeof(aBuff), "%s*** '%s' has changed topic to '%s'", aTime, aMsgFrom.c_str(), aMsgText.c_str());
                             pChan->m_Buffer.push_back(aBuff);
 						}
 
@@ -554,9 +561,9 @@ void CIrc::StartConnection() // call this from a thread only!
 									m_IrcComs.push_back(pNewQuery);
 
 									if (MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "*** %s: %s", aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
+										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str(), aMsgText.c_str());
+										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
 									pNewQuery->m_Buffer.push_back(aBuff);
 								}
 								else
@@ -568,15 +575,16 @@ void CIrc::StartConnection() // call this from a thread only!
 									}
 
 									if (MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "*** %s: %s", aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
+										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str(), aMsgText.c_str());
+										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
 									pCom->m_Buffer.push_back(aBuff);
 								}
 
 								if (pCom == GetActiveCom())
 								{
 									aMsgFrom.insert(0,"<"); aMsgFrom.append("> ");
+									aMsgFrom.insert(0, aTime);
 									m_pGameClient->OnMessageIrc("", aMsgFrom.c_str(), aMsgText.c_str());
 								}
 							}
@@ -591,16 +599,17 @@ void CIrc::StartConnection() // call this from a thread only!
 										pCom->m_NumUnreadMsg++;
 									}
 									if (MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "*** %s: %s", aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
+										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str(), aMsgText.c_str());
+										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
 									pCom->m_Buffer.push_back(aBuff);
 								}
 
 								if (pCom == GetActiveCom())
 								{
-									aMsgChan.insert(0,"["); aMsgChan.append("] ");
-									aMsgFrom.insert(0,"<"); aMsgFrom.append("> ");
+									aMsgChan.insert(0, "["); aMsgChan.append("] ");
+									aMsgFrom.insert(0, "<"); aMsgFrom.append("> ");
+									aMsgFrom.insert(0, aTime);
 									m_pGameClient->OnMessageIrc(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 								}
 							}
