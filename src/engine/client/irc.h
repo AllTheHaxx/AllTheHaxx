@@ -17,6 +17,7 @@ public:
 
     int GetState() { return m_State; }
     void NextRoom();
+    void PrevRoom();
 
     void SetActiveCom(int index);
 	void SetActiveCom(CIrcCom *pCom);
@@ -24,11 +25,12 @@ public:
     CIrcCom* GetCom(size_t index);
     CIrcCom* GetCom(std::string name);
     int GetNumComs() { return m_IrcComs.size(); }
+    bool CanCloseCom(CIrcCom *pCom);
 
     void OpenQuery(const char *to);
     void JoinTo(const char *to, const char *pass = "");
     void SetTopic(const char *topic);
-    void Part(const char *pReason = 0);
+    void Part(const char *pReason = 0, CIrcCom *pCom = 0);
 
     void SetMode(const char *mode, const char *to);
     void SetNick(const char *nick);

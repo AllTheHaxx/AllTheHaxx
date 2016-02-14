@@ -185,12 +185,12 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
 }
 
-int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners)
+int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive, vec4 ColorInactive)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarActive, Corners, 10.0f);
+		RenderTools()->DrawUIRect(pRect, ColorActive, Corners, 10.0f);
 	else
-		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarInactive, Corners, 10.0f);
+		RenderTools()->DrawUIRect(pRect, ColorInactive, Corners, 10.0f);
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
 #if defined(__ANDROID__)
@@ -920,78 +920,106 @@ void CMenus::RenderIrc(CUIRect MainView)
 	{
 		CUIRect ButtonBox, InputBox;
 
-		//Channel List
+		// channel list
 		MainIrc.HSplitTop(20.0f, &ButtonBox, &EntryBox);
 		ButtonBox.VSplitRight(80.0f, &ButtonBox, &Button);
 		static float s_ButtonDisc = 0;
 		if(DoButton_Menu(&s_ButtonDisc, Localize("Disconnect"), 0, &Button))
 			m_pClient->m_pIrcBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
 
+		// scroll through the tabs
+		if(UI()->MouseInside(&ButtonBox))
+		{
+			if(m_pClient->Input()->KeyDown(KEY_MOUSE_WHEEL_UP))
+				m_pClient->Irc()->NextRoom();
+			else if(m_pClient->Input()->KeyDown(KEY_MOUSE_WHEEL_DOWN))
+				m_pClient->Irc()->PrevRoom();
+		}
+
 		float LW = (ButtonBox.w - ButtonBox.x) / m_pClient->Irc()->GetNumComs();
-		static int s_ButsID[100];
+		static int s_ButsID[64];
 		for(int i = 0; i < m_pClient->Irc()->GetNumComs(); i++)
 		{
 			CIrcCom *pCom = m_pClient->Irc()->GetCom(i);
 
-			if(pCom == m_pClient->Irc()->GetActiveCom())
+		//	if(pCom == m_pClient->Irc()->GetActiveCom())
 				ButtonBox.VSplitLeft(LW - 25.0f, &Button, &ButtonBox);
-			else
-			{
-				ButtonBox.VSplitLeft(LW, &Button, &ButtonBox);
-				Button.VSplitRight(2.0f, &Button, 0x0);
-			}
+		//	else
+		//	{
+		//		ButtonBox.VSplitLeft(LW, &Button, &ButtonBox);
+		//		Button.VSplitRight(2.0f, &Button, 0x0);
+		//	}
 
-			if(pCom->m_UnreadMsg)
-			{
-				ms_ColorTabbarActive = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-				ms_ColorTabbarInactive = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			}
-			else
-			{
-				if(pCom == m_pClient->Irc()->GetActiveCom())
-				{
-					ms_ColorTabbarActive = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-					ms_ColorTabbarInactive = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-				}
-				else
-				{
-					ms_ColorTabbarActive = vec4(0.35f, 0.35f, 0.35f, 1.0f);
-					ms_ColorTabbarInactive = vec4(0.35f, 0.35f, 0.35f, 1.0f);
-				}
-			}
+			// close using middle mouse button
+			if(UI()->MouseInside(&Button) && m_pClient->Input()->KeyDown(KEY_MOUSE_3) &&
+					m_pClient->Irc()->CanCloseCom(m_pClient->Irc()->GetCom(i)))
+				m_pClient->Irc()->Part(g_Config.m_ClIRCLeaveMsg, m_pClient->Irc()->GetCom(i));
 
 			if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
 			{
 				CComChan *pChan = static_cast<CComChan*>(pCom);
+				static float FadeVal[64] = { 0.0f };
+				static bool Add[64] = { true };
+
+				if(Add[i])
+					smooth_set(&FadeVal[i], 1.0f, 70.0f, 0);
+				else
+					smooth_set(&FadeVal[i], 0.0f, 70.0f, 0);
+				if(FadeVal[i] >= 0.8f) Add[i] = false;
+				if(FadeVal[i] <= 0.2f) Add[i] = true;
+
 				char aTab[255];
 				if(pCom->m_UnreadMsg)
+				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->m_Channel, pCom->m_NumUnreadMsg);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_UnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+						m_pClient->Irc()->SetActiveCom(i);
+				}
 				else
+				{
+					FadeVal[i] = 0.0f; Add[i] = true;
 					str_copy(aTab, pChan->m_Channel, sizeof(aTab));
-
-				if(DoButton_MenuTab(&s_ButsID[i], aTab, 0, &Button, 0))
-					m_pClient->Irc()->SetActiveCom(i);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->Irc()->GetActiveCom(), &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0))
+						m_pClient->Irc()->SetActiveCom(i);
+				}
 			}
 			else if(pCom->GetType() == CIrcCom::TYPE_QUERY)
 			{
 				CComQuery *pQuery = static_cast<CComQuery*>(pCom);
+				static float FadeVal[64] = { 0.0f };
+				static bool Add[64] = { true };
+
+				if(Add[i])
+					smooth_set(&FadeVal[i], 1.0f, 70.0f, 0);
+				else
+					smooth_set(&FadeVal[i], 0.0f, 70.0f, 0);
+				if(FadeVal[i] >= 0.8f) Add[i] = false;
+				if(FadeVal[i] <= 0.2f) Add[i] = true;
+
 				char aTab[255];
 				if(pCom->m_UnreadMsg)
+				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->m_User, pCom->m_NumUnreadMsg);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_UnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+						m_pClient->Irc()->SetActiveCom(i);
+				}
 				else
+				{
+					FadeVal[i] = 0.0f; Add[i] = true;
 					str_copy(aTab, pQuery->m_User, sizeof(aTab));
-
-				if(DoButton_MenuTab(&s_ButsID[i], aTab, 0, &Button, 0))
-					m_pClient->Irc()->SetActiveCom(i);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->Irc()->GetActiveCom(), &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0))
+						m_pClient->Irc()->SetActiveCom(i);
+				}
 			}
 
-			if(pCom == m_pClient->Irc()->GetActiveCom() && m_pClient->Irc()->GetNumComs() > 2 && str_comp_nocase(((CComChan*)pCom)->m_Channel, "#AllTheHaxx"))
+			if(i > 0 && pCom == m_pClient->Irc()->GetActiveCom() && m_pClient->Irc()->GetNumComs() > 2 && str_comp_nocase(((CComChan*)pCom)->m_Channel, "#AllTheHaxx"))
 			{
-				ButtonBox.VSplitLeft(25.0f, &Button, &ButtonBox);
-				Button.VSplitRight(2.0f, &Button, 0x0);
+				Button.VSplitRight(ButtonBox.h, 0, &Button);
+				Button.Margin(3.0f, &Button);
+				Button.x -= 5.0f; Button.h = Button.w;
 				static int sCloseButton = 0;
-				if(DoButton_MenuTab(&sCloseButton, "×", 0, &Button, 0))
-					m_pClient->Irc()->Part();
+				if(DoButton_Menu(&sCloseButton, "×", 0, &Button, 0, CUI::CORNER_ALL, ms_ColorTabbarActive+vec4(0.3f,0.3f,0.3f,0)))
+					m_pClient->Irc()->Part(g_Config.m_ClIRCLeaveMsg);
 			}
 		}
 
@@ -1072,7 +1100,8 @@ void CMenus::RenderIrc(CUIRect MainView)
 							std::list<std::string>::iterator it = pChan->m_Users.begin();
 							std::advance(it, o);
 
-							m_pClient->Irc()->OpenQuery((*it).c_str());
+							if(str_comp_nocase(it->c_str()+1, m_pClient->Irc()->GetNick()) != 0)
+								m_pClient->Irc()->OpenQuery(it->c_str());
 						}
 
 						//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CONNECT, &ButtonQS,
@@ -1082,11 +1111,11 @@ void CMenus::RenderIrc(CUIRect MainView)
 							std::list<std::string>::iterator it = pChan->m_Users.begin();
 							std::advance(it, o);
 
-							m_pClient->Irc()->SendGetServer((*it).c_str());
+							m_pClient->Irc()->SendGetServer(it->c_str());
 						}
 					}
 					else
-						UI()->DoLabelScaled(&Item.m_Rect, (*it).c_str(), 12.0f, -1);
+						UI()->DoLabelScaled(&Item.m_Rect, it->c_str(), 12.0f, -1);
 				}
 
 				o++;

@@ -63,6 +63,7 @@ public:
 
     virtual int GetState() = 0;
     virtual void NextRoom() = 0;
+    virtual void PrevRoom() = 0;
 
     virtual void SetActiveCom(int index) = 0;
 	virtual void SetActiveCom(CIrcCom *pCom) = 0;
@@ -70,11 +71,12 @@ public:
     virtual CIrcCom* GetCom(size_t index) = 0;
     virtual CIrcCom* GetCom(std::string name) = 0;
     virtual int GetNumComs() = 0;
+    virtual bool CanCloseCom(CIrcCom *pCom) = 0;
 
     virtual void OpenQuery(const char *to) = 0;
     virtual void JoinTo(const char *to, const char *pass = "") = 0;
     virtual void SetTopic(const char *topic) = 0;
-    virtual void Part(const char *pReason = 0) = 0;
+    virtual void Part(const char *pReason = 0, CIrcCom *pCom = 0) = 0;
 
     virtual void SetMode(const char *mode, const char *to) = 0;
     virtual void SetNick(const char *nick) = 0;

@@ -116,6 +116,18 @@ CIrcCom* CIrc::GetCom(std::string name)
     return 0x0;
 }
 
+bool CIrc::CanCloseCom(CIrcCom *pCom)
+{
+	if(!pCom)
+		return false;
+
+	if(GetNumComs() <= 2 || str_comp_nocase(((CComChan*)pCom)->m_Channel, "#AllTheHaxx") == 0 ||
+			str_comp_nocase(((CComQuery*)pCom)->m_User, "@status") == 0)
+		return false;
+
+	return true;
+}
+
 void CIrc::StartConnection() // call this from a thread only!
 {
 	NETADDR BindAddr;
@@ -745,12 +757,25 @@ void CIrc::StartConnection() // call this from a thread only!
 
 void CIrc::NextRoom()
 {
+	/* -- dunno if i misunderstood this...? -Henritees
     if (m_ActiveCom >= (int)m_IrcComs.size()-1)
         SetActiveCom(((int)m_IrcComs.size()>1)?1:0);
     else if (m_ActiveCom <= 0)
         SetActiveCom((int)m_IrcComs.size()-1);
     else
-        SetActiveCom(m_ActiveCom+1);
+        SetActiveCom(m_ActiveCom+1);*/
+	if (m_ActiveCom >= (int)m_IrcComs.size()-1)
+		SetActiveCom(0);
+	else
+		SetActiveCom(m_ActiveCom+1);
+}
+
+void CIrc::PrevRoom()
+{
+    if (m_ActiveCom <= 0)
+        SetActiveCom((int)m_IrcComs.size()-1);
+    else
+        SetActiveCom(m_ActiveCom-1);
 }
 
 void CIrc::OpenQuery(const char *to)
@@ -801,9 +826,11 @@ void CIrc::SetTopic(const char *topic)
     SendRaw("TOPIC %s :%s", pChan->m_Channel, topic);
 }
 
-void CIrc::Part(const char *pReason)
+void CIrc::Part(const char *pReason, CIrcCom *pCom)
 {
-    CIrcCom *pCom = GetCom(m_ActiveCom);
+    if(!pCom)
+    	pCom = GetCom(m_ActiveCom);
+
     if (!pCom)
         return;
 
