@@ -918,7 +918,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		float k = (*pColorSlider[s]) / 255.0f;
 		k = DoScrollbarH(pColorSlider[s], &Button, k);
 		*pColorSlider[s] = (int)(k*255.0f);
-		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "%s: %i", paLabels[s], *(pColorSlider[s]));
+		UI()->DoLabelScaled(&Text, aBuf, 15.0f, -1);
 	}
 }
 

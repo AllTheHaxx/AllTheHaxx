@@ -95,13 +95,13 @@ MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 64, "localhost:8303", CFGFL
 MACRO_CONFIG_INT(UiScale, ui_scale, 100, 50, 150, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface scale")
 MACRO_CONFIG_INT(UiMousesens, ui_mousesens, 100, 5, 100000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Mouse sensitivity for menus/editor")
 
-MACRO_CONFIG_INT(UiColorHue, ui_color_hue, 160, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color hue")
-MACRO_CONFIG_INT(UiColorSat, ui_color_sat, 70, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color saturation")
-MACRO_CONFIG_INT(UiColorLht, ui_color_lht, 175, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color lightness")
-MACRO_CONFIG_INT(UiColorAlpha, ui_color_alpha, 228, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface alpha")
+MACRO_CONFIG_INT(UiColorHue, ui_color_hue, 78, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color hue")
+MACRO_CONFIG_INT(UiColorSat, ui_color_sat, 169, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color saturation")
+MACRO_CONFIG_INT(UiColorLht, ui_color_lht, 102, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color lightness")
+MACRO_CONFIG_INT(UiColorAlpha, ui_color_alpha, 241, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface alpha")
 
-MACRO_CONFIG_INT(UiColorizePing, ui_colorize_ping, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight ping")
-MACRO_CONFIG_INT(UiColorizeGametype, ui_colorize_gametype, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight gametype")
+MACRO_CONFIG_INT(UiColorizePing, br_colored_ping, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight ping")
+MACRO_CONFIG_INT(UiColorizeGametype, br_colored_gametype, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight gametype")
 
 MACRO_CONFIG_STR(UiDemoSelected, ui_demo_selected, 256, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Selected demo file")
 
