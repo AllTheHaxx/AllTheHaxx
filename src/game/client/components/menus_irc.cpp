@@ -211,7 +211,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L);
 		static float s_ButtonSend = 0;
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
-				|| ((Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER)) && m_ActivePage == PAGE_IRC))
+				|| ((Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER))/* && m_ActivePage == PAGE_IRC*/))
 		{
 			if(aEntryText[0] == '/'/* || (m_pClient->Irc()->GetActiveCom()->GetType() == CIrcCom::TYPE_QUERY &&
 					str_comp_nocase(((CComQuery*)m_pClient->Irc()->GetActiveCom())->m_User, "@Status") == 0)*/)

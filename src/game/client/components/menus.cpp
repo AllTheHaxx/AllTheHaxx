@@ -760,11 +760,11 @@ int CMenus::RenderMenubar(CUIRect r)
 		g_Config.m_ClEditor = 1;
 	}
 
-	Box.VSplitRight(10.0f, &Box, &Button);
+/*	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(80.0f, &Box, &Button);
 	static int s_ChatButton=0;
 	if(DoButton_MenuTab(&s_ChatButton, "Chat", m_ActivePage==PAGE_IRC, &Button, CUI::CORNER_T))
-		NewPage = PAGE_IRC;
+		NewPage = PAGE_IRC;*/
 
 	if(NewPage != -1)
 	{
@@ -1030,8 +1030,8 @@ int CMenus::Render()
 				RenderServerControl(MainView);
 			else if(m_GamePage == PAGE_SPOOFING)
 				RenderSpoofing(MainView);
-			else if(m_GamePage == PAGE_IRC)
-				RenderIrc(MainView);
+		//	else if(m_GamePage == PAGE_IRC)
+		//		RenderIrc(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
 			else if(m_GamePage == PAGE_GHOST)
@@ -1051,8 +1051,8 @@ int CMenus::Render()
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_DDNET)
 			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_IRC)
-			RenderIrc(MainView);
+	//	else if(g_Config.m_UiPage == PAGE_IRC)
+	//		RenderIrc(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);
 
