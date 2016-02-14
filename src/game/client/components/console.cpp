@@ -765,6 +765,7 @@ void CGameConsole::RenderIRCUserList(CUIRect MainView)
 	Pane.Margin(5.0f, &Pane);
 	Pane.HSplitTop(10.0f, 0, &Pane);
 	Pane.HSplitTop(20.0f, &Button, &Pane);
+	Pane.h = 290; // console height
 
 	static int s_ConnectButton = 0;
 	if(m->DoButton_Menu(&s_ConnectButton, r->IsConnected() ? "Disconnect" : "Connect", 0, &Button))
@@ -775,15 +776,62 @@ void CGameConsole::RenderIRCUserList(CUIRect MainView)
 			r->Connect();
 	}
 
-	//static int s_Listbox = 0; static float s_ScrollVal = 0.0f;
-	//m->UiDoListboxStart((void*)&s_Listbox, &Pane, 10.0f, "Clients", "", 3, 1, 0, &s_ScrollVal);
+	Pane.HSplitTop(6.0f, 0, &Pane);
 
-	//for(int i = 0; i < 3; i++)
-	//{
-	//	CMenus::CListboxItem Item = m->UiDoListboxNextItem();
+	CIrcCom *pCom = m_pClient->Irc()->GetActiveCom();
+	if(!pCom)
+		return;
 
-	//m->UiDoListboxEnd(&s_ScrollVal, 0);
+	if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+	{
+		CComChan *pChan = static_cast<CComChan*>(pCom);
 
+		static int s_Listbox = 0; static float s_ScrollVal = 0.0f;
+
+		char aBuff[50];
+		str_format(aBuff, sizeof(aBuff), "Total: %d", pChan->m_Users.size());
+
+		int o = 0;
+		static int Selected = 0;
+		std::list<std::string>::iterator it = pChan->m_Users.begin();
+		m->UiDoListboxStart((void*)&s_Listbox, &Pane, 18.0f, "Clients", aBuff, pChan->m_Users.size(), 1, Selected, s_ScrollVal, CUI::CORNER_ALL);
+		while(it != pChan->m_Users.end())
+		{
+			CMenus::CListboxItem Item = m->UiDoListboxNextItem(&(*it));
+
+			if(Item.m_Visible)
+			{
+				if(Selected == o)
+				{
+					CUIRect Label, ButtonQS;
+					Item.m_Rect.VSplitRight(Item.m_Rect.h, &Label, &ButtonQS);
+					UI()->DoLabelScaled(&Label, (*it).c_str(), 12.0f, -1);
+					if(UI()->DoButtonLogic(&Item.m_Selected, "", Selected, &Label))
+					{
+						std::list<std::string>::iterator it = pChan->m_Users.begin();
+						std::advance(it, o);
+
+						m_pClient->Irc()->OpenQuery((*it).c_str());
+					}
+
+					if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
+					{
+						std::list<std::string>::iterator it = pChan->m_Users.begin();
+						std::advance(it, o);
+
+						m_pClient->Irc()->SendGetServer((*it).c_str());
+					}
+				}
+				else
+					UI()->DoLabelScaled(&Item.m_Rect, (*it).c_str(), 12.0f, -1);
+			}
+
+			o++;
+			it++;
+		}
+
+		Selected = m->UiDoListboxEnd(&s_ScrollVal, 0);
+	}
 }
 
 
