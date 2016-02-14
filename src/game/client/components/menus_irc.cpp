@@ -212,7 +212,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 		//Button.VSplitLeft(5.0f, 0x0, &Button);
 		static char aEntryText[500];
 		static float s_Offset;
-		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L);
+		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
 		static float s_ButtonSend = 0;
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
 				|| m_EnterPressed)

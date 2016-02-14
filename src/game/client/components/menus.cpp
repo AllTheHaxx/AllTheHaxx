@@ -309,7 +309,7 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 
-int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
+int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText, int Align)
 {
 	int Inside = UI()->MouseInside(pRect);
 	bool ReturnValue = false;
@@ -331,7 +331,12 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			s_DoScroll = true;
 			s_ScrollStart = UI()->MouseX();
 			int MxRel = (int)(UI()->MouseX() - pRect->x);
-			float dOffset = pRect->w/2.0f-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
+			float dOffset = 0.0f;
+
+			if(Align == 0)
+				dOffset = pRect->w/2.0f-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
+			else if(Align > 0)
+				dOffset = pRect->w-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f; // TODO: FIX THIS!!!
 
 			for(int i = 1; i <= Len; i++)
 			{
@@ -413,7 +418,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	const char *pDisplayStr = pStr;
 	char aStars[128];
 
-	if(pDisplayStr[0] == '\0')
+	if(pDisplayStr[0] == '\0' && pEmptyText)
 	{
 		pDisplayStr = pEmptyText;
 		TextRender()->TextColor(1, 1, 1, 0.75f);
@@ -457,18 +462,32 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, 0);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, Align);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, Align ? s_AtIndex : -1);
 		Textbox = *pRect;
-		Textbox.x += Textbox.w/2.0f-w/2.0f;
-		w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
-		Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		if(Align < 0)
+		{
+			Textbox.VSplitLeft(2.0f, 0, &Textbox);
+			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		}
+		else if(Align == 0)
+		{
+			Textbox.x += Textbox.w/2.0f-w/2.0f;
+			w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		}
+		else if(Align > 0)
+		{
+			w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+			Textbox.VSplitRight(2.0f, 0, &Textbox);
+			Textbox.x -= (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		}
 
 		if((2*time_get()/time_freq()) % 2)	// make it blink
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
