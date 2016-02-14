@@ -89,19 +89,19 @@ MACRO_CONFIG_INT(ClPlayerColorFeetRainbow, player_color_feet_rainbow, 0, 0, 100,
 
 MACRO_CONFIG_STR(ClPlayerSkin, player_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin")
 
-MACRO_CONFIG_INT(UiPage, ui_page, 6, 0, 11, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
+MACRO_CONFIG_INT(UiPage, ui_page, 6, 0, 12, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
 MACRO_CONFIG_INT(UiToolboxPage, ui_toolbox_page, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toolbox page")
 MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 64, "localhost:8303", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface server address")
 MACRO_CONFIG_INT(UiScale, ui_scale, 100, 50, 150, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface scale")
 MACRO_CONFIG_INT(UiMousesens, ui_mousesens, 100, 5, 100000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Mouse sensitivity for menus/editor")
 
-MACRO_CONFIG_INT(UiColorHue, ui_color_hue, 160, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color hue")
-MACRO_CONFIG_INT(UiColorSat, ui_color_sat, 70, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color saturation")
-MACRO_CONFIG_INT(UiColorLht, ui_color_lht, 175, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color lightness")
-MACRO_CONFIG_INT(UiColorAlpha, ui_color_alpha, 228, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface alpha")
+MACRO_CONFIG_INT(UiColorHue, ui_color_hue, 78, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color hue")
+MACRO_CONFIG_INT(UiColorSat, ui_color_sat, 169, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color saturation")
+MACRO_CONFIG_INT(UiColorLht, ui_color_lht, 102, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color lightness")
+MACRO_CONFIG_INT(UiColorAlpha, ui_color_alpha, 241, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface alpha")
 
-MACRO_CONFIG_INT(UiColorizePing, ui_colorize_ping, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight ping")
-MACRO_CONFIG_INT(UiColorizeGametype, ui_colorize_gametype, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight gametype")
+MACRO_CONFIG_INT(UiColorizePing, br_colored_ping, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight ping")
+MACRO_CONFIG_INT(UiColorizeGametype, br_colored_gametype, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight gametype")
 
 MACRO_CONFIG_STR(UiDemoSelected, ui_demo_selected, 256, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Selected demo file")
 
@@ -144,6 +144,7 @@ MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLA
 MACRO_CONFIG_INT(ClPathFinding, cl_path_finding, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")
 MACRO_CONFIG_INT(ClShowhudHealthAmmoBars, cl_showhud_healthammo_bars, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use bars for health and ammo")
 MACRO_CONFIG_INT(ClShowhudChatbox, cl_showhud_chatbox, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Nice background for the chat (alpha, 0-100)")
+MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to irc on startup automatically")
 MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
 MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
 MACRO_CONFIG_STR(ClIRCUser, cl_irc_user, 32, "allthehaxx", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC username")

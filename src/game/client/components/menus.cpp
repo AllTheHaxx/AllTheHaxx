@@ -20,6 +20,7 @@
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/irc.h>
 #include <engine/shared/config.h>
 
 #include <game/version.h>
@@ -39,6 +40,7 @@
 #include "skins.h"
 #include "spoofremote.h"
 #include "controls.h"
+#include "irc.h"
 
 vec4 CMenus::ms_GuiColor;
 vec4 CMenus::ms_ColorTabbarInactiveOutgame;
@@ -96,6 +98,20 @@ CMenus::CMenus()
 	m_SpoofSelectedPlayer = -1;
 }
 
+float *CMenus::ButtonFade(const void *pID, float Seconds, int Checked)
+{
+	float *pFade = (float*)pID;
+	if(UI()->HotItem() == pID || Checked)
+		*pFade = Seconds;
+	else if(*pFade > 0.0f)
+	{
+		*pFade -= Client()->RenderFrameTime();
+		if(*pFade < 0.0f)
+			*pFade = 0.0f;
+	}
+	return pFade;
+}
+
 void CMenusTooltip::OnRender()
 {
 	if(m_aTooltip[0])
@@ -111,6 +127,12 @@ void CMenusTooltip::OnRender()
 
 		m_aTooltip[0] = 0;
 	}
+}
+
+void CMenus::OnConsoleInit()
+{
+	Console()->Register("+hotbar", "", CFGFLAG_CLIENT, ConKeyShortcut, this, "Access the hotbar");
+	Console()->Register("+irc", "", CFGFLAG_CLIENT, ConKeyShortcutIRC, this, "Toggle the IRC");
 }
 
 vec4 CMenus::ButtonColorMul(const void *pID)
@@ -157,7 +179,12 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 
 int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner, vec4 Color)
 {
-	RenderTools()->DrawUIRect(pRect, Color*ButtonColorMul(pID), Corner, 5.0f);
+	float Seconds = 0.6f; //  0.6 seconds for fade
+	float *pFade = ButtonFade(pID, Seconds, Checked);
+	float FadeVal = *pFade/Seconds;
+
+	vec4 FinalColor = mix(vec4(0.0f, 0.0f, 0.0f, 0.25f), Color, FadeVal);
+	RenderTools()->DrawUIRect(pRect, FinalColor, Corner, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(pRect->h>=20.0f?2.0f:1.0f, &Temp);
 #if defined(__ANDROID__)
@@ -165,7 +192,11 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	Temp.y += (Temp.h - TextH) / 2;
 	UI()->DoLabel(&Temp, pText, TextH*ms_FontmodHeight, 0);
 #else
+	TextRender()->TextColor(1.0f-FadeVal, 1.0f-FadeVal, 1.0f-FadeVal, 1.0f);
+	TextRender()->TextOutlineColor(0.0f+FadeVal, 0.0f+FadeVal, 0.0f+FadeVal, 0.25f);
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 #endif
 	if(UI()->HotItem() == pID && pTooltip)
 	{
@@ -177,18 +208,29 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
+	float Seconds = 0.6f; //  0.6 seconds for fade
+	float *pFade = ButtonFade(pID, Seconds, Checked);
+	float FadeVal = *pFade/Seconds;
+
+	RenderTools()->DrawUIRect(pRect, vec4(0.0f+FadeVal, 0.0f+FadeVal, 0.0f+FadeVal, 0.25f+FadeVal*0.5f), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
+	TextRender()->TextColor(1.0f-FadeVal, 1.0f-FadeVal, 1.0f-FadeVal, 1.0f);
+	TextRender()->TextOutlineColor(0.0f+FadeVal, 0.0f+FadeVal, 0.0f+FadeVal, 0.25f);
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 }
 
-int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners)
+int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive, vec4 ColorInactive)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarActive, Corners, 10.0f);
+		RenderTools()->DrawUIRect(pRect, ColorActive, Corners, 10.0f);
+	else if(UI()->MouseInside(pRect))
+		RenderTools()->DrawUIRect(pRect, mix(ColorInactive, ColorActive, 0.5f), Corners, 10.0f);
 	else
-		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarInactive, Corners, 10.0f);
+		RenderTools()->DrawUIRect(pRect, ColorInactive, Corners, 10.0f);
+
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
 #if defined(__ANDROID__)
@@ -202,11 +244,11 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
-int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners)
 //void CMenus::ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
+		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), Corners, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
 #if defined(__ANDROID__)
@@ -218,9 +260,11 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
-int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip, bool Checked)
 //void CMenus::ui_draw_checkbox_common(const void *id, const char *text, const char *boxtext, const CUIRect *r, const void *extra)
 {
+	RenderTools()->DrawUIRect(pRect, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+
 	CUIRect c = *pRect;
 	CUIRect t = *pRect;
 	c.w = c.h;
@@ -229,16 +273,32 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	t.VSplitLeft(5.0f, 0, &t);
 
 	c.Margin(2.0f, &c);
-	RenderTools()->DrawUIRect(&c, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 3.0f);
-	c.y += 2;
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MENUICONS].m_Id);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, UI()->HotItem() == pID ? 1.0f : 0.6f);
+	if(Checked)
+		RenderTools()->SelectSprite(SPRITE_MENU_CHECKBOX_ACTIVE);
+	else
+		RenderTools()->SelectSprite(SPRITE_MENU_CHECKBOX_INACTIVE);
+	IGraphics::CQuadItem QuadItem(c.x, c.y, c.w, c.h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+
+	t.y += 2.0f; // lame fix
 	UI()->DoLabel(&c, pBoxText, pRect->h*ms_FontmodHeight*0.6f, 0);
 	UI()->DoLabel(&t, pText, pRect->h*ms_FontmodHeight*0.8f, -1);
+
+	if(UI()->HotItem() == pID && pTooltip)
+	{
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+	}
+
 	return UI()->DoButtonLogic(pID, pText, 0, pRect);
 }
 
-int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
 {
-	return DoButton_CheckBox_Common(pID, pText, Checked?"X":"", pRect);
+	return DoButton_CheckBox_Common(pID, pText, "", pRect, pTooltip, Checked);
 }
 
 
@@ -607,7 +667,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	m_ActivePage = g_Config.m_UiPage;
 	int NewPage = -1;
 
-	if(Client()->State() != IClient::STATE_OFFLINE)
+	if(Client()->State() != IClient::STATE_OFFLINE) // hack
 		m_ActivePage = m_GamePage;
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
@@ -747,10 +807,16 @@ int CMenus::RenderMenubar(CUIRect r)
 	//Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_EditorButton=0;
-	if(DoButton_MenuTab(&s_EditorButton, "✎", 0, &Button, CUI::CORNER_TL))
+	if(DoButton_MenuTab(&s_EditorButton, "✎", g_Config.m_ClEditor, &Button, CUI::CORNER_TL))
 	{
 		g_Config.m_ClEditor = 1;
 	}
+
+/*	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(80.0f, &Box, &Button);
+	static int s_ChatButton=0;
+	if(DoButton_MenuTab(&s_ChatButton, "Chat", m_ActivePage==PAGE_IRC, &Button, CUI::CORNER_T))
+		NewPage = PAGE_IRC;*/
 
 	if(NewPage != -1)
 	{
@@ -939,7 +1005,12 @@ int CMenus::Render()
 		m_DoubleClickIndex = -1;
 
 		if(g_Config.m_UiPage == PAGE_INTERNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		{
+			if(m_pClient->ServerBrowser()->CacheExists())
+				m_pClient->ServerBrowser()->LoadCache();
+			else
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		}
 		else if(g_Config.m_UiPage == PAGE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		else if(g_Config.m_UiPage == PAGE_FAVORITES)
@@ -985,10 +1056,13 @@ int CMenus::Render()
 		TabBar.VMargin(20.0f, &TabBar);
 		RenderMenubar(TabBar);
 
-		// news is not implemented yet
+		// make sure the ui page didn't go wild
 		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			if(m_pClient->ServerBrowser()->CacheExists())
+				m_pClient->ServerBrowser()->LoadCache();
+			else
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			g_Config.m_UiPage = PAGE_INTERNET;
 			m_DoubleClickIndex = -1;
 		}
@@ -1008,6 +1082,8 @@ int CMenus::Render()
 				RenderServerControl(MainView);
 			else if(m_GamePage == PAGE_SPOOFING)
 				RenderSpoofing(MainView);
+		//	else if(m_GamePage == PAGE_IRC)
+		//		RenderIrc(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
 			else if(m_GamePage == PAGE_GHOST)
@@ -1027,8 +1103,12 @@ int CMenus::Render()
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_DDNET)
 			RenderServerbrowser(MainView);
+	//	else if(g_Config.m_UiPage == PAGE_IRC)
+	//		RenderIrc(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);
+
+
 	}
 	else
 	{
@@ -1119,7 +1199,7 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Sound error");
 			pExtraText = Localize("The audio device couldn't be initialised.");
-			pButtonText = Localize("Ok");
+			pButtonText = Localize("I don't care");
 			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_PASSWORD)
@@ -1687,10 +1767,10 @@ bool CMenus::OnMouseMove(float x, float y)
 {
 	m_LastInput = time_get();
 
-	if(!m_MenuActive && !m_HotbarActive)
+	if(!m_MenuActive && !m_HotbarActive && !m_IRCActive)
 		return false;
 
-	if((!m_MenuActive && !m_HotbarActive) || !m_pClient->m_pGameConsole->IsClosed())
+	if((!m_MenuActive && !m_HotbarActive && !m_IRCActive) || !m_pClient->m_pGameConsole->IsClosed())
 		return false;
 
 #if defined(__ANDROID__) // No relative mouse on Android
@@ -1721,6 +1801,8 @@ bool CMenus::OnInput(IInput::CEvent e)
 			m_EscapePressed = true;
 			if(m_HotbarActive)
 				m_HotbarActive = false;
+			if(m_IRCActive)
+				m_IRCActive = false;
 			else
 				SetActive(!IsActive());
 			return true;
@@ -1743,7 +1825,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 		return true;
 	}
 
-	if(HotbarLockInput(e))
+	if(LockInput(e))
 		return true;
 
 	return false;
@@ -1826,7 +1908,7 @@ void CMenus::OnRender()
 		m_Popup = POPUP_PURE;
 	}
 
-	if(!IsActive() && !m_HotbarActive)
+	if(!IsActive())
 	{
 		m_EscapePressed = false;
 		m_EnterPressed = false;
@@ -1880,9 +1962,10 @@ void CMenus::OnRender()
 		UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
 #endif
 	}
-
 	// render
-	if(m_HotbarActive)
+	if(m_IRCActive)
+		RenderIrc(*UI()->Screen());
+	else if(m_HotbarActive)
 		RenderHotbar(*UI()->Screen());
 	else if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Render();
@@ -2041,4 +2124,16 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	}
 
 	Graphics()->Swap();
+}
+
+bool CMenus::LockInput(IInput::CEvent e)
+{
+	if(m_HotbarActive || m_IRCActive)
+	{
+		if(e.m_Flags&IInput::FLAG_PRESS && (e.m_Key == KEY_MOUSE_1 || e.m_Key == KEY_MOUSE_2))
+		{
+			return true;
+		}
+	}
+	return false;
 }

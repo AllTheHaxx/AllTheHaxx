@@ -70,6 +70,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IFetcher *m_pFetcher;
 	IUpdater *m_pUpdater;
 	IEngineMasterServer *m_pMasterServer;
+	IIrc *m_pIrc;
 
 	enum
 	{
@@ -87,6 +88,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CFriends m_Friends;
 	class CFriends m_Foes;
 	class CMapChecker m_MapChecker;
+	class CIrc m_Irc;
 
 	char m_aServerAddressStr[256];
 
@@ -214,6 +216,7 @@ public:
 	IStorage *Storage() { return m_pStorage; }
 	IFetcher *Fetcher() { return m_pFetcher; }
 	IUpdater *Updater() { return m_pUpdater; }
+	IIrc *Irc() { return m_pIrc; }
 
 	CClient();
 
@@ -366,6 +369,7 @@ public:
 
 	virtual const char* GetCurrentMap();
 	virtual int GetCurrentMapCrc();
+	virtual const char* GetCurrentServerAddress() const { return m_aServerAddressStr; }
 	virtual const char* RaceRecordStart(const char *pFilename);
 	virtual void RaceRecordStop();
 	virtual bool RaceRecordIsRecording();

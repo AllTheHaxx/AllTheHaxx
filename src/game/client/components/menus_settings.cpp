@@ -838,7 +838,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxVsync, Localize("V-Sync"), g_Config.m_GfxVsync, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxVsync, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if you got performance problems")))
 	{
 		g_Config.m_GfxVsync ^= 1;
 		CheckSettings = true;
@@ -918,7 +918,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		float k = (*pColorSlider[s]) / 255.0f;
 		k = DoScrollbarH(pColorSlider[s], &Button, k);
 		*pColorSlider[s] = (int)(k*255.0f);
-		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "%s: %i", paLabels[s], *(pColorSlider[s]));
+		UI()->DoLabelScaled(&Text, aBuf, 15.0f, -1);
 	}
 }
 

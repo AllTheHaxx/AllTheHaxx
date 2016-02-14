@@ -28,11 +28,6 @@ void CMenus::ConKeyShortcut(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CMenus::OnConsoleInit()
-{
-	Console()->Register("+hotbar", "", CFGFLAG_CLIENT, ConKeyShortcut, this, "Access the hotbar");
-}
-
 void CMenus::RenderIdents(CUIRect MainView)
 {
 	const int NumIdentities = m_pClient->m_pIdentity->NumIdents();
@@ -197,16 +192,4 @@ void CMenus::RenderHotbar(CUIRect MainView)
 	t.x = MainView.w - t.w;
 	t.y = MainView.h / 2.0f - t.h / 2.0f;
 	RenderTrans(t);
-}
-
-bool CMenus::HotbarLockInput(IInput::CEvent e)
-{
-	if(m_HotbarActive)
-	{
-		if(e.m_Flags&IInput::FLAG_PRESS && (e.m_Key == KEY_MOUSE_1 || e.m_Key == KEY_MOUSE_2))
-		{
-			return true;
-		}
-	}
-	return false;
 }

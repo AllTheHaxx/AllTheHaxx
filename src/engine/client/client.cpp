@@ -29,6 +29,7 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/irc.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/compression.h>
@@ -42,6 +43,8 @@
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/fifoconsole.h>
+
+#include <engine/client/irc.h>
 
 #include <game/version.h>
 
@@ -2551,6 +2554,7 @@ void CClient::RegisterInterfaces()
 #endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 	Kernel()->ReregisterInterface(static_cast<IFriends*>(&m_Foes));
+	Kernel()->RegisterInterface(static_cast<IIrc*>(&m_Irc));
 }
 
 void CClient::InitInterfaces()
@@ -2569,6 +2573,7 @@ void CClient::InitInterfaces()
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pIrc = Kernel()->RequestInterface<IIrc>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 
@@ -2629,6 +2634,8 @@ void CClient::Run()
 
 	// init sound, allowed to fail
 	m_SoundInitFailed = Sound()->Init() != 0;
+	
+	m_pIrc->Init();
 
 	// open socket
 	{

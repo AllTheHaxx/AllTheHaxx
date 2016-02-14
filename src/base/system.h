@@ -789,6 +789,7 @@ int str_length(const char *str);
 */
 int str_format(char *buffer, int buffer_size, const char *format, ...);
 
+void str_irc_sanitize(char *str_in); // H-Client
 /*
 	Function: str_trim_words
 		Trims specific number of words at the start of a string.

@@ -113,7 +113,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// do headers
 	for(int i = 0; i < NumCols; i++)
 	{
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect, 0))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{
@@ -503,7 +503,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// clear button
 	{
 		static int s_ClearButton = 0;
-		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
+		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, Localize("clear"), CUI::CORNER_R, vec4(1,1,1,0.35f)))
 		{
 			g_Config.m_BrFilterString[0] = 0;
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
@@ -527,7 +527,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// clear button
 	{
 		static int s_ClearButton = 0;
-		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
+		if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, Localize("clear"), CUI::CORNER_R, vec4(1,1,1,0.35f)))
 		{
 			g_Config.m_BrExcludeString[0] = 0;
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
@@ -1383,7 +1383,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button))
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely")))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -1412,7 +1412,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 				str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
 			else
 				str_copy(aBuf, Localize("Update"), sizeof(aBuf));
-			if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button) && !ServerBrowser()->IsRefreshing())
+			if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button, Localize("Just update the info of the entries")) && !ServerBrowser()->IsRefreshing())
 			{
 				ServerBrowser()->Refresh(-1, 1);
 			}
@@ -1426,12 +1426,12 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			CUIRect Right;
 			Button.VSplitMid(&Button, &Right);
 			static int s_SaveButton = 0;
-			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, 0, CUI::CORNER_L))
+			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, Localize("Save the serverlist"), CUI::CORNER_L))
 			{
 				ServerBrowser()->SaveCache();
 			}
 			static int s_LoadButton = 0;
-			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, 0, CUI::CORNER_R))
+			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, Localize("Load the saved serverlist"), CUI::CORNER_R))
 			{
 				if(!ServerBrowser()->LoadCache())
 					Console()->Print(0, "browser", "failed to load cache file", false);

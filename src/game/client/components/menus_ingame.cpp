@@ -63,7 +63,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitRight(7.0f, &ButtonBar, &Button);
 	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
 	static int s_ReconnectButton = 0;
-	if(DoButton_Menu(&s_ReconnectButton, Localize("Reconnect"), 0, &Button))
+	if(DoButton_Menu(&s_ReconnectButton, Localize("Reconnect"), 0, &Button, Localize("Rejoin the current server")))
 	{
 		Client()->Disconnect();
 		Client()->Connect(g_Config.m_UiServerAddress);
@@ -72,7 +72,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitRight(5.0f, &ButtonBar, &Button);
 	ButtonBar.VSplitRight(85.0f, &ButtonBar, &Button);
 	static int s_CrashButton = 0;
-	if(DoButton_CheckBox(&s_CrashButton, Localize("Crash"), g_Config.m_ClServerCrasher, &Button))
+	if(DoButton_CheckBox(&s_CrashButton, Localize("Crash"), g_Config.m_ClServerCrasher, &Button, Localize("Check this and click 'Reconnect' to crash 0.6.2 and earlier servers")))
 		g_Config.m_ClServerCrasher ^= 1;
 
 	static int s_SpectateButton = 0;
@@ -821,7 +821,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	if(!m_pClient->m_pSpoofRemote->IsConnected())
 	{
 		static int s_ButtonConnect = 0;
-		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect to server"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect to server"), 0, &Button, Localize("Connect to the spoofing-server")))
 		{
 			if(!m_pClient->m_pSpoofRemote->IsConnected())
 				m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
@@ -879,7 +879,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(25.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static int s_ButtonFetch = 0;
-	if(DoButton_Menu(&s_ButtonFetch, Localize("Fetch IPs"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonFetch, Localize("Fetch IPs"), 0, &Button, Localize("Fetch player IPs from master")))
 	{
 		m_pClient->m_pSpoofRemote->SendCommand("fetchips");
 	}
@@ -887,7 +887,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static int s_ButtonGet = 0;
-	if(DoButton_Menu(&s_ButtonGet, Localize("Grab IPs"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonGet, Localize("Grab IPs"), 0, &Button, Localize("View player IPs (run Fetch IPs first)")))
 	{
 		char aCmd[256];
 		str_format(aCmd, sizeof(aCmd), "ipspam %s", aServerAddr);
@@ -974,7 +974,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), Localize("Start flooding"));
 		else
 			str_format(aBuf, sizeof(aBuf), Localize("Stop flooding"));
-		if(DoButton_Menu(&s_ButtonDummySpam, aBuf, 0, &Button))
+		if(DoButton_Menu(&s_ButtonDummySpam, aBuf, 0, &Button, Localize("Fire the laz0r!!!")))
 		{
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd), "ds %s %i", aServerAddr, s_ScrollValue+1);
@@ -1176,7 +1176,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			static int PrevSelectedPlayer = -1;
 			if(s_DoForAll && m_SpoofSelectedPlayer > -1)
 				s_DoForAll = 0;
-			if(DoButton_CheckBox(&s_AllCheckbox, Localize("All"), s_DoForAll, &Button))
+			if(DoButton_CheckBox(&s_AllCheckbox, Localize("All"), s_DoForAll, &Button, Localize("Perform the actions for all players")))
 			{
 				if(s_DoForAll ^= 1)
 				{
@@ -1206,7 +1206,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_DCButton = 0;
-			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button))
+			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button, Localize("Disconnect packet from client to server")))
 			{
 				char aCmd[256];
 				if(s_DoForAll)
@@ -1219,7 +1219,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_TimeoutButton = 0;
-			if(DoButton_Menu(&s_TimeoutButton, Localize("Timeout"), 0, &Button))
+			if(DoButton_Menu(&s_TimeoutButton, Localize("Timeout"), 0, &Button, Localize("Disconnect packet from server to client")))
 			{
 				// glitchy! found by accident :D
 				if(s_DoForAll)
@@ -1249,7 +1249,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static int s_StressingButton = 0;
-			if(DoButton_Menu(&s_StressingButton, Localize("Stressing"), 0, &Button))
+			if(DoButton_Menu(&s_StressingButton, Localize("Stressing"), 0, &Button, Localize("Flood with the players IP to ban him")))
 			{
 				char aCmd[256];
 				if(s_DoForAll)
@@ -1313,7 +1313,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
 			static int s_SendChatButton = 0;
-			if(DoButton_Menu(&s_SendChatButton, Localize("Send"), 0, &Button))
+			if(DoButton_Menu(&s_SendChatButton, Localize("Send"), 0, &Button, Localize("Send a chat message")))
 			{
 				char aCmd[256];
 				if(s_DoForAll)
@@ -1328,7 +1328,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
 			{
 				static int s_SendChatDummiesButton = 0;
-				if(DoButton_Menu(&s_SendChatDummiesButton, Localize("Send (Dummies)"), 0, &Button))
+				if(DoButton_Menu(&s_SendChatDummiesButton, Localize("Send (Dummies)"), 0, &Button, Localize("Send a chat message from the dummies")))
 				{
 					char aCmd[256];
 					str_format(aCmd, sizeof(aCmd), "chatdum %s", s_aChatMessage);
@@ -1367,7 +1367,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				static int s_UseCustomAddrButton = 0;
 				if((s_CustomAddrState&1) && !(s_CustomAddrState&2)) // display button only if valid and not in use
 				{
-					if(DoButton_Menu(&s_UseCustomAddrButton, Localize("Use"), 0, &Button))
+					if(DoButton_Menu(&s_UseCustomAddrButton, Localize("Use"), 0, &Button, Localize("Use a custom IP as source address")))
 					{
 						s_CustomAddrState |= 2; // use
 						m_SpoofSelectedPlayer = -1;

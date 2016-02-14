@@ -48,6 +48,8 @@ class CMenus : public CComponent
 	static vec4 ms_ColorTabbarInactive;
 	static vec4 ms_ColorTabbarActive;
 
+	float *ButtonFade(const void *pID, float Seconds, int Checked=0);
+
 	vec4 ButtonColorMul(const void *pID);
 
 
@@ -55,10 +57,10 @@ class CMenus : public CComponent
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
-	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners);
+	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive = ms_ColorTabbarActive, vec4 ColorInactive = ms_ColorTabbarInactive);
 
-	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect);
-	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false);
+	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
 	/*static void ui_draw_menu_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -68,7 +70,7 @@ class CMenus : public CComponent
 	*/
 
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
-	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners = CUI::CORNER_T);
 
 	//static void ui_draw_browse_icon(int what, const CUIRect *r);
 	//static void ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -97,7 +99,7 @@ class CMenus : public CComponent
 	};
 
 	void UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-						int ItemsPerRow, int SelectedIndex, float ScrollValue);
+						int ItemsPerRow, int SelectedIndex, float ScrollValue, int Corners = CUI::CORNER_T);
 	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false);
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated);
@@ -309,9 +311,15 @@ class CMenus : public CComponent
 	void RenderIdents(CUIRect MainView);
 	void RenderTrans(CUIRect MainView);
 	static void ConKeyShortcut(IConsole::IResult *pResult, void *pUserData);
-	bool HotbarLockInput(IInput::CEvent Event);
+
+	// found in menus_irc.cpp
+	bool m_IRCActive;
+	bool m_IRCWasActive;
+	void RenderIrc(CUIRect MainView);
+	static void ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData);
 
 	void SetActive(bool Active);
+	bool LockInput(IInput::CEvent Event);
 public:
 	void RenderBackground();
 
@@ -324,7 +332,7 @@ public:
 	void RenderLoading();
 	void RenderUpdating(const char *pCaption, int current=0, int total=0);
 
-	bool IsActive() const { return m_MenuActive || m_HotbarActive; }
+	bool IsActive() const { return m_MenuActive || m_HotbarActive || m_IRCActive; }
 
 	virtual void OnInit();
 	virtual void OnConsoleInit();
@@ -348,11 +356,12 @@ public:
 		PAGE_FAVORITES,
 		PAGE_DDNET,
 		PAGE_DEMOS,
+		//PAGE_IRC,
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
 		PAGE_DDRace,
 		PAGE_BROWSER,
-		PAGE_GHOST
+		PAGE_GHOST,
 	};
 
 	// DDRace
