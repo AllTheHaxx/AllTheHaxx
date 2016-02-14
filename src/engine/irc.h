@@ -74,7 +74,7 @@ public:
     virtual void OpenQuery(const char *to) = 0;
     virtual void JoinTo(const char *to, const char *pass = "") = 0;
     virtual void SetTopic(const char *topic) = 0;
-    virtual void Part() = 0;
+    virtual void Part(const char *pReason = 0) = 0;
 
     virtual void SetMode(const char *mode, const char *to) = 0;
     virtual void SetNick(const char *nick) = 0;
@@ -85,12 +85,11 @@ public:
     virtual void SendGetServer(const char *to) = 0;
 
     virtual void StartConnection() = 0;
-    virtual void EndConnection() = 0;
+    virtual void Disconnect(const char *pReason = 0) = 0;
 
     virtual void SetAway(bool state, const char *msg = 0x0) = 0;
 
     virtual void ExecuteCommand(const char *cmd, char *params) = 0;
 };
 
-void ThreadIrcConnection(void *params);
 #endif

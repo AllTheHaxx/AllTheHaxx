@@ -42,18 +42,17 @@ public:
 	CIrcBind();
 
 	void SendChat(const char *pMsg);
-	void SendRaw(const char *pMsg);
+	void SendCommand(const char *pCmd);
 
 	void Connect();
 	void Disconnect(char *pReason);
 
-	void SendRequestUserList();
 	void SendNickChange(const char *pNewNick);
 	void AddLine(int Type, const char *pNick, const char *pLine); // chat
 	void AddLine(const char *pLine); // system
 
 	const char *CurrentNick() { return m_pClient->Irc()->GetNick(); } // XXX this is depreciated and only for compatibility
-	bool IsConnected() { return m_pClient->Irc()->GetState()&IIrc::STATE_CONNECTED; }
+	bool IsConnected() { return m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTED; }
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();

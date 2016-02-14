@@ -28,7 +28,7 @@ public:
     void OpenQuery(const char *to);
     void JoinTo(const char *to, const char *pass = "");
     void SetTopic(const char *topic);
-    void Part();
+    void Part(const char *pReason = 0);
 
     void SetMode(const char *mode, const char *to);
     void SetNick(const char *nick);
@@ -39,7 +39,7 @@ public:
     void SendGetServer(const char *to);
 
     void StartConnection();
-    void EndConnection();
+    void Disconnect(const char *pReason = 0);
 
     void SetAway(bool state, const char *msg = 0x0);
 

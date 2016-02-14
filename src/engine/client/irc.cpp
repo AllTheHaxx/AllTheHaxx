@@ -116,7 +116,7 @@ CIrcCom* CIrc::GetCom(std::string name)
     return 0x0;
 }
 
-void CIrc::StartConnection()
+void CIrc::StartConnection() // call this from a thread only!
 {
 	NETADDR BindAddr;
     mem_zero(&m_HostAddress, sizeof(m_HostAddress));
@@ -125,15 +125,15 @@ void CIrc::StartConnection()
 
     m_State = STATE_CONNECTING;
     // lookup
-	if(net_host_lookup("irc.quakenet.org", &m_HostAddress, NETTYPE_IPV4) != 0)
+	if(net_host_lookup("irc.quakenet.org:6667", &m_HostAddress, NETTYPE_IPV4) != 0)
 	{
-        dbg_msg("IRC","ERROR: Can't lookup Quakenet");
+        dbg_msg("IRC","ERROR: Can't lookup irc.quakenet.org");
         m_State = STATE_DISCONNECTED;
         return;
 	}
-	m_HostAddress.port = 6668;
+	m_HostAddress.port = 6667;
 
-    //Connect
+    // connect
     BindAddr.type = NETTYPE_IPV4;
     m_Socket = net_tcp_create(BindAddr);
 	if(net_tcp_connect(m_Socket, &m_HostAddress) != 0)
@@ -141,15 +141,15 @@ void CIrc::StartConnection()
 	    net_tcp_close(m_Socket);
 	    char aBuf[64];
 	    net_addr_str(&m_HostAddress, aBuf, sizeof(aBuf), 0);
-	    dbg_msg("IRC","ERROR: Can't connect with '%s:%d'...", aBuf, m_HostAddress.port);
+	    dbg_msg("IRC","ERROR: Can't connect to '%s:%d'...", aBuf, m_HostAddress.port);
 	    m_State = STATE_DISCONNECTED;
 		return;
 	}
 
-    // send request
+	// send request
 	SendRaw("CAP LS");
 	SendRaw("NICK %s", m_Nick.c_str());
-	SendRaw("USER HClient 0 * :HClient");
+	SendRaw("USER %s 0 * :%s", g_Config.m_ClIRCUser, g_Config.m_ClIRCRealname); // TODO: we have config vars for this
 
     // status Tab
     CComQuery *pStatus = new CComQuery();
@@ -164,9 +164,9 @@ void CIrc::StartConnection()
     //int TotalBytes = 0;
     int CurrentRecv = 0;
     char LastPong[255]={0};
-    while ((CurrentRecv = net_tcp_recv(m_Socket, aNetBuff, sizeof(aNetBuff))) > 0 && m_State == STATE_CONNECTED)
+    while ((CurrentRecv = net_tcp_recv(m_Socket, aNetBuff, sizeof(aNetBuff))) >= 0 && m_State == STATE_CONNECTED)
     {
-        for (int i=0; i<CurrentRecv; i++)
+        for (int i=0; i < CurrentRecv; i++)
         {
             if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')
                  continue;
@@ -196,7 +196,7 @@ void CIrc::StartConnection()
                         pCom->m_Buffer.push_back(aMsgText);
                     }
                 } else
-                { //Raw Message
+                { //raw message
                     del = NetData.find_first_of(" ");
                     std::string aMsgFServer = NetData.substr(1, del);
                     ldel = del;
@@ -208,8 +208,15 @@ void CIrc::StartConnection()
 
                     if (aMsgID.compare("001") == 0)
                     {
-                        //Auto-Join
-                        JoinTo("#H-Client");
+                    	// set the user's wanted modes
+                    	SetMode(g_Config.m_ClIRCModes, m_Nick.c_str());
+
+                    	// send Q auth
+						if(g_Config.m_ClIRCQAuthName[0] != '\0' && g_Config.m_ClIRCQAuthPass[0] != '\0')
+							SendRaw("PRIVMSG Q@CServe.quakenet.org :AUTH %s %s", g_Config.m_ClIRCQAuthName, g_Config.m_ClIRCQAuthPass);
+
+                        // auto-join
+                        JoinTo("#AllTheHaxx");
                     }
                     else if (aMsgID.compare("332") == 0)
                     {
@@ -624,7 +631,7 @@ void CIrc::StartConnection()
                             CComChan *pChan = static_cast<CComChan*>(pCom);
                             if (pChan)
                             {
-                                str_format(aBuff, sizeof(aBuff), "*** '%s' change mode '%s' to %s", aNickFrom.c_str(), aNickTo.c_str(), aMode.c_str());
+                                str_format(aBuff, sizeof(aBuff), "*** '%s' sets mode '%s' on '%s'", aNickFrom.c_str(), aMode.c_str(), aNickTo.c_str());
                                 pChan->m_Buffer.push_back(aBuff);
 
                                 std::string aNewNick = aNickTo;
@@ -729,11 +736,11 @@ void CIrc::StartConnection()
         }
     }
 
-    //Finish
+    // finish
     net_tcp_close(m_Socket);
     m_State = STATE_DISCONNECTED;
 
-    EndConnection();
+    Disconnect();
 }
 
 void CIrc::NextRoom()
@@ -794,7 +801,7 @@ void CIrc::SetTopic(const char *topic)
     SendRaw("TOPIC %s :%s", pChan->m_Channel, topic);
 }
 
-void CIrc::Part()
+void CIrc::Part(const char *pReason)
 {
     CIrcCom *pCom = GetCom(m_ActiveCom);
     if (!pCom)
@@ -803,7 +810,14 @@ void CIrc::Part()
     if (pCom->GetType() == CIrcCom::TYPE_CHANNEL)
     {
         CComChan *pChan = static_cast<CComChan*>(pCom);
-        SendRaw("PART %s", pChan->m_Channel);
+        char aBuf[64];
+        if(pReason && pReason[0])
+        {
+        	str_format(aBuf, sizeof(aBuf), "PART %s :%s", pChan->m_Channel, pReason);
+        	SendRaw(aBuf);
+        }
+        else
+        	SendRaw("PART %s %", pChan->m_Channel);
 
         m_IrcComs.remove(pCom);
         delete pCom;
@@ -823,11 +837,18 @@ void CIrc::Part()
     }
 }
 
-void CIrc::EndConnection()
+void CIrc::Disconnect(const char *pReason)
 {
     if (m_State != STATE_DISCONNECTED)
     {
-    	SendRaw("QUIT :H-Client");
+    	char aBuf[64];
+		if(pReason && pReason[0])
+		{
+			str_format(aBuf, sizeof(aBuf), "QUIT :%s", pReason);
+			SendRaw(aBuf);
+		}
+		else
+			SendRaw("QUIT");
         m_State = STATE_DISCONNECTED;
     }
 
@@ -965,13 +986,6 @@ void CIrc::SendGetServer(const char *to)
 {
 	str_format(m_CmdToken, sizeof(m_CmdToken), "%ld", time_get());
 	SendRaw("PRIVMSG %s :GETTWSERVER %s", to, m_CmdToken);
-}
-
-void ThreadIrcConnection(void *params)
-{
-    CIrc *pIrc = static_cast<CIrc*>(params);
-
-    pIrc->StartConnection();
 }
 
 void CIrc::ExecuteCommand(const char *cmd, char *params)

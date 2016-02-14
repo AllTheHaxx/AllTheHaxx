@@ -19,7 +19,8 @@ void CIrcBind::OnRender()
 
 void CIrcBind::ListenIRCThread(void *pUser)
 {
-	//CIRC *pData = (CIRC *)pUser;
+	CIrcBind *pIrc = (CIrcBind*)pUser;
+	pIrc->m_pClient->Irc()->StartConnection();
 	return;
 }
 
@@ -57,18 +58,14 @@ void CIrcBind::AddLine(const char *pLine)
 }
 
 
-void CIrcBind::SendChat(const char* pMsg)
+void CIrcBind::SendChat(const char* pMsg) // XXX this is depreciated and only for compatibility
 {
-	char aBuf[510];
-	str_format(aBuf, sizeof(aBuf), "PRIVMSG #AllTheHaxx :%s", pMsg);
-	// TODO!
+	m_pClient->Irc()->SendMsg("#AllTheHaxx", pMsg, IIrc::MSG_TYPE_NORMAL);
 }
 
-void CIrcBind::SendRaw(const char* pMsg)
+void CIrcBind::SendCommand(const char* pCmd)
 {
-	char aBuf[510];
-	str_format(aBuf, sizeof(aBuf), "%s", pMsg+1);
-	// TODO!
+	m_pClient->Irc()->SendRaw(++pCmd);
 }
 
 void CIrcBind::Connect() // XXX this is depreciated and only for compatibility
@@ -76,7 +73,8 @@ void CIrcBind::Connect() // XXX this is depreciated and only for compatibility
 	if(IsConnected())
 		return;
 
-	m_pClient->Irc()->StartConnection();
+    m_pClient->Irc()->SetNick(g_Config.m_ClIRCNick);
+	thread_init(ListenIRCThread, this);
 }
 
 void CIrcBind::Disconnect(char *pReason) // XXX this is depreciated and only for compatibility
@@ -84,13 +82,7 @@ void CIrcBind::Disconnect(char *pReason) // XXX this is depreciated and only for
 	if(!IsConnected())
 		return;
 
-	m_pClient->Irc()->EndConnection();
-}
-
-void CIrcBind::SendRequestUserList()
-{
-	m_UserList.clear();
-	// XXX!
+	m_pClient->Irc()->Disconnect(pReason);
 }
 
 void CIrcBind::SendNickChange(const char *pNewNick) // XXX this is depreciated and only for compatibility
@@ -100,7 +92,8 @@ void CIrcBind::SendNickChange(const char *pNewNick) // XXX this is depreciated a
 
 void CIrcBind::OnConsoleInit()
 {
-	//Connect();
+	if(g_Config.m_ClIRCAutoconnect)
+		Connect();
 }
 
 void CIrcBind::OnReset()

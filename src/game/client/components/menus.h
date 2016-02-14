@@ -68,7 +68,7 @@ class CMenus : public CComponent
 	*/
 
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
-	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners = CUI::CORNER_T);
 
 	//static void ui_draw_browse_icon(int what, const CUIRect *r);
 	//static void ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -97,7 +97,7 @@ class CMenus : public CComponent
 	};
 
 	void UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-						int ItemsPerRow, int SelectedIndex, float ScrollValue);
+						int ItemsPerRow, int SelectedIndex, float ScrollValue, int Corners = CUI::CORNER_T);
 	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false);
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated);
@@ -257,6 +257,7 @@ class CMenus : public CComponent
 	//void render_loading(float percent);
 	int RenderMenubar(CUIRect r);
 	void RenderNews(CUIRect MainView);
+	void RenderIrc(CUIRect MainView);
 
 	// found in menus_demo.cpp
 	void RenderDemoPlayer(CUIRect MainView);
@@ -348,11 +349,12 @@ public:
 		PAGE_FAVORITES,
 		PAGE_DDNET,
 		PAGE_DEMOS,
+		PAGE_IRC,
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
 		PAGE_DDRace,
 		PAGE_BROWSER,
-		PAGE_GHOST
+		PAGE_GHOST,
 	};
 
 	// DDRace

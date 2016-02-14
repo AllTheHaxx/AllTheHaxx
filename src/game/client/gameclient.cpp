@@ -181,7 +181,7 @@ void CGameClient::OnConsoleInit()
 	m_pMapSounds = &::gs_MapSounds;
 
 	m_pAStar = &::gs_AStar;
-	m_pIRC = &::gs_IRC;
+	m_pIrcBind = &::gs_IRC;
 	m_pIdentity = &::gs_Identity;
 
 	m_pRaceDemo = &::gs_RaceDemo;
@@ -203,7 +203,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pRaceDemo);
 	m_All.Add(m_pMapSounds);
 	m_All.Add(m_pAStar);
-	m_All.Add(m_pIRC);
+	m_All.Add(m_pIrcBind);
 	m_All.Add(m_pIdentity);
 
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
@@ -970,7 +970,7 @@ void CGameClient::OnShutdown()
 {
 	m_pIdentity->SaveIdents();
 	m_pRaceDemo->OnShutdown();
-	m_pIRC->OnShutdown();
+	m_pIrcBind->OnShutdown();
 }
 
 void CGameClient::OnEnterGame()

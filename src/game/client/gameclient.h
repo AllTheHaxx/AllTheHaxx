@@ -360,7 +360,7 @@ public:
 	class CMapSounds *m_pMapSounds;
 
 	class CAStar *m_pAStar;
-	class CIrcBind *m_pIRC;
+	class CIrcBind *m_pIrcBind;
 	class CIdentity *m_pIdentity;
 
 	// DDRace

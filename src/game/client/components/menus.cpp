@@ -20,6 +20,7 @@
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/irc.h>
 #include <engine/shared/config.h>
 
 #include <game/version.h>
@@ -39,6 +40,7 @@
 #include "skins.h"
 #include "spoofremote.h"
 #include "controls.h"
+#include "irc.h"
 
 vec4 CMenus::ms_GuiColor;
 vec4 CMenus::ms_ColorTabbarInactiveOutgame;
@@ -202,11 +204,11 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
-int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners)
 //void CMenus::ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
+		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), Corners, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
 #if defined(__ANDROID__)
@@ -238,7 +240,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 
 int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	return DoButton_CheckBox_Common(pID, pText, Checked?"X":"", pRect);
+	return DoButton_CheckBox_Common(pID, pText, Checked?"×":"", pRect);
 }
 
 
@@ -607,7 +609,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	m_ActivePage = g_Config.m_UiPage;
 	int NewPage = -1;
 
-	if(Client()->State() != IClient::STATE_OFFLINE)
+	if(Client()->State() != IClient::STATE_OFFLINE) // hack
 		m_ActivePage = m_GamePage;
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
@@ -747,10 +749,16 @@ int CMenus::RenderMenubar(CUIRect r)
 	//Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_EditorButton=0;
-	if(DoButton_MenuTab(&s_EditorButton, "✎", 0, &Button, CUI::CORNER_TL))
+	if(DoButton_MenuTab(&s_EditorButton, "✎", g_Config.m_ClEditor, &Button, CUI::CORNER_TL))
 	{
 		g_Config.m_ClEditor = 1;
 	}
+
+	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(80.0f, &Box, &Button);
+	static int s_ChatButton=0;
+	if(DoButton_MenuTab(&s_ChatButton, "Chat", m_ActivePage==PAGE_IRC, &Button, CUI::CORNER_T))
+		NewPage = PAGE_IRC;
 
 	if(NewPage != -1)
 	{
@@ -849,6 +857,296 @@ void CMenus::RenderNews(CUIRect MainView)
 	}
 }
 
+// stolen from H-Client :3
+void CMenus::RenderIrc(CUIRect MainView)
+{
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+
+	MainView.HSplitTop(15.0f, 0, &MainView);
+	MainView.VSplitLeft(15.0f, 0, &MainView);
+
+	MainView.Margin(5.0f, &MainView);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarInactive, CUI::CORNER_ALL, 10.0f);
+
+	CUIRect MainIrc, EntryBox, Button;
+	MainView.Margin(10.0f, &MainIrc);
+
+	/*if (m_GamePagePanel != PANEL_CHAT && UI()->MouseInside(&MainView) && Input()->KeyPressed(KEY_MOUSE_1))
+	 {
+	 m_GamePagePanel = PANEL_CHAT;
+	 }*/
+
+	if(m_pClient->Irc()->GetState() == IIrc::STATE_DISCONNECTED)
+	{
+		EntryBox.x = MainIrc.x + (MainIrc.w / 2.0f - 300.0f / 2.0f);
+		EntryBox.w = 300.0f;
+		EntryBox.y = MainIrc.y + (MainIrc.h / 2.0f - 55.0f / 2.0f);
+		EntryBox.h = 55.0f;
+
+		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+		EntryBox.Margin(5.0f, &EntryBox);
+
+		EntryBox.HSplitTop(18.0f, &Button, &EntryBox);
+		CUIRect Label;
+		Button.VSplitLeft(40.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Nick:"), 14.0f, -1);
+		static float OffsetNick;
+		if(g_Config.m_ClIRCNick[0] == 0)
+		{
+			str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
+			str_irc_sanitize(g_Config.m_ClIRCNick);
+		} //TODO_ here?
+		DoEditBox(&g_Config.m_ClIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &OffsetNick,
+				false, CUI::CORNER_ALL);
+
+		EntryBox.HSplitTop(5.0f, 0x0, &EntryBox);
+		EntryBox.HSplitTop(20.0f, &Button, &EntryBox);
+		static float s_ButtonConnect = 0;
+		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect"), 0, &Button))
+			m_pClient->m_pIrcBind->Connect();
+	}
+	else if(m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTING)
+	{
+		EntryBox.x = MainIrc.x + (MainIrc.w / 2.0f - 300.0f / 2.0f);
+		EntryBox.w = 300.0f;
+		EntryBox.y = MainIrc.y + (MainIrc.h / 2.0f - 25.0f / 2.0f);
+		EntryBox.h = 25.0f;
+
+		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+		EntryBox.Margin(5.0f, &EntryBox);
+		UI()->DoLabelScaled(&EntryBox, Localize("Connecting, please wait..."), 14.0f, -1);
+	}
+	else if(m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTED)
+	{
+		CUIRect ButtonBox, InputBox;
+
+		//Channel List
+		MainIrc.HSplitTop(20.0f, &ButtonBox, &EntryBox);
+		ButtonBox.VSplitRight(80.0f, &ButtonBox, &Button);
+		static float s_ButtonDisc = 0;
+		if(DoButton_Menu(&s_ButtonDisc, Localize("Disconnect"), 0, &Button))
+			m_pClient->m_pIrcBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
+
+		float LW = (ButtonBox.w - ButtonBox.x) / m_pClient->Irc()->GetNumComs();
+		static int s_ButsID[100];
+		for(int i = 0; i < m_pClient->Irc()->GetNumComs(); i++)
+		{
+			CIrcCom *pCom = m_pClient->Irc()->GetCom(i);
+
+			if(pCom == m_pClient->Irc()->GetActiveCom())
+				ButtonBox.VSplitLeft(LW - 25.0f, &Button, &ButtonBox);
+			else
+			{
+				ButtonBox.VSplitLeft(LW, &Button, &ButtonBox);
+				Button.VSplitRight(2.0f, &Button, 0x0);
+			}
+
+			if(pCom->m_UnreadMsg)
+			{
+				ms_ColorTabbarActive = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+				ms_ColorTabbarInactive = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			}
+			else
+			{
+				if(pCom == m_pClient->Irc()->GetActiveCom())
+				{
+					ms_ColorTabbarActive = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+					ms_ColorTabbarInactive = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+				}
+				else
+				{
+					ms_ColorTabbarActive = vec4(0.35f, 0.35f, 0.35f, 1.0f);
+					ms_ColorTabbarInactive = vec4(0.35f, 0.35f, 0.35f, 1.0f);
+				}
+			}
+
+			if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+			{
+				CComChan *pChan = static_cast<CComChan*>(pCom);
+				char aTab[255];
+				if(pCom->m_UnreadMsg)
+					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->m_Channel, pCom->m_NumUnreadMsg);
+				else
+					str_copy(aTab, pChan->m_Channel, sizeof(aTab));
+
+				if(DoButton_MenuTab(&s_ButsID[i], aTab, 0, &Button, 0))
+					m_pClient->Irc()->SetActiveCom(i);
+			}
+			else if(pCom->GetType() == CIrcCom::TYPE_QUERY)
+			{
+				CComQuery *pQuery = static_cast<CComQuery*>(pCom);
+				char aTab[255];
+				if(pCom->m_UnreadMsg)
+					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->m_User, pCom->m_NumUnreadMsg);
+				else
+					str_copy(aTab, pQuery->m_User, sizeof(aTab));
+
+				if(DoButton_MenuTab(&s_ButsID[i], aTab, 0, &Button, 0))
+					m_pClient->Irc()->SetActiveCom(i);
+			}
+
+			if(pCom == m_pClient->Irc()->GetActiveCom() && m_pClient->Irc()->GetNumComs() > 2 && str_comp_nocase(((CComChan*)pCom)->m_Channel, "#AllTheHaxx"))
+			{
+				ButtonBox.VSplitLeft(25.0f, &Button, &ButtonBox);
+				Button.VSplitRight(2.0f, &Button, 0x0);
+				static int sCloseButton = 0;
+				if(DoButton_MenuTab(&sCloseButton, "×", 0, &Button, 0))
+					m_pClient->Irc()->Part();
+			}
+		}
+
+		// Input Box
+		EntryBox.HSplitBottom(20.0f, &EntryBox, &InputBox);
+		InputBox.VSplitRight(50.0f, &InputBox, &Button);
+		//Button.VSplitLeft(5.0f, 0x0, &Button);
+		static char aEntryText[500];
+		static float s_Offset;
+		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L);
+		static float s_ButtonSend = 0;
+		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
+				|| ((Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER)) && m_ActivePage == PAGE_IRC))
+		{
+			if(aEntryText[0] == '/'/* || (m_pClient->Irc()->GetActiveCom()->GetType() == CIrcCom::TYPE_QUERY &&
+					str_comp_nocase(((CComQuery*)m_pClient->Irc()->GetActiveCom())->m_User, "@Status") == 0)*/)
+			{
+				std::string strCmdRaw;
+				//if(str_comp_nocase(((CComQuery*)m_pClient->Irc()->GetActiveCom())->m_User, "@Status") == 0)
+				//	strCmdRaw = aEntryText;
+				//else
+					strCmdRaw = aEntryText + 1;
+				char aCmd[32] = { 0 }, aCmdParams[255] = { 0 };
+				size_t del = strCmdRaw.find_first_of(" ");
+				if(del != std::string::npos)
+				{
+					str_copy(aCmd, strCmdRaw.substr(0, del).c_str(), sizeof(aCmd));
+					str_copy(aCmdParams, strCmdRaw.substr(del + 1).c_str(), sizeof(aCmdParams));
+				}
+				else
+					str_copy(aCmd, strCmdRaw.c_str(), sizeof(aCmd));
+
+				if(aCmd[0] != 0)
+					m_pClient->Irc()->ExecuteCommand(aCmd, aCmdParams);
+			}
+			else
+				m_pClient->Irc()->SendMsg(0x0, aEntryText);
+
+			aEntryText[0] = 0;
+		}
+
+		//Channel/Query
+		CIrcCom *pCom = m_pClient->Irc()->GetActiveCom();
+		if(!pCom)
+			return;
+
+		if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+		{
+			CComChan *pChan = static_cast<CComChan*>(pCom);
+
+			CUIRect Chat, UserList;
+			EntryBox.Margin(5.0f, &EntryBox);
+			EntryBox.VSplitRight(150.0f, &Chat, &UserList);
+
+			static int Selected = 0;
+			static int s_UsersList = 0;
+			static float s_UsersScrollValue = 0;
+			char aBuff[50];
+			str_format(aBuff, sizeof(aBuff), "Total: %d", pChan->m_Users.size());
+			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, "Users", aBuff, pChan->m_Users.size(), 1, Selected,
+					s_UsersScrollValue, CUI::CORNER_TR);
+
+			int o = 0;
+			std::list<std::string>::iterator it = pChan->m_Users.begin();
+			while(it != pChan->m_Users.end())
+			{
+				CListboxItem Item = UiDoListboxNextItem(&(*it));
+
+				if(Item.m_Visible)
+				{
+					if(Selected == o)
+					{
+						CUIRect Label, ButtonQS;
+						Item.m_Rect.VSplitRight(Item.m_Rect.h, &Label, &ButtonQS);
+						UI()->DoLabelScaled(&Label, (*it).c_str(), 12.0f, -1);
+						if(UI()->DoButtonLogic(&Item.m_Selected, "", Selected, &Label))
+						{
+							std::list<std::string>::iterator it = pChan->m_Users.begin();
+							std::advance(it, o);
+
+							m_pClient->Irc()->OpenQuery((*it).c_str());
+						}
+
+						//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CONNECT, &ButtonQS,
+						//		vec4(0.47f, 0.58f, 0.72f, 1.0f));
+						if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
+						{
+							std::list<std::string>::iterator it = pChan->m_Users.begin();
+							std::advance(it, o);
+
+							m_pClient->Irc()->SendGetServer((*it).c_str());
+						}
+					}
+					else
+						UI()->DoLabelScaled(&Item.m_Rect, (*it).c_str(), 12.0f, -1);
+				}
+
+				o++;
+				it++;
+			}
+			Selected = UiDoListboxEnd(&s_UsersScrollValue, 0);
+
+			static int s_Chat = 0;
+			static float s_ChatScrollValue = 100.0f;
+			UiDoListboxStart(&s_Chat, &Chat, 12.0f,
+					pChan->m_Topic.c_str()[0] ? pChan->m_Topic.c_str() : "", "",
+					pChan->m_Buffer.size(), 1, -1, s_ChatScrollValue, CUI::CORNER_TL);
+			for(size_t i = 0; i < pChan->m_Buffer.size(); i++)
+			{
+				CListboxItem Item = UiDoListboxNextItem(&pChan->m_Buffer[i]);
+
+				if(Item.m_Visible)
+					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 8.0f, -1);
+			}
+			UiDoListboxEnd(&s_ChatScrollValue, 0);
+		}
+		else if(pCom->GetType() == CIrcCom::TYPE_QUERY)
+		{
+			CComQuery *pQuery = static_cast<CComQuery*>(pCom);
+			CUIRect Chat;
+			EntryBox.Margin(5.0f, &Chat);
+
+			static int s_Chat = 0;
+			static float s_ChatScrollValue = 100.0f;
+			UiDoListboxStart(&s_Chat, &Chat, 12.0f, pQuery->m_User, "", pQuery->m_Buffer.size(), 1, -1,
+					s_ChatScrollValue);
+			for(size_t i = 0; i < pQuery->m_Buffer.size(); i++)
+			{
+				CListboxItem Item = UiDoListboxNextItem(&pQuery->m_Buffer[i]);
+
+				if(Item.m_Visible)
+					UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 8.0f, -1);
+			}
+			UiDoListboxEnd(&s_ChatScrollValue, 0);
+
+			if(str_comp_nocase(pQuery->m_User, "@status") != 0)
+			{
+				CUIRect ButtonQS;
+				Chat.VSplitRight(32.0f, 0x0, &ButtonQS);
+				ButtonQS.h = 32.0f;
+				ButtonQS.x -= 20.0f;
+				ButtonQS.y += 25.0f;
+				RenderTools()->DrawUIRect(&ButtonQS, vec4(0.2f, 0.4f, 0.4f, UI()->MouseInside(&ButtonQS) ? 1.0f : 0.5f),
+						CUI::CORNER_ALL, 10.0f);
+				//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CONNECT, &ButtonQS, vec4(0.47f, 0.58f, 0.72f, 1.0f));
+				static int s_ButtonQSLog = 0;
+				if(UI()->DoButtonLogic(&s_ButtonQSLog, "", 0, &ButtonQS))
+				{
+					m_pClient->Irc()->SendGetServer(pQuery->m_User);
+				}
+			}
+		}
+	}
+}
+
 void CMenus::OnInit()
 {
 
@@ -939,7 +1237,12 @@ int CMenus::Render()
 		m_DoubleClickIndex = -1;
 
 		if(g_Config.m_UiPage == PAGE_INTERNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		{
+			if(m_pClient->ServerBrowser()->CacheExists())
+				m_pClient->ServerBrowser()->LoadCache();
+			else
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		}
 		else if(g_Config.m_UiPage == PAGE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		else if(g_Config.m_UiPage == PAGE_FAVORITES)
@@ -985,10 +1288,13 @@ int CMenus::Render()
 		TabBar.VMargin(20.0f, &TabBar);
 		RenderMenubar(TabBar);
 
-		// news is not implemented yet
+		// make sure the ui page didn't go wild
 		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			if(m_pClient->ServerBrowser()->CacheExists())
+				m_pClient->ServerBrowser()->LoadCache();
+			else
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			g_Config.m_UiPage = PAGE_INTERNET;
 			m_DoubleClickIndex = -1;
 		}
@@ -1008,6 +1314,8 @@ int CMenus::Render()
 				RenderServerControl(MainView);
 			else if(m_GamePage == PAGE_SPOOFING)
 				RenderSpoofing(MainView);
+			else if(m_GamePage == PAGE_IRC)
+				RenderIrc(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
 			else if(m_GamePage == PAGE_GHOST)
@@ -1027,8 +1335,12 @@ int CMenus::Render()
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_DDNET)
 			RenderServerbrowser(MainView);
+		else if(g_Config.m_UiPage == PAGE_IRC)
+			RenderIrc(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);
+
+
 	}
 	else
 	{
@@ -1119,7 +1431,7 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Sound error");
 			pExtraText = Localize("The audio device couldn't be initialised.");
-			pButtonText = Localize("Ok");
+			pButtonText = Localize("I don't care");
 			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_PASSWORD)

@@ -81,14 +81,14 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		else
 			m_pGameConsole->Client()->RconAuth("", pLine);
 	}
-	else if(m_Type == CGameConsole::CONSOLETYPE_IRC && m_pGameConsole->m_pClient->m_pIRC->IsConnected())
+	else if(m_Type == CGameConsole::CONSOLETYPE_IRC && m_pGameConsole->m_pClient->m_pIrcBind->IsConnected())
 	{
 		if(pLine[0] == '/')
-			m_pGameConsole->m_pClient->m_pIRC->SendRaw(pLine);
+			m_pGameConsole->m_pClient->m_pIrcBind->SendCommand(pLine);
 		else
 		{
-			m_pGameConsole->m_pClient->m_pIRC->SendChat(pLine);
-			m_pGameConsole->m_pClient->m_pIRC->AddLine(CIrcBind::IRC_LINETYPE_CHAT, m_pGameConsole->m_pClient->m_pIRC->CurrentNick(), pLine);
+			m_pGameConsole->m_pClient->m_pIrcBind->SendChat(pLine);
+			m_pGameConsole->m_pClient->m_pIrcBind->AddLine(CIrcBind::IRC_LINETYPE_CHAT, m_pGameConsole->m_pClient->m_pIrcBind->CurrentNick(), pLine);
 		}
 	}
 }
@@ -465,13 +465,6 @@ void CGameConsole::OnRender()
 		ConsoleHeight -= 22.0f;
 	}
 
-	if(m_ConsoleType == CONSOLETYPE_IRC)
-	{
-		CUIRect rect;
-		rect.x = 0; rect.y = 20.0f; rect.h = ConsoleHeight-10.0f-20.0f; rect.w = Screen.w;
-		RenderIRCUserList(rect);
-	}
-
 	CInstance *pConsole = CurrentConsole();
 
 	{
@@ -507,7 +500,7 @@ void CGameConsole::OnRender()
 		}
 		else if(m_ConsoleType == CONSOLETYPE_IRC)
 		{
-			if(m_pClient->m_pIRC->IsConnected())
+			if(m_pClient->m_pIrcBind->IsConnected())
 				pPrompt = "Say: ";
 			else
 				pPrompt = "NOT CONNECTED! ";
@@ -516,7 +509,7 @@ void CGameConsole::OnRender()
 
 		x = Cursor.m_X;
 
-		//hide rcon password
+		// hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(), sizeof(aInputString));
 		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed())
@@ -621,7 +614,7 @@ void CGameConsole::OnRender()
 						if (!pUrlBeginning)
 							break;
 
-						memset(aUrl, 0, sizeof(aUrl));
+						mem_zero(aUrl, sizeof(aUrl));
 						urlSize = 0;
 
 						pUrlBeginning = str_find(pCursor, "http://");
@@ -644,7 +637,7 @@ void CGameConsole::OnRender()
 							urlSize = pUrlEnding - pUrlBeginning;
 							str_copy(aUrl, pUrlBeginning, urlSize + 1);
 
-							//url rect
+							// url rect
 							TextRect.x = TextRender()->TextWidth(0, FontSize, pEntry->m_aText, pUrlBeginning - pEntry->m_aText);
 							TextRect.y = y - OffsetY;
 							TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, urlSize);
@@ -667,10 +660,10 @@ void CGameConsole::OnRender()
 							else
 								TextRender()->TextColor(1.0f, 0.39f, 0.0f, 1.0f);
 
-							//render the link
+							// render the link
 							TextRender()->TextEx(&Cursor, pUrlBeginning, urlSize);
 
-							//render the rest
+							// render the rest
 							if (one)
 							{
 								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -728,6 +721,13 @@ void CGameConsole::OnRender()
 		TextRender()->Text(0, Screen.w-Width-10.0f, 10.0f, FontSize, aBuf, -1);
 	}
 
+	if(m_ConsoleType == CONSOLETYPE_IRC)
+	{
+		CUIRect rect;
+		rect.x = 0; rect.y = 20.0f; rect.h = Screen.h-rect.y/*ConsoleHeight-10.0f-20.0f*/; rect.w = Screen.w;
+		RenderIRCUserList(rect);
+	}
+
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
 	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
@@ -758,7 +758,7 @@ void CGameConsole::OnRender()
 void CGameConsole::RenderIRCUserList(CUIRect MainView)
 {
 	CUIRect Pane, Button;
-	CIrcBind * const r = m_pClient->m_pIRC;
+	CIrcBind * const r = m_pClient->m_pIrcBind;
 	CMenus * const m = m_pClient->m_pMenus;
 	MainView.VSplitRight(MainView.w/5, &MainView, &Pane);
 
@@ -939,7 +939,7 @@ void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUser
 {
 	pfnCallback(pResult, pCallbackUserData);
 	CGameConsole *pThis = static_cast<CGameConsole *>(pUserData);
-	pThis->m_pClient->m_pIRC->SendNickChange(g_Config.m_ClIRCNick);
+	pThis->m_pClient->m_pIrcBind->SendNickChange(g_Config.m_ClIRCNick);
 }
 
 
