@@ -342,8 +342,11 @@ void CMenus::RenderIrc(CUIRect MainView)
 				ButtonQS.h = 32.0f;
 				ButtonQS.x -= 20.0f;
 				ButtonQS.y += 25.0f;
-				RenderTools()->DrawUIRect(&ButtonQS, vec4(0.2f, 0.4f, 0.4f, UI()->MouseInside(&ButtonQS) ? 1.0f : 0.5f),
-						CUI::CORNER_ALL, 10.0f);
+				RenderTools()->DrawUIRect(&ButtonQS, vec4(0.2f, 0.6f, 0.4f, UI()->MouseInside(&ButtonQS) ? 1.0f : 0.6f),
+						CUI::CORNER_ALL, 15.0f);
+				ButtonQS.x += 5.0f;
+				ButtonQS.y += 7.0f;
+				UI()->DoLabelScaled(&ButtonQS, "Join", 12.0f, -1);
 				//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CONNECT, &ButtonQS, vec4(0.47f, 0.58f, 0.72f, 1.0f));
 				static int s_ButtonQSLog = 0;
 				if(UI()->DoButtonLogic(&s_ButtonQSLog, "", 0, &ButtonQS))
