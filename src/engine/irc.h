@@ -45,6 +45,14 @@ class IIrc : public IInterface
 {
 	MACRO_INTERFACE("irc", 0)
 public:
+	struct ReplyData
+	{
+		std::string channel;
+		std::string from;
+		std::string to;
+		std::string params;
+	};
+
     enum
     {
         STATE_DISCONNECTED=0,
@@ -60,6 +68,9 @@ public:
 
 
     virtual void Init() = 0;
+
+    virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*), void *pUser) = 0; // pData, pUser
+    virtual void CallHooks(const char* pMsgID, ReplyData* pReplyData) = 0;
 
     virtual int GetState() = 0;
     virtual void NextRoom() = 0;

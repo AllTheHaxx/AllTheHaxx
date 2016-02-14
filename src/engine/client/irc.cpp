@@ -26,6 +26,7 @@ static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 CIrc::CIrc()
 {
     m_IrcComs.clear();
+    m_Hooks.clear();
     m_pGraphics = 0x0;
     m_State = STATE_DISCONNECTED;
     m_Socket = invalid_socket;
@@ -34,6 +35,25 @@ CIrc::CIrc()
     m_Nick = tmpNick;
     mem_zero(m_CmdToken, sizeof(m_CmdToken));
     SetActiveCom(-1);
+}
+
+void CIrc::RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*), void *pUser) // pData, pUser
+{
+	IrcHook h;
+	h.messageID = pMsgID;
+	h.function = func;
+	h.user = pUser;
+	m_Hooks.add(h);
+	dbg_msg("engine/irc", "registered callback for '%s'", pMsgID);
+}
+
+void CIrc::CallHooks(const char *pMsgID, ReplyData* pReplyData)
+{
+	for(int i = 0; i < m_Hooks.size(); i++)
+	{
+		if(m_Hooks[i].messageID == std::string(pMsgID))
+			(*(m_Hooks[i].function))(pReplyData, m_Hooks[i].user);
+	}
 }
 
 void CIrc::Init()
@@ -178,6 +198,7 @@ void CIrc::StartConnection() // call this from a thread only!
     char LastPong[255]={0};
     while ((CurrentRecv = net_tcp_recv(m_Socket, aNetBuff, sizeof(aNetBuff))) >= 0 && m_State == STATE_CONNECTED)
     {
+    	ReplyData reply;
         for (int i=0; i < CurrentRecv; i++)
         {
             if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')
@@ -198,6 +219,7 @@ void CIrc::StartConnection() // call this from a thread only!
                         str_format(aBuff, sizeof(aBuff), "PING [%s]", aMsgText.c_str());
                         pCom->m_Buffer.push_back(aBuff);*/
                     	SendRaw("PONG %s :%s", LastPong, aMsgText.c_str());
+                    	dbg_msg("engine/irc", "Ping? Pong!");
                         LastPong[0]=0;
                     }
                     else if (aMsgID.compare("PONG") == 0)
@@ -206,6 +228,9 @@ void CIrc::StartConnection() // call this from a thread only!
                     {
                         CIrcCom *pCom = GetCom("@Status");
                         pCom->m_Buffer.push_back(aMsgText);
+                    	reply.channel = "@Status";
+                        reply.from = "quakenet.org";
+                    	reply.params = aMsgText;
                     }
                 } else
                 { //raw message
@@ -229,8 +254,11 @@ void CIrc::StartConnection() // call this from a thread only!
 
                         // auto-join
                         JoinTo("#AllTheHaxx");
+
+                        reply.channel = "@Status";
+                        reply.from = "quakenet.org";
                     }
-                    else if (aMsgID.compare("332") == 0)
+                    else if (aMsgID.compare("332") == 0) // topic
                     {
                         del = NetData.find_first_of(" ",del+1);
                         ldel = NetData.find_first_of(" ",del+1);
@@ -242,8 +270,11 @@ void CIrc::StartConnection() // call this from a thread only!
                         CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
                         if (pChan)
                             pChan->m_Topic = aMsgTopic;
+
+                        reply.channel = aMsgChan;
+                        reply.params = aMsgTopic;
                     }
-                    else if (aMsgID.compare("353") == 0)
+                    else if (aMsgID.compare("353") == 0) // NAMREPLY
                     {
                         del = NetData.find_first_of("=");
                         ldel = NetData.find_first_of(" ",del+2);
@@ -262,8 +293,10 @@ void CIrc::StartConnection() // call this from a thread only!
                                 ldel=del+1;
                             } while (del != std::string::npos);
                         }
+                        reply.channel = aMsgChan;
+                        reply.params = aMsgUsers;
                     }
-                    else if (aMsgID.compare("366") == 0)
+                    else if (aMsgID.compare("366") == 0) // ENDOFNAMES
                     {
                         del = NetData.find_first_of(" ",del+1);
                         ldel = NetData.find_first_of(" ",del+1);
@@ -272,8 +305,11 @@ void CIrc::StartConnection() // call this from a thread only!
                         CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
                         if (pChan)
                             pChan->m_Users.sort();
+
+                        reply.channel = aMsgChan;
+
                     }
-                    else if (aMsgID.compare("401") == 0)
+                    else if (aMsgID.compare("401") == 0) // NOSUCHNICK
                     {
                         char aBuff[255];
                         del = NetData.find_first_of(" ",del+1);
@@ -289,8 +325,11 @@ void CIrc::StartConnection() // call this from a thread only!
                         str_format(aBuff, sizeof(aBuff), "*** '%s' %s", aMsgFrom.c_str(), aMsgText.c_str());
                         pCom->m_Buffer.push_back(aBuff);
 
+                        reply.from = aMsgFrom;
+                        reply.params = aMsgText;
+
                     }
-                    else if (aMsgID.compare("421") == 0)
+                    else if (aMsgID.compare("421") == 0) // UNKNOWNCOMMAND
                     {
                         char aBuff[255];
                         del = NetData.find_first_of(" ",del+1);
@@ -302,6 +341,9 @@ void CIrc::StartConnection() // call this from a thread only!
                         CIrcCom *pCom = GetCom("@Status");
                         str_format(aBuff, sizeof(aBuff), "'%s' %s", aMsgCmd.c_str(), aMsgText.c_str());
                         pCom->m_Buffer.push_back(aBuff);
+
+                        reply.from = aMsgCmd;
+                        reply.params = aMsgText;
 
                     }
                     else if (aMsgID.compare("JOIN") == 0)
@@ -331,6 +373,9 @@ void CIrc::StartConnection() // call this from a thread only!
                                 pChan->m_Buffer.push_back(aBuff);
                             }
                         }
+
+                        reply.channel = aMsgChannel;
+                        reply.from = aMsgFrom;
                     }
                     else if (aMsgID.compare("PART") == 0)
                     {
@@ -365,6 +410,9 @@ void CIrc::StartConnection() // call this from a thread only!
                                 pChan->m_Buffer.push_back(aBuff);
                             }
                         }
+
+                       reply.channel = aMsgChannel;
+					   reply.from = aMsgFrom;
                     }
                     else if (aMsgID.compare("QUIT") == 0)
                     {
@@ -404,7 +452,11 @@ void CIrc::StartConnection() // call this from a thread only!
                                 ++it;
                             }
                         }
-                    }
+
+                        reply.channel = "IRC";
+						reply.params = aMsgText;
+						reply.from = aMsgFrom;
+					}
                     else if (aMsgID.compare("TOPIC") == 0)
                     {
                         ldel = NetData.find_first_of(" ",del+1);
@@ -421,7 +473,11 @@ void CIrc::StartConnection() // call this from a thread only!
                             pChan->m_Topic = aMsgText;
                             str_format(aBuff, sizeof(aBuff), "*** '%s' has changed topic to '%s'", aMsgFrom.c_str(), aMsgText.c_str());
                             pChan->m_Buffer.push_back(aBuff);
-                        }
+						}
+
+						reply.channel = aMsgChan;
+						reply.from = aMsgFrom;
+						reply.params = aMsgText;
                     }
                     else if (aMsgID.compare("PRIVMSG") == 0)
                     {
@@ -549,6 +605,11 @@ void CIrc::StartConnection() // call this from a thread only!
 								}
 							}
                         }
+
+                        reply.channel = aMsgChan;
+                        reply.from = aMsgFrom;
+                        reply.params = aMsgText;
+
                     }
                     else if (aMsgID.compare("NICK") == 0)
                     {
@@ -617,6 +678,9 @@ void CIrc::StartConnection() // call this from a thread only!
 
                             ++it;
                         }
+
+						reply.from = aMsgOldNick;
+						reply.to = aMsgNewNick;
                     }
                     else if (aMsgID.compare("MODE") == 0)
                     {
@@ -676,6 +740,10 @@ void CIrc::StartConnection() // call this from a thread only!
                                 pChan->m_Users.sort();
                             }
                         }
+                        reply.channel = aChannel;
+						reply.from = aNickFrom;
+						reply.to = aNickTo;
+						reply.params = aMode;
                     }
                     else if (aMsgID.compare("KICK") == 0)
                     {
@@ -719,6 +787,10 @@ void CIrc::StartConnection() // call this from a thread only!
                                 pChan->m_Users.remove(aNickTo);
                             }
                         }
+                        reply.channel = aChannel;
+						reply.from = aNickFrom;
+						reply.to = aNickTo;
+						reply.params = aKickReason;
                     }
                     else
                     {
@@ -738,12 +810,13 @@ void CIrc::StartConnection() // call this from a thread only!
                         CIrcCom *pCom = GetCom("@Status");
                         pCom->m_Buffer.push_back(aBuff);
                     }
+
+                    CallHooks(aMsgID.c_str(), &reply);
                 }
 
                 NetData.clear();
                 continue;
             }
-
             NetData+=aNetBuff[i];
         }
     }

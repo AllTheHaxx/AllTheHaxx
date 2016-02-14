@@ -7,6 +7,31 @@
 #include "hud.h"
 #include "irc.h"
 
+
+int irchook_join(IIrc::ReplyData* hostd, void* user)
+{
+	CIrcBind *pData = (CIrcBind *)user;
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "[%s] %s joined the chat", hostd->channel.c_str(), hostd->from.c_str());
+	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
+	return 0;
+}
+
+int irchook_leave(IIrc::ReplyData* hostd, void* user) // serves for both QUIT and PART
+{
+	CIrcBind *pData = (CIrcBind *)user;
+
+	char aBuf[64];
+	if(hostd->params.c_str()[0])
+		str_format(aBuf, sizeof(aBuf), "[%s] %s left the chat (%s)", hostd->channel.c_str(), hostd->from.c_str(), hostd->params.c_str());
+	else
+		str_format(aBuf, sizeof(aBuf), "[%s] %s left the chat", hostd->channel.c_str(), hostd->from.c_str());
+	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
+	return 0;
+}
+
+
 CIrcBind::CIrcBind()
 {
 	m_pIRCThread = 0;
@@ -92,6 +117,11 @@ void CIrcBind::SendNickChange(const char *pNewNick) // XXX this is depreciated a
 
 void CIrcBind::OnConsoleInit()
 {
+	// TODO: register hooks here!
+	m_pClient->Irc()->RegisterCallback("JOIN", irchook_join, this);
+	m_pClient->Irc()->RegisterCallback("PART", irchook_leave, this);
+	m_pClient->Irc()->RegisterCallback("QUIT", irchook_leave, this);
+
 	if(g_Config.m_ClIRCAutoconnect)
 		Connect();
 }

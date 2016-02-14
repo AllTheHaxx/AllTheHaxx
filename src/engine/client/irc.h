@@ -4,16 +4,26 @@
 #define ENGINE_CLIENT_IRC_H
 
 #include <base/system.h>
+#include <base/tl/array.h>
 #include <engine/irc.h>
 #include <list>
 #include <string>
 
 class CIrc : public IIrc
 {
+	struct IrcHook
+	{
+		std::string messageID;
+		int (*function)(IIrc::ReplyData*, void*);
+		void* user;
+	};
+
 public:
     CIrc();
 
     void Init();
+
+    virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*), void *pUser); // pData, pUser
 
     int GetState() { return m_State; }
     void NextRoom();
@@ -62,8 +72,11 @@ protected:
     char m_CmdToken[12];
 
     std::list<CIrcCom*> m_IrcComs;
+    array<IrcHook> m_Hooks;
 
 private:
+    void CallHooks(const char* pMsgID, ReplyData* pReplyData);
+
     int GetMsgType(const char *msg);
     void SendServer(const char *to, const char *Token);
 };
