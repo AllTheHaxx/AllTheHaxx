@@ -33,7 +33,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 
 	m_IRCWasActive = true;
 
-	smooth_set(&YOffset, 50.0f, 35.0f, 0);
+	smooth_set(&YOffset, 50.0f, (0.005f/Client()->RenderFrameTime())*35.0f, 0);
 	
 	// small0r
 	MainView.x = 50;
