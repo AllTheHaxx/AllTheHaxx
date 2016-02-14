@@ -10,27 +10,34 @@
 void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 {
 	CMenus *pSelf = (CMenus *)pUserData;
-	if(pSelf->Client()->State() == IClient::STATE_ONLINE)
+	//if(pSelf->Client()->State() == IClient::STATE_ONLINE)
 	{
 		if(pResult->GetInteger(0) != 0)
+		{
 			pSelf->m_IRCActive ^= 1;
+			pSelf->RenderIrc(*pSelf->UI()->Screen());
+		}
 	}
 }
 
 // stolen from H-Client :3
 void CMenus::RenderIrc(CUIRect MainView)
 {
+	static float YOffset = -500.0f;
 	if(!m_IRCActive)
 	{
+		YOffset = -500.0f;
 		m_IRCWasActive = false;
 		return;
 	}
 
 	m_IRCWasActive = true;
 
+	smooth_set(&YOffset, 50.0f, 35.0f, 0);
+	
 	// small0r
 	MainView.x = 50;
-	MainView.y = 50;
+	MainView.y = YOffset;
 	MainView.w -= 100;
 	MainView.h -= 100;
 
