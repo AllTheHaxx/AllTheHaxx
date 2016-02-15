@@ -280,6 +280,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			m_NeedSendinfo = true;
 	}
 
+	Dummy.w /= 2.3f;
 	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &Dummy))
 	{
 		m_Dummy ^= 1;
@@ -383,6 +384,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 
+	Dummy.w /= 2.3f;
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
 	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &DummyLabel))
@@ -391,7 +393,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
-
+	DummyLabel.y += 2.5f;
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
