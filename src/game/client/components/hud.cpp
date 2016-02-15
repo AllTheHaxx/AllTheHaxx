@@ -404,11 +404,16 @@ void CHud::RenderNotifications()
 	// render background
 	if(m_Notifications.size())
 	{
+		// check for the required number of lines
+		int NumLines = 0;
+		for(int i = 0; i < m_Notifications.size(); i++)
+			NumLines += TextRender()->TextLineCount(0, 6.4f, m_Notifications[i].m_aMsg, m_Width/4.3f);
+
 		float ybottom = Y_BOTTOM + 6.3f/2;
-		float ytop = ybottom - m_Notifications.size()*6.3f - 6.3f/2;
+		float ytop = ybottom - NumLines*6.3f - 6.3f/2;
 		float height = ybottom-ytop;
 		CUIRect r;
-		r.x = 0; r.y = ytop; r.w = m_Width/4.3f + 2.0f; r.h = height;
+		r.x = 0; r.y = ytop; r.w = m_Width/4.3f + 4.0f; r.h = height;
 		RenderTools()->DrawUIRect(&r, vec4(0,0,0,m_Notifications.size()>1?0.5f:min(0.5f,(float)(m_Notifications[0].m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME)), CUI::CORNER_R, 3.5f);
 	}
 
@@ -417,6 +422,8 @@ void CHud::RenderNotifications()
 	for(int i = 0; i < m_Notifications.size(); i++)
 	{
 		CNotification *n = &m_Notifications[i];
+		yOffset += (TextRender()->TextLineCount(0, 6.4f, n->m_aMsg, m_Width/4.3f)-1)*6.4f;
+
 		float FadeVal = (n->m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME;
 
 		// remove if faded out
@@ -434,6 +441,8 @@ void CHud::RenderNotifications()
 			TextRender()->TextColor(n->m_Color.r, n->m_Color.g, n->m_Color.b, min(FadeVal, n->m_Color.a));
 		}
 		TextRender()->Text(0, 7.0f+(n->m_xOffset-=n->m_xOffset/15), Y_BOTTOM-(yOffset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
+		//if(TextRender()->TextLineCount(0, 6.4f, n->m_aMsg, m_Width/4.3f) > 1)
+		//yOffset += (TextRender()->TextLineCount(0, 6.4f, n->m_aMsg, m_Width/4.3f)-1)*6.3f;
 	}
 
 	TextRender()->TextColor(1,1,1,1);
