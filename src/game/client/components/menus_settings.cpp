@@ -408,17 +408,21 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(70.0f, 0, &Label);
 	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
 
-	// custom colour selector
+	// custom color selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitMid(&Button, &Button2);
-	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
-		*UseCustomColor = *UseCustomColor?0:1;
-		if(m_Dummy)
-			m_NeedSendDummyinfo = true;
-		else
-			m_NeedSendinfo = true;
+		CUIRect bt = Button;
+		bt.w /= 2.0f;
+		if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &bt))
+		{
+			*UseCustomColor = *UseCustomColor?0:1;
+			if(m_Dummy)
+				m_NeedSendDummyinfo = true;
+			else
+				m_NeedSendinfo = true;
+		}
 	}
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
@@ -539,7 +543,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
 			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
-			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1,Item.m_Rect.w);
+			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1, Item.m_Rect.w, g_Config.m_ClSkinFilterString);
 			if(g_Config.m_Debug)
 			{
 				vec3 BloodColor = *UseCustomColor ? m_pClient->m_pSkins->GetColorV3(*ColorBody) : s->m_BloodColor;
@@ -568,9 +572,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-		const char *pSearchLabel = "⚲";
-		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
-		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+		UI()->DoLabelScaled(&QuickSearch, "⚲", 14.0f, -1);
+		float wSearch = TextRender()->TextWidth(0, 14.0f, "⚲", -1);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
@@ -581,9 +584,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// clear button
 		{
 			static int s_ClearButton = 0;
-			RenderTools()->DrawUIRect(&QuickSearchClearButton, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-			UI()->DoLabel(&QuickSearchClearButton, "×", QuickSearchClearButton.h*ms_FontmodHeight, 0);
-			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &QuickSearchClearButton))
+			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClSkinFilterString[0] = 0;
 				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
