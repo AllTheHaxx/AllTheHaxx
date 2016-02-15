@@ -273,7 +273,7 @@ void CEffects::OnRender()
 		else
 			m_Add100hz = false;
 
-		if(time_get()-LastUpdate50hz > time_freq()/(100*pInfo->m_Speed))
+		if(time_get()-LastUpdate50hz > time_freq()/(50*pInfo->m_Speed))
 		{
 			m_Add50hz = true;
 			LastUpdate50hz = time_get();
@@ -295,7 +295,7 @@ void CEffects::OnRender()
 	else
 		m_Add100hz = false;
 
-	if(time_get()-LastUpdate50hz > time_freq()/100)
+	if(time_get()-LastUpdate50hz > time_freq()/50)
 	{
 		m_Add50hz = true;
 		LastUpdate50hz = time_get();
