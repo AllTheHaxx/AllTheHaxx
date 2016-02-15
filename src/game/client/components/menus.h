@@ -54,14 +54,15 @@ class CMenus : public CComponent
 
 
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
-	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
+
+	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners, const char *pTooltip = 0);
+	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active, const char *pTooltip = 0);
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
-	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive = ms_ColorTabbarActive, vec4 ColorInactive = ms_ColorTabbarInactive);
+	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive = ms_ColorTabbarActive, vec4 ColorInactive = ms_ColorTabbarInactive, const char *pTooltip = 0);
 
 	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false);
 	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
-	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 
 	/*static void ui_draw_menu_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_keyselect_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -79,13 +80,13 @@ class CMenus : public CComponent
 	static void ui_draw_checkbox(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_checkbox_number(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	*/
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "");
+	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", int Align = 0, const char *pTooltip = 0);
 	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
 
-	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
-	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current);
-	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoKeyReader(void *pID, const CUIRect *pRect, int Key);
+	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0);
+	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0);
+	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
+	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, const char *pTooltip = 0);
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View);
@@ -314,7 +315,6 @@ class CMenus : public CComponent
 
 	// found in menus_irc.cpp
 	bool m_IRCActive;
-	bool m_IRCWasActive;
 	void RenderIrc(CUIRect MainView);
 	static void ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData);
 
@@ -356,12 +356,25 @@ public:
 		PAGE_FAVORITES,
 		PAGE_DDNET,
 		PAGE_DEMOS,
-		//PAGE_IRC,
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
 		PAGE_DDRace,
 		PAGE_BROWSER,
 		PAGE_GHOST,
+
+		PAGE_SETTINGS_LANGUAGE=1,
+		PAGE_SETTINGS_GENERAL,
+		PAGE_SETTINGS_PLAYER,
+		PAGE_SETTINGS_TEE,
+		PAGE_SETTINGS_CONTROLS,
+		PAGE_SETTINGS_GRAPHICS,
+		PAGE_SETTINGS_SOUND,
+		PAGE_SETTINGS_HAXX,
+		PAGE_SETTINGS_HUD,
+		PAGE_SETTINGS_CHAT,
+		PAGE_SETTINGS_IDENTITIES,
+		PAGE_SETTINGS_DDNET,
+		PAGE_SETTINGS_INFO // TODO: implement info page, should contain tabs "about" and "help"
 	};
 
 	// DDRace

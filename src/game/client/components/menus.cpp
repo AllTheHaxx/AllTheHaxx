@@ -157,7 +157,7 @@ int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 	return 0;
 }
 
-int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active)
+int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active, const char *pTooltip)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
 	Graphics()->QuadsBegin();
@@ -171,6 +171,9 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 		RenderTools()->SelectSprite(SPRITE_GUIBUTTON_HOVER);
 		IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
+
+		if(pTooltip && pTooltip[0] != '\0')
+			m_pClient->m_pTooltip->SetTooltip(pTooltip);
 	}
 	Graphics()->QuadsEnd();
 
@@ -206,7 +209,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
-void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
 {
 	float Seconds = 0.6f; //  0.6 seconds for fade
 	float *pFade = ButtonFade(pID, Seconds, Checked);
@@ -220,14 +223,22 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
+
+	if(UI()->MouseInside(&Temp) && pTooltip && pTooltip[0] != '\0')
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+
 }
 
-int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive, vec4 ColorInactive)
+int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive, vec4 ColorInactive, const char *pTooltip)
 {
 	if(Checked)
 		RenderTools()->DrawUIRect(pRect, ColorActive, Corners, 10.0f);
 	else if(UI()->MouseInside(pRect))
+	{
 		RenderTools()->DrawUIRect(pRect, mix(ColorInactive, ColorActive, 0.5f), Corners, 10.0f);
+		if(pTooltip && pTooltip[0] != '\0')
+			m_pClient->m_pTooltip->SetTooltip(pTooltip);
+	}
 	else
 		RenderTools()->DrawUIRect(pRect, ColorInactive, Corners, 10.0f);
 
@@ -302,14 +313,14 @@ int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, c
 }
 
 
-int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
 {
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d", Checked);
-	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
+	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect, pTooltip);
 }
 
-int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
+int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText, int Align, const char *pTooltip)
 {
 	int Inside = UI()->MouseInside(pRect);
 	bool ReturnValue = false;
@@ -331,10 +342,16 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			s_DoScroll = true;
 			s_ScrollStart = UI()->MouseX();
 			int MxRel = (int)(UI()->MouseX() - pRect->x);
+			float dOffset = 0.0f;
+
+			if(Align == 0)
+				dOffset = pRect->w/2.0f-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
+			else if(Align > 0)
+				dOffset = pRect->w-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f; // TODO: FIX THIS!!!
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i) - *Offset > MxRel)
+				if(dOffset + TextRender()->TextWidth(0, FontSize, pStr, i) - *Offset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -405,14 +422,14 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	}
 
 	CUIRect Textbox = *pRect;
-	RenderTools()->DrawUIRect(&Textbox, vec4(1, 1, 1, 0.5f), Corners, 3.0f);
+	RenderTools()->DrawUIRect(&Textbox, vec4(0.0f, 0.0f, 0.0f, 0.25f), Corners, 3.0f);
 	Textbox.VMargin(2.0f, &Textbox);
 	Textbox.HMargin(2.0f, &Textbox);
 
 	const char *pDisplayStr = pStr;
 	char aStars[128];
 
-	if(pDisplayStr[0] == '\0')
+	if(pDisplayStr[0] == '\0' && pEmptyText)
 	{
 		pDisplayStr = pEmptyText;
 		TextRender()->TextColor(1, 1, 1, 0.75f);
@@ -456,27 +473,46 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *Offset;
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, Align);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, Align ? s_AtIndex : -1);
 		Textbox = *pRect;
-		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		if(Align < 0)
+		{
+			Textbox.VSplitLeft(2.0f, 0, &Textbox);
+			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		}
+		else if(Align == 0)
+		{
+			Textbox.x += Textbox.w/2.0f-w/2.0f;
+			w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		}
+		else if(Align > 0)
+		{
+			w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+			Textbox.VSplitRight(2.0f, 0, &Textbox);
+			Textbox.x -= (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		}
 
 		if((2*time_get()/time_freq()) % 2)	// make it blink
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
 	}
 	UI()->ClipDisable();
 
+	if(Inside && pTooltip && pTooltip[0] != '\0')
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+
+
 	return ReturnValue;
 }
 
-float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
+float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip)
 {
 	CUIRect Handle;
 	static float OffsetY;
@@ -531,12 +567,15 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	Slider.Margin(5.0f, &Slider);
 	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 2.5f);
 
+	if(Inside && pTooltip && pTooltip[0] != '\0')
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+
 	return ReturnValue;
 }
 
 
 
-float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
+float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip)
 {
 	CUIRect Handle;
 	static float OffsetX;
@@ -587,10 +626,13 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 	Slider.Margin(5.0f, &Slider);
 	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 2.5f);
 
+	if(Inside && pTooltip && pTooltip[0] != '\0')
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+
 	return ReturnValue;
 }
 
-int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
+int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, const char *pTooltip)
 {
 	// process
 	static void *pGrabbedID = 0;
@@ -647,13 +689,13 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
 
 	// draw
 	if (UI()->ActiveItem() == pID && ButtonUsed == 0)
-		DoButton_KeySelect(pID, "???", 0, pRect);
+		DoButton_KeySelect(pID, "???", 0, pRect, pTooltip);
 	else
 	{
 		if(Key == 0)
-			DoButton_KeySelect(pID, "", 0, pRect);
+			DoButton_KeySelect(pID, "", 0, pRect, pTooltip);
 		else
-			DoButton_KeySelect(pID, Input()->KeyName(Key), 0, pRect);
+			DoButton_KeySelect(pID, Input()->KeyName(Key), 0, pRect, pTooltip);
 	}
 	return NewKey;
 }

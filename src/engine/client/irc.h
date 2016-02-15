@@ -45,6 +45,7 @@ public:
     void SetMode(const char *mode, const char *to);
     void SetNick(const char *nick);
     const char* GetNick() { return m_Nick.c_str(); }
+    int NumUnreadMessages(int *pArray = 0);
 
     void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
     void SendRaw(const char *fmt, ...);

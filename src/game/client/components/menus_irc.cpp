@@ -10,27 +10,39 @@
 void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 {
 	CMenus *pSelf = (CMenus *)pUserData;
-	if(pSelf->Client()->State() == IClient::STATE_ONLINE)
+	//if(pSelf->Client()->State() == IClient::STATE_ONLINE)
 	{
 		if(pResult->GetInteger(0) != 0)
-			pSelf->m_IRCActive ^= 1;
+		{
+			static CIrcCom *s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
+			if(!(pSelf->m_IRCActive ^= 1))
+			{
+				// set active com to @status in order to receive unread message notification
+				s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
+				pSelf->m_pClient->Irc()->SetActiveCom(0);
+			}
+			else
+				pSelf->m_pClient->Irc()->SetActiveCom(s_pActiveCom);
+			pSelf->RenderIrc(*pSelf->UI()->Screen());
+		}
 	}
 }
 
 // stolen from H-Client :3
 void CMenus::RenderIrc(CUIRect MainView)
 {
+	static float YOffset = -500.0f; // dunno if a constant is optimal...
 	if(!m_IRCActive)
 	{
-		m_IRCWasActive = false;
+		YOffset = -500.0f;
 		return;
 	}
 
-	m_IRCWasActive = true;
-
+	smooth_set(&YOffset, 50.0f, (0.005f/Client()->RenderFrameTime())*35.0f, 0);
+	
 	// small0r
 	MainView.x = 50;
-	MainView.y = 50;
+	MainView.y = YOffset;
 	MainView.w -= 100;
 	MainView.h -= 100;
 
@@ -148,10 +160,10 @@ void CMenus::RenderIrc(CUIRect MainView)
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
 				char aTab[255];
-				if(pCom->m_UnreadMsg)
+				if(pCom->m_NumUnreadMsg)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->m_Channel, pCom->m_NumUnreadMsg);
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_UnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
 						m_pClient->Irc()->SetActiveCom(i);
 				}
 				else
@@ -176,10 +188,10 @@ void CMenus::RenderIrc(CUIRect MainView)
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
 				char aTab[255];
-				if(pCom->m_UnreadMsg)
+				if(pCom->m_NumUnreadMsg)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->m_User, pCom->m_NumUnreadMsg);
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_UnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
 						m_pClient->Irc()->SetActiveCom(i);
 				}
 				else
@@ -208,7 +220,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 		//Button.VSplitLeft(5.0f, 0x0, &Button);
 		static char aEntryText[500];
 		static float s_Offset;
-		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L);
+		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
 		static float s_ButtonSend = 0;
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
 				|| m_EnterPressed)
