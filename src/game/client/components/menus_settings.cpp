@@ -1200,7 +1200,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 void CMenus::RenderSettings(CUIRect MainView)
 {
-	static int s_SettingsPage = 0;
+	//static int s_SettingsPage = 0;
 
 	// render background
 	CUIRect Temp, TabBar, RestartWarning;
@@ -1234,37 +1234,39 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	for(int i = 0; i < NumTabs; i++)
 	{
-		TabBar.HSplitTop(i==7||i==11?24:10, &Button, &TabBar);
+		TabBar.HSplitTop(i == 7 || i == 11 ? 24 : 10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
-		if(DoButton_MenuTab(aTabs[i], aTabs[i], s_SettingsPage == i, &Button, CUI::CORNER_R))
-			s_SettingsPage = i;
+		if(UI()->MouseInside(&Button))
+			Button.w += 5.0f;
+		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R))
+			g_Config.m_UiSettingsPage = i;
 	}
 
 	MainView.Margin(10.0f, &MainView);
 
-	if(s_SettingsPage == 0)
+	if(g_Config.m_UiSettingsPage == 0)
 		RenderLanguageSelection(MainView);
-	else if(s_SettingsPage == 1)
+	else if(g_Config.m_UiSettingsPage == 1)
 		RenderSettingsGeneral(MainView);
-	else if(s_SettingsPage == 2)
+	else if(g_Config.m_UiSettingsPage == 2)
 		RenderSettingsPlayer(MainView);
-	else if(s_SettingsPage == 3)
+	else if(g_Config.m_UiSettingsPage == 3)
 		RenderSettingsTee(MainView);
-	else if(s_SettingsPage == 4)
+	else if(g_Config.m_UiSettingsPage == 4)
 		RenderSettingsControls(MainView);
-	else if(s_SettingsPage == 5)
+	else if(g_Config.m_UiSettingsPage == 5)
 		RenderSettingsGraphics(MainView);
-	else if(s_SettingsPage == 6)
+	else if(g_Config.m_UiSettingsPage == 6)
 		RenderSettingsSound(MainView);
-	else if(s_SettingsPage == 7)
+	else if(g_Config.m_UiSettingsPage == 7)
 		RenderSettingsHaxx(MainView);
-	else if(s_SettingsPage == 8)
+	else if(g_Config.m_UiSettingsPage == 8)
 		RenderSettingsHUD(MainView);
-	else if(s_SettingsPage == 9)
+	else if(g_Config.m_UiSettingsPage == 9)
 		RenderSettingsIRC(MainView);
-	else if(s_SettingsPage == 10)
+	else if(g_Config.m_UiSettingsPage == 10)
 		RenderSettingsIdent(MainView);
-	else if(s_SettingsPage == 11)
+	else if(g_Config.m_UiSettingsPage == 11)
 		RenderSettingsDDRace(MainView);
 
 
