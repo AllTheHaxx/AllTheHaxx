@@ -29,7 +29,7 @@ int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
-int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
+int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners, const char *pTooltip)
 {
 	RenderTools()->DrawUIRect(pRect, Checked ? vec4(1.0f, 1.0f, 1.0f, 0.10f) : vec4(1.0f, 1.0f, 1.0f, 0.5f)*ButtonColorMul(pID), Corners, 5.0f);
 	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
@@ -40,6 +40,9 @@ int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Chec
 	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
+
+	if(UI()->MouseInside(pRect))
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
 
 	return UI()->DoButtonLogic(pID, "", Checked, pRect);
 }
