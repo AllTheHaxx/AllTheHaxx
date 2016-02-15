@@ -14,7 +14,15 @@ void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pResult->GetInteger(0) != 0)
 		{
-			pSelf->m_IRCActive ^= 1;
+			static CIrcCom *s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
+			if(!(pSelf->m_IRCActive ^= 1))
+			{
+				// set active com to @status in order to receive unread message notification
+				s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
+				pSelf->m_pClient->Irc()->SetActiveCom(0);
+			}
+			else
+				pSelf->m_pClient->Irc()->SetActiveCom(s_pActiveCom);
 			pSelf->RenderIrc(*pSelf->UI()->Screen());
 		}
 	}

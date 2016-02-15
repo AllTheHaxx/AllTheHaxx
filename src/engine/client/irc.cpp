@@ -1158,3 +1158,24 @@ void CIrc::ExecuteCommand(const char *cmd, char *params)
     else
         SendRaw("%s %s", cmd, params);
 }
+
+int CIrc::NumUnreadMessages(int *pArray)
+{
+	int NumChan = 0, NumQuery = 0;
+	for(int i = 0; i < GetNumComs(); i++)
+	{
+		CIrcCom *pCom = GetCom(i);
+		if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+			NumChan += ((CComChan *)pCom)->m_NumUnreadMsg;
+		else if(pCom->GetType() == CIrcCom::TYPE_QUERY)
+			NumQuery += ((CComQuery *)pCom)->m_NumUnreadMsg;
+	}
+
+	if(pArray)
+	{
+		pArray[0] = NumChan;
+		pArray[1] = NumQuery;
+	}
+
+	return NumChan + NumQuery;
+}

@@ -31,6 +31,7 @@ class CHud : public CComponent
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
 	void RenderNotifications();
+	void RenderIRCNotifications(CUIRect Rect);
 	void RenderChatBox();
 	void RenderVoting();
 	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);

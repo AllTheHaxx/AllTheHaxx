@@ -4,6 +4,7 @@
 #include <engine/serverbrowser.h>
 #include <engine/textrender.h>
 #include <engine/shared/config.h>
+#include <engine/client/irc.h>
 
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -357,7 +358,7 @@ void CHud::RenderTeambalanceWarning()
 		if (g_Config.m_ClWarningTeambalance && (TeamDiff >= 2 || TeamDiff <= -2))
 		{
 			const char *pText = Localize("Please balance teams!");
-			float FlashVal = 0.3*(sin(Client()->LocalTime()*2.35f)/2+0.4f); //TODO: test this!
+			float FlashVal = 0.3*(sin(Client()->LocalTime()*2.35f)/2+0.4f);
 			TextRender()->TextColor(0.7f+FlashVal,0.7f+FlashVal,0.2f+FlashVal,1.0f);
 			TextRender()->Text(0x0, 5, 50, 6, pText, -1);
 			TextRender()->TextColor(1,1,1,1);
@@ -448,6 +449,38 @@ void CHud::RenderNotifications()
 	TextRender()->TextColor(1,1,1,1);
 }
 
+void CHud::RenderIRCNotifications(CUIRect Rect)
+{
+	Rect.HMargin(Rect.h/3.0f, &Rect);
+
+	// hack
+	{
+		static bool True = false;
+		if(!True) m_pClient->Irc()->SetActiveCom(-1);
+		True = true;
+	}
+
+	static float Offset = -Rect.w-1;
+	if(m_pClient->Irc()->NumUnreadMessages())
+	{
+		smooth_set(&Offset, 0.0f, (0.005f/Client()->RenderFrameTime())*40.0f);
+		Rect.x += Offset;
+
+		char aBuf[16];
+		int Num, pNum[2];
+		Num = m_pClient->Irc()->NumUnreadMessages(pNum);
+		str_format(aBuf, sizeof(aBuf), "Chat: %i (%i + %i)", Num, pNum[0], pNum[1]); // total, channel, query
+
+		Rect.w = TextRender()->TextWidth(0, 6.0f, aBuf, str_length(aBuf)) + 7.5f;
+		RenderTools()->DrawUIRect(&Rect, vec4(0,0,0,0.40f), CUI::CORNER_R, 5.0f);
+
+		Rect.x += 2.5f;
+		TextRender()->Text(0, Rect.x, Rect.y+3.0f, 6.0f, aBuf, -1);
+	}
+	else
+		Offset = -Rect.w - 1;
+}
+
 void CHud::RenderChatBox()
 {
 	if (!g_Config.m_ClShowhudChatbox || !m_pClient->m_pChat->Blend())
@@ -488,6 +521,13 @@ void CHud::RenderVoting()
 		smooth_set(&Offset, Rect.w*0.75f, 10.0f); // only a bit visible
 	else
 		smooth_set(&Offset, Rect.w, 10.0f, 0.02f); // invisible
+
+	{
+		CUIRect IRCRect = Rect;
+		IRCRect.x += Rect.w;
+		IRCRect.x -= Offset;
+		RenderIRCNotifications(IRCRect);
+	}
 
 	// completely invisible, nothing to render
 	if(Offset == Rect.w && !ShouldRender)
