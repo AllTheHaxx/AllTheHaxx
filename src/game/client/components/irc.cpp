@@ -38,7 +38,7 @@ int irchook_privmsg(IIrc::ReplyData* hostd, void* user)
 	if(str_find_nocase(hostd->params.c_str(), pData->GameClient()->Irc()->GetNick()))
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "[%s] You were mentioned by %s", hostd->channel, hostd->from);
+		str_format(aBuf, sizeof(aBuf), "[%s] You were mentioned by %s", hostd->channel.c_str(), hostd->from.c_str());
 		pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
 	}
 	return 0;
