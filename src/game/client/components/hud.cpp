@@ -455,7 +455,7 @@ void CHud::RenderIRCNotifications(CUIRect Rect)
 		smooth_set(&Offset, 0.0f, (0.005f/Client()->RenderFrameTime())*40.0f);
 		Rect.x += Offset;
 
-		char aBuf[16];
+		char aBuf[19];
 		int Num, pNum[2];
 		Num = m_pClient->Irc()->NumUnreadMessages(pNum);
 		str_format(aBuf, sizeof(aBuf), "Chat: %i (%i + %i)", Num, pNum[0], pNum[1]); // total, channel, query
