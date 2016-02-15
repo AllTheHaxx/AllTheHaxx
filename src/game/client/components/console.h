@@ -33,6 +33,7 @@ class CGameConsole : public CComponent
 		int m_Type;
 		int m_CompletionEnumerationCount;
 		int m_BacklogActPage;
+		int m_BacklogLineOffset;
 
 	public:
 		CGameConsole *m_pGameConsole;
