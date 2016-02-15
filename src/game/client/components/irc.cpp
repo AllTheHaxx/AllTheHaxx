@@ -31,6 +31,18 @@ int irchook_leave(IIrc::ReplyData* hostd, void* user) // serves for both QUIT an
 	return 0;
 }
 
+int irchook_privmsg(IIrc::ReplyData* hostd, void* user)
+{
+	CIrcBind *pData = (CIrcBind *)user;
+
+	if(str_find_nocase(hostd->params.c_str(), pData->GameClient()->Irc()->GetNick()))
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "[%s] You were mentioned by %s", hostd->channel, hostd->from);
+		pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
+	}
+	return 0;
+}
 
 CIrcBind::CIrcBind()
 {
@@ -121,6 +133,7 @@ void CIrcBind::OnConsoleInit()
 	m_pClient->Irc()->RegisterCallback("JOIN", irchook_join, this);
 	m_pClient->Irc()->RegisterCallback("PART", irchook_leave, this);
 	m_pClient->Irc()->RegisterCallback("QUIT", irchook_leave, this);
+	m_pClient->Irc()->RegisterCallback("PRIVMSG", irchook_privmsg, this);
 
 	if(g_Config.m_ClIRCAutoconnect)
 		Connect();

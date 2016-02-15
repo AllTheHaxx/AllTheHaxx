@@ -543,6 +543,10 @@ void CIrc::StartConnection() // call this from a thread only!
                         }
                         else
                         {
+                        	reply.channel = aMsgChan;
+							reply.from = aMsgFrom;
+							reply.params = aMsgText;
+
 							if (aMsgChan == m_Nick)
 							{
 								CIrcCom *pCom = GetCom(aMsgFrom);
@@ -602,11 +606,6 @@ void CIrc::StartConnection() // call this from a thread only!
 								}
 							}
                         }
-
-                        reply.channel = aMsgChan;
-                        reply.from = aMsgFrom;
-                        reply.params = aMsgText;
-
                     }
                     else if (aMsgID.compare("NICK") == 0)
                     {
