@@ -64,50 +64,39 @@ void CHud::RenderGameTimer()
 		CServerInfo Info;
 		Client()->GetServerInfo(&Info);
 
-		if(Time <= 0 && g_Config.m_ClShowDecisecs)
-			str_format(aBuf, sizeof(aBuf), "00:00.0");
-		else if(Time <= 0)
-			str_format(aBuf, sizeof(aBuf), "00:00");
-		else if(IsRace(&Info) && !IsDDRace(&Info) && m_ServerRecord >= 0)
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
-		else if(g_Config.m_ClShowDecisecs)
-		{
-			if(Time >= 60*60*24)
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d:%02d.%d", Time/60/60/24, (Time%86400)/3600, (Time/60)%60, (Time)%60, m_DDRaceTick/10);
-			else if(Time >= 60*60)
-				str_format(aBuf, sizeof(aBuf), "%02:%02d:%02d.%d", Time/60/24, (Time/60)%60, Time%60, m_DDRaceTick/10);
-			else
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
-		}
-		else
-		{
-			if(Time >= 60*60*24)
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d:%02d", Time/60/60/24, (Time%86400)/3600, (Time/60)%60, (Time)%60);
-			else if(Time >= 60*60)
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time/60/24, (Time/60)%60, Time%60);
-			else
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time/60, Time%60);
-		}
-		float FontSize = 10.0f;
-		float w;
+		// TODO: show m_ServerRecord somewhere if we are in a race
+
+		if(Time >= 60*60*24) // 60sec x 60min x 24h = 1 day
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d:%02d", Time/60/60/24, (Time%86400)/3600, (Time/60)%60, (Time)%60);
+		else if(Time >= 60*60) // 60sec x 60 min = 1 hour
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time/60/24, (Time/60)%60, Time%60);
+		else // only min:sec
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time/60, Time%60);
+
 		if(g_Config.m_ClShowDecisecs)
-			w = TextRender()->TextWidth(0, 12,"00:00.0",-1);
-		else
-			w = TextRender()->TextWidth(0, 12,"00:00",-1);
+		{
+			char aTmp[4];
+			str_format(aTmp, sizeof(aTmp), ".%d", m_DDRaceTick/10);
+			str_append(aBuf, aTmp, sizeof(aBuf));
+		}
+
+		const float FontSize = 10.0f;
+		float w = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && !m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer)
 		{
 			float Alpha = Time <= 10 && (2*time_get()/time_freq()) % 2 ? 0.5f : 1.0f;
 			TextRender()->TextColor(1.0f, 0.25f, 0.25f, Alpha);
 		}
-		TextRender()->Text(0, Half-w/2, 2, FontSize, aBuf, -1);
+		TextRender()->Text(0, Half-w/2, 2.0f, FontSize, aBuf, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
 
 void CHud::RenderPauseNotification()
 {
-	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED &&
+	if((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED) &&
 		!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 	{
 		const char *pText = Localize("Game paused");
