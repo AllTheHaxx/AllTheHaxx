@@ -14,18 +14,25 @@ void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pResult->GetInteger(0) != 0)
 		{
-			static CIrcCom *s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
-			if(!(pSelf->m_IRCActive ^= 1))
-			{
-				// set active com to @status in order to receive unread message notification
-				s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
-				pSelf->m_pClient->Irc()->SetActiveCom(0);
-			}
-			else
-				pSelf->m_pClient->Irc()->SetActiveCom(s_pActiveCom);
-			pSelf->RenderIrc(*pSelf->UI()->Screen());
+			pSelf->ToggleIrc();
 		}
 	}
+}
+
+bool CMenus::ToggleIrc()
+{
+	static CIrcCom *s_pActiveCom = m_pClient->Irc()->GetActiveCom();
+	if(!(m_IRCActive ^= 1))
+	{
+		// set active com to @status in order to receive unread message notification
+		s_pActiveCom = m_pClient->Irc()->GetActiveCom();
+		m_pClient->Irc()->SetActiveCom(0);
+	}
+	else
+		m_pClient->Irc()->SetActiveCom(s_pActiveCom);
+	RenderIrc(*UI()->Screen());
+
+	return m_IRCActive;
 }
 
 // stolen from H-Client :3
