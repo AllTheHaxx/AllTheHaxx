@@ -62,6 +62,7 @@ void CGameConsole::CInstance::ClearBacklog()
 {
 	m_Backlog.Init();
 	m_BacklogActPage = 0;
+	m_BacklogLineOffset = 0;
 }
 
 void CGameConsole::CInstance::ClearHistory()
@@ -185,15 +186,45 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				}
 			}
 		}
-		else if(Event.m_Key == KEY_PAGEUP || Event.m_Key == KEY_MOUSE_WHEEL_UP)
+		else if(Event.m_Key == KEY_PAGEUP)
 		{
-			++m_BacklogActPage;
+			if(m_BacklogLineOffset+=26 > 27-1) // 27 lines fit onto one page
+			{
+				m_BacklogLineOffset = m_BacklogLineOffset%27;
+				m_BacklogActPage++;
+			}
 		}
-		else if(Event.m_Key == KEY_PAGEDOWN || Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
+		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
-			--m_BacklogActPage;
-			if(m_BacklogActPage < 0)
-				m_BacklogActPage = 0;
+			if(m_BacklogLineOffset-=27 < 0)
+			{
+				m_BacklogLineOffset = m_BacklogLineOffset%27;
+				if(--m_BacklogActPage < 0)
+				{
+					m_BacklogActPage = 0;
+					m_BacklogLineOffset = 0;
+				}
+			}
+		}
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
+		{
+			if(++m_BacklogLineOffset > 27-1) // 27 lines fit onto one page
+			{
+				m_BacklogLineOffset = 0;
+				m_BacklogActPage++;
+			}
+		}
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
+		{
+			if(--m_BacklogLineOffset < 0)
+			{
+				m_BacklogLineOffset = 27-1;
+				if(--m_BacklogActPage < 0)
+				{
+					m_BacklogActPage = 0;
+					m_BacklogLineOffset = 0;
+				}
+			}
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
 		{
@@ -548,8 +579,16 @@ void CGameConsole::OnRender()
 
 		for(int Page = 0; Page <= pConsole->m_BacklogActPage; ++Page, OffsetY = 0.0f)
 		{
+			for(int asdf = 0; asdf < pConsole->m_BacklogLineOffset; asdf++)
+			{
+				if(pConsole->m_Backlog.Prev(pEntry))
+					pEntry = pConsole->m_Backlog.Prev(pEntry);
+				else break;
+			}
+
 			while(pEntry)
 			{
+
 				if(pEntry->m_Highlighted)
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 				else
@@ -621,14 +660,14 @@ void CGameConsole::OnRender()
 							TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, urlSize);
 							TextRect.h = FontSize;
 
-							//render the first part
+							// render the first part
 							if (pUrlBeginning - pCursor > 0)
 							{
 								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 								TextRender()->TextEx(&Cursor, pCursor, pUrlBeginning - pCursor);
 							}
 
-							//set the color and check if pressed
+							// set the color and check if pressed
 							if (UI()->MouseInside(&TextRect))
 							{
 								TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
@@ -671,6 +710,7 @@ void CGameConsole::OnRender()
 			if(!pEntry && Page < pConsole->m_BacklogActPage)
 			{
 				pConsole->m_BacklogActPage = Page;
+				pConsole->m_BacklogLineOffset = 26; // <-ANZAHL DER ZEILEN AUF SEITE "Page" TODO XXX nicht 27
 				pEntry = pConsole->m_Backlog.First();
 				while(OffsetY > 0.0f && pEntry)
 				{
@@ -687,7 +727,7 @@ void CGameConsole::OnRender()
 		// render page
 		char aBuf[128];
 		TextRender()->TextColor(1,1,1,1);
-		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogActPage+1);
+		str_format(aBuf, sizeof(aBuf), Localize("-Page %d, Offset %d-"), pConsole->m_BacklogActPage+1, pConsole->m_BacklogLineOffset);
 		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
 
 		// render version
