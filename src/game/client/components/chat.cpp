@@ -317,6 +317,37 @@ void CChat::EnableMode(int Team)
 
 void CChat::OnMessage(int MsgType, void *pRawMsg)
 {
+	static const char *apNotificationMsgs[] = {
+			"You are now in a solo part.",
+			"You are now out of the solo part.",
+			"Rescue is not enabled on this server",
+			"You aren't freezed!",
+			"You are not freezed!",
+			"Please join a team before you start",
+			"Server admin requires you to be in a team and with other tees to start",
+			"You have a jetpack gun",
+			"You lost your jetpack gun",
+			"You can't hook others",
+			"You can hook others",
+			"You can jump",
+			"You have unlimited air jumps",
+			"You don't have unlimited air jumps",
+			"You can collide with others",
+			"You can't collide with others",
+			"Endless hook has been activated",
+			"Endless hook has been deactivated",
+			"You can hit others",
+			"You can't hit others",
+			"You can hammer hit others",
+			"You can't hammer hit others",
+			"You can shoot others with shotgun",
+			"You can't shoot others with shotgun",
+			"You can shoot others with grenade",
+			"You can't shoot others with grenade",
+			"You can shoot others with rifle",
+			"You can't shoot others with rifle",
+	};
+
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
@@ -324,28 +355,13 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 		if(g_Config.m_ClNotifications)
 		{
-			// also tile based (currently not)
-			if( str_comp_nocase(pMsg->m_pMessage, "You are now in a solo part.") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "You are now out of the solo part.") == 0
-				)
+			for(int i = 0; i < 28; i++) // don't forget to increment 28 if you add more messages!
 			{
-				//if(str_comp(m_pClient->m_pHud->GetNotification(0), pMsg->m_pMessage) != 0)
+				if(str_comp_nocase(pMsg->m_pMessage, apNotificationMsgs[i]) == 0)
+				{
 					m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
-				HideChat = true;
-			}
-
-			// chat-based only
-			if( str_comp_nocase(pMsg->m_pMessage, "Rescue is not enabled on this server") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "You aren't freezed!") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "You are not freezed!") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "Please join a team before you start") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "Server admin requires you to be in a team and with other tees to start") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "You have a jetpack gun") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "You lost your jetpack gun") == 0
-				)
-			{
-				m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
-				HideChat = true;
+					HideChat = true;
+				}
 			}
 		}
 
