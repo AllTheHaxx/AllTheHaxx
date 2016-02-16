@@ -160,9 +160,9 @@ void CMenus::RenderIrc(CUIRect MainView)
 				static bool Add[64] = { true };
 
 				if(Add[i])
-					smooth_set(&FadeVal[i], 1.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 1.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				else
-					smooth_set(&FadeVal[i], 0.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 0.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				if(FadeVal[i] >= 0.8f) Add[i] = false;
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
@@ -188,9 +188,9 @@ void CMenus::RenderIrc(CUIRect MainView)
 				static bool Add[64] = { true };
 
 				if(Add[i])
-					smooth_set(&FadeVal[i], 1.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 1.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				else
-					smooth_set(&FadeVal[i], 0.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 0.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				if(FadeVal[i] >= 0.8f) Add[i] = false;
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 

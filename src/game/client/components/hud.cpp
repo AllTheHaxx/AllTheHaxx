@@ -505,11 +505,11 @@ void CHud::RenderVoting()
 
 
 	if(ShouldRender)
-		smooth_set(&Offset, 0.0f, 10.0f, 0.03f); // visible
+		smooth_set(&Offset, 0.0f, (0.01f/Client()->RenderFrameTime())*10.0f, 0.03f); // visible
 	else if(!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice() && m_pClient->m_pVoting->IsVoting())
-		smooth_set(&Offset, Rect.w*0.75f, 10.0f); // only a bit visible
+		smooth_set(&Offset, Rect.w*0.75f, (0.01f/Client()->RenderFrameTime())*10.0f); // only a bit visible
 	else
-		smooth_set(&Offset, Rect.w, 10.0f, 0.02f); // invisible
+		smooth_set(&Offset, Rect.w, (0.01f/Client()->RenderFrameTime())*10.0f, 0.02f); // invisible
 
 	{
 		CUIRect IRCRect = Rect;
@@ -675,7 +675,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 			LastWeapon = pCharacter->m_Weapon;
 		}
 
-		smooth_set(&Width, pCharacter->m_AmmoCount*12, 10);
+		smooth_set(&Width, pCharacter->m_AmmoCount*12, (0.01f/Client()->RenderFrameTime())*10.0f);
 		if(Width > 5)
 		{
 			r.w = min(m_Width/2, Width);
@@ -705,7 +705,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(smooth_set(&Width, pCharacter->m_Health*12, 10.0f) > 5)
+		if(smooth_set(&Width, pCharacter->m_Health*12, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
 		{
 			r.w = min(m_Width/2, Width);
 			RenderTools()->DrawUIRect(&r, vec4(g_Config.m_ClColorfulClient?1.0f-Width/120.0f:0.7f, g_Config.m_ClColorfulClient?Width/120.0f:0.0f, 0, 0.8f), CUI::CORNER_R, 3.0f);
@@ -744,7 +744,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(smooth_set(&Width, pCharacter->m_Armor*12, 10.0f) > 5)
+		if(smooth_set(&Width, pCharacter->m_Armor*12, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
 		{
 			r.w = min(m_Width/2, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.8f, 0, 0.8f), CUI::CORNER_R, 3.0f);
