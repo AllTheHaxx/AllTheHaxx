@@ -85,11 +85,16 @@ void CTranslator::TranslationWorker(void *pUser)
 
 			json_value *pValue = json_parse(aResponse);
 			str_copy(aTranslated, json_string_get(json_object_get(json_object_get(pValue,"responseData"),"translatedText")), sizeof(aTranslated));
-			dbg_msg("trans", "translated '%s' from '%s' to '%s', result: '%s'", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang, aTranslated);
+			if(str_comp_nocase(Entry.m_Text, aTranslated) != 0)
+			{
+				dbg_msg("trans", "translated '%s' from '%s' to '%s', result: '%s'", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang, aTranslated);
 
-			// put the result to the queue
-			str_copy(Entry.m_Text, aTranslated, sizeof(Entry.m_Text));
-			pTrans->Results.push_back(Entry);
+				// put the result to the queue
+				str_copy(Entry.m_Text, aTranslated, sizeof(Entry.m_Text));
+				pTrans->Results.push_back(Entry);
+			}
+			else
+				dbg_msg("trans", "translating '%s' from '%s' to '%s' failed", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang);
 
 			// done, remove the element from out queue
 			pTrans->Queue.erase(pTrans->Queue.begin());
