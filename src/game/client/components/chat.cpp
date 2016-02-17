@@ -745,9 +745,10 @@ void CChat::OnRender()
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, Blend);
 
 		// friends always in green
-		if(g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aName, m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aClan, true))
+		if(m_aLines[r].m_ClientID > 0 && m_aLines[r].m_ClientID < MAX_CLIENTS && g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aName, m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aClan, true))
 			TextRender()->TextColor(0,0.7f,0,Blend);
-
+		else if (m_aLines[r].m_ClientID == -1337) // translator in blue
+			TextRender()->TextColor(0.2f,0.2f,0.7f,Blend);
 		TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
 
 		// render line
@@ -755,7 +756,7 @@ void CChat::OnRender()
 		if (m_aLines[r].m_ClientID == -1)
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
 		else if (m_aLines[r].m_ClientID == -1337)
-			TextRender()->TextColor(0.45f,0.45f,1.0f, Blend);
+			rgb = vec3(0.45f, 0.45f, 1.0f); //TextRender()->TextColor(0.45f,0.45f,1.0f, Blend);
 		else if (m_aLines[r].m_Highlighted)
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 		else if (m_aLines[r].m_Team)
