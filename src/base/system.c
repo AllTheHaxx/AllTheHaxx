@@ -108,7 +108,8 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 
 void dbg_break()
 {
-	*((volatile unsigned*)0) = 0x0;
+	//*((volatile unsigned*)0) = 0x0;
+	abort();
 }
 
 #if !defined(CONF_PLATFORM_MACOSX)

@@ -368,7 +368,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 						CUI::CORNER_ALL, 15.0f);
 				ButtonQS.x += 5.0f;
 				ButtonQS.y += 7.0f;
-				UI()->DoLabelScaled(&ButtonQS, "Join", 12.0f, -1);
+				UI()->DoLabelScaled(&ButtonQS, Localize("Join"), 11.0f, -1);
 				//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CONNECT, &ButtonQS, vec4(0.47f, 0.58f, 0.72f, 1.0f));
 				static int s_ButtonQSLog = 0;
 				if(UI()->DoButtonLogic(&s_ButtonQSLog, "", 0, &ButtonQS))

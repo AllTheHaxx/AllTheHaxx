@@ -10,7 +10,7 @@
 #include "irc.h"
 
 
-int irchook_join(IIrc::ReplyData* hostd, void* user)
+int irchook_join(IIrc::ReplyData* hostd, void* user, void* engine)
 {
 	CIrcBind *pData = (CIrcBind *)user;
 
@@ -20,7 +20,7 @@ int irchook_join(IIrc::ReplyData* hostd, void* user)
 	return 0;
 }
 
-int irchook_leave(IIrc::ReplyData* hostd, void* user) // serves for both QUIT and PART
+int irchook_leave(IIrc::ReplyData* hostd, void* user, void* engine) // serves for both QUIT and PART
 {
 	CIrcBind *pData = (CIrcBind *)user;
 
@@ -33,19 +33,55 @@ int irchook_leave(IIrc::ReplyData* hostd, void* user) // serves for both QUIT an
 	return 0;
 }
 
-int irchook_privmsg(IIrc::ReplyData* hostd, void* user)
+int irchook_privmsg(IIrc::ReplyData* hostd, void* user, void* engine)
 {
 	CIrcBind *pData = (CIrcBind *)user;
+	CIrc *pIrc = (CIrc *)engine;
 
+	// nothing to do for control messages
+	if(pIrc->GetMsgType(hostd->params.c_str()) != IIrc::MSG_TYPE_NORMAL)
+		return 0;
+
+	// play a sound
 	if(g_Config.m_ClIRCSound)
 		pData->GameClient()->m_pSounds->Play(CSounds::CHN_GUI, SOUND_IRC_MESSAGE, 1.0f);
 
-	if(str_find_nocase(hostd->params.c_str(), pData->GameClient()->Irc()->GetNick()))
+	// print chat message....
+	if(g_Config.m_ClIRCPrintChat)
+	{
+		char aBuf[256], aTime[32];
+    	time_t rawtime;
+		struct tm *timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+
+		// ...to console
+		if(hostd->channel == pIrc->m_Nick)
+			str_format(aBuf, sizeof(aBuf), "[private chat]: %s<%s> %s", aTime, hostd->from.c_str(), hostd->params.c_str());
+		else
+			str_format(aBuf, sizeof(aBuf), "[chat]: [%s]: %s<%s> %s", hostd->channel.c_str(), aTime, hostd->from.c_str(), hostd->params.c_str());
+		pData->GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "IRC", aBuf, false);
+
+		// ...to notifications
+		if(g_Config.m_ClNotifications)
+		{
+			if(hostd->channel == pIrc->m_Nick)
+				str_format(aBuf, sizeof(aBuf), "[%s]: %s", hostd->channel.c_str(), hostd->params.c_str());
+			else
+				str_format(aBuf, sizeof(aBuf), "[%s]: <%s> %s", hostd->channel.c_str(), hostd->from.c_str(), hostd->params.c_str());
+			pData->GameClient()->m_pHud->PushNotification(aBuf, str_find_nocase(hostd->params.c_str(), pIrc->m_Nick.c_str()) ?
+					vec4(0.2f, 1, 0.5f, 1) :
+					vec4(0.2f, 0.5f, 1, 1));
+		}
+	}
+	else if(str_find_nocase(hostd->params.c_str(), pIrc->m_Nick.c_str()))
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "[%s] You were mentioned by %s", hostd->channel.c_str(), hostd->from.c_str());
 		pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));
 	}
+
 	return 0;
 }
 

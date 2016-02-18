@@ -14,7 +14,7 @@ class CIrc : public IIrc
 	struct IrcHook
 	{
 		std::string messageID;
-		int (*function)(IIrc::ReplyData*, void*);
+		int (*function)(IIrc::ReplyData*, void*, void*);
 		void* user;
 	};
 
@@ -23,7 +23,7 @@ public:
 
     void Init();
 
-    virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*), void *pUser); // pData, pUser
+    virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser); // pData, pUser, this
 
     int GetState() { return m_State; }
     void NextRoom();
@@ -46,6 +46,7 @@ public:
     void SetNick(const char *nick);
     const char* GetNick() { return m_Nick.c_str(); }
     int NumUnreadMessages(int *pArray = 0);
+    int GetMsgType(const char *msg);
 
     void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
     void SendRaw(const char *fmt, ...);
@@ -78,7 +79,6 @@ protected:
 private:
     void CallHooks(const char* pMsgID, ReplyData* pReplyData);
 
-    int GetMsgType(const char *msg);
     void SendServer(const char *to, const char *Token);
 };
 #endif

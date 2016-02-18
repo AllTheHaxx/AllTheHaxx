@@ -37,7 +37,7 @@ CIrc::CIrc()
     SetActiveCom(-1);
 }
 
-void CIrc::RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*), void *pUser) // pData, pUser
+void CIrc::RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser) // pData, pUser
 {
 	IrcHook h;
 	h.messageID = pMsgID;
@@ -52,7 +52,16 @@ void CIrc::CallHooks(const char *pMsgID, ReplyData* pReplyData)
 	for(int i = 0; i < m_Hooks.size(); i++)
 	{
 		if(m_Hooks[i].messageID == std::string(pMsgID))
-			(*(m_Hooks[i].function))(pReplyData, m_Hooks[i].user);
+		{
+			int ret = (*(m_Hooks[i].function))(pReplyData, m_Hooks[i].user, this);
+			if(ret != 0)
+			{
+				char aError[128];
+				str_format(aError, sizeof(aError), "irc callback returned != 0 (ret=%i, i=%i, callback=%s, func=%p)",
+						ret, i, m_Hooks[i].messageID.c_str(), m_Hooks[i].function);
+				dbg_assert(ret == 0, aError);
+			}
+		}
 	}
 }
 
@@ -512,7 +521,9 @@ void CIrc::StartConnection() // call this from a thread only!
 										if (m_CmdToken[0] != 0 && str_comp(CleanMsg.substr(0, pc).c_str(), m_CmdToken) == 0 && aAddr[0] != 0)
 										{
 											if (aAddr[0] != 0 && str_comp_nocase(aAddr, "NONE") != 0)
+											{
 												m_pClient->Connect(aAddr);
+											}
 											else
 											{
 												CIrcCom *pCom = GetActiveCom();
@@ -549,14 +560,6 @@ void CIrc::StartConnection() // call this from a thread only!
 
 							if (aMsgChan == m_Nick)
 							{
-								if(g_Config.m_ClIRCPrintChat)
-								{
-									IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
-									char aBuf[256];
-									str_format(aBuf, sizeof(aBuf), "[private chat]: %s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
-									pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "IRC", aBuf, false);
-								}
-
 								CIrcCom *pCom = GetCom(aMsgFrom);
 								if (!pCom)
 								{
@@ -592,14 +595,6 @@ void CIrc::StartConnection() // call this from a thread only!
 							}
 							else
 							{
-								if(g_Config.m_ClIRCPrintChat)
-								{
-									IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
-									char aBuf[256];
-									str_format(aBuf, sizeof(aBuf), "[chat]: [%s]: %s<%s> %s", aMsgChan.c_str(), aTime, aMsgFrom.c_str(), aMsgText.c_str());
-									pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "IRC", aBuf, false);
-								}
-
 								CIrcCom *pCom = GetCom(aMsgChan);
 								if (pCom)
 								{

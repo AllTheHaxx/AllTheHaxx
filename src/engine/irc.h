@@ -80,7 +80,7 @@ public:
 
     virtual void Init() = 0;
 
-    virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*), void *pUser) = 0; // pData, pUser
+    virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser) = 0; // pData, pUser
     virtual void CallHooks(const char* pMsgID, ReplyData* pReplyData) = 0;
 
     virtual int GetState() = 0;
@@ -104,6 +104,7 @@ public:
     virtual void SetNick(const char *nick) = 0;
     virtual const char* GetNick() = 0;
     virtual int NumUnreadMessages(int *pArray = 0) = 0;
+    virtual int GetMsgType(const char *msg) = 0;
 
     virtual void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL) = 0;
     virtual void SendRaw(const char *fmt, ...) = 0;
