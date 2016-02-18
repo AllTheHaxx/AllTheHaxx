@@ -976,6 +976,24 @@ void CGameClient::OnShutdown()
 void CGameClient::OnEnterGame()
 {
 	g_GameClient.m_pEffects->ResetDamageIndicator();
+
+	//onentergame script
+	char aBuf[32];
+	str_format(aBuf, sizeof(aBuf), "%s.cfg", g_Config.m_UiServerAddress);
+
+	for (int y = 0; y < 32; y++)
+	{
+		if (aBuf[y] == ':')
+			aBuf[y] = '-';
+	}
+
+	IOHANDLE file = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+	if (file)
+	{
+		io_close(file);
+
+		Console()->ExecuteFile(aBuf);
+	}
 }
 
 void CGameClient::OnGameOver()
