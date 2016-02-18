@@ -5,6 +5,8 @@
 
 #include "console.h"
 #include "hud.h"
+#include <engine/shared/jobs.h> // sounds.h needs this
+#include "sounds.h"
 #include "irc.h"
 
 
@@ -34,6 +36,9 @@ int irchook_leave(IIrc::ReplyData* hostd, void* user) // serves for both QUIT an
 int irchook_privmsg(IIrc::ReplyData* hostd, void* user)
 {
 	CIrcBind *pData = (CIrcBind *)user;
+
+	if(g_Config.m_ClIRCSound)
+		pData->GameClient()->m_pSounds->Play(CSounds::CHN_GUI, SOUND_IRC_MESSAGE, 1.0f);
 
 	if(str_find_nocase(hostd->params.c_str(), pData->GameClient()->Irc()->GetNick()))
 	{
