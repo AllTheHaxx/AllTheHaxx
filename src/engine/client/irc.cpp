@@ -549,6 +549,14 @@ void CIrc::StartConnection() // call this from a thread only!
 
 							if (aMsgChan == m_Nick)
 							{
+								if(g_Config.m_ClIRCPrintChat)
+								{
+									IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
+									char aBuf[256];
+									str_format(aBuf, sizeof(aBuf), "[private chat]: %s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
+									pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "IRC", aBuf, false);
+								}
+
 								CIrcCom *pCom = GetCom(aMsgFrom);
 								if (!pCom)
 								{
@@ -584,6 +592,14 @@ void CIrc::StartConnection() // call this from a thread only!
 							}
 							else
 							{
+								if(g_Config.m_ClIRCPrintChat)
+								{
+									IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
+									char aBuf[256];
+									str_format(aBuf, sizeof(aBuf), "[chat]: [%s]: %s<%s> %s", aMsgChan.c_str(), aTime, aMsgFrom.c_str(), aMsgText.c_str());
+									pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "IRC", aBuf, false);
+								}
+
 								CIrcCom *pCom = GetCom(aMsgChan);
 								if (pCom)
 								{
@@ -1003,7 +1019,15 @@ void CIrc::SendMsg(const char *to, const char *msg, int type)
     	if (type == MSG_TYPE_ACTION)
     		str_format(aBuff, sizeof(aBuff),"*** %s: %s", GetNick(), msg);
     	else
-    		str_format(aBuff, sizeof(aBuff),"<%s> %s", GetNick(), msg);
+    	{
+    		char aTime[16];
+    		time_t rawtime;
+			struct tm *timeinfo;
+			time(&rawtime);
+			timeinfo = localtime(&rawtime);
+			str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+    		str_format(aBuff, sizeof(aBuff),"%s<%s> %s", aTime, GetNick(), msg);
+    	}
         pCom->m_Buffer.push_back(aBuff);
     }
 }

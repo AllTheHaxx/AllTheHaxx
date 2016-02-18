@@ -297,7 +297,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		if(m_Yes)
 		{
 			CUIRect YesArea = Bars;
-			smooth_set(&YesVal, m_Yes, 100.0f);
+			smooth_set(&YesVal, m_Yes, (0.01f/Client()->RenderFrameTime())*50.0f);
 			YesArea.w *= YesVal/(float)m_Total;
 			RenderTools()->DrawUIRect(&YesArea, vec4(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
 
@@ -317,7 +317,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		if(m_No)
 		{
 			CUIRect NoArea = Bars;
-			smooth_set(&NoVal, m_No, 100.0f);
+			smooth_set(&NoVal, m_No, (0.01f/Client()->RenderFrameTime())*50.0f);
 			NoArea.w *= NoVal/(float)m_Total;
 			NoArea.x = (Bars.x + Bars.w)-NoArea.w;
 			RenderTools()->DrawUIRect(&NoArea, vec4(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);

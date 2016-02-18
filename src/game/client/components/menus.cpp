@@ -1844,7 +1844,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 			if(m_HotbarActive)
 				m_HotbarActive = false;
 			if(m_IRCActive)
-				m_IRCActive = false;
+				ToggleIrc();
 			else
 				SetActive(!IsActive());
 			return true;

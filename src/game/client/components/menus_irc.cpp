@@ -14,18 +14,28 @@ void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pResult->GetInteger(0) != 0)
 		{
-			static CIrcCom *s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
-			if(!(pSelf->m_IRCActive ^= 1))
-			{
-				// set active com to @status in order to receive unread message notification
-				s_pActiveCom = pSelf->m_pClient->Irc()->GetActiveCom();
-				pSelf->m_pClient->Irc()->SetActiveCom(0);
-			}
-			else
-				pSelf->m_pClient->Irc()->SetActiveCom(s_pActiveCom);
-			pSelf->RenderIrc(*pSelf->UI()->Screen());
+			pSelf->ToggleIrc();
 		}
 	}
+}
+
+bool CMenus::ToggleIrc()
+{
+	static CIrcCom *s_pActiveCom = m_pClient->Irc()->GetActiveCom();
+	if(!(m_IRCActive ^= 1))
+	{
+		// set active com to @status in order to receive unread message notification
+		s_pActiveCom = m_pClient->Irc()->GetActiveCom();
+		m_pClient->Irc()->SetActiveCom(0);
+	}
+	else
+	{
+		m_pClient->Irc()->SetActiveCom(s_pActiveCom);
+		UI()->SetActiveItem(&m_IRCActive);
+	}
+	RenderIrc(*UI()->Screen());
+
+	return m_IRCActive;
 }
 
 // stolen from H-Client :3
@@ -153,9 +163,9 @@ void CMenus::RenderIrc(CUIRect MainView)
 				static bool Add[64] = { true };
 
 				if(Add[i])
-					smooth_set(&FadeVal[i], 1.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 1.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				else
-					smooth_set(&FadeVal[i], 0.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 0.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				if(FadeVal[i] >= 0.8f) Add[i] = false;
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
@@ -181,9 +191,9 @@ void CMenus::RenderIrc(CUIRect MainView)
 				static bool Add[64] = { true };
 
 				if(Add[i])
-					smooth_set(&FadeVal[i], 1.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 1.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				else
-					smooth_set(&FadeVal[i], 0.0f, 70.0f, 0);
+					smooth_set(&FadeVal[i], 0.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
 				if(FadeVal[i] >= 0.8f) Add[i] = false;
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
@@ -220,7 +230,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 		//Button.VSplitLeft(5.0f, 0x0, &Button);
 		static char aEntryText[500];
 		static float s_Offset;
-		DoEditBox(&aEntryText, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
+		DoEditBox(&m_IRCActive, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
 		static float s_ButtonSend = 0;
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
 				|| m_EnterPressed)
