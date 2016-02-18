@@ -403,8 +403,8 @@ void CHud::RenderNotifications()
 		float ytop = ybottom - NumLines*6.3f - 6.3f/2;
 		float height = ybottom-ytop;
 		CUIRect r;
-		r.x = 0; r.y = ytop; r.w = m_Width/4.3f + 4.0f; r.h = height;
-		RenderTools()->DrawUIRect(&r, vec4(0,0,0,m_Notifications.size()>1?0.5f:min(0.5f,(float)(m_Notifications[0].m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME)), CUI::CORNER_R, 3.5f);
+		r.x = m_Width-m_Width/4.3f-2.5f; r.y = ytop; r.w = m_Width/4.3f+2.5f; r.h = height;
+		RenderTools()->DrawUIRect(&r, vec4(0,0,0,m_Notifications.size()>1?0.5f:min(0.5f,(float)(m_Notifications[0].m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME)), CUI::CORNER_L, 3.5f);
 	}
 
 	// render all the notifications
@@ -430,7 +430,7 @@ void CHud::RenderNotifications()
 			n->m_xOffset = 0.0f;
 			TextRender()->TextColor(n->m_Color.r, n->m_Color.g, n->m_Color.b, min(FadeVal, n->m_Color.a));
 		}
-		TextRender()->Text(0, 7.0f+(n->m_xOffset-=n->m_xOffset/15), Y_BOTTOM-(yOffset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
+		TextRender()->Text(0, m_Width-m_Width/4.3f+2.5f-(n->m_xOffset-=n->m_xOffset/15), Y_BOTTOM-(yOffset+=6.3f), 6.4f, n->m_aMsg, m_Width/4.3f);
 		//if(TextRender()->TextLineCount(0, 6.4f, n->m_aMsg, m_Width/4.3f) > 1)
 		//yOffset += (TextRender()->TextLineCount(0, 6.4f, n->m_aMsg, m_Width/4.3f)-1)*6.3f;
 	}
