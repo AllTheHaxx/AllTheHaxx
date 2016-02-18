@@ -116,7 +116,7 @@ void CAStar::OnRender()
 
 int CAStar::GetStart()
 {
-	int NumTiles = 0;
+	size_t NumTiles = 0;
 	int aTiles[128];
 
 	for(int y = 0; y < Collision()->GetHeight(); y++)
@@ -124,8 +124,10 @@ int CAStar::GetStart()
 		for(int x = 0; x < Collision()->GetWidth(); x++)
 		{
 			// hack. but apperently this can indeed happen
-			if(x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_BEGIN)
+			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_BEGIN)
 				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
+			else
+				return -1;
 		}
 	}
 
@@ -137,7 +139,7 @@ int CAStar::GetStart()
 
 int CAStar::GetFinish()
 {
-	int NumTiles = 0;
+	size_t NumTiles = 0;
 	int aTiles[128];
 
 	for(int y = 0; y < Collision()->GetHeight(); y++)
@@ -145,8 +147,10 @@ int CAStar::GetFinish()
 		for(int x = 0; x < Collision()->GetWidth(); x++)
 		{
 			// hack. but apperently this can indeed happen
-			if(x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_END)
+			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_END)
 				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
+			else
+				return -1;
 		}
 	}
 
