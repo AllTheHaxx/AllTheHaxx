@@ -131,6 +131,7 @@ MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFL
 MACRO_CONFIG_INT(BrAutoRefresh, br_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Time in secs to refresh the serverbrowser when active (0 disables)")
 MACRO_CONFIG_INT(BrAutoCache, br_auto_cache, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable automatic serverlist cache management (recommended)")
 MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show DDNet tab in serverbrowser")
+//
 MACRO_CONFIG_STR(ClSpoofSrvIP, cl_spoofsrv_ip, 32, "127.0.0.1", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IP of the spoofing server")
 MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 0, 0, 64000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Port of the spoofing server")
 MACRO_CONFIG_INT(ClSpoofAutoconnect, cl_spoof_autoconnect, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to zervor on startup automatically")
@@ -145,6 +146,7 @@ MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLA
 MACRO_CONFIG_INT(ClPathFinding, cl_path_finding, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")
 MACRO_CONFIG_INT(ClShowhudHealthAmmoBars, cl_showhud_healthammo_bars, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use bars for health and ammo")
 MACRO_CONFIG_INT(ClShowhudChatbox, cl_showhud_chatbox, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Nice background for the chat (alpha, 0-100)")
+//
 MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to irc on startup automatically")
 MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
 //MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
@@ -156,6 +158,9 @@ MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+i-w+x", CFGFLAG_CLIENT|CFGFLAG_
 MACRO_CONFIG_STR(ClIRCLeaveMsg, cl_irc_leavemsg, 32, "Leaving", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC leave message")
 MACRO_CONFIG_INT(ClIRCPrintChat, cl_irc_print_messages, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print messages from the IRC chat into console")
 MACRO_CONFIG_INT(ClIRCSound, cl_irc_sound, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Play a sound when a message arrives")
+//
+MACRO_CONFIG_INT(ClUiShowExtraBar, cl_ui_extra_bar, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show the extra bar")
+
 
 // translator stuff
 MACRO_CONFIG_INT(ClTransIn, cl_trans_in, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate incoming messages")

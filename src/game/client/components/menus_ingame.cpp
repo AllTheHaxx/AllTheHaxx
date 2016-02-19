@@ -39,7 +39,17 @@ void CMenus::RenderGame(CUIRect MainView)
 #else
 	MainView.HSplitTop(45.0f, &ButtonBar, &MainView);
 #endif
-	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, g_Config.m_ClUiShowExtraBar ? CUI::CORNER_T : CUI::CORNER_ALL, 10.0f);
+
+	{
+		CUIRect ExtraBar;
+#if defined(__ANDROID__)
+		MainView.HSplitTop(100.0f, &ExtraBar, &MainView);
+#else
+		MainView.HSplitTop(45.0f, &ExtraBar, &MainView);
+#endif
+		RenderGameExtra(ExtraBar);
+	}
 
 	// button bar
 	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
@@ -74,6 +84,12 @@ void CMenus::RenderGame(CUIRect MainView)
 	static int s_CrashButton = 0;
 	if(DoButton_CheckBox(&s_CrashButton, Localize("Crash"), g_Config.m_ClServerCrasher, &Button, Localize("Check this and click 'Reconnect' to crash 0.6.2 and earlier servers")))
 		g_Config.m_ClServerCrasher ^= 1;
+
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonBar.h, &Button, &ButtonBar);
+	static int s_ToggleExtraButton = 0;
+	if(DoButton_Menu(&s_ToggleExtraButton, g_Config.m_ClUiShowExtraBar ? "–" : "+", 0, &Button))
+		g_Config.m_ClUiShowExtraBar ^= 1;
 
 	static int s_SpectateButton = 0;
 	static int s_JoinRedButton = 0;
@@ -153,20 +169,45 @@ void CMenus::RenderGame(CUIRect MainView)
 
 	static int s_DummyButton = 0;
 	if(DummyConnecting)
-	{
 		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
-	}
-	else if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? "Disconnect dummy" : "Connect dummy"), 0, &Button))
+	else if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy")), 0, &Button))
 	{
 		if(!Client()->DummyConnected())
-		{
 			Client()->DummyConnect();
-		}
 		else
-		{
 			Client()->DummyDisconnect(0);
-		}
 	}
+}
+
+void CMenus::RenderGameExtra(CUIRect ButtonBar)
+{
+	if(!g_Config.m_ClUiShowExtraBar)
+		return;
+
+	CUIRect Button;
+	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+
+	// button bar
+	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
+#if defined(__ANDROID__)
+	ButtonBar.HSplitTop(80.0f, &ButtonBar, 0);
+#else
+	ButtonBar.HSplitTop(25.0f, &ButtonBar, 0);
+#endif
+	ButtonBar.VMargin(10.0f, &ButtonBar);
+
+
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
+	static int s_OpenChatButton = 0;
+	if(DoButton_Menu(&s_OpenChatButton, Localize("Chat"), 0, &Button))
+		ToggleIrc();
+
+/*	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
+	static int s_Test2Button = 0;
+	if(DoButton_Menu(&s_Test2Button, Localize("sometext"), 0, &Button))
+		;*/
 }
 
 void CMenus::RenderPlayers(CUIRect MainView)
