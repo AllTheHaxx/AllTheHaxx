@@ -903,7 +903,7 @@ void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUser
 {
 	pfnCallback(pResult, pCallbackUserData);
 	CGameConsole *pThis = static_cast<CGameConsole *>(pUserData);
-	pThis->m_pClient->m_pIrcBind->SendNickChange(g_Config.m_ClIRCNick);
+	pThis->m_pClient->m_pIrcBind->OnNickChange(g_Config.m_ClIRCNick);
 }
 
 

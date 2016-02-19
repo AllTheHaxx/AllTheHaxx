@@ -1086,7 +1086,7 @@ int CIrc::GetMsgType(const char *msg)
 void CIrc::SendServer(const char *to, const char *Token)
 {
 	const char *curAddr = m_pClient->GetCurrentServerAddress();
-	SendRaw("PRIVMSG %s :TWSERVER %s %s", to, Token, (curAddr&&curAddr[0]!=0)?curAddr:"NONE");
+	SendRaw("PRIVMSG %s :TWSERVER %s %s", to, Token, g_Config.m_ClAllowJoin ? ((curAddr&&curAddr[0]!=0)?curAddr:"NONE") : "FORBIDDEN");
 }
 
 void CIrc::SendGetServer(const char *to)

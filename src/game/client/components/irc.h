@@ -1,10 +1,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_IRC_H
 #define GAME_CLIENT_COMPONENTS_IRC_H
 
-#include <stdlib.h>
-#include <string>
-
-#include <base/tl/sorted_array.h>
 #include <engine/client/irc.h>
 #include <game/client/component.h>
 
@@ -18,15 +14,11 @@ private:
 public:
 	CIrcBind();
 
-	void SendChat(const char *pMsg);
-	void SendCommand(const char *pCmd);
-
 	void Connect();
 	void Disconnect(char *pReason);
 
-	void SendNickChange(const char *pNewNick);
-	void AddLine(int Type, const char *pNick, const char *pLine); // chat
-	void AddLine(const char *pLine); // system
+	void SendCommand(const char *pCmd);
+	void OnNickChange(const char *pNewNick);
 
 	const char *CurrentNick() { return m_pClient->Irc()->GetNick(); } // XXX this is depreciated and only for compatibility
 	bool IsConnected() { return m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTED; }

@@ -75,10 +75,8 @@ void CSpoofRemote::OnRender()
 		{
 			if(Step)
 			{
-				CServerInfo CurrentServerInfo;
-				char aServerAddr[64];
-				Client()->GetServerInfo(&CurrentServerInfo);
-				str_copy(aServerAddr, CurrentServerInfo.m_aAddress, sizeof(aServerAddr));
+				char aServerAddr[NETADDR_MAXSTRSIZE];
+				str_copy(aServerAddr, Client()->GetCurrentServerAddress(), sizeof(aServerAddr));
 				net_addr_split(aServerAddr, sizeof(aServerAddr));
 
 				char aCmd[256];

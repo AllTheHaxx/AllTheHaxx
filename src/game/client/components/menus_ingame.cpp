@@ -967,10 +967,8 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	char aServerAddr[NETADDR_MAXSTRSIZE];
 	char aClientAddr[NETADDR_MAXSTRSIZE];
 	{
-		CServerInfo CurrentServerInfo;
-		Client()->GetServerInfo(&CurrentServerInfo);
-
-		str_copy(aServerAddr, CurrentServerInfo.m_aAddress, sizeof(aServerAddr));
+		char aServerAddr[NETADDR_MAXSTRSIZE];
+		str_copy(aServerAddr, Client()->GetCurrentServerAddress(), sizeof(aServerAddr));
 		net_addr_split(aServerAddr, sizeof(aServerAddr));
 
 		if(m_SpoofSelectedPlayer > 0)

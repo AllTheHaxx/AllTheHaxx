@@ -1858,9 +1858,6 @@ bool CMenus::OnMouseMove(float x, float y)
 {
 	m_LastInput = time_get();
 
-	if(!m_MenuActive && !m_HotbarActive && !m_IRCActive)
-		return false;
-
 	if((!m_MenuActive && !m_HotbarActive && !m_IRCActive) || !m_pClient->m_pGameConsole->IsClosed())
 		return false;
 
@@ -1982,7 +1979,8 @@ void CMenus::OnRender()
 	Graphics()->QuadsEnd();
 	return;*/
 
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if((Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK) ||
+			m_HotbarActive || m_IRCActive)
 		SetActive(true);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
@@ -2055,7 +2053,11 @@ void CMenus::OnRender()
 	}
 	// render
 	if(m_IRCActive)
+	{
+		if(Client()->State() != IClient::STATE_ONLINE)
+			RenderBackground();
 		RenderIrc(*UI()->Screen());
+	}
 	else if(m_HotbarActive)
 		RenderHotbar(*UI()->Screen());
 	else if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
