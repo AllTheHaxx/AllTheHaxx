@@ -39,6 +39,8 @@ void CNamePlates::RenderNameplate(
 			a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
 
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
+		const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
+
 		float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
 
 		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
@@ -63,14 +65,17 @@ void CNamePlates::RenderNameplate(
 				TextRender()->TextColor(0.7f, 0.7f, 1.0f, a);
 		}
 
-		TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f, FontSize, pName, -1);
-
-		if(g_Config.m_ClNameplatesClan)
+		if (str_comp(pClan, "") && g_Config.m_ClNameplatesClan) // name + clan
 		{
-			const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
-			float tw_clan = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
-			TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y-FontSize-FontSizeClan-38.0f, FontSizeClan, pClan, -1);
+			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, pName, -1);
+
+			FontSize = round_to_int(FontSize * 3 / 4);
+			tw = TextRender()->TextWidth(0, FontSize, pClan, -1);
+
+			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pClan, -1);
 		}
+		else
+			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pName, -1); // just name
 
 		if(g_Config.m_Debug) // render client id when in debug aswell
 		{
