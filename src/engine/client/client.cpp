@@ -2992,10 +2992,14 @@ void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-
 	CMsgPacker Msg(NETMSG_PING);
 	pSelf->SendMsgEx(&Msg, 0);
 	pSelf->m_PingStartTime = time_get();
+}
+
+void CClient::Con_SaveConfig(IConsole::IResult *pResult, void *pUserData)
+{
+	((CClient *)pUserData)->Kernel()->RequestInterface<IConfig>()->Save();
 }
 
 void CClient::AutoScreenshot_Start()
@@ -3291,6 +3295,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("connect", "s[host|ip]", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
+	m_pConsole->Register("config_save", "", CFGFLAG_CLIENT, Con_SaveConfig, this, "Write down the config");
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");
 	m_pConsole->Register("rcon", "r[rcon-command]", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon");
 	m_pConsole->Register("rcon_auth", "s[password]", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon");
