@@ -67,7 +67,7 @@ int irchook_privmsg(IIrc::ReplyData* hostd, void* user, void* engine)
 		if(g_Config.m_ClNotifications)
 		{
 			if(hostd->channel == pIrc->m_Nick)
-				str_format(aBuf, sizeof(aBuf), "[%s]: %s", hostd->channel.c_str(), hostd->params.c_str());
+				str_format(aBuf, sizeof(aBuf), "[%s]: %s", hostd->from.c_str(), hostd->params.c_str());
 			else
 				str_format(aBuf, sizeof(aBuf), "[%s]: <%s> %s", hostd->channel.c_str(), hostd->from.c_str(), hostd->params.c_str());
 			pData->GameClient()->m_pHud->PushNotification(aBuf, str_find_nocase(hostd->params.c_str(), pIrc->m_Nick.c_str()) ?
