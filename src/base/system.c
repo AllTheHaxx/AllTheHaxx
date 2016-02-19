@@ -1959,6 +1959,17 @@ char *str_trim_words(char *str, int words)
 	return str;
 }
 
+/* replaces a single character within a string */
+void str_replace_char(char *str_in, size_t size, char find, char replace)
+{
+	size_t i;
+	for(i = 0; i < size; i++)
+	{
+		if(str_in[i] == find)
+			str_in[i] = replace;
+	}
+}
+
 /* makes sure that the string only contains the characters between 65-95 & 97-122 */
 void str_irc_sanitize(char *str_in)
 {
@@ -2007,6 +2018,17 @@ void str_sanitize(char *str_in)
 			*str = ' ';
 		str++;
 	}
+}
+
+int str_count_char(char *str, size_t size, char c)
+{
+	size_t i; int count = 0;
+	for(i = 0; i < size && str[i] != '\0'; i++)
+	{
+		if(str[i] == c)
+			count++;
+	}
+	return count;
 }
 
 char *str_skip_to_whitespace(char *str)

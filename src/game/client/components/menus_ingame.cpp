@@ -188,6 +188,19 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	CUIRect Button;
 	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
+	// static variables for submenus
+	static int s_ShowServerConfig = 0;
+
+	// render submenus
+	Button = ButtonBar;
+	//Button.HSplitTop(10.0f, 0, &Button);
+	Button.HSplitTop(UI()->Screen()->h*0.85f, &Button, 0);
+	Button.Margin(50.0f, &Button);
+	Button.y = ButtonBar.y + ButtonBar.h;
+
+	if(s_ShowServerConfig)
+		RenderServerConfigCreator(Button);
+
 	// button bar
 	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
 #if defined(__ANDROID__)
@@ -197,18 +210,143 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 #endif
 	ButtonBar.VMargin(10.0f, &ButtonBar);
 
-
+	// render buttons
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
 	static int s_OpenChatButton = 0;
-	if(DoButton_Menu(&s_OpenChatButton, Localize("Chat"), 0, &Button))
+	if(DoButton_Menu(&s_OpenChatButton, Localize("Chat"), 0, &Button, "Open the IRC overlay"))
 		ToggleIrc();
 
-/*	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
-	static int s_Test2Button = 0;
-	if(DoButton_Menu(&s_Test2Button, Localize("sometext"), 0, &Button))
-		;*/
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+	static int s_ServerConfigButton = 0;
+	if(DoButton_Menu(&s_ServerConfigButton, Localize("Server Config"), s_ShowServerConfig, &Button, "Execute commands when joining this server"))
+		s_ShowServerConfig ^= 1;
+
+}
+
+void CMenus::RenderServerConfigCreator(CUIRect MainView)
+{
+	CUIRect Button, Button2;
+	static array<CListboxItem> Items;
+	static char aEditBoxBuffer[256][256] = { 0 };
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+
+	MainView.HSplitTop(10.0f, 0, &MainView);
+	TextRender()->Text(0, MainView.x+10.0f, MainView.y, 12.0f, Localize("Server-Dependent-Configuration Manager"), -1);
+
+	MainView.HSplitTop(10.0f, 0, &MainView);
+	MainView.Margin(20.0f, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitMid(&Button, &Button2);
+	Button.VSplitRight(10.0f, &Button, 0); Button2.VSplitLeft(10.0f, 0, &Button2);
+	static int s_AddEntryButton = 0;
+	if(DoButton_Menu(&s_AddEntryButton, Localize("Add"), 0, &Button) || (UI()->MouseInside(&MainView) && Input()->KeyDown(KEY_RETURN)))
+	{
+		CListboxItem n;
+		Items.add(n);
+	}
+
+	static int s_SaveButton = 0;
+	Button2.VSplitMid(&Button, &Button2);
+	Button.VSplitRight(5.0f, &Button, 0);
+	Button2.VSplitLeft(5.0f, 0, &Button2);
+	if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button))
+	{
+		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
+		str_replace_char(aBuf, sizeof(aBuf), ':', '_');
+
+		IOHANDLE f = pStorage->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		if(!f)
+			dbg_msg("serverconfig", "failed to open '%s' for writing", aBuf);
+		else
+		{
+			for(int i = 0; i < Items.size(); i++)
+			{
+				io_write(f, aEditBoxBuffer[i], str_length(aEditBoxBuffer[i]));
+				io_write(f, "\n", sizeof('\n'));
+			}
+			io_close(f);
+		}
+	}
+
+	static bool s_MustReload = false;
+	static char s_LastServer[64] = {0};
+	if(str_comp_nocase(s_LastServer, g_Config.m_UiServerAddress) != 0)
+	{
+		s_MustReload = true;
+		str_copy(s_LastServer, g_Config.m_UiServerAddress, sizeof(s_LastServer));
+	}
+	static int s_LoadButton = 0;
+	if(s_MustReload || DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Button2))
+	{
+		s_MustReload = false;
+		// load server specific config
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
+		str_replace_char(aBuf, sizeof(aBuf), ':', '_');
+
+		Items.clear();
+		mem_zero(aEditBoxBuffer, sizeof(aEditBoxBuffer));
+		IOHANDLE f = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+		if(f)
+		{
+			char aBuffer[1024], aIn[128];
+			io_read(f, aBuffer, sizeof(aBuffer));
+			int c = str_count_char(aBuffer, sizeof(aBuffer), '\n');
+			int index = 0;
+			for(int i = 0; i < c; i++)
+			{
+				mem_zero(aIn, sizeof(aIn));
+				str_split(aIn, aBuffer, i, '\n');
+				str_format(aEditBoxBuffer[index], sizeof(aEditBoxBuffer[index]), "%s", aIn);
+				CListboxItem n;
+				Items.add(n);
+				index++;
+			}
+		/*
+			for(int i = 0, j = 0; i < str_length(aBuffer); i++, j++)
+			{
+				if(aBuffer[i] != '\n')
+					aIn[j] = aBuffer[i];
+				else
+				{
+					str_format(aEditBoxBuffer[index], sizeof(aEditBoxBuffer[index]), "%s", aIn);
+					//str_sanitize_strong(aEditBoxBuffer[index]);
+					mem_zero(aIn, sizeof(aIn)); j = 0;
+					CListboxItem n;
+					Items.add(n);
+					index++;
+				}
+			}*/
+		}
+	}
+
+	static int s_Listbox = 0;
+	static float s_ScrollVal = 0.0f;
+	MainView.HSplitTop(10.0f, 0, &MainView);
+	UiDoListboxStart(&s_Listbox, &MainView, 15.0f, "", "", Items.size(), 1, -1, s_ScrollVal);
+
+	for(int i = 0; i < Items.size(); i++)
+	{
+		if(i > 0xFF)
+		{
+			Items.remove_index(i);
+			continue;
+		}
+
+		CListboxItem n = UiDoListboxNextItem(&Items[i], false);
+		if(!n.m_Visible)
+			continue;
+
+		static int s_EditBox[256] = { 0 };
+		static float s_Offset[256] = { 0.0f };
+		DoEditBox(&s_EditBox[i], &n.m_HitRect, aEditBoxBuffer[i], sizeof(aEditBoxBuffer[i]), 8.0f, &s_Offset[i], false, 0, Localize("Enter your f1 commands here..."), -1);
+	}
+
+	UiDoListboxEnd(&s_ScrollVal, 0);
 }
 
 void CMenus::RenderPlayers(CUIRect MainView)

@@ -275,6 +275,7 @@ class CMenus : public CComponent
 	// found in menus_ingame.cpp
 	void RenderGame(CUIRect MainView);
 	void RenderGameExtra(CUIRect ButtonBar);
+	void RenderServerConfigCreator(CUIRect MainView);
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerControl(CUIRect MainView);

@@ -789,6 +789,8 @@ int str_length(const char *str);
 */
 int str_format(char *buffer, int buffer_size, const char *format, ...);
 
+void str_replace_char(char *str_in, size_t size, char find, char replace);
+
 void str_irc_sanitize(char *str_in); // H-Client
 /*
 	Function: str_trim_words
@@ -842,6 +844,8 @@ void str_sanitize_cc(char *str);
 		- The strings are treated as zero-termineted strings.
 */
 void str_sanitize(char *str);
+
+int str_count_char(char *str, size_t size, char c);
 
 /*
 	Function: str_skip_to_whitespace
