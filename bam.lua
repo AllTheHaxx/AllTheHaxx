@@ -298,7 +298,7 @@ function build(settings)
 	settings.cc.includes:Add("src/engine/external/sqlite3")
 	sqlite3 = Compile(settings, Collect("src/engine/external/sqlite3/*.c"))
 	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
-	cpirc = Compile(settings, Collect("src/engine/external/cpirc/*.cpp"))
+	lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -386,7 +386,7 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
-		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps, cpirc)
+		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps, lua)
 
 	server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)
