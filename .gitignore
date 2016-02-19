@@ -35,6 +35,10 @@ bam.exe
 *.log
 *.exe
 *.res
+*.o
+*.a
+*.so
+*.s
 *.patch
 *.prefs
 *.lnk
@@ -53,7 +57,6 @@ bam.exe
 *.dll
 *.db
 *.db-journal 
-cache.svl
 
 DDNet*
 AllTheHaxx*

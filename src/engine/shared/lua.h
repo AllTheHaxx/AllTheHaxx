@@ -20,7 +20,7 @@ protected:
 
 public:
     CLua();
-    ~CLua();
+    virtual ~CLua();
 
     virtual bool LoadFile(const char *pFilename); //default loader
 
