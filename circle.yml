@@ -10,9 +10,10 @@ dependencies:
 
   cache_directories:
     - "~/bam/"
+    - "./other/luajit/LuaJIT-2.0.2/"
 
 ## Customize test commands
 test:
   override:
     - |
-        ../bam/bam -j 4 release
+        ../bam/bam -j 4 client_release
