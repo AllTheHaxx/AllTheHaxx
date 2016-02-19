@@ -18,7 +18,8 @@ luajit = {
                 if platform == "macosx" then
                     settings.link.libpath:Add(luajit.basepath .. "/macosx")
                 else
-                    settings.link.libpath:Add(luajit.basepath .. "/unix") --meh
+                    settings.link.libpath:Add(luajit.basepath .. "/unix/lib64")
+--TODO TODO 32bit!--settings.link.libpath:Add(luajit.basepath .. "/unix/lib32")
                 end
             end
             settings.link.libs:Add("luajit-5.1")
