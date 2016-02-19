@@ -286,6 +286,9 @@ function build(settings)
 		zlib = Compile(settings, Collect("src/engine/external/zlib/*.c"))
 		settings.cc.includes:Add("src/engine/external/zlib")
 	end
+	
+	-- luabridge
+	settings.cc.includes:Add("src/engine/external/luabridge")
 
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
@@ -386,7 +389,7 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
-		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps, lua)
+		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps, lua, luajit, luabridge)
 
 	server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)
