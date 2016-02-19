@@ -38,6 +38,8 @@ public:
 
 class CMenus : public CComponent
 {
+	typedef float (*FDropdownCallback)(CUIRect View, void *pUser);
+
 	friend class CGameConsole; // need this for IRC GUI
 
 	static vec4 ms_GuiColor;
@@ -87,6 +89,8 @@ class CMenus : public CComponent
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0);
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, const char *pTooltip = 0);
+
+	float DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback);
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View);
@@ -163,6 +167,9 @@ class CMenus : public CComponent
 	int m_CallvoteSelectedPlayer;
 	char m_aCallvoteReason[VOTE_REASON_LENGTH<<4];
 	char m_aFilterString[25];
+
+	// for callbacks
+	int *m_pActiveDropdown;
 
 	// for teh haxx
 	int m_SpoofSelectedPlayer;

@@ -88,7 +88,8 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonBar.h, &Button, &ButtonBar);
 	static int s_ToggleExtraButton = 0;
-	if(DoButton_Menu(&s_ToggleExtraButton, g_Config.m_ClUiShowExtraBar ? "–" : "+", 0, &Button))
+	DoButton_Icon(IMAGE_MENUICONS, g_Config.m_ClUiShowExtraBar ? SPRITE_MENU_EXPANDED : SPRITE_MENU_COLLAPSED, &Button);
+	if(DoButton_Menu(&s_ToggleExtraButton, "", 0, &Button))
 		g_Config.m_ClUiShowExtraBar ^= 1;
 
 	static int s_SpectateButton = 0;
