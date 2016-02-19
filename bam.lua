@@ -15,6 +15,7 @@ end
 
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
+Import("other/luajit/luajit.lua")
 Import("other/freetype/freetype.lua")
 Import("other/curl/curl.lua")
 Import("other/opus/opusfile.lua")
@@ -30,6 +31,7 @@ config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-ve
 config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
+config:Add(luajit.OptFind("luajit", true))
 config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
@@ -161,6 +163,7 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libogg-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopusfile-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/luajit/win32/lua51.dll"))
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib64/freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL.dll"))
@@ -288,7 +291,7 @@ function build(settings)
 	end
 	
 	-- luabridge
-	settings.cc.includes:Add("src/engine/external/luabridge")
+	--settings.cc.includes:Add("src/engine/external/luabridge")
 
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
@@ -301,7 +304,10 @@ function build(settings)
 	settings.cc.includes:Add("src/engine/external/sqlite3")
 	sqlite3 = Compile(settings, Collect("src/engine/external/sqlite3/*.c"))
 	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
-	lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
+	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
+	
+	-- apply luajit settings
+	config.luajit:Apply(settings)
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -389,7 +395,7 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
-		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps, lua, luajit, luabridge)
+		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps)
 
 	server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)
