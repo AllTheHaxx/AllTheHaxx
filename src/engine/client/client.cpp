@@ -551,30 +551,7 @@ void CClient::SendInput()
 
 	if(m_DummyConnected)
 	{
-		if(!g_Config.m_ClDummyHammer)
-		{
-			if(m_Fire != 0)
-			{
-				m_DummyInput.m_Fire = HammerInput.m_Fire;
-				m_Fire = 0;
-			}
-
-			if(!Size && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
-				return;
-
-			// pack input
-			CMsgPacker Msg(NETMSG_INPUT);
-			Msg.AddInt(m_AckGameTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(m_PredTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(sizeof(m_DummyInput));
-
-			// pack it
-			for(unsigned int i = 0; i < sizeof(m_DummyInput)/4; i++)
-				Msg.AddInt(((int*) &m_DummyInput)[i]);
-
-			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
-		}
-		else
+		if(g_Config.m_ClDummyHammer)
 		{
 			if ((((float) m_Fire / 12.5) - (int ((float) m_Fire / 12.5))) > 0.01)
 			{
@@ -601,6 +578,57 @@ void CClient::SendInput()
 			// pack it
 			for(unsigned int i = 0; i < sizeof(HammerInput)/4; i++)
 				Msg.AddInt(((int*) &HammerInput)[i]);
+
+			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
+		}
+		else if(g_Config.m_ClDummyHookFly)
+		{
+			vec2 Main = ((CGameClient *)GameClient())->m_LocalCharacterPos;
+			vec2 Dummy = ((CGameClient *)GameClient())->m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
+			vec2 Dir = Main - Dummy;
+			m_DummyInput.m_TargetX = Dir.x;
+			m_DummyInput.m_TargetY = Dir.y;
+
+			if(Dummy.y < Main.y && distance(Dummy, Main) > 16)
+				m_DummyInput.m_Hook = 1;
+			else
+				m_DummyInput.m_Hook = 0;
+
+			if(((CGameClient *)GameClient())->m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_HookState == HOOK_RETRACTED || distance(Dummy, Main) < 48)
+				m_DummyInput.m_Hook = 0;
+
+			// pack input
+			CMsgPacker Msg(NETMSG_INPUT);
+			Msg.AddInt(m_AckGameTick[!g_Config.m_ClDummy]);
+			Msg.AddInt(m_PredTick[!g_Config.m_ClDummy]);
+			Msg.AddInt(sizeof(m_DummyInput));
+
+			// pack it
+			for(unsigned int i = 0; i < sizeof(m_DummyInput)/4; i++)
+				Msg.AddInt(((int*) &m_DummyInput)[i]);
+
+			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
+		}
+		else
+		{
+			if(m_Fire != 0)
+			{
+				m_DummyInput.m_Fire = HammerInput.m_Fire;
+				m_Fire = 0;
+			}
+
+			if(!Size && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
+				return;
+
+			// pack input
+			CMsgPacker Msg(NETMSG_INPUT);
+			Msg.AddInt(m_AckGameTick[!g_Config.m_ClDummy]);
+			Msg.AddInt(m_PredTick[!g_Config.m_ClDummy]);
+			Msg.AddInt(sizeof(m_DummyInput));
+
+			// pack it
+			for(unsigned int i = 0; i < sizeof(m_DummyInput)/4; i++)
+				Msg.AddInt(((int*) &m_DummyInput)[i]);
 
 			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
 		}

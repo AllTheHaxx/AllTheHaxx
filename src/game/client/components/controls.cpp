@@ -271,11 +271,11 @@ int CControls::SnapInput(int *pData)
 		if(g_Config.m_ClDummyCopyMoves)
 		{
 			CNetObj_PlayerInput *DummyInput = &Client()->m_DummyInput;
-			DummyInput->m_Direction = m_InputData[g_Config.m_ClDummy].m_Direction;
+			DummyInput->m_Direction = m_InputData[g_Config.m_ClDummy].m_Direction * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
 			DummyInput->m_Hook = m_InputData[g_Config.m_ClDummy].m_Hook;
 			DummyInput->m_Jump = m_InputData[g_Config.m_ClDummy].m_Jump;
 			DummyInput->m_PlayerFlags = m_InputData[g_Config.m_ClDummy].m_PlayerFlags;
-			DummyInput->m_TargetX = m_InputData[g_Config.m_ClDummy].m_TargetX;
+			DummyInput->m_TargetX = m_InputData[g_Config.m_ClDummy].m_TargetX * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
 			DummyInput->m_TargetY = m_InputData[g_Config.m_ClDummy].m_TargetY;
 			DummyInput->m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon;
 

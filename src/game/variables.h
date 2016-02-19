@@ -120,6 +120,9 @@ MACRO_CONFIG_INT(ClDummy, cl_dummy, 0, 0, 1, CFGFLAG_CLIENT, "0 - player / 1 - d
 MACRO_CONFIG_INT(ClDummyHammer, cl_dummy_hammer, 0, 0, 1, CFGFLAG_CLIENT, "Whether dummy is hammering for a hammerfly")
 MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_dummy_resetonswitch, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether dummy should stop pressing keys when you switch")
 MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copy_moves, 0, 0, 1, CFGFLAG_CLIENT, "Whether dummy should copy your moves")
+// advanced dummy
+MACRO_CONFIG_INT(ClDummyHookFly, cl_dummy_hook_fly, 0, 0, 1, CFGFLAG_CLIENT, "Hook-fly with your dummy")
+MACRO_CONFIG_INT(ClDummyCopyMirror, cl_dummy_copy_mirror, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Wether dummy copys your moves like a mirroŕ")
 
 // curl http download
 MACRO_CONFIG_INT(ClHTTPConnectTimeoutMs, cl_http_connect_timeout_ms, 2000, 0, 100000, CFGFLAG_CLIENT, "HTTP downloads: timeout for the connect phase in milliseconds (0 to disable)")
