@@ -30,8 +30,11 @@ bool CMenus::ToggleIrc()
 	}
 	else
 	{
-		m_pClient->Irc()->SetActiveCom(s_pActiveCom);
-		UI()->SetActiveItem(&m_IRCActive);
+		if(m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTED)
+		{
+			m_pClient->Irc()->SetActiveCom(s_pActiveCom);
+			UI()->SetActiveItem(&m_IRCActive);
+		}
 	}
 	RenderIrc(*UI()->Screen());
 
