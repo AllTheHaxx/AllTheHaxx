@@ -1979,8 +1979,7 @@ void CMenus::OnRender()
 	Graphics()->QuadsEnd();
 	return;*/
 
-	if((Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK) ||
-			m_HotbarActive || m_IRCActive)
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
