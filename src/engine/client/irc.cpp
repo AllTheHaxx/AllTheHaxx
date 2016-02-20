@@ -182,6 +182,9 @@ void CIRC::StartConnection() // call this from a thread only!
 		return;
 	}
 
+	if(g_Config.m_ClIRCUser[0] == '\0')
+		str_copy(g_Config.m_ClIRCUser, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCUser));
+
 	// send request
 	SendRaw("CAP LS");
 	SendRaw("NICK %s", m_Nick.c_str());
