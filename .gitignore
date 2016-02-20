@@ -60,3 +60,14 @@ bam.exe
 
 DDNet*
 AllTheHaxx*
+
+other/luajit/LuaJIT-2.0.2/src/host/buildvm
+other/luajit/LuaJIT-2.0.2/src/host/buildvm_arch.h
+other/luajit/LuaJIT-2.0.2/src/host/minilua
+other/luajit/LuaJIT-2.0.2/src/jit/vmdef.lua
+other/luajit/LuaJIT-2.0.2/src/lj_bcdef.h
+other/luajit/LuaJIT-2.0.2/src/lj_ffdef.h
+other/luajit/LuaJIT-2.0.2/src/lj_folddef.h
+other/luajit/LuaJIT-2.0.2/src/lj_libdef.h
+other/luajit/LuaJIT-2.0.2/src/lj_recdef.h
+other/luajit/LuaJIT-2.0.2/src/luajit
