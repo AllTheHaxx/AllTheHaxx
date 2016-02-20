@@ -483,6 +483,25 @@ void CGameConsole::OnRender()
 
 	CInstance *pConsole = CurrentConsole();
 
+	// update the ui
+	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*Screen.w;
+	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*Screen.h;
+	{
+		int Buttons = 0;
+		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
+		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
+		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+
+#if defined(__ANDROID__)
+		static int ButtonsOneFrameDelay = 0; // For Android touch input
+
+		UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
+		ButtonsOneFrameDelay = Buttons;
+#else
+		UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
+#endif
+	}
+
 	{
 		float FontSize = 10.0f;
 		float RowHeight = FontSize*1.25f;
@@ -588,7 +607,6 @@ void CGameConsole::OnRender()
 
 			while(pEntry)
 			{
-
 				if(pEntry->m_Highlighted)
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 				else
@@ -671,8 +689,14 @@ void CGameConsole::OnRender()
 							if (UI()->MouseInside(&TextRect))
 							{
 								TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
-								if (UI()->MouseButtonClicked(0))
+								static float LastClicked = 0;
+								if (UI()->MouseButtonClicked(0) && Client()->LocalTime() > LastClicked + 1)
+								{
+									LastClicked = Client()->LocalTime();
+									Input()->MouseModeAbsolute();
+									//((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->Minimize();
 									open_default_browser(aUrl);
+								}
 							}
 							else
 								TextRender()->TextColor(1.0f, 0.39f, 0.0f, 1.0f);
@@ -738,24 +762,6 @@ void CGameConsole::OnRender()
 		Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->Text(0, Screen.w-Width-10.0f, 10.0f, FontSize, aBuf, -1);
 	}
-
-	// update the ui
-	CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
-	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
-	int Buttons = 0;
-	if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-	if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-	if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
-
-#if defined(__ANDROID__)
-	static int ButtonsOneFrameDelay = 0; // For Android touch input
-
-	UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
-	ButtonsOneFrameDelay = Buttons;
-#else
-	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
-#endif
 
 	// render cursor
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);

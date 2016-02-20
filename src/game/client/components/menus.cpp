@@ -2031,26 +2031,22 @@ void CMenus::OnRender()
 	CUIRect *pScreen = UI()->Screen();
 	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
 	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
-
-	if(m_pClient->m_pGameConsole->IsClosed())
+	int Buttons = 0;
+	if(m_UseMouseButtons)
 	{
-		int Buttons = 0;
-		if(m_UseMouseButtons)
-		{
-			if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-			if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-			if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
-		}
-
-#if defined(__ANDROID__)
-		static int ButtonsOneFrameDelay = 0; // For Android touch input
-
-		UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
-		ButtonsOneFrameDelay = Buttons;
-#else
-		UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
-#endif
+		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
+		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
+		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
 	}
+#if defined(__ANDROID__)
+	static int ButtonsOneFrameDelay = 0; // For Android touch input
+
+	UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
+	ButtonsOneFrameDelay = Buttons;
+#else
+	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
+#endif
+
 	// render
 	if(m_IRCActive)
 	{
