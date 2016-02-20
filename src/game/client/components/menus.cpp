@@ -1890,7 +1890,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 			if(m_HotbarActive)
 				m_HotbarActive = false;
 			if(m_IRCActive)
-				ToggleIrc();
+				ToggleIRC();
 			else
 				SetActive(!IsActive());
 			return true;
@@ -2056,7 +2056,7 @@ void CMenus::OnRender()
 	{
 		if(Client()->State() != IClient::STATE_ONLINE)
 			RenderBackground();
-		RenderIrc(*UI()->Screen());
+		RenderIRC(*UI()->Screen());
 	}
 	else if(m_HotbarActive)
 		RenderHotbar(*UI()->Screen());

@@ -8,7 +8,7 @@
 #include <string>
 #include <list>
 
-class CIrcCom
+class CIRCCom
 {
 public:
 	enum
@@ -17,7 +17,7 @@ public:
 		TYPE_QUERY
 	};
 
-	CIrcCom(unsigned int type)
+	CIRCCom(unsigned int type)
 	{
 		m_Type = type;
 		m_NumUnreadMsg = 0;
@@ -33,10 +33,10 @@ protected:
 };
 
 
-class CComChan : public CIrcCom
+class CComChan : public CIRCCom
 {
 public:
-	CComChan() : CIrcCom(CIrcCom::TYPE_CHANNEL) { }
+	CComChan() : CIRCCom(CIRCCom::TYPE_CHANNEL) { }
 
 	std::list<std::string> m_Users;
 	std::string m_Topic;
@@ -44,17 +44,17 @@ public:
 };
 
 
-class CComQuery : public CIrcCom
+class CComQuery : public CIRCCom
 {
 public:
-	CComQuery() : CIrcCom(CIrcCom::TYPE_QUERY) { }
+	CComQuery() : CIRCCom(CIRCCom::TYPE_QUERY) { }
 	char m_User[25];
 };
 
 
-class IIrc : public IInterface
+class IIRC : public IInterface
 {
-	MACRO_INTERFACE("irc", 0)
+	MACRO_INTERFACE("IRC", 0)
 public:
 	struct ReplyData
 	{
@@ -88,17 +88,17 @@ public:
     virtual void PrevRoom() = 0;
 
     virtual void SetActiveCom(int index) = 0;
-	virtual void SetActiveCom(CIrcCom *pCom) = 0;
-    virtual CIrcCom* GetActiveCom() = 0;
-    virtual CIrcCom* GetCom(size_t index) = 0;
-    virtual CIrcCom* GetCom(std::string name) = 0;
+	virtual void SetActiveCom(CIRCCom *pCom) = 0;
+    virtual CIRCCom* GetActiveCom() = 0;
+    virtual CIRCCom* GetCom(size_t index) = 0;
+    virtual CIRCCom* GetCom(std::string name) = 0;
     virtual int GetNumComs() = 0;
-    virtual bool CanCloseCom(CIrcCom *pCom) = 0;
+    virtual bool CanCloseCom(CIRCCom *pCom) = 0;
 
     virtual void OpenQuery(const char *to) = 0;
     virtual void JoinTo(const char *to, const char *pass = "") = 0;
     virtual void SetTopic(const char *topic) = 0;
-    virtual void Part(const char *pReason = 0, CIrcCom *pCom = 0) = 0;
+    virtual void Part(const char *pReason = 0, CIRCCom *pCom = 0) = 0;
 
     virtual void SetMode(const char *mode, const char *to) = 0;
     virtual void SetNick(const char *nick) = 0;

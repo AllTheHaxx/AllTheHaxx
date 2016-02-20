@@ -97,7 +97,7 @@ class CGameClient : public IGameClient
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
 	class IUpdater *m_pUpdater;
-	class IIrc *m_pIrc;
+	class IIRC *m_pIRC;
 
 	CLayers m_Layers;
 	class CCollision m_Collision;
@@ -145,7 +145,7 @@ public:
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
 	class IUpdater *Updater() { return m_pUpdater; }
-	class IIrc *Irc() const { return m_pIrc; }
+	class IIRC *IRC() const { return m_pIRC; }
 
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
@@ -303,7 +303,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy = 0);
-	virtual void OnMessageIrc(const char *pFrom, const char *pUser, const char *pText);
+	virtual void OnMessageIRC(const char *pFrom, const char *pUser, const char *pText);
 	virtual void OnNewSnapshot();
 	virtual void OnPredict();
 	virtual void OnActivateEditor();
@@ -360,7 +360,7 @@ public:
 	class CMapSounds *m_pMapSounds;
 
 	class CAStar *m_pAStar;
-	class CIrcBind *m_pIrcBind;
+	class CIRCBind *m_pIRCBind;
 	class CIdentity *m_pIdentity;
 
 	// DDRace

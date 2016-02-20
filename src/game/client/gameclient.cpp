@@ -110,7 +110,7 @@ static CBackground gs_BackGround;
 static CMapSounds gs_MapSounds;
 
 static CAStar gs_AStar;
-static CIrcBind gs_IRC;
+static CIRCBind gs_IRC;
 
 static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;
@@ -149,7 +149,7 @@ void CGameClient::OnConsoleInit()
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
-	m_pIrc = Kernel()->RequestInterface<IIrc>();
+	m_pIRC = Kernel()->RequestInterface<IIRC>();
 
 	// setup pointers
 	m_pBinds = &::gs_Binds;
@@ -181,7 +181,7 @@ void CGameClient::OnConsoleInit()
 	m_pMapSounds = &::gs_MapSounds;
 
 	m_pAStar = &::gs_AStar;
-	m_pIrcBind = &::gs_IRC;
+	m_pIRCBind = &::gs_IRC;
 	m_pIdentity = &::gs_Identity;
 
 	m_pRaceDemo = &::gs_RaceDemo;
@@ -203,7 +203,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pRaceDemo);
 	m_All.Add(m_pMapSounds);
 	m_All.Add(m_pAStar);
-	m_All.Add(m_pIrcBind);
+	m_All.Add(m_pIRCBind);
 	m_All.Add(m_pIdentity);
 
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
@@ -778,10 +778,10 @@ void CGameClient::OnRelease()
 		m_All.m_paComponents[i]->OnRelease();
 }
 
-void CGameClient::OnMessageIrc(const char *pFrom, const char *pUser, const char *pText)
+void CGameClient::OnMessageIRC(const char *pFrom, const char *pUser, const char *pText)
 {
 	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnMessageIrc(pFrom, pUser, pText);
+		m_All.m_paComponents[i]->OnMessageIRC(pFrom, pUser, pText);
 }
 
 void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
@@ -970,7 +970,7 @@ void CGameClient::OnShutdown()
 {
 	m_pIdentity->SaveIdents();
 	m_pRaceDemo->OnShutdown();
-	m_pIrcBind->OnShutdown();
+	m_pIRCBind->OnShutdown();
 }
 
 void CGameClient::OnEnterGame()

@@ -14,35 +14,35 @@ void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pResult->GetInteger(0) != 0)
 		{
-			pSelf->ToggleIrc();
+			pSelf->ToggleIRC();
 		}
 	}
 }
 
-bool CMenus::ToggleIrc()
+bool CMenus::ToggleIRC()
 {
-	static CIrcCom *s_pActiveCom = m_pClient->Irc()->GetActiveCom();
+	static CIRCCom *s_pActiveCom = m_pClient->IRC()->GetActiveCom();
 	if(!(m_IRCActive ^= 1))
 	{
 		// set active com to @status in order to receive unread message notification
-		s_pActiveCom = m_pClient->Irc()->GetActiveCom();
-		m_pClient->Irc()->SetActiveCom(0);
+		s_pActiveCom = m_pClient->IRC()->GetActiveCom();
+		m_pClient->IRC()->SetActiveCom(0);
 	}
 	else
 	{
-		if(m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTED)
+		if(m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTED)
 		{
-			m_pClient->Irc()->SetActiveCom(s_pActiveCom);
+			m_pClient->IRC()->SetActiveCom(s_pActiveCom);
 			UI()->SetActiveItem(&m_IRCActive);
 		}
 	}
-	RenderIrc(*UI()->Screen());
+	RenderIRC(*UI()->Screen());
 
 	return m_IRCActive;
 }
 
 // stolen from H-Client :3
-void CMenus::RenderIrc(CUIRect MainView)
+void CMenus::RenderIRC(CUIRect MainView)
 {
 	static float YOffset = -500.0f; // dunno if a constant is optimal...
 	if(!m_IRCActive)
@@ -72,19 +72,19 @@ void CMenus::RenderIrc(CUIRect MainView)
 	MainView.Margin(5.0f, &MainView);
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActiveIngame-vec4(0.0f, 0.0f, 0.0f, 0.2f), CUI::CORNER_ALL, 5.0f);
 
-	CUIRect MainIrc, EntryBox, Button;
-	MainView.Margin(10.0f, &MainIrc);
+	CUIRect MainIRC, EntryBox, Button;
+	MainView.Margin(10.0f, &MainIRC);
 
 	/*if (m_GamePagePanel != PANEL_CHAT && UI()->MouseInside(&MainView) && Input()->KeyPressed(KEY_MOUSE_1))
 	 {
 	 m_GamePagePanel = PANEL_CHAT;
 	 }*/
 
-	if(m_pClient->Irc()->GetState() == IIrc::STATE_DISCONNECTED)
+	if(m_pClient->IRC()->GetState() == IIRC::STATE_DISCONNECTED)
 	{
-		EntryBox.x = MainIrc.x + (MainIrc.w / 2.0f - 300.0f / 2.0f);
+		EntryBox.x = MainIRC.x + (MainIRC.w / 2.0f - 300.0f / 2.0f);
 		EntryBox.w = 300.0f;
-		EntryBox.y = MainIrc.y + (MainIrc.h / 2.0f - 55.0f / 2.0f);
+		EntryBox.y = MainIRC.y + (MainIRC.h / 2.0f - 55.0f / 2.0f);
 		EntryBox.h = 55.0f;
 
 		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive-vec4(0.0f, 0.0f, 0.0f, 0.2f), CUI::CORNER_ALL, 10.0f);
@@ -107,46 +107,46 @@ void CMenus::RenderIrc(CUIRect MainView)
 		EntryBox.HSplitTop(20.0f, &Button, &EntryBox);
 		static float s_ButtonConnect = 0;
 		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect"), 0, &Button))
-			m_pClient->m_pIrcBind->Connect();
+			m_pClient->m_pIRCBind->Connect();
 	}
-	else if(m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTING)
+	else if(m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTING)
 	{
-		EntryBox.x = MainIrc.x + (MainIrc.w / 2.0f - 300.0f / 2.0f);
+		EntryBox.x = MainIRC.x + (MainIRC.w / 2.0f - 300.0f / 2.0f);
 		EntryBox.w = 300.0f;
-		EntryBox.y = MainIrc.y + (MainIrc.h / 2.0f - 25.0f / 2.0f);
+		EntryBox.y = MainIRC.y + (MainIRC.h / 2.0f - 25.0f / 2.0f);
 		EntryBox.h = 25.0f;
 
 		RenderTools()->DrawUIRect(&EntryBox, ms_ColorTabbarActive-vec4(0.0f, 0.0f, 0.0f, 0.2f), CUI::CORNER_ALL, 10.0f);
 		EntryBox.Margin(5.0f, &EntryBox);
 		UI()->DoLabelScaled(&EntryBox, Localize("Connecting, please wait..."), 14.0f, -1);
 	}
-	else if(m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTED)
+	else if(m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTED)
 	{
 		CUIRect ButtonBox, InputBox;
 
 		// channel list
-		MainIrc.HSplitTop(20.0f, &ButtonBox, &EntryBox);
+		MainIRC.HSplitTop(20.0f, &ButtonBox, &EntryBox);
 		ButtonBox.VSplitRight(80.0f, &ButtonBox, &Button);
 		static float s_ButtonDisc = 0;
 		if(DoButton_Menu(&s_ButtonDisc, Localize("Disconnect"), 0, &Button))
-			m_pClient->m_pIrcBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
+			m_pClient->m_pIRCBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
 
 		// scroll through the tabs
 		if(UI()->MouseInside(&ButtonBox))
 		{
 			if(m_pClient->Input()->KeyDown(KEY_MOUSE_WHEEL_UP))
-				m_pClient->Irc()->NextRoom();
+				m_pClient->IRC()->NextRoom();
 			else if(m_pClient->Input()->KeyDown(KEY_MOUSE_WHEEL_DOWN))
-				m_pClient->Irc()->PrevRoom();
+				m_pClient->IRC()->PrevRoom();
 		}
 
-		float LW = (ButtonBox.w - ButtonBox.x) / m_pClient->Irc()->GetNumComs();
+		float LW = (ButtonBox.w - ButtonBox.x) / m_pClient->IRC()->GetNumComs();
 		static int s_ButsID[64];
-		for(int i = 0; i < m_pClient->Irc()->GetNumComs(); i++)
+		for(int i = 0; i < m_pClient->IRC()->GetNumComs(); i++)
 		{
-			CIrcCom *pCom = m_pClient->Irc()->GetCom(i);
+			CIRCCom *pCom = m_pClient->IRC()->GetCom(i);
 
-		//	if(pCom == m_pClient->Irc()->GetActiveCom())
+		//	if(pCom == m_pClient->IRC()->GetActiveCom())
 				ButtonBox.VSplitLeft(LW - 25.0f, &Button, &ButtonBox);
 		//	else
 		//	{
@@ -156,10 +156,10 @@ void CMenus::RenderIrc(CUIRect MainView)
 
 			// close using middle mouse button
 			if(UI()->MouseInside(&Button) && m_pClient->Input()->KeyDown(KEY_MOUSE_3) &&
-					m_pClient->Irc()->CanCloseCom(m_pClient->Irc()->GetCom(i)))
-				m_pClient->Irc()->Part(g_Config.m_ClIRCLeaveMsg, m_pClient->Irc()->GetCom(i));
+					m_pClient->IRC()->CanCloseCom(m_pClient->IRC()->GetCom(i)))
+				m_pClient->IRC()->Part(g_Config.m_ClIRCLeaveMsg, m_pClient->IRC()->GetCom(i));
 
-			if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+			if(pCom->GetType() == CIRCCom::TYPE_CHANNEL)
 			{
 				CComChan *pChan = static_cast<CComChan*>(pCom);
 				static float FadeVal[64] = { 0.0f };
@@ -176,18 +176,18 @@ void CMenus::RenderIrc(CUIRect MainView)
 				if(pCom->m_NumUnreadMsg)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->m_Channel, pCom->m_NumUnreadMsg);
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
-						m_pClient->Irc()->SetActiveCom(i);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+						m_pClient->IRC()->SetActiveCom(i);
 				}
 				else
 				{
 					FadeVal[i] = 0.0f; Add[i] = true;
 					str_copy(aTab, pChan->m_Channel, sizeof(aTab));
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->Irc()->GetActiveCom(), &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0))
-						m_pClient->Irc()->SetActiveCom(i);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->IRC()->GetActiveCom(), &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0))
+						m_pClient->IRC()->SetActiveCom(i);
 				}
 			}
-			else if(pCom->GetType() == CIrcCom::TYPE_QUERY)
+			else if(pCom->GetType() == CIRCCom::TYPE_QUERY)
 			{
 				CComQuery *pQuery = static_cast<CComQuery*>(pCom);
 				static float FadeVal[64] = { 0.0f };
@@ -204,26 +204,26 @@ void CMenus::RenderIrc(CUIRect MainView)
 				if(pCom->m_NumUnreadMsg)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->m_User, pCom->m_NumUnreadMsg);
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
-						m_pClient->Irc()->SetActiveCom(i);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+						m_pClient->IRC()->SetActiveCom(i);
 				}
 				else
 				{
 					FadeVal[i] = 0.0f; Add[i] = true;
 					str_copy(aTab, pQuery->m_User, sizeof(aTab));
-					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->Irc()->GetActiveCom(), &Button, i==m_pClient->Irc()->GetNumComs()-1?CUI::CORNER_R:0))
-						m_pClient->Irc()->SetActiveCom(i);
+					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->IRC()->GetActiveCom(), &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0))
+						m_pClient->IRC()->SetActiveCom(i);
 				}
 			}
 
-			if(i > 0 && pCom == m_pClient->Irc()->GetActiveCom() && m_pClient->Irc()->GetNumComs() > 2 && str_comp_nocase(((CComChan*)pCom)->m_Channel, "#AllTheHaxx"))
+			if(i > 0 && pCom == m_pClient->IRC()->GetActiveCom() && m_pClient->IRC()->GetNumComs() > 2 && str_comp_nocase(((CComChan*)pCom)->m_Channel, "#AllTheHaxx"))
 			{
 				Button.VSplitRight(ButtonBox.h, 0, &Button);
 				Button.Margin(3.0f, &Button);
 				Button.x -= 5.0f; Button.h = Button.w;
 				static int sCloseButton = 0;
 				if(DoButton_Menu(&sCloseButton, "×", 0, &Button, 0, CUI::CORNER_ALL, ms_ColorTabbarActive+vec4(0.3f,0.3f,0.3f,0)))
-					m_pClient->Irc()->Part(g_Config.m_ClIRCLeaveMsg);
+					m_pClient->IRC()->Part(g_Config.m_ClIRCLeaveMsg);
 			}
 		}
 
@@ -238,11 +238,11 @@ void CMenus::RenderIrc(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
 				|| m_EnterPressed)
 		{
-			if(aEntryText[0] == '/'/* || (m_pClient->Irc()->GetActiveCom()->GetType() == CIrcCom::TYPE_QUERY &&
-					str_comp_nocase(((CComQuery*)m_pClient->Irc()->GetActiveCom())->m_User, "@Status") == 0)*/)
+			if(aEntryText[0] == '/'/* || (m_pClient->IRC()->GetActiveCom()->GetType() == CIRCCom::TYPE_QUERY &&
+					str_comp_nocase(((CComQuery*)m_pClient->IRC()->GetActiveCom())->m_User, "@Status") == 0)*/)
 			{
 				std::string strCmdRaw;
-				//if(str_comp_nocase(((CComQuery*)m_pClient->Irc()->GetActiveCom())->m_User, "@Status") == 0)
+				//if(str_comp_nocase(((CComQuery*)m_pClient->IRC()->GetActiveCom())->m_User, "@Status") == 0)
 				//	strCmdRaw = aEntryText;
 				//else
 					strCmdRaw = aEntryText + 1;
@@ -257,20 +257,20 @@ void CMenus::RenderIrc(CUIRect MainView)
 					str_copy(aCmd, strCmdRaw.c_str(), sizeof(aCmd));
 
 				if(aCmd[0] != 0)
-					m_pClient->Irc()->ExecuteCommand(aCmd, aCmdParams);
+					m_pClient->IRC()->ExecuteCommand(aCmd, aCmdParams);
 			}
 			else
-				m_pClient->Irc()->SendMsg(0x0, aEntryText);
+				m_pClient->IRC()->SendMsg(0x0, aEntryText);
 
 			aEntryText[0] = 0;
 		}
 
 		//Channel/Query
-		CIrcCom *pCom = m_pClient->Irc()->GetActiveCom();
+		CIRCCom *pCom = m_pClient->IRC()->GetActiveCom();
 		if(!pCom)
 			return;
 
-		if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+		if(pCom->GetType() == CIRCCom::TYPE_CHANNEL)
 		{
 			CComChan *pChan = static_cast<CComChan*>(pCom);
 
@@ -304,8 +304,8 @@ void CMenus::RenderIrc(CUIRect MainView)
 							std::list<std::string>::iterator it = pChan->m_Users.begin();
 							std::advance(it, o);
 
-							if(str_comp_nocase(it->c_str()+1, m_pClient->Irc()->GetNick()) != 0)
-								m_pClient->Irc()->OpenQuery(it->c_str());
+							if(str_comp_nocase(it->c_str()+1, m_pClient->IRC()->GetNick()) != 0)
+								m_pClient->IRC()->OpenQuery(it->c_str());
 						}
 
 						//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CONNECT, &ButtonQS,
@@ -315,7 +315,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 							std::list<std::string>::iterator it = pChan->m_Users.begin();
 							std::advance(it, o);
 
-							m_pClient->Irc()->SendGetServer(it->c_str());
+							m_pClient->IRC()->SendGetServer(it->c_str());
 						}
 					}
 					else
@@ -341,7 +341,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
 		}
-		else if(pCom->GetType() == CIrcCom::TYPE_QUERY)
+		else if(pCom->GetType() == CIRCCom::TYPE_QUERY)
 		{
 			CComQuery *pQuery = static_cast<CComQuery*>(pCom);
 			CUIRect Chat;
@@ -376,7 +376,7 @@ void CMenus::RenderIrc(CUIRect MainView)
 				static int s_ButtonQSLog = 0;
 				if(UI()->DoButtonLogic(&s_ButtonQSLog, "", 0, &ButtonQS))
 				{
-					m_pClient->Irc()->SendGetServer(pQuery->m_User);
+					m_pClient->IRC()->SendGetServer(pQuery->m_User);
 				}
 			}
 		}

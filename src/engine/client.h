@@ -205,7 +205,7 @@ public:
 	virtual void OnStateChange(int NewState, int OldState) = 0;
 	virtual void OnConnected() = 0;
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, bool IsDummy = 0) = 0;
-	virtual void OnMessageIrc(const char *pFrom, const char *pUser, const char *pText) = 0;
+	virtual void OnMessageIRC(const char *pFrom, const char *pUser, const char *pText) = 0;
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
 

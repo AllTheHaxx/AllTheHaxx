@@ -4,7 +4,7 @@
 #include <engine/client/irc.h>
 #include <game/client/component.h>
 
-class CIrcBind : public CComponent
+class CIRCBind : public CComponent
 {
 private:
 
@@ -12,7 +12,7 @@ private:
 	static void ListenIRCThread(void *pUser);
 
 public:
-	CIrcBind();
+	CIRCBind();
 
 	void Connect();
 	void Disconnect(char *pReason);
@@ -20,8 +20,8 @@ public:
 	void SendCommand(const char *pCmd);
 	void OnNickChange(const char *pNewNick);
 
-	const char *CurrentNick() { return m_pClient->Irc()->GetNick(); } // XXX this is depreciated and only for compatibility
-	bool IsConnected() { return m_pClient->Irc()->GetState() == IIrc::STATE_CONNECTED; }
+	const char *CurrentNick() { return m_pClient->IRC()->GetNick(); } // XXX this is depreciated and only for compatibility
+	bool IsConnected() { return m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTED; }
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();

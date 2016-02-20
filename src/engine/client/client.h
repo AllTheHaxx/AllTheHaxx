@@ -70,7 +70,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IFetcher *m_pFetcher;
 	IUpdater *m_pUpdater;
 	IEngineMasterServer *m_pMasterServer;
-	IIrc *m_pIrc;
+	IIRC *m_pIRC;
 
 	enum
 	{
@@ -88,7 +88,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CFriends m_Friends;
 	class CFriends m_Foes;
 	class CMapChecker m_MapChecker;
-	class CIrc m_Irc;
+	class CIRC m_IRC;
 
 	char m_aServerAddressStr[256];
 
@@ -216,7 +216,7 @@ public:
 	IStorage *Storage() { return m_pStorage; }
 	IFetcher *Fetcher() { return m_pFetcher; }
 	IUpdater *Updater() { return m_pUpdater; }
-	IIrc *Irc() { return m_pIrc; }
+	IIRC *IRC() { return m_pIRC; }
 
 	CClient();
 

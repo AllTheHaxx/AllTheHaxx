@@ -322,10 +322,10 @@ class CMenus : public CComponent
 	void RenderTrans(CUIRect MainView);
 	static void ConKeyShortcut(IConsole::IResult *pResult, void *pUserData);
 
-	// found in menus_irc.cpp
+	// found in menus_IRC.cpp
 	bool m_IRCActive;
-	void RenderIrc(CUIRect MainView);
-	bool ToggleIrc();
+	void RenderIRC(CUIRect MainView);
+	bool ToggleIRC();
 	static void ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData);
 
 	void SetActive(bool Active);

@@ -903,7 +903,7 @@ void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUser
 {
 	pfnCallback(pResult, pCallbackUserData);
 	CGameConsole *pThis = static_cast<CGameConsole *>(pUserData);
-	pThis->m_pClient->m_pIrcBind->OnNickChange(g_Config.m_ClIRCNick);
+	pThis->m_pClient->m_pIRCBind->OnNickChange(g_Config.m_ClIRCNick);
 }
 
 
@@ -934,7 +934,7 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This may be moved to elsewhere
+	Console()->Chain("cl_IRC_nick", ConchainIRCNickUpdate, this); // TODO: This may be moved to elsewhere
 
 }
 

@@ -23,9 +23,9 @@
 
 static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 
-CIrc::CIrc()
+CIRC::CIRC()
 {
-    m_IrcComs.clear();
+    m_IRCComs.clear();
     m_Hooks.clear();
     m_pGraphics = 0x0;
     m_State = STATE_DISCONNECTED;
@@ -37,17 +37,17 @@ CIrc::CIrc()
     SetActiveCom(-1);
 }
 
-void CIrc::RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser) // pData, pUser
+void CIRC::RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser) // pData, pUser
 {
-	IrcHook h;
+	IRCHook h;
 	h.messageID = pMsgID;
 	h.function = func;
 	h.user = pUser;
 	m_Hooks.add(h);
-	dbg_msg("engine/irc", "registered callback for '%s'", pMsgID);
+	dbg_msg("engine/IRC", "registered callback for '%s'", pMsgID);
 }
 
-void CIrc::CallHooks(const char *pMsgID, ReplyData* pReplyData)
+void CIRC::CallHooks(const char *pMsgID, ReplyData* pReplyData)
 {
 	for(int i = 0; i < m_Hooks.size(); i++)
 	{
@@ -57,7 +57,7 @@ void CIrc::CallHooks(const char *pMsgID, ReplyData* pReplyData)
 			if(ret != 0)
 			{
 				char aError[128];
-				str_format(aError, sizeof(aError), "irc callback returned != 0 (ret=%i, i=%i, callback=%s, func=%p)",
+				str_format(aError, sizeof(aError), "IRC callback returned != 0 (ret=%i, i=%i, callback=%s, func=%p)",
 						ret, i, m_Hooks[i].messageID.c_str(), m_Hooks[i].function);
 				dbg_assert(ret == 0, aError);
 			}
@@ -65,69 +65,69 @@ void CIrc::CallHooks(const char *pMsgID, ReplyData* pReplyData)
 	}
 }
 
-void CIrc::Init()
+void CIRC::Init()
 {
     m_pGraphics = Kernel()->RequestInterface<IGraphics>();
     m_pGameClient = Kernel()->RequestInterface<IGameClient>();
     m_pClient = Kernel()->RequestInterface<IClient>();
 }
 
-void CIrc::SetActiveCom(int index)
+void CIRC::SetActiveCom(int index)
 {
-    if (index < 0 || index >= (int)m_IrcComs.size())
+    if (index < 0 || index >= (int)m_IRCComs.size())
         index = 0;
 
     m_ActiveCom = index;
-    CIrcCom *pCom = GetCom(index);
+    CIRCCom *pCom = GetCom(index);
     if (pCom)
         pCom->m_NumUnreadMsg = 0;
 }
 
-void CIrc::SetActiveCom(CIrcCom *pCom)
+void CIRC::SetActiveCom(CIRCCom *pCom)
 {
     if (!pCom)
 		return;
 	
-	std::list<CIrcCom*>::iterator it = std::find(m_IrcComs.begin(), m_IrcComs.end(), pCom);
-	if (it != m_IrcComs.end())
+	std::list<CIRCCom*>::iterator it = std::find(m_IRCComs.begin(), m_IRCComs.end(), pCom);
+	if (it != m_IRCComs.end())
 	{
         pCom->m_NumUnreadMsg = 0;
-		m_ActiveCom = std::distance(m_IrcComs.begin(), it);
+		m_ActiveCom = std::distance(m_IRCComs.begin(), it);
 	}
 }
 
-CIrcCom* CIrc::GetActiveCom()
+CIRCCom* CIRC::GetActiveCom()
 {
-    if (m_ActiveCom < 0 || m_ActiveCom >= (int)m_IrcComs.size())
+    if (m_ActiveCom < 0 || m_ActiveCom >= (int)m_IRCComs.size())
         return 0x0;
 
-    std::list<CIrcCom*>::iterator it = m_IrcComs.begin();
+    std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
     std::advance(it, m_ActiveCom);
     return (*it);
 }
 
-CIrcCom* CIrc::GetCom(size_t index)
+CIRCCom* CIRC::GetCom(size_t index)
 {
-    if (index < 0 || index >= m_IrcComs.size())
+    if (index < 0 || index >= m_IRCComs.size())
         return 0x0;
 
-    std::list<CIrcCom*>::iterator it = m_IrcComs.begin();
+    std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
     std::advance(it, index);
     return (*it);
 }
-CIrcCom* CIrc::GetCom(std::string name)
+CIRCCom* CIRC::GetCom(std::string name)
 {
-    std::list<CIrcCom*>::iterator it = m_IrcComs.begin();
+    std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
 
-    while (it != m_IrcComs.end())
+    while (it != m_IRCComs.end())
     {
-        if ((*it)->GetType() == CIrcCom::TYPE_CHANNEL)
+        if ((*it)->GetType() == CIRCCom::TYPE_CHANNEL)
         {
             CComChan *pChan = static_cast<CComChan*>((*it));
             if (str_comp_nocase(name.c_str(), pChan->m_Channel) == 0)
                 return (*it);
         }
-        else if ((*it)->GetType() == CIrcCom::TYPE_QUERY)
+        else if ((*it)->GetType() == CIRCCom::TYPE_QUERY)
         {
             CComQuery *pQuery = static_cast<CComQuery*>((*it));
             if (str_comp_nocase(name.c_str(), pQuery->m_User) == 0)
@@ -140,7 +140,7 @@ CIrcCom* CIrc::GetCom(std::string name)
     return 0x0;
 }
 
-bool CIrc::CanCloseCom(CIrcCom *pCom)
+bool CIRC::CanCloseCom(CIRCCom *pCom)
 {
 	if(!pCom)
 		return false;
@@ -152,7 +152,7 @@ bool CIrc::CanCloseCom(CIrcCom *pCom)
 	return true;
 }
 
-void CIrc::StartConnection() // call this from a thread only!
+void CIRC::StartConnection() // call this from a thread only!
 {
 	NETADDR BindAddr;
     mem_zero(&m_HostAddress, sizeof(m_HostAddress));
@@ -161,9 +161,9 @@ void CIrc::StartConnection() // call this from a thread only!
 
     m_State = STATE_CONNECTING;
     // lookup
-	if(net_host_lookup("irc.quakenet.org:6667", &m_HostAddress, NETTYPE_IPV4) != 0)
+	if(net_host_lookup("IRC.quakenet.org:6667", &m_HostAddress, NETTYPE_IPV4) != 0)
 	{
-        dbg_msg("IRC","ERROR: Can't lookup irc.quakenet.org");
+        dbg_msg("IRC","ERROR: Can't lookup IRC.quakenet.org");
         m_State = STATE_DISCONNECTED;
         return;
 	}
@@ -190,7 +190,7 @@ void CIrc::StartConnection() // call this from a thread only!
     // status Tab
     CComQuery *pStatus = new CComQuery();
     str_copy(pStatus->m_User, "@Status", sizeof(pStatus->m_User));
-    m_IrcComs.push_back(pStatus);
+    m_IRCComs.push_back(pStatus);
     SetActiveCom(-1);
 
     m_State = STATE_CONNECTED;
@@ -226,18 +226,18 @@ void CIrc::StartConnection() // call this from a thread only!
                     if (aMsgID.compare("PING") == 0)
                     {
                         /*char aBuff[255];
-                        CIrcCom *pCom = GetCom("@Status");
+                        CIRCCom *pCom = GetCom("@Status");
                         str_format(aBuff, sizeof(aBuff), "PING [%s]", aMsgText.c_str());
                         pCom->m_Buffer.push_back(aBuff);*/
                     	SendRaw("PONG %s :%s", LastPong, aMsgText.c_str());
-                    	dbg_msg("engine/irc", "Ping? Pong!");
+                    	dbg_msg("engine/IRC", "Ping? Pong!");
                         LastPong[0]=0;
                     }
                     else if (aMsgID.compare("PONG") == 0)
                         str_copy(LastPong, aMsgText.c_str(), sizeof(LastPong));
                     else
                     {
-                        CIrcCom *pCom = GetCom("@Status");
+                        CIRCCom *pCom = GetCom("@Status");
                         pCom->m_Buffer.push_back(aMsgText);
                     	reply.channel = "@Status";
                         reply.from = "quakenet.org";
@@ -329,7 +329,7 @@ void CIrc::StartConnection() // call this from a thread only!
                         del = NetData.find_first_of(":",1);
                         std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
 
-                        CIrcCom *pCom = GetCom(aMsgFrom);
+                        CIRCCom *pCom = GetCom(aMsgFrom);
                         if (!pCom)
                             pCom = GetCom("@Status");
 
@@ -349,7 +349,7 @@ void CIrc::StartConnection() // call this from a thread only!
                         del = NetData.find_first_of(":",1);
                         std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
 
-                        CIrcCom *pCom = GetCom("@Status");
+                        CIRCCom *pCom = GetCom("@Status");
                         str_format(aBuff, sizeof(aBuff), "'%s' %s", aMsgCmd.c_str(), aMsgText.c_str());
                         pCom->m_Buffer.push_back(aBuff);
 
@@ -368,8 +368,8 @@ void CIrc::StartConnection() // call this from a thread only!
                             CComChan *pNewChan = new CComChan();
                             pNewChan->m_NumUnreadMsg = 0;
                             str_copy(pNewChan->m_Channel, aMsgChannel.c_str(), sizeof(pNewChan->m_Channel));
-                            m_IrcComs.push_back(pNewChan);
-                            SetActiveCom(m_IrcComs.size()-1);
+                            m_IRCComs.push_back(pNewChan);
+                            SetActiveCom(m_IRCComs.size()-1);
                         }
                         else
                         {
@@ -396,13 +396,13 @@ void CIrc::StartConnection() // call this from a thread only!
 
                         if (aMsgFrom == m_Nick)
                         {
-                            CIrcCom *pCom = GetCom(aMsgChannel);
+                            CIRCCom *pCom = GetCom(aMsgChannel);
                             if (pCom)
                             {
-                                m_IrcComs.remove(pCom);
+                                m_IRCComs.remove(pCom);
                                 delete pCom;
                                 pCom=0x0;
-                                SetActiveCom(m_IrcComs.size()-1);
+                                SetActiveCom(m_IRCComs.size()-1);
                             }
                         }
                         else
@@ -434,10 +434,10 @@ void CIrc::StartConnection() // call this from a thread only!
 
                         if (aMsgFrom != m_Nick)
                         {
-                            std::list<CIrcCom*>::iterator it = m_IrcComs.begin();
-                            while (it != m_IrcComs.end())
+                            std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
+                            while (it != m_IRCComs.end())
                             {
-                                if (!(*it) || (*it)->GetType() != CIrcCom::TYPE_CHANNEL)
+                                if (!(*it) || (*it)->GetType() != CIRCCom::TYPE_CHANNEL)
                                 {
                                     ++it;
                                     continue;
@@ -526,7 +526,7 @@ void CIrc::StartConnection() // call this from a thread only!
 											}
 											else
 											{
-												CIrcCom *pCom = GetActiveCom();
+												CIRCCom *pCom = GetActiveCom();
 												if (pCom)
 												{
 													char aBuf[128];
@@ -560,13 +560,13 @@ void CIrc::StartConnection() // call this from a thread only!
 
 							if (aMsgChan == m_Nick)
 							{
-								CIrcCom *pCom = GetCom(aMsgFrom);
+								CIRCCom *pCom = GetCom(aMsgFrom);
 								if (!pCom)
 								{
 									CComQuery *pNewQuery = new CComQuery();
 									pNewQuery->m_NumUnreadMsg = 1;
 									str_copy(pNewQuery->m_User, aMsgFrom.c_str(), sizeof(pNewQuery->m_User));
-									m_IrcComs.push_back(pNewQuery);
+									m_IRCComs.push_back(pNewQuery);
 
 									if (MsgType == MSG_TYPE_ACTION)
 										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
@@ -590,12 +590,12 @@ void CIrc::StartConnection() // call this from a thread only!
 								{
 									aMsgFrom.insert(0,"<"); aMsgFrom.append("> ");
 									aMsgFrom.insert(0, aTime);
-									m_pGameClient->OnMessageIrc("", aMsgFrom.c_str(), aMsgText.c_str());
+									m_pGameClient->OnMessageIRC("", aMsgFrom.c_str(), aMsgText.c_str());
 								}
 							}
 							else
 							{
-								CIrcCom *pCom = GetCom(aMsgChan);
+								CIRCCom *pCom = GetCom(aMsgChan);
 								if (pCom)
 								{
 									if (pCom != GetActiveCom())
@@ -613,7 +613,7 @@ void CIrc::StartConnection() // call this from a thread only!
 									aMsgChan.insert(0, "["); aMsgChan.append("] ");
 									aMsgFrom.insert(0, "<"); aMsgFrom.append("> ");
 									aMsgFrom.insert(0, aTime);
-									m_pGameClient->OnMessageIrc(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
+									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 								}
 							}
                         }
@@ -630,10 +630,10 @@ void CIrc::StartConnection() // call this from a thread only!
                         if (aMsgOldNick == m_Nick)
                             m_Nick = aMsgNewNick;
 
-                        std::list<CIrcCom*>::iterator it = m_IrcComs.begin();
-                        while (it != m_IrcComs.end())
+                        std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
+                        while (it != m_IRCComs.end())
                         {
-                            if ((*it)->GetType() == CIrcCom::TYPE_QUERY)
+                            if ((*it)->GetType() == CIRCCom::TYPE_QUERY)
                             {
                                 CComQuery *pQuery = static_cast<CComQuery*>((*it));
                                 if (str_comp_nocase(pQuery->m_User, aMsgOldNick.c_str()) == 0)
@@ -643,7 +643,7 @@ void CIrc::StartConnection() // call this from a thread only!
                                     pQuery->m_Buffer.push_back(aBuff);
                                 }
                             }
-                            else if ((*it)->GetType() == CIrcCom::TYPE_CHANNEL)
+                            else if ((*it)->GetType() == CIRCCom::TYPE_CHANNEL)
                             { //TODO: Rewrite this!! duplicate code :P
                                 CComChan *pChan = static_cast<CComChan*>((*it));
                                 std::list<std::string>::iterator itU = pChan->m_Users.begin();
@@ -708,8 +708,8 @@ void CIrc::StartConnection() // call this from a thread only!
                         std::string aNickTo = NetData.substr(ldel+1, del-(ldel+1));
 
 
-                        CIrcCom *pCom = GetCom(aChannel);
-                        if (pCom && pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+                        CIRCCom *pCom = GetCom(aChannel);
+                        if (pCom && pCom->GetType() == CIRCCom::TYPE_CHANNEL)
                         {
                             CComChan *pChan = static_cast<CComChan*>(pCom);
                             if (pChan)
@@ -770,12 +770,12 @@ void CIrc::StartConnection() // call this from a thread only!
                         std::string aKickReason = NetData.substr(ldel+1);
 
 
-                        CIrcCom *pCom = GetCom(aChannel);
-                        if (pCom && pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+                        CIRCCom *pCom = GetCom(aChannel);
+                        if (pCom && pCom->GetType() == CIRCCom::TYPE_CHANNEL)
                         {
                             if (aNickTo == m_Nick)
                             {
-                                m_IrcComs.remove(pCom);
+                                m_IRCComs.remove(pCom);
                                 delete pCom;
                                 pCom=0x0;
                                 SetActiveCom(0);
@@ -814,7 +814,7 @@ void CIrc::StartConnection() // call this from a thread only!
                         else
                             str_format(aBuff, sizeof(aBuff), "%s", aMsgText.c_str());
 
-                        CIrcCom *pCom = GetCom("@Status");
+                        CIRCCom *pCom = GetCom("@Status");
                         pCom->m_Buffer.push_back(aBuff);
                     }
 
@@ -835,55 +835,55 @@ void CIrc::StartConnection() // call this from a thread only!
     Disconnect();
 }
 
-void CIrc::NextRoom()
+void CIRC::NextRoom()
 {
 	/* -- dunno if i misunderstood this...? -Henritees
-    if (m_ActiveCom >= (int)m_IrcComs.size()-1)
-        SetActiveCom(((int)m_IrcComs.size()>1)?1:0);
+    if (m_ActiveCom >= (int)m_IRCComs.size()-1)
+        SetActiveCom(((int)m_IRCComs.size()>1)?1:0);
     else if (m_ActiveCom <= 0)
-        SetActiveCom((int)m_IrcComs.size()-1);
+        SetActiveCom((int)m_IRCComs.size()-1);
     else
         SetActiveCom(m_ActiveCom+1);*/
-	if (m_ActiveCom >= (int)m_IrcComs.size()-1)
+	if (m_ActiveCom >= (int)m_IRCComs.size()-1)
 		SetActiveCom(0);
 	else
 		SetActiveCom(m_ActiveCom+1);
 }
 
-void CIrc::PrevRoom()
+void CIRC::PrevRoom()
 {
     if (m_ActiveCom <= 0)
-        SetActiveCom((int)m_IrcComs.size()-1);
+        SetActiveCom((int)m_IRCComs.size()-1);
     else
         SetActiveCom(m_ActiveCom-1);
 }
 
-void CIrc::OpenQuery(const char *to)
+void CIRC::OpenQuery(const char *to)
 {
     char SanNick[25] = {0};
     str_copy(SanNick, (to[0] == '@' || to[0] == '+')?to+1:to, sizeof(SanNick));
 	
-	CIrcCom *pCom = GetCom(SanNick);
+	CIRCCom *pCom = GetCom(SanNick);
 	if (pCom)
 		SetActiveCom(pCom);
 	else
 	{
 		CComQuery *pQuery = new CComQuery();
 		str_copy(pQuery->m_User, (to[0] == '@' || to[0] == '+')?to+1:to, sizeof(pQuery->m_User));
-		m_IrcComs.push_back(pQuery);
-		SetActiveCom(m_IrcComs.size()-1);
+		m_IRCComs.push_back(pQuery);
+		SetActiveCom(m_IRCComs.size()-1);
 	}
 }
 
-void CIrc::JoinTo(const char *to, const char *pass)
+void CIRC::JoinTo(const char *to, const char *pass)
 {
 	SendRaw("JOIN %s %s", to, pass);
 }
 
-void CIrc::SetMode(const char *mode, const char *to)
+void CIRC::SetMode(const char *mode, const char *to)
 {
-    CIrcCom *pCom = GetActiveCom();
-    if (!pCom || pCom->GetType() == CIrcCom::TYPE_QUERY)
+    CIRCCom *pCom = GetActiveCom();
+    if (!pCom || pCom->GetType() == CIRCCom::TYPE_QUERY)
         return;
 
     CComChan *pChan = static_cast<CComChan*>(pCom);
@@ -896,17 +896,17 @@ void CIrc::SetMode(const char *mode, const char *to)
     	SendRaw("MODE %s %s %s", pChan->m_Channel, mode, to);
 }
 
-void CIrc::SetTopic(const char *topic)
+void CIRC::SetTopic(const char *topic)
 {
-    CIrcCom *pCom = GetActiveCom();
-    if (!pCom || pCom->GetType() != CIrcCom::TYPE_CHANNEL)
+    CIRCCom *pCom = GetActiveCom();
+    if (!pCom || pCom->GetType() != CIRCCom::TYPE_CHANNEL)
         return;
 
     CComChan *pChan = static_cast<CComChan*>(pCom);
     SendRaw("TOPIC %s :%s", pChan->m_Channel, topic);
 }
 
-void CIrc::Part(const char *pReason, CIrcCom *pCom)
+void CIRC::Part(const char *pReason, CIRCCom *pCom)
 {
     if(!pCom)
     	pCom = GetCom(m_ActiveCom);
@@ -914,7 +914,7 @@ void CIrc::Part(const char *pReason, CIrcCom *pCom)
     if (!pCom)
         return;
 
-    if (pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+    if (pCom->GetType() == CIRCCom::TYPE_CHANNEL)
     {
         CComChan *pChan = static_cast<CComChan*>(pCom);
         if(pReason && pReason[0])
@@ -922,25 +922,25 @@ void CIrc::Part(const char *pReason, CIrcCom *pCom)
         else
         	SendRaw("PART %s %", pChan->m_Channel);
 
-        m_IrcComs.remove(pCom);
+        m_IRCComs.remove(pCom);
         delete pCom;
         pCom=0x0;
-        SetActiveCom(m_IrcComs.size()-1);
+        SetActiveCom(m_IRCComs.size()-1);
     }
-    else if (pCom->GetType() == CIrcCom::TYPE_QUERY)
+    else if (pCom->GetType() == CIRCCom::TYPE_QUERY)
     {
         CComQuery *pQuery = static_cast<CComQuery*>(pCom);
         if (str_comp_nocase(pQuery->m_User, "@Status") == 0)
             return;
 
-        m_IrcComs.remove(pCom);
+        m_IRCComs.remove(pCom);
         delete pCom;
         pCom=0x0;
-        SetActiveCom(m_IrcComs.size()-1);
+        SetActiveCom(m_IRCComs.size()-1);
     }
 }
 
-void CIrc::Disconnect(const char *pReason)
+void CIRC::Disconnect(const char *pReason)
 {
     if (m_State != STATE_DISCONNECTED)
     {
@@ -951,17 +951,17 @@ void CIrc::Disconnect(const char *pReason)
         m_State = STATE_DISCONNECTED;
     }
 
-    std::list<CIrcCom*>::iterator it = m_IrcComs.begin();
-    while (it != m_IrcComs.end())
+    std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
+    while (it != m_IRCComs.end())
     {
         delete (*it);
-        it = m_IrcComs.erase(it);
+        it = m_IRCComs.erase(it);
     }
 
     mem_zero(m_CmdToken, sizeof(m_CmdToken));
 }
 
-void CIrc::SendMsg(const char *to, const char *msg, int type)
+void CIRC::SendMsg(const char *to, const char *msg, int type)
 { //TODO: Rework this! duplicate code :P
     if (GetState() == STATE_DISCONNECTED || !msg || msg[0] == 0)
         return;
@@ -975,14 +975,14 @@ void CIrc::SendMsg(const char *to, const char *msg, int type)
         if (m_ActiveCom == -1)
             return;
 
-        std::list<CIrcCom*>::iterator it = m_IrcComs.begin();
+        std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
         std::advance(it, m_ActiveCom);
-        if ((*it)->GetType() == CIrcCom::TYPE_CHANNEL)
+        if ((*it)->GetType() == CIRCCom::TYPE_CHANNEL)
         {
             CComChan *pChan = static_cast<CComChan*>((*it));
             str_copy(aDest, pChan->m_Channel, sizeof(aDest));
         }
-        else if ((*it)->GetType() == CIrcCom::TYPE_QUERY)
+        else if ((*it)->GetType() == CIRCCom::TYPE_QUERY)
         {
             CComQuery *pQuery = static_cast<CComQuery*>((*it));
             if (str_comp_nocase(pQuery->m_User, "@Status") == 0)
@@ -1008,7 +1008,7 @@ void CIrc::SendMsg(const char *to, const char *msg, int type)
     	str_copy(aBuff, msg, sizeof(aBuff));
 
     SendRaw("PRIVMSG %s :%s", aDest, aBuff);
-    CIrcCom *pCom = GetCom(aDest);
+    CIRCCom *pCom = GetCom(aDest);
     if (pCom)
     {
     	if (type == MSG_TYPE_ACTION)
@@ -1027,7 +1027,7 @@ void CIrc::SendMsg(const char *to, const char *msg, int type)
     }
 }
 
-void CIrc::SendRaw(const char *fmt, ...)
+void CIRC::SendRaw(const char *fmt, ...)
 {
     if (!fmt || fmt[0] == 0)
         return;
@@ -1047,7 +1047,7 @@ void CIrc::SendRaw(const char *fmt, ...)
     net_tcp_send(m_Socket, msg, strlen(msg));
 }
 
-void CIrc::SetNick(const char *nick)
+void CIRC::SetNick(const char *nick)
 {
     if (m_State == STATE_CONNECTED)
         SendRaw("Nick %s", nick);
@@ -1055,7 +1055,7 @@ void CIrc::SetNick(const char *nick)
     m_Nick = nick;
 }
 
-void CIrc::SetAway(bool state, const char *msg)
+void CIRC::SetAway(bool state, const char *msg)
 {
 	if (state)
 		SendRaw("AWAY :%s", msg);
@@ -1063,7 +1063,7 @@ void CIrc::SetAway(bool state, const char *msg)
 		SendRaw("AWAY");
 }
 
-int CIrc::GetMsgType(const char *msg)
+int CIRC::GetMsgType(const char *msg)
 {
 	int len = str_length(msg);
 	if (len > 0 && msg[0] == 0x01 && msg[len-1] == 0x01)
@@ -1083,19 +1083,19 @@ int CIrc::GetMsgType(const char *msg)
 	return MSG_TYPE_NORMAL;
 }
 
-void CIrc::SendServer(const char *to, const char *Token)
+void CIRC::SendServer(const char *to, const char *Token)
 {
 	const char *curAddr = m_pClient->GetCurrentServerAddress();
 	SendRaw("PRIVMSG %s :TWSERVER %s %s", to, Token, g_Config.m_ClAllowJoin ? ((curAddr&&curAddr[0]!=0)?curAddr:"NONE") : "FORBIDDEN");
 }
 
-void CIrc::SendGetServer(const char *to)
+void CIRC::SendGetServer(const char *to)
 {
 	str_format(m_CmdToken, sizeof(m_CmdToken), "%ld", time_get());
 	SendRaw("PRIVMSG %s :GETTWSERVER %s", to, m_CmdToken);
 }
 
-void CIrc::ExecuteCommand(const char *cmd, char *params)
+void CIRC::ExecuteCommand(const char *cmd, char *params)
 {
 	array<std::string> CmdListParams;
 	for (char *p = strtok(params, " "); p != NULL; p = strtok(NULL, " "))
@@ -1170,7 +1170,7 @@ void CIrc::ExecuteCommand(const char *cmd, char *params)
     }
     else if (str_comp_nocase(cmd, "clear") == 0)
     {
-    	CIrcCom *pCom = GetActiveCom();
+    	CIRCCom *pCom = GetActiveCom();
     	if (pCom)
     		pCom->m_Buffer.clear();
     }
@@ -1178,15 +1178,15 @@ void CIrc::ExecuteCommand(const char *cmd, char *params)
         SendRaw("%s %s", cmd, params);
 }
 
-int CIrc::NumUnreadMessages(int *pArray)
+int CIRC::NumUnreadMessages(int *pArray)
 {
 	int NumChan = 0, NumQuery = 0;
 	for(int i = 0; i < GetNumComs(); i++)
 	{
-		CIrcCom *pCom = GetCom(i);
-		if(pCom->GetType() == CIrcCom::TYPE_CHANNEL)
+		CIRCCom *pCom = GetCom(i);
+		if(pCom->GetType() == CIRCCom::TYPE_CHANNEL)
 			NumChan += ((CComChan *)pCom)->m_NumUnreadMsg;
-		else if(pCom->GetType() == CIrcCom::TYPE_QUERY)
+		else if(pCom->GetType() == CIRCCom::TYPE_QUERY)
 			NumQuery += ((CComQuery *)pCom)->m_NumUnreadMsg;
 	}
 

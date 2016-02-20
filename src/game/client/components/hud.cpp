@@ -445,19 +445,19 @@ void CHud::RenderIRCNotifications(CUIRect Rect)
 	// hack
 	{
 		static bool True = false;
-		if(!True) m_pClient->Irc()->SetActiveCom(-1);
+		if(!True) m_pClient->IRC()->SetActiveCom(-1);
 		True = true;
 	}
 
 	static float Offset = -Rect.w-1;
-	if(m_pClient->Irc()->NumUnreadMessages())
+	if(m_pClient->IRC()->NumUnreadMessages())
 	{
 		smooth_set(&Offset, 0.0f, (0.005f/Client()->RenderFrameTime())*40.0f);
 		Rect.x += Offset;
 
 		char aBuf[19];
 		int Num, pNum[2];
-		Num = m_pClient->Irc()->NumUnreadMessages(pNum);
+		Num = m_pClient->IRC()->NumUnreadMessages(pNum);
 		str_format(aBuf, sizeof(aBuf), "Chat: %i (%i + %i)", Num, pNum[0], pNum[1]); // total, channel, query
 
 		Rect.w = TextRender()->TextWidth(0, 6.0f, aBuf, str_length(aBuf)) + 7.5f;

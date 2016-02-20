@@ -215,7 +215,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
 	static int s_OpenChatButton = 0;
 	if(DoButton_Menu(&s_OpenChatButton, Localize("Chat"), 0, &Button, "Open the IRC overlay"))
-		ToggleIrc();
+		ToggleIRC();
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);

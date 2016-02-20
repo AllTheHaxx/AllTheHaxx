@@ -9,17 +9,17 @@
 #include <list>
 #include <string>
 
-class CIrc : public IIrc
+class CIRC : public IIRC
 {
-	struct IrcHook
+	struct IRCHook
 	{
 		std::string messageID;
-		int (*function)(IIrc::ReplyData*, void*, void*);
+		int (*function)(IIRC::ReplyData*, void*, void*);
 		void* user;
 	};
 
 public:
-    CIrc();
+    CIRC();
 
     void Init();
 
@@ -30,17 +30,17 @@ public:
     void PrevRoom();
 
     void SetActiveCom(int index);
-	void SetActiveCom(CIrcCom *pCom);
-    CIrcCom* GetActiveCom();
-    CIrcCom* GetCom(size_t index);
-    CIrcCom* GetCom(std::string name);
-    int GetNumComs() { return m_IrcComs.size(); }
-    bool CanCloseCom(CIrcCom *pCom);
+	void SetActiveCom(CIRCCom *pCom);
+    CIRCCom* GetActiveCom();
+    CIRCCom* GetCom(size_t index);
+    CIRCCom* GetCom(std::string name);
+    int GetNumComs() { return m_IRCComs.size(); }
+    bool CanCloseCom(CIRCCom *pCom);
 
     void OpenQuery(const char *to);
     void JoinTo(const char *to, const char *pass = "");
     void SetTopic(const char *topic);
-    void Part(const char *pReason = 0, CIrcCom *pCom = 0);
+    void Part(const char *pReason = 0, CIRCCom *pCom = 0);
 
     void SetMode(const char *mode, const char *to);
     void SetNick(const char *nick);
@@ -73,8 +73,8 @@ protected:
 
     char m_CmdToken[12];
 
-    std::list<CIrcCom*> m_IrcComs;
-    array<IrcHook> m_Hooks;
+    std::list<CIRCCom*> m_IRCComs;
+    array<IRCHook> m_Hooks;
 
 private:
     void CallHooks(const char* pMsgID, ReplyData* pReplyData);

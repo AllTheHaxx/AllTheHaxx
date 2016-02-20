@@ -10,9 +10,9 @@
 #include "irc.h"
 
 
-int irchook_join(IIrc::ReplyData* hostd, void* user, void* engine)
+int IRChook_join(IIRC::ReplyData* hostd, void* user, void* engine)
 {
-	CIrcBind *pData = (CIrcBind *)user;
+	CIRCBind *pData = (CIRCBind *)user;
 
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "[%s] %s joined the chat", hostd->channel.c_str(), hostd->from.c_str());
@@ -20,9 +20,9 @@ int irchook_join(IIrc::ReplyData* hostd, void* user, void* engine)
 	return 0;
 }
 
-int irchook_leave(IIrc::ReplyData* hostd, void* user, void* engine) // serves for both QUIT and PART
+int IRChook_leave(IIRC::ReplyData* hostd, void* user, void* engine) // serves for both QUIT and PART
 {
-	CIrcBind *pData = (CIrcBind *)user;
+	CIRCBind *pData = (CIRCBind *)user;
 
 	char aBuf[64];
 	if(hostd->params.c_str()[0])
@@ -33,13 +33,13 @@ int irchook_leave(IIrc::ReplyData* hostd, void* user, void* engine) // serves fo
 	return 0;
 }
 
-int irchook_privmsg(IIrc::ReplyData* hostd, void* user, void* engine)
+int IRChook_privmsg(IIRC::ReplyData* hostd, void* user, void* engine)
 {
-	CIrcBind *pData = (CIrcBind *)user;
-	CIrc *pIrc = (CIrc *)engine;
+	CIRCBind *pData = (CIRCBind *)user;
+	CIRC *pIRC = (CIRC *)engine;
 
 	// nothing to do for control messages
-	if(pIrc->GetMsgType(hostd->params.c_str()) != IIrc::MSG_TYPE_NORMAL)
+	if(pIRC->GetMsgType(hostd->params.c_str()) != IIRC::MSG_TYPE_NORMAL)
 		return 0;
 
 	// play a sound
@@ -57,7 +57,7 @@ int irchook_privmsg(IIrc::ReplyData* hostd, void* user, void* engine)
 		str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
 		// ...to console
-		if(hostd->channel == pIrc->m_Nick)
+		if(hostd->channel == pIRC->m_Nick)
 			str_format(aBuf, sizeof(aBuf), "[private chat]: %s<%s> %s", aTime, hostd->from.c_str(), hostd->params.c_str());
 		else
 			str_format(aBuf, sizeof(aBuf), "[chat]: [%s]: %s<%s> %s", hostd->channel.c_str(), aTime, hostd->from.c_str(), hostd->params.c_str());
@@ -66,16 +66,16 @@ int irchook_privmsg(IIrc::ReplyData* hostd, void* user, void* engine)
 		// ...to notifications
 		if(g_Config.m_ClNotifications)
 		{
-			if(hostd->channel == pIrc->m_Nick)
+			if(hostd->channel == pIRC->m_Nick)
 				str_format(aBuf, sizeof(aBuf), "[%s]: %s", hostd->from.c_str(), hostd->params.c_str());
 			else
 				str_format(aBuf, sizeof(aBuf), "[%s]: <%s> %s", hostd->channel.c_str(), hostd->from.c_str(), hostd->params.c_str());
-			pData->GameClient()->m_pHud->PushNotification(aBuf, str_find_nocase(hostd->params.c_str(), pIrc->m_Nick.c_str()) ?
+			pData->GameClient()->m_pHud->PushNotification(aBuf, str_find_nocase(hostd->params.c_str(), pIRC->m_Nick.c_str()) ?
 					vec4(0.2f, 1, 0.5f, 1) :
 					vec4(0.2f, 0.5f, 1, 1));
 		}
 	}
-	else if(str_find_nocase(hostd->params.c_str(), pIrc->m_Nick.c_str()))
+	else if(str_find_nocase(hostd->params.c_str(), pIRC->m_Nick.c_str()))
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "[%s] You were mentioned by %s", hostd->channel.c_str(), hostd->from.c_str());
@@ -85,67 +85,67 @@ int irchook_privmsg(IIrc::ReplyData* hostd, void* user, void* engine)
 	return 0;
 }
 
-CIrcBind::CIrcBind()
+CIRCBind::CIRCBind()
 {
 	m_pIRCThread = 0;
 	OnReset();
 }
 
-void CIrcBind::OnRender()
+void CIRCBind::OnRender()
 {
 }
 
-void CIrcBind::ListenIRCThread(void *pUser)
+void CIRCBind::ListenIRCThread(void *pUser)
 {
-	CIrcBind *pIrc = (CIrcBind*)pUser;
-	pIrc->m_pClient->Irc()->StartConnection();
+	CIRCBind *pIRC = (CIRCBind*)pUser;
+	pIRC->m_pClient->IRC()->StartConnection();
 	return;
 }
 
-void CIrcBind::SendCommand(const char* pCmd)
+void CIRCBind::SendCommand(const char* pCmd)
 {
-	m_pClient->Irc()->SendRaw(++pCmd);
+	m_pClient->IRC()->SendRaw(++pCmd);
 }
 
-void CIrcBind::Connect() // XXX this is depreciated and only for compatibility
+void CIRCBind::Connect() // XXX this is depreciated and only for compatibility
 {
 	if(IsConnected())
 		return;
 
-    m_pClient->Irc()->SetNick(g_Config.m_ClIRCNick);
+    m_pClient->IRC()->SetNick(g_Config.m_ClIRCNick);
 	thread_init(ListenIRCThread, this);
 }
 
-void CIrcBind::Disconnect(char *pReason) // XXX this is depreciated and only for compatibility
+void CIRCBind::Disconnect(char *pReason) // XXX this is depreciated and only for compatibility
 {
 	if(!IsConnected())
 		return;
 
-	m_pClient->Irc()->Disconnect(pReason);
+	m_pClient->IRC()->Disconnect(pReason);
 }
 
-void CIrcBind::OnNickChange(const char *pNewNick) // XXX this is depreciated and only for compatibility
+void CIRCBind::OnNickChange(const char *pNewNick) // XXX this is depreciated and only for compatibility
 {
-	m_pClient->Irc()->SetNick(pNewNick);
+	m_pClient->IRC()->SetNick(pNewNick);
 }
 
-void CIrcBind::OnConsoleInit()
+void CIRCBind::OnConsoleInit()
 {
 	// TODO: register hooks here!
-	m_pClient->Irc()->RegisterCallback("JOIN", irchook_join, this);
-	m_pClient->Irc()->RegisterCallback("PART", irchook_leave, this);
-	m_pClient->Irc()->RegisterCallback("QUIT", irchook_leave, this);
-	m_pClient->Irc()->RegisterCallback("PRIVMSG", irchook_privmsg, this);
+	m_pClient->IRC()->RegisterCallback("JOIN", IRChook_join, this);
+	m_pClient->IRC()->RegisterCallback("PART", IRChook_leave, this);
+	m_pClient->IRC()->RegisterCallback("QUIT", IRChook_leave, this);
+	m_pClient->IRC()->RegisterCallback("PRIVMSG", IRChook_privmsg, this);
 
 	if(g_Config.m_ClIRCAutoconnect)
 		Connect();
 }
 
-void CIrcBind::OnReset()
+void CIRCBind::OnReset()
 {
 }
 
-void CIrcBind::OnShutdown()
+void CIRCBind::OnShutdown()
 {
 	Disconnect(g_Config.m_ClIRCLeaveMsg);
 }
