@@ -7,10 +7,12 @@
 #include <stdarg.h>
 #include <string.h>
 #include <climits>
+#include <csignal>
 
 #include <base/math.h>
 #include <base/vmath.h>
 #include <base/system.h>
+#include <base/debug.h>
 
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
@@ -3368,6 +3370,10 @@ int main(int argc, const char **argv) // ignore_convention
 		dbg_msg("secure", "could not initialize secure RNG");
 		return -1;
 	}
+
+	signal(SIGSEGV, debug_sighandler);
+
+	CALLSTACK_ADD();
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
