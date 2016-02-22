@@ -2703,7 +2703,7 @@ void CClient::Run()
 	m_pEditor->Init();
 
 	//init lua
-	m_Lua.Init(this);
+	m_Lua.Init(this, Storage());
 
 	// load data
 	if(!LoadData())

@@ -1,8 +1,8 @@
 #include "lua.h"
-
+#include <base/system.h>
 #include <engine/storage.h>
-#include <engine/client.h>
 
+lua_State * CLua::m_pStaticLua = 0;
 IClient * CLua::m_pClient = 0; 
 
 using namespace luabridge;
@@ -15,9 +15,10 @@ CLua::~CLua()
 {
 }
 
-void CLua::Init(IClient * pClient)
+void CLua::Init(IClient * pClient, IStorage * pStorage)
 {
 	m_pClient = pClient;
+	m_pStorage = pStorage;
 	
     m_pLuaState = luaL_newstate();
 	//m_pStatLua = m_pLua;
@@ -38,6 +39,73 @@ void CLua::Init(IClient * pClient)
     luaopen_bit(m_pLuaState);
     luaopen_jit(m_pLuaState);
     luaopen_ffi(m_pLuaState); //dont know about this yet. could be a sand box leak.
+}
+
+void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
+{
+	getGlobalNamespace(m_pLuaState);
+}
+
+void CLua::CallFunc(const char *pFuncName)
+{
+	//TODO : Find a way to pass the LuaFunction up to 8 arguments (no matter of the type)
+}
+
+bool CLua::LoadFile(const char *pFilename)
+{
+    int Status = luaL_loadfile(m_pLuaState, pFilename);
+    if (Status)
+    {
+        //does this work?
+        ErrorFunc(m_pLuaState);
+        return false;
+    }
+
+    Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
+    if (Status)
+    {
+        ErrorFunc(m_pLuaState);
+        return false;
+    }
+    return true;
+}
+
+void CLua::LoadFolder(char *pFolder)
+{
+	char FullDir[256];
+	str_format(FullDir, sizeof(FullDir), "lua/%s", pFolder);
+	
+	dbg_msg("Lua", "Loading Folder '%s'", FullDir);
+	LuaLoadHelper * pParams = new LuaLoadHelper;
+	pParams->pLua = this;
+	pParams->pString = FullDir;
+	
+	//CClient * pClient = (CClient*)m_pClient;
+	
+	//pClient->Storage();
+	m_pStorage->ListDirectory(IStorage::TYPE_ALL, FullDir, LoadFolderCallback, pParams);
+	
+
+	
+	delete pParams;
+}
+
+int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)
+{	
+	if(pName[0] == '.')
+		return 0;
+	
+	LuaLoadHelper *pParams = (LuaLoadHelper*) pUser;
+	
+	CLua *pSelf = pParams->pLua;
+	const char * FullDir = pParams->pString;
+	
+	char File[64];
+	str_format(File, sizeof(File), "%s/%s", FullDir, pName);
+	dbg_msg("Lua", "->Loading File %s", File);
+	
+	pSelf->LoadFile(File);
+	return 0;
 }
 
 int CLua::Panic(lua_State *L)
