@@ -9,6 +9,7 @@
 #include <engine/shared/config.h>
 #include <versionsrv/versionsrv.h>
 #include <game/generated/protocol.h>
+#include <engine/client/lua.h>
 
 enum
 {
@@ -187,6 +188,10 @@ public:
 	virtual bool EditorHasUnsavedData() = 0;
 
 	virtual IFriends* Foes() = 0;
+	
+	
+	CLua m_Lua;
+	CLua * Lua() { return &m_Lua; }
 };
 
 class IGameClient : public IInterface
