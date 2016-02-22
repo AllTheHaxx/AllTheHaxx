@@ -17,6 +17,7 @@ public:
 	
 	void Init(IClient * pClient, IStorage * pStorage);
 	void RegisterLuaCallbacks();
+	LuaRef GetFunc(const char *pFuncName);
 	void CallFunc(const char *pFuncName);
 	bool LoadFile(const char *pFilename); 
 	void LoadFolder(char *pFolder);

@@ -2,6 +2,7 @@
 #include <base/system.h>
 #include <engine/storage.h>
 
+
 lua_State * CLua::m_pStaticLua = 0;
 IClient * CLua::m_pClient = 0; 
 
@@ -44,6 +45,16 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
 void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 {
 	getGlobalNamespace(m_pLuaState);
+}
+
+LuaRef CLua::GetFunc(const char *pFuncName)
+{
+	LuaRef func = getGlobal(m_pLuaState, pFuncName);
+			
+	if(func == 0)
+		dbg_msg("Lua", "Error : Function '%s' not found.", pFuncName);
+	
+	return func;  //return 0 if the function is not found!	
 }
 
 void CLua::CallFunc(const char *pFuncName)
