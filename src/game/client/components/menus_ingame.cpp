@@ -962,6 +962,10 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 {
+#if !defined(CONF_FAMILY_UNIX)
+	return;
+#endif
+
 	CUIRect Button, Box;
 
 	char aServerAddr[NETADDR_MAXSTRSIZE];
