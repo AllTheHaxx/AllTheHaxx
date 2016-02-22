@@ -2702,6 +2702,8 @@ void CClient::Run()
 	// init the editor
 	m_pEditor->Init();
 
+	//init lua
+	m_Lua.Init(this);
 
 	// load data
 	if(!LoadData())
@@ -3371,9 +3373,9 @@ int main(int argc, const char **argv) // ignore_convention
 		return -1;
 	}
 
-	signal(SIGSEGV, debug_sighandler);
+	//signal(SIGSEGV, debug_sighandler);
 
-	CALLSTACK_ADD();
+	//CALLSTACK_ADD();
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
