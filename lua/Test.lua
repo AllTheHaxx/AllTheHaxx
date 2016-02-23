@@ -1,5 +1,5 @@
 local function test()
-	print("rendering scoreboard")
+	print("\n" .. client.GetTick() .. "\n")
 end
 
-RegisterEvent("OnRenderScoreboard", test)
+RegisterEvent("OnChat", test)

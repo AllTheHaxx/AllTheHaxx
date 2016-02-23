@@ -1,7 +1,7 @@
 #include "lua.h"
+#include "luabinding.h"
 #include <base/system.h>
 #include <engine/storage.h>
-
 
 lua_State * CLua::m_pStaticLua = 0;
 IClient * CLua::m_pClient = 0; 
@@ -43,11 +43,19 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
 	
 	LoadFolder("main");
 	LoadFile("lua/Test.lua");
+	
+	RegisterLuaCallbacks();
 }
 
 void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 {
-	getGlobalNamespace(m_pLuaState);
+	getGlobalNamespace(m_pLuaState)
+		.beginNamespace("client")
+			.addFunction("GetTick", &CLuaBinding::GetTickLua)
+		
+		.endNamespace();
+		
+	dbg_msg("Lua", "Registering LuaBindings complete.");
 }
 
 LuaRef CLua::GetFunc(const char *pFuncName)
