@@ -2141,6 +2141,11 @@ void CMenus::RenderBackground()
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
+	// EVENT CALL
+	LuaRef func = Client()->Lua()->GetFunc("OnRenderBackground");
+	if(func)
+		func();
+
 	// restore screen
 	{CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}

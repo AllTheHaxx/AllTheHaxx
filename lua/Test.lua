@@ -1,5 +1,5 @@
-local function test(ID, Team, Message)
-	print(Message)
+local function test()
+	print("yo")
 end
 
-RegisterEvent("OnChat", test)
+RegisterEvent("OnRenderBackground", test)
