@@ -207,6 +207,9 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	}
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	int ret = UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	if(ret) *const_cast<float*>(reinterpret_cast<const float*>(pID)) = 0.0f; // hacky...? But it's sexy so idc :P
+	return ret;
 }
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
