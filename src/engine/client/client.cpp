@@ -686,6 +686,10 @@ void CClient::SetState(int s)
 // called when the map is loaded and we should init for a new round
 void CClient::OnEnterGame()
 {
+	LuaRef func = m_Lua.GetFunc("OnEnterGame");
+	if(func)
+		func();
+	
 	// reset input
 	int i;
 	for(i = 0; i < 200; i++)

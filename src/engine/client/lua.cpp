@@ -40,6 +40,9 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
     luaopen_bit(m_pLuaState);
     luaopen_jit(m_pLuaState);
     luaopen_ffi(m_pLuaState); //dont know about this yet. could be a sand box leak.
+	
+	LoadFolder("main");
+	LoadFile("lua/Test.lua");
 }
 
 void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
@@ -91,12 +94,7 @@ void CLua::LoadFolder(char *pFolder)
 	pParams->pLua = this;
 	pParams->pString = FullDir;
 	
-	//CClient * pClient = (CClient*)m_pClient;
-	
-	//pClient->Storage();
 	m_pStorage->ListDirectory(IStorage::TYPE_ALL, FullDir, LoadFolderCallback, pParams);
-	
-
 	
 	delete pParams;
 }
