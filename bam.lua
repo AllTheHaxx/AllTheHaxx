@@ -230,6 +230,7 @@ function build(settings)
 		settings.cc.flags:Add("/EHsc")
 	else
 		settings.cc.flags:Add("-Wall")
+		settings.cc.flags:Add("-Wno-deprecated")
 		if family == "windows" then
 			if config.compiler.driver == "gcc" then
 				settings.link.flags:Add("-static-libgcc")
