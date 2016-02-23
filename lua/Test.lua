@@ -1,5 +1,5 @@
-local function test()
-	print("yo")
+local function test(Killer, Victim, Weapon)
+	print("yo"..Weapon)
 end
 
-RegisterEvent("OnRenderBackground", test)
+RegisterEvent("OnKill", test)

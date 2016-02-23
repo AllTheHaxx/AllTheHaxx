@@ -14,6 +14,14 @@ function OnEnterGame()
 	end
 end
 
+function OnKill(Killer, Victim, Weapon)
+	for script, event in pairs(Events["OnKill"]) do
+		if event ~= nil then
+			event(Killer, Victim, Weapon)
+		end
+	end
+end
+
 function OnRenderBackground()
 	for script, event in pairs(Events["OnRenderBackground"]) do
 		if event ~= nil then
