@@ -2715,6 +2715,8 @@ void CClient::Run()
 		return;
 
 	GameClient()->OnInit();
+	m_Lua.SetGameClient(GameClient());
+	m_Lua.LoadFile("lua/Test.lua");
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());

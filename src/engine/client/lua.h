@@ -5,9 +5,11 @@
 #include <base/tl/array.h>
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
+//#include <game/client/gameclient.h>
 
 class IClient;
 class IStorage;
+class IGameClient;
 
 using namespace luabridge;
 
@@ -27,10 +29,15 @@ public:
 	static int ErrorFunc(lua_State *L);
     static int Panic(lua_State *L);
 
-	
+
+	static IGameClient *m_pGameClient;
 	static lua_State *m_pStaticLua;
 	static IClient * Client()  { return m_pClient; }
+	static IGameClient *GameClient() { return m_pGameClient; }
 	
+	void SetGameClient(IGameClient *pGameClient) { CLua::m_pGameClient = pGameClient; }
+
+
 	struct LuaLoadHelper
 	{
 		CLua * pLua;

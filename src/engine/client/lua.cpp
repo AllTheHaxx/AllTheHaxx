@@ -5,11 +5,13 @@
 
 lua_State * CLua::m_pStaticLua = 0;
 IClient * CLua::m_pClient = 0; 
+IGameClient * CLua::m_pGameClient = 0;
 
 using namespace luabridge;
 
 CLua::CLua()
 {
+	m_pLuaState = 0;
 }
 
 CLua::~CLua()
@@ -22,7 +24,7 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
 	m_pStorage = pStorage;
 	
     m_pLuaState = luaL_newstate();
-	//m_pStatLua = m_pLua;
+	//m_pStaticLua = m_pLua;
 	
     lua_atpanic(m_pLuaState, this->Panic);
     lua_register(m_pLuaState, "errorfunc", this->ErrorFunc);
@@ -42,19 +44,52 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
     luaopen_ffi(m_pLuaState); //dont know about this yet. could be a sand box leak.
 	
 	LoadFolder("main");
-	LoadFile("lua/Test.lua");
-	
 	RegisterLuaCallbacks();
+
+	//LoadFile("lua/Test.lua");
 }
 
 void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 {
+	// client namespace
 	getGlobalNamespace(m_pLuaState)
+
 		.beginNamespace("client")
 			.addFunction("GetTick", &CLuaBinding::LuaGetTick)
-		
-		.endNamespace();
-		
+		.endNamespace()
+
+
+		// lua namespace
+		.beginNamespace("lua")
+			.addFunction("SetScriptTitle", &CLuaBinding::LuaSetScriptTitle)
+			.addFunction("SetScriptInfo", &CLuaBinding::LuaSetScriptInfo)
+			.addFunction("SetScriptHasSettings", &CLuaBinding::LuaSetScriptHasSettings)
+		.endNamespace()
+
+
+		// ui namespace
+		.beginNamespace("ui")
+		.endNamespace()
+
+
+		// components namespace
+		.beginNamespace("components")
+		.endNamespace()
+
+
+		// graphics namespace
+		.beginNamespace("graphics")
+			.addFunction("GetScreenWidth", &CLuaBinding::LuaGetScreenWidth)
+			.addFunction("GetScreenHeight", &CLuaBinding::LuaGetScreenHeight)
+			.addFunction("BlendNone", &CLuaBinding::LuaBlendNone)
+			.addFunction("BlendNormal", &CLuaBinding::LuaBlendNormal)
+			.addFunction("BlendAdditive", &CLuaBinding::LuaBlendAdditive)
+			.addFunction("SetColor", &CLuaBinding::LuaSetColor)
+			.addFunction("LoadTexture", &CLuaBinding::LuaLoadTexture)
+			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
+		.endNamespace()
+
+	;
 	dbg_msg("Lua", "Registering LuaBindings complete.");
 }
 
@@ -75,6 +110,9 @@ void CLua::CallFunc(const char *pFuncName)
 
 bool CLua::LoadFile(const char *pFilename)
 {
+	if(!pFilename || pFilename[0] == '\0') // TODO: Check if the file extension is '.lua'
+		return false;
+
     int Status = luaL_loadfile(m_pLuaState, pFilename);
     if (Status)
     {
