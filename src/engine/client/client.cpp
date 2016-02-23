@@ -686,6 +686,11 @@ void CClient::SetState(int s)
 // called when the map is loaded and we should init for a new round
 void CClient::OnEnterGame()
 {
+	// EVENT CALL
+	LuaRef func = m_Lua.GetFunc("OnEnterGame");
+	if(func)
+		func();
+	
 	// reset input
 	int i;
 	for(i = 0; i < 200; i++)
@@ -2702,6 +2707,8 @@ void CClient::Run()
 	// init the editor
 	m_pEditor->Init();
 
+	//init lua
+	m_Lua.Init(this, Storage());
 
 	// load data
 	if(!LoadData())
@@ -3371,9 +3378,9 @@ int main(int argc, const char **argv) // ignore_convention
 		return -1;
 	}
 
-	signal(SIGSEGV, debug_sighandler);
+	//signal(SIGSEGV, debug_sighandler);
 
-	CALLSTACK_ADD();
+	//CALLSTACK_ADD();
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();

@@ -57,6 +57,8 @@ bam.exe
 *.dll
 *.db
 *.db-journal 
+*.config
+crash_*.txt
 
 DDNet*
 AllTheHaxx*

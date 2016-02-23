@@ -1010,6 +1010,8 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 */
 const char *str_find(const char *haystack, const char *needle);
 
+const char *str_find_rev(const char *haystack, const char *needle);
+
 /*
 	Function: str_hex
 		Takes a datablock and generates a hexstring of it.

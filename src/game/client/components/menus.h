@@ -309,7 +309,10 @@ class CMenus : public CComponent
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettingsHaxx(CUIRect MainView);
 	void RenderSettingsIRC(CUIRect MainView);
+	void RenderSettingsLua(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
+
+	void RenderLoadingLua();
 
 	// found in menus_identity.cpp
 	void RenderSettingsIdent(CUIRect MainView);

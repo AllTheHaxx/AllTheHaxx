@@ -2168,6 +2168,26 @@ const char *str_find(const char *haystack, const char *needle)
 	return 0;
 }
 
+const char *str_find_rev(const char *haystack, const char *needle)
+{
+	haystack = haystack + str_length(haystack) - 1;
+	while(*haystack) /* native implementation */
+	{
+		const char *a = haystack;
+		const char *b = needle;
+		while(*a && *b && *a == *b)
+		{
+			a++;
+			b++;
+		}
+		if(!(*b))
+			return haystack + 1;
+		haystack--;
+	}
+
+	return 0;
+}
+
 void str_hex(char *dst, int dst_size, const void *data, int data_size)
 {
 	static const char hex[] = "0123456789ABCDEF";
