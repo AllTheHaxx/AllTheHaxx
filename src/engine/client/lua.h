@@ -22,7 +22,7 @@ public:
 	LuaRef GetFunc(const char *pFuncName);
 	void CallFunc(const char *pFuncName);
 	bool LoadFile(const char *pFilename); 
-	void LoadFolder(char *pFolder);
+	void LoadFolder(const char *pFolder);
 	
 	static int ErrorFunc(lua_State *L);
     static int Panic(lua_State *L);

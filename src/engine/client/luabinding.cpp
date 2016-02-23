@@ -1,8 +1,9 @@
-#include "luabinding.h"
-#include "lua.h"
 #include <engine/client.h>
 
-int CLuaBinding::GetTickLua()
+#include "luabinding.h"
+#include "lua.h"
+
+int CLuaBinding::LuaGetTick()
 {
 	return CLua::Client()->GameTick();
 }

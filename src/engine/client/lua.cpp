@@ -51,7 +51,7 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 {
 	getGlobalNamespace(m_pLuaState)
 		.beginNamespace("client")
-			.addFunction("GetTick", &CLuaBinding::GetTickLua)
+			.addFunction("GetTick", &CLuaBinding::LuaGetTick)
 		
 		.endNamespace();
 		
@@ -97,7 +97,7 @@ bool CLua::LoadFile(const char *pFilename)
     return true;
 }
 
-void CLua::LoadFolder(char *pFolder)
+void CLua::LoadFolder(const char *pFolder)
 {
 	char FullDir[256];
 	str_format(FullDir, sizeof(FullDir), "lua/%s", pFolder);
