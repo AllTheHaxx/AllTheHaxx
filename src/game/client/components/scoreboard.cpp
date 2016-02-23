@@ -666,7 +666,7 @@ void CScoreboard::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	// EVENT CALL
-	LuaRef func = Client()->Lua()->GetFunc("OnScoreboardRender");
+	LuaRef func = Client()->Lua()->GetFunc("OnRenderScoreboard");
 	if(func)
 		func();
 

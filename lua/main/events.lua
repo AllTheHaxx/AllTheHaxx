@@ -38,8 +38,8 @@ function OnRenderBackground()
 	end
 end
 
-function OnScoreboardRender()
-	for script, event in pairs(Events["OnScoreboardRender"]) do
+function OnRenderScoreboard()
+	for script, event in pairs(Events["OnRenderScoreboard"]) do
 		if event ~= nil then
 			event()
 		end

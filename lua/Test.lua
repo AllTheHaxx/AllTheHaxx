@@ -2,4 +2,4 @@ local function test()
 	print("rendering scoreboard")
 end
 
-RegisterEvent("OnScoreboardRender", test)
+RegisterEvent("OnRenderScoreboard", test)
