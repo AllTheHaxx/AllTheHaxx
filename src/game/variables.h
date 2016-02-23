@@ -90,7 +90,7 @@ MACRO_CONFIG_INT(ClPlayerColorFeetRainbow, player_color_feet_rainbow, 0, 0, 100,
 MACRO_CONFIG_STR(ClPlayerSkin, player_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin")
 
 MACRO_CONFIG_INT(UiPage, ui_page, 7, 0, 12, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
-MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 0, 0, 11, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface settings page")
+MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 0, 0, 12, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface settings page")
 MACRO_CONFIG_INT(UiToolboxPage, ui_toolbox_page, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toolbox page")
 MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 64, "localhost:8303", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface server address")
 MACRO_CONFIG_INT(UiScale, ui_scale, 100, 50, 150, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface scale")
@@ -165,6 +165,8 @@ MACRO_CONFIG_INT(ClIRCSound, cl_irc_sound, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE,
 MACRO_CONFIG_INT(ClAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow others to request the server you're playing on")
 //
 MACRO_CONFIG_INT(ClUiShowExtraBar, cl_ui_extra_bar, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show the extra bar")
+//
+MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
 
 
 // translator stuff

@@ -1265,7 +1265,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("HUD"),
 		Localize("Chat"),
 		Localize("Identities"),
-		Localize("DDNet"),
+		("DDNet"),
+		Localize("Lua"),
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1306,6 +1307,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsIdent(MainView);
 	else if(g_Config.m_UiSettingsPage == 11)
 		RenderSettingsDDRace(MainView);
+	else if(g_Config.m_UiSettingsPage == 12)
+		RenderSettingsLua(MainView);
 
 
 	if(m_NeedRestartUpdate)
@@ -2062,3 +2065,174 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 {
 
 }
+
+
+void CMenus::RenderLoadingLua()
+{
+	CUIRect Bar, Rect = *UI()->Screen();
+
+	Rect.Margin(Rect.w*0.23f, &Rect);
+
+	Rect.HSplitTop(15.0f, &Bar, &Rect);
+	RenderTools()->DrawUIRect(&Bar, vec4(0.2f, 0.7f, 0.2f, 0.8f), CUI::CORNER_T, 5.0f);
+	RenderTools()->DrawUIRect(&Rect, vec4(0,0,0, 0.8f), CUI::CORNER_B, 5.0f);
+	UI()->DoLabelScaled(&Bar, Localize("Please wait..."), 12.0f, 0, -1, 0);
+	Rect.y += Rect.h/3; Rect.h *= 2/3;
+	UI()->DoLabelScaled(&Rect, Localize("Loading Lua Script"), 18.0f, 0, -1, 0);
+}
+
+void CMenus::RenderSettingsLua(CUIRect MainView)
+{
+	CUIRect Button;
+	static int s_AddScriptMode = 0;
+	static int s_ActiveListElement = -1;
+
+	if (s_ActiveListElement < 0)
+	{
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		CUIRect AddButton;
+		Button.VSplitRight(100.0f, &Button, &AddButton);
+		if (DoButton_MenuTab(&s_AddScriptMode, s_AddScriptMode ? Localize("Back") : Localize("Add script") , s_AddScriptMode, &AddButton, CUI::CORNER_ALL))
+		{
+			s_AddScriptMode ^=1;
+			// TODO: Load list of available scripts here!
+		}
+		if(DoButton_CheckBox(&g_Config.m_ClLua, Localize("Use lua"), g_Config.m_ClLua, &Button))
+		{
+			g_Config.m_ClLua ^= 1;
+		}
+
+		if(!g_Config.m_ClLua)
+			return;
+
+		if (s_AddScriptMode == 0)
+		{
+			int NumLuaFiles = Client()->Lua()->GetLuaFiles().size();
+
+			// display mode list
+			static float s_ScrollValue = 0;
+			static int pIDItem[128];
+			static int pIDButtonReload[128];
+			static int pIDButtonDeactivate[128];
+			static int pIDButtonSettings[128];
+			int OldSelected = -1;
+
+			static int s_NumNodes = 0;
+			UiDoListboxStart(&s_NumNodes, &MainView, 50.0f, Localize("Lua files"), "", NumLuaFiles, 1, OldSelected, s_ScrollValue);
+
+			int HighlightIndex = 0;
+			for(int i = 0; i < NumLuaFiles; i++)
+			{
+				CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
+				if(Item.m_Visible)
+				{
+					CUIRect LabelTitle;
+					CUIRect LabelInfo;
+					CUIRect ButtonDeactivate;
+					CUIRect ButtonSettings;
+					CUIRect ButtonReload;
+					CUIRect Buttons;
+
+					HighlightIndex++;
+					if (HighlightIndex % 2 == 0)
+						RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0,0,0,0.3f), CUI::CORNER_ALL, 5.0f);
+					else
+						RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 5.0f);
+
+					Item.m_Rect.HSplitTop(24.0f, &LabelTitle, &LabelInfo);
+
+					Buttons = Item.m_Rect;
+					Buttons.VSplitRight(100.0f, &Buttons, &ButtonDeactivate);
+					Buttons.VSplitRight(100.0f, &Buttons, &ButtonReload);
+					Buttons.VSplitRight(100.0f, &Buttons, &ButtonSettings);
+					ButtonDeactivate.HMargin(15.0f, &ButtonDeactivate);
+					ButtonDeactivate.VMargin(5.0f, &ButtonDeactivate);
+					ButtonReload.HMargin(15.0f, &ButtonReload);
+					ButtonReload.VMargin(5.0f, &ButtonReload);
+					ButtonSettings.HMargin(15.0f, &ButtonSettings);
+					ButtonSettings.VMargin(5.0f, &ButtonSettings);
+
+					if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Deactivate"), false, &ButtonDeactivate))
+					{
+						//m_pClient->m_pLuaCore->DeleteLuaFile(i);
+					}
+					if (DoButton_Menu(&pIDButtonReload[i], Localize("Reload"), false, &ButtonReload))
+					{
+						RenderLoadingLua();
+						//m_pClient->m_pLua->m_aLuaFiles[i].Init(m_pClient->m_pLuaCore->GetFileDir(i));
+					}
+				/*	if (m_pClient->m_pLua->m_aLuaFiles[i].m_HaveSettings)
+					{
+						if (DoButton_Menu(&pIDButtonSettings[i], Localize("Settings"), false, &ButtonSettings))
+						{
+							if (m_pClient->m_pLua->m_aLuaFiles[i].FunctionExist("ConfigOpen") && m_pClient->m_pLua->m_aLuaFiles[i].FunctionExist("ConfigClose"))
+							{
+								m_pClient->m_pLua->m_aLuaFiles[i].FunctionPrepare("ConfigOpen");
+								MainView.HSplitTop(10.0f, 0, &MainView);
+								m_pClient->m_pLua->m_aLuaFiles[i].PushInteger(MainView.x);
+								m_pClient->m_pLua->m_aLuaFiles[i].PushInteger(MainView.y);
+								m_pClient->m_pLua->m_aLuaFiles[i].PushInteger(MainView.w);
+								m_pClient->m_pLua->m_aLuaFiles[i].PushInteger(MainView.h);
+								m_pClient->m_pLua->m_aLuaFiles[i].FunctionExec();
+								m_ActivLuaFile = i;
+							}
+						}
+					}*/
+				//	if (m_pClient->m_pLua->m_aLuaFiles[i].m_aTitle[0])
+				//		UI()->DoLabelScaled(&LabelTitle, m_pClient->m_pLua->m_aLuaFiles[i].m_aTitle, 16.0f, -1);
+				//	else
+						UI()->DoLabelScaled(&LabelTitle, Client()->Lua()->GetLuaFiles()[i].aName, 16.0f, -1);
+				//	UI()->DoLabelScaled(&LabelInfo, m_pClient->m_pLua->m_aLuaFiles[i].m_aInfo, 14.0f, -1);
+				}
+			}
+
+			UiDoListboxEnd(&s_ScrollValue, 0);
+		}
+	/*	else
+		{
+			static int s_LuaListId = 0;
+			static int s_LuaSelectedIndex = 0;
+			static float s_ScrollValue = 0;
+			UiDoListboxStart(&s_LuaListId, &MainView, 17.0f, Localize("Add lua files"), "", m_lLuaFiles.size(), 1, s_LuaSelectedIndex, s_ScrollValue);
+			for(sorted_array<CLuaItem>::range r = m_lLuaFiles.all(); !r.empty(); r.pop_front())
+			{
+				CListboxItem Item = UiDoListboxNextItem((void*)(&r.front()));
+				if(Item.m_Visible)
+				{
+					UI()->DoLabel(&Item.m_Rect, r.front().m_aName, Item.m_Rect.h*ms_FontmodHeight, -1);
+				}
+			}
+			bool Activated = false;
+			s_LuaSelectedIndex = UiDoListboxEnd(&s_ScrollValue, &Activated);
+			if (Activated)
+			{
+				m_pClient->m_pLuaCore->AddLuaFile(m_lLuaFiles[s_LuaSelectedIndex].m_aFilename);
+				LuaPopulate();
+			}
+		}*/
+	}
+	else
+	{
+		CUIRect Button;
+		CUIRect Label;
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(100.0f, &Button, &Label);
+		static int s_ButtonBack = 0;
+		UI()->DoLabelScaled(&Label, "title", 16.0f, 0);
+		if(DoButton_Menu(&s_ButtonBack, Localize("Back"), 0, &Button))
+		{
+			//m_pClient->m_pLua->m_aLuaFiles[m_ActivLuaFile].ConfigClose();
+			s_ActiveListElement = -1;
+		}
+
+		//|_______________
+		//|Back|Title |Tab
+		//|           |Tab
+		//|The Script |Tab
+		//|can place  |Lua
+		//|Ui Elements|
+		//|Here       |
+		//|_______________
+	}
+}
+

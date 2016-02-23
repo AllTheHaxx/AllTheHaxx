@@ -81,6 +81,11 @@ bool CLua::LoadFile(const char *pFilename)
         ErrorFunc(m_pLuaState);
         return false;
     }
+
+    LuaFile newfile;
+	str_copy(newfile.aName, pFilename, sizeof(newfile.aName));
+	//str_copy(newfile.aDir, FullDir, sizeof(newfile.aDir));
+	m_LuaFiles.add(newfile);
     return true;
 }
 
