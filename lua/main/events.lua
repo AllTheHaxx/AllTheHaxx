@@ -17,6 +17,8 @@ function OnChat(ID, Team, Message)
 			end
 		end
 	end
+	
+	return 2
 end
 
 function OnEnterGame()
