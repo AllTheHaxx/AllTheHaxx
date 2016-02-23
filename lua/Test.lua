@@ -18,4 +18,4 @@ local function test()
 	
 end
 
-RegisterEvent("OnRenderScoreboard", test)
+RegisterEvent("OnRenderLevel20", test) -- render level 20 is right before the scoreboard

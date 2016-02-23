@@ -96,7 +96,7 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 LuaRef CLua::GetFunc(const char *pFuncName)
 {
 	LuaRef func = getGlobal(m_pLuaState, pFuncName);
-			
+
 	if(func == 0)
 		dbg_msg("Lua", "Error : Function '%s' not found.", pFuncName);
 	

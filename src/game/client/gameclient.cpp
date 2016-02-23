@@ -46,6 +46,7 @@
 #include "components/irc.h"
 #include "components/items.h"
 #include "components/killmessages.h"
+#include "components/luarender.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
@@ -69,6 +70,36 @@
 
 
 CGameClient g_GameClient;
+
+// instantiate the lua render levels
+static CLuaRender gs_LuaRender0(0);
+static CLuaRender gs_LuaRender1(1);
+static CLuaRender gs_LuaRender2(2);
+static CLuaRender gs_LuaRender3(3);
+static CLuaRender gs_LuaRender4(4);
+static CLuaRender gs_LuaRender5(5);
+static CLuaRender gs_LuaRender6(6);
+static CLuaRender gs_LuaRender7(7);
+static CLuaRender gs_LuaRender8(8);
+static CLuaRender gs_LuaRender9(9);
+static CLuaRender gs_LuaRender10(10);
+static CLuaRender gs_LuaRender11(11);
+static CLuaRender gs_LuaRender12(12);
+static CLuaRender gs_LuaRender13(13);
+static CLuaRender gs_LuaRender14(14);
+static CLuaRender gs_LuaRender15(15);
+static CLuaRender gs_LuaRender16(16);
+static CLuaRender gs_LuaRender17(17);
+static CLuaRender gs_LuaRender18(18);
+static CLuaRender gs_LuaRender19(19);
+static CLuaRender gs_LuaRender20(20);
+static CLuaRender gs_LuaRender21(20);
+static CLuaRender gs_LuaRender22(22);
+static CLuaRender gs_LuaRender23(23);
+static CLuaRender gs_LuaRender24(24);
+static CLuaRender gs_LuaRender25(25);
+static CLuaRender gs_LuaRender26(26);
+static CLuaRender gs_LuaRender27(27);
 
 // instanciate all systems
 static CKillMessages gs_KillMessages;
@@ -206,32 +237,59 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pIRCBind);
 	m_All.Add(m_pIdentity);
 
+	m_All.Add(&gs_LuaRender0); // lua
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
+	m_All.Add(&gs_LuaRender1); // lua
 	m_All.Add(&gs_MapLayersBackGround); // first to render
+	m_All.Add(&gs_LuaRender2); // lua
 	m_All.Add(m_pAStar); // <- this could be even more at the bottom
+	m_All.Add(&gs_LuaRender3); // lua
 	m_All.Add(&m_pParticles->m_RenderTrail);
+	m_All.Add(&gs_LuaRender4); // lua
 	m_All.Add(m_pItems);
+	m_All.Add(&gs_LuaRender5); // lua
 	m_All.Add(&gs_Players);
+	m_All.Add(&gs_LuaRender6); // lua
 	m_All.Add(m_pGhost);
+	m_All.Add(&gs_LuaRender7); // lua
 	m_All.Add(&gs_MapLayersForeGround);
+	m_All.Add(&gs_LuaRender8); // lua
 	m_All.Add(&m_pParticles->m_RenderExplosions);
+	m_All.Add(&gs_LuaRender9); // lua
 	m_All.Add(&gs_NamePlates);
+	m_All.Add(&gs_LuaRender10); // lua
 	m_All.Add(&m_pParticles->m_RenderGeneral);
+	m_All.Add(&gs_LuaRender11); // lua
 	m_All.Add(m_pDamageind);
+	m_All.Add(&gs_LuaRender12); // lua
 	m_All.Add(m_pHud);
+	m_All.Add(&gs_LuaRender13); // lua
 	m_All.Add(&gs_Spectator);
+	m_All.Add(&gs_LuaRender14); // lua
 	m_All.Add(&gs_Emoticon);
+	m_All.Add(&gs_LuaRender15); // lua
 	m_All.Add(&gs_KillMessages);
+	m_All.Add(&gs_LuaRender16); // lua
 	m_All.Add(&gs_SpoofRemote);
+	m_All.Add(&gs_LuaRender17); // lua
 	m_All.Add(m_pChat);
+	m_All.Add(&gs_LuaRender18); // lua
 	m_All.Add(&gs_Broadcast);
+	m_All.Add(&gs_LuaRender19); // lua
 	m_All.Add(&gs_DebugHud);
+	m_All.Add(&gs_LuaRender20); // lua
 	m_All.Add(&gs_Scoreboard);
+	m_All.Add(&gs_LuaRender21); // lua
 	m_All.Add(&gs_Statboard);
+	m_All.Add(&gs_LuaRender22); // lua
 	m_All.Add(m_pMotd);
+	m_All.Add(&gs_LuaRender23); // lua
 	m_All.Add(m_pMenus);
+	m_All.Add(&gs_LuaRender24); // lua
 	m_All.Add(m_pTooltip);
+	m_All.Add(&gs_LuaRender25); // lua
 	m_All.Add(m_pGameConsole);
+	m_All.Add(&gs_LuaRender26); // lua
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key

@@ -355,10 +355,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		// EVENT CALL
 		LuaRef func = Client()->Lua()->GetFunc("OnChat");
 		if(func)
-		{
-			int x = func(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage));
-			dbg_msg("Chat", "%d", x);
-		}
+			func(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage));
 
 		bool HideChat = false;
 

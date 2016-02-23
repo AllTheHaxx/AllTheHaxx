@@ -86,7 +86,7 @@ void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, f
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
-	//pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h); // nah breaks it :/
+	//pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h); // TODO: map the screen to get consistent behavior!
 	pGraphics->TextureSet(ID);
 	pGraphics->QuadsBegin();
 	IGraphics::CQuadItem Item;
