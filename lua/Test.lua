@@ -1,10 +1,5 @@
-local function xyz()
-print("xyz\n")
+local function test(ID, Team, Message)
+	print(Message)
 end
 
-local function abc()
-	print("abc\n")
-end
-
-RegisterEvent("OnEnterGame", xyz)
-RegisterEvent("OnEnterGame", abc)
+RegisterEvent("OnChat", test)
