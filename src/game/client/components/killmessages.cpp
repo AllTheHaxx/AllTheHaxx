@@ -38,6 +38,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
 		Kill.m_Tick = Client()->GameTick();
 
+		// EVENT CALL
 		LuaRef func = Client()->Lua()->GetFunc("OnKill");
 		if(func)
 			func(Kill.m_KillerID, Kill.m_VictimID, Kill.m_Weapon);

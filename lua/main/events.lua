@@ -29,3 +29,11 @@ function OnRenderBackground()
 		end
 	end
 end
+
+function OnStateChange(NewState, OldState)
+	for script, event in pairs(Events["OnStateChange"]) do
+		if event ~= nil then
+			event(NewState, OldState)
+		end
+	end
+end

@@ -1,5 +1,5 @@
-local function test(Killer, Victim, Weapon)
-	print("yo"..Weapon)
+local function test(OldState, NewState)
+	print("yo"..OldState..":"..NewState)
 end
 
-RegisterEvent("OnKill", test)
+RegisterEvent("OnStateChange", test)

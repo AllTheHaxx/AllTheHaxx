@@ -964,6 +964,11 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 	// then change the state
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnStateChange(NewState, OldState);
+
+	// EVENT CALL
+	LuaRef func = Client()->Lua()->GetFunc("OnStateChange");
+	if(func)
+		func(NewState, OldState);
 }
 
 void CGameClient::OnShutdown()
