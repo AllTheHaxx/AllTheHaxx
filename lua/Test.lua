@@ -1,5 +1,5 @@
-local function test(OldState, NewState)
-	print("yo"..OldState..":"..NewState)
+local function test()
+	print("rendering scoreboard")
 end
 
-RegisterEvent("OnStateChange", test)
+RegisterEvent("OnScoreboardRender", test)

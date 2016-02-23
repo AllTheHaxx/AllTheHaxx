@@ -22,8 +22,24 @@ function OnKill(Killer, Victim, Weapon)
 	end
 end
 
+function OnMessageIRC(From, User, Message)
+	for script, event in pairs(Events["OnMessageIRC"]) do
+		if event ~= nil then
+			event(From, User, Message)
+		end
+	end
+end
+
 function OnRenderBackground()
 	for script, event in pairs(Events["OnRenderBackground"]) do
+		if event ~= nil then
+			event()
+		end
+	end
+end
+
+function OnScoreboardRender()
+	for script, event in pairs(Events["OnScoreboardRender"]) do
 		if event ~= nil then
 			event()
 		end

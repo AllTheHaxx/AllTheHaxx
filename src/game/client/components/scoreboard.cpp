@@ -665,6 +665,11 @@ void CScoreboard::OnRender()
 
 	Graphics()->MapScreen(0, 0, Width, Height);
 
+	// EVENT CALL
+	LuaRef func = Client()->Lua()->GetFunc("OnScoreboardRender");
+	if(func)
+		func();
+
 	float w = 700.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
