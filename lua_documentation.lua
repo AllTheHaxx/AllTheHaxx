@@ -103,3 +103,40 @@ _ui.DrawUiRect(x, y, w, h, corners, rounding)
 	-- Describtion: Draws a rect with the given params (X, Y, width, height, cornertype, rounding of the corners)
 	-- Parameters: Float, Float, Float, Float, Integer, Float
 	-- Return value: none
+
+--------- Namespace: _game
+------------- SubNamespace: chat
+	_game.chat.Send(Team, Message)
+		-- Describtion: Sends a chatmessage
+		-- Parameters: Integer, String
+		-- Return value: none
+	_game.chat.Active()
+		-- Describtion: Checks wether the chat is active
+		-- Parameters: none
+		-- Return value: Boolean
+	_game.chat.AllActive()
+		-- Describtion: Checks wether the "All" chat is active
+		-- Parameters: none
+		-- Return value: Boolean
+	_game.chat.TeamActive()
+		-- Describtion: Checks wether the "Team" chat is active
+		-- Parameters: none
+		-- Return value: Boolean
+------------- SubNamespace: collision
+	_game.collision.GetMapWidth()
+		-- Describtion: Returns the map width (in tiles)
+		-- Parameters: none
+		-- Return value: Integer
+	_game.collision.GetMapHeight()
+		-- Describtion: Returns the map heught (in tiles)
+		-- Parameters: none
+		-- Return value: Integer
+	_game.collision.GetTile(x, y)
+		-- Describtion: Returns the  tile index at the given position
+		-- Parameters: Integer, Integer
+		-- Return value: Integer
+------------- SubNamespace: emote
+	_game.emote.Send(Emote)
+		-- Describtion: Do an emoticon (Emote is the ID)
+		-- Parameters: Integer
+		-- Return value: none
