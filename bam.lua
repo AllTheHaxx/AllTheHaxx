@@ -228,6 +228,9 @@ function build(settings)
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
+		
+		--vs 2015
+		settings.cc.flags:Add("/D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS") 
 	else
 		settings.cc.flags:Add("-Wall")
 		settings.cc.flags:Add("-Wno-deprecated")

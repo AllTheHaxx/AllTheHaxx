@@ -5,6 +5,7 @@
 #include <list>
 #include <iostream>
 #include <fstream>
+#include <string>
 #include "system.h"
 
 #define DEBUG_CALLSTACK_SIZE 10
