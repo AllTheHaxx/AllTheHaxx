@@ -88,6 +88,8 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 			.endNamespace()
 
 			.beginNamespace("collision")
+				.addFunction("GetMapWidth", &CLuaBinding::LuaColGetMapWidth)
+				.addFunction("GetMapHeight", &CLuaBinding::LuaColGetMapHeight)
 				.addFunction("GetTile", &CLuaBinding::LuaColGetTile)
 			.endNamespace()
 		.endNamespace()

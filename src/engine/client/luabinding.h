@@ -35,6 +35,8 @@ public:
 	static bool LuaChatAllActive();
 	static bool LuaChatTeamActive();
 	// --- collision
+	static int LuaColGetMapWidth();
+	static int LuaColGetMapHeight();
 	static int LuaColGetTile(int x, int y);
 
 

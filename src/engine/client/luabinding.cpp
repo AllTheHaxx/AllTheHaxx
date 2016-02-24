@@ -95,6 +95,18 @@ bool CLuaBinding::LuaChatTeamActive()
 }
 
 // --- collision
+int CLuaBinding::LuaColGetMapWidth()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return pGameClient->Collision()->GetWidth();
+}
+
+int CLuaBinding::LuaColGetMapHeight()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return pGameClient->Collision()->GetHeight();
+}
+
 int CLuaBinding::LuaColGetTile(int x, int y)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();

@@ -1,5 +1,5 @@
 local function test()
-	print("index: ".._game.collision.GetTile(0,0))
+	print("width: ".._game.collision.GetMapWidth().." height: ".._game.collision.GetMapHeight())
 end
 
 RegisterEvent("OnRenderScoreboard", test)
