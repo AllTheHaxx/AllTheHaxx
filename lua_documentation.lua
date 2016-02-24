@@ -4,10 +4,17 @@
 -- some tutorials for that online first.
 -- IF YOU THINK A NEW FUNCTION/CALLBACK SHOULD BE ADDED PLEASE OPEN A TICKET AT https://github.com/AllTheHaxx/AllTheHaxx/issues
 
+-- If you got problems understanding how those functions work, checkout our example scripts shipped with the client.
+
+
+
 
 -- Structure:
 ------ Event callbacks
 ------ Functions
+
+
+
 
 -- ~~~~~~~~~~~~~~~~~~~~~~~
 -- ~~~ Event callbacks ~~~
@@ -17,7 +24,6 @@ RegisterEvent("EventName", FunctionToExecuteOnEvent) -- Example
 	-- Now, whenever the event occurs your function will be called.
 
 -- LIST OF EVENTS (among quick explaination):
-
 RegisterEvent("OnStateChange", YourCallbackFunction) 
 	-- Called when the clientstate changes (i.E. from offline to online - while joining a server)
 	-- Callback function parameters: YourCallbackFunction(NewState, OldState)
