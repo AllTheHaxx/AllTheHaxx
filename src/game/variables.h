@@ -167,6 +167,7 @@ MACRO_CONFIG_INT(ClAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG
 MACRO_CONFIG_INT(ClUiShowExtraBar, cl_ui_extra_bar, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show the extra bar")
 //
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
+MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console")
 
 
 // translator stuff
