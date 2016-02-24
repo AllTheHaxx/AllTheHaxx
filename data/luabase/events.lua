@@ -20,6 +20,26 @@ function OnChat(ID, Team, Message)
 	end
 end
 
+function OnConfigOpen(x, y, w, h)
+	if Events["OnConfigOpen"] ~= nil then
+		for script, event in pairs(Events["OnConfigOpen"]) do
+			if event ~= nil then
+				event(x, y, w, h)
+			end
+		end
+	end
+end
+
+function OnConfigClose()
+	if Events["OnConfigClose"] ~= nil then
+		for script, event in pairs(Events["OnConfigClose"]) do
+			if event ~= nil then
+				event()
+			end
+		end
+	end
+end
+
 function OnEnterGame()
 	if Events["OnEnterGame"] ~= nil then
 		for script, event in pairs(Events["OnEnterGame"]) do

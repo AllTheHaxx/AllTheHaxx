@@ -5,62 +5,70 @@
 #include <base/tl/array.h>
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
-//#include <game/client/gameclient.h>
+#include "luafile.h"
+
+#define LUA_FIRE_EVENT(EVENTNAME) \
+	for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++) \
+	{ \
+		if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED) \
+			continue; \
+		LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc(EVENTNAME); \
+		if(lfunc) \
+			lfunc(); \
+	}
+
+#define LUA_FIRE_EVENT_V(EVENTNAME, ...) \
+	for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++) \
+	{ \
+		if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED) \
+			continue; \
+		LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc(EVENTNAME); \
+		if(lfunc) \
+			lfunc(__VA_ARGS__); \
+	}
 
 class IClient;
 class IStorage;
 class IGameClient;
+class CLuaFile;
 
 using namespace luabridge;
 
 class CLua
 {
+	array<CLuaFile*> m_pLuaFiles;
+	static IClient *m_pClient;
+	IStorage *m_pStorage;
+
 public:
     CLua();
     ~CLua();
 	
-	void Init(IClient * pClient, IStorage * pStorage);
-	void RegisterLuaCallbacks();
-	LuaRef GetFunc(const char *pFuncName);
-	void CallFunc(const char *pFuncName);
-	bool LoadFile(const char *pFilename); 
-	void LoadFolder(const char *pFolder);
-	
+	void Init(IClient *pClient, IStorage *pStorage);
+	void AddUserscript(const char *pFilename);
+	void LoadFolder();
+
 	static int ErrorFunc(lua_State *L);
     static int Panic(lua_State *L);
 
-
 	static IGameClient *m_pGameClient;
-	static lua_State *m_pStaticLua;
-	static IClient * Client()  { return m_pClient; }
+	static IClient *Client() { return m_pClient; }
 	static IGameClient *GameClient() { return m_pGameClient; }
 	
 	void SetGameClient(IGameClient *pGameClient) { CLua::m_pGameClient = pGameClient; }
+	array<CLuaFile*> &GetLuaFiles() { return m_pLuaFiles; }
 
+	IStorage *Storage() const { return m_pStorage; }
 
 	struct LuaLoadHelper
 	{
 		CLua * pLua;
 		const char * pString;
 	};
-	
-	struct LuaFile // for now it seems useless, but maybe we'll need this later
-	{
-		char aName[128];
-		char aDir[512];
-	};
-
-    array<LuaFile> GetLuaFiles() { return m_LuaFiles; }
-
 
 private:
-	lua_State *m_pLuaState;
-	array<LuaFile> m_LuaFiles;
-	
 	static int LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser);
-	
-	static IClient * m_pClient;
-	IStorage *m_pStorage;
+
 };
 
 #endif

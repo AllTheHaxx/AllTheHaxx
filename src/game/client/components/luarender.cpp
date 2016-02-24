@@ -3,7 +3,5 @@
 void CLuaRender::OnRender()
 {
 	// EVENT CALL
-	LuaRef func = Client()->Lua()->GetFunc("OnRenderLevel");
-	if(func)
-		func(m_Level);
+	LUA_FIRE_EVENT_V("OnRenderLevel", m_Level);
 }

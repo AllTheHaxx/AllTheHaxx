@@ -39,6 +39,9 @@ protected:
 	float m_RenderFrameTime;
 
 	int m_GameTickSpeed;
+
+	CLua m_Lua;
+
 public:
 	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
@@ -188,10 +191,8 @@ public:
 	virtual bool EditorHasUnsavedData() = 0;
 
 	virtual IFriends* Foes() = 0;
-	
-	
-	CLua m_Lua;
-	CLua * Lua() { return &m_Lua; }
+
+	CLua *Lua() { return &m_Lua; }
 };
 
 class IGameClient : public IInterface

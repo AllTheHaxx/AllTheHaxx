@@ -2145,9 +2145,7 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsEnd();
 
 	// EVENT CALL
-	LuaRef func = Client()->Lua()->GetFunc("OnRenderBackground");
-	if(func)
-		func();
+	LUA_FIRE_EVENT("OnRenderBackground");
 
 	// restore screen
 	{CUIRect Screen = *UI()->Screen();

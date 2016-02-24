@@ -679,9 +679,7 @@ void CClient::SetState(int s)
 void CClient::OnEnterGame()
 {
 	// EVENT CALL
-	LuaRef func = m_Lua.GetFunc("OnEnterGame");
-	if(func)
-		func();
+	LUA_FIRE_EVENT("OnEnterGame");
 	
 	// reset input
 	int i;
@@ -2708,7 +2706,7 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 	m_Lua.SetGameClient(GameClient());
-	m_Lua.LoadFile("lua/Test.lua");
+	//m_Lua.LoadFile("lua/Test.lua");
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());

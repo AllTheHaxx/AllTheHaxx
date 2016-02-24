@@ -207,6 +207,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	CSql *m_pDatabase;
 
 public:
+	IClient *Client() { return this; }
 	IEngine *Engine() { return m_pEngine; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 	IEngineInput *Input() { return m_pInput; }

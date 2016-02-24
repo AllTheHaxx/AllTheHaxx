@@ -25,12 +25,6 @@ public:
 	static int LuaGetLocalCharacterHealth();
 	static int LuaGetLocalCharacterArmor();
 
-
-	// lua namespace
-	static void LuaSetScriptTitle();
-	static void LuaSetScriptInfo();
-	static void LuaSetScriptHasSettings();
-
 	// ui namespace
 	static void LuaSetUiColor(float r, float g, float b, float a);
 	static void LuaDrawUiRect(float x, float y, float w, float h, int corners, float rounding);

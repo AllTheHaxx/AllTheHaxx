@@ -1,11 +1,10 @@
 #include <base/system.h>
 #include <engine/storage.h>
 
-#include "lua.h"
 #include "luabinding.h"
+#include "lua.h"
 
 
-lua_State * CLua::m_pStaticLua = 0;
 IClient * CLua::m_pClient = 0; 
 IGameClient * CLua::m_pGameClient = 0;
 
@@ -13,188 +12,62 @@ using namespace luabridge;
 
 CLua::CLua()
 {
-	m_pLuaState = 0;
 	CLuaBinding::m_pUiContainer = new CLuaBinding::UiContainer;
 }
 
 CLua::~CLua()
 {
+	m_pLuaFiles.delete_all();
+	m_pLuaFiles.clear();
 }
 
 void CLua::Init(IClient * pClient, IStorage * pStorage)
 {
 	m_pClient = pClient;
 	m_pStorage = pStorage;
-	
-    m_pLuaState = luaL_newstate();
-	//m_pStaticLua = m_pLua;
-	
-    lua_atpanic(m_pLuaState, this->Panic);
-    lua_register(m_pLuaState, "errorfunc", this->ErrorFunc);
-
-    //dont use openlibs. this include io and os functions
-    luaL_openlibs(m_pLuaState);
-    luaopen_base(m_pLuaState);
-    luaopen_math(m_pLuaState);
-    luaopen_string(m_pLuaState);
-    luaopen_table(m_pLuaState);
-    //luaopen_io(m_pLua);
-    luaopen_os(m_pLuaState);
-    //luaopen_package(m_pLua); //not sure whether we should load this
-    luaopen_debug(m_pLuaState);
-    luaopen_bit(m_pLuaState);
-    luaopen_jit(m_pLuaState);
-    luaopen_ffi(m_pLuaState); //dont know about this yet. could be a sand box leak.
-	
-	LoadFolder("main");
-	RegisterLuaCallbacks();
-
-	//LoadFile("lua/Test.lua");
+	//LoadFolder();
 }
 
-void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
+void CLua::AddUserscript(const char *pFilename)
 {
-	// client namespace
-	getGlobalNamespace(m_pLuaState)
+	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
+		return;
 
-		.beginNamespace("_client")
-			.addFunction("Connect", &CLuaBinding::LuaConnect)
-			.addFunction("GetTick", &CLuaBinding::LuaGetTick)
-			// local info
-			.addFunction("GetLocalCharacterID", &CLuaBinding::LuaGetLocalCharacterID)
-			//.addFunction("GetLocalCharacterPos", &CLuaBinding::LuaGetLocalCharacterPos)
-			.addFunction("GetLocalCharacterWeapon", &CLuaBinding::LuaGetLocalCharacterWeapon)
-			.addFunction("GetLocalCharacterWeaponAmmo", &CLuaBinding::LuaGetLocalCharacterWeaponAmmo)
-			.addFunction("GetLocalCharacterHealth", &CLuaBinding::LuaGetLocalCharacterHealth)
-			.addFunction("GetLocalCharacterArmor", &CLuaBinding::LuaGetLocalCharacterArmor)
-		.endNamespace()
-
-
-		// lua namespace
-		.beginNamespace("_lua")
-			.addFunction("SetScriptTitle", &CLuaBinding::LuaSetScriptTitle)
-			.addFunction("SetScriptInfo", &CLuaBinding::LuaSetScriptInfo)
-			.addFunction("SetScriptHasSettings", &CLuaBinding::LuaSetScriptHasSettings)
-		.endNamespace()
-
-
-		// ui namespace
-		.beginNamespace("_ui")
-			.addFunction("SetUiColor", &CLuaBinding::LuaSetUiColor)
-			.addFunction("DrawUiRect", &CLuaBinding::LuaDrawUiRect)
-		.endNamespace()
-
-
-		// components namespace
-		.beginNamespace("_game")
-			.beginNamespace("chat")
-				.addFunction("Send", &CLuaBinding::LuaChatSend)
-				.addFunction("Active", &CLuaBinding::LuaChatActive)
-				.addFunction("AllActive", &CLuaBinding::LuaChatAllActive)
-				.addFunction("TeamActive", &CLuaBinding::LuaChatTeamActive)
-			.endNamespace()
-
-			.beginNamespace("collision")
-				.addFunction("GetMapWidth", &CLuaBinding::LuaColGetMapWidth)
-				.addFunction("GetMapHeight", &CLuaBinding::LuaColGetMapHeight)
-				.addFunction("GetTile", &CLuaBinding::LuaColGetTile)
-			.endNamespace()
-
-			.beginNamespace("emote")
-				.addFunction("Send", &CLuaBinding::LuaEmoteSend)
-			.endNamespace()
-		.endNamespace()
-
-
-		// graphics namespace
-		.beginNamespace("_graphics")
-			.addFunction("GetScreenWidth", &CLuaBinding::LuaGetScreenWidth)
-			.addFunction("GetScreenHeight", &CLuaBinding::LuaGetScreenHeight)
-			.addFunction("BlendNone", &CLuaBinding::LuaBlendNone)
-			.addFunction("BlendNormal", &CLuaBinding::LuaBlendNormal)
-			.addFunction("BlendAdditive", &CLuaBinding::LuaBlendAdditive)
-			.addFunction("SetColor", &CLuaBinding::LuaSetColor)
-			.addFunction("LoadTexture", &CLuaBinding::LuaLoadTexture)
-			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
-		.endNamespace()
-
-	;
-	dbg_msg("Lua", "Registering LuaBindings complete.");
+	std::string file = pFilename;
+	dbg_msg("Lua", "adding script '%s' to list", file.c_str());
+	m_pLuaFiles.add(new CLuaFile(this, file));
 }
 
-LuaRef CLua::GetFunc(const char *pFuncName)
+void CLua::LoadFolder()
 {
-	LuaRef func = getGlobal(m_pLuaState, pFuncName);
+	//char FullDir[256];
+	//str_format(FullDir, sizeof(FullDir), "lua");
 
-	if(func == 0)
-		dbg_msg("Lua", "Error : Function '%s' not found.", pFuncName);
-	
-	return func;  //return 0 if the function is not found!	
-}
-
-void CLua::CallFunc(const char *pFuncName)
-{
-	//TODO : Find a way to pass the LuaFunction up to 8 arguments (no matter of the type)
-}
-
-bool CLua::LoadFile(const char *pFilename)
-{
-	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
-			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
-		return false;
-
-    int Status = luaL_loadfile(m_pLuaState, pFilename);
-    if (Status)
-    {
-        //does this work?
-        ErrorFunc(m_pLuaState);
-        return false;
-    }
-
-    Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
-    if (Status)
-    {
-        ErrorFunc(m_pLuaState);
-        return false;
-    }
-
-    LuaFile newfile;
-	str_copy(newfile.aName, pFilename, sizeof(newfile.aName));
-	//str_copy(newfile.aDir, FullDir, sizeof(newfile.aDir));
-	m_LuaFiles.add(newfile);
-    return true;
-}
-
-void CLua::LoadFolder(const char *pFolder)
-{
-	char FullDir[256];
-	str_format(FullDir, sizeof(FullDir), "lua/%s", pFolder);
-	
-	dbg_msg("Lua", "Loading Folder '%s'", FullDir);
-	LuaLoadHelper * pParams = new LuaLoadHelper;
+	dbg_msg("Lua", "Loading Folder");
+	CLua::LuaLoadHelper * pParams = new CLua::LuaLoadHelper;
 	pParams->pLua = this;
-	pParams->pString = FullDir;
-	
-	m_pStorage->ListDirectory(IStorage::TYPE_ALL, FullDir, LoadFolderCallback, pParams);
-	
+	pParams->pString = "lua";
+
+	m_pStorage->ListDirectory(IStorage::TYPE_ALL, "lua", LoadFolderCallback, pParams);
+
 	delete pParams;
 }
 
 int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)
-{	
+{
 	if(pName[0] == '.')
 		return 0;
-	
-	LuaLoadHelper *pParams = (LuaLoadHelper*) pUser;
-	
+
+	LuaLoadHelper *pParams = (LuaLoadHelper *)pUser;
+
 	CLua *pSelf = pParams->pLua;
-	const char * FullDir = pParams->pString;
-	
+	const char *pFullDir = pParams->pString;
+
 	char File[64];
-	str_format(File, sizeof(File), "%s/%s", FullDir, pName);
-	dbg_msg("Lua", "->Loading File %s", File);
-	
-	pSelf->LoadFile(File);
+	str_format(File, sizeof(File), "%s/%s", pFullDir, pName);
+	dbg_msg("Lua", "-> Found File %s", File);
+
+	pSelf->AddUserscript(File);
 	return 0;
 }
 

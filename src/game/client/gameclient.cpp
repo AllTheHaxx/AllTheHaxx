@@ -1024,9 +1024,7 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 		m_All.m_paComponents[i]->OnStateChange(NewState, OldState);
 
 	// EVENT CALL
-	LuaRef func = Client()->Lua()->GetFunc("OnStateChange");
-	if(func)
-		func(NewState, OldState);
+	LUA_FIRE_EVENT_V("OnStateChange", NewState, OldState);
 }
 
 void CGameClient::OnShutdown()

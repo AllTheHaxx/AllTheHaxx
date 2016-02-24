@@ -666,9 +666,7 @@ void CScoreboard::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	// EVENT CALL
-	LuaRef func = Client()->Lua()->GetFunc("OnRenderScoreboard");
-	if(func)
-		func();
+	LUA_FIRE_EVENT("OnRenderScoreboard")
 
 	float w = 700.0f;
 

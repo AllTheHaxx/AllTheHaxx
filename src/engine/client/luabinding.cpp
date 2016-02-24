@@ -73,23 +73,6 @@ int CLuaBinding::LuaGetLocalCharacterArmor()
 		return -1;
 }
 
-
-// lua namespace
-void CLuaBinding::LuaSetScriptTitle()
-{
-
-}
-
-void CLuaBinding::LuaSetScriptInfo()
-{
-
-}
-
-void CLuaBinding::LuaSetScriptHasSettings()
-{
-
-}
-
 // ui namespace
 void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
 {
