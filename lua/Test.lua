@@ -1,5 +1,5 @@
 local function test()
-	print("width: ".._game.collision.GetMapWidth().." height: ".._game.collision.GetMapHeight())
+	_game.emote.Send(2)
 end
 
-RegisterEvent("OnRenderScoreboard", test)
+RegisterEvent("OnChat", test)

@@ -38,6 +38,8 @@ public:
 	static int LuaColGetMapWidth();
 	static int LuaColGetMapHeight();
 	static int LuaColGetTile(int x, int y);
+	// --- emote
+	static void LuaEmoteSend(int Emote);
 
 
 	// graphics namespace

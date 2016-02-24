@@ -92,6 +92,10 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 				.addFunction("GetMapHeight", &CLuaBinding::LuaColGetMapHeight)
 				.addFunction("GetTile", &CLuaBinding::LuaColGetTile)
 			.endNamespace()
+
+			.beginNamespace("emote")
+				.addFunction("Send", &CLuaBinding::LuaEmoteSend)
+			.endNamespace()
 		.endNamespace()
 
 

@@ -113,6 +113,16 @@ int CLuaBinding::LuaColGetTile(int x, int y)
 	return pGameClient->Collision()->GetTileRaw(x, y);
 }
 
+// --- emote
+void CLuaBinding::LuaEmoteSend(int Emote)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	CNetMsg_Cl_Emoticon Msg;
+	Msg.m_Emoticon = Emote;
+	pGameClient->Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+}
+
 
 // graphics namespace
 int CLuaBinding::LuaGetScreenWidth()
