@@ -58,6 +58,7 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 	getGlobalNamespace(m_pLuaState)
 
 		.beginNamespace("_client")
+			.addFunction("Connect", &CLuaBinding::LuaConnect)
 			.addFunction("GetTick", &CLuaBinding::LuaGetTick)
 		.endNamespace()
 

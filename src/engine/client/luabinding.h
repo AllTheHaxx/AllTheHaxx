@@ -15,6 +15,7 @@ public:
 	static UiContainer *m_pUiContainer; // this will be moved to CLuaFile once it exists
 
 	// client namespace
+	static void LuaConnect(const char *pAddr);
 	static int LuaGetTick();
 
 	// lua namespace

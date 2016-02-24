@@ -1,7 +1,5 @@
 local function test()
-	if(_components.chat.Active()) then
-		print("yo")
-	end
+	_client.Connect("127.0.0.1:8303")
 end
 
-RegisterEvent("OnRenderLevel1", test)
+RegisterEvent("OnRenderScoreboard", test)

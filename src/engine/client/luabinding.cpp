@@ -10,6 +10,13 @@
 CLuaBinding::UiContainer * CLuaBinding::m_pUiContainer = 0;
 
 // client namespace
+void CLuaBinding::LuaConnect(const char *pAddr)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	str_copy(g_Config.m_UiServerAddress, pAddr, sizeof(g_Config.m_UiServerAddress));
+	pGameClient->Client()->Connect(pAddr);
+}
+
 int CLuaBinding::LuaGetTick()
 {
 	return CLua::Client()->GameTick();
