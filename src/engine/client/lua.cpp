@@ -79,6 +79,9 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 
 		// components namespace
 		.beginNamespace("_components")
+			.beginNamespace("chat")
+				.addFunction("ChatSend", &CLuaBinding::LuaChatSend)
+			.endNamespace()
 		.endNamespace()
 
 

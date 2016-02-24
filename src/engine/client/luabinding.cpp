@@ -2,6 +2,8 @@
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
 
+#include <game/client/components/chat.h>
+
 #include "luabinding.h"
 #include "lua.h"
 
@@ -60,6 +62,12 @@ void CLuaBinding::LuaDrawUiRect(float x, float y, float w, float h, int corners,
 }
 
 // components namespace
+// --- chat
+void CLuaBinding::LuaChatSend(int Team, const char *pMessage)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	pGameClient->m_pChat->Say(Team, pMessage);
+}
 
 
 // graphics namespace
