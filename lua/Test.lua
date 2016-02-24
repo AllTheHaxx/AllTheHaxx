@@ -1,5 +1,5 @@
 local function test()
-	_client.Connect("127.0.0.1:8303")
+	print("index: ".._game.collision.GetTile(0,0))
 end
 
 RegisterEvent("OnRenderScoreboard", test)

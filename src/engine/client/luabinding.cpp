@@ -94,6 +94,13 @@ bool CLuaBinding::LuaChatTeamActive()
 	return pGameClient->m_pChat->GetMode() == 2;
 }
 
+// --- collision
+int CLuaBinding::LuaColGetTile(int x, int y)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return pGameClient->Collision()->GetTileRaw(x, y);
+}
+
 
 // graphics namespace
 int CLuaBinding::LuaGetScreenWidth()

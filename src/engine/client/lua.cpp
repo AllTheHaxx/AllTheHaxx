@@ -86,6 +86,10 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 				.addFunction("AllActive", &CLuaBinding::LuaChatAllActive)
 				.addFunction("TeamActive", &CLuaBinding::LuaChatTeamActive)
 			.endNamespace()
+
+			.beginNamespace("collision")
+				.addFunction("GetTile", &CLuaBinding::LuaColGetTile)
+			.endNamespace()
 		.endNamespace()
 
 

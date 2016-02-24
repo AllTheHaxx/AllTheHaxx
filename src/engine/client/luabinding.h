@@ -34,6 +34,8 @@ public:
 	static bool LuaChatActive();
 	static bool LuaChatAllActive();
 	static bool LuaChatTeamActive();
+	// --- collision
+	static int LuaColGetTile(int x, int y);
 
 
 	// graphics namespace
