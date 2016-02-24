@@ -44,10 +44,24 @@ RegisterEvent("OnEnterGame", YourCallbackFunction)
 -- Callback function parameters: none
 
 -- ~~~ Functions ~~~
--- _client
+------ _lua
+_lua.SetScriptTitle(Title)
+-- Describtion: Set the script title (ingame displaying)
+-- Parameters: String
+-- Return value: none
+_lua.SetScriptInfo(Info)
+-- Describtion: Set the script info (ingame displaying)
+-- Parameters: String
+-- Return value: none
+_lua.SetScriptHasSettings()
+-- Describtion: Check wether the script uses a config
+-- Parameters: none
+-- Return value: Boolean
+
+------ _client
 _client.Connect(Address)
 -- Describtion: Connects to the given serveradress
--- Parameters: Address (string)
+-- Parameters: String
 -- Return value: none
 _client.GetTick()
 -- Describtion: Returns the current gametick
