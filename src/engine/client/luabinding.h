@@ -17,6 +17,14 @@ public:
 	// client namespace
 	static void LuaConnect(const char *pAddr);
 	static int LuaGetTick();
+	// local info
+	static int LuaGetLocalCharacterID();
+	//static int LuaGetLocalCharacterPos();
+	static int LuaGetLocalCharacterWeapon();
+	static int LuaGetLocalCharacterWeaponAmmo();
+	static int LuaGetLocalCharacterHealth();
+	static int LuaGetLocalCharacterArmor();
+
 
 	// lua namespace
 	static void LuaSetScriptTitle();

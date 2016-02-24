@@ -22,6 +22,58 @@ int CLuaBinding::LuaGetTick()
 	return CLua::Client()->GameTick();
 }
 
+// local info
+int CLuaBinding::LuaGetLocalCharacterID()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(pGameClient->m_Snap.m_pLocalCharacter)
+		return pGameClient->m_Snap.m_LocalClientID;
+	else
+		return -1;
+}
+
+/*int CLuaBinding::LuaGetLocalCharacterPos()
+{
+	// not sure how to return a vector/two values in luabridge
+}*/
+
+int CLuaBinding::LuaGetLocalCharacterWeapon()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(pGameClient->m_Snap.m_pLocalCharacter)
+		return pGameClient->m_Snap.m_pLocalCharacter->m_Weapon;
+	else
+		return -1;
+}
+
+int CLuaBinding::LuaGetLocalCharacterWeaponAmmo()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(pGameClient->m_Snap.m_pLocalCharacter)
+		return pGameClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
+	else
+		return -1;
+}
+
+int CLuaBinding::LuaGetLocalCharacterHealth()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(pGameClient->m_Snap.m_pLocalCharacter)
+		return pGameClient->m_Snap.m_pLocalCharacter->m_Health;
+	else
+		return -1;
+}
+
+int CLuaBinding::LuaGetLocalCharacterArmor()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(pGameClient->m_Snap.m_pLocalCharacter)
+		return pGameClient->m_Snap.m_pLocalCharacter->m_Armor;
+	else
+		return -1;
+}
+
+
 // lua namespace
 void CLuaBinding::LuaSetScriptTitle()
 {

@@ -60,6 +60,13 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 		.beginNamespace("_client")
 			.addFunction("Connect", &CLuaBinding::LuaConnect)
 			.addFunction("GetTick", &CLuaBinding::LuaGetTick)
+			// local info
+			.addFunction("GetLocalCharacterID", &CLuaBinding::LuaGetLocalCharacterID)
+			//.addFunction("GetLocalCharacterPos", &CLuaBinding::LuaGetLocalCharacterPos)
+			.addFunction("GetLocalCharacterWeapon", &CLuaBinding::LuaGetLocalCharacterWeapon)
+			.addFunction("GetLocalCharacterWeaponAmmo", &CLuaBinding::LuaGetLocalCharacterWeaponAmmo)
+			.addFunction("GetLocalCharacterHealth", &CLuaBinding::LuaGetLocalCharacterHealth)
+			.addFunction("GetLocalCharacterArmor", &CLuaBinding::LuaGetLocalCharacterArmor)
 		.endNamespace()
 
 
