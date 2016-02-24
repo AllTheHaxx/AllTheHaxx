@@ -1,6 +1,5 @@
 -- TODO: UNFINISHED!
 
---[[
 
 SetScriptTitle("Blood-Patch")
 SetScriptInfo("(c) by MAP94 - AllTheHaxx edit by Henritees")
@@ -197,5 +196,4 @@ end
 RegisterEvent("OnKill", Kill)
 RegisterEvent("OnRenderLevel5", RenderBlood)
 
-]]
 

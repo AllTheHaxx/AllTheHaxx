@@ -48,7 +48,7 @@ public:
 	CLua *Lua() const { return m_pLua; }
 
 	// lua namespace
-	RefCountedPtr<CLuaFile> LuaGetLuaFile() { return this; }
+	//RefCountedPtr<CLuaFile> LuaGetLuaFile() { return this; } // TODO: how?
 	void LuaSetScriptTitle(std::string Title);
 	void LuaSetScriptInfo(std::string Infotext);
 	void LuaSetScriptHasSettings(int Val);

@@ -3,6 +3,7 @@
 #include <game/client/gameclient.h>
 
 #include <game/client/components/chat.h>
+#include <game/client/components/menus.h>
 
 #include "luabinding.h"
 #include "lua.h"
@@ -102,6 +103,17 @@ void CLuaBinding::LuaDrawUiRect(float x, float y, float w, float h, int corners,
 	float Height = 400*3.0f;
 	pGraphics->MapScreen(0, 0, Width, Height);
 }
+
+int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	int ID = 0; // hm.
+	CUIRect r;
+	r.x = x; r.y = y;
+	r.w = w; r.h = h;
+	return pGameClient->m_pMenus->DoButton_Menu(&ID, pText ? pText : "", Checked, &r, pTooltip ? pTooltip : "", Corners, CLuaBinding::m_pUiContainer->Color);
+}
+
 
 // components namespace
 // --- chat

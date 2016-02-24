@@ -25,7 +25,7 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
 {
 	m_pClient = pClient;
 	m_pStorage = pStorage;
-	//LoadFolder();
+	LoadFolder();
 }
 
 void CLua::AddUserscript(const char *pFilename)

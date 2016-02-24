@@ -2086,10 +2086,10 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	CUIRect Button;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	CUIRect AddButton;
-	Button.VSplitRight(100.0f, &Button, &AddButton);
-	static int s_AddScript = 0;
-	if (DoButton_MenuTab(&s_AddScript, Localize("Refresh"), s_AddScript, &AddButton, CUI::CORNER_ALL))
+	CUIRect RefreshButton;
+	Button.VSplitRight(100.0f, &Button, &RefreshButton);
+	static int s_RefreshButton = 0;
+	if (DoButton_Menu(&s_RefreshButton, Localize("Reload Lua"), 0, &RefreshButton, "This will re-init the whole Lua API and unload all scripts!"))
 	{
 		Client()->Lua()->GetLuaFiles().delete_all();
 		Client()->Lua()->GetLuaFiles().clear();
@@ -2135,7 +2135,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				CUIRect LabelInfo;
 				CUIRect Buttons, Button;
 
-				vec4 Color = L->State() == CLuaFile::LUAFILE_STATE_ERROR ? vec4(0.7f,0,0,0.3f) : vec4(0,0,0,0.3f);
+				vec4 Color = L->State() == CLuaFile::LUAFILE_STATE_ERROR ? vec4(0.7f,0,0,0.3f) :
+						L->State() == CLuaFile::LUAFILE_STATE_LOADED ? vec4(0,0.7f,0,0.3f) : vec4(0,0,0,0.3f);
 
 				HighlightIndex++;
 				if (HighlightIndex % 2 == 0)
@@ -2166,7 +2167,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						L->Init();
 					}
 				}
-				else if(L->State() == CLuaFile::LUAFILE_STATE_IDLE)
+				else //if(L->State() == CLuaFile::LUAFILE_STATE_IDLE)
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
@@ -2175,6 +2176,13 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						RenderLoadingLua();
 						L->Init();
 					}
+				}
+
+				if(L->State() == CLuaFile::LUAFILE_STATE_ERROR)
+				{
+					Buttons.VSplitRight(5.0f, &Buttons, 0);
+					Buttons.VSplitRight(100.0f, &Buttons, &Button);
+					UI()->DoLabel(&Button, Localize("An error occured while loading"), 10.0f, -1, Button.w, 0);
 				}
 
 				LuaRef func = L->GetFunc("OnConfigOpen");

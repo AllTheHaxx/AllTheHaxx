@@ -114,6 +114,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.beginNamespace("_ui")
 			.addFunction("SetUiColor", &CLuaBinding::LuaSetUiColor)
 			.addFunction("DrawUiRect", &CLuaBinding::LuaDrawUiRect)
+			.addFunction("DoButton_Menu", &CLuaBinding::LuaDoButton_Menu)
 		.endNamespace()
 
 
@@ -124,6 +125,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 				.addFunction("Active", &CLuaBinding::LuaChatActive)
 				.addFunction("AllActive", &CLuaBinding::LuaChatAllActive)
 				.addFunction("TeamActive", &CLuaBinding::LuaChatTeamActive)
+
 			.endNamespace()
 
 			.beginNamespace("collision")

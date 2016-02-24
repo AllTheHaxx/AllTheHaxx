@@ -102,13 +102,18 @@ _client.GetLocalCharacterArmor()
 
 --------- Namespace: _ui
 _ui.SetUiColor(r, g, b, a)
-	-- Describtion: Sets the UI color to the given values (red, blue, green, alpha)
+	-- Describtion: Sets the UI color to the given values (red, green, blue, alpha)
 	-- Parameters: Float (0 to 1), Float (0 to 1), Float (0 to 1), Float (0 to 1)
 	-- Return value: none
 _ui.DrawUiRect(x, y, w, h, corners, rounding)
 	-- Describtion: Draws a rect with the given params (X, Y, width, height, cornertype, rounding of the corners)
 	-- Parameters: Float, Float, Float, Float, Integer, Float
 	-- Return value: none
+	
+_ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
+	-- Describtion: Draws an interactable button with the given params (Label, IsChecked?, X, Y, width, height, PopupText, cornertype)
+	-- Parameters: String, Integer (0 or 1), Float, Float, Float, Float, String, Integer
+	-- Return value: Integer ~= 0 if the button is pressed, otherwise zero
 
 --------- Namespace: _game
 ------------- SubNamespace: chat

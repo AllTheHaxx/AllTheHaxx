@@ -41,6 +41,7 @@ class CMenus : public CComponent
 	typedef float (*FDropdownCallback)(CUIRect View, void *pUser);
 
 	friend class CGameConsole; // need this for IRC GUI
+	friend class CLuaBinding; // need this for lua
 
 	static vec4 ms_GuiColor;
 	static vec4 ms_ColorTabbarInactiveOutgame;
