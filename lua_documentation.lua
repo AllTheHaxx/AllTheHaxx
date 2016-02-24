@@ -1,3 +1,4 @@
+-- ALLTHEHAXX LUA DOCUMENTATION
 -- Below you will find a short documentation on the Lua features that come with the AllTheHaxx client,
 -- however you will not learn how to program in Lua, so if you can't develope in Lua/Luabridge yet search
 -- some tutorials for that online first.
@@ -8,8 +9,9 @@
 ------ Event callbacks
 ------ Functions
 
-
+-- ~~~~~~~~~~~~~~~~~~~~~~~
 -- ~~~ Event callbacks ~~~
+-- ~~~~~~~~~~~~~~~~~~~~~~~
 -- Events are registered the following:
 RegisterEvent("EventName", FunctionToExecuteOnEvent) -- Example
 -- Now, whenever the event occurs your function will be called.
@@ -43,8 +45,11 @@ RegisterEvent("OnEnterGame", YourCallbackFunction)
 -- Called when you join a server and are ready to enter the game.
 -- Callback function parameters: none
 
+
+-- ~~~~~~~~~~~~~~~~~
 -- ~~~ Functions ~~~
------- _lua
+-- ~~~~~~~~~~~~~~~~~
+--------- Namespace: _lua
 _lua.SetScriptTitle(Title)
 -- Describtion: Set the script title (ingame displaying)
 -- Parameters: String
@@ -58,7 +63,7 @@ _lua.SetScriptHasSettings()
 -- Parameters: none
 -- Return value: Boolean
 
------- _client
+--------- Namespace: _client
 _client.Connect(Address)
 -- Describtion: Connects to the given serveradress
 -- Parameters: String
