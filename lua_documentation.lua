@@ -1,7 +1,8 @@
 -- Below you will find a short documentation on the Lua features that come with the AllTheHaxx client,
--- however you will not learn how to program in Lua, so if you can't develope in Lua yet search some
--- tutorials for that online first.
--- IF YOU THINK A NEW FUNCTION SHOULD BE ADDED PLEASE OPEN A TICKET AT https://github.com/AllTheHaxx/AllTheHaxx/issues
+-- however you will not learn how to program in Lua, so if you can't develope in Lua/Luabridge yet search
+-- some tutorials for that online first.
+-- IF YOU THINK A NEW FUNCTION/CALLBACK SHOULD BE ADDED PLEASE OPEN A TICKET AT https://github.com/AllTheHaxx/AllTheHaxx/issues
+
 
 -- Structure:
 ------ Event callbacks
@@ -43,4 +44,32 @@ RegisterEvent("OnEnterGame", YourCallbackFunction)
 -- Callback function parameters: none
 
 -- ~~~ Functions ~~~
--- todo
+-- _client
+_client.Connect(Address)
+-- Describtion: Connects to the given serveradress
+-- Parameters: Address (string)
+-- Return value: none
+_client.GetTick()
+-- Describtion: Returns the current gametick
+-- Parameters: none
+-- Return value: Integer
+_client.GetLocalCharacterID()
+-- Describtion: Returns your current ClientID, -1 on failure
+-- Parameters: none
+-- Return value: Integer
+_client.GetLocalCharacterWeapon()
+-- Describtion: Return your active weapon, -1 on failure
+-- Parameters: none
+-- Return value: Integer
+_client.GetLocalCharacterWeaponAmmo()
+-- Describtion: Returns your ammo, -1 on failure
+-- Parameters: none
+-- Return value: Integer
+_client.GetLocalCharacterHealth()
+-- Describtion: Returns your health, -1 on failure
+-- Parameters: none
+-- Return value: Integer
+_client.GetLocalCharacterArmor()
+-- Describtion: Returns your armor, -1 on failure
+-- Parameters: none
+-- Return value: Integer
