@@ -69,6 +69,24 @@ void CLuaBinding::LuaChatSend(int Team, const char *pMessage)
 	pGameClient->m_pChat->Say(Team, pMessage);
 }
 
+bool CLuaBinding::LuaChatActive()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return pGameClient->m_pChat->GetMode() != 0;
+}
+
+bool CLuaBinding::LuaChatAllActive()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return pGameClient->m_pChat->GetMode() == 1;
+}
+
+bool CLuaBinding::LuaChatTeamActive()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return pGameClient->m_pChat->GetMode() == 2;
+}
+
 
 // graphics namespace
 int CLuaBinding::LuaGetScreenWidth()

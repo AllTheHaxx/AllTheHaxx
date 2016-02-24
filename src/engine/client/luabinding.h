@@ -30,6 +30,9 @@ public:
 	// components namespace
 	// --- chat
 	static void LuaChatSend(int Team, const char *pMessage);
+	static bool LuaChatActive();
+	static bool LuaChatAllActive();
+	static bool LuaChatTeamActive();
 
 
 	// graphics namespace

@@ -82,6 +82,7 @@ public:
 	CChat();
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
+	int GetMode() const { return m_Mode; }
 	bool IsShown() const { return m_Show; }
 	float Blend() const { return time_get() > m_aLines[m_CurrentLine].m_Time+14*time_freq() && !m_Show ? 1.0f-(time_get()-m_aLines[m_CurrentLine].m_Time-14*time_freq())/(2.0f*time_freq()) : 1.0f; }
 

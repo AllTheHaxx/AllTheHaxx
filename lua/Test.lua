@@ -1,5 +1,7 @@
 local function test()
-	_components.chat.ChatSend(0, "DENNIS!")
+	if(_components.chat.Active()) then
+		print("yo")
+	end
 end
 
-RegisterEvent("OnChat", test)
+RegisterEvent("OnRenderLevel1", test)
