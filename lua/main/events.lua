@@ -60,9 +60,9 @@ function OnRenderBackground()
 	end
 end
 
-function OnRenderScoreboard()
-	if Events["OnRenderScoreboard"] ~= nil then
-		for script, event in pairs(Events["OnRenderScoreboard"]) do
+function OnRenderLevel(level)
+	if Events["OnRenderLevel" .. level] ~= nil then
+		for script, event in pairs(Events["OnRenderLevel" .. level]) do
 			if event ~= nil then
 				event()
 			end
@@ -70,9 +70,9 @@ function OnRenderScoreboard()
 	end
 end
 
-function OnRenderLevel(level)
-	if Events["OnRenderLevel" .. level] ~= nil then
-		for script, event in pairs(Events["OnRenderLevel" .. level]) do
+function OnRenderScoreboard()
+	if Events["OnRenderScoreboard"] ~= nil then
+		for script, event in pairs(Events["OnRenderScoreboard"]) do
 			if event ~= nil then
 				event()
 			end
