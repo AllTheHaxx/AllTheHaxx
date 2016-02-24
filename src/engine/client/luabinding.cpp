@@ -5,6 +5,7 @@
 #include "luabinding.h"
 #include "lua.h"
 
+CLuaBinding::UiContainer * CLuaBinding::m_pUiContainer = 0;
 
 // client namespace
 int CLuaBinding::LuaGetTick()
@@ -29,7 +30,34 @@ void CLuaBinding::LuaSetScriptHasSettings()
 }
 
 // ui namespace
+void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
+{
+	if(r >= 0)
+		CLuaBinding::m_pUiContainer->Color.r = r;
+	if(g >= 0)
+		CLuaBinding::m_pUiContainer->Color.g = g;
+	if(b >= 0)
+		CLuaBinding::m_pUiContainer->Color.b = b;
+	if(a >= 0)
+		CLuaBinding::m_pUiContainer->Color.a = a;
+}
 
+void CLuaBinding::LuaDrawUiRect(float x, float y, float w, float h, int corners, float rounding)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
+
+	CUIRect rect;
+	rect.x = x; rect.y = y;
+	rect.w = w; rect.h = h;
+
+	pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h);
+	pGameClient->RenderTools()->DrawUIRect(&rect, CLuaBinding::m_pUiContainer->Color, corners, rounding);
+
+	float Width = 400*3.0f*pGraphics->ScreenAspect();
+	float Height = 400*3.0f;
+	pGraphics->MapScreen(0, 0, Width, Height);
+}
 
 // components namespace
 
@@ -86,9 +114,8 @@ void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, f
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
-	float Width = 400*3.0f*pGraphics->ScreenAspect();
-	float Height = 400*3.0f;
-	pGraphics->MapScreen(0, 0, Width, Height);
+
+	pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h);
 	pGraphics->TextureSet(ID);
 	pGraphics->QuadsBegin();
 	IGraphics::CQuadItem Item;
@@ -97,4 +124,8 @@ void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, f
 	pGraphics->QuadsSetRotation(rot);
 	pGraphics->QuadsDraw(&Item, 1);
 	pGraphics->QuadsEnd();
+
+	float Width = 400*3.0f*pGraphics->ScreenAspect();
+	float Height = 400*3.0f;
+	pGraphics->MapScreen(0, 0, Width, Height);
 }

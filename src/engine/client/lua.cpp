@@ -1,7 +1,9 @@
-#include "lua.h"
-#include "luabinding.h"
 #include <base/system.h>
 #include <engine/storage.h>
+
+#include "lua.h"
+#include "luabinding.h"
+
 
 lua_State * CLua::m_pStaticLua = 0;
 IClient * CLua::m_pClient = 0; 
@@ -12,6 +14,7 @@ using namespace luabridge;
 CLua::CLua()
 {
 	m_pLuaState = 0;
+	CLuaBinding::m_pUiContainer = new CLuaBinding::UiContainer;
 }
 
 CLua::~CLua()
@@ -54,13 +57,13 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 	// client namespace
 	getGlobalNamespace(m_pLuaState)
 
-		.beginNamespace("client")
+		.beginNamespace("_client")
 			.addFunction("GetTick", &CLuaBinding::LuaGetTick)
 		.endNamespace()
 
 
 		// lua namespace
-		.beginNamespace("lua")
+		.beginNamespace("_lua")
 			.addFunction("SetScriptTitle", &CLuaBinding::LuaSetScriptTitle)
 			.addFunction("SetScriptInfo", &CLuaBinding::LuaSetScriptInfo)
 			.addFunction("SetScriptHasSettings", &CLuaBinding::LuaSetScriptHasSettings)
@@ -68,17 +71,19 @@ void CLua::RegisterLuaCallbacks()  //LUABRIDGE!
 
 
 		// ui namespace
-		.beginNamespace("ui")
+		.beginNamespace("_ui")
+			.addFunction("SetUiColor", &CLuaBinding::LuaSetUiColor)
+			.addFunction("DrawUiRect", &CLuaBinding::LuaDrawUiRect)
 		.endNamespace()
 
 
 		// components namespace
-		.beginNamespace("components")
+		.beginNamespace("_components")
 		.endNamespace()
 
 
 		// graphics namespace
-		.beginNamespace("graphics")
+		.beginNamespace("_graphics")
 			.addFunction("GetScreenWidth", &CLuaBinding::LuaGetScreenWidth)
 			.addFunction("GetScreenHeight", &CLuaBinding::LuaGetScreenHeight)
 			.addFunction("BlendNone", &CLuaBinding::LuaBlendNone)
@@ -110,7 +115,8 @@ void CLua::CallFunc(const char *pFuncName)
 
 bool CLua::LoadFile(const char *pFilename)
 {
-	if(!pFilename || pFilename[0] == '\0') // TODO: Check if the file extension is '.lua'
+	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
+			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
 		return false;
 
     int Status = luaL_loadfile(m_pLuaState, pFilename);
