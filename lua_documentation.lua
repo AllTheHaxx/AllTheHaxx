@@ -140,3 +140,37 @@ _ui.DrawUiRect(x, y, w, h, corners, rounding)
 		-- Describtion: Do an emoticon (Emote is the ID)
 		-- Parameters: Integer
 		-- Return value: none
+
+--------- Namespace: _graphics
+_graphics.GetScreenWidth()
+	-- Describtion: Returns the screen width
+	-- Parameters: none
+	-- Return value: Integer
+_graphics.GetScreenHeight()
+	-- Describtion: Returns the screen height
+	-- Parameters: none
+	-- Return value: Integer
+_graphics.BlendNone()
+	-- Describtion: Sets blendmode to "none"
+	-- Parameters: none
+	-- Return value: Integer
+_graphics.BlendNormal()
+	-- Describtion: Sets blendmode to "normal"
+	-- Parameters: none
+	-- Return value: Integer
+_graphics.BlendAdditive()
+	-- Describtion: Sets blendmode to "additive"
+	-- Parameters: none
+	-- Return value: Integer
+_graphics.SetColor(r, g, b, a)
+	-- Describtion: Sets the color for further rendering tasks to the given values (red, blue, green, alpha)
+	-- Parameters: Float (0 to 1), Float (0 to 1), Float (0 to 1), Float (0 to 1)
+	-- Return value: none
+_graphics.LoadTexture(Filename, StorageType, StoreFormat, Flags)
+	-- Describtion: Loads a texture to be rendered
+	-- Parameters: String, Integer, Integer, Integer
+	-- Return value: none
+_graphics.RenderTexture(ID, x, y, w, h, Rotation)
+	-- Describtion: Renders a loaded texture with the given params (ID, X, Y, width, height, rotation)
+	-- Parameters: Integer, Float, Float, Float, Float, Float
+	-- Return value: none
