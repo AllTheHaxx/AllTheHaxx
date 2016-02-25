@@ -99,6 +99,10 @@ _client.GetLocalCharacterArmor()
 	-- Describtion: Returns your armor, -1 on failure
 	-- Parameters: none
 	-- Return value: Integer
+_client.GetFPS)
+	-- Describtion: Returns current FPS
+	-- Parameters: none
+	-- Return value: Integer
 
 --------- Namespace: _ui
 _ui.SetUiColor(r, g, b, a)
