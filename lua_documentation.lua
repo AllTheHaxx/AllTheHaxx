@@ -58,151 +58,151 @@ RegisterEvent("OnEnterGame", YourCallbackFunction)
 -- ~~~~~~~~~~~~~~~~~
 --------- Namespace: _lua
 _lua.SetScriptTitle(Title)
-	-- Describtion: Set the script title (ingame displaying)
+	-- Description: Set the script title (ingame displaying)
 	-- Parameters: String
 	-- Return value: none
 _lua.SetScriptInfo(Info)
-	-- Describtion: Set the script info (ingame displaying)
+	-- Description: Set the script info (ingame displaying)
 	-- Parameters: String
 	-- Return value: none
 _lua.SetScriptHasSettings()
-	-- Describtion: Check wether the script uses a config
+	-- Description: Check wether the script uses a config
 	-- Parameters: none
 	-- Return value: Boolean
 
 --------- Namespace: _client
 _client.Connect(Address)
-	-- Describtion: Connects to the given serveradress
+	-- Description: Connects to the given serveradress
 	-- Parameters: String
 	-- Return value: none
 _client.GetTick()
-	-- Describtion: Returns the current gametick
+	-- Description: Returns the current gametick
 	-- Parameters: none
 	-- Return value: Integer
 _client.GetLocalCharacterID()
-	-- Describtion: Returns your current ClientID, -1 on failure
+	-- Description: Returns your current ClientID, -1 on failure
 	-- Parameters: none
 	-- Return value: Integer
 _client.GetLocalCharacterWeapon()
-	-- Describtion: Return your active weapon, -1 on failure
+	-- Description: Return your active weapon, -1 on failure
 	-- Parameters: none
 	-- Return value: Integer
 _client.GetLocalCharacterWeaponAmmo()
-	-- Describtion: Returns your ammo, -1 on failure
+	-- Description: Returns your ammo, -1 on failure
 	-- Parameters: none
 	-- Return value: Integer
 _client.GetLocalCharacterHealth()
-	-- Describtion: Returns your health, -1 on failure
+	-- Description: Returns your health, -1 on failure
 	-- Parameters: none
 	-- Return value: Integer
 _client.GetLocalCharacterArmor()
-	-- Describtion: Returns your armor, -1 on failure
+	-- Description: Returns your armor, -1 on failure
 	-- Parameters: none
 	-- Return value: Integer
 _client.GetFPS)
-	-- Describtion: Returns current FPS
+	-- Description: Returns current FPS
 	-- Parameters: none
 	-- Return value: Integer
 
 --------- Namespace: _ui
 _ui.SetUiColor(r, g, b, a)
-	-- Describtion: Sets the UI color to the given values (red, green, blue, alpha)
+	-- Description: Sets the UI color to the given values (red, green, blue, alpha)
 	-- Parameters: Float (0 to 1), Float (0 to 1), Float (0 to 1), Float (0 to 1)
 	-- Return value: none
 _ui.DrawUiRect(x, y, w, h, corners, rounding)
-	-- Describtion: Draws a rect with the given params (X, Y, width, height, cornertype, rounding of the corners)
+	-- Description: Draws a rect with the given params (X, Y, width, height, cornertype, rounding of the corners)
 	-- Parameters: Float, Float, Float, Float, Integer, Float
 	-- Return value: none
 	
 _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
-	-- Describtion: Draws an interactable button with the given params (Label, IsChecked?, X, Y, width, height, PopupText, cornertype)
+	-- Description: Draws an interactable button with the given params (Label, IsChecked?, X, Y, width, height, PopupText, cornertype)
 	-- Parameters: String, Integer (0 or 1), Float, Float, Float, Float, String, Integer
 	-- Return value: Integer ~= 0 if the button is pressed, otherwise zero
 
 --------- Namespace: _game
 ------------- SubNamespace: chat
 	_game.chat.Send(Team, Message)
-		-- Describtion: Sends a chatmessage
+		-- Description: Sends a chatmessage
 		-- Parameters: Integer, String
 		-- Return value: none
 	_game.chat.Active()
-		-- Describtion: Checks wether the chat is active
+		-- Description: Checks wether the chat is active
 		-- Parameters: none
 		-- Return value: Boolean
 	_game.chat.AllActive()
-		-- Describtion: Checks wether the "All" chat is active
+		-- Description: Checks wether the "All" chat is active
 		-- Parameters: none
 		-- Return value: Boolean
 	_game.chat.TeamActive()
-		-- Describtion: Checks wether the "Team" chat is active
+		-- Description: Checks wether the "Team" chat is active
 		-- Parameters: none
 		-- Return value: Boolean
 ------------- SubNamespace: collision
 	_game.collision.GetMapWidth()
-		-- Describtion: Returns the map width (in tiles)
+		-- Description: Returns the map width (in tiles)
 		-- Parameters: none
 		-- Return value: Integer
 	_game.collision.GetMapHeight()
-		-- Describtion: Returns the map heught (in tiles)
+		-- Description: Returns the map heught (in tiles)
 		-- Parameters: none
 		-- Return value: Integer
 	_game.collision.GetTile(x, y)
-		-- Describtion: Returns the  tile index at the given position
+		-- Description: Returns the  tile index at the given position
 		-- Parameters: Integer, Integer
 		-- Return value: Integer
 ------------- SubNamespace: emote
 	_game.emote.Send(Emote)
-		-- Describtion: Do an emoticon (Emote is the ID)
+		-- Description: Do an emoticon (Emote is the ID)
 		-- Parameters: Integer
 		-- Return value: none
 ------------- SubNamespace: controls
 	_game.controls.LockInput()
-		-- Describtion: Locks the players' input, call this before changing the input via Lua
+		-- Description: Locks the players' input, call this before changing the input via Lua
 		-- Parameters: none
 		-- Return value: none
 	_game.controls.UnlockInput()
-		-- Describtion: Unlocks the players' input, call this to make the player be able to move by himself again
+		-- Description: Unlocks the players' input, call this to make the player be able to move by himself again
 		-- Parameters: none
 		-- Return value: none
 	_game.controls.InputLocked()
-		-- Describtion: Checks wether the input is currently locked
+		-- Description: Checks wether the input is currently locked
 		-- Parameters: none
 		-- Return value: Boolean
-	_game.controls.InputLocked(Input, Value)
-		-- Describtion: Sets an input to the given value. Possible inputs: Direction, Fire, Hook, Jump, Weapon, TargetX, TargetY
+	_game.controls.SetInput(Input, Value)
+		-- Description: Sets an input to the given value. Possible inputs: Direction, Fire, Hook, Jump, Weapon, TargetX, TargetY
 		-- Parameters: String, Integer
 		-- Return value: none
 
 --------- Namespace: _graphics
 _graphics.GetScreenWidth()
-	-- Describtion: Returns the screen width
+	-- Description: Returns the screen width
 	-- Parameters: none
 	-- Return value: Integer
 _graphics.GetScreenHeight()
-	-- Describtion: Returns the screen height
+	-- Description: Returns the screen height
 	-- Parameters: none
 	-- Return value: Integer
 _graphics.BlendNone()
-	-- Describtion: Sets blendmode to "none"
+	-- Description: Sets blendmode to "none"
 	-- Parameters: none
 	-- Return value: Integer
 _graphics.BlendNormal()
-	-- Describtion: Sets blendmode to "normal"
+	-- Description: Sets blendmode to "normal"
 	-- Parameters: none
 	-- Return value: Integer
 _graphics.BlendAdditive()
-	-- Describtion: Sets blendmode to "additive"
+	-- Description: Sets blendmode to "additive"
 	-- Parameters: none
 	-- Return value: Integer
 _graphics.SetColor(r, g, b, a)
-	-- Describtion: Sets the color for further rendering tasks to the given values (red, blue, green, alpha)
+	-- Description: Sets the color for further rendering tasks to the given values (red, blue, green, alpha)
 	-- Parameters: Float (0 to 1), Float (0 to 1), Float (0 to 1), Float (0 to 1)
 	-- Return value: none
 _graphics.LoadTexture(Filename, StorageType, StoreFormat, Flags)
-	-- Describtion: Loads a texture to be rendered
+	-- Description: Loads a texture to be rendered
 	-- Parameters: String, Integer, Integer, Integer
 	-- Return value: none
 _graphics.RenderTexture(ID, x, y, w, h, Rotation)
-	-- Describtion: Renders a loaded texture with the given params (ID, X, Y, width, height, rotation)
+	-- Description: Renders a loaded texture with the given params (ID, X, Y, width, height, rotation)
 	-- Parameters: Integer, Float, Float, Float, Float, Float
 	-- Return value: none
