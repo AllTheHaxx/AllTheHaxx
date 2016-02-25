@@ -1,5 +1,5 @@
 local function GreetBot(ClientID, Team, Message)
-	if(string.find(Message, _client.GetPlayerName(_client.GetLocalCharacterID()))) then
+	if(ClientID >= 0 and string.find(Message, _client.GetPlayerName(_client.GetLocalCharacterID()))) then
 		if(string.find(string.lower(Message), "hi") or
 		string.find(string.lower(Message), "hello") or
 		string.find(string.lower(Message), "hey") or
