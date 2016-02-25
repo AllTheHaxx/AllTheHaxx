@@ -168,6 +168,10 @@ _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
 		-- Describtion: Checks wether the input is currently locked
 		-- Parameters: none
 		-- Return value: Boolean
+	_game.controls.InputLocked(Input, Value)
+		-- Describtion: Sets an input to the given value. Possible inputs: Direction, Fire, Hook, Jump, Weapon, TargetX, TargetY
+		-- Parameters: String, Integer
+		-- Return value: none
 
 --------- Namespace: _graphics
 _graphics.GetScreenWidth()
