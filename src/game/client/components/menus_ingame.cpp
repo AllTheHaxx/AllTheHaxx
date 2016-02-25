@@ -970,16 +970,13 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	char aServerAddr[NETADDR_MAXSTRSIZE];
 	char aClientAddr[NETADDR_MAXSTRSIZE];
-	{
-		char aServerAddr[NETADDR_MAXSTRSIZE];
-		str_copy(aServerAddr, g_Config.m_UiServerAddress, sizeof(aServerAddr));
-		net_addr_split(aServerAddr, sizeof(aServerAddr));
+	str_copy(aServerAddr, g_Config.m_UiServerAddress, sizeof(aServerAddr));
+	net_addr_split(aServerAddr, sizeof(aServerAddr));
 
-		if(m_SpoofSelectedPlayer > 0)
-		{
-			str_copy(aClientAddr, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aClientAddr));
-			net_addr_split(aClientAddr, sizeof(aClientAddr));
-		}
+	if(m_SpoofSelectedPlayer >= 0)
+	{
+		str_copy(aClientAddr, m_pClient->m_aClients[m_SpoofSelectedPlayer].m_Addr, sizeof(aClientAddr));
+		net_addr_split(aClientAddr, sizeof(aClientAddr));
 	}
 
 	MainView.Margin(10.0f, &MainView);
