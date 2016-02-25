@@ -230,6 +230,20 @@ int CInput::Update()
 					}
 					//CLua::LUA_FIRE_EVENT_V("OnKeyPress", IInput::KeyName(Key));
 				}
+
+				if(Action == IInput::FLAG_RELEASE)
+				{
+					// EVENT CALL
+					for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+					{
+						if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+							continue;
+						LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyRelease");
+						if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+					}
+					//CLua::LUA_FIRE_EVENT_V("OnKeyRelease", IInput::KeyName(Key));
+				}
+
 				AddEvent(0, Key, Action);
 			}
 

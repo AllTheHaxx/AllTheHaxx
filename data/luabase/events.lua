@@ -60,6 +60,16 @@ function OnKeyPress(Key)
 	end
 end
 
+function OnKeyRelease(Key)
+	if Events["OnKeyRelease"] ~= nil then
+		for script, event in pairs(Events["OnKeyRelease"]) do
+			if event ~= nil then
+				event(Key)
+			end
+		end
+	end
+end
+
 function OnKill(Killer, Victim, Weapon)
 	if Events["OnKill"] ~= nil then
 		for script, event in pairs(Events["OnKill"]) do
