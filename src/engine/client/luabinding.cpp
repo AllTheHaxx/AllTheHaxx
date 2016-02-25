@@ -2,6 +2,7 @@
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
 
+#include <game/client/components/controls.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/menus.h>
 
@@ -79,6 +80,7 @@ int CLuaBinding::LuaGetFPS()
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	return 1.0f/pGameClient->Client()->RenderFrameTime();
 }
+
 
 // ui namespace
 void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
@@ -174,6 +176,19 @@ void CLuaBinding::LuaEmoteSend(int Emote)
 	CNetMsg_Cl_Emoticon Msg;
 	Msg.m_Emoticon = Emote;
 	pGameClient->Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+}
+
+// --- controls
+void CLuaBinding::LuaLockInput()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	pGameClient->m_pControls->m_LuaLockInput = true;
+}
+
+void CLuaBinding::LuaUnlockInput()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	pGameClient->m_pControls->m_LuaLockInput = false;
 }
 
 

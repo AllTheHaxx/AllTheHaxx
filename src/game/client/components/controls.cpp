@@ -311,6 +311,13 @@ int CControls::SnapInput(int *pData)
 		else if(m_InputData[g_Config.m_ClDummy].m_WantedWeapon != m_LastData[g_Config.m_ClDummy].m_WantedWeapon) Send = true;
 		else if(m_InputData[g_Config.m_ClDummy].m_NextWeapon != m_LastData[g_Config.m_ClDummy].m_NextWeapon) Send = true;
 		else if(m_InputData[g_Config.m_ClDummy].m_PrevWeapon != m_LastData[g_Config.m_ClDummy].m_PrevWeapon) Send = true;
+		else if(m_LuaInputData[g_Config.m_ClDummy].m_Direction != m_LastData[g_Config.m_ClDummy].m_Direction) Send = true;
+		else if(m_LuaInputData[g_Config.m_ClDummy].m_Jump != m_LastData[g_Config.m_ClDummy].m_Jump) Send = true;
+		else if(m_LuaInputData[g_Config.m_ClDummy].m_Fire != m_LastData[g_Config.m_ClDummy].m_Fire) Send = true;
+		else if(m_LuaInputData[g_Config.m_ClDummy].m_Hook != m_LastData[g_Config.m_ClDummy].m_Hook) Send = true;
+		else if(m_LuaInputData[g_Config.m_ClDummy].m_WantedWeapon != m_LastData[g_Config.m_ClDummy].m_WantedWeapon) Send = true;
+		else if(m_LuaInputData[g_Config.m_ClDummy].m_NextWeapon != m_LastData[g_Config.m_ClDummy].m_NextWeapon) Send = true;
+		else if(m_LuaInputData[g_Config.m_ClDummy].m_PrevWeapon != m_LastData[g_Config.m_ClDummy].m_PrevWeapon) Send = true;
 
 		// send at at least 10hz
 		if(time_get() > LastSendTime + time_freq()/25)
@@ -322,13 +329,13 @@ int CControls::SnapInput(int *pData)
 	}
 
 	// copy and return size
-	m_LastData[g_Config.m_ClDummy] = m_InputData[g_Config.m_ClDummy];
+	m_LastData[g_Config.m_ClDummy] = m_LuaLockInput ? m_LuaInputData[g_Config.m_ClDummy] : m_InputData[g_Config.m_ClDummy];
 
 	if(!Send)
 		return 0;
 
 	LastSendTime = time_get();
-	mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
+	mem_copy(pData, m_LuaLockInput ? &m_LuaInputData[g_Config.m_ClDummy] : &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
 	return sizeof(m_InputData[0]);
 }
 

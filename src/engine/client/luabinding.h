@@ -25,6 +25,7 @@ public:
 	static int LuaGetLocalCharacterHealth();
 	static int LuaGetLocalCharacterArmor();
 	static int LuaGetFPS();
+	static int LuaGetPing();
 
 	// ui namespace
 	static void LuaSetUiColor(float r, float g, float b, float a);
@@ -43,6 +44,9 @@ public:
 	static int LuaColGetTile(int x, int y);
 	// --- emote
 	static void LuaEmoteSend(int Emote);
+	// --- controls
+	static void LuaLockInput();
+	static void LuaUnlockInput();
 
 
 	// graphics namespace

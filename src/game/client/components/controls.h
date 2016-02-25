@@ -26,6 +26,8 @@ public:
 
 	CNetObj_PlayerInput m_InputData[2];
 	CNetObj_PlayerInput m_LastData[2];
+	CNetObj_PlayerInput m_LuaInputData[2];
+	bool m_LuaLockInput;
 	int m_InputDirectionLeft[2];
 	int m_InputDirectionRight[2];
 	int m_ShowHookColl[2];

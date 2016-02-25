@@ -126,7 +126,6 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 				.addFunction("Active", &CLuaBinding::LuaChatActive)
 				.addFunction("AllActive", &CLuaBinding::LuaChatAllActive)
 				.addFunction("TeamActive", &CLuaBinding::LuaChatTeamActive)
-
 			.endNamespace()
 
 			.beginNamespace("collision")
@@ -137,6 +136,11 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 			.beginNamespace("emote")
 				.addFunction("Send", &CLuaBinding::LuaEmoteSend)
+			.endNamespace()
+
+			.beginNamespace("controls")
+				.addFunction("LockInput", &CLuaBinding::LuaLockInput)
+				.addFunction("UnlockInput", &CLuaBinding::LuaUnlockInput)
 			.endNamespace()
 		.endNamespace()
 
