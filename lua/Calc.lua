@@ -1,11 +1,10 @@
 local function Calc(ClientID, Team, Message)
 	if(string.sub(Message, 1, string.len(".calc")) == ".calc") then
 		x = string.sub(Message, string.len(".calc")+2, string.len(Message))
-		print(x)
-		func = assert(load("return " .. x))
+		func = assert(load("return "..x))
 		y = func()
-		_game.chat.Send(0, "Result: "..y)
-		print("Result: "..y)
+		_game.chat.Send(0, x.." = "..y)
+		print("Result: "..x.." = "..y)
 	end
 end
 
