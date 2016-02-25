@@ -129,3 +129,13 @@ function OnStateChange(NewState, OldState)
 		end
 	end
 end
+
+function OnTick()
+	if Events["OnTick"] ~= nil then
+		for script, event in pairs(Events["OnTick"]) do
+			if event ~= nil then
+				event()
+			end
+		end
+	end
+end
