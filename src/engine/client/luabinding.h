@@ -24,6 +24,7 @@ public:
 	static int LuaGetLocalCharacterWeaponAmmo();
 	static int LuaGetLocalCharacterHealth();
 	static int LuaGetLocalCharacterArmor();
+	static int LuaGetFPS();
 
 	// ui namespace
 	static void LuaSetUiColor(float r, float g, float b, float a);

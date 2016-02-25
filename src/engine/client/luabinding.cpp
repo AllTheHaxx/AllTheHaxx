@@ -74,6 +74,12 @@ int CLuaBinding::LuaGetLocalCharacterArmor()
 		return -1;
 }
 
+int CLuaBinding::LuaGetFPS()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return 1.0f/pGameClient->Client()->RenderFrameTime();
+}
+
 // ui namespace
 void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
 {
