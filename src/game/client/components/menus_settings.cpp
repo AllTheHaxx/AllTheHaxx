@@ -2186,7 +2186,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				}
 
 				LuaRef func = L->GetFunc("OnConfigOpen");
-				if (func && L->GetScriptHasSettings())
+				if (!(func == 0) && L->GetScriptHasSettings())
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
