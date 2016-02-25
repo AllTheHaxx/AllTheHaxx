@@ -177,7 +177,7 @@ _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
 		-- Return value: none
 ------------- SubNamespace: controls
 	_game.controls.LockInput()
-		-- Description: Locks the players' input, call this before changing the input via Lua
+		-- Description: Locks the players' input, call this to just use controls given by Lua
 		-- Parameters: none
 		-- Return value: none
 	_game.controls.UnlockInput()
