@@ -155,6 +155,15 @@ _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
 		-- Describtion: Do an emoticon (Emote is the ID)
 		-- Parameters: Integer
 		-- Return value: none
+------------- SubNamespace: controls
+	_game.controls.LockInput()
+		-- Describtion: Locks the players' input, call this before changing the input via Lua
+		-- Parameters: none
+		-- Return value: none
+	_game.controls.UnlockInput()
+		-- Describtion: Unlocks the players' input, call this to make the player be able to move by himself again
+		-- Parameters: none
+		-- Return value: none
 
 --------- Namespace: _graphics
 _graphics.GetScreenWidth()
