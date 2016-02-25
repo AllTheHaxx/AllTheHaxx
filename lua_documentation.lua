@@ -176,6 +176,10 @@ _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
 		-- Description: Sets an input to the given value. Possible inputs: Direction, Fire, Hook, Jump, Weapon, TargetX, TargetY
 		-- Parameters: String, Integer
 		-- Return value: none
+	_game.controls.ResetInput()
+		-- Description: Resets all inputs
+		-- Parameters: none
+		-- Return value: none
 
 --------- Namespace: _graphics
 _graphics.GetScreenWidth()
