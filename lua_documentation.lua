@@ -24,6 +24,10 @@ RegisterEvent("EventName", FunctionToExecuteOnEvent) -- Example
 	-- Now, whenever the event occurs your function will be called.
 
 -- LIST OF EVENTS (among quick explaination):
+RegisterEvent("OnTick", YourCallbackFunction) 
+	-- Called on every tick (gameclient render)
+	-- Callback function parameters: none
+
 RegisterEvent("OnStateChange", YourCallbackFunction) 
 	-- Called when the clientstate changes (i.E. from offline to online - while joining a server)
 	-- Callback function parameters: YourCallbackFunction(NewState, OldState)
