@@ -878,7 +878,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 			return;
 		}
 
-		AddLine(-1337, 0, "Unknown command. Try '/cmdlist'!");
+		AddLine(-1337, 0, "Unknown command. Try '!cmdlist'!");
 		return;
 	}
 	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && !NoTrans)
