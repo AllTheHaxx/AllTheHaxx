@@ -4,10 +4,12 @@
 
 #include <base/system.h>
 #include <engine/shared/config.h>
+#include <engine/client.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
 
+#include "lua.h"
 #include "input.h"
 
 //print >>f, "int inp_key_code(const char *key_name) { int i; if (!strcmp(key_name, \"-?-\")) return -1; else for (i = 0; i < 512; i++) if (!strcmp(key_strings[i], key_name)) return i; return -1; }"
@@ -215,7 +217,19 @@ int CInput::Update()
 			{
 				m_aInputCount[m_InputCurrent][Key].m_Presses++;
 				if(Action == IInput::FLAG_PRESS)
+				{
 					m_aInputState[m_InputCurrent][Key] = 1;
+
+					// EVENT CALL
+					for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+					{
+						if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+							continue;
+						LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyPress");
+						if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+					}
+					//CLua::LUA_FIRE_EVENT_V("OnKeyPress", IInput::KeyName(Key));
+				}
 				AddEvent(0, Key, Action);
 			}
 

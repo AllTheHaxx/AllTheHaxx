@@ -50,6 +50,16 @@ function OnEnterGame()
 	end
 end
 
+function OnKeyPress(Key)
+	if Events["OnKeyPress"] ~= nil then
+		for script, event in pairs(Events["OnKeyPress"]) do
+			if event ~= nil then
+				event(Key)
+			end
+		end
+	end
+end
+
 function OnKill(Killer, Victim, Weapon)
 	if Events["OnKill"] ~= nil then
 		for script, event in pairs(Events["OnKill"]) do
