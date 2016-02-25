@@ -167,6 +167,21 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
 		.endNamespace()
 
+		// global types
+		.beginClass< vector2_base<int> >("vec2")
+		.endClass()
+		.beginClass< vector2_base<int> >("vec3")
+		.endClass()
+		.beginClass< vector2_base<int> >("vec4")
+		.endClass()
+
+		.beginClass< vector2_base<float> >("vec2f")
+		.endClass()
+		.beginClass< vector2_base<float> >("vec3f")
+		.endClass()
+		.beginClass< vector2_base<float> >("vec4f")
+		.endClass()
+
 	;
 	dbg_msg("Lua", "Registering LuaBindings complete.");
 }
