@@ -13,8 +13,7 @@
 		if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED) \
 			continue; \
 		LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc(EVENTNAME); \
-		if(lfunc) \
-			lfunc(); \
+		if(lfunc) try { lfunc(); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } \
 	}
 
 #define LUA_FIRE_EVENT_V(EVENTNAME, ...) \
@@ -23,8 +22,7 @@
 		if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED) \
 			continue; \
 		LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc(EVENTNAME); \
-		if(lfunc) \
-			lfunc(__VA_ARGS__); \
+		if(lfunc) try { lfunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } \
 	}
 
 class IClient;
