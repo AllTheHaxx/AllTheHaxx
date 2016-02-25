@@ -50,6 +50,7 @@ public:
 	static bool LuaInputLocked();
 	static int LuaGetInput(const char *pInput);
 	static void LuaSetInput(const char *pInput, int Value);
+	static void LuaResetInput();
 
 
 	// graphics namespace

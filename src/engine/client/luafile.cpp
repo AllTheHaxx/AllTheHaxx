@@ -144,6 +144,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 				.addFunction("InputLocked", &CLuaBinding::LuaInputLocked)
 				.addFunction("GetInput", &CLuaBinding::LuaGetInput)
 				.addFunction("SetInput", &CLuaBinding::LuaSetInput)
+				.addFunction("ResetInput", &CLuaBinding::LuaResetInput)
 			.endNamespace()
 		.endNamespace()
 

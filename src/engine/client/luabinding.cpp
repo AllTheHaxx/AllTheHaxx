@@ -259,6 +259,19 @@ void CLuaBinding::LuaSetInput(const char *pInput, int Value)
 		pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY = Value;
 }
 
+void CLuaBinding::LuaSetInput()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Direction = 0;
+	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Fire = 0;
+	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Hook = 0;
+	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Jump = 0;
+	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_WantedWeapon = 1;
+	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetX = 1;
+	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY = 0;
+}
+
 
 // graphics namespace
 int CLuaBinding::LuaGetScreenWidth()
