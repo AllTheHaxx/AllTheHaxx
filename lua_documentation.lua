@@ -168,6 +168,10 @@ _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
 		-- Description: Checks wether the input is currently locked
 		-- Parameters: none
 		-- Return value: Boolean
+	_game.controls.GetInput(Input)
+		-- Description: Returns the value of an Input, can be used without locking the input aswell!
+		-- Parameters: String
+		-- Return value: Integer
 	_game.controls.SetInput(Input, Value)
 		-- Description: Sets an input to the given value. Possible inputs: Direction, Fire, Hook, Jump, Weapon, TargetX, TargetY
 		-- Parameters: String, Integer
