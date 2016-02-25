@@ -164,6 +164,10 @@ _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
 		-- Describtion: Unlocks the players' input, call this to make the player be able to move by himself again
 		-- Parameters: none
 		-- Return value: none
+	_game.controls.InputLocked()
+		-- Describtion: Checks wether the input is currently locked
+		-- Parameters: none
+		-- Return value: Boolean
 
 --------- Namespace: _graphics
 _graphics.GetScreenWidth()
