@@ -197,6 +197,48 @@ bool CLuaBinding::LuaInputLocked()
 	return pGameClient->m_pControls->m_LuaLockInput;
 }
 
+int CLuaBinding::LuaGetInput(const char *pInput)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	if(pGameClient->m_pControls->m_LuaLockInput)
+	{
+		if(str_comp_nocase(pInput, "Direction") == 0)
+			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Direction;
+		else if(str_comp_nocase(pInput, "Fire") == 0)
+			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Fire;
+		else if(str_comp_nocase(pInput, "Hook") == 0)
+			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Hook;
+		else if(str_comp_nocase(pInput, "Jump") == 0)
+			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Jump;
+		else if(str_comp_nocase(pInput, "Weapon") == 0)
+			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_WantedWeapon;
+		else if(str_comp_nocase(pInput, "TargetX") == 0)
+			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetX;
+		else if(str_comp_nocase(pInput, "TargetY") == 0)
+			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY;
+	}
+	else
+	{
+		if(str_comp_nocase(pInput, "Direction") == 0)
+			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Direction;
+		else if(str_comp_nocase(pInput, "Fire") == 0)
+			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Fire;
+		else if(str_comp_nocase(pInput, "Hook") == 0)
+			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Hook;
+		else if(str_comp_nocase(pInput, "Jump") == 0)
+			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Jump;
+		else if(str_comp_nocase(pInput, "Weapon") == 0)
+			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_WantedWeapon;
+		else if(str_comp_nocase(pInput, "TargetX") == 0)
+			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetX;
+		else if(str_comp_nocase(pInput, "TargetY") == 0)
+			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetY;
+	}
+
+	return -1337;
+}
+
 void CLuaBinding::LuaSetInput(const char *pInput, int Value)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
