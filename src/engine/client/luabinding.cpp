@@ -259,7 +259,7 @@ void CLuaBinding::LuaSetInput(const char *pInput, int Value)
 		pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY = Value;
 }
 
-void CLuaBinding::LuaSetInput()
+void CLuaBinding::LuaResetInput()
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 
