@@ -97,6 +97,8 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("GetLocalCharacterHealth", &CLuaBinding::LuaGetLocalCharacterHealth)
 			.addFunction("GetLocalCharacterArmor", &CLuaBinding::LuaGetLocalCharacterArmor)
 			.addFunction("GetFPS", &CLuaBinding::LuaGetFPS)
+			// external info
+			.addFunction("GetPlayerName", &CLuaBinding::LuaGetPlayerName)
 		.endNamespace()
 
 

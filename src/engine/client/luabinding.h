@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_LUABINDING_H
 #define ENGINE_CLIENT_LUABINDING_H
 #include <base/vmath.h>
+#include <string>
 
 class CClient;
 
@@ -26,6 +27,8 @@ public:
 	static int LuaGetLocalCharacterArmor();
 	static int LuaGetFPS();
 	static int LuaGetPing();
+	// external info
+	static std::string LuaGetPlayerName(int ClientID);
 
 	// ui namespace
 	static void LuaSetUiColor(float r, float g, float b, float a);

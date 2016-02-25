@@ -81,6 +81,22 @@ int CLuaBinding::LuaGetFPS()
 	return 1.0f/pGameClient->Client()->RenderFrameTime();
 }
 
+// external info
+std::string CLuaBinding::LuaGetPlayerName(int ClientID)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		if(pGameClient->m_aClients[ClientID].m_aName[0])
+			return std::string(pGameClient->m_aClients[ClientID].m_aName);
+		else
+			return "failure";
+	}
+	else
+		return "failure";
+}
+
 
 // ui namespace
 void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
