@@ -52,6 +52,15 @@ RegisterEvent("OnEnterGame", YourCallbackFunction)
 	-- Called when you join a server and are ready to enter the game.
 	-- Callback function parameters: none
 
+RegisterEvent("OnKeyPress", YourCallbackFunction)
+	-- Called when you press a key
+	-- Callback function parameters: YourCallbackFunction(Key)
+
+RegisterEvent("OnKeyRelease", YourCallbackFunction)
+	-- Called when you release a key
+	-- Callback function parameters: YourCallbackFunction(Key)
+
+
 
 -- ~~~~~~~~~~~~~~~~~
 -- ~~~ Functions ~~~
