@@ -191,6 +191,12 @@ void CLuaBinding::LuaUnlockInput()
 	pGameClient->m_pControls->m_LuaLockInput = false;
 }
 
+bool CLuaBinding::LuaInputLocked()
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	return pGameClient->m_pControls->m_LuaLockInput;
+}
+
 
 // graphics namespace
 int CLuaBinding::LuaGetScreenWidth()

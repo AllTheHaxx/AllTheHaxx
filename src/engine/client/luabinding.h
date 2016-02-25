@@ -47,6 +47,7 @@ public:
 	// --- controls
 	static void LuaLockInput();
 	static void LuaUnlockInput();
+	static bool LuaInputLocked();
 
 
 	// graphics namespace
