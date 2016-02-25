@@ -103,10 +103,26 @@ _client.GetFPS()
 	-- Description: Returns current FPS
 	-- Parameters: none
 	-- Return value: Integer
-_client.GetPlayername(ClientID)
+_client.GetPlayerName(ClientID)
 	-- Description: Returns the name of the player with the given ClientID
 	-- Parameters: Integer
 	-- Return value: String
+_client.GetPlayerClan(ClientID)
+	-- Description: Returns the clan of the player with the given ClientID
+	-- Parameters: Integer
+	-- Return value: String
+_client.GetPlayerCountry(ClientID)
+	-- Description: Returns the country of the player with the given ClientID
+	-- Parameters: Integer
+	-- Return value: Integer
+_client.GetPlayerScore(ClientID)
+	-- Description: Returns the score of the player with the given ClientID
+	-- Parameters: Integer
+	-- Return value: Integer
+_client.GetPlayerPing(ClientID)
+	-- Description: Returns the ping of the player with the given ClientID
+	-- Parameters: Integer
+	-- Return value: Integer
 
 --------- Namespace: _ui
 _ui.SetUiColor(r, g, b, a)
