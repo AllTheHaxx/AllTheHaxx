@@ -99,6 +99,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("GetFPS", &CLuaBinding::LuaGetFPS)
 			// external info
 			.addFunction("GetPlayerName", &CLuaBinding::LuaGetPlayerName)
+			.addFunction("GetPlayerClan", &CLuaBinding::LuaGetPlayerClan)
+			.addFunction("GetPlayerCountry", &CLuaBinding::LuaGetPlayerCountry)
+			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
+			.addFunction("GetPlayerPing", &CLuaBinding::LuaGetPlayerPing)
 		.endNamespace()
 
 

@@ -29,6 +29,10 @@ public:
 	static int LuaGetPing();
 	// external info
 	static std::string LuaGetPlayerName(int ClientID);
+	static std::string LuaGetPlayerClan(int ClientID);
+	static int LuaGetPlayerCountry(int ClientID);
+	static int LuaGetPlayerScore(int ClientID);
+	static int LuaGetPlayerPing(int ClientID);
 
 	// ui namespace
 	static void LuaSetUiColor(float r, float g, float b, float a);

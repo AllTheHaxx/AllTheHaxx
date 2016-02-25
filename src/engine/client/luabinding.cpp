@@ -97,6 +97,65 @@ std::string CLuaBinding::LuaGetPlayerName(int ClientID)
 		return "failure";
 }
 
+std::string CLuaBinding::LuaGetPlayerClan(int ClientID)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		if(pGameClient->m_aClients[ClientID].m_aClan[0])
+			return std::string(pGameClient->m_aClients[ClientID].m_aClan);
+		else
+			return "";
+	}
+	else
+		return "failure";
+}
+
+int CLuaBinding::LuaGetPlayerCountry(int ClientID)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		return pGameClient->m_aClients[ClientID].m_Country;
+	}
+
+	return -1;
+}
+
+int CLuaBinding::LuaGetPlayerScore(int ClientID)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		const CNetObj_PlayerInfo *pInfo = pGameClient->m_Snap.m_paPlayerInfos[ClientID];
+		if (pInfo)
+		{
+			return pInfo->m_Score;
+		}
+	}
+
+	return -1;
+}
+
+int CLuaBinding::LuaGetPlayerPing(int ClientID)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		const CNetObj_PlayerInfo *pInfo = pGameClient->m_Snap.m_paPlayerInfos[ClientID];
+		if (pInfo)
+		{
+			return pInfo->m_Latency;
+		}
+	}
+
+	return -1;
+}
+
 
 // ui namespace
 void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
