@@ -685,6 +685,9 @@ void CGameClient::OnRender()
 	//g_Config.m_ClPlayerColorBody += 0x010000;
 	//if((g_Config.m_ClPlayerColorBody&0xFF0000) >= 0xFF0000) g_Config.m_ClPlayerColorBody = g_Config.m_ClPlayerColorBody&0x00FFFF;
 
+	// EVENT CALL
+	LUA_FIRE_EVENT_V("OnTick");
+
 	if(g_Config.m_ClPlayerColorBodyRainbow || g_Config.m_ClPlayerColorFeetRainbow)
 	{
 		static int bcolor = g_Config.m_ClPlayerColorBody;
