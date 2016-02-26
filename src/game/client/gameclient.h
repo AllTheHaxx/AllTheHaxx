@@ -385,6 +385,8 @@ public:
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];
+
+	bool m_ResetConfig;
 };
 
 

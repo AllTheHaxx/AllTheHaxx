@@ -420,6 +420,8 @@ void CGameClient::OnInit()
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
 
+	m_ResetConfig = false;
+
 	// Set free binds to DDRace binds if it's active
 	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
 		gs_Binds.SetDDRaceBinds(true);
@@ -540,6 +542,18 @@ void CGameClient::OnReset()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+
+	if(m_ResetConfig)
+	{
+		IOHANDLE File = Storage()->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+		if(File)
+		{
+			io_close(File);
+			Console()->ExecuteFile(CONFIG_FILE);
+		}
+
+		m_ResetConfig = false;
+	}
 
 	for(int i = 0; i < 150; i++)
 		m_aWeaponData[i].m_Tick = -1;
@@ -1047,11 +1061,11 @@ void CGameClient::OnEnterGame()
 	str_replace_char(aBuf, sizeof(aBuf), ':', '_');
 
 	IOHANDLE file = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-	if (file)
+	if(file)
 	{
 		io_close(file);
-
 		Console()->ExecuteFile(aBuf);
+		m_ResetConfig = true;
 	}
 }
 
