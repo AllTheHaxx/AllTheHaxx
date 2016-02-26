@@ -79,12 +79,6 @@ void CMenus::RenderGame(CUIRect MainView)
 		Client()->Connect(g_Config.m_UiServerAddress);
 	}
 
-	ButtonBar.VSplitRight(5.0f, &ButtonBar, &Button);
-	ButtonBar.VSplitRight(85.0f, &ButtonBar, &Button);
-	static int s_CrashButton = 0;
-	if(DoButton_CheckBox(&s_CrashButton, Localize("Crash"), g_Config.m_ClServerCrasher, &Button, Localize("Check this and click 'Reconnect' to crash 0.6.2 and earlier servers")))
-		g_Config.m_ClServerCrasher ^= 1;
-
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonBar.h, &Button, &ButtonBar);
 	static int s_ToggleExtraButton = 0;
