@@ -37,6 +37,7 @@
 
 #include "countryflags.h"
 #include "console.h"
+#include "mapimages.h"
 #include "menus.h"
 #include "skins.h"
 #include "spoofremote.h"
@@ -2071,6 +2072,18 @@ void CMenus::OnRender()
 		m_DeletePressed = false;
 		m_NumInputEvents = 0;
 		return;
+	}
+
+	if(!Client()->MapLoaded())
+	{
+		Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
+
+		m_pClient->Layers()->Init(Kernel());
+		m_pClient->Collision()->Init(Layers());
+		RenderTools()->RenderTilemapGenerateSkip(Layers());
+		m_pClient->m_pMapimages->OnMapLoad();
+
+		m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 	}
 
 	// update colors
