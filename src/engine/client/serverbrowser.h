@@ -51,6 +51,7 @@ public:
 	enum
 	{
 		MAX_FAVORITES=2048,
+		MAX_RECENT=2048,
 		MAX_DDNET_COUNTRIES=16,
 		MAX_DDNET_TYPES=32,
 	};
@@ -71,9 +72,11 @@ public:
 
 	int NumSortedServers() const { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const;
+	const CServerInfo *Get(int Index) const;
 
 	bool IsFavorite(const NETADDR &Addr) const;
 	void AddFavorite(const NETADDR &Addr);
+	void AddRecent(const NETADDR &Addr);
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNet();
@@ -116,6 +119,9 @@ private:
 
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
 	int m_NumFavoriteServers;
+
+	NETADDR m_aRecentServers[MAX_RECENT];
+	int m_NumRecentServers;
 
 	CDDNetCountry m_aDDNetCountries[MAX_DDNET_COUNTRIES];
 	int m_NumDDNetCountries;

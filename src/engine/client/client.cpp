@@ -706,6 +706,8 @@ void CClient::OnEnterGame()
 		m_LastDummyConnectTime = 0;
 
 	GameClient()->OnEnterGame();
+
+	m_ServerBrowser.AddRecent(m_ServerAddress);
 }
 
 void CClient::EnterGame()

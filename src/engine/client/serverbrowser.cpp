@@ -64,6 +64,17 @@ CServerBrowser::CServerBrowser()
 
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
+
+	char aFilePath[1024];
+	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
+	str_append(aFilePath, "/recent.cfg", sizeof(aFilePath));
+	IOHANDLE RecentFile = io_open(aFilePath, IOFLAG_READ);
+	if(RecentFile)
+	{
+		io_read(RecentFile, m_aRecentServers, io_length(RecentFile));
+		m_NumRecentServers = io_length(RecentFile) / sizeof(NETADDR);
+		io_close(RecentFile);
+	}
 }
 
 void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
@@ -85,6 +96,12 @@ const CServerInfo *CServerBrowser::SortedGet(int Index) const
 	return &m_ppServerlist[m_pSortedServerlist[Index]]->m_Info;
 }
 
+const CServerInfo *CServerBrowser::Get(int Index) const
+{
+	if(Index < 0 || Index >= m_NumSortedServers)
+		return 0;
+	return &m_ppServerlist[Index]->m_Info;
+}
 
 bool CServerBrowser::SortCompareName(int Index1, int Index2) const
 {
@@ -476,6 +493,17 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			QueueRequest(pEntry);
 		}
 	}
+	else if(Type == IServerBrowser::SET_RECENT)
+	{
+		if(m_ServerlistType != IServerBrowser::TYPE_RECENT)
+			return;
+
+		if(!Find(Addr))
+		{
+			pEntry = Add(Addr);
+			QueueRequest(pEntry);
+		}
+	}
 	else if(Type == IServerBrowser::SET_DDNET_ADD)
 	{
 		if(m_ServerlistType != IServerBrowser::TYPE_DDNET)
@@ -581,6 +609,11 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 	{
 		for(int i = 0; i < m_NumFavoriteServers; i++)
 			Set(m_aFavoriteServers[i], IServerBrowser::SET_FAV_ADD, -1, 0);
+	}
+	else if(Type == IServerBrowser::TYPE_RECENT)
+	{
+		for(int i = 0; i < m_NumRecentServers; i++)
+			Set(m_aRecentServers[i], IServerBrowser::SET_RECENT, -1, 0);
 	}
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
@@ -1050,6 +1083,31 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 			return;
 		}
 	}
+}
+
+template<class T>
+inline void swap(T &a, T &b)
+{
+	T c = b;
+	b = a;
+	a = c;
+}
+
+void CServerBrowser::AddRecent(const NETADDR &Addr)
+{
+	for(int i = MAX_RECENT - 1; i > 0; i--)
+		swap(m_aRecentServers[i], m_aRecentServers[i - 1]);
+	m_aRecentServers[0] = Addr;
+	if(m_NumRecentServers < MAX_RECENT)
+		m_NumRecentServers++;
+
+	//save recent to file
+	char aFilePath[1024];
+	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
+	str_append(aFilePath, "/recent.cfg", sizeof(aFilePath));
+	IOHANDLE RecentFile = io_open(aFilePath, IOFLAG_WRITE);
+	io_write(RecentFile, m_aRecentServers, sizeof(NETADDR) * m_NumRecentServers);
+	io_close(RecentFile);
 }
 
 void CServerBrowser::LoadDDNet()

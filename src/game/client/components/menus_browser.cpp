@@ -212,7 +212,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 				m_SelectedIndex = NewIndex;
 
-				const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
+
+				const CServerInfo *pItem;
+				if(g_Config.m_UiPage == PAGE_RECENT)
+					pItem = ServerBrowser()->Get(m_SelectedIndex);
+				else
+					pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
 				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 			}
 		}
@@ -1391,6 +1396,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			else if(g_Config.m_UiPage == PAGE_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			else if(g_Config.m_UiPage == PAGE_RECENT)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
 			else if(g_Config.m_UiPage == PAGE_DDNET)
 			{
 				// start a new serverlist request
@@ -1480,4 +1487,6 @@ void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUser
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() && (g_Config.m_UiPage == PAGE_FAVORITES || g_Config.m_UiPage == PAGE_DDNET) && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+	if(pResult->NumArguments() && g_Config.m_UiPage == PAGE_RECENT && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
+        ((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
 }

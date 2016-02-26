@@ -751,11 +751,21 @@ int CMenus::RenderMenubar(CUIRect r)
 		//box.VSplitLeft(4.0f, 0, &box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_FavoritesButton=0;
-		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, CUI::CORNER_TR*(1-g_Config.m_BrShowDDNet)))
+		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			NewPage = PAGE_FAVORITES;
+			m_DoubleClickIndex = -1;
+		}
+
+		Box.VSplitLeft(100.0f, &Button, &Box);
+		static int s_RecentButton=0;
+		if(DoButton_MenuTab(&s_RecentButton, Localize("Recent"), m_ActivePage==PAGE_RECENT, &Button, CUI::CORNER_TR*(1-g_Config.m_BrShowDDNet)))
+		{
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_RECENT)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
+			NewPage = PAGE_RECENT;
 			m_DoubleClickIndex = -1;
 		}
 
@@ -1194,6 +1204,8 @@ int CMenus::Render()
 		else if(g_Config.m_UiPage == PAGE_DEMOS)
 			RenderDemoList(MainView);
 		else if(g_Config.m_UiPage == PAGE_FAVORITES)
+			RenderServerbrowser(MainView);
+		else if(g_Config.m_UiPage == PAGE_RECENT)
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_DDNET)
 			RenderServerbrowser(MainView);

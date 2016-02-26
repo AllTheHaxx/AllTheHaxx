@@ -86,12 +86,14 @@ public:
 		TYPE_INTERNET = 1,
 		TYPE_LAN = 2,
 		TYPE_FAVORITES = 3,
-		TYPE_DDNET = 4,
+		TYPE_RECENT = 4,
+		TYPE_DDNET = 5,
 
 		SET_MASTER_ADD=1,
 		SET_FAV_ADD,
 		SET_DDNET_ADD,
-		SET_TOKEN
+		SET_TOKEN,
+		SET_RECENT,
 	};
 
 	virtual void Refresh(int Type, int NoReload=0) = 0;
@@ -107,10 +109,13 @@ public:
 
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
+	virtual const CServerInfo *Get(int Index) const = 0;
 
 	virtual bool IsFavorite(const NETADDR &Addr) const = 0;
 	virtual void AddFavorite(const NETADDR &Addr) = 0;
 	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
+
+	virtual void AddRecent(const NETADDR &Addr) = 0;
 
 	virtual int NumDDNetCountries() = 0;
 	virtual int GetDDNetCountryFlag(int Index) = 0;
