@@ -551,7 +551,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static bool HasCached = false;
 		if(g_Config.m_BrAutoCache)
 		{
-			if(!HasCached && !ServerBrowser()->IsRefreshing())
+			if(!HasCached && !ServerBrowser()->IsRefreshing() && m_ActivePage != PAGE_RECENT)
 			{
 				ServerBrowser()->SaveCache();
 				HasCached = true;
@@ -1435,13 +1435,15 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			static int s_SaveButton = 0;
 			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, Localize("Save the serverlist"), CUI::CORNER_L))
 			{
-				ServerBrowser()->SaveCache();
+				if(m_ActivePage != PAGE_RECENT)
+					ServerBrowser()->SaveCache();
 			}
 			static int s_LoadButton = 0;
 			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, Localize("Load the saved serverlist"), CUI::CORNER_R))
 			{
-				if(!ServerBrowser()->LoadCache())
-					Console()->Print(0, "browser", "failed to load cache file", false);
+				if(m_ActivePage != PAGE_RECENT)
+					if(!ServerBrowser()->LoadCache())
+						Console()->Print(0, "browser", "failed to load cache file", false);
 			}
 		}
 
