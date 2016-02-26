@@ -81,12 +81,21 @@ void CCamera::OnRender()
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		m_Zoom = 0.7f;
-
-		// do little rotation
 		static vec2 Dir = vec2(1.0f, 0.0f);
-		float RotPerTick = 18.0f * Client()->RenderFrameTime(); // 20 sec for one rotation (18° per sec)
-		Dir = rotate(Dir, RotPerTick);
-		m_Center = m_RotationCenter+Dir*30.0f;
+
+		if(distance(m_Center, m_RotationCenter) <= (float)g_Config.m_ClRotationRadius+0.5f)
+		{
+			// do little rotation
+			float RotPerTick = 360.0f/(float)g_Config.m_ClRotationSpeed * Client()->RenderFrameTime();
+			Dir = rotate(Dir, RotPerTick);
+			m_Center = m_RotationCenter+Dir*(float)g_Config.m_ClRotationRadius;
+		}
+		else
+		{
+			Dir = normalize(m_RotationCenter-m_Center);
+			m_Center += Dir*(500.0f*Client()->RenderFrameTime());
+			Dir = normalize(m_Center-m_RotationCenter);
+		}
 	}
 
 	m_PrevCenter = m_Center;
