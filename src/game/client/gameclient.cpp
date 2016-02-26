@@ -393,6 +393,8 @@ void CGameClient::OnInit()
 	for(int i = m_All.m_Num-1; i >= 0; --i)
 		m_All.m_paComponents[i]->OnInit();
 
+	Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
+
 	char aBuf[256];
 
 	// setup load amount// load textures
@@ -408,6 +410,13 @@ void CGameClient::OnInit()
 
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
+
+	m_Layers.Init(Kernel());
+	m_Collision.Init(Layers());
+
+	RenderTools()->RenderTilemapGenerateSkip(Layers());
+	
+	m_pMapimages->OnMapLoad();
 
 	int64 End = time_get();
 	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());

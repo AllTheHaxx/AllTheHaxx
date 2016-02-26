@@ -200,6 +200,8 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	void GraphicsThread();
 	vec3 GetColorV3(int v);
 
+	int64 TickStartTime(int Tick);
+
 	char m_aDDNetSrvListToken[4];
 	bool m_DDNetSrvListTokenSet;
 
@@ -293,6 +295,9 @@ public:
 	virtual void Quit();
 
 	virtual const char *ErrorString();
+
+	bool MapLoaded();
+	void LoadBackgroundMap(const char *pName, const char *pFilename);
 
 	const char *LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, int WantedCrc);

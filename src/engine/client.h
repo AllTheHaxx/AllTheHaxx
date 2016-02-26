@@ -32,6 +32,9 @@ protected:
 	float m_GameIntraTick[2];
 	float m_GameTickTime[2];
 
+	int m_CurMenuTick;
+	int64 m_MenuStartTime;
+
 	int m_PredTick[2];
 	float m_PredIntraTick[2];
 
@@ -83,6 +86,7 @@ public:
 	// tick time access
 	inline int PrevGameTick() const { return m_PrevGameTick[g_Config.m_ClDummy]; }
 	inline int GameTick() const { return m_CurGameTick[g_Config.m_ClDummy]; }
+	inline int MenuTick() const { return m_CurMenuTick; }
 	inline int PredGameTick() const { return m_PredTick[g_Config.m_ClDummy]; }
 	inline float IntraGameTick() const { return m_GameIntraTick[g_Config.m_ClDummy]; }
 	inline float PredIntraGameTick() const { return m_PredIntraTick[g_Config.m_ClDummy]; }
@@ -116,6 +120,9 @@ public:
 
 	// networking
 	virtual void EnterGame() = 0;
+
+	virtual void LoadBackgroundMap(const char *pName, const char *pFilename) = 0;
+	virtual bool MapLoaded() = 0;
 
 	//
 	virtual const char *MapDownloadName() = 0;

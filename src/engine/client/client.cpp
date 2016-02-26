@@ -696,6 +696,8 @@ void CClient::OnEnterGame()
 	m_CurGameTick[g_Config.m_ClDummy] = 0;
 	m_PrevGameTick[g_Config.m_ClDummy] = 0;
 
+	m_CurMenuTick = 0;
+
 	if (g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
 
@@ -1101,6 +1103,24 @@ void CClient::Render()
 vec3 CClient::GetColorV3(int v)
 {
 	return HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
+}
+
+bool CClient::MapLoaded()
+{
+	return m_pMap->IsLoaded();
+}
+
+void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
+{
+	if(!m_pMap->Load(pFilename))
+		return;
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+
+	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
+	m_CurrentMapCrc = m_pMap->Crc();
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)
@@ -2628,6 +2648,8 @@ void CClient::Run()
 		atexit(SDL_Quit); // ignore_convention
 	}
 
+	m_MenuStartTime = time_get();
+
 	// init graphics
 	{
 		if(g_Config.m_GfxThreadedOld)
@@ -2896,6 +2918,14 @@ void CClient::Run()
 		if(State() == IClient::STATE_QUITING)
 			break;
 
+		// menu tick
+		if(State() == IClient::STATE_OFFLINE)
+		{
+			int64 t = time_get();
+			while(t > TickStartTime(m_CurMenuTick+1))
+				m_CurMenuTick++;
+		}
+
 		// beNice
 		if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);
@@ -2936,6 +2966,11 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 		Last = false;
 
 	return false;
+}
+
+int64 CClient::TickStartTime(int Tick)
+{
+	return m_MenuStartTime + (time_freq()*Tick)/m_GameTickSpeed;
 }
 
 void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)

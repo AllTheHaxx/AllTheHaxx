@@ -1167,7 +1167,7 @@ int CMenus::Render()
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE)
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->MapLoaded())
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
