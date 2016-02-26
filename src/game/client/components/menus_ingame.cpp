@@ -1644,12 +1644,12 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 		NewPage = PAGE_FAVORITES;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
-	static int s_FavoritesButton=0;
-	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Recent"), Page==PAGE_RECENT, &Button, 0))
+	Box.VSplitLeft(90.0f, &Button, &Box);
+	static int s_RecentButton=0;
+	if(DoButton_MenuTab(&s_RecentButton, Localize("Recent"), Page==PAGE_RECENT, &Button, 0))
 	{
 		if(Page != PAGE_RECENT)
-			ServerBrowser()->Refresh(IServerBrowser::PAGE_RECENT);
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
 		NewPage = PAGE_RECENT;
 	}
 
