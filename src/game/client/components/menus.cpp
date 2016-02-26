@@ -133,6 +133,8 @@ void CMenus::OnConsoleInit()
 {
 	Console()->Register("+hotbar", "", CFGFLAG_CLIENT, ConKeyShortcut, this, "Access the hotbar");
 	Console()->Register("+irc", "", CFGFLAG_CLIENT, ConKeyShortcutIRC, this, "Toggle the IRC");
+
+	Console()->Register("+unlock_mouse", "", CFGFLAG_CLIENT, ConKeyShortcutRelMouse, this, "Release the mouse");
 }
 
 vec4 CMenus::ButtonColorMul(const void *pID)
@@ -2284,4 +2286,12 @@ bool CMenus::LockInput(IInput::CEvent e)
 		}
 	}
 	return false;
+}
+
+void CMenus::ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData)
+{
+	CMenus *pSelf = (CMenus *)pUserData;
+
+	if(pResult->GetInteger(0) != 0)
+		pSelf->Input()->MouseModeAbsolute();
 }

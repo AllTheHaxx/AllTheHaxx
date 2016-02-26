@@ -334,6 +334,8 @@ class CMenus : public CComponent
 
 	void SetActive(bool Active);
 	bool LockInput(IInput::CEvent Event);
+
+	static void ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData);
 public:
 	void RenderBackground();
 
