@@ -7,6 +7,7 @@
 
 IClient * CLua::m_pClient = 0; 
 IGameClient * CLua::m_pGameClient = 0;
+CGameClient * CLua::m_pCGameClient = 0;
 
 using namespace luabridge;
 
@@ -26,6 +27,12 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
 	m_pClient = pClient;
 	m_pStorage = pStorage;
 	LoadFolder();
+}
+
+void CLua::SetGameClient(IGameClient *pGameClient)
+{
+	CLua::m_pGameClient = pGameClient;
+	CLua::m_pCGameClient = (CGameClient*)pGameClient;
 }
 
 void CLua::AddUserscript(const char *pFilename)

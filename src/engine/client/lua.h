@@ -28,6 +28,7 @@
 class IClient;
 class IStorage;
 class IGameClient;
+class CGameClient;
 class CLuaFile;
 
 using namespace luabridge;
@@ -52,8 +53,9 @@ public:
 	static IGameClient *m_pGameClient;
 	static IClient *Client() { return m_pClient; }
 	static IGameClient *GameClient() { return m_pGameClient; }
+	static CGameClient * m_pCGameClient;
 	
-	void SetGameClient(IGameClient *pGameClient) { CLua::m_pGameClient = pGameClient; }
+	void SetGameClient(IGameClient *pGameClient);
 	array<CLuaFile*> &GetLuaFiles() { return m_pLuaFiles; }
 
 	IStorage *Storage() const { return m_pStorage; }

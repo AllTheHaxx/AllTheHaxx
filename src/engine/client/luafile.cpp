@@ -2,6 +2,9 @@
 #include "lua.h"
 #include "luabinding.h"
 
+#include <game/client/gameclient.h>
+#include <game/client/components/chat.h>
+
 CLuaFile::CLuaFile(CLua *pLua, std::string Filename) : m_pLua(pLua), m_Filename(Filename)
 {
 	m_pLuaState = 0;
@@ -181,6 +184,22 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.endClass()
 		.beginClass< vector2_base<float> >("vec4f")
 		.endClass()
+		
+		//OOP BEGINS HERE
+		
+		.beginClass<CGameClient>("CGameClient")
+			.addData("Chat", &CGameClient::m_pChat)
+		.endClass()
+		.beginClass<CChat>("CChat")
+			.addFunction("Say", &CChat::Say)
+		.endClass()
+
+		.beginNamespace("Game")
+			.addVariable("Client", &CLua::m_pCGameClient, false)	      //false means read only! important so noobs dont mess up the pointer		
+			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)
+		.endNamespace()
+		
+		//OOP ENDS HERE
 
 	;
 	dbg_msg("Lua", "Registering LuaBindings complete.");
