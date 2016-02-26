@@ -27,6 +27,7 @@
 #include <game/generated/protocol.h>
 
 #include <game/generated/client_data.h>
+#include <game/client/components/camera.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
@@ -733,6 +734,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_InternetButton=0;
 		if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
 		{
+			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
+
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			NewPage = PAGE_INTERNET;
@@ -744,6 +747,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_LanButton=0;
 		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
 		{
+			m_pClient->m_pCamera->m_RotationCenter = vec2(1000.0f, 1000.0f);
+
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			NewPage = PAGE_LAN;
@@ -755,6 +760,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_FavoritesButton=0;
 		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
 		{
+			m_pClient->m_pCamera->m_RotationCenter = vec2(1500.0f, 500.0f);
+
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			NewPage = PAGE_FAVORITES;
@@ -765,6 +772,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_RecentButton=0;
 		if(DoButton_MenuTab(&s_RecentButton, Localize("Recent"), m_ActivePage==PAGE_RECENT, &Button, CUI::CORNER_TR*(1-g_Config.m_BrShowDDNet)))
 		{
+			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 1000.0f);
+
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_RECENT)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
 			NewPage = PAGE_RECENT;
