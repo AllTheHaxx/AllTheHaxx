@@ -20,6 +20,7 @@ CCamera::CCamera()
 	m_CamType = CAMTYPE_UNDEFINED;
 	m_ZoomSet = false;
 	m_Zoom = 1.0;
+	m_RotationCenter = vec2(0.0f, 0.0f);
 }
 
 void CCamera::OnRender()
@@ -75,6 +76,17 @@ void CCamera::OnRender()
 			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + CameraOffset;
 		else
 			m_Center = m_pClient->m_LocalCharacterPos + CameraOffset;
+	}
+
+	if(Client()->State() == IClient::STATE_OFFLINE)
+	{
+		m_Zoom = 0.7f;
+
+		// do little rotation
+		static vec2 Dir = vec2(1.0f, 0.0f);
+		float RotPerTick = 18.0f * Client()->RenderFrameTime(); // 20 sec for one rotation (18° per sec)
+		Dir = rotate(Dir, RotPerTick);
+		m_Center = m_RotationCenter+Dir*30.0f;
 	}
 
 	m_PrevCenter = m_Center;
