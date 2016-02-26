@@ -3,7 +3,7 @@ local function Calc(ClientID, Team, Message)
 		x = string.sub(Message, string.len(".calc")+2, string.len(Message))
 		func = assert(load("return "..x))
 		y = func()
-		_game.chat.Send(0, x.." = "..y)
+		_game.chat.Send(0, _client.GetPlayerName(ClientID) .. ": " .. x.." = "..y)
 		print("Result: "..x.." = "..y)
 	end
 end
