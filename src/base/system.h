@@ -221,6 +221,13 @@ IOHANDLE io_open(const char *filename, int flags);
 */
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size);
 
+struct io_thread_data
+{
+	IOHANDLE io; void *buffer; unsigned size;
+	unsigned ret;
+};
+void io_read_threaded(void *io_data);
+
 /*
 	Function: io_skip
 		Skips data in a file.

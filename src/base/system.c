@@ -437,6 +437,12 @@ unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 	return fread(buffer, 1, size, (FILE*)io);
 }
 
+void io_read_threaded(void *io_data)
+{
+	struct io_thread_data *d = (struct io_thread_data*)io_data;
+	d->ret = fread(d->buffer, 1, d->size, (FILE*)d->io);
+}
+
 unsigned io_skip(IOHANDLE io, int size)
 {
 	fseek((FILE*)io, size, SEEK_CUR);
