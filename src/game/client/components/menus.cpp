@@ -933,19 +933,36 @@ float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, 
 	return HeaderHeight;
 }
 
+// TODO: Add more! :D
+static const char *s_aSayings[] = {	"The client with the keck!",
+									"Project codename: D.I.C.K.E.R. D.E.N.N.I.S",
+									"KAT ZE! :3",
+									"You can keep any bugs you find!",
+									"Random splash!",
+									"LUABRIDGE!",
+									"Low on calories!",
+									"DENNIS!",
+									"KECK!",
+									"1338 - The Next Level",
+									"1338 - Off By One",
+									"1338 - Close Enough",
+									"1338 - Gone Too Far",
+									"0x53A-0x539=0x1" };
+
 void CMenus::RenderLoading()
 {
 	// TODO: not supported right now due to separate render thread
 
-	static int64 LastLoadRender = 0;
+	//static int64 LastLoadRender = 0;
 	float Percent = m_LoadCurrent++/(float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get()-LastLoadRender < time_freq()/60)
-		return;
+	// even my 850mhz cpu can handle this
+	/*if(time_get()-LastLoadRender < time_freq()/60)
+		return;*/
 
-	LastLoadRender = time_get();
+	//LastLoadRender = time_get();
 
 	// need up date this here to get correct
 	vec3 Rgb = HslToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
@@ -956,9 +973,9 @@ void CMenus::RenderLoading()
 
 	RenderBackground();
 
-	float w = 700;
+	float w = Screen.w;
 	float h = 200;
-	float x = Screen.w/2-w/2;
+	float x = 0;
 	float y = Screen.h/2-h/2;
 
 	Graphics()->BlendNormal();
@@ -966,7 +983,7 @@ void CMenus::RenderLoading()
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.50f);
-	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
+	RenderTools()->DrawRoundRect(x, y, w, h, 0.0f);
 	Graphics()->QuadsEnd();
 
 
@@ -986,6 +1003,31 @@ void CMenus::RenderLoading()
 	Graphics()->SetColor(1,1,1,0.50f);
 	RenderTools()->DrawRoundRect(x+40, y+h-75, (w-80)*Percent, 25, 5.0f);
 	Graphics()->QuadsEnd();
+
+	char aBuf[16];
+
+	str_format(aBuf, sizeof(aBuf), "%.2f%%", (float)(Percent*100.0f));
+
+	CUIRect p;
+
+	p.x = x;
+	p.y = y+125;
+	p.w = w;
+	p.h = h;
+
+	UI()->DoLabel(&p, aBuf, 16.0f, 0, -1);
+
+	CUIRect c;
+	c.x = x;
+	c.y = y+160;
+	c.w = w;
+	c.h = h;
+
+	static char *pSaying;
+	if(!pSaying)
+		pSaying = (char*)s_aSayings[rand()%14];
+
+	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
 
 	Graphics()->Swap();
 }
