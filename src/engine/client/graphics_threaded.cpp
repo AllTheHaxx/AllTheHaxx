@@ -793,7 +793,7 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_DbgResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
-	return m_pBackend->Init("Teeworlds AllTheHaxx - VERKECKT ~ by xush' and Henritees", &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags);
+	return m_pBackend->Init("Teeworlds AllTheHaxx - The client with the keck!", &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags);
 }
 
 int CGraphics_Threaded::InitWindow()
