@@ -1641,7 +1641,16 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 	{
 		if (Page != PAGE_FAVORITES)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-		NewPage  = PAGE_FAVORITES;
+		NewPage = PAGE_FAVORITES;
+	}
+
+	Box.VSplitLeft(110.0f, &Button, &Box);
+	static int s_FavoritesButton=0;
+	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Recent"), Page==PAGE_RECENT, &Button, 0))
+	{
+		if(Page != PAGE_RECENT)
+			ServerBrowser()->Refresh(IServerBrowser::PAGE_RECENT);
+		NewPage = PAGE_RECENT;
 	}
 
 	if(g_Config.m_BrShowDDNet)
@@ -1652,7 +1661,7 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 		{
 			if (Page != PAGE_DDNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-			NewPage  = PAGE_DDNET;
+			NewPage = PAGE_DDNET;
 		}
 	}
 
