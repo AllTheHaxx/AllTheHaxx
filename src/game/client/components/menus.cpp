@@ -1177,17 +1177,19 @@ int CMenus::Render()
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE || Client()->MapLoaded())
+	if(Client()->State() == IClient::STATE_ONLINE)
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
 	}
 	else
 	{
-		RenderBackground();
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveOutgame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 	}
+
+	if(!Client()->MapLoaded() && Client()->State() != IClient::STATE_ONLINE)
+		RenderBackground();
 
 	CUIRect TabBar;
 	CUIRect MainView;
