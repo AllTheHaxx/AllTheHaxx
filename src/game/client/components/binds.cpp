@@ -141,6 +141,8 @@ void CBinds::SetDefaults()
 	Bind(KEY_LCTRL, "+hotbar");
 	Bind(KEY_F5, "+irc");
 
+	Bind(KEY_F12, "+unlock_mouse");
+
 	// DDRace
 
 	if(g_Config.m_ClDDRaceBinds)
