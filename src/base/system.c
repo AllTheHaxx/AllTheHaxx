@@ -263,7 +263,7 @@ static void logger_stdout(const char *line)
 	printf("%s\n", line);
 	fflush(stdout);
 #if defined(__ANDROID__)
-	__android_log_print(ANDROID_LOG_INFO, "DDNet", "%s", line);
+	__android_log_print(ANDROID_LOG_INFO, "AllTheHaxx", "%s", line);
 #endif
 }
 
