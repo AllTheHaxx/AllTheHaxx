@@ -3429,14 +3429,16 @@ int main(int argc, const char **argv) // ignore_convention
 		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
-	else if((File = pStorage->OpenFile("settings_ddnet.cfg", IOFLAG_READ, IStorage::TYPE_ALL))) // fallback to ddnet
+	// Do not fallback to other configs to have our default values applied.
+	// Old configs can easily be loaded using "exec" in f1
+/*	else if((File = pStorage->OpenFile("settings_ddnet.cfg", IOFLAG_READ, IStorage::TYPE_ALL))) // fallback to ddnet
 	{
 		io_close(File);
 	}
 	else
 	{
 		pConsole->ExecuteFile("settings.cfg"); // fallback to vanilla
-	}
+	}*/
 
 	// execute autoexec file
 	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
