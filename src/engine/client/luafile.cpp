@@ -192,6 +192,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.endClass()
 		.beginClass<CChat>("CChat")
 			.addFunction("Say", &CChat::Say)
+			.addProperty("Mode", &CChat::GetMode)
 		.endClass()
 
 		.beginNamespace("Game")
