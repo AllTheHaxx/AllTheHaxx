@@ -666,7 +666,7 @@ void CScoreboard::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	// EVENT CALL
-	LUA_FIRE_EVENT("OnRenderScoreboard")
+	LUA_FIRE_EVENT_V("OnRenderScoreboard", m_FadeVal)
 
 	float w = 700.0f;
 

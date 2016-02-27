@@ -1,5 +1,6 @@
 --_lua.GetLuaFile():SetScriptTitle("AllThehaxx Awesome Lua API testing script 2")
 
+-- load much stuff here to show it's working and to see how long it takes
 tex1 = _graphics.LoadTexture("arrow.png", -1, -1, 1)
 tex2 = _graphics.LoadTexture("blob.png", -1, -1, 1)
 tex3 = _graphics.LoadTexture("browse_icons.png", -1, -1, 1)
@@ -17,11 +18,12 @@ texE = _graphics.LoadTexture("gui_logo.png", -1, -1, 1)
 texF = _graphics.LoadTexture("menu.png", -1, -1, 1)
 tex0 = _graphics.LoadTexture("particles.png", -1, -1, 1)
 
-local function test()
+local function test(FadeVal)
 	w = _graphics.GetScreenWidth()
 	h = _graphics.GetScreenHeight()
 	
-	_ui.SetUiColor(0,0,0,0.3)
+	if FadeVal > 0.3 then FadeVal = 0.3 end
+	_ui.SetUiColor(0,0,0,FadeVal)
 	_ui.DrawUiRect(0, 0, w, h, 0, 0)
 	
 	-- draw some fancy textures here, using tex0-texF :D

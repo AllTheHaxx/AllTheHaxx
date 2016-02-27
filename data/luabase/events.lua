@@ -110,11 +110,11 @@ function OnRenderLevel(level)
 	end
 end
 
-function OnRenderScoreboard()
+function OnRenderScoreboard(FadeVal)
 	if Events["OnRenderScoreboard"] ~= nil then
 		for script, event in pairs(Events["OnRenderScoreboard"]) do
 			if event ~= nil then
-				event()
+				event(FadeVal)
 			end
 		end
 	end
