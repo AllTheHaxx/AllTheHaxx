@@ -946,7 +946,7 @@ float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, 
 }
 
 // TODO: Add more! :D
-static const char *s_aSayings[] = {	"The client with the keck!",
+static const char *s_apSayings[] = {	"The client with the keck!",
 									"Project codename: D.I.C.K.E.R. D.E.N.N.I.S",
 									"KAT ZE! :3",
 									"You can keep bugs you find any!",
@@ -977,7 +977,7 @@ static const char *s_aSayings[] = {	"The client with the keck!",
 									"You expect Haxx?",
 									"!!!!11eleven",
 									"Don't be salty!",
-									"This text is stored in static const char *s_aSayings[]",
+									"This text is stored in static const char *s_apSayings[]",
 									"Rainbow are awesome",
 									"Blue is the color of life...!",
 									"Melons can be green, yellow or a hat!",
@@ -1104,10 +1104,10 @@ void CMenus::RenderLoading()
 	c.y = y+160;
 	c.w = w;
 	c.h = h;
-	size_t n = rand()%(sizeof(s_aSayings)/sizeof(s_aSayings[0]));
+	size_t n = rand()%(sizeof(s_apSayings)/sizeof(s_apSayings[0]));
 	static char *pSaying;
 	if(!pSaying)
-		pSaying = (char*)s_aSayings[n];
+		pSaying = (char*)s_apSayings[n];
 
 	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
 
