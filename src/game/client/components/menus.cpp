@@ -949,7 +949,7 @@ float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, 
 static const char *s_aSayings[] = {	"The client with the keck!",
 									"Project codename: D.I.C.K.E.R. D.E.N.N.I.S",
 									"KAT ZE! :3",
-									"You can keep any bugs you find!",
+									"You can keep bugs you find any!",
 									"Random splash!",
 									"LUABRIDGE!",
 									"Low on calories!",
@@ -959,7 +959,76 @@ static const char *s_aSayings[] = {	"The client with the keck!",
 									"1338 - Off By One",
 									"1338 - Close Enough",
 									"1338 - Gone Too Far",
-									"0x53A-0x539=0x1" };
+									"0x53A-0x539=0x1,"
+									"Waiting for 0.7!",
+									"YAA, SPAß IM LEBEN!",
+									"Dennis dennis = new Dennis()",
+									"Definitely legal!",
+									"Lua goes OOP!",
+									"SMOOTH!",
+									"This game was named 'Teewars'",
+									"long ago...",
+									"containing free Melon power!",
+									"Jump the gun!",
+									"øıŋĸ?",
+									"§1C§2o§3l§4o§5r§6m§7a§8t§9i§ac",
+									"Have fun!",
+									"What is a floppy disk...?",
+									"You expect Haxx?",
+									"!!!!11eleven",
+									"Don't be salty!",
+									"This text is stored in static const char *s_aSayings[]",
+									"Rainbow are awesome",
+									"Blue is the color of life...!",
+									"Melons can be green, yellow or a hat!",
+									"Sublime!",
+									"Try +hotbar!",
+									"Try +irc",
+									"- allthehaxx.github.io -",
+									"much beta!",
+									"the crasher got removed :c",
+									"100+ commits per week!",
+									GAME_NETVERSION,
+									"Build on " BUILD_DATE,
+									"Searching for ideas...",
+									"(mooning) (sheep) (dog)",
+									".calc 2^10*5e3",
+									"Tequila!! DODO DODODO DODO DO!",
+									"They will not force us!",
+									"Got many splashes, pfew",
+									"Seperated by a comma.",
+									"::.. xx-xx-xx ..::",
+									"Do not count 'em ;)",
+									"Guaranteed to be 420% verkeckt!",
+									"CI Status: PASSED",
+									"rm -rf /",
+									"Markdown supported     ...not...",
+									"You can click links!",
+									"Keep it always up-to-date",
+									"Join the chat!",
+									"No forum",
+									"It has to be teeish",
+									"Don't quote liars!"
+									"(4N Y0U R34D 7H15??",
+									"0.6.3",
+									"Going out of splash texts....",
+									"Life is strange :o",
+									"ja wat is dat denn ey...?",
+									"¿¡¿¡¿¡¿¡¿¡¿¡¿¡¿¡",
+									"...REISUB!",
+									"do you get the insiders...? :D",
+									"Ask if you need something!",
+									"Ignore the spoofing tab!!",
+									"Brain.exe has stopped working",
+									"Read error: Could not access data at address 0x00000000",
+									"Do you play an instrument?",
+									"Cucumber ya mei lord, cucumber ya!",
+									"git rebase -i HEAD~~",
+									"Multicoloral!",
+									"Localize('%p')",
+									"func = assert(load('return ' .. x))",
+									"RegisterEvent('OnIdle', fap)",
+};
 
 void CMenus::RenderLoading()
 {
@@ -1034,10 +1103,10 @@ void CMenus::RenderLoading()
 	c.y = y+160;
 	c.w = w;
 	c.h = h;
-
+	size_t n = rand()%(sizeof(s_aSayings)/sizeof(s_aSayings[0]));
 	static char *pSaying;
 	if(!pSaying)
-		pSaying = (char*)s_aSayings[rand()%14];
+		pSaying = (char*)s_aSayings[n];
 
 	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
 
