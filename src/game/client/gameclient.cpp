@@ -401,21 +401,18 @@ void CGameClient::OnInit()
 		// init the components
 		if(i < m_All.m_Num)  // 0 <= i <= m_All.m_Num-1
 		{
-			//dbg_msg("asdasdasdasd", "INITING COMPONENT NUMMER %i/%i", m_All.m_Num-i-1, m_All.m_Num-1);
 			m_All.m_paComponents[m_All.m_Num-i-1]->OnInit();
 		}
 
 		// load the textures
-		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages) // m_All.m_Num <= i <= m_All.m_Num+g_pData->m_NumImages-1                        /////i < g_pData->m_NumImages && i >= m_All.m_Num7
+		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages)
 		{
-			//dbg_msg("asdasdasdasd", "LOADING TEXTURE NUMBER %i/%i", i-m_All.m_Num, g_pData->m_NumImages-1);
 			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		}
 
 		// load background map when textures have finished
 		if(i == m_All.m_Num+g_pData->m_NumImages)
 		{
-			//dbg_msg("asdasdasdasd", "LOADING BACKGROUND MAP", i-m_All.m_Num, m_All.m_Num+g_pData->m_NumImages-1);
 			Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
 		}
 
@@ -424,7 +421,6 @@ void CGameClient::OnInit()
 		// reset all components after loading
 		if(i >= m_All.m_Num+g_pData->m_NumImages && i < TotalLoadAmount-3-1)
 		{
-			dbg_msg("asdasdasdasd", "RESETTINGS DINGS NUMBER %i/%i", i-g_pData->m_NumImages-m_All.m_Num, m_All.m_Num-1);
 			m_All.m_paComponents[i-g_pData->m_NumImages-m_All.m_Num]->OnReset();
 		}
 
@@ -442,11 +438,15 @@ void CGameClient::OnInit()
 
 		// init irc
 		if(i == TotalLoadAmount-2-1)
+		{
 			m_pIRC->Init();
+		}
 
 		// init the editor
 		if(i == TotalLoadAmount-1-1)
+		{
 			m_pEditor->Init();
+		}
 
 		// last iteration
 		if(i == TotalLoadAmount-0-1)
