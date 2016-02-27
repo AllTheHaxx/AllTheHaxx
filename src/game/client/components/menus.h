@@ -124,7 +124,7 @@ class CMenus : public CComponent
 
 	// loading
 	int m_LoadCurrent;
-	int m_LoadTotal;
+public:	int m_LoadTotal; private:
 
 	//
 	char m_aMessageTopic[512];

@@ -390,37 +390,63 @@ void CGameClient::OnInit()
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='fonts/DejaVuSans.ttf'");
 
 	// init all components
-	for(int i = m_All.m_Num-1; i >= 0; --i)
-		m_All.m_paComponents[i]->OnInit();
-
-	Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
 
 	char aBuf[256];
 
-	// setup load amount// load textures
-	for(int i = 0; i < g_pData->m_NumImages; i++)
+	// setup load amount & load textures and stuff
+	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1;
+	g_GameClient.m_pMenus->m_LoadTotal = TotalLoadAmount + g_pData->m_NumSounds;
+	for(int i = 0; i < TotalLoadAmount; i++)
 	{
-		g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		// init the components
+		if(i < m_All.m_Num)  // 0 <= i <= m_All.m_Num-1
+		{
+			//dbg_msg("asdasdasdasd", "INITING COMPONENT NUMMER %i/%i", m_All.m_Num-i-1, m_All.m_Num-1);
+			m_All.m_paComponents[m_All.m_Num-i-1]->OnInit();
+		}
+
+		// load the textures
+		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages) // m_All.m_Num <= i <= m_All.m_Num+g_pData->m_NumImages-1                        /////i < g_pData->m_NumImages && i >= m_All.m_Num7
+		{
+			//dbg_msg("asdasdasdasd", "LOADING TEXTURE NUMBER %i/%i", i-m_All.m_Num, g_pData->m_NumImages-1);
+			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		}
+
+		// load background map when textures have finished
+		if(i == m_All.m_Num+g_pData->m_NumImages)
+		{
+			//dbg_msg("asdasdasdasd", "LOADING BACKGROUND MAP", i-m_All.m_Num, m_All.m_Num+g_pData->m_NumImages-1);
+			Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
+		}
+
 		g_GameClient.m_pMenus->RenderLoading();
+
+		// reset all components after loading
+		if(i >= m_All.m_Num+g_pData->m_NumImages && i < TotalLoadAmount-1)
+		{
+			//dbg_msg("asdasdasdasd", "RESETTINGS DINGS NUMBER %i/%i", i-g_pData->m_NumImages-m_All.m_Num, m_All.m_Num-1);
+			m_All.m_paComponents[i-g_pData->m_NumImages-m_All.m_Num]->OnReset();
+		}
+
+		// last iteration
+		if(i == TotalLoadAmount-1)
+		{
+			//dbg_msg("asdasdasdasd", "INITING MAP COMPONENTS", i-m_All.m_Num, m_All.m_Num+g_pData->m_NumImages-1);
+
+			m_Layers.Init(Kernel());
+			m_Collision.Init(Layers());
+
+			RenderTools()->RenderTilemapGenerateSkip(Layers());
+
+			m_pMapimages->OnMapLoad();
+		}
 	}
 
 #if defined(__ANDROID__)
 	m_pMapimages->OnMapLoad(); // Reload map textures on Android
 #endif
 
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnReset();
-
-	m_Layers.Init(Kernel());
-	m_Collision.Init(Layers());
-
-	RenderTools()->RenderTilemapGenerateSkip(Layers());
-	
-	m_pMapimages->OnMapLoad();
-
-	int64 End = time_get();
-	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
+	dbg_msg("gameclient", "initialisation finished after %.2fms", ((time_get()-Start)*1000)/(float)time_freq());
 
 	m_ServerMode = SERVERMODE_PURE;
 

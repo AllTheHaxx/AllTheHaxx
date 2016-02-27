@@ -2670,8 +2670,6 @@ void CClient::Run()
 
 	// init sound, allowed to fail
 	m_SoundInitFailed = Sound()->Init() != 0;
-	
-	m_pIRC->Init();
 
 	// open socket
 	{
@@ -2702,22 +2700,23 @@ void CClient::Run()
 	// init the input
 	Input()->Init();
 
+	// init the components
+	GameClient()->OnInit();
+	m_pIRC->Init();
+
 	// start refreshing addresses while we load
 	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
 
 	// init the editor
 	m_pEditor->Init();
 
-	//init lua
+	// init lua
 	m_Lua.Init(this, Storage());
+	m_Lua.SetGameClient(GameClient());
 
 	// load data
 	if(!LoadData())
 		return;
-
-	GameClient()->OnInit();
-	m_Lua.SetGameClient(GameClient());
-	//m_Lua.LoadFile("lua/Test.lua");
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());

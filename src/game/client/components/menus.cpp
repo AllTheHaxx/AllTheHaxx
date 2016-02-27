@@ -98,6 +98,10 @@ CMenus::CMenus()
 	m_Dummy = false;
 
 	m_SpoofSelectedPlayer = -1;
+
+	m_LoadCurrent = 0;
+	m_LoadTotal = 100; // some approx number so that we don't divide m_LoadCurrent by zero
+
 }
 
 float *CMenus::ButtonFade(const void *pID, float Seconds, int Checked)
@@ -959,7 +963,7 @@ static const char *s_apSayings[] = {	"The client with the keck!",
 									"1338 - Off By One",
 									"1338 - Close Enough",
 									"1338 - Gone Too Far",
-									"0x53A-0x539=0x1,"
+									"0x53A-0x539=0x1",
 									"Waiting for 0.7!",
 									"YAA, SPAß IM LEBEN!",
 									"Dennis * dennis = new Dennis()",
@@ -1203,10 +1207,11 @@ void CMenus::OnInit()
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
 
 	// setup load amount
-	m_LoadCurrent = 0;
-	m_LoadTotal = g_pData->m_NumImages;
+	//m_LoadCurrent = 0;
+	//m_LoadTotal = g_pData->m_NumImages;
 	//if(!g_Config.m_ClThreadsoundloading)
-		m_LoadTotal += g_pData->m_NumSounds;
+		//m_LoadTotal += g_pData->m_NumSounds;
+	//m_LoadTotal = 100; // some approx number so that we don't divide m_LoadCurrent by zero
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
