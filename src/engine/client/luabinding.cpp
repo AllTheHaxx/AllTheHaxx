@@ -10,6 +10,7 @@
 #include "lua.h"
 
 CLuaBinding::UiContainer * CLuaBinding::m_pUiContainer = 0;
+CConfiguration * CConfigProperties::m_pConfig = 0;
 
 // client namespace
 void CLuaBinding::LuaConnect(const char *pAddr)

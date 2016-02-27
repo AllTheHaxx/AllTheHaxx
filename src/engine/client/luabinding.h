@@ -2,6 +2,8 @@
 #define ENGINE_CLIENT_LUABINDING_H
 #include <base/vmath.h>
 #include <string>
+#include <engine/shared/config.h>
+
 
 class CClient;
 
@@ -69,8 +71,19 @@ public:
 	static void LuaSetColor(float r, float g, float b, float a);
 	static int LuaLoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags); // e.g. CImageInfo::FORMAT_AUTO, IGraphics::TEXLOAD_NORESAMPLE
 	static void LuaRenderTexture(int ID, float x, float y, float w, float h, float rot);
+};
 
-
+struct CConfigProperties
+{
+	static CConfiguration * m_pConfig;
+	static std::string GetConfigPlayerName() { return g_Config.m_PlayerName; }
+	static void SetConfigPlayerName(std::string name) { str_copy(g_Config.m_PlayerName, name.c_str(), sizeof(g_Config.m_PlayerName)); }
+	
+	static std::string GetConfigPlayerClan() { return g_Config.m_PlayerClan; }
+	static void SetConfigPlayerClan(std::string clan) { str_copy(g_Config.m_PlayerClan, clan.c_str(), sizeof(g_Config.m_PlayerClan)); }
+	
+	static std::string GetConfigPlayerSkin() { return g_Config.m_ClPlayerSkin; }
+	static void SetConfigPlayerSkin(std::string skin) { str_copy(g_Config.m_ClPlayerSkin, skin.c_str(), sizeof(g_Config.m_ClPlayerSkin)); }
 };
 
 #endif

@@ -172,6 +172,9 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 		// global types
 		.beginClass< vector2_base<int> >("vec2")
+			.addConstructor <void (*) (int, int)> ()
+			.addData("x", &vector2_base<int>::x)
+			.addData("y", &vector2_base<int>::y)
 		.endClass()
 		.beginClass< vector2_base<int> >("vec3")
 		.endClass()
@@ -204,6 +207,17 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.beginNamespace("Local")
 				.addVariable("CID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID)
 			.endNamespace()
+						
+			.beginClass<CConfigProperties>("Config")   // g_Config stuff...
+				.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
+				.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
+				.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
+				
+				.addStaticProperty("PlayerSkin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
+				.addStaticData("PlayerColorBody", &CConfigProperties::m_pConfig->m_ClPlayerColorBody)
+				.addStaticData("PlayerColorFeet", &CConfigProperties::m_pConfig->m_ClPlayerColorFeet)
+				.addStaticData("PlayerUseCustomColor", &CConfigProperties::m_pConfig->m_ClPlayerUseCustomColor)
+			.endClass()
 		.endNamespace()
 		
 		//OOP ENDS HERE

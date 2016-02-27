@@ -14,6 +14,8 @@ using namespace luabridge;
 CLua::CLua()
 {
 	CLuaBinding::m_pUiContainer = new CLuaBinding::UiContainer;
+	
+	CConfigProperties::m_pConfig = &g_Config;
 }
 
 CLua::~CLua()
