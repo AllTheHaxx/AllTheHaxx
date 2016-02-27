@@ -244,9 +244,6 @@ void CConsole::SetPrintOutputLevel(int Index, int OutputLevel)
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, bool Highlighted)
 {
-	if(!g_Config.m_ClPrintStartup && ((IClient *)Kernel()->RequestInterface<IClient>())->LocalTime() < 1)
-		return;
-
 	dbg_msg(pFrom ,"%s", pStr);
 	for(int i = 0; i < m_NumPrintCB; ++i)
 	{
