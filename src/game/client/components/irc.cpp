@@ -88,7 +88,6 @@ int IRChook_privmsg(IIRC::ReplyData* hostd, void* user, void* engine)
 CIRCBind::CIRCBind()
 {
 	m_pIRCThread = 0;
-	OnReset();
 }
 
 void CIRCBind::OnRender()
@@ -136,13 +135,12 @@ void CIRCBind::OnConsoleInit()
 	m_pClient->IRC()->RegisterCallback("PART", IRChook_leave, this);
 	m_pClient->IRC()->RegisterCallback("QUIT", IRChook_leave, this);
 	m_pClient->IRC()->RegisterCallback("PRIVMSG", IRChook_privmsg, this);
-
-	if(g_Config.m_ClIRCAutoconnect)
-		Connect();
 }
 
 void CIRCBind::OnReset()
 {
+	if(g_Config.m_ClIRCAutoconnect && !IsConnected())
+		Connect();
 }
 
 void CIRCBind::OnShutdown()
