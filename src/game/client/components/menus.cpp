@@ -962,7 +962,7 @@ static const char *s_aSayings[] = {	"The client with the keck!",
 									"0x53A-0x539=0x1,"
 									"Waiting for 0.7!",
 									"YAA, SPAß IM LEBEN!",
-									"Dennis dennis = new Dennis()",
+									"Dennis * dennis = new Dennis()",
 									"Definitely legal!",
 									"Lua goes OOP!",
 									"SMOOTH!",
@@ -1025,9 +1025,10 @@ static const char *s_aSayings[] = {	"The client with the keck!",
 									"Cucumber ya mei lord, cucumber ya!",
 									"git rebase -i HEAD~~",
 									"Multicoloral!",
-									"Localize('%p')",
+									"Localize('%s')",
 									"func = assert(load('return ' .. x))",
 									"RegisterEvent('OnIdle', fap)",
+									"Grr Java ate my brain",
 };
 
 void CMenus::RenderLoading()
