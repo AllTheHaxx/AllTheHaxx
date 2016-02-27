@@ -1029,6 +1029,7 @@ static const char *s_apSayings[] = {	"The client with the keck!",
 									"func = assert(load('return ' .. x))",
 									"RegisterEvent('OnIdle', fap)",
 									"Grr Java ate my brain",
+									"May contain traces of peanuts.",
 };
 
 void CMenus::RenderLoading()
