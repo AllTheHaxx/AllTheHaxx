@@ -11,9 +11,7 @@ local function GreetAdd(ClientID, Team, Message)
 	if Message:find("entered and joined") then
 		abc = string.match(Message, "'.-'")    -- returns everything between '' => name
 		abc = abc:gsub("'", "")                      -- string replace
-		
-		print(_client.GetPlayerName(Client.Local.CID) .. "=" .. abc .. " at " .. Client.Local.CID)
-		
+				
 		if abc ~= _client.GetPlayerName(Client.Local.CID) then
 			List[abc] = _client.GetTick() + 30        --time stamp
 		end

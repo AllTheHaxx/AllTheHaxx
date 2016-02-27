@@ -200,6 +200,12 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)
 		.endNamespace()
 		
+		.beginNamespace("Client")
+			.beginNamespace("Local")
+				.addVariable("CID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID)
+			.endNamespace()
+		.endNamespace()
+		
 		//OOP ENDS HERE
 
 	;
