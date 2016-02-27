@@ -335,9 +335,16 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 		if(!n.m_Visible)
 			continue;
 
+		CUIRect Box, Button;
+		n.m_HitRect.VSplitRight(n.m_HitRect.h, &Box, &Button);
+
 		static int s_EditBox[256] = { 0 };
 		static float s_Offset[256] = { 0.0f };
-		DoEditBox(&s_EditBox[i], &n.m_HitRect, aEditBoxBuffer[i], sizeof(aEditBoxBuffer[i]), 8.0f, &s_Offset[i], false, 0, Localize("Enter your f1 commands here..."), -1);
+		DoEditBox(&s_EditBox[i], &Box, aEditBoxBuffer[i], sizeof(aEditBoxBuffer[i]), 8.0f, &s_Offset[i], false, 0, Localize("Enter your f1 commands here..."), -1);
+
+		static int s_ClearButton[256] = { 0 };
+		if(DoButton_Menu(&s_ClearButton[i], "×", 0, &Button, "Remove", 0))
+			Items.remove_index(i);
 	}
 
 	UiDoListboxEnd(&s_ScrollVal, 0);
