@@ -2702,13 +2702,9 @@ void CClient::Run()
 
 	// init the components
 	GameClient()->OnInit();
-	m_pIRC->Init();
 
 	// start refreshing addresses while we load
 	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
-
-	// init the editor
-	m_pEditor->Init();
 
 	// init lua
 	m_Lua.Init(this, Storage());
@@ -2718,9 +2714,8 @@ void CClient::Run()
 	if(!LoadData())
 		return;
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	//
+	m_FpsGraph.Init(0.0f, 200.0f);
 
 	// connect to the server if wanted
 	/*
@@ -2728,17 +2723,6 @@ void CClient::Run()
 		Connect(config.cl_connect);
 	config.cl_connect[0] = 0;
 	*/
-
-	//
-	m_FpsGraph.Init(0.0f, 200.0f);
-
-	// never start with the editor
-	g_Config.m_ClEditor = 0;
-
-	Input()->MouseModeRelative();
-
-	// process pending commands
-	m_pConsole->StoreCommands(false);
 
 	bool LastD = false;
 	bool LastQ = false;

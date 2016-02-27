@@ -394,7 +394,7 @@ void CGameClient::OnInit()
 	char aBuf[256];
 
 	// setup load amount & load textures and stuff
-	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1;
+	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1    +3;
 	g_GameClient.m_pMenus->m_LoadTotal = TotalLoadAmount + g_pData->m_NumSounds;
 	for(int i = 0; i < TotalLoadAmount; i++)
 	{
@@ -422,16 +422,15 @@ void CGameClient::OnInit()
 		g_GameClient.m_pMenus->RenderLoading();
 
 		// reset all components after loading
-		if(i >= m_All.m_Num+g_pData->m_NumImages && i < TotalLoadAmount-1)
+		if(i >= m_All.m_Num+g_pData->m_NumImages && i < TotalLoadAmount-3-1)
 		{
-			//dbg_msg("asdasdasdasd", "RESETTINGS DINGS NUMBER %i/%i", i-g_pData->m_NumImages-m_All.m_Num, m_All.m_Num-1);
+			dbg_msg("asdasdasdasd", "RESETTINGS DINGS NUMBER %i/%i", i-g_pData->m_NumImages-m_All.m_Num, m_All.m_Num-1);
 			m_All.m_paComponents[i-g_pData->m_NumImages-m_All.m_Num]->OnReset();
 		}
 
-		// last iteration
-		if(i == TotalLoadAmount-1)
+		if(i == TotalLoadAmount-3-1)
 		{
-			//dbg_msg("asdasdasdasd", "INITING MAP COMPONENTS", i-m_All.m_Num, m_All.m_Num+g_pData->m_NumImages-1);
+			dbg_msg("asdasdasdasd", "INITING MAP COMPONENTS");
 
 			m_Layers.Init(Kernel());
 			m_Collision.Init(Layers());
@@ -440,10 +439,36 @@ void CGameClient::OnInit()
 
 			m_pMapimages->OnMapLoad();
 		}
+
+		// init irc
+		if(i == TotalLoadAmount-2-1)
+			m_pIRC->Init();
+
+		// init the editor
+		if(i == TotalLoadAmount-1-1)
+			m_pEditor->Init();
+
+		// last iteration
+		if(i == TotalLoadAmount-0-1)
+		{
+			str_format(aBuf, sizeof(aBuf), "version %s", NetVersion());
+			if(g_Config.m_ClPrintStartup)
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+			else
+				dbg_msg("client", aBuf);
+
+			// never start with the editor
+			g_Config.m_ClEditor = 0;
+
+			Input()->MouseModeRelative();
+
+			// process pending commands
+			m_pConsole->StoreCommands(false);
+		}
 	}
 
 #if defined(__ANDROID__)
-	m_pMapimages->OnMapLoad(); // Reload map textures on Android
+	m_pMapimages->OnMapLoad(); // Reload map textures on Android    ...could be broken by background map stuff
 #endif
 
 	dbg_msg("gameclient", "initialisation finished after %.2fms", ((time_get()-Start)*1000)/(float)time_freq());
