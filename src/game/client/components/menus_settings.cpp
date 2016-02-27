@@ -1064,11 +1064,11 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_SndHighlight, Localize("Enable highlighted chat sound"), g_Config.m_SndHighlight, &Button))
 		g_Config.m_SndHighlight ^= 1;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
+/*	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClThreadsoundloading, Localize("Threaded sound loading"), g_Config.m_ClThreadsoundloading, &Button))
 		g_Config.m_ClThreadsoundloading ^= 1;
-
+*/
 	// sample rate box
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
