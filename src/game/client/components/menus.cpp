@@ -2156,6 +2156,7 @@ void CMenus::OnRender()
 		RenderTools()->RenderTilemapGenerateSkip(Layers());
 		m_pClient->m_pMapimages->OnMapLoad();
 
+		m_pClient->m_pCamera->m_Center = vec2(500.0f, 1000.0f);
 		m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 	}
 
