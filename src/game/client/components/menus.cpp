@@ -1093,6 +1093,14 @@ void CMenus::RenderLoading()
 	RenderTools()->DrawRoundRect(x+40, y+h-75, (w-80)*Percent, 25, 5.0f);
 	Graphics()->QuadsEnd();
 
+	CUIRect l;
+	l.x = x;
+	l.y = y+97;
+	l.w = w;
+	l.h = h;
+
+	UI()->DoLabel(&l, m_pLoadLabel, 12.0f, 0, -1);
+
 	char aBuf[16];
 
 	str_format(aBuf, sizeof(aBuf), "%.2f%%", (float)(Percent*100.0f));

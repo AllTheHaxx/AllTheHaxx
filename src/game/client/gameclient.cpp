@@ -399,18 +399,24 @@ void CGameClient::OnInit()
 	for(int i = 0; i < TotalLoadAmount; i++)
 	{
 		// init the components
+		if(i == 0)
+			g_GameClient.m_pMenus->m_pLoadLabel = "Initializing Components";
 		if(i < m_All.m_Num)  // 0 <= i <= m_All.m_Num-1
 		{
 			m_All.m_paComponents[m_All.m_Num-i-1]->OnInit();
 		}
 
 		// load the textures
+		if(i == m_All.m_Num+1)
+			g_GameClient.m_pMenus->m_pLoadLabel = "Loading Textures";
 		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages)
 		{
 			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		}
 
 		// load background map when textures have finished
+		if(i == m_All.m_Num+1)
+			g_GameClient.m_pMenus->m_pLoadLabel = "Loading Textures";
 		if(i == m_All.m_Num+g_pData->m_NumImages)
 		{
 			Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
@@ -419,6 +425,8 @@ void CGameClient::OnInit()
 		g_GameClient.m_pMenus->RenderLoading();
 
 		// reset all components after loading
+		if(i == m_All.m_Num+g_pData->m_NumImages)
+			g_GameClient.m_pMenus->m_pLoadLabel = "Resetting Components";
 		if(i >= m_All.m_Num+g_pData->m_NumImages && i < TotalLoadAmount-3-1)
 		{
 			m_All.m_paComponents[i-g_pData->m_NumImages-m_All.m_Num]->OnReset();
@@ -426,7 +434,7 @@ void CGameClient::OnInit()
 
 		if(i == TotalLoadAmount-3-1)
 		{
-			dbg_msg("asdasdasdasd", "INITING MAP COMPONENTS");
+			g_GameClient.m_pMenus->m_pLoadLabel = "Loading Background Map";
 
 			m_Layers.Init(Kernel());
 			m_Collision.Init(Layers());
@@ -439,18 +447,23 @@ void CGameClient::OnInit()
 		// init irc
 		if(i == TotalLoadAmount-2-1)
 		{
+			g_GameClient.m_pMenus->m_pLoadLabel = "Initializing IRC Engine";
+
 			m_pIRC->Init();
 		}
 
 		// init the editor
 		if(i == TotalLoadAmount-1-1)
 		{
+			g_GameClient.m_pMenus->m_pLoadLabel = "Initializing Editor";
+
 			m_pEditor->Init();
 		}
 
 		// last iteration
 		if(i == TotalLoadAmount-0-1)
 		{
+			g_GameClient.m_pMenus->m_pLoadLabel = "Loading done. Have Fun!";
 			str_format(aBuf, sizeof(aBuf), "version %s", NetVersion());
 			if(g_Config.m_ClPrintStartup)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
