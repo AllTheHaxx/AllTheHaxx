@@ -1404,9 +1404,18 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if (DoButton_CheckBox(&g_Config.m_ClNotifications, Localize("Show notifications"), g_Config.m_ClNotifications, &Button))
 	{
-		g_Config.m_ClNotifications ^= 1;
+		CUIRect Other;
+		Button.VSplitLeft(Button.w*0.4f, &Button, &Other);
+		if (DoButton_CheckBox(&g_Config.m_ClNotifications, Localize("Show notifications"), g_Config.m_ClNotifications, &Button))
+		{
+			g_Config.m_ClNotifications ^= 1;
+		}
+		Other.x += Button.w*0.1f;
+		Other.w -= Button.w*0.1f;
+		Other.h *= 0.80f;
+		Other.y += 2.0f;
+		g_Config.m_ClShowhudChatbox = round_to_int(DoScrollbarH(&g_Config.m_ClShowhudChatbox, &Other, g_Config.m_ClShowhudChatbox/100.0f, Localize("Chatbox Alpha"))*100.0f);
 	}
 
 	MainView.HSplitTop(170.0f, &Messages, &MainView);
