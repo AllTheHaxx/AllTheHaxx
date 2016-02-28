@@ -89,7 +89,7 @@ MACRO_CONFIG_INT(ClPlayerColorFeetRainbow, player_color_feet_rainbow, 0, 0, 100,
 
 MACRO_CONFIG_STR(ClPlayerSkin, player_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin")
 
-MACRO_CONFIG_INT(UiPage, ui_page, 7, 0, 12, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
+MACRO_CONFIG_INT(UiPage, ui_page, 7, 0, 13, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
 MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 0, 0, 12, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface settings page")
 MACRO_CONFIG_INT(UiToolboxPage, ui_toolbox_page, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toolbox page")
 MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 64, "localhost:8303", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface server address")
@@ -162,7 +162,7 @@ MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+i-w+x", CFGFLAG_CLIENT|CFGFLAG_
 MACRO_CONFIG_STR(ClIRCLeaveMsg, cl_irc_leavemsg, 32, "Leaving", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC leave message")
 MACRO_CONFIG_INT(ClIRCPrintChat, cl_irc_print_messages, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print messages from the IRC chat into console")
 MACRO_CONFIG_INT(ClIRCSound, cl_irc_sound, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Play a sound when a message arrives")
-MACRO_CONFIG_INT(ClAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow others to request the server you're playing on")
+MACRO_CONFIG_INT(ClIRCAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow others to request the server you're playing on")
 //
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
 MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console")

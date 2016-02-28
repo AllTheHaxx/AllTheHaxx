@@ -2058,12 +2058,134 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 void CMenus::RenderSettingsHaxx(CUIRect MainView)
 {
+	CUIRect Left, Right, Button;
+	MainView.VSplitMid(&Left, &Right);
+	Left.Margin(5.0f, &Left);
+	Right.Margin(5.0f, &Right);
+
+	Left.HSplitTop(30.0f, &Button, &Left);
+	UI()->DoLabel(&Button, Localize("Haxx"), 20.0f, 0, Button.w);
+
+	Left.HSplitTop(7.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClUsernameFetching, Localize("Gather Statistics"), g_Config.m_ClUsernameFetching, &Button))
+		g_Config.m_ClUsernameFetching ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClChatDennisProtection, ("Dennis Protection"), g_Config.m_ClChatDennisProtection, &Button))
+		g_Config.m_ClChatDennisProtection ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClSendInfoExploit, Localize("Fast Info Sending"), g_Config.m_ClSendInfoExploit, &Button, Localize("To be used on old DDNet for fast rainbow")))
+		g_Config.m_ClSendInfoExploit ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClColorfulClient, ("Colorful Client"), g_Config.m_ClColorfulClient, &Button, "Makes everything look way more awesome!"))
+		g_Config.m_ClColorfulClient ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClPathFinding, Localize("A* Path Finding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
+		g_Config.m_ClPathFinding ^= 1;
 
 }
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)
 {
+	CUIRect Left, Right, Button;
+	MainView.VSplitMid(&Left, &Right);
+	Left.Margin(5.0f, &Left);
+	Right.Margin(5.0f, &Right);
 
+	Left.HSplitTop(30.0f, &Button, &Left);
+	UI()->DoLabel(&Button, Localize("Chat"), 20.0f, 0, Button.w);
+
+	Left.HSplitTop(7.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClIRCAutoconnect, Localize("Connect automatically"), g_Config.m_ClIRCAutoconnect, &Button, Localize("Connect to the Chat automatically on startup")))
+		g_Config.m_ClIRCAutoconnect ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClIRCPrintChat, Localize("Print to console"), g_Config.m_ClIRCPrintChat, &Button))
+		g_Config.m_ClIRCPrintChat ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClIRCSound, Localize("Play sound notification"), g_Config.m_ClIRCSound, &Button))
+		g_Config.m_ClIRCSound ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClIRCAllowJoin, Localize("Allow others to join you"), g_Config.m_ClIRCAllowJoin, &Button))
+		g_Config.m_ClIRCAllowJoin ^= 1;
+
+	static const char *s_apLabels[] = {
+			Localize("Nickname"),
+			Localize("Username"),
+			Localize("Password"),
+			Localize("Q Auth Name"),
+			Localize("Q Auth Pass"),
+			Localize("Modes"),
+			Localize("Leave Message"),
+	};
+
+	CUIRect Background;
+	Left.HSplitTop(7.5f, 0, &Background);
+	Background.h = 25.0f*(sizeof(s_apLabels)/sizeof(s_apLabels[0]))+7.5f;
+	RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
+
+	CUIRect Label;
+	int LabelIndex = 0;
+#define DO_NEXT_LABEL Button.VSplitLeft(Button.w*0.4f, &Label, &Button); UI()->DoLabel(&Label, s_apLabels[LabelIndex++], 12.0f, -1, Label.w-3);
+
+	Left.VMargin(5.0f, &Left);
+	Left.HSplitTop(15.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	DO_NEXT_LABEL
+	static float s_OffsetNick = 0.0f;
+	DoEditBox(&g_Config.m_ClIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &s_OffsetNick, false);
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	DO_NEXT_LABEL
+	static float s_OffsetUser = 0.0f;
+	DoEditBox(&g_Config.m_ClIRCUser, &Button, g_Config.m_ClIRCUser, sizeof(g_Config.m_ClIRCUser), 12.0f, &s_OffsetUser, false);
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	DO_NEXT_LABEL
+	static float s_OffsetPass = 0.0f;
+	DoEditBox(&g_Config.m_ClIRCPass, &Button, g_Config.m_ClIRCPass, sizeof(g_Config.m_ClIRCPass), 12.0f, &s_OffsetPass, true);
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	DO_NEXT_LABEL
+	static float s_OffsetQAuthName = 0.0f;
+	DoEditBox(&g_Config.m_ClIRCQAuthName, &Button, g_Config.m_ClIRCQAuthName, sizeof(g_Config.m_ClIRCQAuthName), 12.0f, &s_OffsetQAuthName, false);
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	DO_NEXT_LABEL
+	static float s_OffsetQAuthPass = 0.0f;
+	DoEditBox(&g_Config.m_ClIRCQAuthPass, &Button, g_Config.m_ClIRCQAuthPass, sizeof(g_Config.m_ClIRCQAuthPass), 12.0f, &s_OffsetQAuthPass, true);
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	DO_NEXT_LABEL
+	static float s_OffsetModes = 0.0f;
+	DoEditBox(&g_Config.m_ClIRCModes, &Button, g_Config.m_ClIRCModes, sizeof(g_Config.m_ClIRCModes), 12.0f, &s_OffsetModes, false);
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	DO_NEXT_LABEL
+	static float s_OffsetLeaveMsg = 0.0f;
+	DoEditBox(&g_Config.m_ClIRCLeaveMsg, &Button, g_Config.m_ClIRCLeaveMsg, sizeof(g_Config.m_ClIRCLeaveMsg), 12.0f, &s_OffsetLeaveMsg, false);
+
+#undef DO_NEXT_LABEL
 }
 
 
