@@ -69,6 +69,9 @@ private:
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
 	sorted_array<CNotification> m_Notifications;
+	int m_MaxHealth;
+	int m_MaxArmor;
+	int m_MaxAmmo;
 };
 
 #endif

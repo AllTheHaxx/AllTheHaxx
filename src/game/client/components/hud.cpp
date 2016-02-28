@@ -41,6 +41,9 @@ void CHud::OnReset()
 	m_PlayerRecord = -1.0f;
 	m_Notifications.clear();
 	m_Notifications.hint_size(MAX_NOTIFICATIONS>>1);
+	m_MaxHealth = 10;
+	m_MaxArmor = 10;
+	m_MaxAmmo = 10;
 }
 
 void CHud::RenderGameTimer()
@@ -661,6 +664,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	if(g_Config.m_ClShowhudHealthAmmoBars &&
 			(pCharacter->m_Weapon != WEAPON_HAMMER && pCharacter->m_Weapon != WEAPON_NINJA))
 	{
+		m_MaxAmmo = max(m_MaxAmmo, pCharacter->m_AmmoCount);
 		CUIRect r;
 		// background
 		r.x = x + 12; r.y = y+24; r.h = 10; r.w = 12 * 10;
@@ -675,10 +679,10 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 			LastWeapon = pCharacter->m_Weapon;
 		}
 
-		smooth_set(&Width, pCharacter->m_AmmoCount*12, (0.01f/Client()->RenderFrameTime())*10.0f);
+		smooth_set(&Width, ((float)m_MaxAmmo/(float)pCharacter->m_AmmoCount)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f);
 		if(Width > 5)
 		{
-			r.w = min(m_Width/2, Width);
+			r.w = min(m_Width/3, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.7f, 0.7f, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 		char aBuf[16];
@@ -698,6 +702,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	Graphics()->QuadsEnd();
 	if(g_Config.m_ClShowhudHealthAmmoBars)
 	{
+		m_MaxHealth = max(m_MaxHealth, pCharacter->m_Health);
 		CUIRect r;
 		// background
 		r.x = x + 12; r.y = y; r.h = 10; r.w = 12 * 10;
@@ -705,9 +710,9 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(smooth_set(&Width, pCharacter->m_Health*12, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
+		if(smooth_set(&Width, ((float)pCharacter->m_Health/(float)m_MaxHealth)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
 		{
-			r.w = min(m_Width/2, Width);
+			r.w = min(m_Width/3, Width);
 			RenderTools()->DrawUIRect(&r, vec4(g_Config.m_ClColorfulClient?1.0f-Width/120.0f:0.7f, g_Config.m_ClColorfulClient?Width/120.0f:0.0f, 0, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 		char aBuf[16];
@@ -737,6 +742,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	Graphics()->QuadsEnd();
 	if(g_Config.m_ClShowhudHealthAmmoBars)
 	{
+		m_MaxArmor = max(m_MaxArmor, pCharacter->m_Armor);
 		CUIRect r;
 		// background
 		r.x = x + 12; r.y = y + 12; r.h = 10; r.w = 12 * 10;
@@ -744,9 +750,9 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(smooth_set(&Width, pCharacter->m_Armor*12, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
+		if(smooth_set(&Width, ((float)pCharacter->m_Armor/(float)m_MaxArmor)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
 		{
-			r.w = min(m_Width/2, Width);
+			r.w = min(m_Width/3, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.8f, 0, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 
