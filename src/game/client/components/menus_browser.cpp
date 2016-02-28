@@ -604,43 +604,52 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if (DoButton_CheckBox(&g_Config.m_BrFilterEmpty, Localize("Has people playing"), g_Config.m_BrFilterEmpty, &Button))
 		g_Config.m_BrFilterEmpty ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterSpectators, Localize("Count players only"), g_Config.m_BrFilterSpectators, &Button))
 		g_Config.m_BrFilterSpectators ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox(&g_Config.m_BrFilterFull, Localize("Server not full"), g_Config.m_BrFilterFull, &Button))
 		g_Config.m_BrFilterFull ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox(&g_Config.m_BrFilterFriends, Localize("Show friends only"), g_Config.m_BrFilterFriends, &Button))
 		g_Config.m_BrFilterFriends ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox(&g_Config.m_BrFilterPw, Localize("No password"), g_Config.m_BrFilterPw, &Button))
 		g_Config.m_BrFilterPw ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterCompatversion, Localize("Compatible version"), g_Config.m_BrFilterCompatversion, &Button))
 		g_Config.m_BrFilterCompatversion ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterPure, Localize("Standard gametype"), g_Config.m_BrFilterPure, &Button))
 		g_Config.m_BrFilterPure ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterPureMap, Localize("Standard map"), g_Config.m_BrFilterPureMap, &Button))
 		g_Config.m_BrFilterPureMap ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterGametypeStrict, Localize("Strict gametype filter"), g_Config.m_BrFilterGametypeStrict, &Button))
 		g_Config.m_BrFilterGametypeStrict ^= 1;
 
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterVersionStrict, Localize("Strict version filter"), g_Config.m_BrFilterVersionStrict, &Button))
 		g_Config.m_BrFilterVersionStrict ^= 1;
 
-	ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
+	ServerFilter.HSplitTop(7.0f, 0, &ServerFilter);
 
 	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
 	UI()->DoLabelScaled(&Button, Localize("Game types:"), FontSize, -1);
@@ -699,6 +708,18 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
 			m_Popup = POPUP_COUNTRY;
+	}
+
+	// additional settings
+	{
+		ServerFilter.HSplitTop(20.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(15.0f, &Button, &ServerFilter);
+		g_Config.m_BrAutoRefresh = round_to_int(DoScrollbarH(&g_Config.m_BrAutoRefresh, &Button, (float)g_Config.m_BrAutoRefresh/3600.0f, Localize("Time in seconds to refresh the infos"))*3600.0f);
+
+		ServerFilter.HSplitTop(10.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+		if(DoButton_CheckBox(&g_Config.m_BrAutoCache, Localize("Cache Manager"), g_Config.m_BrAutoCache, &Button))
+			g_Config.m_BrAutoCache ^= 1;
 	}
 
 	CUIRect ResetButton;
