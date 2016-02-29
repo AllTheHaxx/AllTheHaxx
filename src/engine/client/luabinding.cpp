@@ -411,6 +411,22 @@ void CLuaBinding::LuaSetColor(float r, float g, float b, float a)
 	pGraphics->QuadsEnd();
 }
 
+void CLuaBinding::LuaDrawLine(float xFrom, float yFrom, float xTo, float yTo)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
+
+	IGraphics::CLineItem l;
+	l.m_X0 = xFrom;
+	l.m_X1 = xTo;
+	l.m_Y0 = yFrom;
+	l.m_Y1 = yTo;
+	pGraphics->LinesBegin();
+	pGraphics->LinesDraw(&l, 1);
+	pGraphics->LinesEnd();
+ }
+
+
 int CLuaBinding::LuaLoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
