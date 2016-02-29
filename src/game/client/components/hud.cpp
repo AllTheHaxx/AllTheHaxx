@@ -673,13 +673,13 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		// bar
 		static float Width = 0.0f;
 		static int LastWeapon = -1;
-		if(pCharacter->m_Weapon != LastWeapon)
+		if(pCharacter->m_Weapon != LastWeapon) // detect weapon switch
 		{
-			Width = pCharacter->m_AmmoCount*12;
+			Width = ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo)*120.0f; // instantly set the value
 			LastWeapon = pCharacter->m_Weapon;
 		}
 
-		smooth_set(&Width, ((float)m_MaxAmmo/(float)pCharacter->m_AmmoCount)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f);
+		smooth_set(&Width, ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f);
 		if(Width > 5)
 		{
 			r.w = min(m_Width/3, Width);
