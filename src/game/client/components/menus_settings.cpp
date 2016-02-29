@@ -2200,6 +2200,8 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 
 void CMenus::RenderLoadingLua()
 {
+	Graphics()->Swap();
+
 	CUIRect Bar, Rect = *UI()->Screen();
 
 	Rect.Margin(Rect.w*0.23f, &Rect);
@@ -2210,6 +2212,8 @@ void CMenus::RenderLoadingLua()
 	UI()->DoLabelScaled(&Bar, Localize("Please wait..."), 12.0f, 0, -1, 0);
 	Rect.y += Rect.h/3; Rect.h *= 2/3;
 	UI()->DoLabelScaled(&Rect, Localize("Loading Lua Script"), 18.0f, 0, -1, 0);
+
+	Graphics()->Swap();
 }
 
 void CMenus::RenderSettingsLua(CUIRect MainView)
