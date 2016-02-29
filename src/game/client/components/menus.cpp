@@ -1099,7 +1099,7 @@ void CMenus::RenderLoading()
 	l.w = w;
 	l.h = h;
 
-	UI()->DoLabel(&l, m_pLoadLabel, 12.0f, 0, -1);
+	UI()->DoLabel(&l, m_aLoadLabel, 12.0f, 0, -1);
 
 	char aBuf[16];
 

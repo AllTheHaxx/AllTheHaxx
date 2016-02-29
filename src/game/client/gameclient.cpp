@@ -396,45 +396,47 @@ void CGameClient::OnInit()
 	// setup load amount & load textures and stuff
 	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1    +3;
 	g_GameClient.m_pMenus->m_LoadTotal = TotalLoadAmount + g_pData->m_NumSounds;
+#define SET_LOAD_LABEL(TEXT) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT)
+#define SET_LOAD_LABEL_V(TEXT, ...) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT, __VA_ARGS__)
 	for(int i = 0; i < TotalLoadAmount; i++)
 	{
 		// init the components
-		if(i == 0)
-			g_GameClient.m_pMenus->m_pLoadLabel = "Initializing Components";
 		if(i < m_All.m_Num)  // 0 <= i <= m_All.m_Num-1
 		{
+
+			if(i != 61)
+				SET_LOAD_LABEL_V("Initializing Components (%i/%i)", i+1, m_All.m_Num);
+			else
+				SET_LOAD_LABEL_V("Initializing Components (%i/%i) --> Loading sounds", i+1, m_All.m_Num);
 			m_All.m_paComponents[m_All.m_Num-i-1]->OnInit();
 		}
 
 		// load the textures
-		if(i == m_All.m_Num+1)
-			g_GameClient.m_pMenus->m_pLoadLabel = "Loading Textures";
 		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages)
 		{
+			SET_LOAD_LABEL_V("Loading Textures (%i/%i): \"%s\"", i-m_All.m_Num+1, g_pData->m_NumImages, g_pData->m_aImages[i-m_All.m_Num].m_pFilename);
 			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		}
 
 		// load background map when textures have finished
-		if(i == m_All.m_Num+1)
-			g_GameClient.m_pMenus->m_pLoadLabel = "Loading Textures";
 		if(i == m_All.m_Num+g_pData->m_NumImages)
 		{
+			SET_LOAD_LABEL("Loading Background Map");
 			Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
 		}
 
 		g_GameClient.m_pMenus->RenderLoading();
 
 		// reset all components after loading
-		if(i == m_All.m_Num+g_pData->m_NumImages)
-			g_GameClient.m_pMenus->m_pLoadLabel = "Resetting Components";
 		if(i >= m_All.m_Num+g_pData->m_NumImages && i < TotalLoadAmount-3-1)
 		{
+			SET_LOAD_LABEL_V("Resetting Components (%i/%i)", i-g_pData->m_NumImages-m_All.m_Num+1, m_All.m_Num);
 			m_All.m_paComponents[i-g_pData->m_NumImages-m_All.m_Num]->OnReset();
 		}
 
 		if(i == TotalLoadAmount-3-1)
 		{
-			g_GameClient.m_pMenus->m_pLoadLabel = "Loading Background Map";
+			SET_LOAD_LABEL("Finalizing Background Map");
 
 			m_Layers.Init(Kernel());
 			m_Collision.Init(Layers());
@@ -447,7 +449,7 @@ void CGameClient::OnInit()
 		// init irc
 		if(i == TotalLoadAmount-2-1)
 		{
-			g_GameClient.m_pMenus->m_pLoadLabel = "Initializing IRC Engine";
+			SET_LOAD_LABEL("Starting IRC Engine");
 
 			m_pIRC->Init();
 		}
@@ -455,7 +457,7 @@ void CGameClient::OnInit()
 		// init the editor
 		if(i == TotalLoadAmount-1-1)
 		{
-			g_GameClient.m_pMenus->m_pLoadLabel = "Initializing Editor";
+			SET_LOAD_LABEL("Initializing Editor");
 
 			m_pEditor->Init();
 		}
@@ -463,7 +465,7 @@ void CGameClient::OnInit()
 		// last iteration
 		if(i == TotalLoadAmount-0-1)
 		{
-			g_GameClient.m_pMenus->m_pLoadLabel = "Loading done. Have Fun!";
+			SET_LOAD_LABEL("Loading done. Have Fun!");
 			str_format(aBuf, sizeof(aBuf), "version %s", NetVersion());
 			if(g_Config.m_ClPrintStartup)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
@@ -479,6 +481,8 @@ void CGameClient::OnInit()
 			m_pConsole->StoreCommands(false);
 		}
 	}
+#undef SET_LOAD_LABEL
+#undef SET_LOAD_LABEL_V
 
 #if defined(__ANDROID__)
 	m_pMapimages->OnMapLoad(); // Reload map textures on Android    ...could be broken by background map stuff
