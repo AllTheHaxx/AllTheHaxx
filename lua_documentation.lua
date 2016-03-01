@@ -10,12 +10,78 @@
 
 
 -- Structure:
+------ General
+------ Specific callbacks
 ------ Event callbacks
 ------ Functions
+------ Types
 
 
 
 
+-- ~~~~~~~~~~~~~~~
+-- ~~~ General ~~~
+-- ~~~~~~~~~~~~~~~
+
+--XXX The script header XXX--
+
+--Every script can (and should) start with the following 3 lines:
+_g_ScriptTitle = "my cool script title"
+_g_ScriptInfo = "written by me"
+config = {}
+ -- _g_ScriptTitle: sets an individual title for the script, if not given the filename will be used
+ -- _g_ScriptInfo: sets a subtext below the script title, if not given it stays empty
+ -- config = {}: creates an empty table in which you can store your scripts configuration
+
+
+--XXX How to use a settings page and script configs XXX--
+
+--- XXX §1: Adding a custom settings page
+
+-- In order to let the api know that your script has a settings page, you must define
+-- OnScriptRenderSettings and OnScriptSaveSettings as functions.
+
+--Example code to get your settings page working:
+
+function OnScriptRenderSettings(x, y, w, h)
+	-- some code to create a nice GUI goes here
+end
+
+function OnScriptSaveSettings()
+	-- Functions to write the config down go here. The "config" is also a lua script
+	-- which holds the contents of your 'config' table. For example:
+	file = io.open("lua/myscript.config", "w+")
+	for k, v in next, config do -- DON'T use ipairs(config) here since it won't get you all values!
+		file:write("config[" .. k .. "] = " .. v)
+	end
+	file:flush()
+	file:close()
+end -- This function should be okay for nearly every script, so you don't have to get too creative ;)
+
+
+--- XXX §2: Loading the previously saved config
+
+-- Since your written down script config is also just a lua file (it really should be!), you
+-- don't have to do anything yourself to get it loaded:
+
+-- (the callback function OnScriptInit() has an own explanation below the events)
+function OnScriptInit()
+	-- the following call will execute a lua file using this file's lua state
+	success = _system.Import("myscript.config") -- note that the "lua/" infront of it is gone now! (see notes below the events)
+	if success == true then
+		print("Settings loaded!")
+	else
+		print("Failed to load settings")
+		return false -- returning false here will abort the execution of your script because you
+		             -- indicated that there were errors and your script is thus not runnable
+	end
+	return true -- DO NEVER EVER FORGET THIS! If the function gives back control WITHOUT any return,
+	            -- the client will CRASH in any circumstance! So please be careful!
+end
+
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- ~~~~~~~~~~~~~~~~~~~~~~~
 -- ~~~ Event callbacks ~~~
 -- ~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,22 +132,44 @@ RegisterEvent("OnKeyRelease", YourCallbackFunction)
 
 
 
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- ~~~ Specific callbacks ~~~
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------- You can define the following functions if you wish to, but they're not required.
+function OnScriptInit() return <true/false> end
+	-- Description: Will be executed right after loading your script
+	-- Parameters: none
+	-- Return value: Boolean
+	-- Additional Info: If you give back from this function without return value, the client
+	--                  will definitely crash. There is nothing we could do against it.
+
+function OnScriptRenderSettings(x, y, w, h) return nil end
+	-- Description: Renders a settings gui
+	-- Parameters: float, float, float, float (windows bounds, also known as "MainView")
+	-- Return value: none
+	-- Additional Info: You must define this function if you want the "settings" button to show up
+
+function OnScriptSaveSettings() return nil end
+	-- Description: Called when the user closes your settings page. Used to write down the config (see above)
+	-- Parameters: none
+	-- Return value: none
+	-- Additional Info: You must define this function if you want the "settings" button to show up
+
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- ~~~~~~~~~~~~~~~~~
 -- ~~~ Functions ~~~
 -- ~~~~~~~~~~~~~~~~~
---------- Namespace: _lua
-_lua.SetScriptTitle(Title)
-	-- Description: Set the script title (ingame displaying)
-	-- Parameters: String
-	-- Return value: none
-_lua.SetScriptInfo(Info)
-	-- Description: Set the script info (ingame displaying)
-	-- Parameters: String
-	-- Return value: none
-_lua.SetScriptHasSettings()
-	-- Description: Check wether the script uses a config
-	-- Parameters: none
+--------- Namespace: _system
+_system.Import(UID, Filename)
+	-- Description: Execute a lua file (mainly used for loading configs)
+	-- Parameters: '_g_ScriptUID', String
 	-- Return value: Boolean
+	-- Additional Info:
+	--  -> You MUST pass '_g_ScriptUID' and nothing else as parameter 1 or it will fail
+	--  -> 'Filename' is relativ to the 'lua/' folder
 
 --------- Namespace: _client
 _client.Connect(Address)
@@ -247,3 +335,17 @@ _graphics.RenderTexture(ID, x, y, w, h, Rotation)
 	-- Description: Renders a loaded texture with the given params (ID, X, Y, width, height, rotation)
 	-- Parameters: Integer, Float, Float, Float, Float, Float
 	-- Return value: none
+
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- ~~~~~~~~~~~~~
+-- ~~~ Types ~~~ ( not finished yet, it beta dude! )
+-- ~~~~~~~~~~~~~
+vec2 -- holding integers x, y
+vec3 -- holding  integersx, y, z
+vec4 -- holding  integersr, g, b, a
+
+vec2f -- holding floats x, y
+vec3f -- holding floats x, y, z
+vec4f -- holding floats r, g, b, a
