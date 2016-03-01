@@ -112,7 +112,7 @@ void CLuaFile::Init()
 	{
 		LuaRef func = GetFunc("OnScriptInit");
 		if(func)
-			if(!func())
+			if(func().cast<bool>())
 				Reset(true);
 	}
 	catch (std::exception& e)

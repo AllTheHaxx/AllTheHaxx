@@ -208,11 +208,15 @@ void CLuaBinding::LuaDrawUiRect(float x, float y, float w, float h, int corners,
 int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	int ID = 0; // hm.
+	static int ID[1024] = {0}; // hm.
+	int hash = round_to_int(x) << 31;
+	hash |= round_to_int(y) << 15;
+	hash |= round_to_int(w) << 7;
+	hash |= round_to_int(h) << 0;
 	CUIRect r;
 	r.x = x; r.y = y;
 	r.w = w; r.h = h;
-	return pGameClient->m_pMenus->DoButton_Menu(&ID, pText ? pText : "", Checked, &r, pTooltip ? pTooltip : "", Corners, CLuaBinding::m_pUiContainer->Color);
+	return pGameClient->m_pMenus->DoButton_Menu(&ID[hash%1024], pText ? pText : "", Checked, &r, pTooltip ? pTooltip : "", Corners, CLuaBinding::m_pUiContainer->Color);
 }
 
 

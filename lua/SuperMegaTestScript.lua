@@ -1,31 +1,43 @@
 _g_ScriptTitle = "Fettes Testskript ;)" -- this defines the script title, TODO: VAR NAME IS FORCED!
 _g_ScriptInfo = "BOAH IS DAT GEIL!" -- this defines the subtext (info), TODO: VAR NAME IS FORCED!
 config = {} -- this creates the table for storing config stuff into
+config["TestBool"] = 0 -- a default value
+
 
 function OnScriptInit() -- XXX if there are script errors in this function, the luafile will enter error-state (nt usable!)
 	if(_system.Import(_g_ScriptUID, "SuperMegaTestScript.config") and config ~= nil) then
-		print("Ya, config loaded successfully!")
-		print("TestValue1: " .. config["TestValue1"])
-		print("TestValue2: " .. config["TestValue2"])
+		print("SuperMegaTestScript.lua: Config loaded!")
 	else
-		return false -- this would force the script to enter error-state (thus cannot be used)
+		print("SuperMegaTestScript.lua: Failed to load config!")
+		return false -- this would force the script to enter error-state (thus unexecutable)
 	end
 	
 	return true -- this is important to tell c++ that the script init was successful
-	---------- XXX if OnScriptInit() doesn't return anything, the client WILL crash in any way!!
+	---------- XXX if OnScriptInit() doesn't return anything, the client WILL CRASH in any way!!
 end
 
 function OnScriptRenderSettings(x, y, w, h)
 	-- just a red rect, much lame ._.
-	_ui.SetUiColor(1,0,0,1)
+	_ui.SetUiColor(1,0,0,0.3)
 	_ui.DrawUiRect(x, y, w, h, 15, 3.0)
+	if(_ui.DoButton_Menu("Toggle TestBool", config["TestBool"], x+20, y+20, 170, 35, "mytooltip", 15) ~= 0) then
+		config["TestBool"] = ((config["TestBool"] == 1) and 0 or 1)
+	end
 end
 
 function OnScriptSaveSettings()
-	-- save the settings here, use io.open, io.write
-	print("YAAA ME SAVED TEH ZETTINGZ!")
-	print("MY SCRIPT UID IS: " .. _g_ScriptUID)
+	file = io.open("lua/SuperMegaTestScript.config", "w+")
+	for k, v in next, config do
+		if(type(k) == "string") then
+			file:write("config[\"" .. k .. "\"] = " .. v .. "\n")
+		else
+			file:write("config[" .. k .. "] = " .. v .. "\n")
+		end
+	end
+	file:flush()
+	file:close()
 end
+
 
 --[[
 local function test()

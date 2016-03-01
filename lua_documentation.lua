@@ -52,7 +52,11 @@ function OnScriptSaveSettings()
 	-- which holds the contents of your 'config' table. For example:
 	file = io.open("lua/myscript.config", "w+")
 	for k, v in next, config do -- DON'T use ipairs(config) here since it won't get you all values!
-		file:write("config[" .. k .. "] = " .. v)
+		if(type(k) == "string") then
+			file:write("config[\"" .. k .. "\"] = " .. v .. "\n")
+		else
+			file:write("config[" .. k .. "] = " .. v .. "\n")
+		end
 	end
 	file:flush()
 	file:close()
