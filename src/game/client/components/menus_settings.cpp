@@ -2219,8 +2219,36 @@ void CMenus::RenderLoadingLua()
 void CMenus::RenderSettingsLua(CUIRect MainView)
 {
 	CUIRect Button;
+	static int s_ActiveLuaSettings = -1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
+
+	if(s_ActiveLuaSettings >= 0)
+	{
+		try
+		{
+			CUIRect CloseButton;
+			MainView.HSplitTop(20.0f, &CloseButton, &MainView);
+			static int s_CloseButton = 0;
+			if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B))
+			{
+				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptSaveSettings")();
+				s_ActiveLuaSettings = -1;
+			}
+			else
+			{
+				MainView.HSplitTop(10.0f, 0, &MainView);
+				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView.x, MainView.y, MainView.w, MainView.h);
+			}
+		}
+		catch(std::exception &e)
+		{
+			printf("LUA EXCEPTION: %s\n", e.what());
+			s_ActiveLuaSettings = -1;
+		}
+		return;
+	}
+
 	CUIRect RefreshButton;
 	Button.VSplitRight(100.0f, &Button, &RefreshButton);
 	static int s_RefreshButton = 0;
@@ -2243,6 +2271,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	if(!g_Config.m_ClLua)
 		return;
 
+
 	{
 		int NumLuaFiles = Client()->Lua()->GetLuaFiles().size();
 
@@ -2255,9 +2284,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		int OldSelected = -1;
 
 		static int s_NumNodes = 0;
-		UiDoListboxStart(&s_NumNodes, &MainView, 50.0f, Localize("Lua files"), "", NumLuaFiles, 1, OldSelected, s_ScrollValue);
-
 		int HighlightIndex = 0;
+		UiDoListboxStart(&s_NumNodes, &MainView, 50.0f, Localize("Lua files"), "", NumLuaFiles, 1, OldSelected, s_ScrollValue);
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
@@ -2320,16 +2348,13 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					UI()->DoLabel(&Button, Localize("An error occured while loading"), 10.0f, -1, Button.w, 0);
 				}
 
-				LuaRef func = L->GetFunc("OnConfigOpen");
-				if (!(func == 0) && L->GetScriptHasSettings())
+				if (L->GetScriptHasSettings())
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
 					if (DoButton_Menu(&pIDButtonSettings[i], Localize("Settings"), false, &Button))
 					{
-						MainView.HSplitTop(10.0f, 0, &MainView);
-						func(MainView.x, MainView.y, MainView.w, MainView.h);
-						//s_ActiveListElement = i;
+						s_ActiveLuaSettings = i;
 					}
 				}
 				if (L->GetScriptTitle()[0] != '\0')

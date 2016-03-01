@@ -12,6 +12,23 @@
 CLuaBinding::UiContainer * CLuaBinding::m_pUiContainer = 0;
 CConfiguration * CConfigProperties::m_pConfig = 0;
 
+// system namespace
+bool CLuaBinding::LuaImport(int UID, const char *pFilename)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	for(int i = 0; i < pGameClient->Client()->Lua()->GetLuaFiles().size(); i++)
+	{
+		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->GetUID() == UID)
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename); // force path to prevent kids from importing events.lua
+			pGameClient->Client()->Lua()->GetLuaFiles()[i]->LoadFile(aBuf);
+			return true;
+		}
+	}
+	return false;
+}
+
 // client namespace
 void CLuaBinding::LuaConnect(const char *pAddr)
 {
@@ -174,18 +191,18 @@ void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
 void CLuaBinding::LuaDrawUiRect(float x, float y, float w, float h, int corners, float rounding)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
+	//IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
 
 	CUIRect rect;
 	rect.x = x; rect.y = y;
 	rect.w = w; rect.h = h;
 
-	pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h);
+	//pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h); // remapping the screen breaks existing gui stuff :S
 	pGameClient->RenderTools()->DrawUIRect(&rect, CLuaBinding::m_pUiContainer->Color, corners, rounding);
 
-	float Width = 400*3.0f*pGraphics->ScreenAspect();
-	float Height = 400*3.0f;
-	pGraphics->MapScreen(0, 0, Width, Height);
+	//float Width = 400*3.0f*pGraphics->ScreenAspect();
+	//float Height = 400*3.0f;
+	//pGraphics->MapScreen(0, 0, Width, Height);
 }
 
 int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners)

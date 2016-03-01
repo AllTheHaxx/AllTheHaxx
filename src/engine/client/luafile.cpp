@@ -9,22 +9,22 @@ CLuaFile::CLuaFile(CLua *pLua, std::string Filename) : m_pLua(pLua), m_Filename(
 {
 	m_pLuaState = 0;
 	m_State = LUAFILE_STATE_IDLE;
-	//str_copy(m_aFilename, pFilename, sizeof(m_aFilename));
 	Reset();
 }
 
-void CLuaFile::Reset()
+void CLuaFile::Reset(bool error)
 {
-	m_State = LUAFILE_STATE_IDLE;
+	m_UID = rand()%0xFFFF;
+	m_State = error ? LUAFILE_STATE_ERROR: LUAFILE_STATE_IDLE;
 
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 
 	m_ScriptHasSettings = false;
 
-	if(m_pLuaState)
-		lua_close(m_pLuaState);
-	m_pLuaState = luaL_newstate();
+	//if(m_pLuaState)
+	//	lua_close(m_pLuaState);
+	//m_pLuaState = luaL_newstate();
 }
 
 void CLuaFile::Unload()
@@ -32,7 +32,7 @@ void CLuaFile::Unload()
 //	if(m_pLuaState)             // -- do not close it in order to prevent crashes
 //		lua_close(m_pLuaState);
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
-	m_State = LUAFILE_STATE_IDLE; // -- just change the state so that everybody knews
+	Reset();
 }
 
 void CLuaFile::OpenLua()
@@ -82,11 +82,54 @@ void CLuaFile::Init()
 		else
 			m_State = LUAFILE_STATE_ERROR;
 	}
+
+	// if we errored so far, don't go any further
+	if(m_State == LUAFILE_STATE_ERROR)
+	{
+		Reset(true);
+		return;
+	}
+
+	// gather basic global infos from the script
+	lua_getglobal(m_pLuaState, "_g_ScriptTitle");
+	if(lua_isstring(m_pLuaState, -1))
+		str_copy(m_aScriptTitle, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptTitle));
+	lua_pop(m_pLuaState, -1);
+
+	lua_getglobal(m_pLuaState, "_g_ScriptInfo");
+	if(lua_isstring(m_pLuaState, -1))
+		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
+	lua_pop(m_pLuaState, -1);
+
+	m_ScriptHasSettings = ScriptHasSettings();
+
+	// pass the uid to the script
+	lua_pushinteger(m_pLuaState, m_UID);
+	lua_setglobal(m_pLuaState, "_g_ScriptUID");
+
+	// call the OnScriptInit function if we have one
+	try
+	{
+		LuaRef func = GetFunc("OnScriptInit");
+		if(func)
+			if(!func())
+				Reset(true);
+	}
+	catch (std::exception& e)
+	{
+		printf("LUA EXCEPTION: %s\n", e.what());
+		Reset(true);
+	}
 }
 
 void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 {
 	getGlobalNamespace(m_pLuaState)
+
+		// system namespace
+		.beginNamespace("_system")
+			.addFunction("Import", &CLuaBinding::LuaImport)
+		.endNamespace()
 
 		// client namespace
 		.beginNamespace("_client")
@@ -107,18 +150,6 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
 			.addFunction("GetPlayerPing", &CLuaBinding::LuaGetPlayerPing)
 		.endNamespace()
-
-
-		// lua namespace
-		.beginNamespace("_lua")
-			//.addFunction("GetLuaFile", &CLuaFile::LuaGetLuaFile)
-			.beginClass<CLuaFile>("CLuaFile")
-				.addFunction("SetScriptTitle", &CLuaFile::LuaSetScriptTitle)
-				.addFunction("SetScriptInfo", &CLuaFile::LuaSetScriptInfo)
-				.addFunction("SetScriptHasSettings", &CLuaFile::LuaSetScriptHasSettings)
-			.endClass()
-		.endNamespace()
-
 
 		// ui namespace
 		.beginNamespace("_ui")
@@ -280,7 +311,8 @@ void CLuaFile::CallFunc(const char *pFuncName)
 bool CLuaFile::LoadFile(const char *pFilename)
 {
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
-			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") || !m_pLuaState)
+			(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") &&
+			str_comp_nocase(&pFilename[str_length(pFilename)]-7, ".config")) || !m_pLuaState)
 		return false;
 
     int Status = luaL_loadfile(m_pLuaState, pFilename);
@@ -297,22 +329,15 @@ bool CLuaFile::LoadFile(const char *pFilename)
     	CLua::ErrorFunc(m_pLuaState);
         return false;
     }
+
     return true;
 }
 
-
-// lua namespace
-void CLuaFile::LuaSetScriptTitle(std::string Title)
+bool CLuaFile::ScriptHasSettings()
 {
-	str_copy(m_aScriptTitle, Title.c_str(), sizeof(m_aScriptTitle));
-}
-
-void CLuaFile::LuaSetScriptInfo(std::string Infotext)
-{
-	str_copy(m_aScriptInfo, Infotext.c_str(), sizeof(m_aScriptInfo));
-}
-
-void CLuaFile::LuaSetScriptHasSettings(int Val)
-{
-	m_ScriptHasSettings = Val > 0;
+	LuaRef func1 = GetFunc("OnScriptRenderSettings");
+	LuaRef func2 = GetFunc("OnScriptSaveSettings");
+	if(func1.cast<bool>() && func2.cast<bool>())
+		return true;
+	return false;
 }

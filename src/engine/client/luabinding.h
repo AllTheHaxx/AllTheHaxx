@@ -17,6 +17,9 @@ public:
 	};
 	static UiContainer *m_pUiContainer; // this will be moved to CLuaFile once it exists
 
+	// system namespace
+	static bool LuaImport(int UID, const char *pFilename);
+
 	// client namespace
 	static void LuaConnect(const char *pAddr);
 	static int LuaGetTick();
@@ -60,7 +63,6 @@ public:
 	static int LuaGetInput(const char *pInput);
 	static void LuaSetInput(const char *pInput, int Value);
 	static void LuaResetInput();
-
 
 	// graphics namespace
 	static int LuaGetScreenWidth();

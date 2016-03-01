@@ -25,6 +25,7 @@ private:
 	int m_State;
 	std::string m_Filename;
 
+	int m_UID; // the script can use this to identify itself
 	char m_aScriptTitle[64];
 	char m_aScriptInfo[128];
 	bool m_ScriptHasSettings;
@@ -32,7 +33,7 @@ private:
 public:
 	CLuaFile(CLua *pLua, std::string Filename);
 	void Init();
-	void Reset();
+	void Reset(bool error = false);
 	void Unload();
 	void OpenLua();
 	luabridge::LuaRef GetFunc(const char *pFuncName);
@@ -40,6 +41,7 @@ public:
 	bool LoadFile(const char *pFilename);
 
 	int State() const { return m_State; }
+	int GetUID() const { return m_UID; }
 	const char* GetFilename() const { return m_Filename.c_str(); }
 	const char* GetScriptTitle() const { return m_aScriptTitle; }
 	const char* GetScriptInfo() const { return m_aScriptInfo; }
@@ -47,15 +49,9 @@ public:
 
 	CLua *Lua() const { return m_pLua; }
 
-	// lua namespace
-	//RefCountedPtr<CLuaFile> LuaGetLuaFile() { return this; } // TODO: how?
-	void LuaSetScriptTitle(std::string Title);
-	void LuaSetScriptInfo(std::string Infotext);
-	void LuaSetScriptHasSettings(int Val);
-
 private:
 	void RegisterLuaCallbacks();
-
+	bool ScriptHasSettings();
 };
 
 #endif
