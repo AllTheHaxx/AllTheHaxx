@@ -295,7 +295,13 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.endClass()
 		
 		.beginClass<CControls>("CControls")
+			.addProperty("Direction", &CControls::GetDirection, &CControls::SetDirection)
+			.addProperty("Fire", &CControls::GetFire, &CControls::SetFire)
+			.addProperty("Hook", &CControls::GetHook, &CControls::SetHook)
 			.addProperty("Jump", &CControls::GetJump, &CControls::SetJump)
+			.addProperty("WantedWeapon", &CControls::GetWantedWeapon, &CControls::SetWantedWeapon)
+			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
+			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
 		.endClass()
 		
 		//Server Infos

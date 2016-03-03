@@ -48,7 +48,20 @@ public:
 	void ClampMousePos();
 	void ResetInput(int dummy);
 	
+	// lua
+	int GetDirection() const { return m_InputData[g_Config.m_ClDummy].m_Direction; }
+	void SetDirection(int n) { m_InputData[g_Config.m_ClDummy].m_Direction = n; }
+	int GetFire() const { return m_InputData[g_Config.m_ClDummy].m_Fire; }
+	void SetFire(int n) { m_InputData[g_Config.m_ClDummy].m_Fire = n; }
+	int GetHook() const { return m_InputData[g_Config.m_ClDummy].m_Hook; }
+	void SetHook(int n) { m_InputData[g_Config.m_ClDummy].m_Hook = n; }
 	int GetJump() const { return m_InputData[g_Config.m_ClDummy].m_Jump; }
 	void SetJump(int n) { m_InputData[g_Config.m_ClDummy].m_Jump = n; }
+	int GetWantedWeapon() const { return m_InputData[g_Config.m_ClDummy].m_WantedWeapon; }
+	void SetWantedWeapon(int n) { m_InputData[g_Config.m_ClDummy].m_WantedWeapon = n; }
+	int GetTargetX() const { return m_InputData[g_Config.m_ClDummy].m_TargetX; }
+	void SetTargetX(int n) { m_InputData[g_Config.m_ClDummy].m_TargetX = n; }
+	int GetTargetY() const { return m_InputData[g_Config.m_ClDummy].m_TargetY; }
+	void SetTargetY(int n) { m_InputData[g_Config.m_ClDummy].m_TargetY = n; }
 };
 #endif
