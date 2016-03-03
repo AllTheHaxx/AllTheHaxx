@@ -356,6 +356,8 @@ void CLuaBinding::LuaSetInput(const char *pInput, int Value)
 			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetX = Value;
 		else if(str_comp_nocase(pInput, "TargetY") == 0)
 			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY = Value;
+		else if(str_comp_nocase(pInput, "Jump") == 0)
+			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Jump = Value;
 	}
 	else
 	{
@@ -373,6 +375,8 @@ void CLuaBinding::LuaSetInput(const char *pInput, int Value)
 			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetX = Value;
 		else if(str_comp_nocase(pInput, "TargetY") == 0)
 			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetY = Value;
+		else if(str_comp_nocase(pInput, "Jump") == 0)
+			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Jump = Value;
 	}
 }
 

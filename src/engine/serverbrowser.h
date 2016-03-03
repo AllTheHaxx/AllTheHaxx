@@ -6,6 +6,7 @@
 #include <engine/shared/protocol.h>
 
 #include "kernel.h"
+#include <string>
 
 /*
 	Structure: CServerInfo
@@ -49,6 +50,12 @@ public:
 	char m_aVersion[32];
 	char m_aAddress[NETADDR_MAXSTRSIZE];
 	CClient m_aClients[MAX_CLIENTS];
+	
+	std::string LuaGetGameType() const { return std::string(m_aGameType); }
+	std::string LuaGetName() const { return std::string(m_aName); }
+	std::string LuaGetMap() const { return std::string(m_aMap); }
+	std::string LuaGetVersion() const { return std::string(m_aVersion); }
+	std::string LuaGetIP() const { return std::string(m_aAddress); }
 };
 
 bool IsRace(const CServerInfo *pInfo);

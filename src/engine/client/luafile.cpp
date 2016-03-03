@@ -2,8 +2,10 @@
 #include "lua.h"
 #include "luabinding.h"
 
-#include <game/client/gameclient.h>
+//#include <game/client/gameclient.h>
 #include <game/client/components/chat.h>
+#include <engine/serverbrowser.h>
+//#include <engine/client/client.h>
 
 CLuaFile::CLuaFile(CLua *pLua, std::string Filename) : m_pLua(pLua), m_Filename(Filename)
 {
@@ -123,7 +125,7 @@ void CLuaFile::Init()
 }
 
 void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
-{
+{	
 	getGlobalNamespace(m_pLuaState)
 
 		// system namespace
@@ -254,10 +256,22 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("Say", &CChat::Say)
 			.addProperty("Mode", &CChat::GetMode)
 		.endClass()
+		
+		.beginClass<CServerInfo>("CServerInfo")
+			.addProperty("GameMode", &CServerInfo::LuaGetGameType)
+			.addProperty("Name", &CServerInfo::LuaGetName)
+			.addProperty("Map", &CServerInfo::LuaGetMap)
+			.addProperty("Version", &CServerInfo::LuaGetVersion)
+			.addProperty("IP", &CServerInfo::LuaGetIP)
+			.addData("Latency", &CServerInfo::m_Latency)
+			.addData("MaxPlayers", &CServerInfo::m_MaxPlayers)
+			.addData("NumPlayers", &CServerInfo::m_NumPlayers)
+		.endClass()
 
 		.beginNamespace("Game")
 			.addVariable("Client", &CLua::m_pCGameClient, false)	      //false means read only! important so noobs dont mess up the pointer		
-			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)
+			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)	
+			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
 		.endNamespace()
 		
 		.beginNamespace("Client")

@@ -1,11 +1,13 @@
 #include <base/system.h>
 #include <engine/storage.h>
+#include <engine/client.h>
 
 #include "luabinding.h"
 #include "lua.h"
 
 
 IClient * CLua::m_pClient = 0; 
+CClient * CLua::m_pCClient = 0;
 IGameClient * CLua::m_pGameClient = 0;
 CGameClient * CLua::m_pCGameClient = 0;
 
@@ -27,6 +29,7 @@ CLua::~CLua()
 void CLua::Init(IClient * pClient, IStorage * pStorage)
 {
 	m_pClient = pClient;
+	m_pCClient = (CClient*)pClient;
 	m_pStorage = pStorage;
 	LoadFolder();
 }

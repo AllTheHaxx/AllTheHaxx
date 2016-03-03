@@ -4,9 +4,6 @@
 #include <string>
 #include <engine/shared/config.h>
 
-
-class CClient;
-
 class CLuaBinding
 {
 public:

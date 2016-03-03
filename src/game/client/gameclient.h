@@ -6,6 +6,7 @@
 #include <base/vmath.h>
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/serverbrowser.h>
 #include <game/layers.h>
 #include <game/gamecore.h>
 #include "render.h"
@@ -381,7 +382,9 @@ public:
 	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers; }
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade; }
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
-
+	
+	CServerInfo m_CurrentServerInfo;
+	
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];

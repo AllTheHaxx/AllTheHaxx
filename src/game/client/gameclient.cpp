@@ -12,6 +12,7 @@
 #include <engine/serverbrowser.h>
 #include <engine/irc.h>
 #include <engine/updater.h>
+#include <engine/serverbrowser.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/config.h>
 
@@ -580,8 +581,7 @@ void CGameClient::OnConnected()
 		m_All.m_paComponents[i]->OnReset();
 	}
 
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
+	Client()->GetServerInfo(&m_CurrentServerInfo);
 
 	m_ServerMode = SERVERMODE_PURE;
 
@@ -640,6 +640,7 @@ void CGameClient::OnReset()
 void CGameClient::UpdatePositions()
 {
 	// local character position
+	Client()->GetServerInfo(&m_CurrentServerInfo);
 	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		if(!AntiPingPlayers())

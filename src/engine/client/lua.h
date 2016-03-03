@@ -26,6 +26,7 @@
 	}
 
 class IClient;
+class CClient;
 class IStorage;
 class IGameClient;
 class CGameClient;
@@ -36,7 +37,6 @@ using namespace luabridge;
 class CLua
 {
 	array<CLuaFile*> m_pLuaFiles;
-	static IClient *m_pClient;
 	IStorage *m_pStorage;
 
 public:
@@ -50,6 +50,8 @@ public:
 	static int ErrorFunc(lua_State *L);
     static int Panic(lua_State *L);
 
+	static CClient * m_pCClient;
+	static IClient *m_pClient;
 	static IGameClient *m_pGameClient;
 	static IClient *Client() { return m_pClient; }
 	static IGameClient *GameClient() { return m_pGameClient; }
