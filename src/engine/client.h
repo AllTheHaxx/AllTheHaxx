@@ -46,6 +46,8 @@ protected:
 	CLua m_Lua;
 
 public:
+	bool m_Restarting; // set this to make the client restart on the next quit
+
 	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
 

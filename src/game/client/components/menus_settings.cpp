@@ -1408,7 +1408,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound)
-		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
+	{
+		static int s_ButtonRestart = 0;
+		if(DoButton_Menu(&s_ButtonRestart, Localize("You must restart the game for all settings to take effect."), 0, &RestartWarning, 0, CUI::CORNER_ALL, vec4(0.75f, 0.18f, 0.18f, 0.83f)))
+			Client()->Restart();
+	}
 }
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {

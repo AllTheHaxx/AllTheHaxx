@@ -336,6 +336,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	HammerInput.m_Fire = 0;
 
 	m_State = IClient::STATE_OFFLINE;
+	m_Restarting = false;
 	m_aServerAddressStr[0] = 0;
 
 	mem_zero(m_aSnapshots, sizeof(m_aSnapshots));
@@ -1062,8 +1063,7 @@ void CClient::DebugRender()
 
 void CClient::Restart()
 {
-	char aBuf[512];
-	shell_execute(Storage()->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+	m_Restarting = true;
 	Quit();
 }
 
@@ -2807,7 +2807,7 @@ void CClient::Run()
 			}
 		}
 
-		// panic quit button
+		// panic quit button and restart
 		if(CtrlShiftKey('q', LastQ))
 		{
 			Quit();
@@ -3516,6 +3516,9 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
+
+	if(pClient->m_Restarting)
+		shell_execute(argv[0]);
 
 	return 0;
 }
