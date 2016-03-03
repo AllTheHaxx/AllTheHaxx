@@ -294,8 +294,8 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addData("Ammo", &CNetObj_Character::m_AmmoCount)
 		.endClass()
 		
-		.beginClass<CNetObj_PlayerInput>("CNetObj_PlayerInput")
-			.addData("Jump", &CNetObj_PlayerInput::m_Jump)
+		.beginClass<CControls>("CControls")
+			.addProperty("Jump", &CControls::GetJump, &CControls::SetJump)
 		.endClass()
 		
 		//Server Infos
@@ -318,7 +318,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
 			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
-			.addVariable("Input", &CLua::m_pCGameClient->m_pControls->m_InputData[0])
+			.addVariable("Input", &CLua::m_pCGameClient->m_pControls)
 			//pointer to components & stuff from gameclient
 			
 			//sub-namespaces etc

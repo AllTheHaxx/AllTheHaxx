@@ -47,5 +47,8 @@ public:
 	int SnapInput(int *pData);
 	void ClampMousePos();
 	void ResetInput(int dummy);
+	
+	int GetJump() const { return m_InputData[g_Config.m_ClDummy].m_Jump; }
+	void SetJump(int n) { m_InputData[g_Config.m_ClDummy].m_Jump = n; }
 };
 #endif

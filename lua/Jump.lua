@@ -4,18 +4,18 @@ a = true
 
 function Jump()
 	
-	if _client.GetTick() < LastTick + 25 then
+	if Game.Client.Tick < LastTick + 28 then
 		return
 	end
 		
 	if a == true then
-		_game.controls.SetInput("Jump", 1)
+		Game.Input.Jump = 1
 		a = false
-		LastTick = _client.GetTick()
+		LastTick = Game.Client.Tick
 	else
-		_game.controls.SetInput("Jump", 0)
+		Game.Input.Jump = 0
 		a = true
-		LastTick = _client.GetTick()
+		LastTick = Game.Client.Tick
 	end
 end
 
