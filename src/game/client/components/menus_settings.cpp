@@ -705,21 +705,50 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		MovementSettings.VMargin(5.0f, &MovementSettings);
 		MovementSettings.HSplitTop(MainView.h/3+75.0f, &MovementSettings, &WeaponSettings);
-		RenderTools()->DrawUIRect(&MovementSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		static float s_AlphaAddition = 0.0f;
+		if(UI()->MouseInside(&MovementSettings))
+			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		else
+			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		RenderTools()->DrawUIRect(&MovementSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
-		TextRender()->Text(0, MovementSettings.x, MovementSettings.y, 14.0f*UI()->Scale(), Localize("Movement"), -1);
+		//TextRender()->Text(0, MovementSettings.x, MovementSettings.y, 14.0f*UI()->Scale(), Localize("Movement"), -1);
 
-		MovementSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MovementSettings);
+		MovementSettings.HSplitTop(14.0f, 0, &MovementSettings);
 
 		{
-			CUIRect Button, Label;
+			CUIRect Button, Label, InputBox;
 			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
 			Button.VSplitLeft(135.0f, &Label, &Button);
 			UI()->DoLabel(&Label, Localize("Mouse sens."), 14.0f*UI()->Scale(), -1);
 			Button.HMargin(2.0f, &Button);
+			Button.VSplitLeft(50.0f, &InputBox, &Button);
+			Button.VSplitLeft(9.0f, 0, &Button);
+			static char aInput[6] = {0}; static float s_Offset = 0.0f;
+			str_format(aInput, sizeof(aInput), "%i", g_Config.m_UiMousesens);
+			DoEditBox(&g_Config.m_UiMousesens, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
+			g_Config.m_UiMousesens = atoi(aInput);
+			g_Config.m_UiMousesens = round_to_int(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (g_Config.m_UiMousesens-5)/995.0f)*995.0f)+5;
+			MovementSettings.HSplitTop(5.0f, 0, &MovementSettings);
+			if(g_Config.m_UiMousesens < 5) g_Config.m_UiMousesens = 5;
+		}
+
+		{
+			CUIRect Button, Label, InputBox;
+			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
+			Button.VSplitLeft(135.0f, &Label, &Button);
+			UI()->DoLabel(&Label, Localize("Ingame sens."), 14.0f*UI()->Scale(), -1);
+			Button.HMargin(2.0f, &Button);
+			Button.VSplitLeft(50.0f, &InputBox, &Button);
+			Button.VSplitLeft(9.0f, 0, &Button);
+			static char aInput[6] = {0}; static float s_Offset = 0.0f;
+			str_format(aInput, sizeof(aInput), "%i", g_Config.m_InpMousesens);
+			DoEditBox(&g_Config.m_InpMousesens, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
+			g_Config.m_InpMousesens = atoi(aInput);
 			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/995.0f)*995.0f)+5;
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
+			if(g_Config.m_InpMousesens < 5) g_Config.m_InpMousesens = 5;
 		}
 
 		UiDoGetButtons(0, 7, MovementSettings);
@@ -730,7 +759,12 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		WeaponSettings.HSplitTop(10.0f, 0, &WeaponSettings);
 		WeaponSettings.HSplitTop(MainView.h/3+35.0f, &WeaponSettings, &ResetButton);
-		RenderTools()->DrawUIRect(&WeaponSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		static float s_AlphaAddition = 0.0f;
+		if(UI()->MouseInside(&WeaponSettings))
+			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		else
+			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		RenderTools()->DrawUIRect(&WeaponSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		WeaponSettings.VMargin(10.0f, &WeaponSettings);
 
 		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y, 14.0f*UI()->Scale(), Localize("Weapon"), -1);
@@ -742,25 +776,49 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// defaults
 	{
 		ResetButton.HSplitTop(10.0f, 0, &ResetButton);
-		RenderTools()->DrawUIRect(&ResetButton, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		static float s_AlphaAddition = 0.0f;
+		if(UI()->MouseInside(&ResetButton))
+			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		else
+			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		RenderTools()->DrawUIRect(&ResetButton, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 10.0f);
 		ResetButton.HMargin(10.0f, &ResetButton);
 		ResetButton.VMargin(30.0f, &ResetButton);
-		ResetButton.HSplitTop(20.0f, &ResetButton, 0);
+		//ResetButton.HSplitTop(20.0f, &ResetButton, 0);
 		static int s_DefaultButton = 0;
-		if(DoButton_Menu((void*)&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
-			m_pClient->m_pBinds->SetDefaults();
+		static int64 s_Clicked = 0;
+		if(!s_Clicked)
+		{
+			if(DoButton_Menu((void*)&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
+				s_Clicked = time_get();
+		}
+		else
+		{
+			if(DoButton_Menu((void*)&s_DefaultButton, Localize("Are you sure?"), 0, &ResetButton, 0, CUI::CORNER_ALL, vec4(0.7f, 0.2f, 0.2f, 0.5f)))
+			{
+				m_pClient->m_pBinds->SetDefaults();
+				s_Clicked = 0;
+			}
+		}
+		if((s_Clicked && time_get() > s_Clicked + time_freq()*4) || !UI()->MouseInside(&ResetButton))
+			s_Clicked = 0;
 	}
 
 	// voting settings
 	{
 		VotingSettings.VMargin(5.0f, &VotingSettings);
 		VotingSettings.HSplitTop(MainView.h/3-106.0f, &VotingSettings, &ChatSettings);
-		RenderTools()->DrawUIRect(&VotingSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		static float s_AlphaAddition = 0.0f;
+		if(UI()->MouseInside(&VotingSettings))
+			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		else
+			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		RenderTools()->DrawUIRect(&VotingSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		VotingSettings.VMargin(10.0f, &VotingSettings);
 
-		TextRender()->Text(0, VotingSettings.x, VotingSettings.y, 14.0f*UI()->Scale(), Localize("Voting"), -1);
+		//TextRender()->Text(0, VotingSettings.x, VotingSettings.y, 14.0f*UI()->Scale(), Localize("Voting"), -1);
 
-		VotingSettings.HSplitTop(14.0f+5.0f, 0, &VotingSettings);
+		VotingSettings.HSplitTop(10.0f, 0, &VotingSettings);
 		UiDoGetButtons(14, 16, VotingSettings);
 	}
 
@@ -768,24 +826,34 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		ChatSettings.HSplitTop(10.0f, 0, &ChatSettings);
 		ChatSettings.HSplitTop(MainView.h/3-56.0f, &ChatSettings, &MiscSettings);
-		RenderTools()->DrawUIRect(&ChatSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		static float s_AlphaAddition = 0.0f;
+		if(UI()->MouseInside(&ChatSettings))
+			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		else
+			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		RenderTools()->DrawUIRect(&ChatSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
-		TextRender()->Text(0, ChatSettings.x, ChatSettings.y, 14.0f*UI()->Scale(), Localize("Chat"), -1);
+		//TextRender()->Text(0, ChatSettings.x, ChatSettings.y, 14.0f*UI()->Scale(), Localize("Chat"), -1);
 
-		ChatSettings.HSplitTop(14.0f+5.0f, 0, &ChatSettings);
+		ChatSettings.HSplitTop(12.0f, 0, &ChatSettings);
 		UiDoGetButtons(16, 20, ChatSettings);
 	}
 
 	// misc settings
 	{
 		MiscSettings.HSplitTop(10.0f, 0, &MiscSettings);
-		RenderTools()->DrawUIRect(&MiscSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		static float s_AlphaAddition = 0.0f;
+		if(UI()->MouseInside(&MiscSettings))
+			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		else
+			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+		RenderTools()->DrawUIRect(&MiscSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		MiscSettings.VMargin(10.0f, &MiscSettings);
 
-		TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
+		//TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
-		MiscSettings.HSplitTop(14.0f+5.0f, 0, &MiscSettings);
+		MiscSettings.HSplitTop(13.0f, 0, &MiscSettings);
 		UiDoGetButtons(20, 33, MiscSettings);
 	}
 
