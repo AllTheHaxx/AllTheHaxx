@@ -302,23 +302,35 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.beginNamespace("TW")
 			.addVariable("Game", &CLua::m_pCGameClient, false)
 			.addVariable("Client", &CLua::m_pClient, false)
-			
-			.beginNamespace("Graphics")
-				.addVariable("Engine", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
-			.endNamespace()
-			
-			
-			.beginClass<CConfigProperties>("Config")   // g_Config stuff...
-				.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
-				.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
-				.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
-				
-				.addStaticProperty("PlayerSkin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
-				.addStaticData("PlayerColorBody", &CConfigProperties::m_pConfig->m_ClPlayerColorBody)
-				.addStaticData("PlayerColorFeet", &CConfigProperties::m_pConfig->m_ClPlayerColorFeet)
-				.addStaticData("PlayerUseCustomColor", &CConfigProperties::m_pConfig->m_ClPlayerUseCustomColor)
-			.endClass()
 		.endNamespace()
+		
+		.beginNamespace("Game")
+            .addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)
+            .addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
+            .addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
+            .addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
+            //.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
+            .addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
+            .addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
+            //pointer to components & stuff from gameclient
+            .addVariable("Local", &CLua::m_pCGameClient->m_Snap, false)
+            .addVariable("Client", &CLua::m_pClient, false)
+		.endNamespace()
+
+		.beginNamespace("Graphics")
+			.addVariable("Engine", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
+		.endNamespace()
+		
+		.beginClass<CConfigProperties>("Config")   // g_Config stuff...
+			.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
+			.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
+			.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
+			
+			.addStaticProperty("PlayerSkin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
+			.addStaticData("PlayerColorBody", &CConfigProperties::m_pConfig->m_ClPlayerColorBody)
+			.addStaticData("PlayerColorFeet", &CConfigProperties::m_pConfig->m_ClPlayerColorFeet)
+			.addStaticData("PlayerUseCustomColor", &CConfigProperties::m_pConfig->m_ClPlayerUseCustomColor)
+		.endClass()
 		
 		
 		//OOP ENDS HERE
