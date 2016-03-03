@@ -28,6 +28,7 @@ public:
 	virtual void OnRelease();
 	virtual bool OnMouseMove(float x, float y);
 
+	bool Active() const { return m_Active; }
 	void Emote(int Emote);
 	void EyeEmote(int EyeEmote);
 };

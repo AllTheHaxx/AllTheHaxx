@@ -4,6 +4,7 @@
 
 //#include <game/client/gameclient.h>
 #include <game/client/components/chat.h>
+#include <game/client/components/emoticon.h>
 #include <engine/serverbrowser.h>
 //#include <engine/client/client.h>
 
@@ -124,6 +125,8 @@ void CLuaFile::Init()
 	}
 }
 
+extern CEmoticon gs_Emoticon;
+
 void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 {	
 	getGlobalNamespace(m_pLuaState)
@@ -135,10 +138,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 		// client namespace
 		.beginNamespace("_client")
-			.addFunction("Connect", &CLuaBinding::LuaConnect)
-			.addFunction("GetTick", &CLuaBinding::LuaGetTick)
+			.addFunction("Connect", &CLuaBinding::LuaConnect)   //ported to oop already
+			.addFunction("GetTick", &CLuaBinding::LuaGetTick)   //ported
 			// local info
-			.addFunction("GetLocalCharacterID", &CLuaBinding::LuaGetLocalCharacterID)
+			.addFunction("GetLocalCharacterID", &CLuaBinding::LuaGetLocalCharacterID)    //ported
 			//.addFunction("GetLocalCharacterPos", &CLuaBinding::LuaGetLocalCharacterPos)
 			.addFunction("GetLocalCharacterWeapon", &CLuaBinding::LuaGetLocalCharacterWeapon)
 			.addFunction("GetLocalCharacterWeaponAmmo", &CLuaBinding::LuaGetLocalCharacterWeaponAmmo)
@@ -164,10 +167,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		// components namespace
 		.beginNamespace("_game")
 			.beginNamespace("chat")
-				.addFunction("Send", &CLuaBinding::LuaChatSend)
-				.addFunction("Active", &CLuaBinding::LuaChatActive)
-				.addFunction("AllActive", &CLuaBinding::LuaChatAllActive)
-				.addFunction("TeamActive", &CLuaBinding::LuaChatTeamActive)
+				.addFunction("Send", &CLuaBinding::LuaChatSend)      //ported
+				.addFunction("Active", &CLuaBinding::LuaChatActive)         //ported as GetMode oop
+				.addFunction("AllActive", &CLuaBinding::LuaChatAllActive)   //ported as GetMode
+				.addFunction("TeamActive", &CLuaBinding::LuaChatTeamActive) //ported as GetMode
 			.endNamespace()
 
 			.beginNamespace("collision")
@@ -177,7 +180,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.endNamespace()
 
 			.beginNamespace("emote")
-				.addFunction("Send", &CLuaBinding::LuaEmoteSend)
+				.addFunction("Send", &CLuaBinding::LuaEmoteSend)			//ported
 			.endNamespace()
 
 			.beginNamespace("controls")
@@ -188,10 +191,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 				.addFunction("SetInput", &CLuaBinding::LuaSetInput)
 				.addFunction("ResetInput", &CLuaBinding::LuaResetInput)
 			.endNamespace()
-
-			//.beginNamespace("players")
-			//	.addFunction("GetPos", &CLuaBinding::LuaGetPlayerPos)
-			//.endNamespace()
+			
 		.endNamespace()
 
 
@@ -248,37 +248,62 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.endClass()
 		
 		//OOP BEGINS HERE
-		
 		.beginClass<CGameClient>("CGameClient")
 			.addData("Chat", &CGameClient::m_pChat)
 		.endClass()
+		
+		//ICLIENT
+		.beginClass<IClient>("IClient")
+			.addProperty("Tick", &IClient::GameTick)
+			.addFunction("Connect", &IClient::Connect)
+			.addFunction("Disconnect", &IClient::Disconnect)
+			.addFunction("Quit", &IClient::Quit)
+			.addFunction("RconSend", &IClient::Rcon)
+			.addFunction("RconAuth", &IClient::RconAuth)
+			.addFunction("DummyConnect", &IClient::DummyConnect)
+			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
+		.endClass()
+		
+		//COMPONENTS
 		.beginClass<CChat>("CChat")
 			.addFunction("Say", &CChat::Say)
 			.addProperty("Mode", &CChat::GetMode)
 		.endClass()
 		
+		.beginClass<CEmoticon>("CEmoticon")
+			.addFunction("Send", &CEmoticon::Emote)
+			.addFunction("SendEye", &CEmoticon::EyeEmote)
+			.addProperty("Active", &CEmoticon::Active)
+		.endClass()
+		
+		//ETC.
 		.beginClass<CServerInfo>("CServerInfo")
 			.addProperty("GameMode", &CServerInfo::LuaGetGameType)
 			.addProperty("Name", &CServerInfo::LuaGetName)
 			.addProperty("Map", &CServerInfo::LuaGetMap)
 			.addProperty("Version", &CServerInfo::LuaGetVersion)
 			.addProperty("IP", &CServerInfo::LuaGetIP)
-			.addData("Latency", &CServerInfo::m_Latency)
-			.addData("MaxPlayers", &CServerInfo::m_MaxPlayers)
-			.addData("NumPlayers", &CServerInfo::m_NumPlayers)
+			.addData("Latency", &CServerInfo::m_Latency, false)
+			.addData("MaxPlayers", &CServerInfo::m_MaxPlayers, false)
+			.addData("NumPlayers", &CServerInfo::m_NumPlayers, false)
 		.endClass()
 
+		//MAIN NAMESPACE
 		.beginNamespace("Game")
-			.addVariable("Client", &CLua::m_pCGameClient, false)	      //false means read only! important so noobs dont mess up the pointer		
+			//.addVariable("Client", &CLua::m_pCGameClient, false)	      //false means read only! important so noobs dont mess up the pointer		
 			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)	
 			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
-		.endNamespace()
-		
-		.beginNamespace("Client")
+			.addVariable("Emote", &gs_Emoticon, false)
+			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
+			//pointer to components & stuff from gameclient
+			
+			//sub-namespaces etc
 			.beginNamespace("Local")
-				.addVariable("CID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID)
+				.addVariable("CID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID, false)
 			.endNamespace()
-						
+			
+			
+			//config //dont use false here
 			.beginClass<CConfigProperties>("Config")   // g_Config stuff...
 				.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
 				.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
@@ -291,8 +316,19 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.endClass()
 		.endNamespace()
 		
+		/*.beginNamespace("Client") //only config for now!					
+			.beginClass<CConfigProperties>("Config")   // g_Config stuff...
+				.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
+				.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
+				.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
+				
+				.addStaticProperty("PlayerSkin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
+				.addStaticData("PlayerColorBody", &CConfigProperties::m_pConfig->m_ClPlayerColorBody)
+				.addStaticData("PlayerColorFeet", &CConfigProperties::m_pConfig->m_ClPlayerColorFeet)
+				.addStaticData("PlayerUseCustomColor", &CConfigProperties::m_pConfig->m_ClPlayerUseCustomColor)
+			.endClass()
+		.endNamespace()*/
 		//OOP ENDS HERE
-
 	;
 	dbg_msg("Lua", "Registering LuaBindings complete.");
 }

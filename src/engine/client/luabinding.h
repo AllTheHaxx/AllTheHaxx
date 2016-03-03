@@ -3,6 +3,7 @@
 #include <base/vmath.h>
 #include <string>
 #include <engine/shared/config.h>
+#include <engine/client.h>
 
 class CLuaBinding
 {
@@ -19,7 +20,7 @@ public:
 
 	// client namespace
 	static void LuaConnect(const char *pAddr);
-	static int LuaGetTick();
+	static int LuaGetTick() { return CLua::Client()->GameTick(); }
 	// local info
 	static int LuaGetLocalCharacterID();
 	//static int LuaGetLocalCharacterPos();

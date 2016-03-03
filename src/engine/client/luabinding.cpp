@@ -37,10 +37,10 @@ void CLuaBinding::LuaConnect(const char *pAddr)
 	pGameClient->Client()->Connect(pAddr);
 }
 
-int CLuaBinding::LuaGetTick()
+/*int CLuaBinding::LuaGetTick()
 {
 	return CLua::Client()->GameTick();
-}
+}*/
 
 // local info
 int CLuaBinding::LuaGetLocalCharacterID()

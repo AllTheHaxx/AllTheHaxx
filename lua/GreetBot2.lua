@@ -9,7 +9,7 @@ Messages =
 }
 
 -- @name = the targets name...
--- @if is for iF'City servers (they use teamchat -> name: msg)
+-- @if is for iF servers (they use teamchat -> name: msg)
 -- @you = your name
 
 local function GreetAdd(ClientID, Team, Message)
@@ -21,20 +21,20 @@ local function GreetAdd(ClientID, Team, Message)
 		abc = string.match(Message, "'.-'")    -- returns everything between '' => name
 		abc = abc:gsub("'", "")                      -- string replace
 				
-		if abc ~= Client.Config.PlayerName then       --dont greet ourselves!
-			List[abc] = _client.GetTick() + 30        --time stamp
+		if abc ~= Game.Config.PlayerName then       --dont greet ourselves!
+			List[abc] = Game.Client.Tick + 30         --time stamp
 		end
 	end
 end
 
 local function Greet()
 	for key,value in pairs(List) do     --key = name, value = timestamp
-		if _client.GetTick() >= value then
+		if Game.Client.Tick >= value then
 		
 			rand = math.random(5)
 					
 			msg = Messages[rand]:gsub("@name", key)
-			msg = msg:gsub("@you", Client.Config.PlayerName)
+			msg = msg:gsub("@you", Game.Config.PlayerName)
 			
 			Mode = Game.ServerInfo.GameMode
 
