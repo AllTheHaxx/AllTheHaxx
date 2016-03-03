@@ -65,6 +65,12 @@ end -- This function should be okay for nearly every script, so you don't have t
 
 --- XXX §2: Loading the previously saved config
 
+--     ******* !TODO> VERY IMPROTANT <TODO! *******
+--
+--      If you save your config to a file, the file MUST end with either '.config' or '.lua'
+--      If you don't stick to this, you will be UNABLE to "Import()" it again!!
+--     *******     *******      *******     *******
+
 -- Since your written down script config is also just a lua file (it really should be!), you
 -- don't have to do anything yourself to get it loaded:
 

@@ -328,15 +328,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 {
-//	bool nostate = m_pLuaState == 0;
-//	if(nostate)                       // SOOO MUCH HACK
-//		m_pLuaState = luaL_newstate();
-
 	LuaRef func = getGlobal(m_pLuaState, pFuncName);
-
-//	if(nostate)
-//		Unload(); // MUCH MUCH HACK
-
 	if(func == 0)
 		dbg_msg("Lua", "Error: Function '%s' not found.", pFuncName);
 
