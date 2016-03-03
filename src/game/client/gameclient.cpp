@@ -446,6 +446,7 @@ void CGameClient::OnInit()
 
 			m_Layers.Init(Kernel());
 			m_Collision.Init(Layers());
+			m_pCollision = &m_Collision; // where fck
 
 			RenderTools()->RenderTilemapGenerateSkip(Layers());
 
@@ -577,6 +578,7 @@ void CGameClient::OnConnected()
 {
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
+	m_pCollision = &m_Collision; // where fck
 
 	RenderTools()->RenderTilemapGenerateSkip(Layers());
 

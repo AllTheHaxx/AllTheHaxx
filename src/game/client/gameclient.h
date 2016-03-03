@@ -364,6 +364,7 @@ public:
 	class CAStar *m_pAStar;
 	class CIRCBind *m_pIRCBind;
 	class CIdentity *m_pIdentity;
+	class CCollision *m_pCollision;
 
 	// DDRace
 

@@ -1,8 +1,11 @@
+#include <base/math.h>
+
 #include "luafile.h"
 #include "lua.h"
 #include "luabinding.h"
 
 //#include <game/client/gameclient.h>
+#include <game/collision.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/emoticon.h>
 #include <game/client/components/controls.h>
@@ -242,6 +245,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("SendEye", &CEmoticon::EyeEmote)
 			.addProperty("Active", &CEmoticon::Active)
 		.endClass()
+
+		.beginClass<CCollision>("CCollision")
+			.addFunction("GetTile", &CCollision::GetTileRaw)
+		.endClass()
 		
 		.beginClass<CHud>("CHud")
 			.addFunction("PushNotification", &CHud::PushNotification)
@@ -292,6 +299,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
 			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
 			.addVariable("Input", &CLua::m_pCGameClient->m_pControls)
+			.addVariable("Collision", &CLua::m_pCGameClient->m_pCollision)
 			//pointer to components & stuff from gameclient
 			
 			//sub-namespaces etc

@@ -50,7 +50,7 @@ end
 
 
 local function test()	
-	Game.HUD:PushNotification("test", vec4f(1,1,1,1))
+	print(Game.Collision:GetTile(Game.Local.Tee.PosX, Game.Local.Tee.PosY))
 end
 
 --[[
@@ -61,4 +61,4 @@ local function test()
 	-- or Game.Client.Chat:Say(0, "Hi"), you can decide :D
 end ]]--
 
-RegisterEvent("OnRenderScoreboard", test)
+RegisterEvent("OnTick", test)
