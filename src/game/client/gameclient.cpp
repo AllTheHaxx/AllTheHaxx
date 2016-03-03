@@ -209,6 +209,7 @@ void CGameClient::OnConsoleInit()
 	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
 	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
 	m_pBackGround = &::gs_BackGround;
+	m_pEmoticon = &gs_Emoticon;
 
 	m_pMapSounds = &::gs_MapSounds;
 

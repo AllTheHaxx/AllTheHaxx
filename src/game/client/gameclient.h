@@ -384,6 +384,7 @@ public:
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
 	
 	CServerInfo m_CurrentServerInfo;
+	CEmoticon * m_pEmoticon;
 	
 private:
 	bool m_DDRaceMsgSent[2];

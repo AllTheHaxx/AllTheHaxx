@@ -140,11 +140,11 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("GetTick", &CLuaBinding::LuaGetTick)   //ported
 			// local info
 			.addFunction("GetLocalCharacterID", &CLuaBinding::LuaGetLocalCharacterID)    //ported
-			//.addFunction("GetLocalCharacterPos", &CLuaBinding::LuaGetLocalCharacterPos)
-			.addFunction("GetLocalCharacterWeapon", &CLuaBinding::LuaGetLocalCharacterWeapon)
-			.addFunction("GetLocalCharacterWeaponAmmo", &CLuaBinding::LuaGetLocalCharacterWeaponAmmo)
-			.addFunction("GetLocalCharacterHealth", &CLuaBinding::LuaGetLocalCharacterHealth)
-			.addFunction("GetLocalCharacterArmor", &CLuaBinding::LuaGetLocalCharacterArmor)
+			//.addFunction("GetLocalCharacterPos", &CLuaBinding::LuaGetLocalCharacterPos) //ported 
+			.addFunction("GetLocalCharacterWeapon", &CLuaBinding::LuaGetLocalCharacterWeapon) //ported 
+			.addFunction("GetLocalCharacterWeaponAmmo", &CLuaBinding::LuaGetLocalCharacterWeaponAmmo) //ported 
+			.addFunction("GetLocalCharacterHealth", &CLuaBinding::LuaGetLocalCharacterHealth) //ported 
+			.addFunction("GetLocalCharacterArmor", &CLuaBinding::LuaGetLocalCharacterArmor) //ported 
 			.addFunction("GetFPS", &CLuaBinding::LuaGetFPS)
 			// external info
 			.addFunction("GetPlayerName", &CLuaBinding::LuaGetPlayerName)
@@ -268,7 +268,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addProperty("Mode", &CChat::GetMode)
 		.endClass()
 		
-		.beginClass<CEmoticon>("CEmoticon")   //TODO: Implement rest (you need a pointer for CEmoticon, or do it through CGameClient)
+		.beginClass<CEmoticon>("CEmoticon")
 			.addFunction("Send", &CEmoticon::Emote)
 			.addFunction("SendEye", &CEmoticon::EyeEmote)
 			.addProperty("Active", &CEmoticon::Active)
@@ -305,7 +305,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			//.addVariable("Client", &CLua::m_pCGameClient, false)	      //false means read only! important so noobs dont mess up the pointer		
 			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)	
 			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
-			//.addVariable("Emote", &emoticon, false)
+			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
 			//pointer to components & stuff from gameclient
 			
