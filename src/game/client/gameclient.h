@@ -65,6 +65,7 @@ public:
 
 class CGameClient : public IGameClient
 {
+	friend class CLuaFile;
 	class CStack
 	{
 	public:
@@ -84,6 +85,7 @@ class CGameClient : public IGameClient
 	CStack m_Input;
 	CNetObjHandler m_NetObjHandler;
 
+protected:
 	class IEngine *m_pEngine;
 	class IInput *m_pInput;
 	class IGraphics *m_pGraphics;
@@ -103,7 +105,7 @@ class CGameClient : public IGameClient
 	CLayers m_Layers;
 	class CCollision m_Collision;
 	CUI m_UI;
-
+private:
 	void DispatchInput();
 	void ProcessEvents();
 	void UpdatePositions();

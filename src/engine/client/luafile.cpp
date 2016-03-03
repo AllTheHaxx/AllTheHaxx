@@ -10,6 +10,7 @@
 #include <game/client/components/emoticon.h>
 #include <game/client/components/controls.h>
 #include <game/client/components/hud.h>
+#include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 //#include <engine/client/client.h>
 
@@ -161,7 +162,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("BlendAdditive", &CLuaBinding::LuaBlendAdditive)
 			.addFunction("SetColor", &CLuaBinding::LuaSetColor)
 			.addFunction("DrawLine", &CLuaBinding::LuaDrawLine)
-			.addFunction("LoadTexture", &CLuaBinding::LuaLoadTexture)
+			.addFunction("LoadTexture", &CLuaBinding::LuaLoadTexture)      //MOved
 			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
 		.endNamespace()
 
@@ -280,6 +281,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
 			.addData("CID", &CGameClient::CSnapState::m_LocalClientID)
 		.endClass()
+		
+		.beginClass<IGraphics>("IGraphics")
+			.addFunction("LoadTexture", &IGraphics::LoadTexture)
+		.endClass()
 
 		.beginClass<CGameClient>("CGameClient")
 			.addData("Chat", &CGameClient::m_pChat)		
@@ -297,6 +302,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.beginNamespace("TW")
 			.addVariable("Game", &CLua::m_pCGameClient, false)
 			.addVariable("Client", &CLua::m_pClient, false)
+			
+			.beginNamespace("Graphics")
+				.addVariable("Engine", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
+			.endNamespace()
 			
 			
 			.beginClass<CConfigProperties>("Config")   // g_Config stuff...
