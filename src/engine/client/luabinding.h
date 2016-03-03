@@ -18,24 +18,10 @@ public:
 	// system namespace
 	static bool LuaImport(int UID, const char *pFilename);
 
-	// client namespace
-	static void LuaConnect(const char *pAddr);
-	static int LuaGetTick() { return CLua::Client()->GameTick(); }
 	// local info
-	static int LuaGetLocalCharacterID();
-	//static int LuaGetLocalCharacterPos();
-	static int LuaGetLocalCharacterWeapon();
-	static int LuaGetLocalCharacterWeaponAmmo();
-	static int LuaGetLocalCharacterHealth();
-	static int LuaGetLocalCharacterArmor();
 	static int LuaGetFPS();
-	static int LuaGetPing();
 	// external info
-	static std::string LuaGetPlayerName(int ClientID);
-	static std::string LuaGetPlayerClan(int ClientID);
-	static int LuaGetPlayerCountry(int ClientID);
 	static int LuaGetPlayerScore(int ClientID);
-	static int LuaGetPlayerPing(int ClientID);
 
 	// ui namespace
 	static void LuaSetUiColor(float r, float g, float b, float a);
@@ -43,24 +29,11 @@ public:
 	static int LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners);
 
 	// components namespace
-	// --- chat
-	static void LuaChatSend(int Team, const char *pMessage);
-	static bool LuaChatActive();
-	static bool LuaChatAllActive();
-	static bool LuaChatTeamActive();
 	// --- collision
 	static int LuaColGetMapWidth();
 	static int LuaColGetMapHeight();
 	static int LuaColGetTile(int x, int y);
 	// --- emote
-	static void LuaEmoteSend(int Emote);
-	// --- controls
-	static void LuaLockInput();
-	static void LuaUnlockInput();
-	static bool LuaInputLocked();
-	static int LuaGetInput(const char *pInput);
-	static void LuaSetInput(const char *pInput, int Value);
-	static void LuaResetInput();
 
 	// graphics namespace
 	static int LuaGetScreenWidth();

@@ -29,70 +29,7 @@ bool CLuaBinding::LuaImport(int UID, const char *pFilename)
 	return false;
 }
 
-// client namespace
-void CLuaBinding::LuaConnect(const char *pAddr)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	str_copy(g_Config.m_UiServerAddress, pAddr, sizeof(g_Config.m_UiServerAddress));
-	pGameClient->Client()->Connect(pAddr);
-}
-
-/*int CLuaBinding::LuaGetTick()
-{
-	return CLua::Client()->GameTick();
-}*/
-
 // local info
-int CLuaBinding::LuaGetLocalCharacterID()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	if(pGameClient->m_Snap.m_pLocalCharacter)
-		return pGameClient->m_Snap.m_LocalClientID;
-	else
-		return -1;
-}
-
-/*int CLuaBinding::LuaGetLocalCharacterPos()
-{
-	// not sure how to return a vector/two values in luabridge
-}*/
-
-int CLuaBinding::LuaGetLocalCharacterWeapon()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	if(pGameClient->m_Snap.m_pLocalCharacter)
-		return pGameClient->m_Snap.m_pLocalCharacter->m_Weapon;
-	else
-		return -1;
-}
-
-int CLuaBinding::LuaGetLocalCharacterWeaponAmmo()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	if(pGameClient->m_Snap.m_pLocalCharacter)
-		return pGameClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
-	else
-		return -1;
-}
-
-int CLuaBinding::LuaGetLocalCharacterHealth()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	if(pGameClient->m_Snap.m_pLocalCharacter)
-		return pGameClient->m_Snap.m_pLocalCharacter->m_Health;
-	else
-		return -1;
-}
-
-int CLuaBinding::LuaGetLocalCharacterArmor()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	if(pGameClient->m_Snap.m_pLocalCharacter)
-		return pGameClient->m_Snap.m_pLocalCharacter->m_Armor;
-	else
-		return -1;
-}
-
 int CLuaBinding::LuaGetFPS()
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
@@ -100,48 +37,6 @@ int CLuaBinding::LuaGetFPS()
 }
 
 // external info
-std::string CLuaBinding::LuaGetPlayerName(int ClientID)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
-	{
-		if(pGameClient->m_aClients[ClientID].m_aName[0])
-			return std::string(pGameClient->m_aClients[ClientID].m_aName);
-		else
-			return "failure";
-	}
-	else
-		return "failure";
-}
-
-std::string CLuaBinding::LuaGetPlayerClan(int ClientID)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
-	{
-		if(pGameClient->m_aClients[ClientID].m_aClan[0])
-			return std::string(pGameClient->m_aClients[ClientID].m_aClan);
-		else
-			return "";
-	}
-	else
-		return "failure";
-}
-
-int CLuaBinding::LuaGetPlayerCountry(int ClientID)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
-	{
-		return pGameClient->m_aClients[ClientID].m_Country;
-	}
-
-	return -1;
-}
-
 int CLuaBinding::LuaGetPlayerScore(int ClientID)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
@@ -157,23 +52,6 @@ int CLuaBinding::LuaGetPlayerScore(int ClientID)
 
 	return -1;
 }
-
-int CLuaBinding::LuaGetPlayerPing(int ClientID)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
-	{
-		const CNetObj_PlayerInfo *pInfo = pGameClient->m_Snap.m_paPlayerInfos[ClientID];
-		if (pInfo)
-		{
-			return pInfo->m_Latency;
-		}
-	}
-
-	return -1;
-}
-
 
 // ui namespace
 void CLuaBinding::LuaSetUiColor(float r, float g, float b, float a)
@@ -221,31 +99,6 @@ int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float
 
 
 // components namespace
-// --- chat
-void CLuaBinding::LuaChatSend(int Team, const char *pMessage)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	pGameClient->m_pChat->Say(Team, pMessage);
-}
-
-bool CLuaBinding::LuaChatActive()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return pGameClient->m_pChat->GetMode() != 0;
-}
-
-bool CLuaBinding::LuaChatAllActive()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return pGameClient->m_pChat->GetMode() == 1;
-}
-
-bool CLuaBinding::LuaChatTeamActive()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return pGameClient->m_pChat->GetMode() == 2;
-}
-
 // --- collision
 int CLuaBinding::LuaColGetMapWidth()
 {
@@ -264,135 +117,6 @@ int CLuaBinding::LuaColGetTile(int x, int y)
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	return pGameClient->Collision()->GetTileRaw(x, y);
 }
-
-// --- emote
-void CLuaBinding::LuaEmoteSend(int Emote)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	CNetMsg_Cl_Emoticon Msg;
-	Msg.m_Emoticon = Emote;
-	pGameClient->Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
-}
-
-// --- controls
-void CLuaBinding::LuaLockInput()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	pGameClient->m_pControls->m_LuaLockInput = true;
-}
-
-void CLuaBinding::LuaUnlockInput()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	pGameClient->m_pControls->m_LuaLockInput = false;
-}
-
-bool CLuaBinding::LuaInputLocked()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return pGameClient->m_pControls->m_LuaLockInput;
-}
-
-int CLuaBinding::LuaGetInput(const char *pInput)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	if(pGameClient->m_pControls->m_LuaLockInput)
-	{
-		if(str_comp_nocase(pInput, "Direction") == 0)
-			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Direction;
-		else if(str_comp_nocase(pInput, "Fire") == 0)
-			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Fire;
-		else if(str_comp_nocase(pInput, "Hook") == 0)
-			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Hook;
-		else if(str_comp_nocase(pInput, "Jump") == 0)
-			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Jump;
-		else if(str_comp_nocase(pInput, "Weapon") == 0)
-			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_WantedWeapon;
-		else if(str_comp_nocase(pInput, "TargetX") == 0)
-			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetX;
-		else if(str_comp_nocase(pInput, "TargetY") == 0)
-			return pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY;
-	}
-	else
-	{
-		if(str_comp_nocase(pInput, "Direction") == 0)
-			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Direction;
-		else if(str_comp_nocase(pInput, "Fire") == 0)
-			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Fire;
-		else if(str_comp_nocase(pInput, "Hook") == 0)
-			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Hook;
-		else if(str_comp_nocase(pInput, "Jump") == 0)
-			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Jump;
-		else if(str_comp_nocase(pInput, "Weapon") == 0)
-			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_WantedWeapon;
-		else if(str_comp_nocase(pInput, "TargetX") == 0)
-			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetX;
-		else if(str_comp_nocase(pInput, "TargetY") == 0)
-			return pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetY;
-	}
-
-	return -1337;
-}
-
-void CLuaBinding::LuaSetInput(const char *pInput, int Value)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	if(pGameClient->m_pControls->m_LuaLockInput)
-	{
-		if(str_comp_nocase(pInput, "Direction") == 0)
-			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Direction = Value;
-		else if(str_comp_nocase(pInput, "Fire") == 0)
-			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Fire = Value;
-		else if(str_comp_nocase(pInput, "Hook") == 0)
-			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Hook = Value;
-		else if(str_comp_nocase(pInput, "Jump") == 0)
-			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Jump = Value;
-		else if(str_comp_nocase(pInput, "Weapon") == 0)
-			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_WantedWeapon = Value;
-		else if(str_comp_nocase(pInput, "TargetX") == 0)
-			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetX = Value;
-		else if(str_comp_nocase(pInput, "TargetY") == 0)
-			pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY = Value;
-		else if(str_comp_nocase(pInput, "Jump") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Jump = Value;
-	}
-	else
-	{
-		if(str_comp_nocase(pInput, "Direction") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Direction = Value;
-		else if(str_comp_nocase(pInput, "Fire") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Fire = Value;
-		else if(str_comp_nocase(pInput, "Hook") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Hook = Value;
-		else if(str_comp_nocase(pInput, "Jump") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Jump = Value;
-		else if(str_comp_nocase(pInput, "Weapon") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_WantedWeapon = Value;
-		else if(str_comp_nocase(pInput, "TargetX") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetX = Value;
-		else if(str_comp_nocase(pInput, "TargetY") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetY = Value;
-		else if(str_comp_nocase(pInput, "Jump") == 0)
-			pGameClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_Jump = Value;
-	}
-}
-
-void CLuaBinding::LuaResetInput()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-
-	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Direction = 0;
-	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Fire = 0;
-	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Hook = 0;
-	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_Jump = 0;
-	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_WantedWeapon = 1;
-	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetX = 1;
-	pGameClient->m_pControls->m_LuaInputData[g_Config.m_ClDummy].m_TargetY = 0;
-}
-
 
 // graphics namespace
 int CLuaBinding::LuaGetScreenWidth()

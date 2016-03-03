@@ -138,22 +138,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 		// client namespace
 		.beginNamespace("_client")
-			.addFunction("Connect", &CLuaBinding::LuaConnect)   //ported to oop already
-			.addFunction("GetTick", &CLuaBinding::LuaGetTick)   //ported
 			// local info
-			.addFunction("GetLocalCharacterID", &CLuaBinding::LuaGetLocalCharacterID)    //ported
-			//.addFunction("GetLocalCharacterPos", &CLuaBinding::LuaGetLocalCharacterPos) //ported 
-			.addFunction("GetLocalCharacterWeapon", &CLuaBinding::LuaGetLocalCharacterWeapon) //ported 
-			.addFunction("GetLocalCharacterWeaponAmmo", &CLuaBinding::LuaGetLocalCharacterWeaponAmmo) //ported 
-			.addFunction("GetLocalCharacterHealth", &CLuaBinding::LuaGetLocalCharacterHealth) //ported 
-			.addFunction("GetLocalCharacterArmor", &CLuaBinding::LuaGetLocalCharacterArmor) //ported 
 			.addFunction("GetFPS", &CLuaBinding::LuaGetFPS)
 			// external info
-			.addFunction("GetPlayerName", &CLuaBinding::LuaGetPlayerName)
-			.addFunction("GetPlayerClan", &CLuaBinding::LuaGetPlayerClan)
-			.addFunction("GetPlayerCountry", &CLuaBinding::LuaGetPlayerCountry)
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
-			.addFunction("GetPlayerPing", &CLuaBinding::LuaGetPlayerPing)
 		.endNamespace()
 
 		// ui namespace
@@ -166,32 +154,11 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 		// components namespace
 		.beginNamespace("_game")
-			.beginNamespace("chat")
-				.addFunction("Send", &CLuaBinding::LuaChatSend)      //ported
-				.addFunction("Active", &CLuaBinding::LuaChatActive)         //ported as GetMode oop
-				.addFunction("AllActive", &CLuaBinding::LuaChatAllActive)   //ported as GetMode
-				.addFunction("TeamActive", &CLuaBinding::LuaChatTeamActive) //ported as GetMode
-			.endNamespace()
-
 			.beginNamespace("collision")
 				.addFunction("GetMapWidth", &CLuaBinding::LuaColGetMapWidth)
 				.addFunction("GetMapHeight", &CLuaBinding::LuaColGetMapHeight)
 				.addFunction("GetTile", &CLuaBinding::LuaColGetTile)
 			.endNamespace()
-
-			.beginNamespace("emote")
-				.addFunction("Send", &CLuaBinding::LuaEmoteSend)	//Ported
-			.endNamespace()
-
-			.beginNamespace("controls")
-				.addFunction("LockInput", &CLuaBinding::LuaLockInput)
-				.addFunction("UnlockInput", &CLuaBinding::LuaUnlockInput)
-				.addFunction("InputLocked", &CLuaBinding::LuaInputLocked)
-				.addFunction("GetInput", &CLuaBinding::LuaGetInput)
-				.addFunction("SetInput", &CLuaBinding::LuaSetInput)
-				.addFunction("ResetInput", &CLuaBinding::LuaResetInput)
-			.endNamespace()
-			
 		.endNamespace()
 
 
