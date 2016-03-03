@@ -141,8 +141,6 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 		// client namespace
 		.beginNamespace("_client")
-			// local info
-			.addFunction("GetFPS", &CLuaBinding::LuaGetFPS)
 			// external info
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
 		.endNamespace()
@@ -217,6 +215,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("RconAuth", &IClient::RconAuth)
 			.addFunction("DummyConnect", &IClient::DummyConnect)
 			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
+			.addProperty("FPS",&IClient::GetFPS)
 		.endClass()
 		
 		//COMPONENTS

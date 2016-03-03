@@ -29,13 +29,6 @@ bool CLuaBinding::LuaImport(int UID, const char *pFilename)
 	return false;
 }
 
-// local info
-int CLuaBinding::LuaGetFPS()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return 1.0f/pGameClient->Client()->RenderFrameTime();
-}
-
 // external info
 int CLuaBinding::LuaGetPlayerScore(int ClientID)
 {

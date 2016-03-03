@@ -94,6 +94,7 @@ public:
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access
+	inline int   GetFPS() const { return 1.f/m_RenderFrameTime; }
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
 	inline float LocalTime() const { return m_LocalTime; }
 

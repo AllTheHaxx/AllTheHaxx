@@ -18,8 +18,6 @@ public:
 	// system namespace
 	static bool LuaImport(int UID, const char *pFilename);
 
-	// local info
-	static int LuaGetFPS();
 	// external info
 	static int LuaGetPlayerScore(int ClientID);
 
