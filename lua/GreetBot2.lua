@@ -21,22 +21,22 @@ local function GreetAdd(ClientID, Team, Message)
 		abc = string.match(Message, "'.-'")    -- returns everything between '' => name
 		abc = abc:gsub("'", "")                      -- string replace
 				
-		if abc ~= Game.Config.PlayerName then       --dont greet ourselves!
-			List[abc] = Game.Client.Tick + 30         --time stamp
+		if abc ~= TW.Config.PlayerName then       --dont greet ourselves!
+			List[abc] = TW.Client.Tick + 30         --time stamp
 		end
 	end
 end
 
 local function Greet()
 	for key,value in pairs(List) do     --key = name, value = timestamp
-		if Game.Client.Tick >= value then
+		if TW.Client.Tick >= value then
 		
 			rand = math.random(5)
 					
 			msg = Messages[rand]:gsub("@name", key)
-			msg = msg:gsub("@you", Game.Config.PlayerName)
+			msg = msg:gsub("@you", TW.Config.PlayerName)
 			
-			Mode = Game.ServerInfo.GameMode
+			Mode = TW.Game.ServerInfo.GameMode
 
 			if Mode == "iF|City" then
 				msg = msg:gsub("@if", ":")
@@ -49,9 +49,9 @@ local function Greet()
 			end
 				
 			if Mode == "iF|City" then
-				Game.Chat:Say(1, msg)
+				TW.Game.Chat:Say(1, msg)
 			else
-				Game.Chat:Say(0, msg)
+				TW.Game.Chat:Say(0, msg)
 			end
 			
 			List[key] = nil

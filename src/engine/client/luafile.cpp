@@ -206,11 +206,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addData("a", &vector4_base<float>::a)
 		.endClass()
 		
-		//OOP BEGINS HERE
-		.beginClass<CGameClient>("CGameClient")
-			.addData("Chat", &CGameClient::m_pChat)
-		.endClass()
-		
+		//OOP BEGINS HERE		
 		//ICLIENT
 		.beginClass<IClient>("IClient")
 			.addProperty("Tick", &IClient::GameTick)
@@ -280,27 +276,30 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addData("MaxPlayers", &CServerInfo::m_MaxPlayers, false)
 			.addData("NumPlayers", &CServerInfo::m_NumPlayers, false)
 		.endClass()
+		
+		.beginClass<CGameClient::CSnapState>("CSnapState")
+			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
+			.addData("CID", &CGameClient::CSnapState::m_LocalClientID)
+		.endClass()
 
-		//MAIN NAMESPACE
-		.beginNamespace("Game")
-			//.addVariable("Client", &CLua::m_pCGameClient, false)	      //false means read only! important so noobs dont mess up the pointer		
-			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)	
-			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
-			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
-			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
-			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
-			.addVariable("Input", &CLua::m_pCGameClient->m_pControls)
-			.addVariable("Collision", &CLua::m_pCGameClient->m_pCollision)
+		.beginClass<CGameClient>("CGameClient")
+			.addData("Chat", &CGameClient::m_pChat)		
+			.addData("ServerInfo", &CGameClient::m_CurrentServerInfo, false)
+			.addData("Emote", &CGameClient::m_pEmoticon, false)
+			.addData("HUD", &CGameClient::m_pHud, false)
+			//.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
+			.addData("Input", &CGameClient::m_pControls)
+			.addData("Collision", &CGameClient::m_pCollision)
 			//pointer to components & stuff from gameclient
+			.addData("Local", &CGameClient::m_Snap)
+		.endClass()
+		
+		//MAIN NAMESPACE
+		.beginNamespace("TW")
+			.addVariable("Game", &CLua::m_pCGameClient, false)
+			.addVariable("Client", &CLua::m_pClient, false)
 			
-			//sub-namespaces etc
-			.beginNamespace("Local")
-				.addVariable("CID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID, false)
-				.addVariable("Tee", &CLua::m_pCGameClient->m_Snap.m_pLocalCharacter, false)
-			.endNamespace()
 			
-			
-			//config //dont use false here
 			.beginClass<CConfigProperties>("Config")   // g_Config stuff...
 				.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
 				.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
@@ -313,18 +312,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.endClass()
 		.endNamespace()
 		
-		/*.beginNamespace("Client") //only config for now!					
-			.beginClass<CConfigProperties>("Config")   // g_Config stuff...
-				.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
-				.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
-				.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
-				
-				.addStaticProperty("PlayerSkin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
-				.addStaticData("PlayerColorBody", &CConfigProperties::m_pConfig->m_ClPlayerColorBody)
-				.addStaticData("PlayerColorFeet", &CConfigProperties::m_pConfig->m_ClPlayerColorFeet)
-				.addStaticData("PlayerUseCustomColor", &CConfigProperties::m_pConfig->m_ClPlayerUseCustomColor)
-			.endClass()
-		.endNamespace()*/
+		
 		//OOP ENDS HERE
 	;
 	dbg_msg("Lua", "Registering LuaBindings complete.");
