@@ -607,8 +607,6 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 		float Max = pRect->w-Handle.w;
 		float Cur = UI()->MouseX()-OffsetX;
 		ReturnValue = (Cur-Min)/Max;
-		if(ReturnValue < 0.0f) ReturnValue = 0.0f;
-		if(ReturnValue > 1.0f) ReturnValue = 1.0f;
 	}
 	else if(UI()->HotItem() == pID)
 	{
@@ -629,18 +627,28 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 
 	CUIRect Slider = Handle;
 	Slider.h = Rail.y-Slider.y;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_T, 2.5f);
+	if(Inside)
+		RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_T, 2.5f);
 	Slider.y = Rail.y+Rail.h;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_B, 2.5f);
+	if(Inside)
+		RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_B, 2.5f);
 
 	Slider = Handle;
-	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 2.5f);
+	Slider.HMargin(5.0f, &Slider);
+	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), 0, 2.5f);
 
 	if(Inside && pTooltip && pTooltip[0] != '\0')
 		m_pClient->m_pTooltip->SetTooltip(pTooltip);
 
-	return ReturnValue;
+	if(UI()->MouseInside(&Rail) || Inside)
+	{
+		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+			ReturnValue += 0.05f;
+		else if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+			ReturnValue -= 0.05f;
+	}
+
+	return clamp(ReturnValue, 0.0f, 1.0f);
 }
 
 int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, const char *pTooltip)
