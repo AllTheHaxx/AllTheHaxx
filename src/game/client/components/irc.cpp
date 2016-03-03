@@ -43,7 +43,7 @@ int IRChook_privmsg(IIRC::ReplyData* hostd, void* user, void* engine)
 		return 0;
 
 	// play a sound
-	if(g_Config.m_ClIRCSound)
+	if(g_Config.m_SndIRC)
 		pData->GameClient()->m_pSounds->Play(CSounds::CHN_GUI, SOUND_IRC_MESSAGE, 1.0f);
 
 	// print chat message....

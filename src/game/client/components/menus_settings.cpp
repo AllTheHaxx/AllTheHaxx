@@ -1132,6 +1132,11 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_SndHighlight, Localize("Enable highlighted chat sound"), g_Config.m_SndHighlight, &Button))
 		g_Config.m_SndHighlight ^= 1;
 
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_SndIRC, Localize("Enable irc chat sound"), g_Config.m_SndIRC, &Button))
+		g_Config.m_SndIRC ^= 1;
+
 /*	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClThreadsoundloading, Localize("Threaded sound loading"), g_Config.m_ClThreadsoundloading, &Button))
@@ -2209,8 +2214,8 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClIRCSound, Localize("Play sound notification"), g_Config.m_ClIRCSound, &Button))
-		g_Config.m_ClIRCSound ^= 1;
+	if(DoButton_CheckBox(&g_Config.m_SndIRC, Localize("Play sound notification"), g_Config.m_SndIRC, &Button))
+		g_Config.m_SndIRC ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);

@@ -161,7 +161,7 @@ MACRO_CONFIG_STR(ClIRCQAuthPass, cl_irc_q_auth_pass, 11, "", CFGFLAG_CLIENT|CFGF
 MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+i-w+x", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC modes")
 MACRO_CONFIG_STR(ClIRCLeaveMsg, cl_irc_leavemsg, 32, "Leaving", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC leave message")
 MACRO_CONFIG_INT(ClIRCPrintChat, cl_irc_print_messages, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print messages from the IRC chat into console")
-MACRO_CONFIG_INT(ClIRCSound, cl_irc_sound, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Play a sound when a message arrives")
+MACRO_CONFIG_INT(SndIRC, snd_irc, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Play a sound when an irc chat message arrives")
 MACRO_CONFIG_INT(ClIRCAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow others to request the server you're playing on")
 //
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
