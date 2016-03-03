@@ -346,6 +346,7 @@ public:
 	class CCamera *m_pCamera;
 	class CControls *m_pControls;
 	class CEffects *m_pEffects;
+	class CEmoticon *m_pEmoticon;
 	class CSounds *m_pSounds;
 	class CSpoofRemote *m_pSpoofRemote;
 	class CMotd *m_pMotd;
@@ -384,7 +385,6 @@ public:
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
 	
 	CServerInfo m_CurrentServerInfo;
-	CEmoticon * m_pEmoticon;
 	
 private:
 	bool m_DDRaceMsgSent[2];

@@ -6,6 +6,7 @@
 #include <game/client/components/chat.h>
 #include <game/client/components/emoticon.h>
 #include <game/client/components/controls.h>
+#include <game/client/components/hud.h>
 #include <engine/serverbrowser.h>
 //#include <engine/client/client.h>
 
@@ -275,6 +276,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addProperty("Active", &CEmoticon::Active)
 		.endClass()
 		
+		.beginClass<CHud>("CHud")
+			.addFunction("PushNotification", &CHud::PushNotification)
+		.endClass()
+
 		//Local player Infos
 		.beginClass<CNetObj_CharacterCore>("CNetObj_CharacterCore")  //TODO : Add the whole class!
 			.addData("PosX", &CNetObj_CharacterCore::m_X, false)
@@ -311,6 +316,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)	
 			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
+			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
 			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
 			.addVariable("Input", &CLua::m_pCGameClient->m_pControls->m_InputData[0])
 			//pointer to components & stuff from gameclient
