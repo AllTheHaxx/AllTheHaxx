@@ -247,6 +247,8 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.endClass()
 
 		.beginClass<CCollision>("CCollision")
+			.addFunction("GetMapWidth", &CCollision::GetWidth)
+			.addFunction("GetMapHeight", &CCollision::GetHeight)
 			.addFunction("GetTile", &CCollision::GetTileRaw)
 		.endClass()
 		
