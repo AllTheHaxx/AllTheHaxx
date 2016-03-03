@@ -28,13 +28,6 @@ public:
 	static void LuaDrawUiRect(float x, float y, float w, float h, int corners, float rounding);
 	static int LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners);
 
-	// components namespace
-	// --- collision
-	static int LuaColGetMapWidth();
-	static int LuaColGetMapHeight();
-	static int LuaColGetTile(int x, int y);
-	// --- emote
-
 	// graphics namespace
 	static int LuaGetScreenWidth();
 	static int LuaGetScreenHeight();

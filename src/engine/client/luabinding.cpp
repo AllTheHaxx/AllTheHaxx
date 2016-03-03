@@ -98,26 +98,6 @@ int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float
 }
 
 
-// components namespace
-// --- collision
-int CLuaBinding::LuaColGetMapWidth()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return pGameClient->Collision()->GetWidth();
-}
-
-int CLuaBinding::LuaColGetMapHeight()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return pGameClient->Collision()->GetHeight();
-}
-
-int CLuaBinding::LuaColGetTile(int x, int y)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return pGameClient->Collision()->GetTileRaw(x, y);
-}
-
 // graphics namespace
 int CLuaBinding::LuaGetScreenWidth()
 {

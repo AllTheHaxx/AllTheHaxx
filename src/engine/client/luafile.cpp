@@ -154,17 +154,6 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("DoButton_Menu", &CLuaBinding::LuaDoButton_Menu)
 		.endNamespace()
 
-
-		// components namespace
-		.beginNamespace("_game")
-			.beginNamespace("collision")
-				.addFunction("GetMapWidth", &CLuaBinding::LuaColGetMapWidth)
-				.addFunction("GetMapHeight", &CLuaBinding::LuaColGetMapHeight)
-				.addFunction("GetTile", &CLuaBinding::LuaColGetTile)
-			.endNamespace()
-		.endNamespace()
-
-
 		// graphics namespace
 		.beginNamespace("_graphics")
 			.addFunction("GetScreenWidth", &CLuaBinding::LuaGetScreenWidth)
