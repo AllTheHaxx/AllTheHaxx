@@ -125,10 +125,8 @@ void CLuaFile::Init()
 	}
 }
 
-extern CEmoticon gs_Emoticon;
-
 void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
-{	
+{		
 	getGlobalNamespace(m_pLuaState)
 
 		// system namespace
@@ -180,7 +178,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.endNamespace()
 
 			.beginNamespace("emote")
-				.addFunction("Send", &CLuaBinding::LuaEmoteSend)			//ported
+				.addFunction("Send", &CLuaBinding::LuaEmoteSend)	
 			.endNamespace()
 
 			.beginNamespace("controls")
@@ -270,13 +268,27 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addProperty("Mode", &CChat::GetMode)
 		.endClass()
 		
-		.beginClass<CEmoticon>("CEmoticon")
+		.beginClass<CEmoticon>("CEmoticon")   //TODO: Implement rest (you need a pointer for CEmoticon, or do it through CGameClient)
 			.addFunction("Send", &CEmoticon::Emote)
 			.addFunction("SendEye", &CEmoticon::EyeEmote)
 			.addProperty("Active", &CEmoticon::Active)
 		.endClass()
 		
-		//ETC.
+		//Local player Infos
+		.beginClass<CNetObj_CharacterCore>("CNetObj_CharacterCore")  //TODO : Add the whole class!
+			.addData("PosX", &CNetObj_CharacterCore::m_X, false)
+			.addData("PosY", &CNetObj_CharacterCore::m_Y, false)
+			.addData("HookedPlayer", &CNetObj_CharacterCore::m_HookedPlayer, false)
+			.addData("HookState", &CNetObj_CharacterCore::m_HookState, false)
+		.endClass()
+		.deriveClass<CNetObj_Character, CNetObj_CharacterCore>("CNetObj_Character")  //TODO: Ppb add the rest
+			.addData("Weapon", &CNetObj_Character::m_Weapon)
+			.addData("Armor", &CNetObj_Character::m_Armor)
+			.addData("Health", &CNetObj_Character::m_Health)
+			.addData("Ammo", &CNetObj_Character::m_AmmoCount)
+		.endClass()
+		
+		//Server Infos
 		.beginClass<CServerInfo>("CServerInfo")
 			.addProperty("GameMode", &CServerInfo::LuaGetGameType)
 			.addProperty("Name", &CServerInfo::LuaGetName)
@@ -293,13 +305,14 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			//.addVariable("Client", &CLua::m_pCGameClient, false)	      //false means read only! important so noobs dont mess up the pointer		
 			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)	
 			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
-			.addVariable("Emote", &gs_Emoticon, false)
+			//.addVariable("Emote", &emoticon, false)
 			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
 			//pointer to components & stuff from gameclient
 			
 			//sub-namespaces etc
 			.beginNamespace("Local")
 				.addVariable("CID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID, false)
+				.addVariable("Tee", &CLua::m_pCGameClient->m_Snap.m_pLocalCharacter, false)
 			.endNamespace()
 			
 			
