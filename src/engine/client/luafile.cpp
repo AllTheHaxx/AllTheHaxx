@@ -5,6 +5,7 @@
 //#include <game/client/gameclient.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/emoticon.h>
+#include <game/client/components/controls.h>
 #include <engine/serverbrowser.h>
 //#include <engine/client/client.h>
 
@@ -178,7 +179,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.endNamespace()
 
 			.beginNamespace("emote")
-				.addFunction("Send", &CLuaBinding::LuaEmoteSend)	
+				.addFunction("Send", &CLuaBinding::LuaEmoteSend)	//Ported
 			.endNamespace()
 
 			.beginNamespace("controls")
@@ -288,6 +289,10 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addData("Ammo", &CNetObj_Character::m_AmmoCount)
 		.endClass()
 		
+		.beginClass<CNetObj_PlayerInput>("CNetObj_PlayerInput")
+			.addData("Jump", &CNetObj_PlayerInput::m_Jump)
+		.endClass()
+		
 		//Server Infos
 		.beginClass<CServerInfo>("CServerInfo")
 			.addProperty("GameMode", &CServerInfo::LuaGetGameType)
@@ -307,6 +312,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("Client", &CLua::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
+			.addVariable("Input", &CLua::m_pCGameClient->m_pControls->m_InputData[0])
 			//pointer to components & stuff from gameclient
 			
 			//sub-namespaces etc
