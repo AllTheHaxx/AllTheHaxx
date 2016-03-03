@@ -209,14 +209,14 @@ int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	static int ID[1024] = {0}; // hm.
-	int hash = round_to_int(x) << 31;
-	hash |= round_to_int(y) << 15;
-	hash |= round_to_int(w) << 7;
+	int hash = round_to_int(x) << 12;
+	hash |= round_to_int(y) << 8;
+	hash |= round_to_int(w) << 4;
 	hash |= round_to_int(h) << 0;
 	CUIRect r;
 	r.x = x; r.y = y;
 	r.w = w; r.h = h;
-	return pGameClient->m_pMenus->DoButton_Menu(&ID[hash%1024], pText ? pText : "", Checked, &r, pTooltip ? pTooltip : "", Corners, CLuaBinding::m_pUiContainer->Color);
+	return pGameClient->m_pMenus->DoButton_Menu(&ID[hash/1024], pText ? pText : "", Checked, &r, pTooltip ? pTooltip : "", Corners, CLuaBinding::m_pUiContainer->Color);
 }
 
 
