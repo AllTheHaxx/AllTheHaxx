@@ -27,7 +27,7 @@
 		if(lfunc) try { lfunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } \
 	} \
 	LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, EVENTNAME); \
-	if(confunc) try { confunc(); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } 
+	if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } 
 
 class IClient;
 class CClient;
