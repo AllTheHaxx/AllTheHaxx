@@ -155,8 +155,6 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 		// graphics namespace
 		.beginNamespace("_graphics")
-			.addFunction("GetScreenWidth", &CLuaBinding::LuaGetScreenWidth)
-			.addFunction("GetScreenHeight", &CLuaBinding::LuaGetScreenHeight)
 			.addFunction("SetColor", &CLuaBinding::LuaSetColor)
 			.addFunction("DrawLine", &CLuaBinding::LuaDrawLine)
 			.addFunction("LoadTexture", &CLuaBinding::LuaLoadTexture)      //MOved

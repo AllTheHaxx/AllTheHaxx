@@ -92,20 +92,6 @@ int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float
 
 
 // graphics namespace
-int CLuaBinding::LuaGetScreenWidth()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	//return ((IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>())->ScreenWidth();
-	return pGameClient->UI()->Screen()->w; // which one is better...?
-}
-
-int CLuaBinding::LuaGetScreenHeight()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	//return ((IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>())->ScreenHeight();
-	return pGameClient->UI()->Screen()->h; // which one is better...?
-}
-
 void CLuaBinding::LuaSetColor(float r, float g, float b, float a)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();

@@ -27,8 +27,6 @@ public:
 	static int LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners);
 
 	// graphics namespace
-	static int LuaGetScreenWidth();
-	static int LuaGetScreenHeight();
 	static void LuaSetColor(float r, float g, float b, float a);
 	static void LuaDrawLine(float x0, float y0, float x1, float y1);
 	static int LuaLoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags); // e.g. CImageInfo::FORMAT_AUTO, IGraphics::TEXLOAD_NORESAMPLE
