@@ -1075,6 +1075,16 @@ void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserD
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
 }
 
+void CGameConsole::Con_Lua(IConsole::IResult *pResult, void *pUserData)
+{
+	if(!g_Config.m_ClLua)
+	{
+		((CGameConsole *)pUserData)->PrintLine(CONSOLETYPE_LOCAL, "Lua is disabled. Please enable Lua first.");
+		return;
+	}
+	((CGameConsole *)pUserData)->m_LuaConsole.ExecuteLine(pResult->GetString(0));
+}
+
 void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted)
 {
 	((CGameConsole *)pUserData)->m_LocalConsole.PrintLine(pStr, Highlighted);
@@ -1137,6 +1147,7 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console");
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
+	Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 	Console()->Chain("cl_IRC_nick", ConchainIRCNickUpdate, this); // TODO: This may be moved to elsewhere
