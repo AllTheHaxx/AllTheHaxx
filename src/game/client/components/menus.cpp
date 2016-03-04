@@ -569,19 +569,31 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current,
 	RenderTools()->DrawUIRect(&Rail, vec4(1,1,1,0.25f), 0, 0.0f);
 
 	CUIRect Slider = Handle;
-	Slider.w = Rail.x-Slider.x;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_L, 2.5f);
-	Slider.x = Rail.x+Rail.w;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_R, 2.5f);
+	if(Inside)
+	{
+		Slider.w = Rail.x-Slider.x;
+		RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_L, 2.5f);
+		Slider.x = Rail.x+Rail.w;
+		RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_R, 2.5f);
+	}
 
 	Slider = Handle;
-	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 2.5f);
+	Slider.VMargin(5.0f, &Slider);
+	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.3f)*ButtonColorMul(pID), 0, 2.5f);
+
 
 	if(Inside && pTooltip && pTooltip[0] != '\0')
 		m_pClient->m_pTooltip->SetTooltip(pTooltip);
 
-	return ReturnValue;
+	if(UI()->MouseInside(&Rail) || Inside)
+	{
+		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+			ReturnValue -= Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
+		else if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+			ReturnValue += Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
+	}
+
+	return clamp(ReturnValue, 0.0f, 1.0f);
 }
 
 
@@ -647,9 +659,9 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 		{
 			Slider.h = 2*(Rail.y-Slider.y)+Rail.h;
 			Slider.Margin(-3.0f, &Slider);
-			RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 2.5f);
+			RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 9.5f);
 			Slider.Margin(3.0f, &Slider);
-			RenderTools()->DrawUIRect(&Slider, vec4(0,0,0,0.80f*clamp(ButtonColorMul(pID).a, 0.8f, 1.2f)), CUI::CORNER_ALL, 1.7f);
+			RenderTools()->DrawUIRect(&Slider, vec4(0,0,0,0.80f*clamp(ButtonColorMul(pID).a, 0.8f, 1.2f)), CUI::CORNER_ALL, 7.3f);
 			char aBuf[16];
 			str_format(aBuf, sizeof(aBuf), "%i", Value);
 			Slider.y = Rail.y-8.5f/4.0f;
@@ -670,9 +682,9 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 	if(UI()->MouseInside(&Rail) || Inside)
 	{
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
-			ReturnValue += 0.05f;
+			ReturnValue += Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
 		else if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			ReturnValue -= 0.05f;
+			ReturnValue -= Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
 	}
 
 	return clamp(ReturnValue, 0.0f, 1.0f);

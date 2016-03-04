@@ -55,7 +55,6 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
-	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
 	MainView.HSplitTop(180.0f, &Game, &Client);
 	Client.HSplitTop(160.0f, &Client, &AutoReconnect);
@@ -762,7 +761,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			str_format(aInput, sizeof(aInput), "%i", g_Config.m_InpMousesens);
 			DoEditBox(&g_Config.m_InpMousesens, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
 			g_Config.m_InpMousesens = atoi(aInput);
-			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/995.0f, 0)*995.0f)+5;
+			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/995.0f)*995.0f)+5;
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 			if(g_Config.m_InpMousesens < 5) g_Config.m_InpMousesens = 5;
 		}
