@@ -1,28 +1,28 @@
--- TODO: UNFINISHED!
+_g_ScriptTitle = "Blood-Patch"
+_g_ScriptInfo = "Teeish Blood Effects!"
+
+Config = {}
+Config["UseTeeColor"] = 1
+Config["UseStdColor"] = 0
+Config["StdColorR"] = 1
+Config["StdColorG"] = 0
+Config["StdColorB"] = 0
 
 
-SetScriptTitle("Blood-Patch")
-SetScriptInfo("(c) by MAP94 - AllTheHaxx edit by Henritees")
-SetScriptHasSetting(1)
-
-Config = table
-Config.UseTeeColor = 1
-Config.UseStdColor = 0
-Config.StdColorR = 1
-Config.StdColorG = 0
-Config.StdColorB = 0
-
-checkfile = io.open("lua/bloodpatch.config", "r")
-if (checkfile == nil) then
-    configout = io.open("lua/bloodpatch.config", "wb")
-    configout:close()
-else
-    checkfile:close()
+function OnScriptInit()
+	if(_system.Import(_g_ScriptUID, "bloodpatch.config") == true) then
+		print("bloodpatch.lua: Config loaded!")
+	else
+		print("bloodpatch.lua: Failed to load config, creating one!")
+		OnScriptSaveSettings()
+		--return false -- this would force the script to enter error-state (thus unexecutable)
+	end
+	return true
 end
---Include ("lua/bloodpatch.config")
-local Blood = graphics.LoadTexture("luares/bloodpatch/blood.png", -1, -1, 1)
 
-local Ui = table
+Blood = Graphics.Engine:LoadTexture("luares/bloodpatch/blood.png", -1, -1, 1)
+
+Ui = table
 Ui.SettingsRect = nil
 Ui.SettingsUseTeeColor = nil
 Ui.SettingsUseStdColor = nil
@@ -36,18 +36,17 @@ BloodSpots = {}
 
 function RenderBlood()
     for k, v in ipairs(BloodSpots) do
-        if (1 - (TimeGet() - v["s"]) / 20 > 0) then
-        	--0, 0, 64, 64, v["r"], v["g"], v["b"], 1 - (TimeGet() - v["s"]) / 30
-        	graphics.SetColor(v["r"], v["g"], v["b"], 1 - (TimeGet() - v["s"]) / 30)
-            graphics.RenderTexture(Blood, v["x"] - 48, v["y"] - 48, 96, 96, v["rot"])
+        if (1 - (Game.Client.LocalTime - v["s"]) / 20 > 0) then
+        	Graphics.Engine:SetColor(v["r"], v["g"], v["b"], 1 - (Game.Client.LocalTime - v["s"]) / 30)
+            _graphics.RenderTexture(Blood, v["x"] - 48, v["y"] - 48, 96, 96, v["rot"])
         end
     end
 end
 
 function Kill(Killer, Victim, Weapon)
-    x, y = GetCharacterPos(Victim)
-    r, g, b = GetPlayerColorBody(Victim)
-    if (Config.UseStdColor == 1) then
+    x, y = GetCharacterPos(Victim) -- TODO
+    r, g, b = GetPlayerColorBody(Victim) -- TODO
+    if (Config["UseStdColor"] == 1) then
         r = Config.StdColorR
         g = Config.StdColorG
         b = Config.StdColorB
@@ -55,13 +54,13 @@ function Kill(Killer, Victim, Weapon)
     for i = 0, 100 do
         a = math.random(0, math.pi * 2)
         x1 = math.cos(a) * math.random(0, 32)
-        y1 = math.sin(a) * math.random(0, 32)
+        y1 = math.sin(a) * math.random(0, 32) -- TODO ↓
         CreateParticle(2, UiGetParticleTextureID(), x, y, x1 * 60, y1 * 60, 2, 0, 0, 25, 1, 0.8, x1 * 10, 2000 + y1 * 5, 0, r, g, b, 1, r, g, b, 0)
     end
     for i = 0, 49 do
         xm = math.random(-3, 3)
         ym = math.random(-3, 3)
-        c = GetTile(x + xm * 32, y + ym * 32)
+        c = Game.Collision:GetTile(x + xm * 32, y + ym * 32)
         if (c == 1 or c == 2 or c == 3) then
             BloodNum = BloodNum + 1
             if (BloodNum == 64) then
@@ -74,126 +73,67 @@ function Kill(Killer, Victim, Weapon)
             BloodSpots[BloodNum]["g"] = g
             BloodSpots[BloodNum]["b"] = b
             BloodSpots[BloodNum]["rot"] = math.random(0, 6.283185308)
-            BloodSpots[BloodNum]["s"] = TimeGet()
+            BloodSpots[BloodNum]["s"] = Game.Client.LocalTime
             break
         end
     end
 end
 
-function ButtonUseTeeColor(state)
-    if (state == 1) then
-        if (Config.UseTeeColor == 1) then
-            Config.UseTeeColor = 0
-            Config.UseStdColor = 1
-        else
-            Config.UseTeeColor = 1
-            Config.UseStdColor = 0
-        end
-        if (Config.UseTeeColor == 1) then
-            UiSetColor(Ui.SettingsUseTeeColor, 0, 1, 0, 0.5)
-        else
-            UiSetColor(Ui.SettingsUseTeeColor, 1, 1, 1, 0.5)
-        end
-        if (Config.UseStdColor == 1) then
-            UiSetColor(Ui.SettingsUseStdColor, 0, 1, 0, 0.5)
-        else
-            UiSetColor(Ui.SettingsUseStdColor, 1, 1, 1, 0.5)
-        end
-    end
-end
+function OnScriptRenderSettings(x, y, w, h)
+    Spacing = Graphics.Engine.ScreenHeight * 0.01
 
-function ButtonUseStdColor(state)
-    if (state == 1) then
-        if (Config.UseStdColor == 1) then
-            Config.UseStdColor = 0
-            Config.UseTeeColor = 1
-        else
-            Config.UseStdColor = 1
-            Config.UseTeeColor = 0
-        end
-        if (Config.UseTeeColor == 1) then
-            UiSetColor(Ui.SettingsUseTeeColor, 0, 1, 0, 0.5)
-        else
-            UiSetColor(Ui.SettingsUseTeeColor, 1, 1, 1, 0.5)
-        end
-        if (Config.UseStdColor == 1) then
-            UiSetColor(Ui.SettingsUseStdColor, 0, 1, 0, 0.5)
-        else
-            UiSetColor(Ui.SettingsUseStdColor, 1, 1, 1, 0.5)
-        end
-    end
-end
-
-function SliderStdColorR(val)
-    Config.StdColorR = val
-    UiSetColor(Ui.SettingsStdColorPreview, Config.StdColorR, Config.StdColorG, Config.StdColorB, 1)
-end
-
-function SliderStdColorG(val)
-    Config.StdColorG = val
-    UiSetColor(Ui.SettingsStdColorPreview, Config.StdColorR, Config.StdColorG, Config.StdColorB, 1)
-end
-
-function SliderStdColorB(val)
-    Config.StdColorB = val
-    UiSetColor(Ui.SettingsStdColorPreview, Config.StdColorR, Config.StdColorG, Config.StdColorB, 1)
-end
-
-function ConfigOpen(x, y, w, h)
-    Spacing = UiGetScreenHeight() * 0.01
-
-    Ui.SettingsRect = UiDoRect(x, y, w, h, 0, 15, 15, 0, 0, 0, 0.5)
+	_ui.SetUiColor(0, 0, 0, 0.5)
+    _ui.DrawUiRect(x, y, w, h, 15, 5.0)
     x = x + Spacing
     y = y + Spacing
     w = w - Spacing * 2
 
-
-    Ui.SettingsUseTeeColor = UiDoButton(x + Spacing, y + Spacing, 250, 20, 0, "Use Tee color as blood color", "ButtonUseTeeColor")
+	_ui.SetUiColor(1, 1, 1, 0.5)
+    if(_ui.DoButton_Menu("Use Tee color as blood color", Config["UseTeeColor"], x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
+    	Config["UseTeeColor"] = ((Config["UseTeeColor"] == 1) and 0 or 1)
+    end
     y = y + Spacing + 20
-    Ui.SettingsUseStdColor = UiDoButton(x + Spacing, y + Spacing, 250, 20, 0, "Use standard color as blood color", "ButtonUseStdColor")
+    
+    if(_ui.DoButton_Menu("Use standard color as blood color", Config["UseStdColor"], x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
+    	Config["UseStdColor"] = ((Config["UseStdColor"] == 1) and 0 or 1)
+    end
     y = y + Spacing + 20
-    Ui.SettingsStdColorPreview = UiDoRect(x + 250 + Spacing * 2, y + Spacing, Spacing * 3 + 60, Spacing * 2 + 45, 0)
-    UiSetColor(Ui.SettingsStdColorPreview, Config.StdColorR, Config.StdColorG, Config.StdColorB, 1)
-    Ui.SettingsStdColorR = UiDoSlider (x + Spacing, y + Spacing, 250, 15, 0, Config.StdColorR, "SliderStdColorR")
-    y = y + Spacing + 15
-    Ui.SettingsStdColorG = UiDoSlider (x + Spacing, y + Spacing, 250, 15, 0, Config.StdColorG, "SliderStdColorG")
-    y = y + Spacing + 15
-    Ui.SettingsStdColorB = UiDoSlider (x + Spacing, y + Spacing, 250, 15, 0, Config.StdColorB, "SliderStdColorB")
-
-    if (Config.UseTeeColor == 1) then
-        UiSetColor(Ui.SettingsUseTeeColor, 0, 1, 0, 0.5)
+    
+    _ui.SetUiColor(Config["StdColorR"], Config["StdColorG"], Config["StdColorB"], 1)
+ --[[   if (Config["UseTeeColor"] == 1) then
+        _ui.SetUiColor(0, 1, 0, 0.5)
     else
         UiSetColor(Ui.SettingsUseTeeColor, 1, 1, 1, 0.5)
-    end
-    if (Config.UseStdColor == 1) then
+    end ]]
+  --[[  if (Config.UseStdColor == 1) then
         UiSetColor(Ui.SettingsUseStdColor, 0, 1, 0, 0.5)
     else
         UiSetColor(Ui.SettingsUseStdColor, 1, 1, 1, 0.5)
-    end
+    end ]]
+    _ui.DrawUiRect(x + 250 + Spacing * 2, y + Spacing, Spacing * 3 + 60, Spacing * 2 + 45, 15, 5.0)
+  
+    --UiDoSlider(x + Spacing, y + Spacing, 250, 15, 0, Config.StdColorR, "SliderStdColorR")
+    y = y + Spacing + 15
+    --UiDoSlider(x + Spacing, y + Spacing, 250, 15, 0, Config.StdColorG, "SliderStdColorG")
+    y = y + Spacing + 15
+    --UiDoSlider(x + Spacing, y + Spacing, 250, 15, 0, Config.StdColorB, "SliderStdColorB")
+
 end
 
-function ConfigClose()
-    configout = io.open("lua/bloodpatch.config", "wb")
-    configout:write("--Configfile for Bloodpatch\n")
-    configout:write("Config = table\n")
-    configout:write("Config.UseTeeColor = " .. Config.UseTeeColor .. "\n")
-    configout:write("Config.UseStdColor = " .. Config.UseStdColor .. "\n")
-    configout:write("Config.StdColorR = " .. Config.StdColorR .. "\n")
-    configout:write("Config.StdColorG = " .. Config.StdColorG .. "\n")
-    configout:write("Config.StdColorB = " .. Config.StdColorB .. "\n")
-    configout:close()
 
-    UiRemoveElement(Ui.SettingsRect)
-    UiRemoveElement(Ui.SettingsUseTeeColor)
-    UiRemoveElement(Ui.SettingsUseStdColor)
-    UiRemoveElement(Ui.SettingsStdColorR)
-    UiRemoveElement(Ui.SettingsStdColorG)
-    UiRemoveElement(Ui.SettingsStdColorB)
-    UiRemoveElement(Ui.SettingsStdColorPreview)
-
+function OnScriptSaveSettings()
+	file = io.open("lua/bloodpatch.config", "w+")
+	for k, v in next, Config do
+		if(type(k) == "string") then
+			file:write("Config[\"" .. k .. "\"] = " .. v .. "\n")
+		else
+			file:write("Config[" .. k .. "] = " .. v .. "\n")
+		end
+	end
+	file:flush()
+	file:close()
 end
 
 RegisterEvent("OnKill", Kill)
-RegisterEvent("OnRenderLevel5", RenderBlood)
-
+RegisterEvent("OnRenderLevel8", RenderBlood)
 
