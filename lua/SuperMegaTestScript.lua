@@ -8,8 +8,9 @@ function OnScriptInit() -- XXX if there are script errors in this function, the 
 	if(_system.Import(_g_ScriptUID, "SuperMegaTestScript.config") and config ~= nil) then
 		print("SuperMegaTestScript.lua: Config loaded!")
 	else
-		print("SuperMegaTestScript.lua: Failed to load config!")
-		return false -- this would force the script to enter error-state (thus unexecutable)
+		print("SuperMegaTestScript.lua: Failed to load config, creating one!")
+		OnScriptSaveSettings()
+		--return false -- this would force the script to enter error-state (thus unexecutable)
 	end
 	
 	return true -- this is important to tell c++ that the script init was successful
