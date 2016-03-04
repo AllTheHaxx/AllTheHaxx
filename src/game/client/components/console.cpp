@@ -134,12 +134,12 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		
 		//SCOPING DETECT!
 		std::string ActLine(pLine);                             //cuz after an elseif is no extra end!
-		if(ActLine.find("while") >= 0 || ActLine.find("function") >= 0 || (ActLine.find("if") >= 0 && ActLine.find("elseif") < 0) || ActLine.find("for") >= 0)
+		if(ActLine.find("while") != std::string::npos || ActLine.find("function") != std::string::npos || (ActLine.find("if") != std::string::npos && ActLine.find("elseif") == std::string::npos) || ActLine.find("for") != std::string::npos)
 		{
 			m_LuaHandler.m_ScopeCount++;
 			ScopeIncreased = true;
 		}
-		if(ActLine.find("end") >= 0)  //NO ELSE IF HERE
+		if(ActLine.find("end") != std::string::npos)  //NO ELSE IF HERE
 		{
 			char aBuf[512] = { 0 };
 			if(m_LuaHandler.m_ScopeCount > 0)
