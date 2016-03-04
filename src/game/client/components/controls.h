@@ -26,8 +26,6 @@ public:
 
 	CNetObj_PlayerInput m_InputData[2];
 	CNetObj_PlayerInput m_LastData[2];
-	CNetObj_PlayerInput m_LuaInputData[2];
-	bool m_LuaLockInput;
 	int m_InputDirectionLeft[2];
 	int m_InputDirectionRight[2];
 	int m_ShowHookColl[2];
@@ -47,7 +45,7 @@ public:
 	int SnapInput(int *pData);
 	void ClampMousePos();
 	void ResetInput(int dummy);
-	
+
 	// lua
 	int GetDirection() const { return m_InputData[g_Config.m_ClDummy].m_Direction; }
 	void SetDirection(int n) { m_InputData[g_Config.m_ClDummy].m_Direction = n; }
