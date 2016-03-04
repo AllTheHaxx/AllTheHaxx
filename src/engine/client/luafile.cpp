@@ -279,6 +279,8 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.beginClass<IGraphics>("IGraphics")
 			.addFunction("QuadsBegin", &IGraphics::QuadsBegin)
 			.addFunction("QuadsEnd", &IGraphics::QuadsEnd)
+			.addFunction("LinesBegin", &IGraphics::LinesBegin)
+			.addFunction("LinesEnd", &IGraphics::LinesEnd)
 			.addProperty("ScreenWidth", &IGraphics::ScreenWidth)
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
 			.addFunction("BlendNone", &IGraphics::BlendNone)
