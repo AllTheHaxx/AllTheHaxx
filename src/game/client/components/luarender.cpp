@@ -1,4 +1,5 @@
 #include "luarender.h"
+#include "console.h"
 
 void CLuaRender::OnRender()
 {

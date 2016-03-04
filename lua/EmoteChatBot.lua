@@ -11,4 +11,4 @@ end
 
 print("shit got loaded!! :D")
 
-RegisterEvent("OnChat", test)
+RegisterEvent("OnChat", "test")

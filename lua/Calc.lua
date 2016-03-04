@@ -8,4 +8,4 @@ local function Calc(ClientID, Team, Message)
 	end
 end
 
-RegisterEvent("OnChat", Calc)
+RegisterEvent("OnChat", "Calc")

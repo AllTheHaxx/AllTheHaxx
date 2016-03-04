@@ -48,9 +48,10 @@ public:
 	bool GetScriptHasSettings() const { return m_ScriptHasSettings; }
 
 	CLua *Lua() const { return m_pLua; }
+	
+	static void RegisterLuaCallbacks(lua_State * L);
 
 private:
-	void RegisterLuaCallbacks();
 	bool ScriptHasSettings();
 };
 

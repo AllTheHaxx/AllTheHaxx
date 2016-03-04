@@ -142,6 +142,6 @@ function OnScriptSaveSettings()
 	file:close()
 end
 
-RegisterEvent("OnKill", Kill)
-RegisterEvent("OnRenderLevel8", RenderBlood)
+RegisterEvent("OnKill", "Kill")
+RegisterEvent("OnRenderLevel8", "RenderBlood")
 

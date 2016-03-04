@@ -62,12 +62,25 @@ class CGameConsole : public CComponent
 
 		const char *GetString() const { return m_Input.GetString(); }
 		static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
+		
+		struct
+		{
+			lua_State * m_pLuaState;
+			bool m_Inited;
+			
+			int m_ScopeCount;
+			std::string m_FullLine;
+			
+		}m_LuaHandler;
+		
+		bool LoadLuaFile(const char *pFile);
 	};
 
 	class IConsole *m_pConsole;
 
 	CInstance m_LocalConsole;
 	CInstance m_RemoteConsole;
+	CInstance m_LuaConsole;
 
 	CInstance *CurrentConsole();
 	float TimeNow();
@@ -87,6 +100,7 @@ class CGameConsole : public CComponent
 	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, bool Highlighted);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleLuaConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData);
@@ -99,11 +113,15 @@ public:
 	{
 		CONSOLETYPE_LOCAL=0,
 		CONSOLETYPE_REMOTE,
+		CONSOLETYPE_LUA,
 	};
-
+	
 	CGameConsole();
 
 	void PrintLine(int Type, const char *pLine);
+	
+	static void PrintLuaLine(const char *pLine);
+	static CInstance * m_pStatLuaConsole;
 
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnConsoleInit();

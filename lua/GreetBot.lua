@@ -12,4 +12,4 @@ local function GreetBot(ClientID, Team, Message)
 	end
 end
 
-RegisterEvent("OnChat", GreetBot)
+RegisterEvent("OnChat", "GreetBot")

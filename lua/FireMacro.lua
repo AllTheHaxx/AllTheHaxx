@@ -19,6 +19,6 @@ local function RapidFireOff(Key)
 	end
 end
 
-RegisterEvent("OnTick", RapidFire)
-RegisterEvent("OnKeyPress", RapidFireOn)
-RegisterEvent("OnKeyRelease", RapidFireOff)
+RegisterEvent("OnTick", "RapidFire")
+RegisterEvent("OnKeyPress", "RapidFireOn")
+RegisterEvent("OnKeyRelease", "RapidFireOff")

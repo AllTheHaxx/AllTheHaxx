@@ -17,6 +17,7 @@
 #include <game/client/components/statboard.h>
 
 #include "scoreboard.h"
+#include "console.h"
 
 #include <time.h>
 #include <base/tl/string.h>

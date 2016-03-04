@@ -30,7 +30,7 @@ local function test(FadeVal)
 	-- ...was to lazy for that right now.
 end
 
-RegisterEvent("OnRenderScoreboard", test)
+RegisterEvent("OnRenderScoreboard", "test")
 
 _graphics.LoadTexture("game.png", -1, -1, 1)
 _graphics.LoadTexture("game.png", -1, -1, 1)

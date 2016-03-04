@@ -79,10 +79,10 @@ void CLuaFile::Init()
 		if(!LoadFile("data/lua/events.luac")) // try for the compiled file if script not found
 			m_State = LUAFILE_STATE_ERROR;
 		else
-			RegisterLuaCallbacks();
+			RegisterLuaCallbacks(m_pLuaState);
 	}
 	else
-		RegisterLuaCallbacks();
+		RegisterLuaCallbacks(m_pLuaState);
 
 	if(m_State != LUAFILE_STATE_ERROR)
 	{
@@ -131,9 +131,9 @@ void CLuaFile::Init()
 	}
 }
 
-void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
+void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 {		
-	getGlobalNamespace(m_pLuaState)
+	getGlobalNamespace(L)
 
 		// system namespace
 		.beginNamespace("_system")

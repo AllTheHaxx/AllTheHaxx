@@ -8,7 +8,7 @@ function Jump()
 	end
 		
 	if a == true then
-		TW.Game.Input.Jump = 1
+		Game.Input.Jump = 1
 		a = false
 		LastTick = TW.Client.Tick
 	else
@@ -18,4 +18,4 @@ function Jump()
 	end
 end
 
-RegisterEvent("OnTick", Jump)
+RegisterEvent("OnTick", "Jump")

@@ -1,11 +1,11 @@
 List = {}
 Messages = 
 {
-	[1] = "/w @name@if DENNIS",
-	[2] = "/w @name@if Hi, nice to see you @name! Have a great day :)",
-	[3] = "/w @name@if Come, enter, @you has warez, everything you need.",
-	[4] = "/w @name@if Hey psst, wanna buy some... magic?",
-	[5] = "/w @name@if Heyo, it's a beautiful day today, isn't it?"
+	[1] = "/w @name@if @name: DENNIS",
+	[2] = "/w @name@if @name: Hi, nice to see you @name! Have a great day :)",
+	[3] = "/w @name@if @name: Come, enter, @you has warez, everything you need.",
+	[4] = "/w @name@if @name: Hey psst, wanna buy some... magic?",
+	[5] = "/w @name@if @name: Heyo, it's a beautiful day today, isn't it?"
 }
 
 -- @name = the targets name...
@@ -21,8 +21,8 @@ local function GreetAdd(ClientID, Team, Message)
 		abc = string.match(Message, "'.-'")    -- returns everything between '' => name
 		abc = abc:gsub("'", "")                      -- string replace
 				
-		if abc ~= TW.Config.PlayerName then       --dont greet ourselves!
-			List[abc] = TW.Client.Tick + 30         --time stamp
+		if abc ~= Config.PlayerName then       --dont greet ourselves!
+			List[abc] = Game.Client.Tick + 30         --time stamp
 		end
 	end
 end
@@ -34,9 +34,11 @@ local function Greet()
 			rand = math.random(5)
 					
 			msg = Messages[rand]:gsub("@name", key)
-			msg = msg:gsub("@you", TW.Config.PlayerName)
+			msg = msg:gsub("@you", Config.PlayerName)
 			
 			Mode = TW.Game.ServerInfo.GameMode
+			
+			print(Mode)
 
 			if Mode == "iF|City" then
 				msg = msg:gsub("@if", ":")
@@ -63,6 +65,6 @@ local function SetSeed()
 	math.randomseed (os.time ())
 end
 
-RegisterEvent("OnChat", GreetAdd)
-RegisterEvent("OnTick", Greet)
-RegisterEvent("OnEnterGame", SetSeed)
+RegisterEvent("OnChat", "GreetAdd")
+RegisterEvent("OnTick", "Greet")
+RegisterEvent("OnEnterGame", "SetSeed")

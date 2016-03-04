@@ -62,4 +62,4 @@ local function test()
 	-- or Game.Client.Chat:Say(0, "Hi"), you can decide :D
 end ]]--
 
-RegisterEvent("OnTick", test)
+RegisterEvent("OnTick", "test")

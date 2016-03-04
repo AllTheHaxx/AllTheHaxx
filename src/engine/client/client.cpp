@@ -49,6 +49,7 @@
 #include <engine/client/irc.h>
 
 #include <game/version.h>
+#include <game/client/components/console.h>
 
 #include <mastersrv/mastersrv.h>
 #include <versionsrv/versionsrv.h>

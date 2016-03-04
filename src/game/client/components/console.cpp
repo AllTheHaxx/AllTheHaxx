@@ -1,6 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#undef luaL_dostring
+#define luaL_dostring(L,s)	\
+	(luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, 0))
+
 #include <base/tl/sorted_array.h>
 
 #include <math.h>
@@ -34,6 +38,8 @@
 #include "irc.h"
 #include "console.h"
 
+CGameConsole::CInstance * CGameConsole::m_pStatLuaConsole = 0;
+
 CGameConsole::CInstance::CInstance(int Type)
 {
 	m_pHistoryEntry = 0x0;
@@ -56,6 +62,38 @@ CGameConsole::CInstance::CInstance(int Type)
 void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 {
 	m_pGameConsole = pGameConsole;
+	
+	if(m_Type == CONSOLETYPE_LUA)
+	{
+		m_LuaHandler.m_pLuaState = luaL_newstate();
+
+		//lua_atpanic(m_pLuaState, CLua::Panic);
+		//lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
+
+		luaL_openlibs(m_LuaHandler.m_pLuaState);
+		luaopen_base(m_LuaHandler.m_pLuaState);
+		luaopen_math(m_LuaHandler.m_pLuaState);
+		luaopen_string(m_LuaHandler.m_pLuaState);
+		luaopen_table(m_LuaHandler.m_pLuaState);
+		//luaopen_io(m_pLua);
+		luaopen_os(m_LuaHandler.m_pLuaState);
+		//luaopen_package(m_pLua); // not sure whether we should load this
+		luaopen_debug(m_LuaHandler.m_pLuaState);
+		luaopen_bit(m_LuaHandler.m_pLuaState);
+		luaopen_jit(m_LuaHandler.m_pLuaState);
+		luaopen_ffi(m_LuaHandler.m_pLuaState); // don't know about this yet. could be a sand box leak.
+		
+		m_LuaHandler.m_Inited = false;
+		m_LuaHandler.m_ScopeCount = 0;
+		
+		//Some luaconsole funcs!
+		getGlobalNamespace(m_LuaHandler.m_pLuaState)
+			.addFunction("print", &CGameConsole::PrintLuaLine);
+			
+		LoadLuaFile("data/luabase/events.lua");
+		
+		CGameConsole::m_pStatLuaConsole = this;
+	}
 };
 
 void CGameConsole::CInstance::ClearBacklog()
@@ -81,6 +119,107 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			m_pGameConsole->Client()->Rcon(pLine);
 		else
 			m_pGameConsole->Client()->RconAuth("", pLine);
+	}
+	else if(m_Type == CGameConsole::CONSOLETYPE_LUA)
+	{
+		int Status = 0;
+		char ErrorMsg[512];
+		bool ScopeIncreased = false;
+		
+		if(!m_LuaHandler.m_Inited)  //this is yet quite retarded!
+		{
+			CLuaFile::RegisterLuaCallbacks(m_LuaHandler.m_pLuaState);
+			m_LuaHandler.m_Inited = true;
+		}
+		
+		//SCOPING DETECT!
+		std::string ActLine(pLine);                             //cuz after an elseif is no extra end!
+		if(ActLine.find("while") != -1 || ActLine.find("function") != -1 || (ActLine.find("if") != -1 && ActLine.find("elseif") == -1) || ActLine.find("for") != -1)
+		{
+			m_LuaHandler.m_ScopeCount++;
+			ScopeIncreased = true;
+		}
+		if(ActLine.find("end") != -1)  //NO ELSE IF HERE
+		{
+			char aBuf[512] = { 0 };
+			if(m_LuaHandler.m_ScopeCount > 0)
+			{	
+				for(int i = 0; i < m_LuaHandler.m_ScopeCount-1; i++)
+					str_append(aBuf, "     ", sizeof(aBuf));
+				str_append(aBuf, pLine, sizeof(aBuf));
+			}
+			m_LuaHandler.m_ScopeCount--;
+			
+			if(m_LuaHandler.m_ScopeCount == 0)  //if we are now at zero after decreasing => print new line!
+			{
+				PrintLine(aBuf);
+				PrintLine("");
+			}
+		}
+		
+		m_LuaHandler.m_FullLine.append(pLine);
+		m_LuaHandler.m_FullLine.append(" ");
+		
+		if(m_LuaHandler.m_ScopeCount == 0)
+		{
+			try
+			{
+				luaL_loadstring(m_LuaHandler.m_pLuaState, m_LuaHandler.m_FullLine.c_str());
+				Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
+				
+				if(Status)
+				{
+					str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
+					
+					if(!strcmp(ErrorMsg, "attempt to call a string value"))  //HACKISH SOLUTION : Try recompile pLine with a print!
+					{
+						Status = 0;
+						
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "print(%s)", m_LuaHandler.m_FullLine.c_str());
+						
+						luaL_loadstring(m_LuaHandler.m_pLuaState, aBuf);
+						Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
+					}
+				}			
+				}
+				catch(std::exception &e)  //just to be sure...
+				{
+					PrintLine(e.what());
+				}
+				catch(...)
+				{
+					PrintLine("An unknown error occured!");
+				}
+				
+				m_LuaHandler.m_FullLine = "";
+				m_LuaHandler.m_ScopeCount = 0;
+				
+				if(Status)
+				{
+					str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
+					PrintLine(ErrorMsg);
+				}
+		}
+		else if(m_LuaHandler.m_ScopeCount < 0)
+		{
+			PrintLine("Please don't end your stuff before you already started.");
+			m_LuaHandler.m_ScopeCount = 0;
+			m_LuaHandler.m_FullLine = "";
+		}
+		
+		if(ScopeIncreased || m_LuaHandler.m_ScopeCount > 0)   //bigger 0
+		{
+			char aBuf[512] = { 0 };
+			
+			int Limit = ScopeIncreased == true ? m_LuaHandler.m_ScopeCount-1 : m_LuaHandler.m_ScopeCount;
+			
+			for(int i = 0; i < Limit; i++)
+				str_append(aBuf, "     ", sizeof(aBuf));
+			
+			str_append(aBuf, pLine, sizeof(aBuf));
+			PrintLine(aBuf);
+		}
 	}
 }
 
@@ -305,8 +444,39 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 	pEntry->m_aText[Len] = 0;
 }
 
+bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is for LuaConsole
+{
+	if(m_Type != CONSOLETYPE_LUA)
+		return false;
+	
+	if(!pFile || pFile[0] == '\0' || !m_LuaHandler.m_pLuaState)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Error loading '%s'", pFile);
+		PrintLine(aBuf);
+		return false;
+	}
+		
+	int Status = luaL_loadfile(m_LuaHandler.m_pLuaState, pFile);
+    if (Status)
+    {
+        // does this work? -- I don't think so, Henritees.
+        PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
+        return false;
+    }
+
+    Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
+    if (Status)
+    {
+    	PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
+        return false;
+    }
+	
+	return true;
+}
+
 CGameConsole::CGameConsole()
-: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
+: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE), m_LuaConsole(CONSOLETYPE_LUA)
 {
 	m_ConsoleType = CONSOLETYPE_LOCAL;
 	m_ConsoleState = CONSOLE_CLOSED;
@@ -324,6 +494,8 @@ CGameConsole::CInstance *CGameConsole::CurrentConsole()
 {
 	if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		return &m_RemoteConsole;
+	else if(m_ConsoleType == CONSOLETYPE_LUA)
+		return &m_LuaConsole;
 	return &m_LocalConsole;
 }
 
@@ -452,6 +624,8 @@ void CGameConsole::OnRender()
 		Graphics()->SetColor(0.2f, 0.2f, 0.2f,0.9f);
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 			Graphics()->SetColor(0.4f, 0.2f, 0.2f,0.9f);
+		else if(m_ConsoleType == CONSOLETYPE_LUA)
+			Graphics()->SetColor(0.0f, 0.2f, 0.4f, 0.9f);
 		Graphics()->QuadsSetSubset(0,-ConsoleHeight*0.075f,Screen.w*0.075f*0.5f,0);
 		QuadItem = IGraphics::CQuadItem(0, 0, Screen.w, ConsoleHeight);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
@@ -532,6 +706,13 @@ void CGameConsole::OnRender()
 			}
 			else
 				pPrompt = "NOT CONNECTED! ";
+		}
+		else if(m_ConsoleType == CONSOLETYPE_LUA)
+		{
+			if(g_Config.m_ClLua)
+				pPrompt = "Lua> ";
+			else
+				pPrompt = "Lua disabled. Please enable Lua first.";
 		}
 		TextRender()->TextEx(&Cursor, pPrompt, -1);
 
@@ -874,6 +1055,11 @@ void CGameConsole::ConClearLocalConsole(IConsole::IResult *pResult, void *pUserD
 	((CGameConsole *)pUserData)->m_LocalConsole.ClearBacklog();
 }
 
+void CGameConsole::ConToggleLuaConsole(IConsole::IResult *pResult, void *pUserData)
+{
+	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_LUA);
+}
+
 void CGameConsole::ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->m_RemoteConsole.ClearBacklog();
@@ -917,8 +1103,19 @@ void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_REMOTE)
 		m_RemoteConsole.PrintLine(pLine);
+	else if(Type = CONSOLETYPE_LUA)
+		m_LuaConsole.PrintLine(pLine);
 	else
 		m_LocalConsole.PrintLine(pLine);
+}
+
+void CGameConsole::PrintLuaLine(const char *pLine)
+{
+	//if the thing is nil in lua then pLine == 0!
+	if(pLine == 0)
+		CGameConsole::m_pStatLuaConsole->PrintLine("nil");
+	else
+		CGameConsole::m_pStatLuaConsole->PrintLine(pLine);
 }
 
 void CGameConsole::OnConsoleInit()
@@ -926,6 +1123,7 @@ void CGameConsole::OnConsoleInit()
 	// init console instances
 	m_LocalConsole.Init(this);
 	m_RemoteConsole.Init(this);
+	m_LuaConsole.Init(this);
 
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
@@ -934,6 +1132,7 @@ void CGameConsole::OnConsoleInit()
 
 	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
 	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
+	Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
 	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
 	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console");
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");

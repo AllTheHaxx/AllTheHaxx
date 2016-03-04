@@ -1,14 +1,23 @@
 Events = {}
 
 -- YOU SHOULD NOT TOUCH THIS FUNCTION IF YOU DON'T KNOW WHAT YOU ARE DOING!
-function RegisterEvent(EventName, Func)
+function RegisterEvent(EventName, FuncName)
 	if Events[EventName] == nil then  --create new table if it's empty
 		Events[EventName] = {}
 	end
 	
-	Events[EventName][Func] = Func
+	Func = getfenv()[FuncName]
+	
+	if Func ~= nil then
+		Events[EventName][FuncName] = Func
+	end
 end
 
+function RemoveEvent(EventName, FuncName)
+	if Events[EventName] ~= nil then
+		Events[EventName][FuncName] = nil
+	end
+end
 
 function OnChat(ID, Team, Message)
 	if Events["OnChat"] ~= nil then

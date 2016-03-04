@@ -24,6 +24,7 @@
 
 #include "hud.h"
 #include "chat.h"
+#include "console.h"
 
 
 CChat::CChat()

@@ -9,6 +9,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
 #include "killmessages.h"
+#include "console.h"
 
 void CKillMessages::OnReset()
 {
