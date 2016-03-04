@@ -29,6 +29,7 @@ public:
 	// graphics namespace
 	static void LuaDrawLine(float x0, float y0, float x1, float y1);
 	static void LuaRenderTexture(int ID, float x, float y, float w, float h, float rot);
+	static void LuaRenderQuadRaw(int x, int y, int w, int h);
 };
 
 struct CConfigProperties

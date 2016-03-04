@@ -157,6 +157,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.beginNamespace("_graphics")
 			.addFunction("DrawLine", &CLuaBinding::LuaDrawLine)
 			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
+			.addFunction("RenderQuad", &CLuaBinding::LuaRenderQuadRaw)
 		.endNamespace()
 
 		// global types
@@ -286,12 +287,16 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("LinesBegin", &IGraphics::LinesBegin)
 			.addFunction("LinesEnd", &IGraphics::LinesEnd)
 			
+			.addFunction("SetRotation", &IGraphics::QuadsSetRotation)
 			.addFunction("SetColor", &IGraphics::SetColor)
 			.addFunction("BlendNone", &IGraphics::BlendNone)
 			.addFunction("BlendNormal", &IGraphics::BlendNormal)
 			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
 
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
+			.addFunction("TextureSet", &IGraphics::TextureSet)
+
+			.addFunction("MapScreen", &IGraphics::MapScreen)
 
 			.addProperty("ScreenWidth", &IGraphics::ScreenWidth)
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)

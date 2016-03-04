@@ -112,7 +112,7 @@ void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, f
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
 
-	pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h);
+	//pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h);
 	pGraphics->TextureSet(ID);
 	pGraphics->QuadsBegin();
 	IGraphics::CQuadItem Item;
@@ -122,7 +122,18 @@ void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, f
 	pGraphics->QuadsDraw(&Item, 1);
 	pGraphics->QuadsEnd();
 
-	float Width = 400*3.0f*pGraphics->ScreenAspect();
-	float Height = 400*3.0f;
-	pGraphics->MapScreen(0, 0, Width, Height);
+	//float Width = 400*3.0f*pGraphics->ScreenAspect();
+	//float Height = 400*3.0f;
+	//pGraphics->MapScreen(0, 0, Width, Height);
+}
+
+void CLuaBinding::LuaRenderQuadRaw(int x, int y, int w, int h)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
+
+	IGraphics::CQuadItem Item;
+	Item.m_X = x; Item.m_Y = y;
+	Item.m_Width = w; Item.m_Height = h;
+	pGraphics->QuadsDraw(&Item, 1);
 }

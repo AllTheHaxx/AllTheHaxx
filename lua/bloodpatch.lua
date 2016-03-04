@@ -1,5 +1,5 @@
 _g_ScriptTitle = "Blood-Patch"
-_g_ScriptInfo = "Teeish Blood Effects!"
+_g_ScriptInfo = "Teeish Blood Effects 18+!"
 
 Config = {}
 Config.UseTeeColor = 1
@@ -7,6 +7,8 @@ Config.UseStdColor = 0
 Config.StdColorR = 1
 Config.StdColorG = 0
 Config.StdColorB = 0
+Config.Lifetime = 45
+Config.MaxBloodNum = 96
 
 
 function OnScriptInit()
@@ -20,63 +22,69 @@ function OnScriptInit()
 	return true
 end
 
-Blood = Graphics.Engine:LoadTexture("luares/bloodpatch/blood.png", -1, -1, 1)
-
-Ui = table
-Ui.SettingsRect = nil
-Ui.SettingsUseTeeColor = nil
-Ui.SettingsUseStdColor = nil
-Ui.SettingsStdColorR = nil
-Ui.SettingsStdColorG = nil
-Ui.SettingsStdColorB = nil
-Ui.SettingsStdColorPreview = nil
+Blood = {}
+for i = 1, 4 do
+	Blood[i] = Graphics.Engine:LoadTexture("luares/bloodpatch/blood" .. i .. ".png", -1, -1, 1) -- luares/bloodpatch/blood.png
+end
 
 BloodNum = 0
 BloodSpots = {}
 
 function RenderBlood()
-    for k, v in ipairs(BloodSpots) do
-        if (1 - (Game.Client.LocalTime - v["s"]) / 20 > 0) then
-        	Graphics.Engine:SetColor(v["r"], v["g"], v["b"], 1 - (Game.Client.LocalTime - v["s"]) / 30)
-            _graphics.RenderTexture(Blood, v["x"] - 48, v["y"] - 48, 96, 96, v["rot"])
+	for k, v in ipairs(BloodSpots) do
+        if (Game.Client.LocalTime - v["s"] < Config.Lifetime) then
+        	--print("Rendering quad id=" .. k .. " at x=" .. v["x"] .. "~" .. v["x"]/32 .. ", y=" .. v["y"] .. "~" .. v["y"]/32)
+        	Graphics.Engine:TextureSet(Blood[v["tex"]])
+        	Graphics.Engine:QuadsBegin()
+        	Graphics.Engine:SetColor(1, 0, 0, 1) -- v["r"], v["g"], v["b"] ----- math.min(Config.Lifetime-Game.Client.LocalTime-v["s"])
+        	Graphics.Engine:SetRotation(v["rot"])
+            _graphics.RenderQuad(v["x"] - 48, v["y"] - 48, 96, 96)
+            Graphics.Engine:QuadsEnd()
         end
     end
 end
 
 function Kill(Killer, Victim, Weapon)
-    x, y = GetCharacterPos(Victim) -- TODO
-    r, g, b = GetPlayerColorBody(Victim) -- TODO
+	if(Victim ~= Game.Local.ClientID) then
+		return
+	end
+    x = Game.Local.Tee.PosX
+    y = Game.Local.Tee.PosY
+   -- r, g, b = GetPlayerColorBody(Victim) -- TODO
     if (Config.UseStdColor == 1) then
         r = Config.StdColorR
         g = Config.StdColorG
         b = Config.StdColorB
     end
-    for i = 0, 100 do
-        a = math.random(0, math.pi * 2)
-        x1 = math.cos(a) * math.random(0, 32)
-        y1 = math.sin(a) * math.random(0, 32) -- TODO ↓
-        CreateParticle(2, UiGetParticleTextureID(), x, y, x1 * 60, y1 * 60, 2, 0, 0, 25, 1, 0.8, x1 * 10, 2000 + y1 * 5, 0, r, g, b, 1, r, g, b, 0)
-    end
-    for i = 0, 49 do
-        xm = math.random(-3, 3)
-        ym = math.random(-3, 3)
-        c = Game.Collision:GetTile(x + xm * 32, y + ym * 32)
-        if (c == 1 or c == 2 or c == 3) then
-            BloodNum = BloodNum + 1
-            if (BloodNum == 64) then
-                BloodNum = 0
-            end
-            BloodSpots[BloodNum] = {}
-            BloodSpots[BloodNum]["x"] = x + xm * 32
-            BloodSpots[BloodNum]["y"] = y + ym * 32
-            BloodSpots[BloodNum]["r"] = r
-            BloodSpots[BloodNum]["g"] = g
-            BloodSpots[BloodNum]["b"] = b
-            BloodSpots[BloodNum]["rot"] = math.random(0, 6.283185308)
-            BloodSpots[BloodNum]["s"] = Game.Client.LocalTime
-            break
-        end
-    end
+    for n = 0, math.random(2, 4) do
+		for i = 0, 100 do
+		    a = math.random(0, math.pi * 2)
+		    x1 = math.cos(a) * math.random(0, 32)
+		    y1 = math.sin(a) * math.random(0, 32) -- TODO ↓
+		    --CreateParticle(2, UiGetParticleTextureID(), x, y, x1 * 60, y1 * 60, 2, 0, 0, 25, 1, 0.8, x1 * 10, 2000 + y1 * 5, 0, r, g, b, 1, r, g, b, 0)
+		end
+		for i = 0, 49 do
+		    xm = math.random(-3, 3)
+		    ym = math.random(-3, 3)
+		    c = Game.Collision:GetTile(x + xm * 32, y + ym * 32)
+		    if (c == 1 or c == 2 or c == 3) then
+		        BloodSpots[BloodNum] = {}
+		        BloodSpots[BloodNum]["x"] = x + xm * 32
+		        BloodSpots[BloodNum]["y"] = y + ym * 32
+		        BloodSpots[BloodNum]["r"] = r
+		        BloodSpots[BloodNum]["g"] = g
+		        BloodSpots[BloodNum]["b"] = b
+		        BloodSpots[BloodNum]["rot"] = math.random(0, 6.283185308)
+		        BloodSpots[BloodNum]["tex"] = math.random(1, 4)
+		        BloodSpots[BloodNum]["s"] = Game.Client.LocalTime
+		        BloodNum = BloodNum + 1
+		        if (BloodNum >= Config.MaxBloodNum) then
+		            BloodNum = 0
+		        end
+		        break
+		    end
+		end
+	end
 end
 
 function OnScriptRenderSettings(x, y, w, h)

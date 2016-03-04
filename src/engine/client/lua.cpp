@@ -92,9 +92,9 @@ int CLua::Panic(lua_State *L)
 int CLua::ErrorFunc(lua_State *L)
 {
 	dbg_msg("Lua", "Lua Script Error! :");
-    lua_getglobal(L, "pLUA");
-    CLua *pSelf = (CLua *)lua_touserdata(L, -1);
-    lua_pop(L, 1);
+    //lua_getglobal(L, "pLUA");
+    //CLua *pSelf = (CLua *)lua_touserdata(L, -1);
+    //lua_pop(L, 1);
 
     int depth = 0;
     int frameskip = 1;
