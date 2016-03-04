@@ -4,5 +4,5 @@
 void CLuaRender::OnRender()
 {
 	// EVENT CALL
-	LUA_FIRE_EVENT_V("OnRenderLevel", m_Level);
+	LUA_FIRE_EVENT("OnRenderLevel", m_Level);
 }

@@ -40,7 +40,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		Kill.m_Tick = Client()->GameTick();
 
 		// EVENT CALL
-		LUA_FIRE_EVENT_V("OnKill", Kill.m_KillerID, Kill.m_VictimID, Kill.m_Weapon);
+		LUA_FIRE_EVENT("OnKill", Kill.m_KillerID, Kill.m_VictimID, Kill.m_Weapon);
 
 		// add the message
 		m_KillmsgCurrent = (m_KillmsgCurrent+1)%MAX_KILLMSGS;

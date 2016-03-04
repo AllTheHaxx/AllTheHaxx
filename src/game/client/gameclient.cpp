@@ -1126,7 +1126,7 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 		m_All.m_paComponents[i]->OnStateChange(NewState, OldState);
 
 	// EVENT CALL
-	LUA_FIRE_EVENT_V("OnStateChange", NewState, OldState);
+	LUA_FIRE_EVENT("OnStateChange", NewState, OldState);
 }
 
 void CGameClient::OnShutdown()

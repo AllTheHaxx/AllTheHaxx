@@ -354,7 +354,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
 		// EVENT CALL
-		LUA_FIRE_EVENT_V("OnChat", pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage));
+		LUA_FIRE_EVENT("OnChat", pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage));
 
 		bool HideChat = false;
 
