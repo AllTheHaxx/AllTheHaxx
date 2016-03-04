@@ -155,7 +155,6 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 
 		// graphics namespace
 		.beginNamespace("_graphics")
-			.addFunction("SetColor", &CLuaBinding::LuaSetColor)
 			.addFunction("DrawLine", &CLuaBinding::LuaDrawLine)
 			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
 		.endNamespace()

@@ -92,15 +92,6 @@ int CLuaBinding::LuaDoButton_Menu(const char *pText, int Checked, float x, float
 
 
 // graphics namespace
-void CLuaBinding::LuaSetColor(float r, float g, float b, float a)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	IGraphics *pGraphics = (IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>();
-	pGraphics->QuadsBegin();
-	pGraphics->SetColor(r, g, b, a);
-	pGraphics->QuadsEnd();
-}
-
 void CLuaBinding::LuaDrawLine(float xFrom, float yFrom, float xTo, float yTo)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();

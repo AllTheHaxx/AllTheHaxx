@@ -27,7 +27,6 @@ public:
 	static int LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners);
 
 	// graphics namespace
-	static void LuaSetColor(float r, float g, float b, float a);
 	static void LuaDrawLine(float x0, float y0, float x1, float y1);
 	static void LuaRenderTexture(int ID, float x, float y, float w, float h, float rot);
 };
