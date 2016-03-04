@@ -120,7 +120,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		else
 			m_pGameConsole->Client()->RconAuth("", pLine);
 	}
-	else if(m_Type == CGameConsole::CONSOLETYPE_LUA)
+	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
 		int Status = 0;
 		char ErrorMsg[512];
