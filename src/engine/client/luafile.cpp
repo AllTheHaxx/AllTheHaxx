@@ -279,7 +279,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		
 		.beginClass<CGameClient::CSnapState>("CSnapState")
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
-			.addData("CID", &CGameClient::CSnapState::m_LocalClientID)
+			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)
 		.endClass()
 		
 		.beginClass<IGraphics>("IGraphics")
