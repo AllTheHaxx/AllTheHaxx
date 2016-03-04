@@ -209,7 +209,8 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("RconAuth", &IClient::RconAuth)
 			.addFunction("DummyConnect", &IClient::DummyConnect)
 			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
-			.addProperty("FPS",&IClient::GetFPS)
+			.addProperty("FPS", &IClient::GetFPS)
+			.addProperty("State", &IClient::State)
 		.endClass()
 		
 		//COMPONENTS
