@@ -202,6 +202,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		//ICLIENT
 		.beginClass<IClient>("IClient")
 			.addProperty("Tick", &IClient::GameTick)
+			.addProperty("LocalTime", &IClient::LocalTime)
 			.addFunction("Connect", &IClient::Connect)
 			.addFunction("Disconnect", &IClient::Disconnect)
 			.addFunction("Quit", &IClient::Quit)
