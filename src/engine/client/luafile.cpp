@@ -281,12 +281,16 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("QuadsEnd", &IGraphics::QuadsEnd)
 			.addFunction("LinesBegin", &IGraphics::LinesBegin)
 			.addFunction("LinesEnd", &IGraphics::LinesEnd)
-			.addProperty("ScreenWidth", &IGraphics::ScreenWidth)
-			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
+			
+			.addFunction("SetColor", &IGraphics::SetColor)
 			.addFunction("BlendNone", &IGraphics::BlendNone)
 			.addFunction("BlendNormal", &IGraphics::BlendNormal)
 			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
+
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
+
+			.addProperty("ScreenWidth", &IGraphics::ScreenWidth)
+			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
 		.endClass()
 
 		.beginClass<CGameClient>("CGameClient")
