@@ -283,6 +283,9 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 		.endClass()
 		
 		.beginClass<IGraphics>("IGraphics")
+			.addFunction("BlendNone", &IGraphics::BlendNone)
+			.addFunction("BlendNormal", &IGraphics::BlendNormal)
+			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
 		.endClass()
 
