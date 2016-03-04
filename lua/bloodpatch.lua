@@ -2,11 +2,11 @@ _g_ScriptTitle = "Blood-Patch"
 _g_ScriptInfo = "Teeish Blood Effects!"
 
 Config = {}
-Config["UseTeeColor"] = 1
-Config["UseStdColor"] = 0
-Config["StdColorR"] = 1
-Config["StdColorG"] = 0
-Config["StdColorB"] = 0
+Config.UseTeeColor = 1
+Config.UseStdColor = 0
+Config.StdColorR = 1
+Config.StdColorG = 0
+Config.StdColorB = 0
 
 
 function OnScriptInit()
@@ -46,7 +46,7 @@ end
 function Kill(Killer, Victim, Weapon)
     x, y = GetCharacterPos(Victim) -- TODO
     r, g, b = GetPlayerColorBody(Victim) -- TODO
-    if (Config["UseStdColor"] == 1) then
+    if (Config.UseStdColor == 1) then
         r = Config.StdColorR
         g = Config.StdColorG
         b = Config.StdColorB
@@ -89,17 +89,17 @@ function OnScriptRenderSettings(x, y, w, h)
     w = w - Spacing * 2
 
 	_ui.SetUiColor(1, 1, 1, 0.5)
-    if(_ui.DoButton_Menu("Use Tee color as blood color", Config["UseTeeColor"], x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
-    	Config["UseTeeColor"] = ((Config["UseTeeColor"] == 1) and 0 or 1)
+    if(_ui.DoButton_Menu("Use Tee color as blood color", Config.UseTeeColor, x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
+    	Config.UseTeeColor = ((Config.UseTeeColor == 1) and 0 or 1)
     end
     y = y + Spacing + 20
     
-    if(_ui.DoButton_Menu("Use standard color as blood color", Config["UseStdColor"], x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
-    	Config["UseStdColor"] = ((Config["UseStdColor"] == 1) and 0 or 1)
+    if(_ui.DoButton_Menu("Use standard color as blood color", Config.UseStdColor, x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
+    	Config.UseStdColor = ((Config.UseStdColor == 1) and 0 or 1)
     end
     y = y + Spacing + 20
     
-    _ui.SetUiColor(Config["StdColorR"], Config["StdColorG"], Config["StdColorB"], 1)
+    _ui.SetUiColor(Config.StdColorR, Config.StdColorG, Config.StdColorB, 1)
  --[[   if (Config["UseTeeColor"] == 1) then
         _ui.SetUiColor(0, 1, 0, 0.5)
     else
