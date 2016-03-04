@@ -29,9 +29,6 @@ public:
 	// graphics namespace
 	static int LuaGetScreenWidth();
 	static int LuaGetScreenHeight();
-	static void LuaBlendNone();
-	static void LuaBlendNormal();
-	static void LuaBlendAdditive();
 	static void LuaSetColor(float r, float g, float b, float a);
 	static void LuaDrawLine(float x0, float y0, float x1, float y1);
 	static int LuaLoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags); // e.g. CImageInfo::FORMAT_AUTO, IGraphics::TEXLOAD_NORESAMPLE

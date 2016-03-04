@@ -106,24 +106,6 @@ int CLuaBinding::LuaGetScreenHeight()
 	return pGameClient->UI()->Screen()->h; // which one is better...?
 }
 
-void CLuaBinding::LuaBlendNone()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	((IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>())->BlendNone();
-}
-
-void CLuaBinding::LuaBlendNormal()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	((IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>())->BlendNormal();
-}
-
-void CLuaBinding::LuaBlendAdditive()
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	((IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>())->BlendAdditive();
-}
-
 void CLuaBinding::LuaSetColor(float r, float g, float b, float a)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
