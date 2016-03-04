@@ -192,6 +192,12 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 					PrintLine("An unknown error occured!");
 				}
 				
+				m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
+				//add this to the history :3
+				char *pEntry = m_History.Allocate(m_LuaHandler.m_FullLine.size()+1);
+				mem_copy(pEntry, m_LuaHandler.m_FullLine.c_str(), m_LuaHandler.m_FullLine.size()+1);
+
+				
 				m_LuaHandler.m_FullLine = "";
 				m_LuaHandler.m_ScopeCount = 0;
 				
