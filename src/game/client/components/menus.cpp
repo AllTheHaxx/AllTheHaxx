@@ -523,7 +523,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	return ReturnValue;
 }
 
-float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip)
+float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
 {
 	CUIRect Handle;
 	static float OffsetY;
@@ -586,7 +586,7 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current,
 
 
 
-float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip)
+float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
 {
 	CUIRect Handle;
 	static float OffsetX;
@@ -625,17 +625,44 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 	pRect->HMargin(5.0f, &Rail);
 	RenderTools()->DrawUIRect(&Rail, vec4(1,1,1,0.25f), 0, 0.0f);
 
-	CUIRect Slider = Handle;
-	Slider.h = Rail.y-Slider.y;
-	if(Inside)
-		RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_T, 2.5f);
-	Slider.y = Rail.y+Rail.h;
-	if(Inside)
-		RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_B, 2.5f);
+	if(Value == -11383873)
+	{
+		CUIRect Slider = Handle;
+		if(Inside || (UI()->HotItem() == pID && UI()->MouseButton(0)) || UI()->ActiveItem() == pID)
+		{
+			Slider.h = Rail.y-Slider.y;
+			RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_T, 2.5f);
+			Slider.y = Rail.y+Rail.h;
+			RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_B, 2.5f);
+		}
 
-	Slider = Handle;
-	Slider.HMargin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), 0, 2.5f);
+		Slider = Handle;
+		Slider.HMargin(5.0f, &Slider);
+		RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), 0, 2.5f);
+	}
+	else
+	{
+		CUIRect Slider = Handle;
+		if(Inside || (UI()->HotItem() == pID && UI()->MouseButton(0)) || UI()->ActiveItem() == pID)
+		{
+			Slider.h = 2*(Rail.y-Slider.y)+Rail.h;
+			Slider.Margin(-3.0f, &Slider);
+			RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 2.5f);
+			Slider.Margin(3.0f, &Slider);
+			RenderTools()->DrawUIRect(&Slider, vec4(0,0,0,0.80f*clamp(ButtonColorMul(pID).a, 0.8f, 1.2f)), CUI::CORNER_ALL, 1.7f);
+			char aBuf[16];
+			str_format(aBuf, sizeof(aBuf), "%i", Value);
+			Slider.y = Rail.y-8.5f/4.0f;
+			UI()->DoLabel(&Slider, aBuf, 8.5f, 0);
+		}
+		else
+		{
+			Slider = Handle;
+			Slider.HMargin(5.0f, &Slider);
+			RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.3f), 0, 2.5f);
+		}
+	}
+
 
 	if(Inside && pTooltip && pTooltip[0] != '\0')
 		m_pClient->m_pTooltip->SetTooltip(pTooltip);

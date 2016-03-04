@@ -86,8 +86,8 @@ class CMenus : public CComponent
 	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", int Align = 0, const char *pTooltip = 0);
 	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
 
-	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0);
-	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0);
+	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = -11383873);
+	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = -11383873);
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, const char *pTooltip = 0);
 

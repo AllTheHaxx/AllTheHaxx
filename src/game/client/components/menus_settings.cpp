@@ -124,10 +124,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(2.5f, 0, &Right);
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Name plates size"), g_Config.m_ClNameplatesSize);
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			UI()->DoLabelScaled(&Label, Localize("Name plates size"), 13.0f, -1);
 			Button.HMargin(2.0f, &Button);
-			g_Config.m_ClNameplatesSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesSize, &Button, g_Config.m_ClNameplatesSize/100.0f)*100.0f+0.1f);
+			g_Config.m_ClNameplatesSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesSize, &Button, g_Config.m_ClNameplatesSize/100.0f, 0, g_Config.m_ClNameplatesSize)*100.0f+0.1f);
 
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
@@ -144,10 +143,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				Right.HSplitTop(2.5f, 0, &Right);
 				Right.HSplitTop(20.0f, &Label, &Right);
 				Right.HSplitTop(20.0f, &Button, &Right);
-				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Clan plates size"), g_Config.m_ClNameplatesClanSize);
-				UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+				UI()->DoLabelScaled(&Label, Localize("Clan plates size"), 13.0f, -1);
 				Button.HMargin(2.0f, &Button);
-				g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize/100.0f)*100.0f+0.1f);
+				g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize/100.0f, 0, g_Config.m_ClNameplatesClanSize)*100.0f+0.1f);
 			}
 	}
 
@@ -208,12 +206,30 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
+		g_Config.m_ClCpuThrottle= round_to_int(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
+
+		Left.HSplitTop(20.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Button.VSplitRight(20.0f, &Button, 0);
+		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect Ban Timeout"), g_Config.m_ClReconnectBanTimeout);
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+		Left.HSplitTop(20.0f, &Button, 0);
+		Button.HMargin(2.0f, &Button);
+		g_Config.m_ClReconnectBanTimeout = max(5,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectBanTimeout, &Button, g_Config.m_ClReconnectBanTimeout/120.0f)*120.0f));
+
+		Left.HSplitTop(20.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Button.VSplitRight(20.0f, &Button, 0);
+		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect Full Timeout"), g_Config.m_ClReconnectFullTimeout);
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+		Left.HSplitTop(20.0f, &Button, 0);
+		Button.HMargin(2.0f, &Button);
+		g_Config.m_ClReconnectFullTimeout = max(1,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectFullTimeout, &Button, g_Config.m_ClReconnectFullTimeout/120.0f)*120.0f));
 
 #if defined(CONF_FAMILY_WINDOWS)
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClHideConsole, Localize("Show console window"), g_Config.m_ClHideConsole, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClHideConsole, Localize("Hide console window"), g_Config.m_ClHideConsole, &Button))
 			g_Config.m_ClHideConsole ^= 1;
 #endif
 
@@ -746,7 +762,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			str_format(aInput, sizeof(aInput), "%i", g_Config.m_InpMousesens);
 			DoEditBox(&g_Config.m_InpMousesens, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
 			g_Config.m_InpMousesens = atoi(aInput);
-			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/995.0f)*995.0f)+5;
+			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/995.0f, 0)*995.0f)+5;
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 			if(g_Config.m_InpMousesens < 5) g_Config.m_InpMousesens = 5;
 		}
@@ -1051,11 +1067,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		Button.HSplitTop(4.0f, 0, &Button);
 
 		float k = (*pColorSlider[s]) / 255.0f;
-		k = DoScrollbarH(pColorSlider[s], &Button, k);
+		k = DoScrollbarH(pColorSlider[s], &Button, k, 0, k*255.0f);
 		*pColorSlider[s] = (int)(k*255.0f);
-		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "%s: %i", paLabels[s], *(pColorSlider[s]));
-		UI()->DoLabelScaled(&Text, aBuf, 15.0f, -1);
+		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
 	}
 }
 
@@ -1163,10 +1177,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i%", Localize("Sound volume"), g_Config.m_SndVolume);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-		g_Config.m_SndVolume = (int)(DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume/100.0f)*100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Sound volume"), 14.0f, -1);
+		g_Config.m_SndVolume = round_to_int(DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume/100.0f, 0, g_Config.m_SndVolume)*100.0f);
 	}
 
 	// volume slider map sounds
@@ -1176,10 +1188,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i%", Localize("Map sound volume"), g_Config.m_SndMapSoundVolume);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-		g_Config.m_SndMapSoundVolume = (int)(DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume/100.0f)*100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Map sound volume"), 14.0f, -1);
+		g_Config.m_SndMapSoundVolume = round_to_int(DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume/100.0f, 0, g_Config.m_SndMapSoundVolume)*100.0f);
 	}
 }
 
@@ -1509,7 +1519,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Other.w -= Button.w*0.1f;
 		Other.h *= 0.80f;
 		Other.y += 2.0f;
-		g_Config.m_ClShowhudChatbox = round_to_int(DoScrollbarH(&g_Config.m_ClShowhudChatbox, &Other, g_Config.m_ClShowhudChatbox/100.0f, Localize("Chatbox Alpha"))*100.0f);
+		g_Config.m_ClShowhudChatbox = round_to_int(DoScrollbarH(&g_Config.m_ClShowhudChatbox, &Other, g_Config.m_ClShowhudChatbox/100.0f, Localize("Chatbox Alpha"), g_Config.m_ClShowhudChatbox)*100.0f);
 	}
 
 	MainView.HSplitTop(170.0f, &Messages, &MainView);
@@ -1539,19 +1549,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageSystemHue = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemHue, &Button, g_Config.m_ClMessageSystemHue / 255.0f)*255.0f);
+		g_Config.m_ClMessageSystemHue = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemHue, &Button, g_Config.m_ClMessageSystemHue / 255.0f, 0, g_Config.m_ClMessageSystemHue)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageSystemSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemSat, &Button, g_Config.m_ClMessageSystemSat / 255.0f)*255.0f);
+		g_Config.m_ClMessageSystemSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemSat, &Button, g_Config.m_ClMessageSystemSat / 255.0f, 0, g_Config.m_ClMessageSystemSat)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageSystemLht = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemLht, &Button, g_Config.m_ClMessageSystemLht / 255.0f)*255.0f);
+		g_Config.m_ClMessageSystemLht = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemLht, &Button, g_Config.m_ClMessageSystemLht / 255.0f, 0, g_Config.m_ClMessageSystemLht)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
 
@@ -1590,21 +1600,21 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageHighlightHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightHue, &Button, g_Config.m_ClMessageHighlightHue / 255.0f)*255.0f);
+		g_Config.m_ClMessageHighlightHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightHue, &Button, g_Config.m_ClMessageHighlightHue / 255.0f, 0, g_Config.m_ClMessageHighlightHue)*255.0f);
 
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageHighlightSat = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightSat, &Button, g_Config.m_ClMessageHighlightSat / 255.0f)*255.0f);
+		g_Config.m_ClMessageHighlightSat = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightSat, &Button, g_Config.m_ClMessageHighlightSat / 255.0f, 0, g_Config.m_ClMessageHighlightSat)*255.0f);
 
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageHighlightLht = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightLht, &Button, g_Config.m_ClMessageHighlightLht / 255.0f)*255.0f);
+		g_Config.m_ClMessageHighlightLht = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightLht, &Button, g_Config.m_ClMessageHighlightLht / 255.0f, 0, g_Config.m_ClMessageHighlightLht)*255.0f);
 
 		Right.HSplitTop(10.0f, &Label, &Right);
 
@@ -1647,19 +1657,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageTeamHue = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamHue, &Button, g_Config.m_ClMessageTeamHue / 255.0f)*255.0f);
+		g_Config.m_ClMessageTeamHue = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamHue, &Button, g_Config.m_ClMessageTeamHue / 255.0f, 0, g_Config.m_ClMessageTeamHue)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageTeamSat = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamSat, &Button, g_Config.m_ClMessageTeamSat / 255.0f)*255.0f);
+		g_Config.m_ClMessageTeamSat = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamSat, &Button, g_Config.m_ClMessageTeamSat / 255.0f, 0, g_Config.m_ClMessageTeamSat)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageTeamLht = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamLht, &Button, g_Config.m_ClMessageTeamLht / 255.0f)*255.0f);
+		g_Config.m_ClMessageTeamLht = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamLht, &Button, g_Config.m_ClMessageTeamLht / 255.0f, 0, g_Config.m_ClMessageTeamLht)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
 
@@ -1695,19 +1705,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHue, &Button, g_Config.m_ClMessageHue / 255.0f)*255.0f);
+		g_Config.m_ClMessageHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHue, &Button, g_Config.m_ClMessageHue / 255.0f, 0, g_Config.m_ClMessageHue)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSat, &Button, g_Config.m_ClMessageSat / 255.0f)*255.0f);
+		g_Config.m_ClMessageSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSat, &Button, g_Config.m_ClMessageSat / 255.0f, 0, g_Config.m_ClMessageSat)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageLht = (int)(DoScrollbarH(&g_Config.m_ClMessageLht, &Button, g_Config.m_ClMessageLht / 255.0f)*255.0f);
+		g_Config.m_ClMessageLht = (int)(DoScrollbarH(&g_Config.m_ClMessageLht, &Button, g_Config.m_ClMessageLht / 255.0f, 0, g_Config.m_ClMessageLht)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
 
@@ -1750,19 +1760,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
-		g_Config.m_ClLaserInnerHue = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerHue, &Button, g_Config.m_ClLaserInnerHue / 255.0f)*255.0f);
+		g_Config.m_ClLaserInnerHue = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerHue, &Button, g_Config.m_ClLaserInnerHue / 255.0f, 0, g_Config.m_ClLaserInnerHue)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(20.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
-		g_Config.m_ClLaserInnerSat = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerSat, &Button, g_Config.m_ClLaserInnerSat / 255.0f)*255.0f);
+		g_Config.m_ClLaserInnerSat = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerSat, &Button, g_Config.m_ClLaserInnerSat / 255.0f, 0, g_Config.m_ClLaserInnerSat)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(20.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
-		g_Config.m_ClLaserInnerLht = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerLht, &Button, g_Config.m_ClLaserInnerLht / 255.0f)*255.0f);
+		g_Config.m_ClLaserInnerLht = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerLht, &Button, g_Config.m_ClLaserInnerLht / 255.0f, 0, g_Config.m_ClLaserInnerLht)*255.0f);
 
 		Laser.HSplitTop(10.0f, 0, &Laser);
 
@@ -1785,19 +1795,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
-		g_Config.m_ClLaserOutlineHue = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineHue, &Button, g_Config.m_ClLaserOutlineHue / 255.0f)*255.0f);
+		g_Config.m_ClLaserOutlineHue = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineHue, &Button, g_Config.m_ClLaserOutlineHue / 255.0f, 0, g_Config.m_ClLaserOutlineHue)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
-		g_Config.m_ClLaserOutlineSat = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineSat, &Button, g_Config.m_ClLaserOutlineSat / 255.0f)*255.0f);
+		g_Config.m_ClLaserOutlineSat = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineSat, &Button, g_Config.m_ClLaserOutlineSat / 255.0f, 0, g_Config.m_ClLaserOutlineSat)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
-		g_Config.m_ClLaserOutlineLht = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineLht, &Button, g_Config.m_ClLaserOutlineLht / 255.0f)*255.0f);
+		g_Config.m_ClLaserOutlineLht = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineLht, &Button, g_Config.m_ClLaserOutlineLht / 255.0f, 0, g_Config.m_ClLaserOutlineLht)*255.0f);
 
 
 		//Laser.HSplitTop(8.0f, &Weapon, &Laser);
@@ -1867,25 +1877,6 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		Graphics()->QuadsEnd();
 	}
-	/*
-	Left.VSplitLeft(20.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Label, &Left);
-	Button.VSplitRight(20.0f, &Button, 0);
-	char aBuf[64];
-	if (g_Config.m_ClReconnectBanTimeout == 1)
-	{
-		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("second"));
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("seconds"));
-	}
-	UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-	Left.HSplitTop(20.0f, &Button, 0);
-	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClReconnectBanTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectBanTimeout, &Button, g_Config.m_ClReconnectBanTimeout / 120.0f) * 120.0f);
-	if (g_Config.m_ClReconnectBanTimeout < 5)
-		g_Config.m_ClReconnectBanTimeout = 5;*/
 }
 
 void CMenus::RenderSettingsDDRace(CUIRect MainView)
@@ -1943,7 +1934,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Button.VSplitLeft(120.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, -1);
-		g_Config.m_ClOverlayEntities = (int)(DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities/100.0f)*100.0f);
+		g_Config.m_ClOverlayEntities = (int)(DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities/100.0f, 0, g_Config.m_ClOverlayEntities)*100.0f);
 	}
 
 	{
@@ -1954,7 +1945,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Button.VSplitLeft(50.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
-		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
+		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f, 0, g_Config.m_ClShowOthersAlpha)*100.0f);
 
 		if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers, &LeftLeft))
 		{
@@ -1975,7 +1966,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	//Right.HSplitTop(20.0f, &Button, 0);
 	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClDefaultZoom= static_cast<int>(DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom/20.0f)*20.0f+0.1f);
+	g_Config.m_ClDefaultZoom = static_cast<int>(DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom/20.0f, 0, g_Config.m_ClDefaultZoom)*20.0f+0.1f);
 
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(130.0f, &Label, &Button);
@@ -1983,7 +1974,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	//Right.HSplitTop(20.0f, &Button, 0);
 	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClAntiPingLimit= static_cast<int>(DoScrollbarH(&g_Config.m_ClAntiPingLimit, &Button, g_Config.m_ClAntiPingLimit/200.0f)*200.0f+0.1f);
+	g_Config.m_ClAntiPingLimit = static_cast<int>(DoScrollbarH(&g_Config.m_ClAntiPingLimit, &Button, g_Config.m_ClAntiPingLimit/200.0f, 0, g_Config.m_ClAntiPingLimit)*200.0f+0.1f);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
@@ -2062,7 +2053,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 
 			float k = (*pColorSlider[i][s]) / 255.0f;
-			k = DoScrollbarH(pColorSlider[i][s], &Button, k);
+			k = DoScrollbarH(pColorSlider[i][s], &Button, k, 0, k*255.0f);
 			*pColorSlider[i][s] = (int)(k*255.0f);
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
