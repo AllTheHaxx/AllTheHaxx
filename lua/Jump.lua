@@ -1,7 +1,45 @@
 _g_ScriptTitle = "Jumpbot"
 
-function OnScriptInit()
-	return _system.Import(_g_ScriptUID, "include/playerctrl.lua")
+function IsGrounded()
+	for i = 48, 32, -16 do
+		c = Game.Collision:GetTile(Game.Local.Tee.PosX, Game.Local.Tee.PosY+i)
+		if (c== 1 or c== 5) then
+			return true
+		end
+		return false
+	end
+end
+
+function Jump()
+	TW.Game.Input.Jump = 1
+end
+
+function ResetJump()
+	TW.Game.Input.Jump = 0
+end
+
+function Fire()
+	TW.Game.Input.Fire = 1
+end
+
+function ResetFire()
+	TW.Game.Input.Fire = 0
+end
+
+function GetPlayerY()
+	return Game.Local.Tee.PosY
+end
+
+function GetPlayerX()
+	return Game.Local.Tee.PosX
+end
+
+function GetPlayerVelX()
+	return Game.Local.Tee.VelX
+end
+
+function GetPlayerVelY()
+	return Game.Local.Tee.VelY
 end
 
 y = -1
@@ -13,6 +51,10 @@ function OnTick()
 	else
 		ResetJump()
 		--ResetFire()
+		--print(math.abs(GetPlayerVelY()))
+		if(math.abs(GetPlayerVelY()) < 700) then -- perfectjump
+			Jump()
+		end
 		if(GetPlayerY() > y+12) then -- do doublejump if we dropped deeper than we jumped high
 			Jump()
 		end
