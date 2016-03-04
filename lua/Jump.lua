@@ -9,8 +9,10 @@ function OnTick()
 	if(IsGrounded() == true) then -- jump if we hit the ground
 		y = GetPlayerY()
 		Jump()
+		--Fire()
 	else
 		ResetJump()
+		--ResetFire()
 		if(GetPlayerY() > y+12) then -- do doublejump if we dropped deeper than we jumped high
 			Jump()
 		end
