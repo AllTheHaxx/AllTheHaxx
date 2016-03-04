@@ -207,6 +207,7 @@ void CLuaFile::RegisterLuaCallbacks() // LUABRIDGE!
 			.addFunction("Quit", &IClient::Quit)
 			.addFunction("RconSend", &IClient::Rcon)
 			.addFunction("RconAuth", &IClient::RconAuth)
+			.addFunction("RconAuthed", &IClient::RconAuthed)
 			.addFunction("DummyConnect", &IClient::DummyConnect)
 			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
 			.addFunction("DummyConnected", &IClient::DummyConnected)
