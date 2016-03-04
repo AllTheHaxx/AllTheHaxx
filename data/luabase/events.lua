@@ -19,6 +19,16 @@ function RemoveEvent(EventName, FuncName)
 	end
 end
 
+function EventList(EventName)
+	if Events[EventName] ~= nil then
+		for name, func in pairs(Events[EventName]) do
+			print(" -> " .. name)
+		end
+	else 
+		print("No Functions found under this Eventname.")	
+	end
+end
+
 function OnChat(ID, Team, Message)
 	if Events["OnChat"] ~= nil then
 		for script, event in pairs(Events["OnChat"]) do
