@@ -2,11 +2,11 @@
 CI Status: [![Circle CI](https://circleci.com/gh/AllTheHaxx/AllTheHaxx.svg?style=svg)](https://circleci.com/gh/AllTheHaxx/AllTheHaxx)
 ###The better DDNet Client. Guaranteed to be 420% verkeckt!
 ================================
-Our own flavor of the popular [DDNet](https://github.com/ddnet/ddnet) client modification for the 2d shooter [teeworlds](http://teeworlds.com). Take a look at our [homepage](http:/AllTheHaxx.tk/) for more information.
+Our own flavor of the popular [DDNet](https://github.com/ddnet/ddnet) client modification for the 2d shooter [teeworlds](http://teeworlds.com). Take a look at our [homepage](https:/AllTheHaxx.github.io/) for more information.
 
-Development discussions happen on #AllTheHaxx on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4)).
+Development discussions happen on #AllTheHaxx on Quakenet ([»Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4)).
 
-You can get binary releases from [our website](http://AllTheHaxx.tk/).
+You can get binary releases from [our website](https://AllTheHaxx.github.io/).
 
 Building
 --------
