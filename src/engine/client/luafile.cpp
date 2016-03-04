@@ -246,6 +246,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("PosY", &CNetObj_CharacterCore::m_Y, false)
 			.addData("HookedPlayer", &CNetObj_CharacterCore::m_HookedPlayer, false)
 			.addData("HookState", &CNetObj_CharacterCore::m_HookState, false)
+			.addData("Jumped", &CNetObj_CharacterCore::m_Jumped, false)
 		.endClass()
 		.deriveClass<CNetObj_Character, CNetObj_CharacterCore>("CNetObj_Character")  //TODO: Ppb add the rest
 			.addData("Weapon", &CNetObj_Character::m_Weapon)
