@@ -114,13 +114,6 @@ void CLuaBinding::LuaDrawLine(float xFrom, float yFrom, float xTo, float yTo)
 	pGraphics->LinesBegin();
 	pGraphics->LinesDraw(&l, 1);
 	pGraphics->LinesEnd();
- }
-
-
-int CLuaBinding::LuaLoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	return ((IGraphics *)pGameClient->Kernel()->RequestInterface<IGraphics>())->LoadTexture(pFilename, StorageType, StoreFormat, Flags);
 }
 
 void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, float rot)
