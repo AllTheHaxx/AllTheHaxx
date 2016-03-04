@@ -22,8 +22,7 @@ bool CLuaBinding::LuaImport(int UID, const char *pFilename)
 		{
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename); // force path to prevent kids from importing events.lua
-			pGameClient->Client()->Lua()->GetLuaFiles()[i]->LoadFile(aBuf);
-			return true;
+			return pGameClient->Client()->Lua()->GetLuaFiles()[i]->LoadFile(aBuf);
 		}
 	}
 	return false;

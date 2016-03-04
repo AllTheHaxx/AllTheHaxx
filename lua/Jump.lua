@@ -1,12 +1,11 @@
 _g_ScriptTitle = "Jumpbot"
 
 function OnScriptInit()
-	return _system.Import(_g_ScriptUID, "include/baselib.lua")
+	return _system.Import(_g_ScriptUID, "include/playerctrl.lua")
 end
 
 y = -1
 function OnTick()
-
 	if(IsGrounded() == true) then -- jump if we hit the ground
 		y = GetPlayerY()
 		Jump()
