@@ -38,7 +38,7 @@ void CLuaFile::Reset(bool error)
 
 void CLuaFile::Unload()
 {
-//	if(m_pLuaState)             // -- do not close it in order to prevent crashes
+//	if(m_pLuaState)			 // -- do not close it in order to prevent crashes
 //		lua_close(m_pLuaState);
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
 	Reset();
@@ -379,19 +379,19 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endNamespace()
 		
 		.beginNamespace("Game")
-            .addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)
-            .addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
-            .addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
-            .addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
-            //.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
-            .addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
-            .addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
-            .addVariable("Ui", &CLua::m_pCGameClient->m_UI, false)
-            //pointer to components & stuff from gameclient
-            //.addVariable("Local", &CLua::m_pCGameClient->m_Snap, false)
+			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)
+			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
+			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
+			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
+			//.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
+			.addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
+			.addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
+			.addVariable("Ui", &CLua::m_pCGameClient->m_UI, false)
+			//pointer to components & stuff from gameclient
+			//.addVariable("Local", &CLua::m_pCGameClient->m_Snap, false)
 			.addVariable("LocalTee", &CLua::m_pCGameClient->m_PredictedChar, false)
 			.addVariable("LocalCID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID, false)
-            .addVariable("Client", &CLua::m_pClient, false)
+			.addVariable("Client", &CLua::m_pClient, false)
 			.addFunction("Players", &CGameClient::LuaGetClientData)
 		.endNamespace()
 
@@ -440,22 +440,22 @@ bool CLuaFile::LoadFile(const char *pFilename)
 			str_comp_nocase(&pFilename[str_length(pFilename)]-7, ".config")) || !m_pLuaState)
 		return false;
 
-    int Status = luaL_loadfile(m_pLuaState, pFilename);
-    if (Status)
-    {
-        // does this work? -- I don't think so, Henritees.
-        CLua::ErrorFunc(m_pLuaState);
-        return false;
-    }
+	int Status = luaL_loadfile(m_pLuaState, pFilename);
+	if (Status)
+	{
+		// does this work? -- I don't think so, Henritees.
+		CLua::ErrorFunc(m_pLuaState);
+		return false;
+	}
 
-    Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
-    if (Status)
-    {
-    	CLua::ErrorFunc(m_pLuaState);
-        return false;
-    }
+	Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
+	if (Status)
+	{
+		CLua::ErrorFunc(m_pLuaState);
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 bool CLuaFile::ScriptHasSettings()
