@@ -272,6 +272,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginClass<CMenus>("CMenus")
 			.addProperty("Active", &CMenus::IsActive)
+			.addProperty("ActivePage", &CMenus::ActivePage)
 		.endClass()
 
 		//Local player Infos

@@ -350,6 +350,7 @@ public:
 	void RenderUpdating(const char *pCaption, int current=0, int total=0);
 
 	bool IsActive() const { return m_MenuActive || m_HotbarActive || m_IRCActive; }
+	int ActivePage() const { return m_ActivePage; }
 
 	virtual void OnInit();
 	virtual void OnConsoleInit();
