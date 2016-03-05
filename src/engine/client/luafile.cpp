@@ -10,6 +10,7 @@
 #include <game/client/components/emoticon.h>
 #include <game/client/components/controls.h>
 #include <game/client/components/hud.h>
+#include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 //#include <engine/client/client.h>
@@ -245,6 +246,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Say", &CChat::Say)
 			.addProperty("Mode", &CChat::GetMode)
 		.endClass()
+
+		.beginClass<IConsole>("IConsole")
+			.addFunction("Print", &IConsole::Print)
+		.endClass()
 		
 		.beginClass<CEmoticon>("CEmoticon")
 			.addFunction("Send", &CEmoticon::Emote)
@@ -380,6 +385,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		
 		.beginNamespace("Game")
 			.addVariable("Chat", &CLua::m_pCGameClient->m_pChat, false)
+			.addVariable("Console", &CLua::m_pCGameClient->m_pConsole, false)
 			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
