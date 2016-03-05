@@ -102,12 +102,12 @@ void CLuaFile::Init()
 	}
 
 	// gather basic global infos from the script
-	lua_getglobal(m_pLuaState, "_g_ScriptTitle");
+	lua_getglobal(m_pLuaState, "g_ScriptTitle");
 	if(lua_isstring(m_pLuaState, -1))
 		str_copy(m_aScriptTitle, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptTitle));
 	lua_pop(m_pLuaState, -1);
 
-	lua_getglobal(m_pLuaState, "_g_ScriptInfo");
+	lua_getglobal(m_pLuaState, "g_ScriptInfo");
 	if(lua_isstring(m_pLuaState, -1))
 		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
 	lua_pop(m_pLuaState, -1);
@@ -116,7 +116,7 @@ void CLuaFile::Init()
 
 	// pass the uid to the script
 	lua_pushinteger(m_pLuaState, m_UID);
-	lua_setglobal(m_pLuaState, "_g_ScriptUID");
+	lua_setglobal(m_pLuaState, "g_ScriptUID");
 
 	// call the OnScriptInit function if we have one
 	try

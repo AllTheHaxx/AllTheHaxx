@@ -1,11 +1,11 @@
-_g_ScriptTitle = "Fettes Testskript ;)" -- this defines the script title, TODO: VAR NAME IS FORCED!
-_g_ScriptInfo = "BOAH IS DAT GEIL!" -- this defines the subtext (info), TODO: VAR NAME IS FORCED!
+g_ScriptTitle = "Fettes Testskript ;)" -- this defines the script title, TODO: VAR NAME IS FORCED!
+g_ScriptInfo = "BOAH IS DAT GEIL!" -- this defines the subtext (info), TODO: VAR NAME IS FORCED!
 config = {} -- this creates the table for storing config stuff into
 config["TestBool"] = 0 -- build the config table
 config["TestInt"] = 0
 
 function OnScriptInit() -- XXX if there are script errors in this function, the luafile will enter error-state (nt usable!)
-	if(_system.Import(_g_ScriptUID, "SuperMegaTestScript.config") and config ~= nil) then
+	if(_system.Import(g_ScriptUID, "SuperMegaTestScript.config") and config ~= nil) then
 		print("SuperMegaTestScript.lua: Config loaded!")
 	else
 		print("SuperMegaTestScript.lua: Failed to load config, creating one!")

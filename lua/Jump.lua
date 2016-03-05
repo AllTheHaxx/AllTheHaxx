@@ -1,5 +1,5 @@
-_g_ScriptTitle = "Jumpbot"
-_g_ScriptInfo = "Hold down Space to make a perfect double jump!"
+g_ScriptTitle = "Jumpbot"
+g_ScriptInfo = "Hold down Space to make a perfect double jump!"
 
 function Jump()
 	TW.Game.Input.Jump = 1
