@@ -1162,7 +1162,7 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	Console()->Chain("cl_IRC_nick", ConchainIRCNickUpdate, this); // TODO: This may be moved to elsewhere
+	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This may be moved to elsewhere
 
 }
 
