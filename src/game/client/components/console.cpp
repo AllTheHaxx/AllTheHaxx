@@ -794,7 +794,7 @@ void CGameConsole::OnRender()
 
 			while(pEntry)
 			{
-				if(str_length(m_pSearchString) && !str_find_nocase(pEntry->m_aText, m_pSearchString))
+				if(m_pSearchString && !str_find_nocase(pEntry->m_aText, m_pSearchString))
 				{
 					pEntry = pConsole->m_Backlog.Prev(pEntry); // skip entries not mathing our search
 					continue;
