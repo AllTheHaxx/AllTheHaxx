@@ -8,15 +8,7 @@ end
 function ResetJump()
 	TW.Game.Input.Jump = 0
 end
---[[
-function Fire()
-	TW.Game.Input.Fire = 1
-end
 
-function ResetFire()
-	TW.Game.Input.Fire = 0
-end
-]]
 function GetPlayerY()
 	return Game.Local.Tee.PosY
 end
@@ -24,11 +16,7 @@ end
 function GetPlayerX()
 	return Game.Local.Tee.PosX
 end
---[[
-function GetPlayerVelX()
-	return Game.Local.Tee.VelX
-end
-]]
+
 function GetPlayerVelY()
 	return Game.LocalTee.Vel.y
 end
@@ -44,8 +32,12 @@ function IsGrounded()
 end
 
 SpacePressed = false
-function OnKeyPress() SpacePressed = true end
-function OnKeyRelease() SpacePressed = false end
+function OnKeyPress(k)
+	if k == "space" then SpacePressed = true end
+end
+function OnKeyRelease(k)
+	if k == "space" then SpacePressed = false end
+end
 
 function OnTick()
 	if(SpacePressed == true and GetPlayerVelY() > -800 and GetPlayerVelY() < 0) then -- perfectjump
