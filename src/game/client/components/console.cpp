@@ -141,19 +141,43 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		}
 		if(ActLine.find("end") != std::string::npos)  //NO ELSE IF HERE
 		{
-			char aBuf[512] = { 0 };
-			if(m_LuaHandler.m_ScopeCount > 0)
-			{	
-				for(int i = 0; i < m_LuaHandler.m_ScopeCount-1; i++)
-					str_append(aBuf, "     ", sizeof(aBuf));
-				str_append(aBuf, pLine, sizeof(aBuf));
-			}
-			m_LuaHandler.m_ScopeCount--;
+			//this is a bit tricky D: because e.g. Game.Emote:Send will also trigger the search for 'end' :D
+			//so we remove all whitespaces and check again
+			bool RealEnd = false;
+			std::string testbuf = ActLine;
 			
-			if(m_LuaHandler.m_ScopeCount == 0)  //if we are now at zero after decreasing => print new line!
+			while(testbuf.find(" ") != std::string::npos)   //remove all whitespaces
 			{
-				PrintLine(aBuf);
-				PrintLine("");
+				testbuf.replace(testbuf.find(" "),testbuf.size(),"");
+			}
+			
+			if(testbuf.compare("end") == 0)
+				RealEnd = true;
+			
+			if(ActLine.find(" end") != std::string::npos)
+				RealEnd = true;
+			
+			if(RealEnd)
+			{
+				char aBuf[512] = { 0 };
+				if(m_LuaHandler.m_ScopeCount > 0)
+				{	
+					int RemoveElseScope = 0;
+						
+					if(ActLine.find("else") != std::string::npos)  //works for else and elseif
+						RemoveElseScope = 1;
+					
+					for(int i = 0; i < m_LuaHandler.m_ScopeCount-1-RemoveElseScope; i++)
+						str_append(aBuf, "     ", sizeof(aBuf));
+					str_append(aBuf, pLine, sizeof(aBuf));
+				}
+				m_LuaHandler.m_ScopeCount--;
+				
+				if(m_LuaHandler.m_ScopeCount == 0)  //if we are now at zero after decreasing => print new line!
+				{
+					PrintLine(aBuf);
+					PrintLine("");
+				}
 			}
 		}
 		
@@ -219,6 +243,9 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			char aBuf[512] = { 0 };
 			
 			int Limit = ScopeIncreased == true ? m_LuaHandler.m_ScopeCount-1 : m_LuaHandler.m_ScopeCount;
+			
+			if(ActLine.find("else") != std::string::npos)
+				Limit--;
 			
 			for(int i = 0; i < Limit; i++)
 				str_append(aBuf, "     ", sizeof(aBuf));
