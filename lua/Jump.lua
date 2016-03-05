@@ -30,7 +30,7 @@ function GetPlayerVelX()
 end
 ]]
 function GetPlayerVelY()
-	return Game.Local.Tee.VelY
+	return Game.LocalTee.Vel.y
 end
 
 function IsGrounded()
@@ -43,25 +43,17 @@ function IsGrounded()
 	end
 end
 
---y = -1
+SpacePressed = false
+function OnKeyPress() SpacePressed = true end
+function OnKeyRelease() SpacePressed = false end
+
 function OnTick()
-	--if(IsGrounded() == true) then -- jump if we hit the ground
-	--	y = GetPlayerY()
-	--	Jump()
-		--Fire()
-	--else
-		--ResetJump()
-		--ResetFire()
-		--print(math.abs(GetPlayerVelY()))
-		--print(GetPlayerVelY()/32)
-		if(Game.Local.Tee.Jumped == 1 and GetPlayerVelY() > -800 and GetPlayerVelY() < 0) then -- perfectjump
-			Jump()
-			ResetJump()
-		end
-	--	if(GetPlayerY() > y+12) then -- do doublejump if we would drop to death
-	--		Jump()
-	--	end
-	--end
+	if(SpacePressed == true and GetPlayerVelY() > -800 and GetPlayerVelY() < 0) then -- perfectjump
+		Jump()
+		ResetJump()
+	end
 end
 
 RegisterEvent("OnTick", "OnTick")
+RegisterEvent("OnKeyPress", "OnKeyPress")
+RegisterEvent("OnKeyRelease", "OnKeyRelease")
