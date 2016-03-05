@@ -1024,6 +1024,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Finished Bufferswapping"), g_Config.m_GfxFinish, &Button)) // dunno if the description is correct
 		g_Config.m_GfxFinish ^= 1;
 
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Graphics Threading Mode"), g_Config.m_GfxThreadedOld, &Button)) // dunno if the description is correct
+		g_Config.m_GfxThreadedOld ^= 1;
+
 
 	// check if the new settings require a restart
 	if(CheckSettings)

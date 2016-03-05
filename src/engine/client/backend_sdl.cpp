@@ -1,3 +1,4 @@
+#include <math.h>
 #include <base/detect.h>
 #include <engine/client/lua.h>
 #include <engine/client.h>
@@ -162,6 +163,7 @@ void *CCommandProcessorFragment_OpenGL::Rescale(int Width, int Height, int NewWi
 
 void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &State)
 {
+	dbg_msg("asdf", "asdf.%p", CLua::m_pClient);
 	// blend
 	switch(State.m_BlendMode)
 	{
