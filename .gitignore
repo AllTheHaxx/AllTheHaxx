@@ -73,3 +73,6 @@ other/luajit/LuaJIT-2.0.2/src/lj_folddef.h
 other/luajit/LuaJIT-2.0.2/src/lj_libdef.h
 other/luajit/LuaJIT-2.0.2/src/lj_recdef.h
 other/luajit/LuaJIT-2.0.2/src/luajit
+
+other/glew/glew-1.13.0/bin/
+

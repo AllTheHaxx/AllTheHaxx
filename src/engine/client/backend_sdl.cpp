@@ -19,7 +19,8 @@
 	#define glOrtho glOrthof
 	#include <SDL_android.h>
 #else
-	#include "SDL_opengl.h"
+	//#include "SDL_opengl.h"
+	#include <GL/glew.h>
 #endif
 
 #if defined(SDL_VIDEO_DRIVER_X11)
@@ -213,18 +214,25 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 		dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
 	};
 
-	float Rot = 0.0f;
+	float Transx = 0.0f, Transy = 0.0f;
 	if(CLua::m_pClient)
-		Rot = 90*sinf(CLua::m_pClient->GameTick()*0.03f);
+	{
+		Transx = 0.2f*sinf(CLua::m_pClient->GameTick()*0.03f);
+		Transy = 0.2f*cosf(CLua::m_pClient->GameTick()*0.03f);
+	}
 	// screen mapping
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glRotatef(Rot, 1.f, 1.0f, 0.0f);
+	glTranslatef(Transx, Transy, 0);
 	glOrtho(State.m_ScreenTL.x, State.m_ScreenBR.x, State.m_ScreenBR.y, State.m_ScreenTL.y, 1.0f, 10.f);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 {
+	char *vsSource = "void main() { }";
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vsSource, NULL);
+
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
 }
 

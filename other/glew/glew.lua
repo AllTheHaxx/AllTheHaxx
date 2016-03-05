@@ -6,7 +6,7 @@ glew = {
 		end
 
 		local apply = function(option, settings)
-            settings.cc.includes:Add(glew.basepath .. "/include")
+            settings.cc.includes:Add(glew.basepath .. "/glew-1.13.0/include")
             if platform == "win32" then
                 settings.link.libpath:Add(glew.basepath .. "/Win32")
                 settings.link.libs:Add("glew32")
