@@ -16,6 +16,7 @@ end
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
 Import("other/luajit/luajit.lua")
+Import("other/glew/glew.lua")
 Import("other/freetype/freetype.lua")
 Import("other/curl/curl.lua")
 Import("other/opus/opusfile.lua")
@@ -32,6 +33,7 @@ config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
 config:Add(luajit.OptFind("luajit", true))
+config:Add(glew.OptFind("glew", true))
 config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
@@ -164,6 +166,7 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopusfile-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/luajit/win32/lua51.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/glew/win32/glew32.dll"))
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib64/freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL.dll"))
@@ -310,8 +313,9 @@ function build(settings)
 	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
 	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
 	
-	-- apply luajit settings
+	-- apply luajit and glew settings
 	config.luajit:Apply(settings)
+	config.glew:Apply(settings)
 
 	-- build game components
 	engine_settings = settings:Copy()
