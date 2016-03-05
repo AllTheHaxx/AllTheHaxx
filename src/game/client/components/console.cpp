@@ -223,10 +223,10 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 					PrintLine("An unknown error occured!");
 				}
 				
-				m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
+				/*m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
 				//add this to the history :3
 				char *pEntry = m_History.Allocate(m_LuaHandler.m_FullLine.size()+1);
-				mem_copy(pEntry, m_LuaHandler.m_FullLine.c_str(), m_LuaHandler.m_FullLine.size()+1);
+				mem_copy(pEntry, m_LuaHandler.m_FullLine.c_str(), m_LuaHandler.m_FullLine.size()+1);*/
 
 				
 				m_LuaHandler.m_FullLine = "";
@@ -308,6 +308,18 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				{
 					char *pEntry = m_History.Allocate(m_Input.GetLength()+1);
 					mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
+				}
+				else if(m_Type == CONSOLETYPE_LUA)
+				{
+					//if(m_LuaHandler.m_FullLine.size())
+					//	m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
+					
+					std::string Complete = m_LuaHandler.m_FullLine;
+					Complete.append(m_Input.GetString());
+					
+					//add this to the history :3
+					char *pEntry = m_History.Allocate(Complete.size()+1);
+					mem_copy(pEntry, Complete.c_str(), Complete.size()+1);
 				}
 				ExecuteLine(m_Input.GetString());
 				m_Input.Clear();
