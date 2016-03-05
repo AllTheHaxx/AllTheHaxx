@@ -71,6 +71,7 @@
 #include <zlib.h>
 
 #include "SDL.h"
+#include "SDL_syswm.h"
 #ifdef main
 #undef main
 #endif
@@ -2724,15 +2725,50 @@ void CClient::Run()
 		Connect(config.cl_connect);
 	config.cl_connect[0] = 0;
 	*/
+	
+	m_pInputThread = thread_init(InputThread, this);
 
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
+	
+	int LastConsoleMode = g_Config.m_ClConsoleMode;
 
 	while (1)
 	{
 		//
+		if(g_Config.m_ClConsoleMode != LastConsoleMode)
+		{
+			SDL_SysWMinfo info;
+			SDL_VERSION(&info.version);
+					
+			if(!SDL_GetWMInfo(&info))
+			{
+				dbg_msg("gfx", "unable to obtain window handle");
+				return;
+			}
+			if(g_Config.m_ClConsoleMode) //Hide
+			{
+				#if defined(CONF_FAMILY_WINDOWS)
+					//ShowWindow(info.window, SW_HIDE);
+					SDL_HideWindow(info.window);
+				#else
+					//Linux here!
+				#endif
+			}
+			else //Show
+			{
+				#if defined(CONF_FAMILY_WINDOWS)
+					ShowWindow(info.window, SW_RESTORE);
+				#else
+					//Linux
+				#endif
+			}
+			
+			LastConsoleMode = g_Config.m_ClConsoleMode;
+		}
+		
 		VersionUpdate();
 
 		// handle pending connects
@@ -2940,6 +2976,11 @@ void CClient::Run()
 	{
 		SDL_Quit();
 	}
+	
+	#if defined(CONF_FAMILY_WINDOWS)
+	if(m_pInputThread)
+		FreeConsole();
+	#endif
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
@@ -3583,4 +3624,53 @@ void CClient::RequestDDNetSrvList()
 	Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST)+4;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
+}
+
+void CClient::InputThread(void * pUser)
+{
+	CClient *pSelf = (CClient *)pUser;
+	char aInput[64];
+	char * Input = aInput;
+	
+	char Data[128];
+	
+	#if defined(CONF_FAMILY_WINDOWS)
+		system("chcp 1252");
+	#endif
+	
+	while(1)
+	{
+		thread_sleep(100);
+		fgets(Input, 200, stdin);
+
+		#if defined(CONF_FAMILY_WINDOWS)
+			if(!str_utf8_check(Input))
+			{
+				char Temp[4];
+				int Length = 0;
+				
+				while(*Input)
+				{
+					//dbg_msg("Client", "%s", Temp);
+					int Size = str_utf8_encode(Temp, static_cast<const unsigned char>(*Input++));
+							
+					if(Length+Size < sizeof(Data))
+					{
+						mem_copy(Data+Length, &Temp, Size);
+						Length += Size;
+					}
+					else
+						break;
+				}
+				Data[Length] = 0;
+				
+				pSelf->m_pConsole->ExecuteLineFlag(Data, CFGFLAG_CLIENT);
+			}
+			else
+				pSelf->m_pConsole->ExecuteLineFlag(Input, CFGFLAG_CLIENT);
+		#else
+			pSelf->m_pConsole->ExecuteLineFlag(Input, CFGFLAG_CLIENT);
+		#endif
+	
+	}		
 }
