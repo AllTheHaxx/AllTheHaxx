@@ -2755,8 +2755,7 @@ void CClient::Run()
 			if(g_Config.m_ClConsoleMode) //Hide
 			{
 				#if defined(CONF_FAMILY_WINDOWS)
-					//ShowWindow(info.window, SW_HIDE);
-					SDL_HideWindow(info.window);
+					ShowWindow(info.window, SW_HIDE);
 				#else
 					//Linux here!
 				#endif
