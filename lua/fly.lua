@@ -2,11 +2,7 @@ g_ScriptTitle = "Fly"
 g_ScriptInfo = "Life's a bitch until ya die, that's why we get high."
 
 function OnTick()
-	if(Game.LocalTee.Vel.y > 0) then
-		Game.Input.Hook = 1
-	else
-		Game.Input.Hook = 0
-	end
+	Game.Input.Hook = ((Game.LocalTee.Vel.y > 0) and 1 or 0)
 end
 
 RegisterEvent("OnTick", "OnTick")
