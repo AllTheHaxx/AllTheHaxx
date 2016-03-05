@@ -161,9 +161,9 @@ void CIRC::StartConnection() // call this from a thread only!
 
     m_State = STATE_CONNECTING;
     // lookup
-	if(net_host_lookup("IRC.quakenet.org:6667", &m_HostAddress, NETTYPE_IPV4) != 0)
+	if(net_host_lookup("irc.quakenet.org:6667", &m_HostAddress, NETTYPE_IPV4) != 0)
 	{
-        dbg_msg("IRC","ERROR: Can't lookup IRC.quakenet.org");
+        dbg_msg("IRC","ERROR: Can't lookup irc.quakenet.org");
         m_State = STATE_DISCONNECTED;
         return;
 	}
