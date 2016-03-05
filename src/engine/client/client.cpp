@@ -71,7 +71,9 @@
 #include <zlib.h>
 
 #include "SDL.h"
-#include "SDL_syswm.h"
+#if defined(CONF_FAMILY_WINDOWS)
+	#include "SDL_syswm.h"
+#endif
 #ifdef main
 #undef main
 #endif
@@ -2740,14 +2742,16 @@ void CClient::Run()
 		//
 		if(g_Config.m_ClConsoleMode != LastConsoleMode)
 		{
-			SDL_SysWMinfo info;
-			SDL_VERSION(&info.version);
+			#if defined(CONF_FAMILY_WINDOWS)
+				SDL_SysWMinfo info;
+				SDL_VERSION(&info.version);
 					
-			if(!SDL_GetWMInfo(&info))
-			{
-				dbg_msg("gfx", "unable to obtain window handle");
-				return;
-			}
+				if(!SDL_GetWMInfo(&info))
+				{
+					dbg_msg("gfx", "unable to obtain window handle");
+					return;
+				}
+			#endif
 			if(g_Config.m_ClConsoleMode) //Hide
 			{
 				#if defined(CONF_FAMILY_WINDOWS)
