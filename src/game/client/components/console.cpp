@@ -122,6 +122,13 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	}
 	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
+		if(strcmp(pLine, "reset") == 0)
+		{
+			m_LuaHandler.m_ScopeCount = 0;
+			m_LuaHandler.m_FullLine = "";
+			PrintLine("Reset complete");
+			return;
+		}
 		int Status = 0;
 		char ErrorMsg[512];
 		bool ScopeIncreased = false;
