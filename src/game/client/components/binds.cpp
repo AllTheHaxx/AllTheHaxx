@@ -140,6 +140,7 @@ void CBinds::SetDefaults()
 
 	Bind(KEY_LCTRL, "+hotbar");
 	Bind(KEY_F5, "+irc");
+	Bind(KEY_F6, "toggle_lua_console");
 
 	Bind(KEY_F12, "+unlock_mouse");
 
