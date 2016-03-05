@@ -12,7 +12,7 @@ Config.MaxBloodNum = 96
 
 
 function OnScriptInit()
-	if(_system.Import(g_ScriptUID, "bloodpatch.config") == true) then
+	if(Import(g_ScriptUID, "bloodpatch.config") == true) then
 		print("bloodpatch.lua: Config loaded!")
 	else
 		print("bloodpatch.lua: Failed to load config, creating one!")

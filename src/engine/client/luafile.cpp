@@ -137,10 +137,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 {		
 	getGlobalNamespace(L)
 
-		// system namespace
-		.beginNamespace("_system")
-			.addFunction("Import", &CLuaBinding::LuaImport)
-		.endNamespace()
+		.addFunction("Import", &CLuaBinding::LuaImport)
 
 		// client namespace
 		.beginNamespace("_client")
