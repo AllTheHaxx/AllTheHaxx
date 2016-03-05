@@ -250,11 +250,25 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("HookState", &CNetObj_CharacterCore::m_HookState, false)
 			.addData("Jumped", &CNetObj_CharacterCore::m_Jumped, false)
 		.endClass()
+		
 		.deriveClass<CNetObj_Character, CNetObj_CharacterCore>("CNetObj_Character")  //TODO: Ppb add the rest
 			.addData("Weapon", &CNetObj_Character::m_Weapon)
 			.addData("Armor", &CNetObj_Character::m_Armor)
 			.addData("Health", &CNetObj_Character::m_Health)
 			.addData("Ammo", &CNetObj_Character::m_AmmoCount)
+		.endClass()
+		
+		.beginClass<CCharacterCore>("CCharacterCore")
+			.addData("Pos", &CCharacterCore::m_Pos)
+			.addData("Vel", &CCharacterCore::m_Vel)
+			.addData("Hook", &CCharacterCore::m_Hook)
+			.addData("Collision", &CCharacterCore::m_Collision)
+			.addData("HookPos", &CCharacterCore::m_HookPos)
+			.addData("HookDir", &CCharacterCore::m_HookDir)
+			.addData("HookedPlayer", &CCharacterCore::m_HookedPlayer)
+			.addData("Weapon", &CCharacterCore::m_ActiveWeapon)
+			.addData("Direction", &CCharacterCore::m_Direction)
+			.addData("Angle", &CCharacterCore::m_Angle)
 		.endClass()
 		
 		.beginClass<CControls>("CControls")
@@ -284,6 +298,24 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)
 		.endClass()
 		
+		.beginClass<CGameClient::CClientData>("CClientData")
+			.addData("ColorBody", &CGameClient::CClientData::m_ColorBody)
+			.addData("ColorFeet", &CGameClient::CClientData::m_ColorFeet)
+			.addData("UseCustomColor", &CGameClient::CClientData::m_UseCustomColor)
+			.addData("SkinID", &CGameClient::CClientData::m_SkinID)
+			.addData("Country", &CGameClient::CClientData::m_Country)
+			.addData("SkinColor", &CGameClient::CClientData::m_SkinColor)
+			.addData("Team", &CGameClient::CClientData::m_Team)
+			.addData("Emote", &CGameClient::CClientData::m_Emoticon)
+			.addData("Friend", &CGameClient::CClientData::m_Friend)
+			.addData("Foe", &CGameClient::CClientData::m_Foe)
+			.addProperty("Name", &CGameClient::CClientData::GetName)
+			.addProperty("Clan", &CGameClient::CClientData::GetClan)
+			.addProperty("SkinName", &CGameClient::CClientData::GetSkinName)
+			//.addProperty("Tee", &CGameClient::CClientData::GetCharSnap)
+			.addData("Tee", &CGameClient::CClientData::m_Predicted)
+		.endClass()
+		
 		.beginClass<IGraphics>("IGraphics")
 			.addFunction("QuadsBegin", &IGraphics::QuadsBegin)
 			.addFunction("QuadsEnd", &IGraphics::QuadsEnd)
@@ -305,7 +337,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
 		.endClass()
 
-		.beginClass<CGameClient>("CGameClient")
+		.beginClass<CGameClient>("CGameClient")   //this class is kinda outdated due to "Game"
 			.addData("Chat", &CGameClient::m_pChat)		
 			.addData("ServerInfo", &CGameClient::m_CurrentServerInfo, false)
 			.addData("Emote", &CGameClient::m_pEmoticon, false)
@@ -314,7 +346,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Input", &CGameClient::m_pControls)
 			.addData("Collision", &CGameClient::m_pCollision)
 			//pointer to components & stuff from gameclient
-			.addData("Local", &CGameClient::m_Snap)
+			//.addData("Local", &CGameClient::m_Snap)
+			.addData("LocalTee", &CGameClient::m_PredictedChar)
 		.endClass()
 		
 		//MAIN NAMESPACE
@@ -332,8 +365,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
             .addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
             .addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
             //pointer to components & stuff from gameclient
-            .addVariable("Local", &CLua::m_pCGameClient->m_Snap, false)
+            //.addVariable("Local", &CLua::m_pCGameClient->m_Snap, false)
+			.addVariable("LocalTee", &CLua::m_pCGameClient->m_PredictedChar, false)
+			.addVariable("LocalCID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID, false)
             .addVariable("Client", &CLua::m_pClient, false)
+			.addFunction("Players", &CGameClient::LuaGetClientData)
 		.endNamespace()
 
 		.beginNamespace("Graphics")
@@ -345,7 +381,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
 			.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
 			
-			.addStaticProperty("PlayerSkin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
+			.addStaticProperty("Skin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
 			.addStaticData("PlayerColorBody", &CConfigProperties::m_pConfig->m_ClPlayerColorBody)
 			.addStaticData("PlayerColorFeet", &CConfigProperties::m_pConfig->m_ClPlayerColorFeet)
 			.addStaticData("PlayerUseCustomColor", &CConfigProperties::m_pConfig->m_ClPlayerUseCustomColor)

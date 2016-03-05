@@ -264,6 +264,11 @@ public:
 		// haxx
 		bool m_Spoofable;
 		char m_Addr[NETADDR_MAXSTRSIZE];
+		
+		//lua
+		std::string GetName() const { return std::string(m_aName); }
+		std::string GetClan() const { return std::string(m_aClan); }
+		std::string GetSkinName() const { return std::string(m_aSkinName); }
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -388,6 +393,8 @@ public:
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
 	
 	CServerInfo m_CurrentServerInfo;
+	
+	static CClientData * LuaGetClientData(int ID) { return &CLua::m_pCGameClient->m_aClients[ID]; }
 	
 private:
 	bool m_DDRaceMsgSent[2];
