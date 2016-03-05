@@ -1,14 +1,5 @@
 _g_ScriptTitle = "Jumpbot"
-
-function IsGrounded()
-	for i = 48, 32, -16 do
-		c = Game.Collision:GetTile(Game.Local.Tee.PosX, Game.Local.Tee.PosY+i)
-		if (c== 1 or c== 5) then
-			return true
-		end
-		return false
-	end
-end
+_g_ScriptInfo = "Hold down Space to make a perfect double jump!"
 
 function Jump()
 	TW.Game.Input.Jump = 1
@@ -17,7 +8,7 @@ end
 function ResetJump()
 	TW.Game.Input.Jump = 0
 end
-
+--[[
 function Fire()
 	TW.Game.Input.Fire = 1
 end
@@ -25,7 +16,7 @@ end
 function ResetFire()
 	TW.Game.Input.Fire = 0
 end
-
+]]
 function GetPlayerY()
 	return Game.Local.Tee.PosY
 end
@@ -33,32 +24,44 @@ end
 function GetPlayerX()
 	return Game.Local.Tee.PosX
 end
-
+--[[
 function GetPlayerVelX()
 	return Game.Local.Tee.VelX
 end
-
+]]
 function GetPlayerVelY()
 	return Game.Local.Tee.VelY
 end
 
-y = -1
+function IsGrounded()
+	for i = 48, 32, -16 do
+		c = Game.Collision:GetTile(GetPlayerX(), GetPlayerY())
+		if (c== 1 or c== 5) then
+			return true
+		end
+		return false
+	end
+end
+
+--y = -1
 function OnTick()
-	if(IsGrounded() == true) then -- jump if we hit the ground
-		y = GetPlayerY()
-		Jump()
+	--if(IsGrounded() == true) then -- jump if we hit the ground
+	--	y = GetPlayerY()
+	--	Jump()
 		--Fire()
-	else
-		ResetJump()
+	--else
+		--ResetJump()
 		--ResetFire()
 		--print(math.abs(GetPlayerVelY()))
-		if(math.abs(GetPlayerVelY()) < 700) then -- perfectjump
+		--print(GetPlayerVelY()/32)
+		if(Game.Local.Tee.Jumped == 1 and GetPlayerVelY() > -800 and GetPlayerVelY() < 0) then -- perfectjump
 			Jump()
+			ResetJump()
 		end
-		if(GetPlayerY() > y+12) then -- do doublejump if we dropped deeper than we jumped high
-			Jump()
-		end
-	end
+	--	if(GetPlayerY() > y+12) then -- do doublejump if we would drop to death
+	--		Jump()
+	--	end
+	--end
 end
 
 RegisterEvent("OnTick", "OnTick")
