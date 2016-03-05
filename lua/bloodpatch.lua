@@ -45,11 +45,10 @@ function RenderBlood()
 end
 
 function Kill(Killer, Victim, Weapon)
-	if(Victim ~= Game.Local.ClientID) then
-		return
-	end
-    x = Game.Local.Tee.PosX
-    y = Game.Local.Tee.PosY
+
+    x = Game.Players(Victim).Tee.Pos.x
+    y = Game.Players(Victim).Tee.Pos.y
+    print(x,y)
    -- r, g, b = GetPlayerColorBody(Victim) -- TODO
     if (Config.UseStdColor == 1) then
         r = Config.StdColorR
