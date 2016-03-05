@@ -212,18 +212,25 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<IClient>("IClient")
 			.addProperty("Tick", &IClient::GameTick)
 			.addProperty("LocalTime", &IClient::LocalTime)
+
 			.addFunction("Connect", &IClient::Connect)
 			.addFunction("Disconnect", &IClient::Disconnect)
-			.addFunction("Quit", &IClient::Quit)
-			.addFunction("RconSend", &IClient::Rcon)
-			.addFunction("RconAuth", &IClient::RconAuth)
-			.addFunction("RconAuthed", &IClient::RconAuthed)
+
 			.addFunction("DummyConnect", &IClient::DummyConnect)
 			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
 			.addFunction("DummyConnected", &IClient::DummyConnected)
 			.addFunction("DummyConnecting", &IClient::DummyConnecting)
+
+			.addFunction("SendInfo", &CGameClient::SendInfo)
+
+			.addFunction("RconAuth", &IClient::RconAuth)
+			.addFunction("RconAuthed", &IClient::RconAuthed)
+			.addFunction("RconSend", &IClient::Rcon)
+
 			.addProperty("FPS", &IClient::GetFPS)
 			.addProperty("State", &IClient::State)
+
+			.addFunction("Quit", &IClient::Quit)
 		.endClass()
 		
 		//COMPONENTS
