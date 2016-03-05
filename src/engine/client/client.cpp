@@ -2817,7 +2817,8 @@ void CClient::Run()
 #endif
 
 		// update sound
-		Sound()->Update();
+		if(!g_Config.m_ClConsoleMode)
+			Sound()->Update();
 
 		// release focus
 		if(!m_pGraphics->WindowActive())
@@ -2833,7 +2834,7 @@ void CClient::Run()
 		}
 
 		// refocus
-		if(m_WindowMustRefocus && m_pGraphics->WindowActive())
+		if(m_WindowMustRefocus && m_pGraphics->WindowActive() && !g_Config.m_ClConsoleMode)
 		{
 			if(m_WindowMustRefocus < 3)
 			{
