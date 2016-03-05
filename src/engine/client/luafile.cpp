@@ -314,6 +314,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
 
+			.addFunction("KeyReleases", &IInput::KeyPressed)
+			.addFunction("KeyPresses", &IInput::KeyPressed)
 			.addFunction("KeyDown", &IInput::KeyDown)
 
 			.addFunction("MouseModeRelative", &IInput::MouseModeRelative)
