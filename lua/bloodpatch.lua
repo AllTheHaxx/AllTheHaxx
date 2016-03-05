@@ -37,7 +37,7 @@ function RenderBlood()
         	Graphics.Engine:TextureSet(Blood[v["tex"]])
         	Graphics.Engine:QuadsBegin()
         	if(Config.UseColor == 1) then
-        		Graphics.Engine:SetColor(v.r, v.g, v.b, 1)
+        		Graphics.Engine:SetColor(v.r/0xFF, v.g/0xFF, v.b/0xFF, 1)
         	else
         		Graphics.Engine:SetColor(Config.StdColorR, Config.StdColorG, Config.StdColorB, 1)
         	end
