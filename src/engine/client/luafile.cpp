@@ -230,6 +230,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("FPS", &IClient::GetFPS)
 			.addProperty("State", &IClient::State)
 
+			.addFunction("DemoStart", &IClient::DemoRecorder_Start)
+			.addFunction("DemoStop", &IClient::DemoRecorder_Stop)
+
 			.addFunction("Quit", &IClient::Quit)
 		.endClass()
 		
