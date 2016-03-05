@@ -5,6 +5,8 @@
 
 #include "kernel.h"
 
+#include <string>
+
 extern const char g_aaKeyStrings[512][16];
 
 class IInput : public IInterface
@@ -73,6 +75,7 @@ public:
 	int KeyPresses(int Key) { return m_aInputCount[m_InputCurrent][Key].m_Presses; }
 	int KeyDown(int Key) { return KeyPressed(Key)&&!KeyWasPressed(Key); }
 	const char *KeyName(int Key) { return (Key >= 0 && Key < 512) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
+	std::string KeyNameSTD(int Key) { return std::string(KeyName(Key)); }
 
 	//
 	virtual void MouseModeRelative() = 0;

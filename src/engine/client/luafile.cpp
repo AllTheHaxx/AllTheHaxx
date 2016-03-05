@@ -317,6 +317,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("KeyReleases", &IInput::KeyPressed)
 			.addFunction("KeyPresses", &IInput::KeyPressed)
 			.addFunction("KeyDown", &IInput::KeyDown)
+			.addFunction("KeyName", &IInput::KeyNameSTD)
 
 			.addFunction("MouseModeRelative", &IInput::MouseModeRelative)
 			.addFunction("MouseModeAbsolute", &IInput::MouseModeAbsolute)
