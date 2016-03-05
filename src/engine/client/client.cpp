@@ -2847,7 +2847,7 @@ void CClient::Run()
 
 			Update();
 
-			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
+			if(!g_Config.m_ClConsoleMode && (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
 			{
 				m_RenderFrames++;
 
@@ -2916,6 +2916,9 @@ void CClient::Run()
 			//thread_sleep(g_Config.m_ClCpuThrottle);
 		else if(g_Config.m_DbgStress || (g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive()))
 			thread_sleep(5);
+
+		if(g_Config.m_ClConsoleMode)
+			thread_sleep(250);
 
 		if(g_Config.m_DbgHitch)
 		{
