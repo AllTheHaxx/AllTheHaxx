@@ -298,11 +298,16 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Hook", &CCharacterCore::m_Hook)
 			.addData("Collision", &CCharacterCore::m_Collision)
 			.addData("HookPos", &CCharacterCore::m_HookPos)
+			.addData("HookTick", &CCharacterCore::m_HookTick)
+            .addData("HookState", &CCharacterCore::m_HookState)
 			.addData("HookDir", &CCharacterCore::m_HookDir)
 			.addData("HookedPlayer", &CCharacterCore::m_HookedPlayer)
 			.addData("Weapon", &CCharacterCore::m_ActiveWeapon)
 			.addData("Direction", &CCharacterCore::m_Direction)
 			.addData("Angle", &CCharacterCore::m_Angle)
+			.addData("Jumps", &CCharacterCore::m_Jumps)
+            .addData("JumpedTotal", &CCharacterCore::m_JumpedTotal)
+            .addData("Jumped", &CCharacterCore::m_Jumped)
 		.endClass()
 		
 		.beginClass<CControls>("CControls")
@@ -313,6 +318,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("WantedWeapon", &CControls::GetWantedWeapon, &CControls::SetWantedWeapon)
 			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
+			.addProperty("DirRight", &CControls::GetDirRight, &CControls::SetDirRight)
+            .addProperty("DirLeft", &CControls::GetDirLeft, &CControls::SetDirLeft)
+
 
 			.addFunction("KeyReleases", &IInput::KeyPressed)
 			.addFunction("KeyPresses", &IInput::KeyPressed)
