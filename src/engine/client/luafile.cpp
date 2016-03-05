@@ -13,6 +13,7 @@
 #include <game/client/components/menus.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
+#include <engine/input.h>
 #include <engine/serverbrowser.h>
 //#include <engine/client/client.h>
 
@@ -312,6 +313,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("WantedWeapon", &CControls::GetWantedWeapon, &CControls::SetWantedWeapon)
 			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
+
+			.addFunction("KeyDown", &IInput::KeyDown)
 		.endClass()
 		
 		//Server Infos
