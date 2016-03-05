@@ -2,8 +2,8 @@ g_ScriptTitle = "Blood-Patch"
 g_ScriptInfo = "Teeish Blood Effects 18+!"
 
 Config = {}
-Config.UseTeeColor = 1
-Config.UseStdColor = 0
+Config.UseColor = 1 -- 1=tee color, 0=std color
+--Config.UseStdColor = 0
 Config.StdColorR = 1
 Config.StdColorG = 0
 Config.StdColorB = 0
@@ -36,7 +36,11 @@ function RenderBlood()
         	--print("Rendering quad id=" .. k .. " at x=" .. v["x"] .. "~" .. v["x"]/32 .. ", y=" .. v["y"] .. "~" .. v["y"]/32)
         	Graphics.Engine:TextureSet(Blood[v["tex"]])
         	Graphics.Engine:QuadsBegin()
-        	Graphics.Engine:SetColor(1, 0, 0, 1) -- v["r"], v["g"], v["b"] ----- math.min(Config.Lifetime-Game.Client.LocalTime-v["s"])
+        	if(Config.UseColor == 1) then
+        		Graphics.Engine:SetColor(v.r, v.g, v.b, 1)
+        	else
+        		Graphics.Engine:SetColor(Config.StdColorR, Config.StdColorG, Config.StdColorB, 1)
+        	end
         	Graphics.Engine:SetRotation(v["rot"])
             _graphics.RenderQuad(v["x"] - 48, v["y"] - 48, 96, 96)
             Graphics.Engine:QuadsEnd()
@@ -48,13 +52,6 @@ function Kill(Killer, Victim, Weapon)
 
     x = Game.Players(Victim).Tee.Pos.x
     y = Game.Players(Victim).Tee.Pos.y
-    print(x,y)
-   -- r, g, b = GetPlayerColorBody(Victim) -- TODO
-    if (Config.UseStdColor == 1) then
-        r = Config.StdColorR
-        g = Config.StdColorG
-        b = Config.StdColorB
-    end
     for n = 0, math.random(2, 4) do
 		for i = 0, 100 do
 		    a = math.random(0, math.pi * 2)
@@ -70,9 +67,9 @@ function Kill(Killer, Victim, Weapon)
 		        BloodSpots[BloodNum] = {}
 		        BloodSpots[BloodNum]["x"] = x + xm * 32
 		        BloodSpots[BloodNum]["y"] = y + ym * 32
-		        BloodSpots[BloodNum]["r"] = r
-		        BloodSpots[BloodNum]["g"] = g
-		        BloodSpots[BloodNum]["b"] = b
+		        BloodSpots[BloodNum]["r"] = bit.rshift(bit.band(Game.Players(Victim).ColorBody, 0xFF0000), 16)--r
+		        BloodSpots[BloodNum]["g"] = bit.rshift(bit.band(Game.Players(Victim).ColorBody, 0x00FF00), 8)--g
+		        BloodSpots[BloodNum]["b"] = bit.rshift(bit.band(Game.Players(Victim).ColorBody, 0x0000FF), 0)--b
 		        BloodSpots[BloodNum]["rot"] = math.random(0, 6.283185308)
 		        BloodSpots[BloodNum]["tex"] = math.random(1, 4)
 		        BloodSpots[BloodNum]["s"] = Game.Client.LocalTime
@@ -100,17 +97,13 @@ function OnScriptRenderSettings(x, y, w, h)
 	rect.y = y
 	rect.w = w
 	rect.h = 20
-    Game.Ui.DoLabel(rect, "Bloodpatch Config", 13.0, 0, -1, 0)
+   -- Game.Ui.DoLabel(rect, "Bloodpatch Config", 13.0, 0, -1, 0)
  	y = y + Spacing + 20
  
 	_ui.SetUiColor(1, 1, 1, 0.5)
-    if(_ui.DoButton_Menu("Use Tee color as blood color", Config.UseTeeColor, x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
+	label = ((Config.UseTeeColor == 1) and "Blood Color: Tee" or "Blood Color: Standard")
+    if(_ui.DoButton_Menu(label, 0, x + Spacing, y + Spacing, 250, 20, "Click to toggle", 15) ~= 0) then
     	Config.UseTeeColor = ((Config.UseTeeColor == 1) and 0 or 1)
-    end
-    y = y + Spacing + 20
-    
-    if(_ui.DoButton_Menu("Use standard color as blood color", Config.UseStdColor, x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
-    	Config.UseStdColor = ((Config.UseStdColor == 1) and 0 or 1)
     end
     y = y + Spacing + 20
     
