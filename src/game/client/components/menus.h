@@ -352,6 +352,9 @@ public:
 	bool IsActive() const { return m_MenuActive || m_HotbarActive || m_IRCActive; }
 	int ActivePage() const { return m_ActivePage; }
 
+	vec2 GetMousePos() const { return m_MousePos; }
+	void SetMousePos(vec2 p) { m_MousePos = p; }
+
 	virtual void OnInit();
 	virtual void OnConsoleInit();
 
