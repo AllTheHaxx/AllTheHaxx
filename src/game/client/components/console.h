@@ -86,6 +86,8 @@ class CGameConsole : public CComponent
 	float TimeNow();
 	int m_PrintCBIndex;
 
+	char *m_pSearchString;
+
 	int m_ConsoleType;
 	int m_ConsoleState;
 	float m_StateChangeEnd;

@@ -718,7 +718,7 @@ void CGameConsole::OnRender()
 			if(g_Config.m_ClLua)
 				pPrompt = "Lua> ";
 			else
-				pPrompt = "Lua disabled. Please enable Lua first.";
+				pPrompt = "Lua disabled. Please enable Lua first. ";
 		}
 		TextRender()->TextEx(&Cursor, pPrompt, -1);
 
@@ -794,6 +794,12 @@ void CGameConsole::OnRender()
 
 			while(pEntry)
 			{
+				if(str_length(m_pSearchString) && !str_find_nocase(pEntry->m_aText, m_pSearchString))
+				{
+					pEntry = pConsole->m_Backlog.Prev(pEntry); // skip entries not mathing our search
+					continue;
+				}
+
 				if(pEntry->m_Highlighted)
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 				else
@@ -824,60 +830,60 @@ void CGameConsole::OnRender()
 					const char *pUrlEnding;
 
 					char aUrl[64];
-					int urlSize;
+					int UrlSize;
 
 					CUIRect TextRect;
 
-					bool found = false;
-					bool one = true;
+					bool Found = false;
+					bool One = true;
 
-					while (true)
+					while(true)
 					{
-						if (!pUrlBeginning)
+						if(!pUrlBeginning)
 							break;
 
 						mem_zero(aUrl, sizeof(aUrl));
-						urlSize = 0;
+						UrlSize = 0;
 
 						pUrlBeginning = str_find(pCursor, "http://");
-						if (!pUrlBeginning)
+						if(!pUrlBeginning)
 							pUrlBeginning = str_find(pCursor, "https://");
 
-						if (pUrlBeginning) // found the link
+						if(pUrlBeginning) // found the link
 						{
-							found = true;
+							Found = true;
 
 							pUrlEnding = str_find(pUrlBeginning, " ");
-							if (!pUrlEnding) // the link is till the end
+							if(!pUrlEnding) // the link is till the end
 								pUrlEnding = pUrlBeginning + str_length(pUrlBeginning);
 							else
 							{
-								one = false;
+								One = false;
 								pUrlEnding++;
 							}
 
-							urlSize = pUrlEnding - pUrlBeginning;
-							str_copy(aUrl, pUrlBeginning, urlSize + 1);
+							UrlSize = pUrlEnding - pUrlBeginning;
+							str_copy(aUrl, pUrlBeginning, UrlSize + 1);
 
 							// url rect
 							TextRect.x = TextRender()->TextWidth(0, FontSize, pEntry->m_aText, pUrlBeginning - pEntry->m_aText);
 							TextRect.y = y - OffsetY;
-							TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, urlSize);
+							TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, UrlSize);
 							TextRect.h = FontSize;
 
 							// render the first part
-							if (pUrlBeginning - pCursor > 0)
+							if(pUrlBeginning - pCursor > 0)
 							{
 								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 								TextRender()->TextEx(&Cursor, pCursor, pUrlBeginning - pCursor);
 							}
 
 							// set the color and check if pressed
-							if (UI()->MouseInside(&TextRect))
+							if(UI()->MouseInside(&TextRect))
 							{
 								TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
 								static float LastClicked = 0;
-								if (UI()->MouseButtonClicked(0) && Client()->LocalTime() > LastClicked + 1)
+								if(UI()->MouseButtonClicked(0) && Client()->LocalTime() > LastClicked + 1)
 								{
 									LastClicked = Client()->LocalTime();
 									Input()->MouseModeAbsolute();
@@ -889,10 +895,10 @@ void CGameConsole::OnRender()
 								TextRender()->TextColor(1.0f, 0.39f, 0.0f, 1.0f);
 
 							// render the link
-							TextRender()->TextEx(&Cursor, pUrlBeginning, urlSize);
+							TextRender()->TextEx(&Cursor, pUrlBeginning, UrlSize);
 
 							// render the rest
-							if (one)
+							if(One)
 							{
 								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 								TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
@@ -902,13 +908,13 @@ void CGameConsole::OnRender()
 						}
 					}
 
-					if (!one)
+					if(!One)
 					{
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 						TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
 					}
 
-					if(!found)
+					if(!Found)
 						TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 				}
 				pEntry = pConsole->m_Backlog.Prev(pEntry);
