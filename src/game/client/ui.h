@@ -8,7 +8,20 @@ class CUIRect
 	// TODO: Refactor: Redo UI scaling
 	float Scale() const;
 public:
+	/*CUIRect() { x=0; y=0; w=0; h=0; }
+	CUIRect(const CUIRect& other) { x=other.x; y=other.y; w=other.w; h=other.h; }
+	CUIRect(float _x, float _y, float _w, float _h) : x(_x), y(_y), w(_w), h(_h) {}*/
 	float x, y, w, h;
+
+	// for lua
+	float GetX() const { return x; }
+	float GetY() const { return y; }
+	float GetW() const { return w; }
+	float GetH() const { return h; }
+	void SetX(float _x) { x = _x; }
+	void SetY(float _y) { y = _y; }
+	void SetW(float _w) { w = _w; }
+	void SetH(float _h) { h = _h; }
 
 	void HSplitMid(CUIRect *pTop, CUIRect *pBottom) const;
 	void HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const;

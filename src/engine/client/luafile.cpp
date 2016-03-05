@@ -199,6 +199,14 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("a", &vector4_base<float>::a)
 		.endClass()
 		
+		.beginClass< CUIRect >("UIRect")
+			.addConstructor <void (*) (void)> ()
+			.addProperty("x", &CUIRect::GetX, &CUIRect::SetX)
+			.addProperty("y", &CUIRect::GetY, &CUIRect::SetY)
+			.addProperty("w", &CUIRect::GetW, &CUIRect::SetW)
+			.addProperty("h", &CUIRect::GetH, &CUIRect::SetH)
+		.endClass()
+
 		//OOP BEGINS HERE		
 		//ICLIENT
 		.beginClass<IClient>("IClient")
@@ -219,6 +227,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 		
 		//COMPONENTS
+		.beginClass<CUI>("CUI")
+			.addFunction("DoLabel", &CUI::DoLabel)
+		.endClass()
+
 		.beginClass<CChat>("CChat")
 			.addFunction("Say", &CChat::Say)
 			.addProperty("Mode", &CChat::GetMode)
@@ -364,6 +376,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
             //.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
             .addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
             .addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
+            .addVariable("Ui", &CLua::m_pCGameClient->m_UI, false)
             //pointer to components & stuff from gameclient
             //.addVariable("Local", &CLua::m_pCGameClient->m_Snap, false)
 			.addVariable("LocalTee", &CLua::m_pCGameClient->m_PredictedChar, false)

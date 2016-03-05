@@ -94,7 +94,15 @@ function OnScriptRenderSettings(x, y, w, h)
     x = x + Spacing
     y = y + Spacing
     w = w - Spacing * 2
-
+    
+    rect = UIRect()
+	rect.x = x
+	rect.y = y
+	rect.w = w
+	rect.h = 20
+    Game.Ui.DoLabel(rect, "Bloodpatch Config", 13.0, 0, -1, 0)
+ 	y = y + Spacing + 20
+ 
 	_ui.SetUiColor(1, 1, 1, 0.5)
     if(_ui.DoButton_Menu("Use Tee color as blood color", Config.UseTeeColor, x + Spacing, y + Spacing, 250, 20, "", 15) ~= 0) then
     	Config.UseTeeColor = ((Config.UseTeeColor == 1) and 0 or 1)
@@ -126,6 +134,7 @@ function OnScriptRenderSettings(x, y, w, h)
     --UiDoSlider(x + Spacing, y + Spacing, 250, 15, 0, Config.StdColorB, "SliderStdColorB")
 
 end
+
 
 
 function OnScriptSaveSettings()

@@ -220,6 +220,8 @@ void CGameClient::OnConsoleInit()
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
+	m_pUi = &m_UI;
+
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_All.Add(m_pSkins);
 	m_All.Add(m_pCountryFlags);

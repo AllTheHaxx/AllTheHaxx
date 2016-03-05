@@ -372,6 +372,7 @@ public:
 	class CIRCBind *m_pIRCBind;
 	class CIdentity *m_pIdentity;
 	class CCollision *m_pCollision;
+	class CUI *m_pUi;
 
 	// DDRace
 
