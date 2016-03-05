@@ -249,6 +249,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginClass<IConsole>("IConsole")
 			.addFunction("Print", &IConsole::Print)
+			.addFunction("ExecuteLine", &IConsole::ExecuteLine)
 		.endClass()
 		
 		.beginClass<CEmoticon>("CEmoticon")
