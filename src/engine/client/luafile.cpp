@@ -315,6 +315,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
 
 			.addFunction("KeyDown", &IInput::KeyDown)
+
+			.addFunction("MouseModeRelative", &IInput::MouseModeRelative)
+			.addFunction("MouseModeAbsolute", &IInput::MouseModeAbsolute)
 		.endClass()
 		
 		//Server Infos
