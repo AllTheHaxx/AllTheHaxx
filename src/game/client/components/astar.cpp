@@ -162,19 +162,17 @@ int CAStar::GetFinish()
 
 void CAStar::BuildPath()
 {
-#if defined(CONF_FAMILY_UNIX)
+//#if defined(CONF_FAMILY_UNIX)
 	int Start = GetStart();
 	int Finish = GetFinish();
 	int SolutionLength = 0;
 	int *pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
 	dbg_msg("path", "start=%i finish=%i solution length=%i", Start, Finish, SolutionLength);
 
-	bool NoFreeze = true; // avoid freeze?
 	if(SolutionLength == -1) // try again ignoring freeze
 	{
 		FillGrid(false);
 		pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
-		bool NoFreeze = false;
 	}
 
 	if(g_Config.m_ClNotifications && g_Config.m_ClPathFinding)
@@ -182,7 +180,7 @@ void CAStar::BuildPath()
 		if(SolutionLength != -1)
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Found path. Length: %i.%s", SolutionLength, NoFreeze?"":" (Ignored freeze)");
+			str_format(aBuf, sizeof(aBuf), "Found path. Length: %i", SolutionLength);
 			m_pClient->m_pHud->PushNotification(aBuf);
 		}
 		else
@@ -211,7 +209,7 @@ void CAStar::BuildPath()
 		}
 		free(pSolution);
 	}
-#endif
+//#endif
 }
 
 void CAStar::FillGrid(bool NoFreeze)

@@ -1,7 +1,7 @@
 #ifndef PRIORITYQUEUE_H_
 #define PRIORITYQUEUE_H_
 #include <base/system.h>
-#if defined(CONF_FAMILY_UNIX)
+//#if defined(CONF_FAMILY_UNIX)
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -23,7 +23,7 @@ void insert (queue *q, int value, double priority);
 void deleteMin (queue *q);
 item *findMin (const queue *q);
 void changePriority (queue *q, int ind, double newPriority);
-void delete (queue *q, int ind);
+void deleteq (queue *q, int ind);
 int priorityOf (const queue *q, int ind);
 int exists (const queue *q, int ind);
 queue *createQueue ();
@@ -33,4 +33,4 @@ void freeQueue (queue *q);
 }
 #endif
 #endif
-#endif
+//#endif
