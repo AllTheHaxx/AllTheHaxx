@@ -220,8 +220,11 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #if defined(CONF_FAMILY_WINDOWS)
 		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #else
-		if(str_comp(sys, "chat") == 0) // colored output
+		// colored output
+		if(str_comp(sys, "chat") == 0)
 			printf("\033[0;%im", 34);
+		else if(str_comp(sys, "teamchat") == 0)
+			printf("\033[0;%im", 32);
 		else
 			printf("\033[0;%im", 0);
 		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
