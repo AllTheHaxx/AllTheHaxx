@@ -2736,17 +2736,51 @@ void CClient::Run()
 	bool LastG = false;
 	
 	int LastConsoleMode = g_Config.m_ClConsoleMode;
+	clock_t ConsoleModeEmote = 0;  //timestamps
 
 	while (1)
 	{
 		if(g_Config.m_ClConsoleMode != LastConsoleMode)
 		{
+			CServerInfo Info;
+			GetServerInfo(&Info);
+			
 			if(g_Config.m_ClConsoleMode) // hide
+			{
 				m_pGraphics->HideWindow();
+				
+				if(strncmp(Info.m_aGameType, "DD", 2) == 0)
+				{
+					//eye emote
+					CNetMsg_Cl_Say Msg;
+					Msg.m_Team = 0;
+					Msg.m_pMessage = "/emote blink 999999";
+					SendPackMsg(&Msg, MSGFLAG_VITAL);
+				}
+			}
 			else // show
+			{
 				m_pGraphics->UnhideWindow();
+				
+				if(strncmp(Info.m_aGameType, "DD", 2) == 0)
+				{
+					//eye emote
+					CNetMsg_Cl_Say Msg;
+					Msg.m_Team = 0;
+					Msg.m_pMessage = "/emote normal 1";
+					SendPackMsg(&Msg, MSGFLAG_VITAL);
+				}
+			}
 
 			LastConsoleMode = g_Config.m_ClConsoleMode;
+		}
+		
+		if(g_Config.m_ClConsoleMode && clock() > ConsoleModeEmote*CLOCKS_PER_SEC/1000)
+		{
+			ConsoleModeEmote = clock();
+			CNetMsg_Cl_Emoticon Msg;
+			Msg.m_Emoticon = 12;
+			SendPackMsg(&Msg, MSGFLAG_VITAL);
 		}
 		
 		VersionUpdate();
