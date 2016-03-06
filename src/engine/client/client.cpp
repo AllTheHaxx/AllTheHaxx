@@ -2737,6 +2737,8 @@ void CClient::Run()
 	
 	int LastConsoleMode = g_Config.m_ClConsoleMode;
 	clock_t ConsoleModeEmote = 0;  //timestamps
+	clock_t LastTick = 0;
+
 
 	while (1)
 	{
@@ -2782,6 +2784,9 @@ void CClient::Run()
 			Msg.m_Emoticon = 12;
 			SendPackMsg(&Msg, MSGFLAG_VITAL);
 		}
+		
+		if(clock() - LastTick > CLOCKS_PER_SEC/50)
+			LUA_FIRE_EVENT("OnTick");
 		
 		VersionUpdate();
 
