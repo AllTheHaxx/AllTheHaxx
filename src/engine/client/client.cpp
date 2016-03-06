@@ -2736,7 +2736,7 @@ void CClient::Run()
 	bool LastG = false;
 	
 	int LastConsoleMode = g_Config.m_ClConsoleMode;
-	clock_t ConsoleModeEmote = 0;  //timestamps
+	int64 ConsoleModeEmote = 0;  //timestamps
 	clock_t LastTick = 0;
 
 
@@ -2777,9 +2777,9 @@ void CClient::Run()
 			LastConsoleMode = g_Config.m_ClConsoleMode;
 		}
 		
-		if(g_Config.m_ClConsoleMode && clock() - ConsoleModeEmote > CLOCKS_PER_SEC)
+		if(g_Config.m_ClConsoleMode && time_get() - ConsoleModeEmote > time_freq())
 		{
-			ConsoleModeEmote = clock();
+			ConsoleModeEmote = time_get();
 			CNetMsg_Cl_Emoticon Msg;
 			Msg.m_Emoticon = 12;
 			SendPackMsg(&Msg, MSGFLAG_VITAL);
