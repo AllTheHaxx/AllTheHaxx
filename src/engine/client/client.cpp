@@ -2781,7 +2781,6 @@ void CClient::Run()
 			CNetMsg_Cl_Emoticon Msg;
 			Msg.m_Emoticon = 12;
 			SendPackMsg(&Msg, MSGFLAG_VITAL);
-			dbg_msg("Test", "HI");
 		}
 		
 		VersionUpdate();
