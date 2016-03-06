@@ -16,7 +16,6 @@ end
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
 Import("other/luajit/luajit.lua")
-Import("other/glew/glew.lua")
 Import("other/freetype/freetype.lua")
 Import("other/curl/curl.lua")
 Import("other/opus/opusfile.lua")
@@ -33,7 +32,6 @@ config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
 config:Add(luajit.OptFind("luajit", true))
-config:Add(glew.OptFind("glew", true))
 config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
@@ -166,7 +164,7 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopusfile-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/luajit/win32/lua51.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/glew/win32/glew32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/glew/glew32.dll"))
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib64/freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL.dll"))
@@ -309,13 +307,13 @@ function build(settings)
 		libwebsockets = Compile(settings, Collect("src/engine/external/libwebsockets/*.c"))
 	end
 	settings.cc.includes:Add("src/engine/external/sqlite3")
+	settings.cc.includes:Add("other/glew/include")
 	sqlite3 = Compile(settings, Collect("src/engine/external/sqlite3/*.c"))
 	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
 	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
 	
 	-- apply luajit and glew settings
 	config.luajit:Apply(settings)
-	config.glew:Apply(settings)
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -323,6 +321,8 @@ function build(settings)
 	client_settings = engine_settings:Copy()
 	launcher_settings = engine_settings:Copy()
 
+	client_settings.link.libpath:Add("other/glew/lib")
+	
 	if family == "unix" then
 		if platform == "macosx" then
 			client_settings.link.frameworks:Add("OpenGL")
@@ -335,6 +335,7 @@ function build(settings)
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
+			client_settings.link.libs:Add("GLEW")
 		end
 
 	elseif family == "windows" then
@@ -348,6 +349,7 @@ function build(settings)
 		client_settings.link.libs:Add("winmm")
 		client_settings.link.libs:Add("libopusfile-0")
 		client_settings.link.libs:Add("curl")
+		client_settings.link.libs:Add("glew32")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")

@@ -62,6 +62,8 @@ protected:
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
+	bool InitShaders();
+
 	void Flush();
 	void AddVertices(int Count);
 	void Rotate(const CPoint &rCenter, CVertex *pPoints, int NumPoints);

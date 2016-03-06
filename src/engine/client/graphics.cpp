@@ -20,7 +20,8 @@
 	#include <GL/glu.h>
 	#define glOrtho glOrthof
 #else
-	#include "SDL_opengl.h"
+	//#include "SDL_opengl.h"
+	#include <GL/glew.h>
 #endif
 
 #if defined(SDL_VIDEO_DRIVER_X11)
@@ -79,6 +80,73 @@ static CVideoMode g_aFakeModes[] = {
 	{1920,1200,5,6,5}, {1920,1440,5,6,5}, {1920,2400,5,6,5},
 	{2048,1536,5,6,5}
 };
+
+bool CGraphics_OpenGL::InitShaders()
+{
+	printf("Compiling vertex shader... ");
+	FILE *f;
+	if(!(f = fopen("data/shaders/test.vsh", "r")))
+	{
+		printf("Failed to open data/shaders/test.vsh\n");
+		return false;
+	}
+	GLchar *vertexSource = (char*)malloc(102400);
+	fread(vertexSource, 102400, 102400, f);
+	fclose(f); f = 0;
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, (const GLchar**)&vertexSource, NULL);
+	glCompileShader(vertexShader);
+	free(vertexSource);
+
+	GLint status;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+	printf("\033[0;%im%s\n", status == GL_TRUE ? 32 : 31, status == GL_TRUE ? "SUCCESSFUL" : "FAILED");
+	printf("\033[0;10m");
+	if(status != GL_TRUE)
+	{
+		char buffer[512];
+		glGetShaderInfoLog(vertexShader, 512, NULL, buffer);
+		printf("\033[0;33m%s\033[0;10m", buffer);
+		return false;
+	}
+
+	printf("Compiling fragment shader... ");
+	if(!(f = fopen("data/shaders/test.fsh", "r")))
+	{
+		printf("Failed to open data/shaders/test.fsh\n");
+		return false;
+	}
+	GLchar *fragmentSource = (char*)malloc(102400);
+	fread(fragmentSource, 102400, 102400, f);
+	fclose(f); f = 0;
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, (const GLchar**)&fragmentSource, NULL);
+	glCompileShader(fragmentShader);
+	free(fragmentSource);
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+	printf("\033[0;%im%s\n", status == GL_TRUE ? 32 : 31, status == GL_TRUE ? "SUCCESSFUL" : "FAILED");
+	printf("\033[0;10m");
+	if(status != GL_TRUE)
+	{
+		char buffer[512];
+		glGetShaderInfoLog(fragmentShader, 512, NULL, buffer);
+		printf("\033[0;33m%s\033[0;10m", buffer);
+		exit(1);
+	}
+
+	printf("Creating shader program... "); printf("\033[0;32mSUCCESSFUL\033[0;10m\n");
+	GLuint shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glBindFragDataLocation(shaderProgram, 0, "outColor");
+
+	printf("Linking shaders... "); printf("\033[0;32mSUCCESSFUL\033[0;10m\n");
+	glLinkProgram(shaderProgram);
+	glUseProgram(shaderProgram);
+
+	printf("\n--------------- GLEW INIT END ---------------\n\n\n");
+	//exit(0);
+}
 
 void CGraphics_OpenGL::Flush()
 {
@@ -1035,6 +1103,25 @@ int CGraphics_SDL::Init()
 	SDL_ShowCursor(0);
 
 	CGraphics_OpenGL::Init();
+
+	// glew
+	//dbg_msg("GLEW", "\n\n\n-------- GLEW INIT BEGIN --------\n\n");
+	dbg_msg("GLEW", "glsl version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	dbg_msg("GLEW", "Initializing glew... ");
+	GLenum error = glewInit();
+	if (error != GLEW_OK)
+	{
+		dbg_msg("GLEW", "ERROR %p\n", error);
+		exit(1);
+	}
+	//printf("\033[0;32mSUCCESSFUL\033[0;10m\n");
+
+	if(!GLEW_VERSION_2_1)
+	{
+		dbg_msg("GLEW", ">> Machine doesn't support the GL 2.1 API, quitting!\n");
+	 	exit(1); // TODO handle this
+	}
 
 	MapScreen(0,0,g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
 	return 0;
