@@ -162,7 +162,7 @@ int CAStar::GetFinish()
 
 void CAStar::BuildPath()
 {
-#if defined(CONF_FAMILY_UNIX)
+//#if defined(CONF_FAMILY_UNIX)
 	int Start = GetStart();
 	int Finish = GetFinish();
 	int SolutionLength = 0;
@@ -211,7 +211,7 @@ void CAStar::BuildPath()
 		}
 		free(pSolution);
 	}
-#endif
+//#endif
 }
 
 void CAStar::FillGrid(bool NoFreeze)
