@@ -28,6 +28,20 @@ bool CLuaBinding::LuaImport(int UID, const char *pFilename)
 	return false;
 }
 
+bool CLuaBinding::LuaKillScript(int UID)
+{
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	for(int i = 0; i < pGameClient->Client()->Lua()->GetLuaFiles().size(); i++)
+	{
+		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->GetUID() == UID)
+		{
+			pGameClient->Client()->Lua()->GetLuaFiles()[i]->Unload();
+			return true;
+		}
+	}
+	return false;
+}
+
 // external info
 int CLuaBinding::LuaGetPlayerScore(int ClientID)
 {

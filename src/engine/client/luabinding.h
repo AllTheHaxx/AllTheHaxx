@@ -17,6 +17,7 @@ public:
 
 	// system namespace
 	static bool LuaImport(int UID, const char *pFilename);
+	static bool LuaKillScript(int UID);
 
 	// external info
 	static int LuaGetPlayerScore(int ClientID);
