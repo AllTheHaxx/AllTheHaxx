@@ -144,6 +144,7 @@ public:
 	virtual void WaitForIdle() = 0;
 
 	virtual void NotifyWindow() = 0;
+	virtual void HideWindow() = 0;
 };
 
 class IEngineGraphics : public IGraphics

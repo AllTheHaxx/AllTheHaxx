@@ -1109,6 +1109,30 @@ void CGraphics_SDL::NotifyWindow()
 	#endif
 }
 
+void CGraphics_SDL::HideWindow()
+{
+	// get window handle
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+	if(!SDL_GetWMInfo(&info))
+	{
+		dbg_msg("gfx", "unable to obtain window handle");
+		return;
+	}
+
+	#if defined(CONF_FAMILY_WINDOWS)
+		// windows shit here
+	#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
+		Display *dpy = info.info.x11.display;
+		Window win;
+		if(m_pScreenSurface->flags & SDL_FULLSCREEN)
+			win = info.info.x11.fswindow;
+		else
+			win = info.info.x11.wmwindow;
+		XUnmapWindow(dpy, win);
+	#endif
+}
+
 void CGraphics_SDL::TakeScreenshot(const char *pFilename)
 {
 	char aDate[20];

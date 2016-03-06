@@ -2758,6 +2758,7 @@ void CClient::Run()
 					ShowWindow(info.window, SW_HIDE);
 				#else
 					//Linux here!
+					m_pGraphics->HideWindow();
 				#endif
 			}
 			else //Show
