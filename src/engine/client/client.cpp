@@ -2739,36 +2739,13 @@ void CClient::Run()
 
 	while (1)
 	{
-		//
 		if(g_Config.m_ClConsoleMode != LastConsoleMode)
 		{
-			#if defined(CONF_FAMILY_WINDOWS)
-				SDL_SysWMinfo info;
-				SDL_VERSION(&info.version);
-					
-				if(!SDL_GetWMInfo(&info))
-				{
-					dbg_msg("gfx", "unable to obtain window handle");
-					return;
-				}
-			#endif
 			if(g_Config.m_ClConsoleMode) // hide
-			{
-				#if defined(CONF_FAMILY_WINDOWS)
-					ShowWindow(info.window, SW_HIDE);
-				#else
-					m_pGraphics->HideWindow();
-				#endif
-			}
+				m_pGraphics->HideWindow();
 			else // show
-			{
-				#if defined(CONF_FAMILY_WINDOWS)
-					ShowWindow(info.window, SW_RESTORE);
-				#else
-					m_pGraphics->UnhideWindow();
-				#endif
-			}
-			
+				m_pGraphics->UnhideWindow();
+
 			LastConsoleMode = g_Config.m_ClConsoleMode;
 		}
 		
