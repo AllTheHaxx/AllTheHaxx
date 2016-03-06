@@ -2752,21 +2752,20 @@ void CClient::Run()
 					return;
 				}
 			#endif
-			if(g_Config.m_ClConsoleMode) //Hide
+			if(g_Config.m_ClConsoleMode) // hide
 			{
 				#if defined(CONF_FAMILY_WINDOWS)
 					ShowWindow(info.window, SW_HIDE);
 				#else
-					//Linux here!
 					m_pGraphics->HideWindow();
 				#endif
 			}
-			else //Show
+			else // show
 			{
 				#if defined(CONF_FAMILY_WINDOWS)
 					ShowWindow(info.window, SW_RESTORE);
 				#else
-					//Linux
+					m_pGraphics->UnhideWindow();
 				#endif
 			}
 			
