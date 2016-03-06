@@ -135,14 +135,14 @@ static struct coord_t adjustInDirection (struct coord_t c, int dir)
 	
 	switch ((dir + 65536) % 8) 
 	{
-		case 0: ret.x = c.x;   ret.y = c.y-1;
-		case 1: ret.x = c.x+1; ret.y = c.y-1;
-		case 2: ret.x = c.x+1; ret.y = c.y;
-		case 3: ret.x = c.x+1; ret.y = c.y+1;
-		case 4: ret.x = c.x;   ret.y = c.y+1; 
-		case 5: ret.x = c.x-1; ret.y = c.y+1;
-		case 6: ret.x = c.x-1; ret.y = c.y;
-		case 7: ret.x = c.x-1; ret.y = c.y-1; 
+		case 0: ret.x = c.x;   ret.y = c.y-1; break;
+		case 1: ret.x = c.x+1; ret.y = c.y-1; break;
+		case 2: ret.x = c.x+1; ret.y = c.y; break;
+		case 3: ret.x = c.x+1; ret.y = c.y+1; break;
+		case 4: ret.x = c.x;   ret.y = c.y+1; break;
+		case 5: ret.x = c.x-1; ret.y = c.y+1; break;
+		case 6: ret.x = c.x-1; ret.y = c.y; break;
+		case 7: ret.x = c.x-1; ret.y = c.y-1; break;
 	}
 	return ret;
 }
