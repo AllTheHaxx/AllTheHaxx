@@ -222,7 +222,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #else
 		// colored output
 		if(str_comp(sys, "chat") == 0)
-			printf("\033[0;%im", 34);
+			printf("\033[0;%im", 36);
 		else if(str_comp(sys, "teamchat") == 0)
 			printf("\033[0;%im", 32);
 		else
