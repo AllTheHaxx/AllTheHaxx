@@ -56,7 +56,7 @@ bam.exe
 *.pyc
 *.dll
 *.db
-*.db-journal 
+*.db-journal
 lua/*.config
 crash_*.txt
 
