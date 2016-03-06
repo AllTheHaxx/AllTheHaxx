@@ -167,6 +167,8 @@ MACRO_CONFIG_INT(ClIRCAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGF
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
 MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console")
 
+MACRO_CONFIG_INT(ClShader, cl_shaders, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Shaders")
+MACRO_CONFIG_INT(GfxFBO, gfx_fbo, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use the frame buffer object for rendering")
 
 // translator stuff
 MACRO_CONFIG_INT(ClTransIn, cl_trans_in, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate incoming messages")

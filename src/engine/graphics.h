@@ -60,6 +60,24 @@ public:
 		TEXLOAD_NOMIPMAPS = 2,
 	};
 
+	enum
+	{
+		SHADER_NONE = 0,
+		SHADER_GRAYSCALE,
+		SHADER_SEPIA,
+		SHADER_NEGATIVE,
+		SHADER_BLUR,
+		SHADER_MOTION_BLUR,
+		SHADER_POST,
+		SHADER_TOON_BW,
+		SHADER_RELIEF_BW,
+		SHADER_COLOR,
+		SHADER_HEXAGON,
+		SHADER_STEREOSCOPE,
+		SHADER_LIGHT,
+		NUM_SHADERS,
+	};
+
 	int ScreenWidth() const { return m_ScreenWidth; }
 	int ScreenHeight() const { return m_ScreenHeight; }
 	float ScreenAspect() const { return (float)ScreenWidth()/(float)ScreenHeight(); }

@@ -25,6 +25,7 @@ protected:
 	{
 		MAX_VERTICES = 32*1024,
 		MAX_TEXTURES = 1024*4,
+		MAX_SHADERS = 64,
 
 		DRAWING_QUADS=1,
 		DRAWING_LINES=2
@@ -35,6 +36,28 @@ protected:
 
 	CColor m_aColor[4];
 	CTexCoord m_aTexture[4];
+
+	typedef struct CShader
+	{
+		bool m_Active;
+		int m_ProgramHandle;
+		int m_VertexHandle;
+		int m_FragmentHandle;
+	};
+
+	CShader m_Shaders[MAX_SHADERS];
+
+	GLuint m_Fbo;
+	GLuint m_FboDepth;
+	GLuint m_FboTexture;
+
+	GLuint m_ActiveTexture;
+
+	int m_ShaderID;
+	int m_TextureOffset[3];
+	bool m_ShaderEnable;
+	bool m_UseFBO;
+
 
 	bool m_RenderEnable;
 
@@ -62,11 +85,12 @@ protected:
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
-	bool InitShaders();
+	static bool InitShaders();
 
 	void Flush();
 	void AddVertices(int Count);
 	void Rotate(const CPoint &rCenter, CVertex *pPoints, int NumPoints);
+	void ShaderLoad(const char *vs, const char *fs);
 
 	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
 	static unsigned char *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
@@ -102,6 +126,16 @@ public:
 
 	void ScreenshotDirect(const char *pFilename);
 
+	virtual void ShaderSet(int ID);
+	virtual void ShaderUniformSet(const char* name, float *var, int num);
+
+	virtual void ShaderBegin();
+	virtual void ShaderEnd();
+
+	virtual void FrameBufferToScreen();
+	virtual void UseFrameBuffer(bool active);
+	virtual unsigned int FrameBufferTexture() { return (unsigned int)m_FboTexture; }
+
 	virtual void TextureSet(int TextureID);
 
 	virtual void Clear(float r, float g, float b);
@@ -124,6 +158,11 @@ public:
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
 
 	virtual int Init();
+	virtual void ShaderInit();
+
+	virtual void FrameBufferInit();
+	virtual void FrameBufferDepthBufferInit();
+	virtual void FrameBufferTextureInit();
 };
 
 class CGraphics_SDL : public CGraphics_OpenGL

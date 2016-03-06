@@ -1,0 +1,18 @@
+const char *SOURCE_RELIEF_BW_FRAGMENT =
+"uniform float u_IsTex;\n"
+"uniform sampler2D u_Tex;\n"
+"varying vec4 v_Color;\n"
+"void main()\n"
+"{\n"
+"	vec4 Color = v_Color;\n"
+"	if(u_IsTex == 1.0)\n"
+"	{\n"
+"		Color -= texture2D(u_Tex , gl_TexCoord[0].st-0.002)*2.7;\n"
+"		Color += texture2D( u_Tex , gl_TexCoord[0].st+0.002)*2.7;\n"
+"		float gr = (0.21*Color.r + 0.71*Color.g + 0.07*Color.b) / 3.0;\n"
+"		Color.rgb = vec3(gr,gr,gr);\n"
+"	}\n"
+"	else\n"
+"		Color = v_Color;\n"
+"	gl_FragColor = Color;\n"
+"}\n";

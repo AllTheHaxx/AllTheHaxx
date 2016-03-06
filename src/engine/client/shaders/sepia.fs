@@ -1,0 +1,16 @@
+const char *SOURCE_SEPIA_FRAGMENT =
+"uniform float u_IsTex;\n"
+"uniform sampler2D u_Tex;\n"
+"varying vec4 v_Color;\n"
+"void main()\n"
+"{\n"
+"	vec4 Color;\n"
+"	if(u_IsTex == 1.0)\n"
+"		Color = texture2D(u_Tex, gl_TexCoord[0].st);\n"
+"	else\n"
+"		Color = v_Color;\n"
+"	gl_FragColor.r = (Color.r * 0.393) + (Color.g * 0.769) + (Color.b * 0.189);\n"
+"	gl_FragColor.g = (Color.r * 0.349) + (Color.g * 0.686) + (Color.b * 0.168);\n"
+"	gl_FragColor.b = (Color.r * 0.272) + (Color.g * 0.534) + (Color.b * 0.131);\n"
+"	gl_FragColor.a = Color.a;\n"
+"}\n";

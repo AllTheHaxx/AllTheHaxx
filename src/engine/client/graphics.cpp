@@ -41,6 +41,7 @@
 #include <math.h> // cosf, sinf
 
 #include "graphics.h"
+#include "shaders.h"
 
 
 #if defined(CONF_PLATFORM_MACOSX)
@@ -80,7 +81,7 @@ static CVideoMode g_aFakeModes[] = {
 	{1920,1200,5,6,5}, {1920,1440,5,6,5}, {1920,2400,5,6,5},
 	{2048,1536,5,6,5}
 };
-
+/*
 bool CGraphics_OpenGL::InitShaders()
 {
 	printf("Compiling vertex shader... ");
@@ -145,9 +146,10 @@ bool CGraphics_OpenGL::InitShaders()
 	glUseProgram(shaderProgram);
 
 	printf("\n--------------- GLEW INIT END ---------------\n\n\n");
-	//exit(0);
-}
 
+	return true;
+}
+*/
 void CGraphics_OpenGL::Flush()
 {
 	if(m_NumVertices == 0)
@@ -921,6 +923,260 @@ void CGraphics_OpenGL::QuadsText(float x, float y, float Size, const char *pText
 	}
 }
 
+void CGraphics_OpenGL::ShaderSet(int ID) { if(ID < NUM_SHADERS) m_ShaderID = ID; }
+
+void CGraphics_OpenGL::ShaderBegin()
+{
+	if(!m_ShaderEnable)
+		return;
+	glUseProgramObjectARB(m_Shaders[m_ShaderID].m_ProgramHandle);
+}
+
+void CGraphics_OpenGL::ShaderEnd()
+{
+	if(!m_ShaderEnable)
+		return;
+	glUseProgramObjectARB(0);
+}
+
+void CGraphics_OpenGL::ShaderUniformSet(const char* name, float *var, int num)
+{
+	if(!m_ShaderEnable)
+		return;
+
+	int varHandler = glGetUniformLocation(m_Shaders[m_ShaderID].m_ProgramHandle, name);
+	if(num == 1)
+		glUniform1fARB(varHandler, var[0]);
+	if(num == 2)
+		glUniform2fARB(varHandler, var[0], var[1]);
+	if(num == 3)
+		glUniform3fARB(varHandler, var[0], var[1], var[2]);
+	if(num == 4)
+		glUniform4fARB(varHandler, var[0], var[1], var[2], var[3]);
+}
+
+void CGraphics_OpenGL::ShaderLoad(const char *vs, const char *fs)
+{
+	if(!m_ShaderEnable)
+		return;
+
+	FILE *f;
+	char *vertexSource = (char*)malloc(10240);
+	char *fragmentSource = (char*)malloc(10240);
+	f = fopen(vs, "r");
+	if(f)
+	{
+		fread(vertexSource, 10240, 10240, f);
+		fclose(f); f = 0;
+	}
+	f = fopen(fs, "r");
+	if(f)
+	{
+		fread(fragmentSource, 10240, 10240, f);
+		fclose(f); f = 0;
+	}
+	if(vertexSource[0] == '\0' || fragmentSource[0] == '\0')
+		return;
+
+	GLenum vsHandle, fsHandle, spHandle; //vertex- and fragment(pixel)shader, shaderprogramhandle
+	int linked = 0;
+	char error[4096];
+
+	spHandle = glCreateProgramObjectARB();
+	vsHandle = glCreateShaderObjectARB(GL_VERTEX_SHADER);
+	fsHandle = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
+
+	glShaderSourceARB(vsHandle, 1, (const GLchar**)&vertexSource, NULL);
+	free(vertexSource);
+	glShaderSourceARB(fsHandle, 1, (const GLchar**)&fragmentSource, NULL);
+	free(fragmentSource);
+	glCompileShaderARB (vsHandle);
+	glCompileShaderARB (fsHandle);
+	glAttachObjectARB(spHandle, vsHandle);
+	glAttachObjectARB(spHandle, fsHandle);
+	glLinkProgramARB(spHandle);
+
+	glGetProgramivARB(spHandle, GL_LINK_STATUS, &linked);
+	if(!linked)
+	{
+		glGetProgramInfoLog(spHandle, sizeof(error), 0, error);
+		if(strlen(error) > 0)
+			dbg_msg("gfx", error);
+	}
+
+	for(int i = 1; i < MAX_SHADERS; i++)
+	{
+		if(m_Shaders[i].m_Active)
+			continue;
+		m_Shaders[i].m_ProgramHandle = spHandle;
+		m_Shaders[i].m_VertexHandle = vsHandle;
+		m_Shaders[i].m_FragmentHandle = fsHandle;
+		m_Shaders[i].m_Active = true;
+		dbg_msg("gfx", "shader #%d loaded", i);
+		return;
+	}
+	dbg_msg("gfx", "shader capacity reached");
+}
+
+void CGraphics_OpenGL::FrameBufferToScreen()
+{
+	float var[2];
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	if(!g_Config.m_GfxFBO)
+		return;
+
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_FboTexture);
+
+	ShaderSet(g_Config.m_ClShader);
+	ShaderBegin();
+	var[0] = 1.0f;
+	ShaderUniformSet("u_IsTex", var, 1);
+
+	var[0] = m_ScreenWidth;
+	var[1] = m_ScreenHeight;
+	ShaderUniformSet("u_Resolution", var, 2);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, m_ScreenWidth, m_ScreenHeight, 0, 1.0f, 10.f);
+	glClear(0);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f);glVertex3f (0,0,-5.0f);
+		glTexCoord2f(1.0f, 1.0f);glVertex3f (m_ScreenWidth, 0, -5.0f);
+		glTexCoord2f(1.0f, 0.0f);glVertex3f (m_ScreenWidth, m_ScreenHeight, -5.0f);
+		glTexCoord2f(0.0f, 0.0f);glVertex3f (0, m_ScreenHeight, -5.0f);
+	glEnd();
+	glFlush (); //bottleneck ?
+	//glBindTexture(GL_TEXTURE_2D, 0); // Unbind any textures
+	glDisable(GL_TEXTURE_2D);
+	ShaderEnd();
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_Fbo);
+}
+
+void CGraphics_OpenGL::UseFrameBuffer(bool active)
+{
+	if(active)
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_Fbo);
+	else
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+}
+
+void CGraphics_OpenGL::FrameBufferInit()
+{
+	//FrameBufferDepthBufferInit(); // no depth needed
+	FrameBufferTextureInit();
+	glGenFramebuffersEXT(1, &m_Fbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_Fbo);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, m_FboTexture, 0);
+
+	//glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_FboDepth);
+
+	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+		dbg_msg("gfx", "failed to create fbo");
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+}
+
+void CGraphics_OpenGL::FrameBufferDepthBufferInit()
+{
+	glGenRenderbuffersEXT(1, &m_FboDepth);
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_FboDepth);
+	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, m_ScreenWidth, m_ScreenHeight);
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_FboDepth);
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+}
+
+void CGraphics_OpenGL::FrameBufferTextureInit()
+{
+	glGenTextures(1, &m_FboTexture);
+	glBindTexture(GL_TEXTURE_2D, m_FboTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_ScreenWidth, m_ScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void CGraphics_OpenGL::ShaderInit()
+{
+	char *aExt = (char*)glGetString(GL_EXTENSIONS);
+
+	if(str_find_nocase(aExt, "GL_ARB_shader_objects") &&
+      str_find_nocase(aExt, "GL_ARB_shading_language_100") &&
+      str_find_nocase(aExt, "GL_ARB_vertex_shader") &&
+      str_find_nocase(aExt, "GL_ARB_fragment_shader") )
+	{
+		glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC) SDL_GL_GetProcAddress("glAttachObjectARB");
+		glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC) SDL_GL_GetProcAddress("glCompileShaderARB");
+		glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC) SDL_GL_GetProcAddress("glCreateProgramObjectARB");
+		glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC) SDL_GL_GetProcAddress("glCreateShaderObjectARB");
+		glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC) SDL_GL_GetProcAddress("glDeleteObjectARB");
+		glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC) SDL_GL_GetProcAddress("glGetInfoLogARB");
+		glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC) SDL_GL_GetProcAddress("glGetObjectParameterivARB");
+		glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC) SDL_GL_GetProcAddress("glGetUniformLocationARB");
+		glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC) SDL_GL_GetProcAddress("glLinkProgramARB");
+		glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC) SDL_GL_GetProcAddress("glShaderSourceARB");
+		glUniform1iARB = (PFNGLUNIFORM1IARBPROC) SDL_GL_GetProcAddress("glUniform1iARB");
+		glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC) SDL_GL_GetProcAddress("glUseProgramObjectARB");
+		glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC) SDL_GL_GetProcAddress("glGetProgramivARB");
+		glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC) SDL_GL_GetProcAddress("glGetProgramInfoLog");
+		glUniform1fARB = (PFNGLUNIFORM1FARBPROC) SDL_GL_GetProcAddress("glUniform1fARB");
+		glUniform2fARB = (PFNGLUNIFORM2FARBPROC) SDL_GL_GetProcAddress("glUniform2fARB");
+		glUniform3fARB = (PFNGLUNIFORM3FARBPROC) SDL_GL_GetProcAddress("glUniform3fARB");
+		glUniform4fARB = (PFNGLUNIFORM4FARBPROC) SDL_GL_GetProcAddress("glUniform4fARB");
+		glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC) SDL_GL_GetProcAddress("glGetUniformLocationARB");
+
+		if(glAttachObjectARB &&
+			glCompileShaderARB &&
+			glCreateProgramObjectARB &&
+			glCreateShaderObjectARB &&
+			glDeleteObjectARB &&
+			glGetInfoLogARB &&
+			glGetObjectParameterivARB &&
+			glGetUniformLocationARB &&
+			glLinkProgramARB &&
+			glShaderSourceARB &&
+			glUniform1iARB &&
+			glUseProgramObjectARB &&
+			glGetProgramivARB &&
+			glUniform1fARB &&
+			glUniform2fARB &&
+			glUniform3fARB &&
+			glUniform4fARB &&
+			glGetUniformLocationARB
+			)
+			m_ShaderEnable = true;
+	}
+
+	if(!m_ShaderEnable)
+	{
+		dbg_msg("gfx", "shaders are NOT supported");
+		return;
+	}
+
+	for(int i = 1; i < MAX_SHADERS; i++)
+		m_Shaders[i].m_Active = false;
+
+	ShaderLoad(SOURCE_GRAYSCALE_VERTEX, SOURCE_GRAYSCALE_FRAGMENT);
+	ShaderLoad(SOURCE_SEPIA_VERTEX, SOURCE_SEPIA_FRAGMENT);
+	ShaderLoad(SOURCE_NEGATIVE_VERTEX, SOURCE_NEGATIVE_FRAGMENT);
+	ShaderLoad(SOURCE_BLUR_VERTEX, SOURCE_BLUR_FRAGMENT);
+	ShaderLoad(SOURCE_MOTION_BLUR_VERTEX, SOURCE_MOTION_BLUR_FRAGMENT);
+	ShaderLoad(SOURCE_POST_VERTEX, SOURCE_POST_FRAGMENT);
+	ShaderLoad(SOURCE_TOON_BW_VERTEX, SOURCE_TOON_BW_FRAGMENT);
+	ShaderLoad(SOURCE_RELIEF_BW_VERTEX, SOURCE_RELIEF_BW_FRAGMENT);
+	ShaderLoad(SOURCE_COLOR_VERTEX, SOURCE_COLOR_FRAGMENT);
+	ShaderLoad(SOURCE_HEXAGON_VERTEX, SOURCE_HEXAGON_FRAGMENT);
+	ShaderLoad(SOURCE_STEREOSCOPE_VERTEX, SOURCE_STEREOSCOPE_FRAGMENT);
+	ShaderLoad(SOURCE_LIGHT_VERTEX, SOURCE_LIGHT_FRAGMENT);
+}
+
 int CGraphics_OpenGL::Init()
 {
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -1113,15 +1369,18 @@ int CGraphics_SDL::Init()
 	if (error != GLEW_OK)
 	{
 		dbg_msg("GLEW", "ERROR %p\n", error);
-		exit(1);
+		return -1;
 	}
 	//printf("\033[0;32mSUCCESSFUL\033[0;10m\n");
 
 	if(!GLEW_VERSION_2_1)
 	{
 		dbg_msg("GLEW", ">> Machine doesn't support the GL 2.1 API, quitting!\n");
-	 	exit(1); // TODO handle this
+	 	return -1;
 	}
+
+	CGraphics_OpenGL::FrameBufferInit();
+	CGraphics_OpenGL::ShaderInit();
 
 	MapScreen(0,0,g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
 	return 0;

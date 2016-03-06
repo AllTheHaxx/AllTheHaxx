@@ -312,7 +312,7 @@ function build(settings)
 	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
 	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
 	
-	-- apply luajit and glew settings
+	-- apply luajit settings
 	config.luajit:Apply(settings)
 
 	-- build game components
