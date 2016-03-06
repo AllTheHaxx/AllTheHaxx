@@ -127,7 +127,7 @@ int CAStar::GetStart()
 			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_BEGIN)
 				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
 			else
-				return -1;
+				continue;
 		}
 	}
 
@@ -150,7 +150,7 @@ int CAStar::GetFinish()
 			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_END)
 				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
 			else
-				return -1;
+				continue;
 		}
 	}
 
