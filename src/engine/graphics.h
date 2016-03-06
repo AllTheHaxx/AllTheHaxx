@@ -145,6 +145,7 @@ public:
 
 	virtual void NotifyWindow() = 0;
 	virtual void HideWindow() = 0;
+	virtual void UnhideWindow() = 0;
 };
 
 class IEngineGraphics : public IGraphics

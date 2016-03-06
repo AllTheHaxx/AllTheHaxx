@@ -310,4 +310,5 @@ public:
 	virtual int WindowOpen();
 	virtual void NotifyWindow();
 	virtual void HideWindow();
+	virtual void UnhideWindow();
 };

@@ -144,6 +144,7 @@ public:
 
 	virtual void NotifyWindow();
 	virtual void HideWindow();
+	virtual void UnhideWindow();
 
 	virtual void TakeScreenshot(const char *pFilename);
 	virtual void TakeCustomScreenshot(const char *pFilename);

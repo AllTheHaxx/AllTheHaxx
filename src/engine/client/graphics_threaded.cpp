@@ -915,6 +915,11 @@ void CGraphics_Threaded::HideWindow()
 	return m_pBackend->HideWindow();
 }
 
+void CGraphics_Threaded::UnhideWindow()
+{
+	return m_pBackend->UnhideWindow();
+}
+
 void CGraphics_Threaded::TakeScreenshot(const char *pFilename)
 {
 	// TODO: screenshot support
