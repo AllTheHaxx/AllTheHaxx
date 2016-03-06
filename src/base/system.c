@@ -225,6 +225,8 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 			printf("\033[0;%im", 36);
 		else if(str_comp(sys, "teamchat") == 0)
 			printf("\033[0;%im", 32);
+		else if(str_comp(sys, "serv") == 0)
+			printf("\033[0;%im", 33);
 		else
 			printf("\033[0;%im", 0);
 		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);

@@ -543,7 +543,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2?"whisper":(m_aLines[m_CurrentLine].m_Team?"teamchat":"chat"), aBuf, Highlighted);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, ClientID == -1?"serv":Team >= 2?"whisper":(m_aLines[m_CurrentLine].m_Team?"teamchat":"chat"), aBuf, Highlighted);
 	}
 
 	// play sound
