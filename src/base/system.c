@@ -218,6 +218,17 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 		va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
+		//see http://www.cplusplus.com/articles/2ywTURfi/
+		
+		if(str_comp(sys, "chat") == 0)
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+		else if(str_comp(sys, "teamchat") == 0)
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2);
+		else if(str_comp(sys, "serv") == 0)
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
+		else
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 8);
+		
 		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #else
 		// colored output
