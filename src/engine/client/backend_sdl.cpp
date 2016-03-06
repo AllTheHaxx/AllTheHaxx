@@ -740,7 +740,7 @@ void CGraphicsBackend_SDL_OpenGL::HideWindow()
 	}
 
 	#if defined(CONF_FAMILY_WINDOWS)
-		// windows shit here
+		ShowWindow(info.window, SW_HIDE);
 	#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 		Display *dpy = info.info.x11.display;
 		Window win;
@@ -764,7 +764,7 @@ void CGraphicsBackend_SDL_OpenGL::UnhideWindow()
 	}
 
 	#if defined(CONF_FAMILY_WINDOWS)
-		// windows shit here
+		ShowWindow(info.window, SW_RESTORE);
 	#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 		Display *dpy = info.info.x11.display;
 		Window win;
