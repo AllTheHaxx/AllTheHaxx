@@ -122,7 +122,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	}
 	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
-		if(strcmp(pLine, "reset") == 0)
+		if(str_comp(pLine, "reset") == 0)
 		{
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
