@@ -5,7 +5,7 @@
 #include "generated/nethash.cpp"
 #define GAME_VERSION "0.6.3, 9.2"
 #define BUILD_DATE __DATE__ ", " __TIME__
-#define ALLTHEHAXX_VERSION "539-6.2" // maybe we need this some day ^^
+#define ALLTHEHAXX_VERSION "beta.7"
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
 static const char GAME_RELEASE_VERSION[8] = "9.2";
 #define CLIENT_VERSIONNR 902
