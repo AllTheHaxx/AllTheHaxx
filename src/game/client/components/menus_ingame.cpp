@@ -206,13 +206,19 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 
 	// render buttons
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
+	static int s_ConModeButton = 0;
+	if(DoButton_Menu(&s_ConModeButton, Localize("Console Mode"), 0, &Button, "Enter console mode (very low CPU usage, no graphics)"))
+		g_Config.m_ClConsoleMode ^= 1;
+
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
 	static int s_OpenChatButton = 0;
-	if(DoButton_Menu(&s_OpenChatButton, Localize("Chat"), 0, &Button, "Open the IRC overlay"))
+	if(DoButton_Menu(&s_OpenChatButton, Localize("IRC Chat"), 0, &Button, "Open the IRC overlay"))
 		ToggleIRC();
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
 	static int s_ServerConfigButton = 0;
 	if(DoButton_Menu(&s_ServerConfigButton, Localize("Server Config"), s_ShowServerConfig, &Button, "Execute commands when joining this server"))
 		s_ShowServerConfig ^= 1;
