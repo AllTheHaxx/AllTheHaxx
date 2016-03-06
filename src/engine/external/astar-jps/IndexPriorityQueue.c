@@ -145,7 +145,7 @@ void changePriority (queue *q, int ind, double newPriority)
 		siftUp (q, q->index[ind]);
 }
 
-void delete (queue *q, int ind)
+void deleteq (queue *q, int ind)
 {
 	changePriority (q, ind, INT_MIN);
 	deleteMin (q);
