@@ -139,6 +139,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	getGlobalNamespace(L)
 
 		.addFunction("Import", &CLuaBinding::LuaImport)
+		.addFunction("KillScript", &CLuaBinding::LuaKillScript)
 
 		// client namespace
 		.beginNamespace("_client")
