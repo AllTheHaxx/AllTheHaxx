@@ -2775,12 +2775,13 @@ void CClient::Run()
 			LastConsoleMode = g_Config.m_ClConsoleMode;
 		}
 		
-		if(g_Config.m_ClConsoleMode && clock() > ConsoleModeEmote*CLOCKS_PER_SEC/1000)
+		if(g_Config.m_ClConsoleMode && clock() - ConsoleModeEmote > CLOCKS_PER_SEC)
 		{
 			ConsoleModeEmote = clock();
 			CNetMsg_Cl_Emoticon Msg;
 			Msg.m_Emoticon = 12;
 			SendPackMsg(&Msg, MSGFLAG_VITAL);
+			dbg_msg("Test", "HI");
 		}
 		
 		VersionUpdate();
