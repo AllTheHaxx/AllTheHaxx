@@ -229,10 +229,6 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 
 void CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 {
-	char *vsSource = "void main() { }";
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vsSource, NULL);
-
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
 }
 
@@ -445,6 +441,90 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	glAlphaFunc(GL_GREATER, 0);
 	glEnable(GL_ALPHA_TEST);
 	glDepthMask(0);
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+
+	printf("\n\n\n-------------- GLEW INIT BEGIN --------------\n\n");
+	printf("DETECTED GLSL VERSION = %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	printf("Initializing glew... ");
+	GLenum error = glewInit();
+	if (error != GLEW_OK)
+	{
+		printf("ERROR %p\n", error);
+		exit(1);
+	}
+	printf("\033[0;32mSUCCESSFUL\033[0;10m\n");
+
+	if (!GLEW_VERSION_2_1)
+	{
+	  printf(">> Machine doesn't support the 2.1 API, quitting!\n");
+	  exit(1);
+	}
+	//printf("Initialization and system testing done, all good.\n");
+
+	printf("Compiling vertex shader... ");
+	FILE *f;
+	if(!(f = fopen("data/shaders/test.vsh", "r")))
+	{
+		printf("Failed to open data/shaders/test.vsh\n");
+		exit(1);
+	}
+	char *vertexSource = (char*)malloc(102400);
+	fread(vertexSource, 102400, 102400, f);
+	fclose(f); f = 0;
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexSource, NULL);
+	glCompileShader(vertexShader);
+	free(vertexSource);
+
+	GLint status;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+	printf("\033[0;%im%s\n", status == GL_TRUE ? 32 : 31, status == GL_TRUE ? "SUCCESSFUL" : "FAILED");
+	printf("\033[0;10m");
+	if(status != GL_TRUE)
+	{
+		char buffer[512];
+		glGetShaderInfoLog(vertexShader, 512, NULL, buffer);
+		printf("\033[0;33m%s\033[0;10m", buffer);
+		exit(1);
+	}
+
+	printf("Compiling fragment shader... ");
+	if(!(f = fopen("data/shaders/test.fsh", "r")))
+	{
+		printf("Failed to open data/shaders/test.fsh\n");
+		exit(1);
+	}
+	char *fragmentSource = (char*)malloc(102400);
+	fread(fragmentSource, 102400, 102400, f);
+	fclose(f); f = 0;
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
+	glCompileShader(fragmentShader);
+	free(fragmentSource);
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+	printf("\033[0;%im%s\n", status == GL_TRUE ? 32 : 31, status == GL_TRUE ? "SUCCESSFUL" : "FAILED");
+	printf("\033[0;10m");
+	if(status != GL_TRUE)
+	{
+		char buffer[512];
+		glGetShaderInfoLog(fragmentShader, 512, NULL, buffer);
+		printf("\033[0;33m%s\033[0;10m", buffer);
+		exit(1);
+	}
+
+	printf("Creating shader program... "); printf("\033[0;32mSUCCESSFUL\033[0;10m\n");
+	GLuint shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glBindFragDataLocation(shaderProgram, 0, "outColor");
+
+	printf("Linking shaders... "); printf("\033[0;32mSUCCESSFUL\033[0;10m\n");
+	glLinkProgram(shaderProgram);
+	glUseProgram(shaderProgram);
+
+	printf("\n--------------- GLEW INIT END ---------------\n\n\n");
+	//exit(0);
 }
 
 void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
