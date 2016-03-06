@@ -1,5 +1,5 @@
 #include <base/system.h>
-#if defined(CONF_FAMILY_UNIX)
+//#if defined(CONF_FAMILY_UNIX)
 #include "IndexPriorityQueue.h"
 #include <stdlib.h>
 #include <string.h>
@@ -41,10 +41,13 @@ int placeAtEnd (queue *q, item item)
 
 void siftUp (queue *q, int i)
 {
-	if (0 == i)
+	int p;
+	item swap;
+	
+	if(i == 0)
 		return;
-
-	int p = (i - 1) / 2;
+	
+	p = (i-1)/2;
 
 	if (q->root[p].priority < q->root[i].priority)
 		return;
@@ -52,7 +55,7 @@ void siftUp (queue *q, int i)
 	q->index[q->root[i].value] = p;
 	q->index[q->root[p].value] = i;
 
-	item swap = q->root[i];
+	swap = q->root[i];
 	q->root[i] = q->root[p];
 	q->root[p] = swap;
 
@@ -62,11 +65,12 @@ void siftUp (queue *q, int i)
 void insert (queue *q, int value, double pri)
 {
 	unsigned int j;
+	int p, newAllocated;
 	item i;
 	i.value = value;
 	i.priority = pri;
 
-        int newAllocated = smallestPowerOfTwoAfter ((value + 1) * sizeof(int));
+        newAllocated = smallestPowerOfTwoAfter ((value + 1) * sizeof(int));
 
         if ((value + 1) * sizeof (int) > q->indexAllocated) {
 		q->index = realloc (q->index, newAllocated);
@@ -77,7 +81,7 @@ void insert (queue *q, int value, double pri)
 		q->indexAllocated = newAllocated;
 	}
 
-	int p = placeAtEnd (q, i);
+	p = placeAtEnd (q, i);
 
 	q->index[q->root[p].value] = p;	
 
@@ -86,7 +90,10 @@ void insert (queue *q, int value, double pri)
 
 void siftDown (queue *q, int i)
 {
-	int c = 1 + 2 * i;
+	int c;
+	item swap;
+	
+	c = 1 + 2 * i;
 	if (c >= q->size)
 		return;
 
@@ -99,7 +106,7 @@ void siftDown (queue *q, int i)
 	q->index[q->root[c].value] = i;
 	q->index[q->root[i].value] = c;
 
-	item swap = q->root[i];
+	swap = q->root[i];
 	q->root[i] = q->root[c];
 	q->root[c] = swap;
 
@@ -176,4 +183,4 @@ void freeQueue (queue* q)
 	free (q);
 }
 
-#endif
+//#endif

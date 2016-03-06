@@ -1,5 +1,5 @@
 #include <base/system.h>
-#if defined(CONF_FAMILY_UNIX)
+//#if defined(CONF_FAMILY_UNIX)
 #include "AStar.h"
 #include "IndexPriorityQueue.h"
 #include <stdlib.h>
@@ -11,7 +11,12 @@
 // Chebyshev distance metric for distance estimation by default
 static double estimateDistance (struct coord_t start, struct coord_t end)
 {
-	return fmax (abs (start.x - end.x), abs (start.y - end.y));
+	double x1 = abs(start.x - end.x);
+	double x2 = abs(start.y - end.y);
+	if (x1 < x2)
+		return x2;
+	return x1;
+	//return fmax (abs (start.x - end.x), abs (start.y - end.y));
 }
 
 // Since we only work on uniform-cost maps, this function only needs
@@ -23,8 +28,7 @@ static double estimateDistance (struct coord_t start, struct coord_t end)
 static double preciseDistance (struct coord_t start, struct coord_t end)
 {
 	if (start.x - end.x != 0 && start.y - end.y != 0)
-		return sqrt (pow (start.x - end.x, 2) + 
-			     pow (start.y - end.y, 2)) ;
+		return sqrt (pow ((float)(start.x - end.x), 2) + pow ((float)(start.y - end.y), 2));
 	else
 		return abs (start.x - end.x) + abs (start.y - end.y);
 }
@@ -124,17 +128,23 @@ static struct coord_t adjustInDirection (struct coord_t c, int dir)
 	// subtract 2 from the direction "north" and get "east"
 	// C's modulo operator doesn't quite behave the right way to do this,
 	// but for our purposes this kluge should be good enough
-	switch ((dir + 65536) % 8) {
-	case 0: return (struct coord_t) {c.x, c.y - 1};
-	case 1: return (struct coord_t) {c.x + 1, c.y - 1};
-	case 2: return (struct coord_t) {c.x + 1, c.y };
-	case 3: return (struct coord_t) {c.x + 1, c.y + 1};
-	case 4: return (struct coord_t) {c.x, c.y + 1};
-	case 5: return (struct coord_t) {c.x - 1, c.y + 1};
-	case 6: return (struct coord_t) {c.x - 1, c.y};
-	case 7: return (struct coord_t) {c.x - 1, c.y - 1};
+	
+	struct coord_t ret;
+	ret.x = -1;
+	ret.y = -1;
+	
+	switch ((dir + 65536) % 8) 
+	{
+		case 0: ret.x = c.x;   ret.y = c.y-1;
+		case 1: ret.x = c.x+1; ret.y = c.y-1;
+		case 2: ret.x = c.x+1; ret.y = c.y;
+		case 3: ret.x = c.x+1; ret.y = c.y+1;
+		case 4: ret.x = c.x;   ret.y = c.y+1; 
+		case 5: ret.x = c.x-1; ret.y = c.y+1;
+		case 6: ret.x = c.x-1; ret.y = c.y;
+		case 7: ret.x = c.x-1; ret.y = c.y-1; 
 	}
-	return (struct coord_t) { -1, -1 };
+	return ret;
 }
 
 // logical implication operator
@@ -330,7 +340,7 @@ static int *recordSolution (astar_t *astar)
 	int rvLen = 1;
 	*astar->solutionLength = 0;
 	int target = astar->goal;
-	int *rv = malloc (rvLen * sizeof (int));
+	int *rv = (int*)malloc (rvLen * sizeof (int));
 	int i = astar->goal;
 
 	for (;;) {
@@ -339,7 +349,7 @@ static int *recordSolution (astar_t *astar)
 		(*astar->solutionLength)++;
 		if (*astar->solutionLength >= rvLen) {
 			rvLen *= 2;
-			rv = realloc (rv, rvLen * sizeof (int));
+			rv = (int*)realloc (rv, rvLen * sizeof (int));
 			if (!rv)
 				return NULL;
 		}
@@ -392,6 +402,7 @@ static direction directionWeCameFrom (astar_t *astar, int node, int nodeFrom)
 
 static int init_astar_object (astar_t* astar, const char *grid, int *solLength, int boundX, int boundY, int start, int end)
 {
+	
 	*solLength = -1;
 	struct coord_t bounds = {boundX, boundY};
 
@@ -416,20 +427,20 @@ static int init_astar_object (astar_t* astar, const char *grid, int *solLength, 
 	if (!astar->open)
 		return 0;
 
-	astar->closed = malloc (size);
+	astar->closed = (char*)malloc (size);
 	if (!astar->closed) {
 		freeQueue (astar->open);
 		return 0;
 	}
 
-	astar->gScores = malloc (size * sizeof (double));
+	astar->gScores = (double*)malloc (size * sizeof (double));
 	if (!astar->gScores) {
 		freeQueue (astar->open);
 		free (astar->closed);
 		return 0;
 	}
 
-	astar->cameFrom = malloc (size * sizeof (int));
+	astar->cameFrom = (node*)malloc (size * sizeof (int));
 	if (!astar->cameFrom) {
 		freeQueue (astar->open);
 		free (astar->closed);
@@ -527,8 +538,15 @@ int *astar_unopt_compute (const char *grid,
 	if (!init_astar_object (&astar, grid, solLength, boundX, boundY, start, end))
 		return NULL;
 
-	struct coord_t bounds = {boundX, boundY};
-	struct coord_t endCoord = getCoord (bounds, end);
+
+	//coord_t bounds;
+	//struct coord_t;// bounds;//endCoord;
+	//bounds = {boundX, boundY};
+	//endCoord = getCoord (bounds, end);
+	
+	struct coord_t bounds, endCoord;
+	bounds.x = boundX; bounds.y = boundY;
+	endCoord = getCoord(bounds, end);
 
 	while (astar.open->size) {
 		int dir;
@@ -571,4 +589,4 @@ int *astar_unopt_compute (const char *grid,
 	return NULL;
 }
 
-#endif
+//#endif
