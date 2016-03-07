@@ -12,18 +12,9 @@
 
 #define CALLSTACK_ADD() \
 	{char aDCSBUFFER[64]; str_format(aDCSBUFFER, sizeof(aDCSBUFFER), "%s(%i) In '%s'", __FILE__, __LINE__, __func__); \
-	g_CallStack.push_back(aDCSBUFFER);} debug_check()
+	g_CallStack.push_back(aDCSBUFFER);} if(g_CallStack.size() > DEBUG_CALLSTACK_SIZE) { while(g_CallStack.size() > DEBUG_CALLSTACK_SIZE) g_CallStack.pop_front(); }
 
 static std::list<std::string> g_CallStack;
-
-static void debug_check()
-{
-	if(g_CallStack.size() > DEBUG_CALLSTACK_SIZE)
-	{
-		while(g_CallStack.size() > DEBUG_CALLSTACK_SIZE)
-			g_CallStack.pop_front();
-	}
-}
 
 void debug_sighandler(int code)
 {

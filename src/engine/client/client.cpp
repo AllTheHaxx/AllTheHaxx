@@ -3650,9 +3650,10 @@ void CClient::InputThread(void * pUser)
 {
 	CClient *pSelf = (CClient *)pUser;
 	char aInput[64];
-	char * Input = aInput;
+	char *pInput = aInput;
 	
-	char Data[128];
+	char aData[128];
+	mem_zero(aData, sizeof(aData));
 	
 	#if defined(CONF_FAMILY_WINDOWS)
 		system("chcp 1252");
@@ -3661,35 +3662,35 @@ void CClient::InputThread(void * pUser)
 	while(1)
 	{
 		thread_sleep(100);
-		fgets(Input, 200, stdin);
+		fgets(pInput, 200, stdin);
 
 		#if defined(CONF_FAMILY_WINDOWS)
-			if(!str_utf8_check(Input))
+			if(!str_utf8_check(pInput))
 			{
 				char Temp[4];
 				int Length = 0;
 				
-				while(*Input)
+				while(*pInput)
 				{
 					//dbg_msg("Client", "%s", Temp);
-					int Size = str_utf8_encode(Temp, static_cast<const unsigned char>(*Input++));
+					int Size = str_utf8_encode(Temp, static_cast<const unsigned char>(*pInput++));
 							
-					if(Length+Size < sizeof(Data))
+					if(Length+Size < sizeof(aData))
 					{
-						mem_copy(Data+Length, &Temp, Size);
+						mem_copy(aData+Length, &Temp, Size);
 						Length += Size;
 					}
 					else
 						break;
 				}
-				Data[Length] = 0;
+				aData[Length] = 0;
 				
-				pSelf->m_pConsole->ExecuteLineFlag(Data, CFGFLAG_CLIENT);
+				pSelf->m_pConsole->ExecuteLineFlag(aData, CFGFLAG_CLIENT);
 			}
 			else
-				pSelf->m_pConsole->ExecuteLineFlag(Input, CFGFLAG_CLIENT);
+				pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
 		#else
-			pSelf->m_pConsole->ExecuteLineFlag(Input, CFGFLAG_CLIENT);
+			pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
 		#endif
 	
 	}		
