@@ -1082,7 +1082,10 @@ static const char *s_apSayings[] = {
 		"RegisterEvent(\"OnIdle\", fap)",
 		"Grr Java ate my brain",
 		"May contain traces of peanuts.",
-		"It\xA is\xA  Line\xA   break\xA    ing!",
+		"It\xA is\xA  line\xA   break\xA    ing!",
+		"146 ist der Boss.",
+		"Würselen city, boys",
+		"Meet me at Internetcaffee 52146",
 };
 
 void CMenus::RenderLoading()
