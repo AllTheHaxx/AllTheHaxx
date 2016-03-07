@@ -16,6 +16,7 @@
 #include <game/client/components/menus.h>
 #include <game/client/components/scoreboard.h>
 
+#include "console.h"
 #include "controls.h"
 
 enum { LEFT_JOYSTICK_X = 0, LEFT_JOYSTICK_Y = 1,
@@ -302,6 +303,8 @@ int CControls::SnapInput(int *pData)
 			m_InputData[g_Config.m_ClDummy].m_TargetX = (int)(sinf(t*3)*100.0f);
 			m_InputData[g_Config.m_ClDummy].m_TargetY = (int)(cosf(t*3)*100.0f);
 		}
+
+		LUA_FIRE_EVENT("OnSnapInput");
 
 		// check if we need to send input
 		if(m_InputData[g_Config.m_ClDummy].m_Direction != m_LastData[g_Config.m_ClDummy].m_Direction) Send = true;

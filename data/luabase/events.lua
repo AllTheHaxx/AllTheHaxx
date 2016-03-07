@@ -139,6 +139,16 @@ function OnRenderScoreboard(FadeVal)
 	end
 end
 
+function OnSnapInput()
+	if Events["OnSnapInput"] ~= nil then
+		for script, event in pairs(Events["OnSnapInput"]) do
+			if event ~= nil then
+				event()
+			end
+		end
+	end
+end
+
 function OnStateChange(NewState, OldState)
 	if Events["OnStateChange"] ~= nil then
 		for script, event in pairs(Events["OnStateChange"]) do
