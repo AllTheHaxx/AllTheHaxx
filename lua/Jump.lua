@@ -3,6 +3,7 @@ g_ScriptInfo = "Hold down Space to make a perfect double jump!"
 
 function Jump()
 	TW.Game.Input.Jump = 1
+	TW.Game.Input.Jump = 0
 end
 
 function ResetJump()
@@ -10,11 +11,11 @@ function ResetJump()
 end
 
 function GetPlayerY()
-	return Game.Local.Tee.PosY
+	return Game.LocalTee.Pos.y
 end
 
 function GetPlayerX()
-	return Game.Local.Tee.PosX
+	return Game.LocalTee.Pos.x
 end
 
 function GetPlayerVelY()
