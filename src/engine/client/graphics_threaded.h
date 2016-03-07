@@ -376,6 +376,7 @@ public:
 	CGraphics_Threaded();
 	
 	static float XAngle;
+	static float YAngle;
 
 	virtual void ClipEnable(int x, int y, int w, int h);
 	virtual void ClipDisable();

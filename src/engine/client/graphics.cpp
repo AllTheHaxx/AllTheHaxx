@@ -270,8 +270,62 @@ void CGraphics_OpenGL::MapScreen(float TopLeftX, float TopLeftY, float BottomRig
 	//glDisable(GL_DEPTH_TEST);
 	glLoadIdentity();
 	//glTranslatef(0,0,-0.1);
+	//glRotatef(CGraphics_Threaded::XAngle, 0.f, 1.f, 0.f);
 	glRotatef(CGraphics_Threaded::XAngle, 0.f, 1.f, 0.f);
-	//glTranslatef(0.f, 0.f, -0.01f);
+	glRotatef(CGraphics_Threaded::YAngle, 1.f, 0.f, 0.f);
+	glTranslatef(0.f, 0.f, 0.35f);	
+	
+	
+	/*glBegin(GL_TRIANGLES);
+	if (CGraphics_Threaded::XAngle > 0)
+	{
+		glColor4f(0, 1, 0, 1);
+		glVertex3f(0.97,-1,-0.11);
+		glVertex3f(0.97, 1, -0.11);
+		glVertex3f(0.97,-1,-0.45);
+		
+		glVertex3f(0.97,-1,-0.45);
+		glVertex3f(0.97, 1, -0.11);
+		glVertex3f(0.97, 1,-0.45);
+		
+		//front wall from this angle
+		glColor4f(1,0,0, 1);
+		
+		glVertex3f(-0.97,-1,-0.11);
+		glVertex3f(-0.97, 1, -0.11);
+		glVertex3f(-0.97,-1,-0.45);
+		
+		glVertex3f(-0.97,-1,-0.45);
+		glVertex3f(-0.97, 1, -0.11);
+		glVertex3f(-0.97, 1,-0.45);
+	}
+	else
+	{
+		glColor4f(1,0,0, 1);
+		
+		glVertex3f(-0.97,-1,-0.11);
+		glVertex3f(-0.97, 1, -0.11);
+		glVertex3f(-0.97,-1,-0.45);
+		
+		glVertex3f(-0.97,-1,-0.45);
+		glVertex3f(-0.97, 1, -0.11);
+		glVertex3f(-0.97, 1,-0.45);
+		
+		
+		//front wall from this angle
+		glColor4f(0, 1, 0, 1);
+		glVertex3f(0.97,-1,-0.11);
+		glVertex3f(0.97, 1, -0.11);
+		glVertex3f(0.97,-1,-0.45);
+		
+		glVertex3f(0.97,-1,-0.45);
+		glVertex3f(0.97, 1, -0.11);
+		glVertex3f(0.97, 1,-0.45);
+
+	}
+	glEnd();*/
+	
+	
 	glOrtho(TopLeftX, BottomRightX, BottomRightY, TopLeftY, 1.0f, 10.f);
 }
 

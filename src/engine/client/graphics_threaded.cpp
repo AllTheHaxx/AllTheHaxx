@@ -23,6 +23,7 @@
 #include "graphics_threaded.h"
 
 float CGraphics_Threaded::XAngle = 0;
+float CGraphics_Threaded::YAngle = 0;
 
 static CVideoMode g_aFakeModes[] = {
 	{320,240,8,8,8}, {400,300,8,8,8}, {640,480,8,8,8},
