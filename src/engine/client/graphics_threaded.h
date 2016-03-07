@@ -374,6 +374,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	int InitWindow();
 public:
 	CGraphics_Threaded();
+	
+	static float XAngle;
 
 	virtual void ClipEnable(int x, int y, int w, int h);
 	virtual void ClipDisable();

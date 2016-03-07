@@ -9,6 +9,8 @@
 #include <engine/updater.h>
 #include <engine/shared/config.h>
 
+#include <engine/client/graphics_threaded.h>
+
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
@@ -18,7 +20,7 @@
 #include <game/client/ui.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/components/console.h>
-
+#include "SDL_opengl.h"
 #include "menus.h"
 
 
@@ -26,6 +28,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 {
 	CUIRect Headers;
 	CUIRect Status;
+	static vec2 LastMousePos;
+	static bool Pressing = false;
+	static float swing = 0;
 
 	View.HSplitTop(ms_ListheaderHeight, &Headers, &View);
 	View.HSplitBottom(28.0f, &View, &Status);
@@ -34,6 +39,32 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	RenderTools()->DrawUIRect(&Headers, vec4(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
 	Headers.VSplitRight(20.0f, &Headers, 0);
 
+	if(Input()->KeyPressed(KEY_MOUSE_2))
+	{
+		if(!Pressing)
+		{
+			LastMousePos = m_MousePos;
+			Pressing = true;
+		}
+		else
+		{
+			float dx = m_MousePos.x - LastMousePos.x;
+			dbg_msg("Menu", "%f = %f - %f", dx, m_MousePos.x, LastMousePos.x);
+			CGraphics_Threaded::XAngle = dx / 10;
+		}
+		
+		swing = 0;
+	}
+	else
+	{
+		Pressing = false;
+		if(CGraphics_Threaded::XAngle > 0.5 || CGraphics_Threaded::XAngle < -0.5)
+		{
+			CGraphics_Threaded::XAngle = CGraphics_Threaded::XAngle * cosf(0.0001f*swing)*pow(2.f, (float)(-swing/100.f));
+			swing++;
+		}
+	}
+	
 	struct CColumn
 	{
 		int m_ID;
@@ -986,6 +1017,11 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 	if(pSelectedServer)
 	{
+		//glLoadIdentity();
+		//glTranslatef(-0.85,0,-0.525);
+		//glRotatef(30.f, 0,1,0);
+		//glEnable(GL_DEPTH_TEST);
+			
 		static int s_VoteList = 0;
 		static float s_ScrollValue = 0;
 		UiDoListboxStart(&s_VoteList, &ServerScoreBoard, 26.0f, Localize("Scoreboard"), "", pSelectedServer->m_NumClients, 1, -1, s_ScrollValue);
@@ -996,7 +1032,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			if(!Item.m_Visible)
 				continue;
-
+			
+			
 			CUIRect Name, Clan, Score, Flag;
 			Item.m_Rect.HSplitTop(25.0f, &Name, &Item.m_Rect);
 			if(UI()->DoButtonLogic(&pSelectedServer->m_aClients[i], "", 0, &Name))
@@ -1090,7 +1127,9 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		}
 
 		UiDoListboxEnd(&s_ScrollValue, 0);
+		//glTranslatef(0.85,0,0.525);
 	}
+	glDisable(GL_DEPTH_TEST);
 }
 
 void CMenus::FriendlistOnUpdate()

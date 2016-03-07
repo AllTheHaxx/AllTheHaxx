@@ -40,6 +40,7 @@
 #include <math.h> // cosf, sinf
 
 #include "graphics.h"
+#include "graphics_threaded.h"
 
 
 #if defined(CONF_PLATFORM_MACOSX)
@@ -265,8 +266,12 @@ void CGraphics_OpenGL::MapScreen(float TopLeftX, float TopLeftY, float BottomRig
 	m_ScreenY0 = TopLeftY;
 	m_ScreenX1 = BottomRightX;
 	m_ScreenY1 = BottomRightY;
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_MODELVIEW);
+	//glDisable(GL_DEPTH_TEST);
 	glLoadIdentity();
+	//glTranslatef(0,0,-0.1);
+	glRotatef(CGraphics_Threaded::XAngle, 0.f, 1.f, 0.f);
+	//glTranslatef(0.f, 0.f, -0.01f);
 	glOrtho(TopLeftX, BottomRightX, BottomRightY, TopLeftY, 1.0f, 10.f);
 }
 
