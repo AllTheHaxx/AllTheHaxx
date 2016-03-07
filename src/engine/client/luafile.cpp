@@ -266,6 +266,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("GetTile", &CCollision::GetTileRaw)
 
 			.addFunction("IntersectLine", &CCollision::IntersectLine)
+			.addFunction("MovePoint", &CCollision::MovePoint)
+			.addFunction("MoveBox", &CCollision::MovePoint)
+			.addFunction("TestBox", &CCollision::TestBox)
 		.endClass()
 		
 		.beginClass<CHud>("CHud")
