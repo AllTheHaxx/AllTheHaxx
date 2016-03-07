@@ -49,8 +49,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		else
 		{
 			float dx = m_MousePos.x - LastMousePos.x;
-			dbg_msg("Menu", "%f = %f - %f", dx, m_MousePos.x, LastMousePos.x);
-			CGraphics_Threaded::XAngle = dx / 10;
+			float dy = m_MousePos.y - LastMousePos.y;
+			//dbg_msg("Menu", "%f = %f - %f", dx, m_MousePos.x, LastMousePos.x);
+			(float)CGraphics_Threaded::XAngle = -clamp((float)(dx / 8), -45.f, 45.f);
+			CGraphics_Threaded::YAngle = -clamp(dy / 8, -45.f, 45.f);
+		
 		}
 		
 		swing = 0;
@@ -63,6 +66,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			CGraphics_Threaded::XAngle = CGraphics_Threaded::XAngle * cosf(0.0001f*swing)*pow(2.f, (float)(-swing/100.f));
 			swing++;
 		}
+		else
+			CGraphics_Threaded::XAngle = 0.f;
+		
+		if(CGraphics_Threaded::YAngle > 0.5 || CGraphics_Threaded::YAngle < -0.5)
+		{
+			CGraphics_Threaded::YAngle = CGraphics_Threaded::YAngle * cosf(0.0001f*swing)*pow(2.f, (float)(-swing/100.f));
+			swing++;
+		}
+		else
+			CGraphics_Threaded::YAngle = 0.f;
 	}
 	
 	struct CColumn
@@ -1129,7 +1142,6 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		UiDoListboxEnd(&s_ScrollValue, 0);
 		//glTranslatef(0.85,0,0.525);
 	}
-	glDisable(GL_DEPTH_TEST);
 }
 
 void CMenus::FriendlistOnUpdate()
