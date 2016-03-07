@@ -219,13 +219,13 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addFunction("DummyConnect", &IClient::DummyConnect)
 			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
-			.addProperty("DummyConnected", &IClient::DummyConnected)
-			.addProperty("DummyConnecting", &IClient::DummyConnecting)
+			.addFunction("DummyConnected", &IClient::DummyConnected)
+			.addFunction("DummyConnecting", &IClient::DummyConnecting)
 
 			.addFunction("SendInfo", &CGameClient::SendInfo)
 
 			.addFunction("RconAuth", &IClient::RconAuth)
-			.addProperty("RconAuthed", &IClient::RconAuthed)
+			.addFunction("RconAuthed", &IClient::RconAuthed)
 			.addFunction("RconSend", &IClient::Rcon)
 
 			.addProperty("FPS", &IClient::GetFPS)
@@ -262,7 +262,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<CCollision>("CCollision")
 			.addProperty("GetMapWidth", &CCollision::GetWidth)
 			.addProperty("GetMapHeight", &CCollision::GetHeight)
+
 			.addFunction("GetTile", &CCollision::GetTileRaw)
+
+			.addFunction("IntersectLine", &CCollision::IntersectLine)
 		.endClass()
 		
 		.beginClass<CHud>("CHud")
