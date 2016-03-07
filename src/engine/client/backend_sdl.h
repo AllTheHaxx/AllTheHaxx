@@ -311,4 +311,13 @@ public:
 	virtual void NotifyWindow();
 	virtual void HideWindow();
 	virtual void UnhideWindow();
+
+	virtual void ShaderSet(int ID);
+	virtual void ShaderUniformSet(const char* name, float *var, int num);
+	virtual void ShaderBegin();
+	virtual void ShaderEnd();
+
+	virtual void FrameBufferToScreen();
+	virtual void UseFrameBuffer(bool active);
+	virtual unsigned int FrameBufferTexture();
 };

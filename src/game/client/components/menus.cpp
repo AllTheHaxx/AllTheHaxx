@@ -242,6 +242,16 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive, vec4 ColorInactive, const char *pTooltip)
 {
+	float var[3];
+	Graphics()->ShaderSet(IGraphics::SHADER_COLOR);
+	Graphics()->ShaderBegin();
+	var[0] = 1.0f;
+	Graphics()->ShaderUniformSet("u_IsTex", var, 1);
+	var[0] = 0.5f;
+	var[1] = 0.5f;
+	var[2] = 0.5f;
+	Graphics()->ShaderUniformSet("u_Color", var, 3);
+
 	if(Checked)
 		RenderTools()->DrawUIRect(pRect, ColorActive, Corners, 10.0f);
 	else if(UI()->MouseInside(pRect))
@@ -252,7 +262,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	}
 	else
 		RenderTools()->DrawUIRect(pRect, ColorInactive, Corners, 10.0f);
-
+	Graphics()->ShaderEnd();
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
 #if defined(__ANDROID__)

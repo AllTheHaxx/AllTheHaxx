@@ -920,6 +920,41 @@ void CGraphics_Threaded::UnhideWindow()
 	return m_pBackend->UnhideWindow();
 }
 
+void CGraphics_Threaded::ShaderSet(int ID)
+{
+	m_pBackend->ShaderSet(ID);
+}
+
+void CGraphics_Threaded::ShaderUniformSet(const char* name, float *var, int num)
+{
+	m_pBackend->ShaderUniformSet(name, var, num);
+}
+
+void CGraphics_Threaded::ShaderBegin()
+{
+	m_pBackend->ShaderBegin();
+}
+
+void CGraphics_Threaded::ShaderEnd()
+{
+	m_pBackend->ShaderEnd();
+}
+
+void CGraphics_Threaded::FrameBufferToScreen()
+{
+	m_pBackend->FrameBufferToScreen();
+}
+
+void CGraphics_Threaded::UseFrameBuffer(bool active)
+{
+	m_pBackend->UseFrameBuffer(active);
+}
+
+unsigned int CGraphics_Threaded::FrameBufferTexture()
+{
+	return m_pBackend->FrameBufferTexture();
+}
+
 void CGraphics_Threaded::TakeScreenshot(const char *pFilename)
 {
 	// TODO: screenshot support

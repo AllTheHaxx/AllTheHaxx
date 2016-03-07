@@ -316,6 +316,15 @@ public:
 	virtual void HideWindow() = 0;
 	virtual void UnhideWindow() = 0;
 
+	virtual void ShaderSet(int ID) = 0;
+	virtual void ShaderUniformSet(const char* name, float *var, int num) = 0;
+	virtual void ShaderBegin() = 0;
+	virtual void ShaderEnd() = 0;
+
+	virtual void FrameBufferToScreen() = 0;
+	virtual void UseFrameBuffer(bool active) = 0;
+	virtual unsigned int FrameBufferTexture() = 0;
+
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
@@ -434,6 +443,15 @@ public:
 	virtual void NotifyWindow();
 	virtual void HideWindow();
 	virtual void UnhideWindow();
+
+	virtual void ShaderSet(int ID);
+	virtual void ShaderUniformSet(const char* name, float *var, int num);
+	virtual void ShaderBegin();
+	virtual void ShaderEnd();
+
+	virtual void FrameBufferToScreen();
+	virtual void UseFrameBuffer(bool active);
+	virtual unsigned int FrameBufferTexture();
 
 	virtual int Init();
 	virtual void Shutdown();

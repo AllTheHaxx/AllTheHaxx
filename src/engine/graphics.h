@@ -105,6 +105,15 @@ public:
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual void TextureSet(int TextureID) = 0;
 
+	virtual void ShaderSet(int ID) = 0;
+	virtual void ShaderUniformSet(const char* name, float *var, int num) = 0;
+	virtual void ShaderBegin() = 0;
+	virtual void ShaderEnd() = 0;
+
+	virtual void FrameBufferToScreen() = 0;
+	virtual void UseFrameBuffer(bool active) = 0;
+	virtual unsigned int FrameBufferTexture() = 0;
+
 	struct CLineItem
 	{
 		float m_X0, m_Y0, m_X1, m_Y1;
