@@ -219,13 +219,13 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addFunction("DummyConnect", &IClient::DummyConnect)
 			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
-			.addFunction("DummyConnected", &IClient::DummyConnected)
-			.addFunction("DummyConnecting", &IClient::DummyConnecting)
+			.addProperty("DummyConnected", &IClient::DummyConnected)
+			.addProperty("DummyConnecting", &IClient::DummyConnecting)
 
 			.addFunction("SendInfo", &CGameClient::SendInfo)
 
 			.addFunction("RconAuth", &IClient::RconAuth)
-			.addFunction("RconAuthed", &IClient::RconAuthed)
+			.addProperty("RconAuthed", &IClient::RconAuthed)
 			.addFunction("RconSend", &IClient::Rcon)
 
 			.addProperty("FPS", &IClient::GetFPS)
@@ -260,8 +260,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass<CCollision>("CCollision")
-			.addFunction("GetMapWidth", &CCollision::GetWidth)
-			.addFunction("GetMapHeight", &CCollision::GetHeight)
+			.addProperty("GetMapWidth", &CCollision::GetWidth)
+			.addProperty("GetMapHeight", &CCollision::GetHeight)
 			.addFunction("GetTile", &CCollision::GetTileRaw)
 		.endClass()
 		
@@ -320,8 +320,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
 
-			.addFunction("KeyReleases", &IInput::KeyPressed)
-			.addFunction("KeyPresses", &IInput::KeyPressed)
 			.addFunction("KeyDown", &IInput::KeyDown)
 			.addFunction("KeyName", &IInput::KeyNameSTD)
 
