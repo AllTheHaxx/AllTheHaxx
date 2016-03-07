@@ -263,6 +263,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("GetMapWidth", &CCollision::GetWidth)
 			.addProperty("GetMapHeight", &CCollision::GetHeight)
 
+			.addFunction("Distance", &CCollision::Distance)
+
 			.addFunction("GetTile", &CCollision::GetTileRaw)
 
 			.addFunction("IntersectLine", &CCollision::IntersectLine)

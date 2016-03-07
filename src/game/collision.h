@@ -110,6 +110,9 @@ public:
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
 
+	// lua
+	int Distance(vec2 s, vec2 e) { return distance(s, e); }
+
 private:
 
 	class CTeleTile *m_pTele;
