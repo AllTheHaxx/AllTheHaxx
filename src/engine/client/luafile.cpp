@@ -351,6 +351,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 		
 		.beginClass<CGameClient::CClientData>("CClientData")
+			.addData("Active", &CGameClient::CClientData::m_Active)
 			.addData("ColorBody", &CGameClient::CClientData::m_ColorBody)
 			.addData("ColorFeet", &CGameClient::CClientData::m_ColorFeet)
 			.addData("UseCustomColor", &CGameClient::CClientData::m_UseCustomColor)
