@@ -2777,7 +2777,7 @@ void CClient::Run()
 			LastConsoleMode = g_Config.m_ClConsoleMode;
 		}
 		
-		if(g_Config.m_ClConsoleMode && time_get() - ConsoleModeEmote > time_freq())
+		if(g_Config.m_ClConsoleMode && g_Config.m_ClConsoleModeEmotes && time_get() - ConsoleModeEmote > time_freq())
 		{
 			ConsoleModeEmote = time_get();
 			CNetMsg_Cl_Emoticon Msg;
