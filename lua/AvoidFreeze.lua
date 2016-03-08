@@ -1,6 +1,9 @@
 g_ScriptTitle = "Avoid Freeze"
 g_ScriptInfo = "Do not go into freeze on race maps"
 
+
+TILE_FREEZE = -1
+
 function Jump()
 	TW.Game.Input.Jump = 0
 	TW.Game.Input.Jump = 1
@@ -29,13 +32,20 @@ function GetPlayerVelY()
 end
 
 function IsFreeze(x, y)
-	return Game.Collision:GetTile(x, y) == 9
+	return Game.Collision:GetTile(x, y) == TILE_FREEZE
 end
 
 NeedReset = false
 function OnTick()
 	gm = string.lower(Game.ServerInfo.GameMode)
-	if(gm ~= "ddnet" and string.find(gm, "race") == nil) then
+	if(gm == "ddnet" or string.find(gm, "race") ~= nil) then
+		TILE_FREEZE = 9
+	end
+	if(gm == "if|city") then
+		TILE_FREEZE = 191
+	end
+	
+	if(TILE_FREEZE < 0) then
 		return
 	end
 	
@@ -67,13 +77,13 @@ function OnTick()
 	end
 end
 
-function OnEnterGame()
+--[[function OnEnterGame()
 	gm = string.lower(Game.ServerInfo.GameMode)
 	if(gm ~= "ddnet" and string.find(gm, "race") == nil) then
 		RemoveEvent("OnTick", "OnTick")
 	else
 		RegisterEvent("OnTick", "OnTick")
 	end
-end
+end]]
 
-RegisterEvent("OnEnterGame", "OnEnterGame")
+RegisterEvent("OnTick", "OnTick")
