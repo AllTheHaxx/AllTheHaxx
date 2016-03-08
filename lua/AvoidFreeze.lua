@@ -44,6 +44,9 @@ function OnTick()
 	if(gm == "if|city") then
 		TILE_FREEZE = 191
 	end
+	if(gm == "dm" or gm == "tdm" or gm == "ctf") then
+		TILE_FREEZE = 2 -- kill
+	end
 	
 	if(TILE_FREEZE < 0) then
 		return
