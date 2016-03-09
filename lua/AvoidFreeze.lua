@@ -5,8 +5,8 @@ g_ScriptInfo = "Do not go into freeze on race maps"
 TILE_FREEZE = -1
 
 function Jump()
-	TW.Game.Input.Jump = 0
-	TW.Game.Input.Jump = 1
+	Game.Input.Jump = 0
+	Game.Input.Jump = 1
 end
 
 function GoRight()
@@ -17,18 +17,6 @@ end
 function GoLeft()
 	--Game.Input.Direction = 0
 	Game.Input.Direction = -1
-end
-
-function GetPlayerY()
-	return Game.LocalTee.Pos.y
-end
-
-function GetPlayerX()
-	return Game.LocalTee.Pos.x
-end
-
-function GetPlayerVelY()
-	return Game.LocalTee.Vel.y
 end
 
 function IsFreeze(x, y)
