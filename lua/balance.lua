@@ -2,12 +2,10 @@ g_ScriptTitle = "Balance"
 g_ScriptInfo = "Select the tee you want to balance on using your hook"
 
 Dir = 0
-Jump = 0
 DoIt = false
 function OnSnapInput()
 	if(DoIt == true) then
 		Game.Input.Direction = Dir
-		Game.Input.Jump = Jump
 	end
 end
 
@@ -26,19 +24,12 @@ function OnTick()
 
 	DoIt = true
 	
--- jump onto the tee
-	if(Game.LocalTee.Vel.y == 0) then -- a little Jump.lua to get onto the tees
-		Jump = 1
-	else
-		Jump = 0
-	end
-	
 -- balance
-	if(Game.LocalTee.Pos.x > Game.Players(c).Tee.Pos.x) then
+	if(Game.LocalTee.Pos.x - Game.Players(c).Tee.Pos.x > 5) then
 		Dir = -1
 		return
 	end
-	if(Game.LocalTee.Pos.x < Game.Players(c).Tee.Pos.x) then
+	if(Game.Players(c).Tee.Pos.x - Game.LocalTee.Pos.x > 5) then
 		Dir = 1
 		return
 	end
