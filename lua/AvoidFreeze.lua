@@ -26,7 +26,7 @@ end
 NeedReset = false
 function OnTick()
 	gm = string.lower(Game.ServerInfo.GameMode)
-	if(gm == "ddnet" or string.find(gm, "race") ~= nil) then
+	if(gm == "idd32+" or gm == "ddnet" or string.find(gm, "race") ~= nil) then
 		TILE_FREEZE = 9
 	end
 	if(gm == "if|city") then
