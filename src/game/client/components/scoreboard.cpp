@@ -432,14 +432,14 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				
 			
 		//ath flag
-		if(m_pClient->m_Snap.m_aCharacters[pInfo->m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH)
+		/*if(m_pClient->m_Snap.m_aCharacters[pInfo->m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.f*m_FadeVal);
 			RenderTools()->DrawRoundRect(x-3.f, y+Spacing, 3.f*LineHeight/2.f, LineHeight, 0.f);
 			Graphics()->QuadsEnd();
-		}			
+		}*/			
 			
 		// score
 		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)

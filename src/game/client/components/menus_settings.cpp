@@ -146,12 +146,17 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				Button.HMargin(2.0f, &Button);
 				g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize/100.0f, 0, g_Config.m_ClNameplatesClanSize)*100.0f+0.1f);
 			}
+		
+			Right.HSplitTop(5.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClShowATHUser, Localize("Show other ATH user"), g_Config.m_ClShowATHUser, &Button))
+				g_Config.m_ClShowATHUser ^= 1;
 	}
 
 	// client
 	{
 		// headline
-		Client.HSplitTop(30.0f, &Label, &Client);
+		Client.HSplitTop(65.0f, &Label, &Client);    //changed due to Show other ATH user
 		UI()->DoLabelScaled(&Label, Localize("Client"), 20.0f, -1);
 		Client.Margin(5.0f, &Client);
 		Client.VSplitMid(&Left, &Right);

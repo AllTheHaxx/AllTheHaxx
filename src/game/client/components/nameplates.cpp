@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/textrender.h>
+#include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -100,6 +101,19 @@ void CNamePlates::RenderNameplate(
 
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
+		
+		if(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
+			Graphics()->QuadsBegin();
+			float Alpha = sinf(Client()->GameTick()*0.025f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+			
+			float PosY = !g_Config.m_ClNameplatesClan ? Position.y - 3.f*FontSize : Position.y - 3*FontSize -38.f;
+			
+			RenderTools()->DrawRoundRect(Position.x-30.f, PosY, 55.f, 25.f, 0.f);
+			Graphics()->QuadsEnd();
+		}
 	}
 }
 

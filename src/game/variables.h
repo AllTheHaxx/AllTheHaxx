@@ -18,6 +18,7 @@ MACRO_CONFIG_INT(ClNameplatesSize, cl_nameplates_size, 50, 0, 100, CFGFLAG_CLIEN
 MACRO_CONFIG_INT(ClNameplatesClan, cl_nameplates_clan, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show clan in name plates")
 MACRO_CONFIG_INT(ClNameplatesClanSize, cl_nameplates_clan_size, 30, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Size of the clan plates from 0 to 100%")
 MACRO_CONFIG_INT(ClNamePlatesScore, cl_nameplates_score, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show score in name plates")
+MACRO_CONFIG_INT(ClShowATHUser, cl_show_ath_user, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show who uses this client.")
 MACRO_CONFIG_INT(ClTextEntities, cl_text_entities, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render textual entity data")
 #if defined(__ANDROID__)
 MACRO_CONFIG_INT(ClAutoswitchWeapons, cl_autoswitch_weapons, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Auto switch weapon on pickup")
