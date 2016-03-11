@@ -1435,7 +1435,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		{
 			static int s_UpdateButton = 0;
 			if(ServerBrowser()->UpgradeProgression() < 100)
-				str_format(aBuf, sizeof(aBuf), "%s (%i%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
+				str_format(aBuf, sizeof(aBuf), "%s (%i%%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
 			else if (g_Config.m_BrAutoRefresh)
 				str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
 			else
