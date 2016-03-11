@@ -89,7 +89,6 @@ void CNamePlates::RenderNameplate(
 				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pNameScore, -1); // just name with Score
 		}
 
-
 		if(g_Config.m_Debug) // render client id when in debug aswell
 		{
 			char aBuf[128];

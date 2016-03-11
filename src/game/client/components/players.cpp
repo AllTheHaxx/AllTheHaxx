@@ -961,7 +961,6 @@ void CPlayers::RenderPlayer(
 	}
 }
 
-
 void CPlayers::OnRender()
 {
 	// update RenderInfo for ninja
