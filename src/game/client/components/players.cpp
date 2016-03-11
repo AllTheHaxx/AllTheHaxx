@@ -908,6 +908,10 @@ void CPlayers::RenderPlayer(
 			const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 			float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
 
+			char aName[128];
+			str_format(aName, 256, "%s (%d)", pName, pPlayerInfo->m_Score);
+			const char *pNameScore = aName;
+
 			vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
 			if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID))
 				rgb = HslToRgb(vec3(m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) / 64.0f, 1.0f, 0.75f));
@@ -930,7 +934,10 @@ void CPlayers::RenderPlayer(
 					TextRender()->TextColor(0.7f, 0.7f, 1.0f, a);
 			}
 
-			TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f, FontSize, pName, -1);
+			if(!g_Config.m_ClNamePlatesScore)
+				TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f, FontSize, pName, -1);
+			else
+				TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f, FontSize, pNameScore, -1);
 
 			if(g_Config.m_ClNameplatesClan)
 			{
