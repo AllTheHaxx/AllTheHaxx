@@ -1,7 +1,7 @@
 MaxNum = 100
 math.randomseed( os.time() )
 MyNum = math.random(MaxNum)
-Game.Chat:Say(0, "Guess my number! (1-"..MaxNum.."). Use : .guess number. PLEASE USE TEAMCHAT")
+Game.Chat:Say(0, "Guess my number! (1-"..MaxNum.."). Use: .guess <number> PLEASE USE TEAMCHAT")
 
 DELAY = 3
 LastGuess = 0
@@ -16,7 +16,7 @@ function Guesser(ID, Team, Msg)
         num = tonumber(msg)
        
         if MyNum == num then
-            Game.Chat:Say(0, Game.Players(ID).Name .. " won! The number was : " .. num)
+            Game.Chat:Say(0, Game.Players(ID).Name .. " won! The number was: " .. num)
             KillScript(g_ScriptUID)
         else
             if MyNum > num then
