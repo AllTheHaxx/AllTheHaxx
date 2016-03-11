@@ -84,6 +84,7 @@ MACRO_CONFIG_INT(SndMapSoundVolume, snd_ambient_volume, 70, 0, 100, CFGFLAG_SAVE
 MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(SndGame, snd_game, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable game sounds")
 MACRO_CONFIG_INT(SndGun, snd_gun, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable gun sound")
+MACRO_CONFIG_INT(SndSpawn, snd_spawn, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable spawn sounds")
 MACRO_CONFIG_INT(SndChat, snd_chat, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable regular chat sound")
 MACRO_CONFIG_INT(SndTeamChat, snd_team_chat, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable team chat sound")
 MACRO_CONFIG_INT(SndServerMessage, snd_servermessage, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable server message sound")
@@ -107,9 +108,11 @@ MACRO_CONFIG_INT(GfxDisplayAllModes, gfx_display_all_modes, 0, 0, 1, CFGFLAG_SAV
 MACRO_CONFIG_INT(GfxTextureCompression, gfx_texture_compression, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use texture compression")
 #if defined(__ANDROID__)
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "High detail")
+MACRO_CONFIG_INT(GfxLowGraphics, gfx_low_graphics, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Disables various graphic effects")
 MACRO_CONFIG_INT(GfxTextureQuality, gfx_texture_quality, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 #else
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "High detail")
+MACRO_CONFIG_INT(GfxLowGraphics, gfx_low_graphics, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Disables various graphic effects")
 MACRO_CONFIG_INT(GfxTextureQuality, gfx_texture_quality, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 #endif
 MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 16, CFGFLAG_SAVE|CFGFLAG_CLIENT, "FSAA Samples")

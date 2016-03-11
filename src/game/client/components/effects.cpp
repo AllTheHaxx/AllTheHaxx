@@ -126,7 +126,7 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 
 void CEffects::BulletTrail(vec2 Pos)
 {
-	if(!m_Add100hz)
+	if(!m_Add100hz || g_Config.m_GfxLowGraphics)
 		return;
 
 	CParticle p;
@@ -144,6 +144,9 @@ void CEffects::PlayerSpawn(vec2 Pos)
 {
 	for(int i = 0; i < 32; i++)
 	{
+		if(g_Config.m_GfxLowGraphics)
+			break;
+
 		float StartSize = 64.0f + frandom()*32;
 
 		CParticle p;
@@ -160,14 +163,17 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.m_Friction = 0.7f;
 		p.m_Color = vec4(0xb5/255.0f, 0x50/255.0f, 0xcb/255.0f, 1.0f);
 		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
-
 	}
-	if(g_Config.m_SndGame)
+
+	if(g_Config.m_SndGame && g_Config.m_SndSpawn)
 		m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, 1.0f, Pos);
 }
 
 void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 {
+	if(g_Config.m_GfxLowGraphics)
+		return;
+
 	if (!g_Config.m_ClGoreStyle || (g_Config.m_ClGoreStyle && ClientID < 0)) // gore
 	{
 		vec3 BloodColor(1.0f,1.0f,1.0f);
@@ -478,7 +484,7 @@ void CEffects::HammerHit(vec2 Pos)
 // H-Client
 void CEffects::LaserTrail(vec2 Pos, vec2 Vel, vec4 color)
 {
-	if(!m_Add50hz)
+	if(!m_Add50hz || g_Config.m_GfxLowGraphics)
 		return;
 
 	float StartSize = 5.0f + frandom()*6;

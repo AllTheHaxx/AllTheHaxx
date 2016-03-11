@@ -1006,6 +1006,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_GfxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button))
+		g_Config.m_GfxLowGraphics ^= 1;
+
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxBackgroundRender, Localize("Render when inactive"), g_Config.m_GfxBackgroundRender, &Button, Localize("Render graphics when window is in background")))
 		g_Config.m_GfxBackgroundRender ^= 1;
 
@@ -1129,6 +1134,11 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_SndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
 		g_Config.m_SndGun ^= 1;
+
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_SndSpawn, Localize("Enable spawn sound"), g_Config.m_SndSpawn, &Button))
+		g_Config.m_SndSpawn ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
