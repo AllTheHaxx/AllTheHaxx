@@ -272,6 +272,20 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent)
 
 	Graphics()->QuadsEnd();
 
+	//H-Client
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+	if(!str_find_nocase(Info.m_aGameType, "race") && !str_find_nocase(Info.m_aGameType, "ddnet") && length(Pos-From) != 0 && Pos != From)
+	{
+		vec2 cPos = From;
+		for (int i=0; i<length(From-Pos); i++)
+		{
+			m_pClient->m_pEffects->LaserTrail(cPos, Dir, InnerColor);
+			cPos += Dir;
+		}
+	}
+	//
+
 	// render head
 	{
 		Graphics()->BlendNormal();

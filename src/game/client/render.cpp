@@ -233,7 +233,29 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 				SelectSprite(OutLine?SPRITE_TEE_BODY_OUTLINE:SPRITE_TEE_BODY, 0, 0, 0);
 				IGraphics::CQuadItem QuadItem(BodyPos.x, BodyPos.y, BaseSize, BaseSize);
 				Graphics()->QuadsDraw(&QuadItem, 1);
+				Graphics()->QuadsEnd();
 
+				//H-Client: draw damage
+				if (!OutLine && pInfo->m_TextureDamage != -1 && g_Config.m_ClGoreStyle)
+				{
+					Graphics()->TextureSet(pInfo->m_TextureDamage);
+					Graphics()->QuadsBegin();
+
+					if (g_Config.m_ClGoreStyleTeeColors)
+						Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
+					else
+						Graphics()->SetColor(1.0f, 1.0f, 1.0f, pInfo->m_ColorBody.a);
+
+					SelectSprite(SPRITE_TEE_BODY, 0, 0, 0);
+					IGraphics::CQuadItem QuadItem(BodyPos.x, BodyPos.y, BaseSize, BaseSize);
+					Graphics()->QuadsDraw(&QuadItem, 1);
+
+					Graphics()->QuadsEnd();
+				}
+
+				Graphics()->TextureSet(pInfo->m_Texture);
+				Graphics()->QuadsBegin();
+				Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
 				// draw eyes
 				if(p == 1)
 				{
@@ -266,6 +288,10 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					Graphics()->QuadsDraw(Array, 2);
 				}
 			}
+			Graphics()->QuadsEnd();
+
+			Graphics()->TextureSet(pInfo->m_Texture);
+			Graphics()->QuadsBegin();
 
 			// draw feet
 			CAnimKeyframe *pFoot = f ? pAnim->GetFrontFoot() : pAnim->GetBackFoot();

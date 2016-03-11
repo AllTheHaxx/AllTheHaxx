@@ -22,10 +22,11 @@
 #include <game/client/components/sounds.h>
 #include <game/client/components/controls.h>
 
+#include <engine/serverbrowser.h>
 #include <engine/textrender.h>
 
 #include "players.h"
-#include <stdio.h>
+//#include <stdio.h>
 
 void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset)
 {
@@ -539,7 +540,7 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if (Player.m_PlayerFlags&PLAYERFLAG_AIM && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))
+		if ((Player.m_PlayerFlags&PLAYERFLAG_AIM) && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))
 		{
 			float Alpha = 1.0f;
 			if (OtherTeam)
@@ -671,7 +672,7 @@ void CPlayers::RenderPlayer(
 				}
 				else
 				{
-					if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED)
+					if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 						IteX = s_LastIteX;
 					else
 						s_LastIteX = IteX;
@@ -735,7 +736,7 @@ void CPlayers::RenderPlayer(
 				}
 				else
 				{
-					if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED)
+					if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 						IteX = s_LastIteX;
 					else
 						s_LastIteX = IteX;
@@ -781,7 +782,17 @@ void CPlayers::RenderPlayer(
 		RenderTools()->RenderTee(&State, &Ghost, Player.m_Emote, Direction, GhostPosition, true); // render ghost
 	}
 
-	RenderInfo.m_Size = 64.0f; // force some settings
+	RenderInfo.m_Size = 64.0f;       // force some settings
+	RenderInfo.m_ColorBody.a = 1.0f;
+	RenderInfo.m_ColorFeet.a = 1.0f;
+
+	// gore
+	{
+		CServerInfo ServerInfo;
+		Client()->GetServerInfo(&ServerInfo);
+		if (g_Config.m_ClGoreStyle && !IsRace(&ServerInfo) && !IsDDNet(&ServerInfo) && Prev.m_Emote == EMOTE_NORMAL && Player.m_Emote == EMOTE_PAIN)
+			m_pClient->m_pEffects->Blood(Position, Direction, 0, pInfo.m_ClientID);
+		}
 
 	if (OtherTeam)
 	{
@@ -834,6 +845,15 @@ void CPlayers::RenderPlayer(
 		RenderTools()->SelectSprite(SPRITE_DOTDOT);
 		if (OtherTeam)
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
+		IGraphics::CQuadItem QuadItem(Position.x + 24, Position.y - 40, 64,64);
+		Graphics()->QuadsDraw(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+	}
+	else if(Player.m_PlayerFlags&PLAYERFLAG_IN_MENU)
+	{
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+		Graphics()->QuadsBegin();
+		RenderTools()->SelectSprite(SPRITE_ZZZ);
 		IGraphics::CQuadItem QuadItem(Position.x + 24, Position.y - 40, 64,64);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 		Graphics()->QuadsEnd();
