@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/demo.h>
+#include <engine/serverbrowser.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
 #include <engine/shared/config.h>
@@ -15,9 +16,8 @@
 #include <game/client/components/effects.h>
 
 #include "items.h"
-#include <stdio.h>
 
-#include <engine/serverbrowser.h>
+
 void CItems::OnReset()
 {
 	m_NumExtraProjectiles = 0;
@@ -28,17 +28,17 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	if(pCurrent->m_Type == WEAPON_GRENADE)
+	if(pCurrent->m_WeaponType == WEAPON_GRENADE)
 	{
 		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeCurvature;
 		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeSpeed;
 	}
-	else if(pCurrent->m_Type == WEAPON_SHOTGUN)
+	else if(pCurrent->m_WeaponType == WEAPON_SHOTGUN)
 	{
 		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunCurvature;
 		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunSpeed;
 	}
-	else if(pCurrent->m_Type == WEAPON_GUN)
+	else if(pCurrent->m_WeaponType == WEAPON_GUN)
 	{
 		Curvature = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunCurvature;
 		Speed = m_pClient->m_Tuning[g_Config.m_ClDummy].m_GunSpeed;
@@ -84,13 +84,13 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 	Graphics()->QuadsBegin();
 
-	RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(pCurrent->m_Type, 0, NUM_WEAPONS-1)].m_pSpriteProj);
+	RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(pCurrent->m_WeaponType, 0, NUM_WEAPONS-1)].m_pSpriteProj);
 	vec2 Vel = Pos-PrevPos;
 	//vec2 pos = mix(vec2(prev->x, prev->y), vec2(current->x, current->y), Client()->IntraGameTick());
 
 
 	// add particle for this projectile
-	if(pCurrent->m_Type == WEAPON_GRENADE)
+	if(pCurrent->m_WeaponType == WEAPON_GRENADE)
 	{
 		m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1);
 		static float s_Time = 0.0f;
@@ -136,7 +136,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick());
 	float Angle = 0.0f;
 	float Size = 64.0f;
-	if (pCurrent->m_Type == POWERUP_WEAPON)
+	if (pCurrent->m_PickupType == POWERUP_WEAPON)
 	{
 		Angle = 0; //-pi/6;//-0.25f * pi * 2.0f;
 		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS-1)].m_pSpriteBody);
@@ -150,9 +150,9 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 			SPRITE_PICKUP_WEAPON,
 			SPRITE_PICKUP_NINJA
 			};
-		RenderTools()->SelectSprite(c[pCurrent->m_Type]);
+		RenderTools()->SelectSprite(c[pCurrent->m_PickupType]);
 
-		if(c[pCurrent->m_Type] == SPRITE_PICKUP_NINJA)
+		if(c[pCurrent->m_PickupType] == SPRITE_PICKUP_NINJA)
 		{
 			m_pClient->m_pEffects->PowerupShine(Pos, vec2(96,18));
 			Size *= 2.0f;

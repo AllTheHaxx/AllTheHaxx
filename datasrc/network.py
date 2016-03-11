@@ -74,7 +74,7 @@ Objects = [
 		NetIntAny("m_VelX"),
 		NetIntAny("m_VelY"),
 
-		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
+		NetIntRange("m_WeaponType", 0, 'NUM_WEAPONS-1'),
 		NetTick("m_StartTick"),
 	]),
 
@@ -91,7 +91,7 @@ Objects = [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 
-		NetIntRange("m_Type", 0, 'max_int'),
+		NetIntRange("m_PickupType", 0, 'max_int'),
 		NetIntRange("m_Subtype", 0, 'max_int'),
 	]),
 

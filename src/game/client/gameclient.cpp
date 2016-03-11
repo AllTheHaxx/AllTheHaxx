@@ -964,7 +964,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 			g_GameClient.m_pItems->AddExtraProjectile(&Proj);
 
-			if(AntiPingWeapons() && Proj.m_Type == WEAPON_GRENADE && !UseExtraInfo(&Proj))
+			if(AntiPingWeapons() && Proj.m_WeaponType == WEAPON_GRENADE && !UseExtraInfo(&Proj))
 			{
 				vec2 StartPos;
 				vec2 Direction;
@@ -1697,7 +1697,7 @@ void CGameClient::OnPredict()
 			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
 			{
 				CNetObj_Projectile* pProj = (CNetObj_Projectile*) pData;
-				if(pProj->m_Type == WEAPON_GRENADE || (pProj->m_Type == WEAPON_SHOTGUN && UseExtraInfo(pProj)))
+				if(pProj->m_WeaponType == WEAPON_GRENADE || (pProj->m_WeaponType == WEAPON_SHOTGUN && UseExtraInfo(pProj)))
 				{
 					CLocalProjectile NewProj;
 					NewProj.Init(this, &World, Collision(), pProj);
@@ -2370,7 +2370,7 @@ void CLocalProjectile::Init(CGameClient *pGameClient, CWorldCore *pWorld, CColli
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
 	m_StartTick = pProj->m_StartTick;
-	m_Type = pProj->m_Type;
+	m_Type = pProj->m_WeaponType;
 	m_Weapon = m_Type;
 
 	ExtractInfo(pProj, &m_Pos, &m_Direction, 1);
