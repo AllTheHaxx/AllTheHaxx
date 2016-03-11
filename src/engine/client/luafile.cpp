@@ -393,7 +393,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass<CGameClient>("CGameClient")   //this class is kinda outdated due to "Game"
-			.addData("Chat", &CGameClient::m_pChat)		
+		/*	.addData("Chat", &CGameClient::m_pChat)
 			.addData("ServerInfo", &CGameClient::m_CurrentServerInfo, false)
 			.addData("Emote", &CGameClient::m_pEmoticon, false)
 			.addData("HUD", &CGameClient::m_pHud, false)
@@ -402,7 +402,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Collision", &CGameClient::m_pCollision)
 			//pointer to components & stuff from gameclient
 			//.addData("Local", &CGameClient::m_Snap)
-			.addData("LocalTee", &CGameClient::m_PredictedChar)
+			.addData("LocalTee", &CGameClient::m_PredictedChar) */
+
+			.addFunction("IntersectCharacter", &CGameClient::IntersectCharacterLua)
 		.endClass()
 		
 		//MAIN NAMESPACE

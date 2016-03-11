@@ -380,6 +380,7 @@ public:
 	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
+	int IntersectCharacterLua(vec2 Pos0, vec2 Pos1, vec2& NewPos, int ownID) { return IntersectCharacter(Pos0, Pos1, NewPos, ownID); }
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2& NewPos, int ownID);
 	int IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2* NewPos2, int ownID, CWorldCore *World);
 
