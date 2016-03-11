@@ -41,6 +41,10 @@ void CNamePlates::RenderNameplate(
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 		const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
 
+		char aName[128];
+		str_format(aName, 256, "%s (%d)", pName, pPlayerInfo->m_Score);
+		const char *pNameScore = aName;
+
 		float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
 
 		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
@@ -67,7 +71,10 @@ void CNamePlates::RenderNameplate(
 
 		if (str_comp(pClan, "") && g_Config.m_ClNameplatesClan) // name + clan
 		{
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, pName, -1);
+			if(!g_Config.m_ClNamePlatesScore)
+				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, pName, -1);
+			else
+				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, pNameScore, -1);
 
 			FontSize = round_to_int(FontSize * 3 / 4);
 			tw = TextRender()->TextWidth(0, FontSize, pClan, -1);
@@ -75,7 +82,13 @@ void CNamePlates::RenderNameplate(
 			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pClan, -1);
 		}
 		else
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pName, -1); // just name
+		{
+			if(!g_Config.m_ClNamePlatesScore)
+				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pName, -1); // just name
+			else
+				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pNameScore, -1); // just name with Score
+		}
+
 
 		if(g_Config.m_Debug) // render client id when in debug aswell
 		{
