@@ -882,7 +882,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		AddLine(-1337, 0, "Unknown command. Try '$cmdlist'!");
 		return;
 	}
-	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && !NoTrans)
+	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
 		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
 		return;
