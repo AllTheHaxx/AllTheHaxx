@@ -105,7 +105,7 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel)
 
 void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 {
-	if(!m_Add100hz)
+	if(!m_Add100hz || g_Config.m_GfxLowGraphics)
 		return;
 
 	float StartSize = 24.0f + frandom()*12;
@@ -447,6 +447,9 @@ void CEffects::Explosion(vec2 Pos)
 	// add the smoke
 	for(int i = 0; i < 24; i++)
 	{
+		if(g_Config.m_GfxLowGraphics)
+			break;
+
 		float StartSize = 32.0f + frandom()*8;
 
 		CParticle p;
