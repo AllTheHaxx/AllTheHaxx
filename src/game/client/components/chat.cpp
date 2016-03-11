@@ -814,7 +814,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
 
-	if(g_Config.m_ClTransChatCmds && pLine[0] == '!')
+	if(g_Config.m_ClTransChatCmds && pLine[0] == '$')
 	{
 		char aCmd[512][256] = {{0}};
 		mem_zero(&aCmd, sizeof(aCmd));
@@ -837,15 +837,15 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		if(!str_comp_nocase(aCmd[0], "cmdlist"))
 		{
 			AddLine(-1337, 0, "~~~~ Commands ~~~~");
-			AddLine(-1337, 0, "'!tout <dst> <message>': Translate a message");
-			AddLine(-1337, 0, "'!tin <src> <ID>': Translate message in the chat (!tin 0 to translate the last message)");
+			AddLine(-1337, 0, "'$tout <dst> <message>': Translate a message");
+			AddLine(-1337, 0, "'$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
 			return;
 		}
 		else if(!str_comp_nocase(aCmd[0], "tout"))
 		{
 			if(!aCmd[1][0] || !aCmd[2][0])
 			{
-				AddLine(-1337, 0, "Please use '!tout <dst> <message>'");
+				AddLine(-1337, 0, "Please use '$tout <dst> <message>'");
 				return;
 			}
 
@@ -869,7 +869,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		{
 			if(!aCmd[1][0] || !aCmd[2][0])
 			{
-				AddLine(-1337, 0, "Please use '!tin <src> <ID>'");
+				AddLine(-1337, 0, "Please use '$tin <src> <ID>'");
 				return;
 			}
 
@@ -879,7 +879,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 			return;
 		}
 
-		AddLine(-1337, 0, "Unknown command. Try '!cmdlist'!");
+		AddLine(-1337, 0, "Unknown command. Try '$cmdlist'!");
 		return;
 	}
 	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && !NoTrans)
