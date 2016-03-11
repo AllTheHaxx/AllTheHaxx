@@ -61,7 +61,7 @@ Objects = [
 		NetIntAny("m_Fire"),
 		NetIntAny("m_Hook"),
 
-		NetIntRange("m_PlayerFlags", 0, 256),
+		NetIntRange("m_PlayerFlags", 0, 'max_int'),
 
 		NetIntAny("m_WantedWeapon"),
 		NetIntAny("m_NextWeapon"),
@@ -145,7 +145,7 @@ Objects = [
 	]),
 
 	NetObject("Character:CharacterCore", [
-		NetIntRange("m_PlayerFlags", 0, 256),
+		NetIntRange("m_PlayerFlags", 0, 'max_int'),
 		NetIntRange("m_Health", 0, 'max_int'),
 		NetIntRange("m_Armor", 0, 'max_int'),
 		NetIntRange("m_AmmoCount", 0, 'max_int'),
