@@ -134,7 +134,7 @@ void CEffects::BulletTrail(vec2 Pos)
 	p.m_Spr = SPRITE_PART_BALL;
 	p.m_Pos = Pos;
 	p.m_LifeSpan = 0.25f + frandom()*0.25f;
-	p.m_StartSize = vec2(28.0f, 28.0f);
+	p.m_StartSize = vec2(8.0f, 8.0f);
 	p.m_EndSize = vec2(0,0);
 	p.m_Friction = 0.7f;
 	m_pClient->m_pParticles->Add(CParticles::GROUP_PROJECTILE_TRAIL, &p);
