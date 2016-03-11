@@ -372,6 +372,10 @@ public:
 	class CIRCBind *m_pIRCBind;
 	class CIdentity *m_pIdentity;
 	class CCollision *m_pCollision;
+	class CgSkins *m_pgSkins;
+	class CpSkins *m_ppSkins;
+	class CeSkins *m_peSkins;
+	class CcSkins *m_pcSkins;
 	class CUI *m_pUi;
 
 	// DDRace

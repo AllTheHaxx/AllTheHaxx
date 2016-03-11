@@ -333,6 +333,13 @@ public:	int m_LoadTotal;
 	bool ToggleIRC();
 	static void ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData);
 
+	// found in menus_texture.cpp
+	void RenderSettingsTexture(CUIRect MainView);
+	void RenderSettingsGameskin(CUIRect MainView);
+	void RenderSettingsParticles(CUIRect MainView);
+	void RenderSettingsEmoticons(CUIRect MainView);
+	void RenderSettingsCursor(CUIRect MainView);
+
 	void SetActive(bool Active);
 	bool LockInput(IInput::CEvent Event);
 

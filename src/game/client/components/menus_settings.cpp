@@ -1382,10 +1382,10 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Sound"),
 		("Haxx"),
 		Localize("HUD"),
-		Localize("Chat"),
 		Localize("Identities"),
+		Localize("Texture"),
 		("DDNet"),
-		Localize("Lua"),
+		Localize("Lua")
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1421,12 +1421,12 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(g_Config.m_UiSettingsPage == 8)
 		RenderSettingsHUD(MainView);
 	else if(g_Config.m_UiSettingsPage == 9)
-		RenderSettingsIRC(MainView);
-	else if(g_Config.m_UiSettingsPage == 10)
 		RenderSettingsIdent(MainView);
+	else if(g_Config.m_UiSettingsPage == 10)
+		RenderSettingsTexture(MainView);
 	else if(g_Config.m_UiSettingsPage == 11)
 		RenderSettingsDDRace(MainView);
-	else if(g_Config.m_UiSettingsPage == 12)
+	else if	(g_Config.m_UiSettingsPage == 12)
 		RenderSettingsLua(MainView);
 
 
@@ -2204,6 +2204,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClPathFinding, Localize("A* Path Finding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
 		g_Config.m_ClPathFinding ^= 1;
 
+	RenderSettingsIRC(Right);
 }
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)

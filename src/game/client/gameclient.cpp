@@ -63,6 +63,10 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/voting.h"
+#include "components/gskins.h"
+#include "components/pskins.h"
+#include "components/eskins.h"
+#include "components/cskins.h"
 
 #include <base/system.h>
 #include "components/race_demo.h"
@@ -129,6 +133,10 @@ static CVoting gs_Voting;
 static CSpectator gs_Spectator;
 static CSpoofRemote gs_SpoofRemote;
 static CIdentity gs_Identity;
+static CgSkins gs_gSkins;
+static CpSkins gs_pSkins;
+static CeSkins gs_eSkins;
+static CcSkins gs_cSkins;
 
 static CPlayers gs_Players;
 static CNamePlates gs_NamePlates;
@@ -216,6 +224,10 @@ void CGameClient::OnConsoleInit()
 	m_pAStar = &::gs_AStar;
 	m_pIRCBind = &::gs_IRC;
 	m_pIdentity = &::gs_Identity;
+	m_pgSkins = &::gs_gSkins;
+	m_ppSkins = &::gs_pSkins;
+	m_peSkins = &::gs_eSkins;
+	m_pcSkins = &::gs_cSkins;
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
@@ -240,6 +252,10 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pAStar);
 	m_All.Add(m_pIRCBind);
 	m_All.Add(m_pIdentity);
+	m_All.Add(m_pgSkins);
+	m_All.Add(m_ppSkins);
+	m_All.Add(m_peSkins);
+	m_All.Add(m_pcSkins);
 
 	m_All.Add(&gs_LuaRender0); // lua
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100

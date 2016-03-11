@@ -173,6 +173,11 @@ MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFL
 
 MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send \"Zzz\" emotes while being in console mode")
 
+MACRO_CONFIG_STR(GameTexture, game_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gameskin texture")
+MACRO_CONFIG_STR(GameParticles, particle_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Particle texture")
+MACRO_CONFIG_STR(GameEmoticons, emoticons_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Emoticons texture")
+MACRO_CONFIG_STR(GameCursor, cursor_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Cursor texture")
+
 // translator stuff
 MACRO_CONFIG_INT(ClTransIn, cl_trans_in, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate incoming messages")
 MACRO_CONFIG_INT(ClTransOut, cl_trans_out, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate outgoing messages")
