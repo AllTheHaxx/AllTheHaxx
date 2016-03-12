@@ -1,6 +1,7 @@
-Teeworlds Copyright (C) 2007-2014 Magnus Auvinen
-DDRace    Copyright (C) 2010-2011 Shereef Marzouk
-DDNet     Copyright (C) 2013-2015 Dennis Felsing
+Teeworlds  Copyright (C) 2007-2014 Magnus Auvinen
+DDRace     Copyright (C) 2010-2011 Shereef Marzouk
+DDNet      Copyright (C) 2013-2015 Dennis Felsing
+AllTheHaxx Copyright (C) 2016 xush' / Henritees / FuroS
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -28,6 +29,11 @@ released under CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
 IMPORTANT NOTE! The source under src/engine/external are stripped
 libraries with their own licenses. Mostly BSD or zlib/libpng license but
 check the individual libraries.
+
+The lua scripts under the lua/ folder doesn't claim the right to be correct,
+complete or harmless in any way. If you get banned from a server because
+of using one of it, nobody except you yourself is responsible!
+You may not redistribute this scripts as if it were yours.
 
 ------------------------------------------------------------------------
 
