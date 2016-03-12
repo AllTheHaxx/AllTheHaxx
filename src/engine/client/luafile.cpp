@@ -11,6 +11,7 @@
 #include <game/client/components/controls.h>
 #include <game/client/components/hud.h>
 #include <game/client/components/menus.h>
+#include <game/client/components/voting.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
@@ -283,6 +284,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("MousePos", &CMenus::GetMousePos, &CMenus::SetMousePos)
 		.endClass()
 
+		.beginClass<CVoting>("CVoting")
+		.endClass()
+
 		//Local player Infos
 		.beginClass<CNetObj_CharacterCore>("CNetObj_CharacterCore")  //TODO : Add the whole class!
 			.addData("PosX", &CNetObj_CharacterCore::m_X, false)
@@ -420,6 +424,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
 			.addVariable("Menus", &CLua::m_pCGameClient->m_pMenus, false)
+			.addVariable("Voting", &CLua::m_pCGameClient->m_pVoting, false)
 			//.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
 			.addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
 			.addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
