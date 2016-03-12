@@ -128,7 +128,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		MainIRC.HSplitTop(20.0f, &ButtonBox, &EntryBox);
 		ButtonBox.VSplitRight(80.0f, &ButtonBox, &Button);
 		static float s_ButtonDisc = 0;
-		if(DoButton_Menu(&s_ButtonDisc, Localize("Disconnect"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonDisc, g_Config.m_ClIRCAutoconnect ? Localize("Reconnect") : Localize("Disconnect"), 0, &Button))
 			m_pClient->m_pIRCBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
 
 		// scroll through the tabs
