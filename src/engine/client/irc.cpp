@@ -30,9 +30,7 @@ CIRC::CIRC()
     m_pGraphics = 0x0;
     m_State = STATE_DISCONNECTED;
     m_Socket = invalid_socket;
-    char tmpNick[25]={0};
-    str_format(tmpNick, sizeof(tmpNick), "HC-%d", time(NULL));
-    m_Nick = tmpNick;
+    m_Nick = "";
     mem_zero(m_CmdToken, sizeof(m_CmdToken));
     SetActiveCom(-1);
 }
@@ -161,16 +159,23 @@ void CIRC::StartConnection() // call this from a thread only!
 
     m_State = STATE_CONNECTING;
     // lookup
-	if(net_host_lookup("irc.quakenet.org:6667", &m_HostAddress, NETTYPE_IPV4) != 0)
-	{
-        dbg_msg("IRC","ERROR: Can't lookup irc.quakenet.org");
-        m_State = STATE_DISCONNECTED;
-        return;
-	}
+    int connectionType = NETTYPE_IPV6;
+    if(net_host_lookup("irc.quakenet.org:6667", &m_HostAddress, connectionType) != 0)
+    {
+    	connectionType = NETTYPE_IPV4;
+    	if(net_host_lookup("irc.quakenet.org:6667", &m_HostAddress, connectionType) != 0)
+		{
+			dbg_msg("IRC","ERROR: Can't lookup irc.quakenet.org, neither on IPv6 nor IPv4");
+			m_State = STATE_DISCONNECTED;
+			return;
+		}
+
+    }
+
 	m_HostAddress.port = 6667;
 
     // connect
-    BindAddr.type = NETTYPE_IPV4;
+    BindAddr.type = connectionType;
     m_Socket = net_tcp_create(BindAddr);
 	if(net_tcp_connect(m_Socket, &m_HostAddress) != 0)
 	{
