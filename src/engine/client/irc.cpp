@@ -538,7 +538,12 @@ void CIRC::StartConnection() // call this from a thread only!
 												if (pCom)
 												{
 													char aBuf[128];
-													str_format(aBuf, sizeof(aBuf), "*** '%s' isn't playing on a server!", aMsgFrom.c_str());
+													if(str_comp_nocase(aAddr, "FORBIDDEN") == 0)
+														str_format(aBuf, sizeof(aBuf), "*** '%s' forbids to join his server!", aMsgFrom.c_str());
+													else if(str_comp_nocase(aAddr, "NONE") == 0)
+														str_format(aBuf, sizeof(aBuf), "*** '%s' isn't playing on a server!", aMsgFrom.c_str());
+													else
+														str_format(aBuf, sizeof(aBuf), "*** '%s' sent invalid information!", aMsgFrom.c_str());
 													pCom->m_Buffer.push_back(aBuf);
 												}
 											}
