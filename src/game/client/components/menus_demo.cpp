@@ -575,13 +575,6 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
 	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect))
 		gs_ListBoxNewSelected = ThisItemIndex;
 
-	if(gs_ListBoxSelectedIndex != ThisItemIndex && UI()->MouseInside(&Item.m_HitRect))
-	{
-		CUIRect r = Item.m_Rect;
-		r.Margin(1.5f, &r);
-		RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.2f), CUI::CORNER_ALL, 4.0f);
-	}
-
 	// process input, regard selected index
 	if(gs_ListBoxSelectedIndex == ThisItemIndex)
 	{
