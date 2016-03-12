@@ -41,7 +41,7 @@ function OnTick()
 	end
 	
 	if(NeedReset == true) then
-		TW.Game.Input.Jump = 0
+		Game.Input.Jump = 0
 		Game.Input.Direction = 0
 		NeedReset = false
 	end
