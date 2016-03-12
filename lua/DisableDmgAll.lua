@@ -7,9 +7,9 @@ function OnTick()
 	if(Game.Players(i).Name == "") then
 		i = i + 1
 	end
-	if(Game.Client.LocalTime > time + 3) then
-		print("Iteration " .. i)
-		if(Game.Players(i).Name ~= "") then
+	if(Game.Client.LocalTime > time + 3.5) then -- chatcooldown
+		--print("Iteration " .. i)
+		if(Game.Players(i).Active == true and Game.Players(i).Name ~= "") then
 		print("Disabling damage to " .. Game.Players(i).Name)
 			Game.Chat:Say(0, "/disabledmg " .. Game.Players(i).Name)
 			time = Game.Client.LocalTime
@@ -18,7 +18,7 @@ function OnTick()
 	end
 	if(i > 32) then
 		KillScript(g_ScriptUID)
-		print("DISABLE? DONE!")
+		print("Disabling Damage to all Players done!")
 	end
 end
 
