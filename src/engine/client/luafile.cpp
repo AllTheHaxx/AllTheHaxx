@@ -285,6 +285,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass<CVoting>("CVoting")
+			.addFunction("Vote", &CVoting::Vote)
 		.endClass()
 
 		//Local player Infos
