@@ -1933,12 +1933,14 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 	if(g_Config.m_ClRaceGhost)
 	{
+		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
 		{
 			g_Config.m_ClRaceShowGhost ^= 1;
 		}
 
+		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
 		{
@@ -1970,6 +1972,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Button.VSplitMid(&LeftLeft, &Button);
 
 		Button.VSplitLeft(50.0f, &Label, &Button);
+		Label.VSplitRight(5.0f, &Label, 0);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
 		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f, 0, g_Config.m_ClShowOthersAlpha)*100.0f);
@@ -1980,6 +1983,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		}
 	}
 
+	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads"), g_Config.m_ClShowQuads, &Button))
 	{
@@ -2011,6 +2015,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 	if(g_Config.m_ClAntiPing)
 	{
+		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClAntiPingPlayers, Localize("AntiPing: predict other players"), g_Config.m_ClAntiPingPlayers, &Button))
 		{
@@ -2034,12 +2039,14 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Right.HSplitTop(60.0f, 0, &Right);
 	}
 
+	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowOtherHookColl, Localize("Show other players' hook collision lines"), g_Config.m_ClShowOtherHookColl, &Button))
 	{
 		g_Config.m_ClShowOtherHookColl ^= 1;
 	}
 
+	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection, &Button))
 	{
@@ -2117,6 +2124,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	//Updater
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	{
+		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		char aBuf[256];
