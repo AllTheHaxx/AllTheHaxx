@@ -1944,7 +1944,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50 && !m_TimeoutCodeSent[g_Config.m_ClDummy])
 					{
-						if(IsDDNet(&m_CurrentServerInfo))
+						if(IsDDNet(&m_CurrentServerInfo) && g_Config.m_ClTimeoutProtection)
 						{
 							m_TimeoutCodeSent[g_Config.m_ClDummy] = true;
 							CNetMsg_Cl_Say Msg;

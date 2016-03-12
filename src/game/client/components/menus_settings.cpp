@@ -2162,26 +2162,62 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 #endif
 
-	{
-		Right.HSplitTop(20.0f, &Button, &Right);
-		Button.VSplitLeft(190.0f, &Label, &Button);
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Timeout code"));
-		UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
-		static float s_OffsetCode = 0.0f;
-		DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode);
-	}
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static int s_Checkbox = 0;
+	if(DoButton_CheckBox(&s_Checkbox, Localize("Enable Timeout Protection"), g_Config.m_ClTimeoutProtection, &Button))
+		g_Config.m_ClTimeoutProtection ^= 1;
 
-	Right.HSplitTop(5.0f, &Button, &Right);
-
+	if(g_Config.m_ClTimeoutProtection)
 	{
-		Right.HSplitTop(20.0f, &Button, &Right);
-		Button.VSplitLeft(190.0f, &Label, &Button);
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Dummy Timeout code"));
-		UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
-		static float s_OffsetCode = 0.0f;
-		DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode);
+		Right.HSplitTop(5.0f, 0, &Right);
+
+		{
+			CUIRect GenButton;
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(190.0f, &Label, &Button);
+			Button.VSplitRight(Button.h, &Button, &GenButton);
+			static int s_GenButton = 0;
+			if(DoButton_Menu(&s_GenButton, "¶", 0, &GenButton, Localize("Generate new Code"), CUI::CORNER_R))
+			{
+				for(unsigned int i = 0; i < 16; i++)
+				{
+					if (rand() % 2)
+						g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 97;
+					else
+						g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 65;
+				}
+			}
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Timeout code"));
+			UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+			static float s_OffsetCode = 0.0f;
+			DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode, false, CUI::CORNER_L);
+		}
+
+		Right.HSplitTop(5.0f, &Button, &Right);
+
+		{
+			CUIRect GenButton;
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(190.0f, &Label, &Button);
+			Button.VSplitRight(Button.h, &Button, &GenButton);
+			static int s_GenButton = 0;
+			if(DoButton_Menu(&s_GenButton, "¶", 0, &GenButton, Localize("Generate new Code"), CUI::CORNER_R))
+			{
+				for(unsigned int i = 0; i < 16; i++)
+				{
+					if (rand() % 2)
+						g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 97;
+					else
+						g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 65;
+				}
+			}
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Dummy Timeout code"));
+			UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+			static float s_OffsetCode = 0.0f;
+			DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode, false, CUI::CORNER_L);
+		}
 	}
 }
 
