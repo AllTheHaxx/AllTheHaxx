@@ -13,16 +13,6 @@ public:
 	CUIRect(float _x, float _y, float _w, float _h) : x(_x), y(_y), w(_w), h(_h) {}*/
 	float x, y, w, h;
 
-	// for lua
-	float GetX() const { return x; }
-	float GetY() const { return y; }
-	float GetW() const { return w; }
-	float GetH() const { return h; }
-	void SetX(float _x) { x = _x; }
-	void SetY(float _y) { y = _y; }
-	void SetW(float _w) { w = _w; }
-	void SetH(float _h) { h = _h; }
-
 	void HSplitMid(CUIRect *pTop, CUIRect *pBottom) const;
 	void HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const;
 	void HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const;
@@ -34,6 +24,21 @@ public:
 	void VMargin(float Cut, CUIRect *pOtherRect) const;
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 
+};
+
+class LuaCUIRect : public CUIRect
+{
+public:
+	float x, y, w, h;
+	LuaCUIRect(float _x, float _y, float _w, float _h) : x(_x), y(_y), w(_w), h(_h) { }
+/*	float GetX() { return x; }
+	float GetY() { return y; }
+	float GetW() { return w; }
+	float GetH() { return h; }
+	void SetX(float _x) { x = _x; }
+	void SetY(float _y) { y = _y; }
+	void SetW(float _w) { w = _w; }
+	void SetH(float _h) { h = _h; }*/
 };
 
 class CUI
