@@ -92,6 +92,8 @@ CIRCBind::CIRCBind()
 
 void CIRCBind::OnRender()
 {
+	if(g_Config.m_ClIRCAutoconnect && !IsConnected())
+		Connect();
 }
 
 void CIRCBind::ListenIRCThread(void *pUser)
@@ -139,8 +141,6 @@ void CIRCBind::OnConsoleInit()
 
 void CIRCBind::OnReset()
 {
-	if(g_Config.m_ClIRCAutoconnect && !IsConnected())
-		Connect();
 }
 
 void CIRCBind::OnShutdown()
