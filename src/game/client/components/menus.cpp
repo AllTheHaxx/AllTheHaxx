@@ -124,12 +124,15 @@ void CMenusTooltip::OnRender()
 	{
 		CUIRect Temp;
 		const float FONT_SIZE = 13.0f;
-		Temp.w = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f; Temp.h = FONT_SIZE+2.5f;
-		Temp.x = UI()->MouseX() + 25.0f; Temp.y = UI()->MouseY() + 0.5f;
+		Temp.x = UI()->MouseX() + 25.0f;
+		Temp.y = UI()->MouseY() + 0.5f;
+		const float mtw = UI()->Screen()->w-Temp.x-10.0f;
+		const int lc = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, mtw);
+		Temp.w = min(mtw+2.5f, TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f);
+		Temp.h = (FONT_SIZE)*lc+2.5;
 		Temp.Margin(-3.0f, &Temp);
 		RenderTools()->DrawUIRect(&Temp, vec4(0,0,0,0.8f), CUI::CORNER_ALL, 2.5f);
-		//Temp.Margin(3/1, &Temp);
-		TextRender()->Text(0, Temp.x+1.5f, Temp.y, FONT_SIZE, m_aTooltip, UI()->Graphics()->ScreenWidth()-Temp.x);
+		TextRender()->Text(0, Temp.x+1.5f, Temp.y, FONT_SIZE, m_aTooltip, mtw);
 
 		m_aTooltip[0] = 0;
 	}
