@@ -1,3 +1,6 @@
+
+-- ***** THIS IS OUTDATED, PLEASE REFER TO THE LuaManual INSTEAD *****
+
 -- ALLTHEHAXX LUA DOCUMENTATION
 -- Below you will find a short documentation on the Lua features that come with the AllTheHaxx client,
 -- however you will not learn how to program in Lua, so if you can't develope in Lua/Luabridge yet search
@@ -26,11 +29,11 @@
 --XXX The script header XXX--
 
 --Every script can (and should) start with the following 3 lines:
-_g_ScriptTitle = "my cool script title"
-_g_ScriptInfo = "written by me"
+g_ScriptTitle = "my cool script title"
+g_ScriptInfo = "written by me"
 config = {}
- -- _g_ScriptTitle: sets an individual title for the script, if not given the filename will be used
- -- _g_ScriptInfo: sets a subtext below the script title, if not given it stays empty
+ -- g_ScriptTitle: sets an individual title for the script, if not given the filename will be used
+ -- g_ScriptInfo: sets a subtext below the script title, if not given it stays empty
  -- config = {}: creates an empty table in which you can store your scripts configuration
 
 
@@ -172,66 +175,23 @@ function OnScriptSaveSettings() return nil end
 -- ~~~~~~~~~~~~~~~~~
 -- ~~~ Functions ~~~
 -- ~~~~~~~~~~~~~~~~~
---------- Namespace: _system
-_system.Import(UID, Filename)
+
+Import(UID, Filename)
 	-- Description: Execute a lua file (mainly used for loading configs)
-	-- Parameters: '_g_ScriptUID', String
+	-- Parameters: 'g_ScriptUID', String
 	-- Return value: Boolean
 	-- Additional Info:
-	--  -> You MUST pass '_g_ScriptUID' and nothing else as parameter 1 or it will fail
+	--  -> You MUST pass 'g_ScriptUID' and nothing else as parameter 1 or it will fail
 	--  -> 'Filename' is relativ to the 'lua/' folder
+KillScript(UID)
+	-- Description: Stop execution of the script; deactivates it
+	-- Parameters: 'g_ScriptUID'
+	-- Return value: Boolean
+	-- Additional Info: You MUST pass 'g_ScriptUID' and nothing else as parameter or it will fail
 
 --------- Namespace: _client
-_client.Connect(Address)
-	-- Description: Connects to the given serveradress
-	-- Parameters: String
-	-- Return value: none
-_client.GetTick()
-	-- Description: Returns the current gametick
-	-- Parameters: none
-	-- Return value: Integer
-_client.GetLocalCharacterID()
-	-- Description: Returns your current ClientID, -1 on failure
-	-- Parameters: none
-	-- Return value: Integer
-_client.GetLocalCharacterWeapon()
-	-- Description: Return your active weapon, -1 on failure
-	-- Parameters: none
-	-- Return value: Integer
-_client.GetLocalCharacterWeaponAmmo()
-	-- Description: Returns your ammo, -1 on failure
-	-- Parameters: none
-	-- Return value: Integer
-_client.GetLocalCharacterHealth()
-	-- Description: Returns your health, -1 on failure
-	-- Parameters: none
-	-- Return value: Integer
-_client.GetLocalCharacterArmor()
-	-- Description: Returns your armor, -1 on failure
-	-- Parameters: none
-	-- Return value: Integer
-_client.GetFPS()
-	-- Description: Returns current FPS
-	-- Parameters: none
-	-- Return value: Integer
-_client.GetPlayerName(ClientID)
-	-- Description: Returns the name of the player with the given ClientID
-	-- Parameters: Integer
-	-- Return value: String
-_client.GetPlayerClan(ClientID)
-	-- Description: Returns the clan of the player with the given ClientID
-	-- Parameters: Integer
-	-- Return value: String
-_client.GetPlayerCountry(ClientID)
-	-- Description: Returns the country of the player with the given ClientID
-	-- Parameters: Integer
-	-- Return value: Integer
 _client.GetPlayerScore(ClientID)
 	-- Description: Returns the score of the player with the given ClientID
-	-- Parameters: Integer
-	-- Return value: Integer
-_client.GetPlayerPing(ClientID)
-	-- Description: Returns the ping of the player with the given ClientID
 	-- Parameters: Integer
 	-- Return value: Integer
 
@@ -249,68 +209,6 @@ _ui.DoButton_Menu(Text, Checked, x, y, w, h, Tooltip, corners)
 	-- Description: Draws an interactable button with the given params (Label, IsChecked?, X, Y, width, height, PopupText, cornertype)
 	-- Parameters: String, Integer (0 or 1), Float, Float, Float, Float, String, Integer
 	-- Return value: Integer ~= 0 if the button is pressed, otherwise zero
-
---------- Namespace: _game
-------------- SubNamespace: chat
-	_game.chat.Send(Team, Message)
-		-- Description: Sends a chatmessage
-		-- Parameters: Integer, String
-		-- Return value: none
-	_game.chat.Active()
-		-- Description: Checks wether the chat is active
-		-- Parameters: none
-		-- Return value: Boolean
-	_game.chat.AllActive()
-		-- Description: Checks wether the "All" chat is active
-		-- Parameters: none
-		-- Return value: Boolean
-	_game.chat.TeamActive()
-		-- Description: Checks wether the "Team" chat is active
-		-- Parameters: none
-		-- Return value: Boolean
-------------- SubNamespace: collision
-	_game.collision.GetMapWidth()
-		-- Description: Returns the map width (in tiles)
-		-- Parameters: none
-		-- Return value: Integer
-	_game.collision.GetMapHeight()
-		-- Description: Returns the map heught (in tiles)
-		-- Parameters: none
-		-- Return value: Integer
-	_game.collision.GetTile(x, y)
-		-- Description: Returns the  tile index at the given position
-		-- Parameters: Integer, Integer
-		-- Return value: Integer
-------------- SubNamespace: emote
-	_game.emote.Send(Emote)
-		-- Description: Do an emoticon (Emote is the ID)
-		-- Parameters: Integer
-		-- Return value: none
-------------- SubNamespace: controls
-	_game.controls.LockInput()
-		-- Description: Locks the players' input, call this to just use controls given by Lua
-		-- Parameters: none
-		-- Return value: none
-	_game.controls.UnlockInput()
-		-- Description: Unlocks the players' input, call this to make the player be able to move by himself again
-		-- Parameters: none
-		-- Return value: none
-	_game.controls.InputLocked()
-		-- Description: Checks wether the input is currently locked
-		-- Parameters: none
-		-- Return value: Boolean
-	_game.controls.GetInput(Input)
-		-- Description: Returns the value of an Input, can be used without locking the input aswell!
-		-- Parameters: String
-		-- Return value: Integer
-	_game.controls.SetInput(Input, Value)
-		-- Description: Sets an input to the given value. Possible inputs: Direction, Fire, Hook, Jump, Weapon, TargetX, TargetY
-		-- Parameters: String, Integer
-		-- Return value: none
-	_game.controls.ResetInput()
-		-- Description: Resets all inputs
-		-- Parameters: none
-		-- Return value: none
 
 --------- Namespace: _graphics
 _graphics.GetScreenWidth()
@@ -350,7 +248,7 @@ _graphics.RenderTexture(ID, x, y, w, h, Rotation)
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- ~~~~~~~~~~~~~
--- ~~~ Types ~~~ ( not finished yet, it beta dude! )
+-- ~~~ Types ~~~
 -- ~~~~~~~~~~~~~
 vec2 -- holding integers x, y
 vec3 -- holding  integersx, y, z
