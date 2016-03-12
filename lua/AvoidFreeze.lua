@@ -1,5 +1,5 @@
 g_ScriptTitle = "Avoid Freeze"
-g_ScriptInfo = "Do not go into freeze on race maps"
+g_ScriptInfo = "Do not go into freeze on race maps | by the AllTheHaxx-Team"
 
 
 TILE_FREEZE = -1

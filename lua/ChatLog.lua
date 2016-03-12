@@ -1,3 +1,6 @@
+g_ScriptTitle = "Chat Logger"
+g_ScriptInfo = "Archive your chatlogs. | by the AllTheHaxx-Team"
+
 File = io.open("chat.log", "a")
 File:write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 File:write(os.date("~~~~~ STARTED LOGGER AT %y-%m-%d %H:%M:%S ~~~~~\n"))

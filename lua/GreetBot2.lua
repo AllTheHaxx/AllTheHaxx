@@ -1,3 +1,6 @@
+g_ScriptTitle = "Welcome Bot"
+g_ScriptInfo = "Welcome tees that enter your server! | by the AllTheHaxx-Team"
+
 List = {}
 Messages = 
 {

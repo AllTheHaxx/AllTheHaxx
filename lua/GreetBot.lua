@@ -1,3 +1,6 @@
+g_ScriptTitle = "Greet Bot"
+g_ScriptInfo = "Greets tees! | by the AllTheHaxx-Team"
+
 local function GreetBot(ClientID, Team, Message)
 	if(ClientID >= 0 and string.find(Message, _client.GetPlayerName(_client.GetLocalCharacterID()))) then
 		if(string.find(string.lower(Message), "hi") or

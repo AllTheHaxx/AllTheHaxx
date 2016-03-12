@@ -1,3 +1,6 @@
+g_ScriptTitle = "Rapid Fire"
+g_ScriptInfo = "CLICK CLICK CLICK CLICK CLICK | by the AllTheHaxx-Team"
+
 -- Probably remove this before release, devs wouldn't approve
 RapidFireActive = false
 

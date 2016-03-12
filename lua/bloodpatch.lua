@@ -1,5 +1,5 @@
 g_ScriptTitle = "Blood-Patch"
-g_ScriptInfo = "Teeish Blood Effects 18+!"
+g_ScriptInfo = "Teeish Blood Effects 18+! | by the AllTheHaxx-Team"
 
 Config = {}
 Config.UseColor = 1 -- 1=tee color, 0=std color

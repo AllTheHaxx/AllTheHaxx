@@ -1,3 +1,6 @@
+g_ScriptTitle = "Guessing Game"
+g_ScriptInfo = "Guess my numb0r, dude. | by the AllTheHaxx-Team"
+
 MaxNum = 100
 math.randomseed( os.time() )
 MyNum = math.random(MaxNum)

@@ -1,3 +1,6 @@
+g_ScriptTitle = "Calculator"
+g_ScriptInfo = "Watch out for injections :D | by the AllTheHaxx-Team"
+
 function Calc(ClientID, Team, Message)
 	if(string.sub(Message, 1, string.len(".calc")) == ".calc") then
 		x = string.sub(Message, string.len(".calc")+2, string.len(Message))

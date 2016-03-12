@@ -1,4 +1,5 @@
 g_ScriptTitle = "Walkbot"
+g_ScriptInfo = "Walkwalkwalkwalk | by the AllTheHaxx-Team"
 
 local LEFT = -1
 local RIGHT = 1

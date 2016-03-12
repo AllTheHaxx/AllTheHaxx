@@ -1,5 +1,5 @@
 g_ScriptTitle = "/disabledmg all - To be used on iF|City"
-g_ScriptInfo = "Activate this and wait a minute to become the most peaceful tee on the server! =)"
+g_ScriptInfo = "Activate this and wait a minute. | by the AllTheHaxx-Team"
 
 time = Game.Client.LocalTime
 i = 0

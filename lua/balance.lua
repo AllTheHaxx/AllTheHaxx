@@ -1,5 +1,5 @@
 g_ScriptTitle = "Balance"
-g_ScriptInfo = "Select the tee you want to balance on using your hook"
+g_ScriptInfo = "Select the tee you want to balance on using your hook | by the AllTheHaxx-Team"
 
 Dir = 0
 DoIt = false
