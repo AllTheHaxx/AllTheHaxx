@@ -287,6 +287,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<CVoting>("CVoting")
 			.addFunction("CallvoteSpectate", &CVoting::CallvoteSpectate)
 			.addFunction("CallvoteKick", &CVoting::CallvoteKick)
+			.addFunction("CallvoteOption", &CVoting::CallvoteOption)
 			.addFunction("Vote", &CVoting::Vote)
 
 			.addProperty("SecondsLeft", &CVoting::SecondsLeft)
