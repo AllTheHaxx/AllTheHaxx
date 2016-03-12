@@ -288,6 +288,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Vote", &CVoting::Vote)
 			.addProperty("SecondsLeft", &CVoting::SecondsLeft)
 			.addProperty("IsVoting", &CVoting::IsVoting)
+			.addProperty("TakenChoice", &CVoting::TakenChoice)
 		.endClass()
 
 		//Local player Infos
