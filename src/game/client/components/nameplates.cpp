@@ -39,15 +39,21 @@ void CNamePlates::RenderNameplate(
 		if(g_Config.m_ClNameplatesAlways == 0)
 			a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
 
-		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
+		char aName[MAX_NAME_LENGTH+3];
+		if(g_Config.m_Debug)
+			str_format(aName, sizeof(aName), "%i: %s", pPlayerInfo->m_ClientID, m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName);
+		else
+			str_copy(aName, m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName, sizeof(aName));
+
+		//char aClan[MAX_CLAN_LENGTH];
+		//str_copy(aClan, m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan, sizeof(aClan));
 		const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
 
-		char aName[128];
-		str_format(aName, 256, "%d", pPlayerInfo->m_Score);
-		const char *pScore = aName;
+		char aScore[128];
+		str_format(aScore, sizeof(aScore), "%i", pPlayerInfo->m_Score);
 
-		float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
-		float tw2 = TextRender()->TextWidth(0, FontSize/2+2, pScore, -1);
+		float tw = TextRender()->TextWidth(0, FontSize, aName, -1);
+		float tw2 = TextRender()->TextWidth(0, FontSize*0.6f+2, aScore, -1);
 
 		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID))
@@ -63,7 +69,7 @@ void CNamePlates::RenderNameplate(
 			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.5f*a);
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, a);
 		}
-		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
+		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS))
 		{
 			if(pPlayerInfo->m_Team == TEAM_RED)
 				TextRender()->TextColor(1.0f, 0.5f, 0.5f, a);
@@ -73,32 +79,39 @@ void CNamePlates::RenderNameplate(
 
 		if (str_comp(pClan, "") && g_Config.m_ClNameplatesClan) // name + clan
 		{
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, pName, -1);
+			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, aName, -1); // name
 
-			FontSize = round_to_int(FontSize * 3 / 4);
-			tw = TextRender()->TextWidth(0, FontSize, pClan, -1);
+			//FontSize = round_to_int(FontSize * 3 / 4);
+			tw = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
 
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pClan, -1);
+			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSizeClan - 38.0f, FontSizeClan, pClan, -1); // clan
 		}
 		else
 		{
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, pName, -1); // just name
+			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, aName, -1); // just name
 		}
 
 		if(g_Config.m_ClNamePlatesScore)
 		{
+			CUIRect Bg;
+			Bg.x = Position.x - tw2 / 2.0f            -1.0f;
+			Bg.y = Position.y - FontSize*0.6f+2+28.0f +1.2f;
+			Bg.w = tw2                                +2.0f;
+			Bg.h = FontSize*0.6f+2                    +2.0f;
+			RenderTools()->DrawUIRect(&Bg, vec4(0.6f, 1.0f, 0.4f, a / 2.0f), CUI::CORNER_ALL, 2.2f);
+
 			TextRender()->TextColor(0.6f, 1.0f, 0.4f, a - 0.1f);
-			TextRender()->Text(0, Position.x - tw2 / 2.0f, Position.y - FontSize/2+2 + 28.0f, FontSize/2+2, pScore, -1);
+			TextRender()->Text(0, Position.x - tw2 / 2.0f, Position.y - FontSize*0.6f+2 + 28.0f, FontSize*0.6f+2, aScore, -1);
 		}
 
-		if(g_Config.m_Debug) // render client id when in debug aswell
+		/*if(g_Config.m_Debug) // render client id when in debug aswell
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
 			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
 			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
-		}
+		}*/
 
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
