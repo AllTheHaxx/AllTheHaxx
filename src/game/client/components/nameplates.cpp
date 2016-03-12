@@ -96,9 +96,9 @@ void CNamePlates::RenderNameplate(
 			CUIRect Bg;
 			Bg.x = Position.x - tw2 / 2.0f            -1.0f;
 			Bg.y = Position.y - FontSize*0.6f+2+28.0f +1.2f;
-			Bg.w = tw2                                +2.0f;
-			Bg.h = FontSize*0.6f+2                    +2.0f;
-			RenderTools()->DrawUIRect(&Bg, vec4(0.6f, 1.0f, 0.4f, a / 2.0f), CUI::CORNER_ALL, 2.2f);
+			Bg.w = tw2                                +4.0f;
+			Bg.h = FontSize*0.6f+2                    +4.0f;
+			RenderTools()->DrawUIRect(&Bg, vec4(0.0f, 0.0f, 0.0f, a / 1.5f), CUI::CORNER_ALL, 10.0f);
 
 			TextRender()->TextColor(0.6f, 1.0f, 0.4f, a - 0.1f);
 			TextRender()->Text(0, Position.x - tw2 / 2.0f, Position.y - FontSize*0.6f+2 + 28.0f, FontSize*0.6f+2, aScore, -1);
