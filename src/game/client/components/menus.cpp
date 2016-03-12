@@ -2097,7 +2097,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 			m_EscapePressed = true;
 			if(m_HotbarActive)
 				m_HotbarActive = false;
-			if(m_IRCActive)
+			else if(m_IRCActive)
 				ToggleIRC();
 			else
 				SetActive(!IsActive());
