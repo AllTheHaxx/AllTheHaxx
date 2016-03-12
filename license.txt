@@ -30,10 +30,12 @@ IMPORTANT NOTE! The source under src/engine/external are stripped
 libraries with their own licenses. Mostly BSD or zlib/libpng license but
 check the individual libraries.
 
-The lua scripts under the lua/ folder doesn't claim the right to be correct,
-complete or harmless in any way. If you get banned from a server because
-of using one of it, nobody except you yourself is responsible!
-You may not redistribute this scripts as if it were yours.
+The lua scripts in the /lua/ directory come with absolutely not warranty
+to be correct, complete or harmless in any way. We are neither encouraging
+you to use them, in case you get banned from a server nobody except yourself 
+is responsible!
+You may not redistribute any of these scripts unless they were significantly
+modified by you. Don't forget to credit the AllTheHaxx-Team anyways!
 
 ------------------------------------------------------------------------
 
