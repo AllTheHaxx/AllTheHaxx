@@ -983,10 +983,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CheckSettings = true;
 	}
 	else if(GfxFsaaSamples_MouseButton == 2) //dec
-		{
-			g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples-1 +17)%17;
-			CheckSettings = true;
-		}
+	{
+		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples-1 +17)%17;
+		CheckSettings = true;
+	}
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -1006,12 +1006,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button, Localize("Show map decoration elements")))
 		g_Config.m_GfxHighDetail ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button, Localize("Disable fancy effects")))
 		g_Config.m_GfxLowGraphics ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
@@ -1031,12 +1031,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Finished Bufferswapping"), g_Config.m_GfxFinish, &Button)) // dunno if the description is correct
+	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Finished Bufferswapping"), g_Config.m_GfxFinish, &Button))
 		g_Config.m_GfxFinish ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Graphics Threading Mode"), g_Config.m_GfxThreadedOld, &Button)) // dunno if the description is correct
+	if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Graphics Threading Mode"), g_Config.m_GfxThreadedOld, &Button))
 		g_Config.m_GfxThreadedOld ^= 1;
 
 
@@ -1063,6 +1063,14 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Text, &MainView);
 	//text.VSplitLeft(15.0f, 0, &text);
+	{
+		CUIRect temp;
+		temp = Text;
+		temp.y -= 2.5f*1.5f;
+		temp.h = 21.0f*5+2.75f;
+		RenderTools()->DrawUIRect(&temp, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
+	}
+	Text.VMargin(15.0f, &Text);
 	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, -1);
 
 	const char *paLabels[] = {
@@ -2174,7 +2182,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	CUIRect Left, Right, Button;
 	MainView.VSplitMid(&Left, &Right);
 	Left.Margin(5.0f, &Left);
-	Right.Margin(5.0f, &Right);
+	//Right.Margin(5.0f, &Right);
 
 	Left.HSplitTop(30.0f, &Button, &Left);
 	UI()->DoLabel(&Button, Localize("Haxx"), 20.0f, 0, Button.w);
@@ -2209,31 +2217,29 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)
 {
-	CUIRect Left, Right, Button;
-	MainView.VSplitMid(&Left, &Right);
-	Left.Margin(5.0f, &Left);
-	Right.Margin(5.0f, &Right);
+	CUIRect Button;
+	MainView.Margin(5.0f, &MainView);
 
-	Left.HSplitTop(30.0f, &Button, &Left);
+	MainView.HSplitTop(30.0f, &Button, &MainView);
 	UI()->DoLabel(&Button, Localize("Chat"), 20.0f, 0, Button.w);
 
-	Left.HSplitTop(7.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(7.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClIRCAutoconnect, Localize("Connect automatically"), g_Config.m_ClIRCAutoconnect, &Button, Localize("Connect to the Chat automatically on startup")))
 		g_Config.m_ClIRCAutoconnect ^= 1;
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClIRCPrintChat, Localize("Print to console"), g_Config.m_ClIRCPrintChat, &Button))
 		g_Config.m_ClIRCPrintChat ^= 1;
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_SndIRC, Localize("Play sound notification"), g_Config.m_SndIRC, &Button))
 		g_Config.m_SndIRC ^= 1;
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClIRCAllowJoin, Localize("Allow others to join you"), g_Config.m_ClIRCAllowJoin, &Button))
 		g_Config.m_ClIRCAllowJoin ^= 1;
 
@@ -2248,7 +2254,7 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 	};
 
 	CUIRect Background;
-	Left.HSplitTop(7.5f, 0, &Background);
+	MainView.HSplitTop(7.5f, 0, &Background);
 	Background.h = 25.0f*(sizeof(s_apLabels)/sizeof(s_apLabels[0]))+7.5f;
 	RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
 
@@ -2256,45 +2262,45 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 	int LabelIndex = 0;
 #define DO_NEXT_LABEL Button.VSplitLeft(Button.w*0.4f, &Label, &Button); UI()->DoLabel(&Label, s_apLabels[LabelIndex++], 12.0f, -1, Label.w-3);
 
-	Left.VMargin(5.0f, &Left);
-	Left.HSplitTop(15.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.VMargin(5.0f, &MainView);
+	MainView.HSplitTop(15.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetNick = 0.0f;
 	DoEditBox(&g_Config.m_ClIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &s_OffsetNick, false);
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetUser = 0.0f;
 	DoEditBox(&g_Config.m_ClIRCUser, &Button, g_Config.m_ClIRCUser, sizeof(g_Config.m_ClIRCUser), 12.0f, &s_OffsetUser, false);
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetPass = 0.0f;
 	DoEditBox(&g_Config.m_ClIRCPass, &Button, g_Config.m_ClIRCPass, sizeof(g_Config.m_ClIRCPass), 12.0f, &s_OffsetPass, true);
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetQAuthName = 0.0f;
 	DoEditBox(&g_Config.m_ClIRCQAuthName, &Button, g_Config.m_ClIRCQAuthName, sizeof(g_Config.m_ClIRCQAuthName), 12.0f, &s_OffsetQAuthName, false);
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetQAuthPass = 0.0f;
 	DoEditBox(&g_Config.m_ClIRCQAuthPass, &Button, g_Config.m_ClIRCQAuthPass, sizeof(g_Config.m_ClIRCQAuthPass), 12.0f, &s_OffsetQAuthPass, true);
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetModes = 0.0f;
 	DoEditBox(&g_Config.m_ClIRCModes, &Button, g_Config.m_ClIRCModes, sizeof(g_Config.m_ClIRCModes), 12.0f, &s_OffsetModes, false);
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetLeaveMsg = 0.0f;
 	DoEditBox(&g_Config.m_ClIRCLeaveMsg, &Button, g_Config.m_ClIRCLeaveMsg, sizeof(g_Config.m_ClIRCLeaveMsg), 12.0f, &s_OffsetLeaveMsg, false);

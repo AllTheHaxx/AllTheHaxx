@@ -131,7 +131,7 @@ void CMenusTooltip::OnRender()
 		Temp.w = min(mtw+2.5f, TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f);
 		Temp.h = (FONT_SIZE)*lc+2.5;
 		Temp.Margin(-3.0f, &Temp);
-		RenderTools()->DrawUIRect(&Temp, vec4(0,0,0,0.8f), CUI::CORNER_ALL, 2.5f);
+		RenderTools()->DrawUIRect(&Temp, vec4(0,0,0.2f,0.8f), CUI::CORNER_ALL, 2.5f);
 		TextRender()->Text(0, Temp.x+1.5f, Temp.y, FONT_SIZE, m_aTooltip, mtw);
 
 		m_aTooltip[0] = 0;
