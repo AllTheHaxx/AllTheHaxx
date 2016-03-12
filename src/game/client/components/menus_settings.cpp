@@ -747,7 +747,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			Button.VSplitLeft(9.0f, 0, &Button);
 			static char aInput[6] = {0}; static float s_Offset = 0.0f;
 			str_format(aInput, sizeof(aInput), "%i", g_Config.m_UiMousesens);
-			DoEditBox(&g_Config.m_UiMousesens, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
+			DoEditBox(&aInput, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
 			g_Config.m_UiMousesens = atoi(aInput);
 			g_Config.m_UiMousesens = round_to_int(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (g_Config.m_UiMousesens-5)/995.0f)*995.0f)+5;
 			MovementSettings.HSplitTop(5.0f, 0, &MovementSettings);
@@ -764,7 +764,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			Button.VSplitLeft(9.0f, 0, &Button);
 			static char aInput[6] = {0}; static float s_Offset = 0.0f;
 			str_format(aInput, sizeof(aInput), "%i", g_Config.m_InpMousesens);
-			DoEditBox(&g_Config.m_InpMousesens, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
+			DoEditBox(&aInput, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
 			g_Config.m_InpMousesens = atoi(aInput);
 			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/1995.0f)*1995.0f)+5;
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
