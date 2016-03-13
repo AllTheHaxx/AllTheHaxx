@@ -1,7 +1,7 @@
 #include <math.h>
 #include <base/detect.h>
-#include <engine/client/lua.h>
-#include <engine/client.h>
+//#include <engine/client/lua.h>
+//#include <engine/client.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 	// For FlashWindowEx, FLASHWINFO, FLASHW_TRAY
@@ -213,13 +213,13 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 		dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
 	};
 
-	float Rot = 0.0f;
+/*	float Rot = 0.0f;
 	if(CLua::m_pClient)
-		Rot = 90*sinf(CLua::m_pClient->GameTick()*0.03f);
+		Rot = 90*sinf(CLua::m_pClient->GameTick()*0.03f);*/
 	// screen mapping
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_PROJECTION); // GL_MODELVIEW
 	glLoadIdentity();
-	glRotatef(Rot, 1.f, 1.0f, 0.0f);
+	//glRotatef(Rot, 1.f, 1.0f, 0.0f);
 	glOrtho(State.m_ScreenTL.x, State.m_ScreenBR.x, State.m_ScreenBR.y, State.m_ScreenTL.y, 1.0f, 10.f);
 }
 
