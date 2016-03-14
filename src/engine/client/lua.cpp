@@ -34,6 +34,32 @@ void CLua::Init(IClient * pClient, IStorage * pStorage)
 	LoadFolder();
 }
 
+void CLua::SortLuaFiles()
+{
+	const int NUM = m_pLuaFiles.size();
+	if(NUM < 2)
+		return;
+
+	for(int curr = 0; curr < NUM-1; curr++)
+	{
+		int minIndex = curr;
+		for(int i = curr + 1; i < NUM; i++)
+		{
+			int c = 4;
+			for(; str_uppercase(m_pLuaFiles[i]->GetFilename()[c]) == str_uppercase(m_pLuaFiles[minIndex]->GetFilename()[c]); c++);
+			if(str_uppercase(m_pLuaFiles[i]->GetFilename()[c]) < str_uppercase(m_pLuaFiles[minIndex]->GetFilename()[c]))
+				minIndex = i;
+		}
+
+		if(minIndex != curr)
+		{
+			CLuaFile* temp = m_pLuaFiles[curr];
+			m_pLuaFiles[curr] = m_pLuaFiles[minIndex];
+			m_pLuaFiles[minIndex] = temp;
+		}
+	}
+}
+
 void CLua::SetGameClient(IGameClient *pGameClient)
 {
 	CLua::m_pGameClient = pGameClient;
@@ -63,6 +89,8 @@ void CLua::LoadFolder()
 	m_pStorage->ListDirectory(IStorage::TYPE_ALL, "lua", LoadFolderCallback, pParams);
 
 	delete pParams;
+
+	SortLuaFiles();
 }
 
 int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)

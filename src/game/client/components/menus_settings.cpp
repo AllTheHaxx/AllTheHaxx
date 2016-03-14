@@ -2414,7 +2414,6 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		Client()->Lua()->GetLuaFiles().delete_all();
 		Client()->Lua()->GetLuaFiles().clear();
 		Client()->Lua()->LoadFolder();
-		// TODO: Load list of available scripts here!
 	}
 	if(DoButton_CheckBox(&g_Config.m_ClLua, Localize("Use lua"), g_Config.m_ClLua, &Button))
 	{
