@@ -2,12 +2,12 @@ g_ScriptTitle = "Jumpbot"
 g_ScriptInfo = "Hold down Space to perform a perfect double jump! | by the AllTheHaxx-Team"
 
 function Jump()
-	TW.Game.Input.Jump = 1
-	TW.Game.Input.Jump = 0
+	Game.Input.Jump = 1
+	Game.Input.Jump = 0
 end
 
 function ResetJump()
-	TW.Game.Input.Jump = 0
+	Game.Input.Jump = 0
 end
 
 function GetPlayerY()
