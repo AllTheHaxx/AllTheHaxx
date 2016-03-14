@@ -10,6 +10,7 @@ Config.StdColorB = 0
 Config.Lifetime = 45
 Config.MaxBloodNum = 96
 
+Blood = {}
 
 function OnScriptInit()
 	if(Import(g_ScriptUID, "bloodpatch.config") == true) then
@@ -19,13 +20,28 @@ function OnScriptInit()
 		OnScriptSaveSettings()
 		--return false -- this would force the script to enter error-state (thus unexecutable)
 	end
-	return true
+	
+	-- load the graphics
+	Success = true
+	for i = 1, 4 do
+		Blood[i] = Graphics.Engine:LoadTexture("luares/bloodpatch/blood" .. i .. ".png", -1, -1, 1) -- luares/bloodpatch/blood.png
+		if(Blood[i] <= 0) then
+			Success = false
+			break
+		end
+	end
+	return Success
 end
 
-Blood = {}
-for i = 1, 4 do
-	Blood[i] = Graphics.Engine:LoadTexture("luares/bloodpatch/blood" .. i .. ".png", -1, -1, 1) -- luares/bloodpatch/blood.png
+function OnScriptUnload()
+-- unload all the textures to not leak memory!
+	for k, v in next, Blood do
+		if v > 0 then
+			Graphics.Engine:UnloadTexture(v)
+		end
+	end
 end
+
 
 BloodNum = 0
 BloodSpots = {}
@@ -52,6 +68,10 @@ function Kill(Killer, Victim, Weapon)
 
     x = Game.Players(Victim).Tee.Pos.x
     y = Game.Players(Victim).Tee.Pos.y
+    if(math.abs(Game.LocalTee.Pos.x - Game.Players(Victim).Tee.Pos.x) > 850) then -- we don't get correct positions beyond this approx. limit
+    	return
+    end
+
     for n = 0, math.random(2, 4) do
 		for i = 0, 100 do
 		    a = math.random(0, math.pi * 2)
