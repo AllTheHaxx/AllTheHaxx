@@ -25,6 +25,11 @@ CLuaFile::CLuaFile(CLua *pLua, std::string Filename) : m_pLua(pLua), m_Filename(
 	Reset();
 }
 
+CLuaFile::~CLuaFile()
+{
+	Unload();
+}
+
 void CLuaFile::Reset(bool error)
 {
 	m_UID = rand()%0xFFFF;
@@ -40,12 +45,24 @@ void CLuaFile::Reset(bool error)
 	//m_pLuaState = luaL_newstate();
 }
 
-void CLuaFile::Unload()
+void CLuaFile::Unload(bool error)
 {
 //	if(m_pLuaState)			 // -- do not close it in order to prevent crashes
 //		lua_close(m_pLuaState);
+
+	try
+	{
+		LuaRef func = GetFunc("OnScriptUnload");
+		if(func.cast<bool>())
+			func();
+	}
+	catch(std::exception &e)
+	{
+		printf("LUA EXCEPTION: %s\n", e.what());
+	}
+
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
-	Reset();
+	Reset(error);
 }
 
 void CLuaFile::OpenLua()
@@ -74,6 +91,9 @@ void CLuaFile::OpenLua()
 
 void CLuaFile::Init()
 {
+	if(m_State == LUAFILE_STATE_LOADED)
+		Unload();
+
 	m_State = LUAFILE_STATE_IDLE;
 
 	OpenLua();
@@ -126,12 +146,12 @@ void CLuaFile::Init()
 		LuaRef func = GetFunc("OnScriptInit");
 		if(func)
 			if(!func().cast<bool>())
-				Reset(true);
+				Unload(true);
 	}
 	catch (std::exception& e)
 	{
 		printf("LUA EXCEPTION: %s\n", e.what());
-		Reset(true);
+		Unload(true);
 	}
 }
 
@@ -405,6 +425,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
 
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
+			.addFunction("UnloadTexture", &IGraphics::UnloadTexture)
 			.addFunction("TextureSet", &IGraphics::TextureSet)
 
 			.addFunction("MapScreen", &IGraphics::MapScreen)

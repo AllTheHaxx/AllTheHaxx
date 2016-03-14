@@ -32,9 +32,10 @@ private:
 
 public:
 	CLuaFile(CLua *pLua, std::string Filename);
+	~CLuaFile();
 	void Init();
 	void Reset(bool error = false);
-	void Unload();
+	void Unload(bool error = false);
 	void OpenLua();
 	luabridge::LuaRef GetFunc(const char *pFuncName);
 	void CallFunc(const char *pFuncName);
