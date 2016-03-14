@@ -49,7 +49,7 @@ void CNamePlates::RenderNameplate(
 		//str_copy(aClan, m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan, sizeof(aClan));
 		const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
 
-		char aScore[128];
+		char aScore[8];
 		str_format(aScore, sizeof(aScore), "%i", pPlayerInfo->m_Score);
 
 		float tw = TextRender()->TextWidth(0, FontSize, aName, -1);
