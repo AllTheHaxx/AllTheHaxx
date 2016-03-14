@@ -12,34 +12,40 @@
 CLuaBinding::UiContainer * CLuaBinding::m_pUiContainer = 0;
 CConfiguration * CConfigProperties::m_pConfig = 0;
 
-// system namespace
-bool CLuaBinding::LuaImport(int UID, const char *pFilename)
+CLuaFile* CLuaBinding::GetLuaFile(int UID)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	for(int i = 0; i < pGameClient->Client()->Lua()->GetLuaFiles().size(); i++)
 	{
 		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->GetUID() == UID)
 		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename); // force path to prevent kids from importing events.lua
-			return pGameClient->Client()->Lua()->GetLuaFiles()[i]->LoadFile(aBuf);
+			return pGameClient->Client()->Lua()->GetLuaFiles()[i];
 		}
 	}
-	return false;
+	return 0;
+}
+
+
+// system namespace
+bool CLuaBinding::LuaImport(int UID, const char *pFilename)
+{
+	CLuaFile *L = GetLuaFile(UID);
+	if(!L)
+		return false;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename); // force path to prevent kids from importing events.lua
+	return L->LoadFile(aBuf);
 }
 
 bool CLuaBinding::LuaKillScript(int UID)
 {
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	for(int i = 0; i < pGameClient->Client()->Lua()->GetLuaFiles().size(); i++)
-	{
-		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->GetUID() == UID)
-		{
-			pGameClient->Client()->Lua()->GetLuaFiles()[i]->Unload();
-			return true;
-		}
-	}
-	return false;
+	CLuaFile *L = GetLuaFile(UID);
+	if(!L)
+		return false;
+
+	L->Unload();
+	return true;
 }
 
 // external info

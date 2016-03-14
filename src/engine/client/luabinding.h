@@ -8,6 +8,8 @@
 class CLuaBinding
 {
 public:
+	static CLuaFile *GetLuaFile(int UID);
+
 	class UiContainer
 	{
 	public:
