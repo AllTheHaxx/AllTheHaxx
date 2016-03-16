@@ -27,6 +27,7 @@
 #include "camera.h"
 #include "countryflags.h"
 #include "menus.h"
+#include "identity.h"
 #include "skins.h"
 
 CMenusKeyBinder CMenus::m_Binder;
@@ -404,20 +405,86 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 
-	Dummy.w /= 2.3f;
-	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+	CUIRect Right;
+	Dummy.HSplitTop(20.0f, 0, &Dummy);
+	Dummy.VSplitLeft(Dummy.w/2.3f, &Dummy, &Right);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &DummyLabel))
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+	static int s_SkinFilter = 0;
+	char aFilterLabel[32];
+	str_format(aFilterLabel, sizeof(aFilterLabel), "Filter: %s", s_SkinFilter == 0 ? Localize("All Skins") : s_SkinFilter == 1 ? Localize("Vanilla Skins only") : s_SkinFilter == 2 ? Localize("Non-Vanilla Skins only") : "");
+	if(DoButton_CheckBox_Number(&s_SkinFilter, aFilterLabel, s_SkinFilter, &DummyLabel))
+	{
+		if(++s_SkinFilter > 2) s_SkinFilter = 0;
+		s_InitSkinlist = true;
+	}
+
+	Right.VSplitLeft(10.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Right, 0);
+	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Allow Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &Right))
+	{
+		g_Config.m_ClVanillaSkinsOnly ^= 1;
+		m_NeedRestartSkins = true;
+	}
+
+	Dummy.HSplitTop(5.0f, 0, &Dummy);
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+	static int s_DummySettings = 0;
+	if(DoButton_CheckBox(&s_DummySettings, Localize("Dummy settings"), m_Dummy, &DummyLabel))
 	{
 		m_Dummy ^= 1;
 	}
 
+	Dummy.HSplitTop(5.0f, 0, &Dummy);
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
-	DummyLabel.y += 2.5f;
-	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
+	static int s_SkinSaveAsIdentClicked = 0;
+	if(s_SkinSaveAsIdentClicked == 0)
 	{
-		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		m_NeedRestartSkins = true;
+		static int s_SkinSaveAsIdentButton = 0;
+		if(DoButton_Menu(&s_SkinSaveAsIdentButton, Localize("Save Skin as new Identity"), 0, &DummyLabel))
+			s_SkinSaveAsIdentClicked = 1;
+	}
+	else if(s_SkinSaveAsIdentClicked == 1)
+	{
+		CUIRect DummyLabelRight;
+		DummyLabel.VSplitRight(30.0f, &DummyLabel, &DummyLabelRight);
+
+		static float s_NewIdentName = 0.0f;
+		static char aName[16];
+		DoEditBox(&s_NewIdentName, &DummyLabel, aName, sizeof(aName), 10, &s_NewIdentName, false, CUI::CORNER_L, g_Config.m_PlayerName);
+
+		static int s_OkButton = 0;
+		if(DoButton_Menu(&s_OkButton, Localize("Ok"), 0, &DummyLabelRight, 0, CUI::CORNER_R))
+		{
+			CIdentity::CIdentEntry Entry;
+			mem_zero(&Entry, sizeof(Entry));
+			str_format(Entry.m_aName, sizeof(Entry.m_aName), str_comp(aName, "") != 0 ? aName : g_Config.m_PlayerName);
+			str_format(Entry.m_aClan, sizeof(Entry.m_aClan), g_Config.m_PlayerClan);
+			str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), g_Config.m_ClPlayerSkin);
+			Entry.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+			Entry.m_ColorBody = g_Config.m_ClPlayerColorBody;
+			Entry.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+			m_pClient->m_pIdentity->AddIdent(Entry);
+			s_SkinSaveAsIdentClicked = 2;
+		}
+	}
+	else if(s_SkinSaveAsIdentClicked == 2)
+	{
+		char aBuf[64];
+		static float s_StartTime = -1.0f;
+		if(s_StartTime < 0.0f)
+			s_StartTime = Client()->LocalTime();
+		str_format(aBuf, sizeof(aBuf), Localize("New Identity '%s' created!"), m_pClient->m_pIdentity->GetIdent(m_pClient->m_pIdentity->NumIdents()-1)->m_aName);
+		TextRender()->TextColor(0.0f, 1.0f,
+								1.0f - ((s_StartTime + 4.0f) - Client()->LocalTime()) / 4.0f,
+								((s_StartTime + 3.5f) - Client()->LocalTime()) / 3.5f);
+		TextRender()->Text(0, DummyLabel.x, DummyLabel.y, 15, aBuf, 800);
+		TextRender()->TextColor(1,1,1,1);
+		if(Client()->LocalTime() > s_StartTime + 4.0f)
+		{
+			s_StartTime = -1.0f;
+			s_SkinSaveAsIdentClicked = 0;
+		}
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -485,7 +552,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				Button.HMargin(2.0f, &Button);
 
 				float k = ((PrevColor>>((2-s)*8))&0xff) / 255.0f;
-				k = DoScrollbarH(&s_aColorSlider[i][s], &Button, k);
+				k = DoScrollbarH(&s_aColorSlider[i][s], &Button, k, 0, k*255.0f);
 				Color <<= 8;
 				Color += clamp((int)(k*255), 0, 255);
 				UI()->DoLabelScaled(&Label, paLabels[s], 14.0f, -1);

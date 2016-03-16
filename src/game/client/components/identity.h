@@ -44,7 +44,7 @@ public:
 
 	// getter and setter functions
 	inline int NumIdents() { return m_aIdentities.size(); }
-	inline void AddIdent(CIdentEntry Entry) { m_aIdentities.add(Entry); }
+	inline void AddIdent(CIdentEntry Entry) { m_aIdentities.add_unsorted(Entry); }
 	inline void DeleteIdent(int Ident)
 	{
 		char aFile[64];
@@ -72,6 +72,32 @@ public:
 	{
 		std::swap(m_aIdentities[i+Dir], m_aIdentities[i]);
 	}
+
+	bool UsingIdent(int i)
+	{
+		CIdentity::CIdentEntry *pIdent = GetIdent(i);
+		if(pIdent &&
+				str_comp(g_Config.m_PlayerName, pIdent->m_aName) == 0 &&
+				str_comp(g_Config.m_PlayerClan, pIdent->m_aClan) == 0 &&
+				str_comp(g_Config.m_ClPlayerSkin, pIdent->m_aSkin) == 0 &&
+				g_Config.m_ClPlayerUseCustomColor == pIdent->m_UseCustomColor &&
+				g_Config.m_ClPlayerColorBody == pIdent->m_ColorBody &&
+				g_Config.m_ClPlayerColorFeet == pIdent->m_ColorFeet)
+			return true;
+		return false;
+	};
+
+	void ApplyIdent(int i)
+	{
+		CIdentity::CIdentEntry *pIdent = m_pClient->m_pIdentity->GetIdent(i);
+		str_format(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), pIdent->m_aName);
+		str_format(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan), pIdent->m_aClan);
+		str_format(g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClPlayerSkin), pIdent->m_aSkin);
+		g_Config.m_ClPlayerUseCustomColor = pIdent->m_UseCustomColor;
+		g_Config.m_ClPlayerColorBody = pIdent->m_ColorBody;
+		g_Config.m_ClPlayerColorFeet = pIdent->m_ColorFeet;
+		m_pClient->SendInfo(false);
+	};
 
 private:
 	static int FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser);

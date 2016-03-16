@@ -35,10 +35,14 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	TabBar.VSplitRight(2.0f, &TabBar, &Button);
 	RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.8f, 0.6f, 0.5f), 0, 0);
 	
-	int s_aUpIDs[128];
-	int s_aDownIDs[128];
+	int s_aDeleteIDs[512] = {0};
+	int s_aUpIDs[512] = {0};
+	int s_aDownIDs[512] = {0};
 	for(int i = 0; i < numID; i++)
 	{
+		if(i >= 512)
+			break;
+
 		CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(i);
 		TabBar.HSplitTop(24.0f, &Button, &TabBar);
 		if(DoButton_MenuTab(pEntry->m_aName, "", Page == i, &Button, 0))
@@ -46,17 +50,25 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		Button.VSplitRight(Button.h, 0, &Temp);
 		Temp.Margin(4.0f, &Temp);
-		if(DoButton_Menu(pEntry, "×", 0, &Temp, Localize("delete"), i < numID-1 ? CUI::CORNER_R: CUI::CORNER_ALL))
+		if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (i < numID-1 ? 0 : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
+		{
 			m_pClient->m_pIdentity->DeleteIdent(i);
+			if(i < Page)
+				Page--;
+		}
 
 		if(i < numID-1)
 		{
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
 			Temp.x -= 16.0f;
-			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, Localize("move down"), i > 0 ? 0 : CUI::CORNER_L))
+			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i > 0 ? 0 : CUI::CORNER_L))
 			{
 				m_pClient->m_pIdentity->SwapIdent(i, 1);
+				if(Page == i)
+					Page++;
+				else if(i == Page-1)
+					Page--;
 			}
 		}
 
@@ -65,9 +77,13 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
 			Temp.x -= 32.0f;
-			if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, Localize("move up"), i < numID-1 ? CUI::CORNER_L : CUI::CORNER_ALL))
+			if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, 0, i < numID-1 ? CUI::CORNER_L : CUI::CORNER_ALL))
 			{
 				m_pClient->m_pIdentity->SwapIdent(i, -1);
+				if(i == Page)
+					Page--;
+				else if(i == Page+1)
+					Page++;
 			}
 		}
 
@@ -91,6 +107,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x + OwnSkinInfo.m_Size, Button.y + Button.h *0.6f));
 		Button.HMargin(2.0f, &Button);
 		Button.HSplitBottom(16.0f, 0, &Button);
+		if(GameClient()->m_pIdentity->UsingIdent(i))
+			TextRender()->TextColor(0.2f, 0.2f, 0.7f, 1.0f);
 		UI()->DoLabelScaled(&Button, pEntry->m_aName, 14.0f, 0);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
@@ -148,8 +166,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
-	static float s_OffsetName = 0.0f;
-	if(DoEditBox(&pEntry->m_aName, &Button, pEntry->m_aName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
+	static float s_OffsetName[512] = {0.0f};
+	if(DoEditBox(&s_OffsetName[Page], &Button, pEntry->m_aName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName[Page]))
 		m_NeedSendinfo = true;
 
 	// player clan
@@ -159,12 +177,24 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
-	static float s_OffsetClan = 0.0f;
-	if(DoEditBox(&pEntry->m_aClan, &Button, pEntry->m_aClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
+	static float s_OffsetClan[512] = {0.0f};
+	if(DoEditBox(&s_OffsetClan[Page], &Button, pEntry->m_aClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan[Page]))
 		m_NeedSendinfo = true;
 
-	// custom colour selector
-	View.HSplitTop(20.0f, 0, &View);
+	// apply identity
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(80.0f, &Label, &Button);
+	Button.VSplitLeft(150.0f, &Button, 0);
+	static float s_ApplyButton[512] = {0.0f};
+	if(!GameClient()->m_pIdentity->UsingIdent(Page))
+	{
+		if(DoButton_Menu(&s_ApplyButton[Page], Localize("Use Identity"), 0, &Button, "", CUI::CORNER_ALL, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
+			GameClient()->m_pIdentity->ApplyIdent(Page);
+	}
+
+	// custom color selector
+	View.HSplitTop(36.0f, 0, &View);
 	View.HSplitTop(20.0f, &Button, &View);
 	Button.VSplitLeft(230.0f, &Button, 0);
 	if(DoButton_CheckBox(&pEntry->m_UseCustomColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
