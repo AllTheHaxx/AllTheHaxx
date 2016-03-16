@@ -35,7 +35,7 @@ void CMenus::RenderIdents(CUIRect MainView)
 	static float s_Scrollbar = 0;
 	static float s_ScrollValue = 0;
 
-	RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.5f, 0.0f, 0.64f), CUI::CORNER_T, 10.0f);
+	RenderTools()->DrawUIRect(&MainView, vec4(0.65f, 0.68f, 0.9f, 0.64f), CUI::CORNER_T, 10.0f);
 
 	MainView.HSplitTop(8.0f, &Button, &Temp);
 	Button.VSplitMid(&Button, &Label);
@@ -65,20 +65,6 @@ void CMenus::RenderIdents(CUIRect MainView)
 
 		pSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(pIdent->m_aSkin));
 
-		Button.VSplitLeft(80.0f, &Label, &Button);
-		static int s_Button[512] = {0};
-		if(DoButton_Menu(&s_Button[i], "", 0, &Label, 0, CUI::CORNER_ALL, vec4(pSkin->m_BloodColor.r, pSkin->m_BloodColor.g, pSkin->m_BloodColor.b, 1.0f)))
-		{
-			CIdentity::CIdentEntry *pIdent = m_pClient->m_pIdentity->GetIdent(i);
-			str_format(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), pIdent->m_aName);
-			str_format(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan), pIdent->m_aClan);
-			str_format(g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClPlayerSkin), pIdent->m_aSkin);
-			g_Config.m_ClPlayerUseCustomColor = pIdent->m_UseCustomColor;
-			g_Config.m_ClPlayerColorBody = pIdent->m_ColorBody;
-			g_Config.m_ClPlayerColorFeet = pIdent->m_ColorFeet;
-			m_pClient->SendInfo(false);
-		}
-
 		if(pIdent->m_UseCustomColor)
 		{
 			SkinInfo.m_Texture = pSkin->m_ColorTexture;
@@ -90,6 +76,21 @@ void CMenus::RenderIdents(CUIRect MainView)
 			SkinInfo.m_Texture = pSkin->m_OrgTexture;
 			SkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			SkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+
+		Button.VSplitLeft(80.0f, &Label, &Button);
+		static int s_Button[512] = {0};
+		if(DoButton_Menu(&s_Button[i], "", 0, &Label, 0, CUI::CORNER_ALL, pIdent->m_UseCustomColor ? mix(SkinInfo.m_ColorBody, SkinInfo.m_ColorFeet, 0.4f)*0.7f :
+				vec4(pSkin->m_BloodColor.r, pSkin->m_BloodColor.g, pSkin->m_BloodColor.b, 0.7f)))
+		{
+			CIdentity::CIdentEntry *pIdent = m_pClient->m_pIdentity->GetIdent(i);
+			str_format(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), pIdent->m_aName);
+			str_format(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan), pIdent->m_aClan);
+			str_format(g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClPlayerSkin), pIdent->m_aSkin);
+			g_Config.m_ClPlayerUseCustomColor = pIdent->m_UseCustomColor;
+			g_Config.m_ClPlayerColorBody = pIdent->m_ColorBody;
+			g_Config.m_ClPlayerColorFeet = pIdent->m_ColorFeet;
+			m_pClient->SendInfo(false);
 		}
 
 		SkinInfo.m_Size = 50.0f*UI()->Scale();
