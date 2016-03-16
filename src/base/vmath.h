@@ -21,6 +21,12 @@ public:
 		y = ny;
 	}
 
+	vector2_base(T nxy)
+	{
+		x = nxy;
+		y = nxy;
+	}
+
 	vector2_base operator -() const { return vector2_base(-x, -y); }
 	vector2_base operator -(const vector2_base &v) const { return vector2_base(x-v.x, y-v.y); }
 	vector2_base operator +(const vector2_base &v) const { return vector2_base(x+v.x, y+v.y); }
@@ -114,6 +120,26 @@ public:
 		z = nz;
 	}
 
+	vector3_base(vector2_base<T> v, T nz)
+	{
+		x = v.x;
+		y = v.y;
+		z = nz;
+	}
+	vector3_base(T nx, vector2_base<T> v)
+	{
+		x = nx;
+		y = v.x;
+		z = v.y;
+	}
+
+	vector3_base(T nxyz)
+	{
+		x = nxyz;
+		y = nxyz;
+		z = nxyz;
+	}
+
 	const vector3_base &operator =(const vector3_base &v) { x = v.x; y = v.y; z = v.z; return *this; }
 
 	vector3_base operator -(const vector3_base &v) const { return vector3_base(x-v.x, y-v.y, z-v.z); }
@@ -192,6 +218,51 @@ public:
 		y = ny;
 		z = nz;
 		w = nw;
+	}
+
+	vector4_base(vector3_base<T> v, T nw)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = nw;
+	}
+	vector4_base(T nx, vector3_base<T> v)
+	{
+		x = nx;
+		y = v.x;
+		z = v.y;
+		w = v.z;
+	}
+
+	vector4_base(vector2_base<T> v, T nz, T nw)
+	{
+		x = v.x;
+		y = v.y;
+		z = nz;
+		w = nw;
+	}
+	vector4_base(T nx, vector2_base<T> v, T nw)
+	{
+		x = nx;
+		y = v.x;
+		z = v.y;
+		w = nw;
+	}
+	vector4_base(T nx, T ny, vector2_base<T> v)
+	{
+		x = nx;
+		y = ny;
+		z = v.x;
+		w = v.y;
+	}
+
+	vector4_base(T nxyz)
+	{
+		x = nxyz;
+		y = nxyz;
+		z = nxyz;
+		w = nxyz;
 	}
 
 	vector4_base operator +(const vector4_base &v) const { return vector4_base(x+v.x, y+v.y, z+v.z, w+v.w); }
