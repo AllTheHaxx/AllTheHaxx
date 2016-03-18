@@ -141,16 +141,11 @@ void CLuaFile::Init()
 	lua_setglobal(m_pLuaState, "g_ScriptUID");
 
 	// call the OnScriptInit function if we have one
-	try
+	bool success = true;
+	LUA_CALL_FUNC(m_pLuaState, "OnScriptInit", bool, success);
+	if(!success)
 	{
-		LuaRef func = GetFunc("OnScriptInit");
-		if(func)
-			if(!func().cast<bool>())
-				Unload(true);
-	}
-	catch (std::exception& e)
-	{
-		printf("LUA EXCEPTION: %s\n", e.what());
+		dbg_msg("Lua", "Script '%s' rejected being loaded", m_Filename.c_str());
 		Unload(true);
 	}
 }

@@ -5,6 +5,13 @@
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
 
+#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) { try { \
+	LuaRef func = getGlobal(LUA_STATE, FUNC_NAME); \
+	if(func) \
+		RETURN = func(__VA_ARGS__).cast<TYPE>(); }\
+	catch (std::exception& e) \
+	{ printf("LUA EXCEPTION: %s\n", e.what()); } }
+
 class IClient;
 class IStorage;
 class CLua;
