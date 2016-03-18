@@ -353,6 +353,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Jumps", &CCharacterCore::m_Jumps)
             .addData("JumpedTotal", &CCharacterCore::m_JumpedTotal)
             .addData("Jumped", &CCharacterCore::m_Jumped)
+			.addFunction("Reset", &CCharacterCore::Reset)
 		.endClass()
 		
 		.beginClass<CControls>("CControls")

@@ -63,7 +63,13 @@ void CTranslator::TranslationWorker(void *pUser)
 
 			// parse response
 			json_value *pValue = json_parse(aResponse);
-			str_copy(aTranslated, json_string_get(json_object_get(json_object_get(pValue,"responseData"),"translatedText")), sizeof(aTranslated));
+			const char *pResult = json_string_get(json_object_get(json_object_get(pValue,"responseData"),"translatedText"));
+			if(!pResult)
+			{
+				dbg_msg("trans", "got not text");
+				return;
+			}
+			str_copy(aTranslated, pResult, sizeof(aTranslated));
 			if(str_comp_nocase(Entry.m_Text, aTranslated) != 0)
 			{
 				dbg_msg("trans", "translated '%s' from '%s' to '%s', result: '%s'", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang, aTranslated);
