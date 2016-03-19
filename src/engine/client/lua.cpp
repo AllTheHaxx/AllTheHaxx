@@ -124,9 +124,9 @@ int CLua::ErrorFunc(lua_State *L)
     //CLua *pSelf = (CLua *)lua_touserdata(L, -1);
     //lua_pop(L, 1);
 
-    int depth = 0;
-    int frameskip = 1;
-    lua_Debug frame;
+    //int depth = 0;
+    //int frameskip = 1;
+    //lua_Debug frame;
 
     if (lua_tostring(L, -1) == 0)
 	{
