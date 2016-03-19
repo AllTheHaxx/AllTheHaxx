@@ -136,19 +136,19 @@ int CLua::ErrorFunc(lua_State *L)
 	
     //dbg_msg("Lua", pSelf->m_aFilename);
     dbg_msg("Lua", lua_tostring(L, -1));
-    dbg_msg("Lua", "Backtrace:");
+    /*dbg_msg("Lua", "Backtrace:");
 
     while(lua_getstack(L, depth, &frame) == 1)
     {
         depth++;
         lua_getinfo(L, "nlSf", &frame);
-        /* check for functions that just report errors. these frames just confuses more then they help */
+        // check for functions that just report errors. these frames just confuses more then they help
         if(frameskip && str_comp(frame.short_src, "[C]") == 0 && frame.currentline == -1)
             continue;
         frameskip = 0;
-        /* print stack frame */
+        // print stack frame
         dbg_msg("Lua", "%s(%d): %s %s", frame.short_src, frame.currentline, frame.name, frame.namewhat);
-    }
+    }*/
     lua_pop(L, 1); // remove error message
     lua_gc(L, LUA_GCCOLLECT, 0);
     return 0;

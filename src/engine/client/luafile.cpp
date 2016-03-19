@@ -76,17 +76,18 @@ void CLuaFile::OpenLua()
 	lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
 
 	luaL_openlibs(m_pLuaState);
-	luaopen_base(m_pLuaState);
+/*	luaopen_base(m_pLuaState);
 	luaopen_math(m_pLuaState);
 	luaopen_string(m_pLuaState);
 	luaopen_table(m_pLuaState);
 	//luaopen_io(m_pLua);
-	luaopen_os(m_pLuaState);
+	//luaopen_os(m_pLuaState);
 	//luaopen_package(m_pLua); // not sure whether we should load this
 	luaopen_debug(m_pLuaState);
 	luaopen_bit(m_pLuaState);
 	luaopen_jit(m_pLuaState);
 	luaopen_ffi(m_pLuaState); // don't know about this yet. could be a sand box leak.
+*/
 }
 
 void CLuaFile::Init()
