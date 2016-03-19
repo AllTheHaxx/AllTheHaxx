@@ -1,28 +1,37 @@
 g_ScriptTitle = "Guessing Game"
 g_ScriptInfo = "Guess my numb0r, dude. | by the AllTheHaxx-Team"
-math.randomseed( os.time() )
+
 
 MAX_RANGE = 500
-MaxNum = nil
-MyNum = -1 --math.random(MaxNum)
---Game.Chat:Say(0, "Guess my number! (1-"..MaxNum.."). Use: .guess <number> PLEASE USE TEAMCHAT")
-
 DELAY = 2
-LastGuess = 0
-
-NumTries = 0
-TriedNums = {}
-Highscores = {}
 
 function OnScriptInit()
+	Reset()
 	LoadHighscores()
 	BroadcastGame()
 	return true
 end
 
 
+function Reset() 
+	math.randomseed( os.time() )
+	MaxNum = nil
+	League = nil
+	MyNum = -1
+
+	LastGuess = 0
+
+	NumTries = 0
+	
+	TriedNums = nil
+	TriedNums = {}
+	
+	Highscores = nil
+	Highscores = {}
+end
+
 function SaveHighscores()
-	print("SAVING HIGHSCORES")
+	print("Saving Highscores")
 	file = io.open("lua/.GuessingGame_Highscores.config", "w+")
 	for i, table in next, Highscores do
 		for name, score in next, table do
@@ -32,7 +41,7 @@ function SaveHighscores()
 	end
 	file:flush()
 	file:close()
-	KillScript(g_ScriptUID)
+	--KillScript(g_ScriptUID)
 end
 
 function LoadHighscores()
@@ -45,7 +54,7 @@ end
 
 function BroadcastGame()
 	Game.Chat:Say(0, "→→ Guessing Game loaded! Use \"!start <MaxNumber>\" (MaxNumber from 100 to " .. MAX_RANGE .. ") to start!")
-	LastGuess = Game.Client.LocalTime+1
+	LastGuess = Game.Client.LocalTime+0.5
 end
 
 function Guesser(ID, Team, Msg)
@@ -56,17 +65,23 @@ function Guesser(ID, Team, Msg)
     if MaxNum == nil then
     	if Msg:find("!start") then
     		msg = Msg:gsub("!start ", "")
-        	denum = math.floor(tonumber(msg))
+        	denum = tonumber(msg)
         	if(denum ~= nil) then
+        		denum = math.floor(denum)
         		if(denum >= 100 and denum <= MAX_RANGE) then
 		    		MaxNum = denum
+		    		League = math.floor(MaxNum/100)
 		    		MyNum = math.random(MaxNum)
 		    		print(MyNum.."!!!!!!!!!!!!!!!!!!!!!!!")
-		    		Game.Chat:Say(0, "→→ Guess my number! (1-"..MaxNum.."). Use: .guess <number> PLEASE USE TEAMCHAT")
+		    		infostring = "→→ Guess my number! (1-"..MaxNum.."). Use: .guess <number>"
+		    		if(string.lower(Game.ServerInfo.GameMode) == "if|city") then
+		    			infostring = infostring .. "PLEASE USE TEAMCHAT"
+		    		end
+		    		Game.Chat:Say(0,  infostring)
+		    		LastGuess = Game.Client.LocalTime
 		    	end
         	end
         end
-        LastGuess = Game.Client.LocalTime
     	return
     end
     
@@ -74,11 +89,11 @@ function Guesser(ID, Team, Msg)
     if Msg:find(".guess") then
     
     	-- initialize the table
-    	if(Highscores[MaxNum] == nil) then
-    		Highscores[MaxNum] = {}
+    	if(Highscores[League] == nil) then
+    		Highscores[League] = {}
     	end
-		if(Highscores[MaxNum][Game.Players(ID).Name] == nil) then
-			Highscores[MaxNum][Game.Players(ID).Name] = 0
+		if(Highscores[League][Game.Players(ID).Name] == nil) then
+			Highscores[League][Game.Players(ID).Name] = 0
 		end
 	
         msg = Msg:gsub(".guess ", "")
@@ -91,24 +106,26 @@ function Guesser(ID, Team, Msg)
         if MyNum == num then
 	        winner = Game.Players(ID).Name
 	        winniwie = "as best as his highscore"
-	        if(Highscores[MaxNum][winner] > 0) then
-		    	if(NumTries < Highscores[MaxNum][winner]) then
-		    		winniwie = Highscores[MaxNum][winner]-NumTries .." better than his highscore"
+	        if(Highscores[League][winner] > 0) then
+		    	if(NumTries < Highscores[League][winner]) then
+		    		winniwie = Highscores[League][winner]-NumTries .." better than his highscore"
 		    	end
-		    	if(NumTries > Highscores[MaxNum][winner]) then
-		    		winniwie = NumTries-Highscores[MaxNum][winner] .. " worse than his highscore"
+		    	if(NumTries > Highscores[League][winner]) then
+		    		winniwie = NumTries-Highscores[League][winner] .. " worse than his highscore"
 		    	end
 		    else
 		    	winniwie = "ranking with that"
 		    end
-        	winniwie = winniwie .. " on " .. MaxNum .. "-league"
+        	winniwie = winniwie .. " on " .. League*100 .. "-league"
         	print(winner .. " won after " .. NumTries .. " tries, " .. winniwie .. "! The number was: " .. num)
             Game.Chat:Say(0, winner .. " won with " .. NumTries .. " tries, " .. winniwie .. "! The number was: " .. num)
-            if(Highscores[MaxNum][winner] <= 0 or NumTries < Highscores[MaxNum][winner]) then
-            	Highscores[MaxNum][winner] = NumTries
+            if(Highscores[League][winner] <= 0 or NumTries < Highscores[League][winner]) then
+            	Highscores[League][winner] = NumTries
             end
             SaveHighscores()
-            --KillScript(g_ScriptUID)
+            -- restart the game
+            Reset()
+            LoadHighscores()
         else
 	        if(TriedNums[num] ~= nil and TriedNums[num] == true) then
 	        	return
