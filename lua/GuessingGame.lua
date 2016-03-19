@@ -2,7 +2,7 @@ g_ScriptTitle = "Guessing Game"
 g_ScriptInfo = "Guess my numb0r, dude. | by the AllTheHaxx-Team"
 
 
-MAX_RANGE = 500
+MAX_RANGE = 999
 DELAY = 2
 
 function OnScriptInit()
@@ -41,7 +41,6 @@ function SaveHighscores()
 	end
 	file:flush()
 	file:close()
-	--KillScript(g_ScriptUID)
 end
 
 function LoadHighscores()
@@ -53,18 +52,47 @@ function LoadHighscores()
 end
 
 function BroadcastGame()
-	Game.Chat:Say(0, "→→ Guessing Game loaded! Use \"!start <MaxNumber>\" (MaxNumber from 100 to " .. MAX_RANGE .. ") to start!")
-	LastGuess = Game.Client.LocalTime+0.5
+	Game.Chat:Say(0, "→→ Guessing Game loaded! Use \"!start <num>\" or \"!rank <league>\"!")
+	LastGuess = Game.Client.LocalTime
 end
 
 function Guesser(ID, Team, Msg)
     if ID == -1 then return end
     if Game.Client.LocalTime < LastGuess + DELAY then return end
     
+    -- stats
+    if Msg:find("!rank") then
+   		msg = Msg:gsub("!rank ", "")
+    	denum = tonumber(msg)
+    	chat = "→→ Usage: !rank <league> (league is a number >= 100)"
+    	if(denum ~= nil) then
+    		if(denum >= 100) then
+    			denum = math.floor(denum/100)
+    			chat = "→→ " .. Game.Players(ID).Name .. " is not ranked in the " .. denum*100 .. "-league"
+    			if(Highscores[denum] ~= nil and Highscores[denum][Game.Players(ID).Name] ~= nil) then
+    				chat = "→→ Best round of " .. Game.Players(ID).Name .. " in the " .. denum*100 .. "-league was " .. Highscores[denum][Game.Players(ID).Name] .. " tries."
+    			end
+    			if(Team ~= 0 and string.lower(Game.ServerInfo.GameMode) == "if|city") then
+    				chat = Game.Players(ID).Name .. ": " .. chat
+    			end
+    			Game.Chat:Say(Team, chat)
+    			print(chat)
+    			return
+    		end
+    	end
+    	if(Team ~= 0 and string.lower(Game.ServerInfo.GameMode) == "if|city") then
+			chat = Game.Players(ID).Name .. ": " .. chat
+		end
+    	Game.Chat:Say(Team, chat)
+    	print(chat)
+    	return
+    end
+    
     -- init the game
     if MaxNum == nil then
     	if Msg:find("!start") then
     		msg = Msg:gsub("!start ", "")
+    		chat = "→→ Usage: !start <num> (num from 100 to " .. MAX_RANGE .. ")"
         	denum = tonumber(msg)
         	if(denum ~= nil) then
         		denum = math.floor(denum)
@@ -81,6 +109,11 @@ function Guesser(ID, Team, Msg)
 		    		LastGuess = Game.Client.LocalTime
 		    	end
         	end
+        	if(Team ~= 0 and string.lower(Game.ServerInfo.GameMode) == "if|city") then
+				chat = Game.Players(ID).Name .. ": " .. chat
+			end
+    		Game.Chat:Say(Team, chat)
+    		print(chat)
         end
     	return
     end
