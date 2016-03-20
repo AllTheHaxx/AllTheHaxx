@@ -148,6 +148,7 @@ void CLuaFile::Init()
 	{
 		dbg_msg("Lua", "Script '%s' rejected being loaded", m_Filename.c_str());
 		Unload(true);
+		return;
 	}
 }
 
