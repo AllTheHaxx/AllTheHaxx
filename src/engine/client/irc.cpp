@@ -169,7 +169,6 @@ void CIRC::StartConnection() // call this from a thread only!
 			m_State = STATE_DISCONNECTED;
 			return;
 		}
-
     }
 
 	m_HostAddress.port = 6667;
@@ -187,8 +186,10 @@ void CIRC::StartConnection() // call this from a thread only!
 		return;
 	}
 
-	if(g_Config.m_ClIRCUser[0] == '\0')
-		str_copy(g_Config.m_ClIRCUser, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCUser));
+	if(g_Config.m_ClIRCNick[0] == '\0' || str_length(g_Config.m_ClIRCNick) == 0)
+		str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
+
+	m_Nick = g_Config.m_ClIRCNick;
 
 	// send request
 	SendRaw("CAP LS");
@@ -1063,7 +1064,7 @@ void CIRC::SendRaw(const char *fmt, ...)
 void CIRC::SetNick(const char *nick)
 {
     if (m_State == STATE_CONNECTED)
-        SendRaw("Nick %s", nick);
+        SendRaw("NICK %s", nick);
 
     m_Nick = nick;
 }
