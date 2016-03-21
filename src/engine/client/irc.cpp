@@ -186,7 +186,7 @@ void CIRC::StartConnection() // call this from a thread only!
 		return;
 	}
 
-	if(g_Config.m_ClIRCNick[0] == '\0' || str_length(g_Config.m_ClIRCNick) == 0)
+	if(str_length(g_Config.m_ClIRCNick) == 0)
 		str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
 
 	m_Nick = g_Config.m_ClIRCNick;
