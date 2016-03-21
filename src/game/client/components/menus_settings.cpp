@@ -728,6 +728,12 @@ static CKeyInfo gs_aKeys[] =
 	{ "Toggle Dummy", "toggle cl_dummy 0 1", 0 },
 	{ "Dummy Copy", "toggle cl_dummy_copy_moves 0 1", 0 },
 	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
+	// ATH stuff
+	{ "Hookfly Dummy", "toggle cl_dummy_hook_fly 0 1", 0 },
+	{ "Toggle IRC", "+irc", 0 },
+	{ "Toggle Lua Console", "toggle_lua_console", 0 },
+	{ "Toggle Hotbar", "+hotbar", 0 },
+	{ "Unlock Mouse", "+unlock_mouse", 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
@@ -2320,6 +2326,38 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClPathFinding, Localize("A* Path Finding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
 		g_Config.m_ClPathFinding ^= 1;
 
+	// extra binds!
+	{
+		// this is kinda slow, but whatever
+		for(int i = 0; i < g_KeyCount; i++)
+			gs_aKeys[i].m_KeyId = 0;
+
+		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		{
+			const char *pBind = m_pClient->m_pBinds->Get(KeyId);
+			if(!pBind[0])
+				continue;
+
+			for(int i = 0; i < g_KeyCount; i++)
+				if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
+				{
+					gs_aKeys[i].m_KeyId = KeyId;
+					break;
+				}
+		}
+
+		CUIRect Background;
+		Left.HSplitTop(7.5f, 0, &Background);
+		Background.h = 23.0f*5+2.0f;
+		RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
+		Left.HSplitTop(7.0f, 0, &Left);
+		Left.VMargin(10.0f, &Left);
+		Left.HSplitTop(5.0f, 0, &Left);
+
+		UiDoGetButtons(33, 38, Left);
+		Left.h = 100.0f;
+	}
+	
 	RenderSettingsIRC(Right);
 }
 
