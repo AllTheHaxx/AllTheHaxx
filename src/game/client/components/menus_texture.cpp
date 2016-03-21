@@ -26,7 +26,7 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 	{
 		TabBar.VSplitLeft(TabBar.w/4, &Button, &TabBar);
 		static int s_Button0 = 0;
-		if(DoButton_MenuTab(&s_Button0, Localize("Gameskin"), s_ControlPage == 0, &Button, 0))
+		if(DoButton_MenuTab(&s_Button0, Localize("Gameskin"), s_ControlPage == 0, &Button, CUI::CORNER_L))
 			s_ControlPage = 0;
 
 		TabBar.VSplitLeft(TabBar.w/3, &Button, &TabBar);
@@ -40,7 +40,7 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 			s_ControlPage = 2;
 
 		static int s_Button3 = 0;
-		if(DoButton_MenuTab(&s_Button3, Localize("Cursor"), s_ControlPage == 3, &TabBar, 0))
+		if(DoButton_MenuTab(&s_Button3, Localize("Cursor"), s_ControlPage == 3, &TabBar, CUI::CORNER_R))
 			s_ControlPage = 3;
 	}
 
@@ -57,7 +57,6 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 
 void CMenus::RenderSettingsGameskin(CUIRect MainView)
 {
-	CUIRect Button, Label;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
@@ -120,7 +119,6 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
         
 void CMenus::RenderSettingsParticles(CUIRect MainView)
 {
-	CUIRect Button, Label;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
@@ -182,7 +180,6 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 
 void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 {
-	CUIRect Button, Label;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
@@ -244,7 +241,6 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 
 void CMenus::RenderSettingsCursor(CUIRect MainView)
 {
-	CUIRect Button, Label;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
