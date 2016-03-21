@@ -2312,11 +2312,6 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClSendInfoExploit, Localize("Fast Info Sending"), g_Config.m_ClSendInfoExploit, &Button, Localize("To be used on old DDNet for fast rainbow")))
-		g_Config.m_ClSendInfoExploit ^= 1;
-
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClColorfulClient, ("Colorful Client"), g_Config.m_ClColorfulClient, &Button, "Makes everything look way more awesome!"))
 		g_Config.m_ClColorfulClient ^= 1;
 
