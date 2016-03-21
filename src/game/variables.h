@@ -86,8 +86,6 @@ MACRO_CONFIG_INT(ClDefaultZoom, cl_default_zoom, 10, 0, 20, CFGFLAG_CLIENT|CFGFL
 MACRO_CONFIG_INT(ClPlayerUseCustomColor, player_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
 MACRO_CONFIG_INT(ClPlayerColorBody, player_color_body, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player body color")
 MACRO_CONFIG_INT(ClPlayerColorFeet, player_color_feet, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player feet color")
-MACRO_CONFIG_INT(ClPlayerColorBodyRainbow, player_color_body_rainbow, 0, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player body color rainbow")
-MACRO_CONFIG_INT(ClPlayerColorFeetRainbow, player_color_feet_rainbow, 0, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player feet color rainbow")
 
 MACRO_CONFIG_STR(ClPlayerSkin, player_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin")
 
