@@ -51,6 +51,7 @@ public:
     void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
     void SendRaw(const char *fmt, ...);
     void SendGetServer(const char *to);
+    void SendVersion(const char *to);
 
     void StartConnection();
     void Disconnect(const char *pReason = 0);

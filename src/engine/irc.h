@@ -71,10 +71,12 @@ public:
         STATE_CONNECTING,
         STATE_AWAY,
 
+		// for CTCP messages
 		MSG_TYPE_NORMAL = 0,
 		MSG_TYPE_ACTION,
 		MSG_TYPE_TWSERVER,
 		MSG_TYPE_GET_TWSERVER,
+		MSG_TYPE_CTCP // any unknown ctcp
     };
 
 
@@ -109,6 +111,7 @@ public:
     virtual void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL) = 0;
     virtual void SendRaw(const char *fmt, ...) = 0;
     virtual void SendGetServer(const char *to) = 0;
+    virtual void SendVersion(const char *to) = 0;
 
     virtual void StartConnection() = 0;
     virtual void Disconnect(const char *pReason = 0) = 0;

@@ -500,51 +500,58 @@ void CIRC::StartConnection() // call this from a thread only!
                     }
                     else if (aMsgID.compare("PRIVMSG") == 0)
                     {
-                        char aBuff[1024];
-                        ldel = NetData.find_first_of(" ", del+1);
-                        std::string aMsgChan = NetData.substr(del+1, ldel-del-1);
+						char aBuff[1024];
+						ldel = NetData.find_first_of(" ", del + 1);
+						std::string aMsgChan = NetData.substr(del + 1, ldel - del - 1);
 
-                        del = NetData.find_first_of(":", 1);
-                        std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
-                        int MsgType = GetMsgType(aMsgText.c_str());
+						del = NetData.find_first_of(":", 1);
+						std::string aMsgText = NetData.substr(del + 1, NetData.length() - del - 1);
+						int MsgType = GetMsgType(aMsgText.c_str());
 
 						del = aMsgFServer.find_first_of("!");
-						std::string aMsgFrom = aMsgFServer.substr(0,del);
+						std::string aMsgFrom = aMsgFServer.substr(0, del);
 
-                        if (MsgType == MSG_TYPE_TWSERVER)
-                        {
-                        	if (aMsgChan == m_Nick)
-                        	{
+						if(MsgType == MSG_TYPE_TWSERVER)
+						{
+							if(aMsgChan == m_Nick)
+							{
 								del = aMsgText.find_first_of(" ");
 								ldel = aMsgText.find_last_of(" ");
-								if (del != std::string::npos && del != ldel)
+								if(del != std::string::npos && del != ldel)
 								{
 									char aAddr[32];
 									mem_zero(aAddr, sizeof(aAddr));
 									std::string CleanMsg = aMsgText.substr(10);
-									CleanMsg = CleanMsg.substr(0, CleanMsg.length()-1);
+									CleanMsg = CleanMsg.substr(0, CleanMsg.length() - 1);
 									size_t pc = CleanMsg.find_first_of(" ");
-									if (pc != std::string::npos)
+									if(pc != std::string::npos)
 									{
-										str_copy(aAddr, CleanMsg.substr(pc+1).c_str(), sizeof(aAddr));
-										if (m_CmdToken[0] != 0 && str_comp(CleanMsg.substr(0, pc).c_str(), m_CmdToken) == 0 && aAddr[0] != 0)
+										str_copy(aAddr, CleanMsg.substr(pc + 1).c_str(), sizeof(aAddr));
+										if(m_CmdToken[0] != 0
+												&& str_comp(CleanMsg.substr(0, pc).c_str(), m_CmdToken) == 0
+												&& aAddr[0] != 0)
 										{
-											if (aAddr[0] != 0 && str_comp_nocase(aAddr, "NONE") != 0)
+											if(aAddr[0] != 0 && str_comp_nocase(aAddr, "NONE") != 0 && str_comp_nocase(aAddr, "FORBIDDEN") != 0)
 											{
 												m_pClient->Connect(aAddr);
 											}
 											else
 											{
 												CIRCCom *pCom = GetActiveCom();
-												if (pCom)
+												if(pCom)
 												{
 													char aBuf[128];
 													if(str_comp_nocase(aAddr, "FORBIDDEN") == 0)
-														str_format(aBuf, sizeof(aBuf), "*** '%s' forbids to join his server!", aMsgFrom.c_str());
+														str_format(aBuf, sizeof(aBuf),
+																"*** '%s' forbids joining his server!",
+																aMsgFrom.c_str());
 													else if(str_comp_nocase(aAddr, "NONE") == 0)
-														str_format(aBuf, sizeof(aBuf), "*** '%s' isn't playing on a server!", aMsgFrom.c_str());
+														str_format(aBuf, sizeof(aBuf),
+																"*** '%s' isn't playing on a server!",
+																aMsgFrom.c_str());
 													else
-														str_format(aBuf, sizeof(aBuf), "*** '%s' sent invalid information!", aMsgFrom.c_str());
+														str_format(aBuf, sizeof(aBuf),
+																"*** '%s' sent invalid information!", aMsgFrom.c_str());
 													pCom->m_Buffer.push_back(aBuf);
 												}
 											}
@@ -553,56 +560,69 @@ void CIRC::StartConnection() // call this from a thread only!
 										}
 									}
 								}
-                        	}
-                        }
-                        else if (MsgType == MSG_TYPE_GET_TWSERVER)
-                        {
-                        	if (aMsgChan == m_Nick)
-                        	{
+							}
+						}
+						else if(MsgType == MSG_TYPE_GET_TWSERVER)
+						{
+							if(aMsgChan == m_Nick)
+							{
 								std::string CleanMsg = aMsgText.substr(13);
-								CleanMsg = CleanMsg.substr(0, CleanMsg.length()-1);
+								CleanMsg = CleanMsg.substr(0, CleanMsg.length() - 1);
 
-								if (!CleanMsg.empty())
+								if(!CleanMsg.empty())
 									SendServer(aMsgFrom.c_str(), CleanMsg.c_str());
-                        	}
-                        }
-                        else
-                        {
-                        	reply.channel = aMsgChan;
+							}
+						}
+						else if(MsgType == MSG_TYPE_CTCP)
+						{
+							dbg_msg("IRC", "got a CTCP '%s' from '%s'", aMsgText.c_str(), aMsgFrom.c_str());
+							if(str_comp_nocase(aMsgText.c_str(), "\1version\1") == 0)
+								SendVersion(aMsgFrom.c_str());
+							else if(str_comp_nocase(aMsgText.c_str(), "\1time\1") == 0)
+								SendRaw("NOTICE %s :TIME %s (zone: %i)", aMsgFrom.c_str(), aTime, timezone);
+						}
+						else
+						{
+							reply.channel = aMsgChan;
 							reply.from = aMsgFrom;
 							reply.params = aMsgText;
 
-							if (aMsgChan == m_Nick)
+							if(aMsgChan == m_Nick)
 							{
 								CIRCCom *pCom = GetCom(aMsgFrom);
-								if (!pCom)
+								if(!pCom)
 								{
 									CComQuery *pNewQuery = new CComQuery();
 									pNewQuery->m_NumUnreadMsg = 1;
 									str_copy(pNewQuery->m_User, aMsgFrom.c_str(), sizeof(pNewQuery->m_User));
 									m_IRCComs.push_back(pNewQuery);
 
-									if (MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
+									if(MsgType == MSG_TYPE_ACTION)
+										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
+												aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
+										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
+												aMsgText.c_str());
 									pNewQuery->m_Buffer.push_back(aBuff);
 								}
 								else
 								{
-									if (pCom != GetActiveCom())
+									if(pCom != GetActiveCom())
 										pCom->m_NumUnreadMsg++;
 
-									if (MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
+									if(MsgType == MSG_TYPE_ACTION)
+										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
+												aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
+										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
+												aMsgText.c_str());
 									pCom->m_Buffer.push_back(aBuff);
 								}
 
-								if (pCom == GetActiveCom())
+								if(pCom == GetActiveCom())
 								{
-									aMsgFrom.insert(0,"<"); aMsgFrom.append("> ");
+									aMsgFrom.insert(0, "<");
+									aMsgFrom.append("> ");
 									aMsgFrom.insert(0, aTime);
 									m_pGameClient->OnMessageIRC("", aMsgFrom.c_str(), aMsgText.c_str());
 								}
@@ -610,28 +630,119 @@ void CIRC::StartConnection() // call this from a thread only!
 							else
 							{
 								CIRCCom *pCom = GetCom(aMsgChan);
-								if (pCom)
+								if(pCom)
 								{
-									if (pCom != GetActiveCom())
+									if(pCom != GetActiveCom())
 										pCom->m_NumUnreadMsg++;
 
-									if (MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
+									if(MsgType == MSG_TYPE_ACTION)
+										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
+												aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(), aMsgText.c_str());
+										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
+												aMsgText.c_str());
 									pCom->m_Buffer.push_back(aBuff);
 								}
 
-								if (pCom == GetActiveCom())
+								if(pCom == GetActiveCom())
 								{
-									aMsgChan.insert(0, "["); aMsgChan.append("] ");
-									aMsgFrom.insert(0, "<"); aMsgFrom.append("> ");
+									aMsgChan.insert(0, "[");
+									aMsgChan.append("] ");
+									aMsgFrom.insert(0, "<");
+									aMsgFrom.append("> ");
 									aMsgFrom.insert(0, aTime);
 									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 								}
 							}
-                        }
-                    }
+						}
+					}
+                    else if (aMsgID.compare("NOTICE") == 0)
+					{
+						char aBuff[1024];
+						ldel = NetData.find_first_of(" ", del + 1);
+						std::string aMsgChan = NetData.substr(del + 1, ldel - del - 1);
+
+						del = NetData.find_first_of(":", 1);
+						std::string aMsgText = NetData.substr(del + 1, NetData.length() - del - 1);
+						int MsgType = GetMsgType(aMsgText.c_str());
+
+						del = aMsgFServer.find_first_of("!");
+						std::string aMsgFrom = aMsgFServer.substr(0, del);
+						{
+							reply.channel = aMsgChan;
+							reply.from = aMsgFrom;
+							reply.params = aMsgText;
+
+							if(aMsgChan == m_Nick)
+							{
+								CIRCCom *pCom = GetCom(aMsgFrom);
+								std::replace(aMsgText.begin(), aMsgText.end(), '\1', ' ');
+								if(!pCom)
+								{
+									CComQuery *pNewQuery = new CComQuery();
+									pNewQuery->m_NumUnreadMsg = 1;
+									str_copy(pNewQuery->m_User, aMsgFrom.c_str(), sizeof(pNewQuery->m_User));
+									m_IRCComs.push_back(pNewQuery);
+
+									if(MsgType == MSG_TYPE_ACTION)
+										str_format(aBuff, sizeof(aBuff), "%s->> %s: %s", aTime, aMsgFrom.c_str(),
+												aMsgText.substr(8, -1).c_str());
+									else
+										str_format(aBuff, sizeof(aBuff), "%s-%s- %s", aTime, aMsgFrom.c_str(),
+												aMsgText.c_str());
+									pNewQuery->m_Buffer.push_back(aBuff);
+								}
+								else
+								{
+									if(pCom != GetActiveCom())
+										pCom->m_NumUnreadMsg++;
+
+									if(MsgType == MSG_TYPE_ACTION)
+										str_format(aBuff, sizeof(aBuff), "%s->> %s: %s", aTime, aMsgFrom.c_str(),
+												aMsgText.substr(8, -1).c_str());
+									else
+										str_format(aBuff, sizeof(aBuff), "%s-%s- %s", aTime, aMsgFrom.c_str(),
+												aMsgText.c_str());
+									pCom->m_Buffer.push_back(aBuff);
+								}
+
+								if(pCom == GetActiveCom())
+								{
+									aMsgFrom.insert(0, "<");
+									aMsgFrom.append("> ");
+									aMsgFrom.insert(0, aTime);
+									m_pGameClient->OnMessageIRC("", aMsgFrom.c_str(), aMsgText.c_str());
+								}
+							}
+							else
+							{
+								CIRCCom *pCom = GetCom(aMsgChan);
+								if(pCom)
+								{
+									if(pCom != GetActiveCom())
+										pCom->m_NumUnreadMsg++;
+
+									if(MsgType == MSG_TYPE_ACTION)
+										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
+												aMsgText.substr(8, -1).c_str());
+									else
+										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
+												aMsgText.c_str());
+									pCom->m_Buffer.push_back(aBuff);
+								}
+
+								if(pCom == GetActiveCom())
+								{
+									aMsgChan.insert(0, "[");
+									aMsgChan.append("] ");
+									aMsgFrom.insert(0, "<");
+									aMsgFrom.append("> ");
+									aMsgFrom.insert(0, aTime);
+									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
+								}
+							}
+						}
+					}
                     else if (aMsgID.compare("NICK") == 0)
                     {
                         char aBuff[255];
@@ -1017,7 +1128,7 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 
     // Send
     if (type == MSG_TYPE_ACTION)
-    	str_format(aBuff, sizeof(aBuff), "ACTION %s", msg);
+    	str_format(aBuff, sizeof(aBuff), "\1ACTION %s\1", msg);
     else
     	str_copy(aBuff, msg, sizeof(aBuff));
 
@@ -1080,11 +1191,12 @@ void CIRC::SetAway(bool state, const char *msg)
 int CIRC::GetMsgType(const char *msg)
 {
 	int len = str_length(msg);
-	if (len > 0 && msg[0] == 0x01 && msg[len-1] == 0x01)
+	if (len > 0 && msg[0] == '\1' && msg[len-1] == '\1')
 	{
 		char aCmd[12];
 		mem_zero(aCmd, sizeof(aCmd));
-		for (int i=1, e=0; i<len&&msg[i]!=32&&e<(int)sizeof(aCmd); i++, e++) aCmd[e] = msg[i];
+		for(int i = 1, e = 0; i < len && msg[i] != ' ' && e < (int)sizeof(aCmd); i++, e++)
+			aCmd[e] = msg[i];
 
 		if (str_comp_nocase(aCmd, "ACTION") == 0)
 			return MSG_TYPE_ACTION;
@@ -1092,6 +1204,8 @@ int CIRC::GetMsgType(const char *msg)
 			return MSG_TYPE_TWSERVER;
 		else if (str_comp_nocase(aCmd, "GETTWSERVER") == 0)
 			return MSG_TYPE_GET_TWSERVER;
+
+		return MSG_TYPE_CTCP;
 	}
 
 	return MSG_TYPE_NORMAL;
@@ -1100,13 +1214,20 @@ int CIRC::GetMsgType(const char *msg)
 void CIRC::SendServer(const char *to, const char *Token)
 {
 	const char *curAddr = m_pClient->GetCurrentServerAddress();
-	SendRaw("PRIVMSG %s :TWSERVER %s %s", to, Token, g_Config.m_ClIRCAllowJoin ? ((curAddr&&curAddr[0]!=0)?curAddr:"NONE") : "FORBIDDEN");
+	SendRaw("PRIVMSG %s :\1TWSERVER %s %s\1", to, Token, g_Config.m_ClIRCAllowJoin ? ((curAddr&&curAddr[0]!=0)?curAddr:"NONE") : "FORBIDDEN");
 }
 
 void CIRC::SendGetServer(const char *to)
 {
 	str_format(m_CmdToken, sizeof(m_CmdToken), "%ld", time_get());
-	SendRaw("PRIVMSG %s :GETTWSERVER %s", to, m_CmdToken);
+	SendRaw("PRIVMSG %s :\1GETTWSERVER %s\1", to, m_CmdToken);
+}
+
+void CIRC::SendVersion(const char *to)
+{
+	str_format(m_CmdToken, sizeof(m_CmdToken), "%ld", time_get());
+	SendRaw("NOTICE %s :VERSION Teeworlds %s (%s); AllTheHaxx %s; DDNet v%i; built on %s", to,
+			GAME_VERSION, GAME_NETVERSION, ALLTHEHAXX_VERSION, CLIENT_VERSIONNR, BUILD_DATE);
 }
 
 void CIRC::ExecuteCommand(const char *cmd, char *params)
@@ -1188,6 +1309,25 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
     	if (pCom)
     		pCom->m_Buffer.clear();
     }
+    else if (str_comp_nocase(cmd, "ctcp") == 0)
+	{
+    	char aBuf[1024] = {0};
+		if (CmdListParams.size() >= 2)
+		{
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\x1%s",
+					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
+			CmdListParams.remove_index(0); // pop twice
+			CmdListParams.remove_index(0); //   -> the first two arguments
+			while(CmdListParams.size() > 0) // add all other arguments
+			{
+				str_append(aBuf, " ", sizeof(aBuf));
+				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
+				CmdListParams.remove_index(0);
+			}
+			aBuf[str_length(aBuf)] = '\x1';
+			SendRaw(aBuf);
+		}
+	}
     else
         SendRaw("%s %s", cmd, params);
 }

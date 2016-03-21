@@ -39,7 +39,8 @@ int IRChook_privmsg(IIRC::ReplyData* hostd, void* user, void* engine)
 	CIRC *pIRC = (CIRC *)engine;
 
 	// nothing to do for control messages
-	if(pIRC->GetMsgType(hostd->params.c_str()) != IIRC::MSG_TYPE_NORMAL)
+	if(pIRC->GetMsgType(hostd->params.c_str()) != IIRC::MSG_TYPE_NORMAL ||
+			hostd->from.length() == 0 || hostd->channel.length() == 0)
 		return 0;
 
 	// play a sound
