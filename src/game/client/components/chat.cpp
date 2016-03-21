@@ -804,30 +804,25 @@ void CChat::OnRender()
 #endif
 }
 
-void CChat::Say(int Team, const char *pLine, bool NoTrans)
+bool CChat::HandleTCommands(const char *pMsg)
 {
-	m_LastChatSend = time_get();
-	
-	char aMessage[1024];
-	str_copy(aMessage, pLine, sizeof(aMessage));
-
-	if(g_Config.m_ClTransChatCmds && pLine[0] == '$')
+	if(g_Config.m_ClTransChatCmds && pMsg[0] == '$')
 	{
 		char aCmd[512][256] = {{0}};
 		mem_zero(&aCmd, sizeof(aCmd));
 		int Cmd = 0;
 		int Char = 0;
 
-		for(int i = 1; i < str_length(pLine); i++)
+		for(int i = 1; i < str_length(pMsg); i++)
 		{
-			if(pLine[i] == ' ')
+			if(pMsg[i] == ' ')
 			{
 				Cmd++;
 				Char = 0;
 				continue;
 			}
 
-			aCmd[Cmd][Char] = pLine[i];
+			aCmd[Cmd][Char] = pMsg[i];
 			Char++;
 		}
 
@@ -836,14 +831,14 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 			AddLine(-1337, 0, "~~~~ Commands ~~~~");
 			AddLine(-1337, 0, "'$tout <dst> <message>': Translate a message");
 			AddLine(-1337, 0, "'$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
-			return;
+			return true;
 		}
 		else if(!str_comp_nocase(aCmd[0], "tout"))
 		{
 			if(!aCmd[1][0] || !aCmd[2][0])
 			{
 				AddLine(-1337, 0, "Please use '$tout <dst> <message>'");
-				return;
+				return true;
 			}
 
 			int i = 2;
@@ -860,26 +855,40 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 			}
 
 			m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, aCmd[1], RawMsg, false);
-			return;
+			return true;
 		}
 		else if(!str_comp_nocase(aCmd[0], "tin"))
 		{
 			if(!aCmd[1][0] || !aCmd[2][0])
 			{
 				AddLine(-1337, 0, "Please use '$tin <src> <ID>'");
-				return;
+				return true;
 			}
 
 			int MsgID = str_toint(aCmd[2]);
 
 			m_pTranslator->RequestTranslation(aCmd[1], g_Config.m_ClTransInDst, m_aLines[m_CurrentLine-MsgID].m_aText, true);
-			return;
+			return true;
 		}
 
 		AddLine(-1337, 0, "Unknown command. Try '$cmdlist'!");
-		return;
+		return true;
 	}
-	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
+
+	return false;
+}
+
+void CChat::Say(int Team, const char *pLine, bool NoTrans)
+{
+	m_LastChatSend = time_get();
+	
+	char aMessage[1024];
+	str_copy(aMessage, pLine, sizeof(aMessage));
+
+	if(HandleTCommands(pLine))
+		return;
+
+	if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
 		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
 		return;

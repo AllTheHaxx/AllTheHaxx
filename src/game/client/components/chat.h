@@ -77,6 +77,7 @@ class CChat : public CComponent
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 
 	CTranslator *m_pTranslator;
+	bool HandleTCommands(const char *pMsg);
 
 public:
 	CChat();
