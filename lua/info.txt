@@ -1,0 +1,1 @@
+Create symlinks to the lua files in this folder to add them to the client
