@@ -598,7 +598,7 @@ void CChat::OnRender()
 		char aBuf[512];
 		if(m_pTranslator->GetTranslation()->m_In)
 		{
-			str_format(aBuf, sizeof(aBuf), "'%s' (%s -> %s)", m_pTranslator->GetTranslation()->m_Text, m_pTranslator->GetTranslation()->m_SrcLang, m_pTranslator->GetTranslation()->m_DstLang);
+			str_format(aBuf, sizeof(aBuf), "'%s' (%s → %s)", m_pTranslator->GetTranslation()->m_Text, m_pTranslator->GetTranslation()->m_SrcLang, m_pTranslator->GetTranslation()->m_DstLang);
 			AddLine(-1337, 0, aBuf);
 		}
 		else
