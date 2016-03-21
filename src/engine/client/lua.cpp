@@ -72,7 +72,7 @@ void CLua::AddUserscript(const char *pFilename)
 		return;
 
 	std::string file = pFilename;
-	dbg_msg("Lua", "adding script '%s' to list", file.c_str());
+	dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
 	m_pLuaFiles.add(new CLuaFile(this, file));
 }
 
@@ -105,7 +105,7 @@ int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pU
 
 	char File[64];
 	str_format(File, sizeof(File), "%s/%s", pFullDir, pName);
-	dbg_msg("Lua", "-> Found File %s", File);
+	//dbg_msg("Lua", "-> Found File %s", File);
 
 	pSelf->AddUserscript(File);
 	return 0;

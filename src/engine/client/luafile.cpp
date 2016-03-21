@@ -50,6 +50,17 @@ void CLuaFile::Unload(bool error)
 //	if(m_pLuaState)			 // -- do not close it in order to prevent crashes
 //		lua_close(m_pLuaState);
 
+	// script is not loaded -> don't unload it
+	if(m_State != LUAFILE_STATE_LOADED)
+	{
+		Reset(error);
+		return;
+	}
+
+	// assertion right here because m_pLuaState just CANNOT be 0 at this
+	// point, and if it is, something went wrong that we need to debug!
+	dbg_assert(m_pLuaState != 0, "Something went fatally wrong! Active luafile has no state?!");
+
 	try
 	{
 		LuaRef func = GetFunc("OnScriptUnload");
@@ -498,17 +509,20 @@ luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 {
 	LuaRef func = getGlobal(m_pLuaState, pFuncName);
 	if(func == 0)
-		dbg_msg("Lua", "Error: Function '%s' not found.", pFuncName);
+		dbg_msg("Lua", "Error: Function '%s' not found in file '%s'", pFuncName, m_Filename.c_str());
 
 	return func;  // return 0 if the function is not found!
 }
 
-void CLuaFile::CallFunc(const char *pFuncName)
+template<class T>
+T CLuaFile::CallFunc(const char *pFuncName) // just for quick access
 {
 	if(!m_pLuaState)
 		return;
 
-	// TODO : Find a way to pass the LuaFunction up to 8 arguments (no matter of the type)
+	T ret;
+	LUA_CALL_FUNC(m_pLuaState, pFuncName, T, ret);
+	return ret;
 }
 
 bool CLuaFile::LoadFile(const char *pFilename)

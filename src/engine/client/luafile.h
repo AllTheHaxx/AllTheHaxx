@@ -18,6 +18,7 @@ class CLua;
 
 class CLuaFile
 {
+	friend class CLuaBinding;
 public:
 	enum
 	{
@@ -43,10 +44,8 @@ public:
 	void Init();
 	void Reset(bool error = false);
 	void Unload(bool error = false);
-	void OpenLua();
 	luabridge::LuaRef GetFunc(const char *pFuncName);
-	void CallFunc(const char *pFuncName);
-	bool LoadFile(const char *pFilename);
+	template<class T> T CallFunc(const char *pFuncName);
 
 	int State() const { return m_State; }
 	int GetUID() const { return m_UID; }
@@ -60,6 +59,9 @@ public:
 	static void RegisterLuaCallbacks(lua_State * L);
 
 private:
+	void OpenLua();
+	bool LoadFile(const char *pFilename);
+
 	bool ScriptHasSettings();
 };
 

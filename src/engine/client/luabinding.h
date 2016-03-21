@@ -17,7 +17,7 @@ public:
 	};
 	static UiContainer *m_pUiContainer; // this will be moved to CLuaFile once it exists
 
-	// system namespace
+	// global namespace
 	static bool LuaImport(int UID, const char *pFilename);
 	static bool LuaKillScript(int UID);
 

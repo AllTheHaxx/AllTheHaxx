@@ -25,8 +25,7 @@ CLuaFile* CLuaBinding::GetLuaFile(int UID)
 	return 0;
 }
 
-
-// system namespace
+// global namespace
 bool CLuaBinding::LuaImport(int UID, const char *pFilename)
 {
 	CLuaFile *L = GetLuaFile(UID);
