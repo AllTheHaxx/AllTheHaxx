@@ -929,3 +929,23 @@ RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
  
 	return pRSA;
 }
+
+/*
+	RSA_PKCS1_PADDING - most commonly used
+	RSA_PKCS1_OAEP_PADDING
+	RSA_SSLV23_PADDING
+	RSA_NO_PADDING - raw RSA crypto
+*/
+int CChat::PublicEncrypt(unsigned char *pData, int Len, unsigned char *pKey, unsigned char *pEncrypted)
+{
+	RSA *pRSA = CreateRSA(pKey, true);
+	int Res = RSA_public_encrypt(Len, pData, pEncrypted, pRSA, RSA_PKCS1_PADDING);
+	return Res;
+}
+
+int CChat::PrivateDecrypt(unsigned char *pEncData, int Len, unsigned char *pKey, unsigned char *pDecrypted)
+{
+	RSA *pRSA = CreateRSA(pKey, false);
+	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, pRSA, RSA_PKCS1_PADDING);
+	return Res;
+}

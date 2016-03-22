@@ -90,6 +90,8 @@ class CChat : public CComponent
 
 	// crypt stuff
 	RSA *CreateRSA(unsigned char *pKey, bool Public);
+	int PublicEncrypt(unsigned char *pData, int Len, unsigned char *pKey, unsigned char *pEncrypted);
+	int PrivateDecrypt(unsigned char *pEncData, int Len, unsigned char *pKey, unsigned char *pDecrypted);
 
 public:
 	CChat();
