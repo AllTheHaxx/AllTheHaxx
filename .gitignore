@@ -58,6 +58,7 @@ bam.exe
 *.db
 *.db-journal
 *.pdf
+*.key
 lua
 crash_*.txt
 
