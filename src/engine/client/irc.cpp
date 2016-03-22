@@ -575,11 +575,44 @@ void CIRC::StartConnection() // call this from a thread only!
 						}
 						else if(MsgType == MSG_TYPE_CTCP)
 						{
-							dbg_msg("IRC", "got a CTCP '%s' from '%s'", aMsgText.c_str(), aMsgFrom.c_str());
-							if(str_comp_nocase(aMsgText.c_str(), "\1version\1") == 0)
+							array<std::string> CmdListParams;
+							char aBuf[512]; char* Ptr;
+							str_copy(aBuf, aMsgText.c_str(), sizeof(aBuf));
+							Ptr = aBuf+1;
+							str_replace_char(Ptr, sizeof(aBuf)-1, '\1', '\0');
+							dbg_msg("IRC", "got a CTCP '%s' from '%s'", Ptr, aMsgFrom.c_str());
+
+							for (char *p = strtok(Ptr, " "); p != NULL; p = strtok(NULL, " "))
+								CmdListParams.add(p);
+
+							if(str_comp_nocase(CmdListParams[0].c_str(), "version") == 0)
 								SendVersion(aMsgFrom.c_str());
-							else if(str_comp_nocase(aMsgText.c_str(), "\1time\1") == 0)
+							else if(str_comp_nocase(CmdListParams[0].c_str(), "time") == 0)
 								SendRaw("NOTICE %s :TIME %s (zone: %i)", aMsgFrom.c_str(), aTime, timezone);
+							else if(str_comp_nocase(CmdListParams[0].c_str(), "playerinfo") == 0)
+							{
+								str_format(aBuf, sizeof(aBuf), "NOTICE %s :PLAYERINFO", aMsgFrom.c_str());
+								CmdListParams.remove_index(0);
+								while(CmdListParams.size())
+								{
+									str_append(aBuf, " '", sizeof(aBuf));
+									if(str_comp_nocase("name", CmdListParams[0].c_str()) == 0)
+										str_append(aBuf, g_Config.m_PlayerName, sizeof(aBuf));
+									else if(str_comp_nocase("clan", CmdListParams[0].c_str()) == 0)
+										str_append(aBuf, g_Config.m_PlayerClan, sizeof(aBuf));
+									else if(str_comp_nocase("skin", CmdListParams[0].c_str()) == 0)
+										str_append(aBuf, g_Config.m_ClPlayerSkin, sizeof(aBuf));
+									else if(str_comp_nocase("dummy", CmdListParams[0].c_str()) == 0)
+										str_append(aBuf, g_Config.m_ClDummyName, sizeof(aBuf));
+									else
+										str_append(aBuf, "\\\\¶¶_error:arg\\\\", sizeof(aBuf));
+									str_append(aBuf, "' ", sizeof(aBuf));
+
+									CmdListParams.remove_index(0);
+								}
+								dbg_msg("nice irc", aBuf);
+								SendRaw(aBuf);
+							}
 						}
 						else
 						{
