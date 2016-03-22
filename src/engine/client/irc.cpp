@@ -1169,7 +1169,7 @@ void CIRC::SendRaw(const char *fmt, ...)
 	va_end(args);
 
 	str_append(msg, "\r\n", sizeof(msg));
-    net_tcp_send(m_Socket, msg, strlen(msg));
+    net_tcp_send(m_Socket, msg, str_length(msg));
 }
 
 void CIRC::SetNick(const char *nick)
