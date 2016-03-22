@@ -183,6 +183,9 @@ MACRO_CONFIG_STR(ClTransInDst, cl_trans_in_dest, 32, "en", CFGFLAG_CLIENT|CFGFLA
 MACRO_CONFIG_STR(ClTransOutSrc, cl_trans_out_src, 32, "en", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language are the outgoing messages written in?")
 MACRO_CONFIG_STR(ClTransOutDst, cl_trans_out_dest, 32, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should outgoing messages be translated?")
 
+// chatcrypt
+MACRO_CONFIG_INT(ClChatCrypt, cl_chat_crypt, 0, 0, 1, CFGFLAG_CLIENT, "Crypt chat traffic (anti logging-admins)")
+
 //
 MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Scoreboard fading time")
 

@@ -884,16 +884,29 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	m_LastChatSend = time_get();
 
-	dbg_msg("dbg", "%s\n\n%s", ReadPubKey(m_pKeyPair), ReadPrivKey(m_pKeyPair));
-	SaveKeys(m_pKeyPair);
-	
+	//dbg_msg("dbg", "%s\n\n%s", ReadPubKey(m_pKeyPair), ReadPrivKey(m_pKeyPair));
+
+	unsigned char aEncrypted[1024] = {};
+	if(g_Config.m_ClChatCrypt)
+	{
+		int Len = PublicEncrypt((unsigned char *)pLine, str_length(pLine), (unsigned char *)ReadPubKey(m_pKeyPair), aEncrypted);
+		if(Len == -1)
+		{
+			dbg_msg("chatcrypt", "failed to public encrypt message");
+		}
+	}
+
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
 
 	if(HandleTCommands(pLine))
 		return;
 
-	if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
+	if(g_Config.m_ClChatCrypt)
+	{
+		str_copy(aMessage, (char *)aEncrypted, sizeof(aMessage));
+	}
+	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
 		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
 		return;
@@ -959,6 +972,11 @@ void CChat::SaveKeys(RSA *pKeyPair)
 	}
 }
 
+void CChat::LoadKeys()
+{
+	// TODO: diz.
+}
+
 RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
 {
 	RSA *pRSA = NULL;
@@ -994,7 +1012,7 @@ RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
 int CChat::PublicEncrypt(unsigned char *pData, int Len, unsigned char *pKey, unsigned char *pEncrypted)
 {
 	RSA *pRSA = CreateRSA(pKey, true);
-	int Res = RSA_public_encrypt(Len, pData, pEncrypted, pRSA, RSA_PKCS1_PADDING);
+	int Res = RSA_public_encrypt(Len, pData, pEncrypted, pRSA, RSA_PKCS1_PADDING); // <-- crashes right here
 	return Res;
 }
 
