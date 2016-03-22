@@ -175,7 +175,7 @@ public:
 		mem_zero(m_apCharacters, sizeof(m_apCharacters));
 	}
 
-	CTuningParams m_Tuning[2];
+	CTuningParams m_Tuning[MAX_CLIENTS];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 };
 

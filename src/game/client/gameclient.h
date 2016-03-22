@@ -111,14 +111,14 @@ private:
 	void UpdatePositions();
 
 	int m_PredictedTick;
-	int m_LastNewPredictedTick[2];
+	int m_LastNewPredictedTick[MAX_CLIENTS];
 
 	int m_LastRoundStartTick;
 
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
 
-	int m_CheckInfo[2];
+	int m_CheckInfo[MAX_CLIENTS];
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
@@ -159,7 +159,7 @@ public:
 	int m_FlagDropTick[2];
 
 	// TODO: move this
-	CTuningParams m_Tuning[2];
+	CTuningParams m_Tuning[MAX_CLIENTS];
 
 	enum
 	{
@@ -198,7 +198,7 @@ public:
 
 		int m_LocalClientID;
 		int m_NumPlayers;
-		int m_aTeamSize[2];
+		int m_aTeamSize[MAX_CLIENTS];
 
 		// spectate data
 		struct CSpectateInfo
@@ -335,7 +335,7 @@ public:
 	// TODO: move these
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
-	virtual void SendDummyInfo(bool Start);
+	virtual void SendDummyInfo(bool Start, int id);
 	void SendKill(int ClientID);
 
 	// pointers to all systems
@@ -403,8 +403,8 @@ public:
 	static CClientData * LuaGetClientData(int ID) { return &CLua::m_pCGameClient->m_aClients[ID]; }
 	
 private:
-	bool m_DDRaceMsgSent[2];
-	int m_ShowOthers[2];
+	bool m_DDRaceMsgSent[MAX_CLIENTS];
+	int m_ShowOthers[MAX_CLIENTS];
 
 	bool m_ResetConfig;
 };

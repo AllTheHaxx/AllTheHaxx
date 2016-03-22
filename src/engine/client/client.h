@@ -78,7 +78,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
 	};
 
-	class CNetClient m_NetClient[3];
+	class CNetClient m_NetClient[MAX_CLIENTS+1];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
@@ -91,6 +91,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CIRC m_IRC;
 
 	char m_aServerAddressStr[256];
+	char m_aDummyServerAddressStr[MAX_CLIENTS][256];
 
 	unsigned m_SnapshotParts;
 	int64 m_LocalStartTime;
@@ -103,6 +104,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_RenderFrames;
 
 	NETADDR m_ServerAddress;
+	NETADDR m_DummyServerAddress[MAX_CLIENTS];
 	int m_WindowMustRefocus;
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
@@ -111,9 +113,9 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
 
-	int m_AckGameTick[2];
-	int m_CurrentRecvTick[2];
-	int m_RconAuthed[2];
+	int m_AckGameTick[MAX_CLIENTS];
+	int m_CurrentRecvTick[MAX_CLIENTS];
+	int m_RconAuthed[MAX_CLIENTS];
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
 
@@ -143,8 +145,8 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_MapdownloadTotalsize;
 
 	// time
-	CSmoothTime m_GameTime[2];
-	CSmoothTime m_PredictedTime;
+	CSmoothTime m_GameTime[MAX_CLIENTS];
+	CSmoothTime m_PredictedTime[MAX_CLIENTS];
 
 	// input
 	struct // TODO: handle input better
@@ -153,11 +155,11 @@ class CClient : public IClient, public CDemoPlayer::IListner
 		int m_Tick; // the tick that the input is for
 		int64 m_PredictedTime; // prediction latency when we sent this input
 		int64 m_Time;
-	} m_aInputs[2][200];
+	} m_aInputs[MAX_CLIENTS][200];
 
-	int m_CurrentInput[2];
-	bool m_LastDummy;
-	bool m_LastDummy2;
+	int m_CurrentInput[MAX_CLIENTS];
+	int m_LastDummy;
+	int m_LastDummy2;
 	CNetObj_PlayerInput HammerInput;
 
 	// graphs
@@ -166,14 +168,14 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	CGraph m_FpsGraph;
 
 	// the game snapshots are modifiable by the game
-	class CSnapshotStorage m_SnapshotStorage[2];
-	CSnapshotStorage::CHolder *m_aSnapshots[2][NUM_SNAPSHOT_TYPES];
+	class CSnapshotStorage m_SnapshotStorage[MAX_CLIENTS];
+	CSnapshotStorage::CHolder *m_aSnapshots[MAX_CLIENTS][NUM_SNAPSHOT_TYPES];
 
-	int m_ReceivedSnapshots[2];
+	int m_ReceivedSnapshots[MAX_CLIENTS];
 	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE];
 
 	class CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][MAX_CLIENTS][CSnapshot::MAX_SIZE];
 
 	class CSnapshotDelta m_SnapshotDelta;
 
@@ -266,12 +268,13 @@ public:
 	void DisconnectWithReason(const char *pReason);
 	virtual void Disconnect();
 
-	virtual void DummyDisconnect(const char *pReason);
+	virtual void DummyDisconnect(const char *pReason, int id);
 	virtual void DummyConnect();
 	virtual bool DummyConnected();
 	virtual bool DummyConnecting();
 	void DummyInfo();
-	int m_DummyConnected;
+	int m_NumDummies;
+	int m_DummyConnected[MAX_CLIENTS];
 	int m_LastDummyConnectTime;
 	int m_Fire;
 
@@ -306,7 +309,7 @@ public:
 
 	void ProcessConnlessPacket(CNetChunk *pPacket);
 	void ProcessServerPacket(CNetChunk *pPacket);
-	void ProcessServerPacketDummy(CNetChunk *pPacket);
+	void ProcessServerPacketDummy(CNetChunk *pPacket, int id);
 
 	void ResetMapDownload();
 	void FinishMapDownload();

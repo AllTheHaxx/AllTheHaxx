@@ -517,10 +517,11 @@ void CGameClient::OnInit()
 
 	m_ServerMode = SERVERMODE_PURE;
 
-	m_DDRaceMsgSent[0] = false;
-	m_DDRaceMsgSent[1] = false;
-	m_ShowOthers[0] = -1;
-	m_ShowOthers[1] = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_DDRaceMsgSent[i] = false;
+		m_ShowOthers[i] = -1;
+	}
 
 	m_ResetConfig = false;
 
@@ -621,8 +622,11 @@ void CGameClient::OnConnected()
 void CGameClient::OnReset()
 {
 	// clear out the invalid pointers
-	m_LastNewPredictedTick[0] = -1;
-	m_LastNewPredictedTick[1] = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_LastNewPredictedTick[i] = -1;
+	}
+
 	mem_zero(&g_GameClient.m_Snap, sizeof(g_GameClient.m_Snap));
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -640,10 +644,11 @@ void CGameClient::OnReset()
 	m_Tuning[g_Config.m_ClDummy] = CTuningParams();
 
 	m_Teams.Reset();
-	m_DDRaceMsgSent[0] = false;
-	m_DDRaceMsgSent[1] = false;
-	m_ShowOthers[0] = -1;
-	m_ShowOthers[1] = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_DDRaceMsgSent[i] = false;
+		m_ShowOthers[i] = -1;
+	}
 
 	if(m_ResetConfig)
 	{
@@ -831,7 +836,7 @@ void CGameClient::OnRender()
 				m_aClients[Client()->m_LocalIDs[1]].m_ColorBody != g_Config.m_ClDummyColorBody ||
 				m_aClients[Client()->m_LocalIDs[1]].m_ColorFeet != g_Config.m_ClDummyColorFeet
 				)
-					SendDummyInfo(false);
+					SendDummyInfo(false, 1);
 				else
 					m_CheckInfo[1] = -1;
 			}
@@ -946,19 +951,19 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 	if(IsDummy)
 	{
-		if(MsgId == NETMSGTYPE_SV_CHAT
-			&& Client()->m_LocalIDs[0] >= 0
-			&& Client()->m_LocalIDs[1] >= 0)
+		if(MsgId == NETMSGTYPE_SV_CHAT)
+			//&& Client()->m_LocalIDs[0] >= 0
+			//&& Client()->m_LocalIDs[1] >= 0)
 		{
 			CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
-			if((pMsg->m_Team == 1
-					&& (m_aClients[Client()->m_LocalIDs[0]].m_Team != m_aClients[Client()->m_LocalIDs[1]].m_Team
-						|| m_Teams.Team(Client()->m_LocalIDs[0]) != m_Teams.Team(Client()->m_LocalIDs[1])))
-				|| pMsg->m_Team > 1)
-			{
+			//if((pMsg->m_Team == 1
+			//		&& (m_aClients[Client()->m_LocalIDs[0]].m_Team != m_aClients[Client()->m_LocalIDs[1]].m_Team
+			//			|| m_Teams.Team(Client()->m_LocalIDs[0]) != m_Teams.Team(Client()->m_LocalIDs[1])))
+			//	|| pMsg->m_Team > 1)
+			//{
 				m_pChat->OnMessage(MsgId, pRawMsg);
-			}
+			//}
 		}
 		return; // no need of all that stuff for the dummy
 	}
@@ -2128,7 +2133,7 @@ void CGameClient::SendInfo(bool Start)
 	}
 }
 
-void CGameClient::SendDummyInfo(bool Start)
+void CGameClient::SendDummyInfo(bool Start, int id)
 {
 	if(Start)
 	{
@@ -2142,8 +2147,8 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 1);
-		m_CheckInfo[1] = -1;
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, id);
+		m_CheckInfo[id] = -1;
 	}
 	else
 	{
@@ -2157,8 +2162,8 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
-		m_CheckInfo[1] = Client()->GameTickSpeed();
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, id);
+		m_CheckInfo[id] = Client()->GameTickSpeed();
 	}
 }
 
@@ -2195,7 +2200,7 @@ void CGameClient::ConchainSpecialDummyInfoupdate(IConsole::IResult *pResult, voi
 {
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
-		((CGameClient*)pUserData)->SendDummyInfo(false);
+		((CGameClient*)pUserData)->SendDummyInfo(false, 1);
 }
 
 void CGameClient::ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

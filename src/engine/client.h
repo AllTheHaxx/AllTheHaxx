@@ -27,16 +27,16 @@ protected:
 	int m_State;
 
 	// quick access to time variables
-	int m_PrevGameTick[2];
-	int m_CurGameTick[2];
-	float m_GameIntraTick[2];
-	float m_GameTickTime[2];
+	int m_PrevGameTick[MAX_CLIENTS];
+	int m_CurGameTick[MAX_CLIENTS];
+	float m_GameIntraTick[MAX_CLIENTS];
+	float m_GameTickTime[MAX_CLIENTS];
 
 	int m_CurMenuTick;
 	int64 m_MenuStartTime;
 
-	int m_PredTick[2];
-	float m_PredIntraTick[2];
+	int m_PredTick[MAX_CLIENTS];
+	float m_PredIntraTick[MAX_CLIENTS];
 
 	float m_LocalTime;
 	float m_RenderFrameTime;
@@ -48,12 +48,12 @@ protected:
 public:
 	bool m_Restarting; // set this to make the client restart on the next quit
 
-	int m_LocalIDs[2];
+	int m_LocalIDs[MAX_CLIENTS];
 	char m_aNews[NEWS_SIZE];
 
 	CNetObj_PlayerInput m_DummyInput;
 
-	bool m_DummySendConnInfo;
+	bool m_DummySendConnInfo[MAX_CLIENTS];
 
 	class CSnapItem
 	{
@@ -105,7 +105,7 @@ public:
 	virtual void Disconnect() = 0;
 
 	// dummy
-	virtual void DummyDisconnect(const char *pReason) = 0;
+	virtual void DummyDisconnect(const char *pReason, int id) = 0;
 	virtual void DummyConnect() = 0;
 	virtual bool DummyConnected() = 0;
 	virtual bool DummyConnecting() = 0;
@@ -226,7 +226,7 @@ public:
 	virtual void OnActivateEditor() = 0;
 
 	virtual int OnSnapInput(int *pData) = 0;
-	virtual void SendDummyInfo(bool Start) = 0;
+	virtual void SendDummyInfo(bool Start, int id) = 0;
 	virtual void ResetDummyInput() = 0;
 	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy) = 0;
 

@@ -2043,7 +2043,7 @@ void CMenus::SetActive(bool Active)
 
 		if(m_NeedSendDummyinfo)
 		{
-			m_pClient->SendDummyInfo(false);
+			m_pClient->SendDummyInfo(false, 1);
 			m_NeedSendDummyinfo = false;
 		}
 

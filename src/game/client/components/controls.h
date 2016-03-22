@@ -10,8 +10,8 @@
 class CControls : public CComponent
 {
 public:
-	vec2 m_MousePos[2];
-	vec2 m_TargetPos[2];
+	vec2 m_MousePos[MAX_CLIENTS];
+	vec2 m_TargetPos[MAX_CLIENTS];
 	float m_OldMouseX;
 	float m_OldMouseY;
 	SDL_Joystick *m_Joystick;
@@ -24,11 +24,11 @@ public:
 
 	int m_AmmoCount[NUM_WEAPONS];
 
-	CNetObj_PlayerInput m_InputData[2];
-	CNetObj_PlayerInput m_LastData[2];
-	int m_InputDirectionLeft[2];
-	int m_InputDirectionRight[2];
-	int m_ShowHookColl[2];
+	CNetObj_PlayerInput m_InputData[MAX_CLIENTS];
+	CNetObj_PlayerInput m_LastData[MAX_CLIENTS];
+	int m_InputDirectionLeft[MAX_CLIENTS];
+	int m_InputDirectionRight[MAX_CLIENTS];
+	int m_ShowHookColl[MAX_CLIENTS];
 	int m_LastDummy;
 	int m_OtherFire;
 
