@@ -331,6 +331,8 @@ function build(settings)
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
+			client_settings.link.libs:Add("ssl")
+			client_settings.link.libs:Add("crypto")
 		end
 
 	elseif family == "windows" then

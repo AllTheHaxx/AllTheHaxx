@@ -1,5 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
+/* If you are missing that file, acquire a complete release at teeworlds.com.				*/
 
 #include <base/tl/string.h>
 
@@ -899,4 +899,33 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	Msg.m_Team = Team;
 	Msg.m_pMessage = aMessage;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+}
+
+////////////////////////////
+// chat crypt stuff below //
+////////////////////////////
+RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
+{
+	RSA *pRSA = NULL;
+	BIO *pKeyBIO;
+	pKeyBIO = BIO_new_mem_buf(pKey, -1);
+
+	if(!pKeyBIO)
+	{
+		dbg_msg("chatcrypt", "failed to create key BIO");
+		return 0;
+	}
+
+	if(Public)
+	{
+		pRSA = PEM_read_bio_RSA_PUBKEY(pKeyBIO, &pRSA,NULL, NULL);
+		dbg_msg("chatcrypt", "created public key");
+	}
+	else
+	{
+		pRSA = PEM_read_bio_RSAPrivateKey(pKeyBIO, &pRSA,NULL, NULL);
+		dbg_msg("chatcrypt", "created private key");
+	}
+ 
+	return pRSA;
 }

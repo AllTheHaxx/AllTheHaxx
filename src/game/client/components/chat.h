@@ -6,6 +6,15 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+// much crypto
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/rsa.h>
+#include <openssl/evp.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+// -----------
+
 #include "translator.h"
 
 class CChat : public CComponent
@@ -78,6 +87,9 @@ class CChat : public CComponent
 
 	CTranslator *m_pTranslator;
 	bool HandleTCommands(const char *pMsg);
+
+	// crypt stuff
+	RSA *CreateRSA(unsigned char *pKey, bool Public);
 
 public:
 	CChat();
