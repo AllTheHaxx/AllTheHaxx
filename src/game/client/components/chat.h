@@ -89,7 +89,10 @@ class CChat : public CComponent
 	bool HandleTCommands(const char *pMsg);
 
 	// crypt stuff
+	RSA *m_pKeyPair;
 	RSA *GenerateKeyPair(int Bytes, int Exp);
+	char *ReadPubKey(RSA *pKeyPair);
+	char *ReadPrivKey(RSA *pKeyPair);
 	RSA *CreateRSA(unsigned char *pKey, bool Public);
 	int PublicEncrypt(unsigned char *pData, int Len, unsigned char *pKey, unsigned char *pEncrypted);
 	int PrivateDecrypt(unsigned char *pEncData, int Len, unsigned char *pKey, unsigned char *pDecrypted);

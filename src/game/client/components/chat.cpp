@@ -33,6 +33,8 @@ CChat::CChat()
 
 	m_pTranslator = new CTranslator();
 	m_pTranslator->Init();
+
+	m_pKeyPair = GenerateKeyPair(512, 3);
 }
 
 void CChat::OnReset()
@@ -882,9 +884,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	m_LastChatSend = time_get();
 
-	char publicKey[]="test123";
-  
-	char privateKey[]="test456";
+	dbg_msg("dbg", "%s\n\n%s", ReadPubKey(m_pKeyPair), ReadPrivKey(m_pKeyPair));
 	
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
@@ -913,6 +913,30 @@ RSA *CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like
 {
 	RSA *pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
 	return pKeyPair;
+}
+
+char *CChat::ReadPubKey(RSA *pKeyPair)
+{
+	BIO *pBio = BIO_new(BIO_s_mem());
+	PEM_write_bio_RSAPublicKey(pBio, pKeyPair);
+
+	char *PEMKey = new char[512];
+	int KeyLen = BIO_pending(pBio);
+	BIO_read(pBio, PEMKey, KeyLen);
+	
+	return PEMKey;
+}
+
+char *CChat::ReadPrivKey(RSA *pKeyPair)
+{
+	BIO *pBio = BIO_new(BIO_s_mem());
+	PEM_write_bio_RSAPrivateKey(pBio, pKeyPair, NULL, NULL, 0, NULL, NULL);
+
+	char *PEMKey = new char[512];
+	int KeyLen = BIO_pending(pBio);
+	BIO_read(pBio, PEMKey, KeyLen);
+	
+	return PEMKey;
 }
 
 RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
