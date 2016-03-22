@@ -930,7 +930,7 @@ RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
 	return pRSA;
 }
 
-/*
+/*  ++++ PADDINGS ++++
 	RSA_PKCS1_PADDING - most commonly used
 	RSA_PKCS1_OAEP_PADDING
 	RSA_SSLV23_PADDING
@@ -946,6 +946,20 @@ int CChat::PublicEncrypt(unsigned char *pData, int Len, unsigned char *pKey, uns
 int CChat::PrivateDecrypt(unsigned char *pEncData, int Len, unsigned char *pKey, unsigned char *pDecrypted)
 {
 	RSA *pRSA = CreateRSA(pKey, false);
+	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, pRSA, RSA_PKCS1_PADDING);
+	return Res;
+}
+
+int CChat::PrivateEncrypt(unsigned char *pData, int Len, unsigned char *pKey, unsigned char *pEncrypted)
+{
+	RSA *pRSA = CreateRSA(pKey, false);
+	int Res = RSA_private_encrypt(Len, pData, pEncrypted, pRSA, RSA_PKCS1_PADDING);
+	return Res;
+}
+
+int CChat::PublicDecrypt(unsigned char *pEncData, int Len, unsigned char *pKey, unsigned char *pDecrypted)
+{
+	RSA *pRSA = CreateRSA(pKey, true);
 	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, pRSA, RSA_PKCS1_PADDING);
 	return Res;
 }
