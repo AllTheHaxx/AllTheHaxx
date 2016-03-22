@@ -881,6 +881,10 @@ bool CChat::HandleTCommands(const char *pMsg)
 void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	m_LastChatSend = time_get();
+
+	char publicKey[]="test123";
+  
+	char privateKey[]="test456";
 	
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
@@ -904,6 +908,13 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 ////////////////////////////
 // chat crypt stuff below //
 ////////////////////////////
+
+RSA *CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like 512 bytes and Exp = 3
+{
+	RSA *pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
+	return pKeyPair;
+}
+
 RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
 {
 	RSA *pRSA = NULL;
@@ -918,13 +929,13 @@ RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
 
 	if(Public)
 	{
-		pRSA = PEM_read_bio_RSA_PUBKEY(pKeyBIO, &pRSA,NULL, NULL);
-		dbg_msg("chatcrypt", "created public key");
+		pRSA = PEM_read_bio_RSA_PUBKEY(pKeyBIO, &pRSA, NULL, NULL);
+		dbg_msg("chatcrypt", "created public RSA");
 	}
 	else
 	{
-		pRSA = PEM_read_bio_RSAPrivateKey(pKeyBIO, &pRSA,NULL, NULL);
-		dbg_msg("chatcrypt", "created private key");
+		pRSA = PEM_read_bio_RSAPrivateKey(pKeyBIO, &pRSA, NULL, NULL);
+		dbg_msg("chatcrypt", "created private RSA");
 	}
  
 	return pRSA;
