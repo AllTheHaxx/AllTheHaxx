@@ -885,6 +885,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	m_LastChatSend = time_get();
 
 	dbg_msg("dbg", "%s\n\n%s", ReadPubKey(m_pKeyPair), ReadPrivKey(m_pKeyPair));
+	SaveKeys(m_pKeyPair);
 	
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
@@ -937,6 +938,25 @@ char *CChat::ReadPrivKey(RSA *pKeyPair)
 	BIO_read(pBio, PEMKey, KeyLen);
 	
 	return PEMKey;
+}
+
+void CChat::SaveKeys(RSA *pKeyPair)
+{
+	FILE *pPubFile;
+	pPubFile = fopen ("rsa_pub.key","w");
+	if(pPubFile != NULL)
+	{
+		fputs(ReadPubKey(pKeyPair), pPubFile);
+		fclose(pPubFile);
+	}
+
+	FILE *pPrivFile;
+	pPrivFile = fopen ("rsa_priv.key","w");
+	if(pPrivFile != NULL)
+	{
+		fputs(ReadPrivKey(pKeyPair), pPrivFile);
+		fclose(pPrivFile);
+	}
 }
 
 RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
