@@ -393,11 +393,12 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		if(g_Config.m_ClChatCrypt)
 		{
 			unsigned char aDecrypted[1024] = {};
-			int Len = PrivateDecrypt((unsigned char *)pMsg->m_pMessage, str_length(pMsg->m_pMessage), aDecrypted);
-			if(Len == -1)
+			if(RSA_private_decrypt(str_length(pMsg->m_pMessage), (unsigned char*)pMsg->m_pMessage, (unsigned char*)aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
 			{
 				dbg_msg("chatcrypt", "failed to private decrypt message");
 			}
+
+			dbg_msg("dasd", (char *)aDecrypted);
 		}
 
 		if(g_Config.m_ClTransIn &&
@@ -899,11 +900,20 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	unsigned char aEncrypted[1024] = {};
 	if(g_Config.m_ClChatCrypt)
 	{
-		int Len = PublicEncrypt((unsigned char *)pLine, str_length(pLine), aEncrypted);
-		if(Len == -1)
+		int Len;
+		if((Len = RSA_public_encrypt(str_length(pLine)+1, (unsigned char*)pLine, (unsigned char*)aEncrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING)) == -1)
 		{
 			dbg_msg("chatcrypt", "failed to public encrypt message");
 		}
+
+		// ya, this works. wuw.
+		/*unsigned char aDecrypted[1024] = {};
+		if(RSA_private_decrypt(str_length((char *)aEncrypted), (unsigned char*)aEncrypted, (unsigned char*)aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
+		{
+			dbg_msg("chatcrypt", "failed to private decrypt message");
+		}
+
+		dbg_msg("dasd", (char *)aDecrypted);*/
 	}
 
 	char aMessage[1024];
@@ -993,14 +1003,3 @@ void CChat::LoadKeys()
 	RSA_SSLV23_PADDING
 	RSA_NO_PADDING - raw RSA crypto
 */
-int CChat::PublicEncrypt(unsigned char *pData, int Len, unsigned char *pEncrypted)
-{
-	int Res = RSA_public_encrypt(Len, pData, pEncrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING);
-	return Res;
-}
-
-int CChat::PrivateDecrypt(unsigned char *pEncData, int Len, unsigned char *pDecrypted)
-{
-	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING);
-	return Res;
-}

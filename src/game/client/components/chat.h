@@ -95,8 +95,7 @@ class CChat : public CComponent
 	char *ReadPrivKey(RSA *pKeyPair);
 	void SaveKeys(RSA *pKeyPair);
 	void LoadKeys();
-	int PublicEncrypt(unsigned char *pData, int Len, unsigned char *pEncrypted);
-	int PrivateDecrypt(unsigned char *pEncData, int Len, unsigned char *pDecrypted);
+
 public:
 	CChat();
 
