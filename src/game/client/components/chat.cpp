@@ -392,8 +392,26 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 		if(g_Config.m_ClChatCrypt)
 		{
+			unsigned char aEncrypted[1024] = {0};
 			unsigned char aDecrypted[1024] = {};
-			if(RSA_private_decrypt(str_length(pMsg->m_pMessage), (unsigned char*)pMsg->m_pMessage, (unsigned char*)aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
+			for(int i = 0, j = 0; pMsg->m_pMessage[j]; i++, j+=2)
+			{
+				char aBuf[3];
+				str_copy(aBuf, &pMsg->m_pMessage[j], sizeof(aBuf));
+				aEncrypted[i] = strtol(aBuf, 0, 16);
+			}
+
+			char aMessage[1024] = {0};
+			for(int i = 0; aEncrypted[i]; i++)
+			{
+				char aBuf[3];
+				str_format(aBuf, sizeof(aBuf), "%x", aEncrypted[i]);
+				str_append(aMessage, aBuf, sizeof(aMessage));
+			}
+			aMessage[256] = '\0';
+			dbg_msg("decrypted", "%s", aMessage);
+
+			if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
 			{
 				dbg_msg("chatcrypt", "failed to private decrypt message");
 			}
@@ -922,9 +940,18 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	if(HandleTCommands(pLine))
 		return;
 
-	if(g_Config.m_ClChatCrypt)
+	if(g_Config.m_ClChatCrypt && pLine[0] != '/')
 	{
-		str_copy(aMessage, (char *)aEncrypted, sizeof(aMessage));
+		mem_zero(aMessage, sizeof(aMessage));
+		for(int i = 0; aEncrypted[i]; i++)
+		{
+			char aBuf[3];
+			str_format(aBuf, sizeof(aBuf), "%x", aEncrypted[i]);
+			str_append(aMessage, aBuf, sizeof(aMessage));
+		}
+		aMessage[256] = '\0';
+		dbg_msg("crypted", "%s", aMessage);
+		//str_copy(aMessage, (char *)aEncrypted, sizeof(aMessage));
 	}
 	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
