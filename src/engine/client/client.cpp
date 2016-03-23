@@ -734,6 +734,7 @@ void CClient::Connect(const char *pAddress)
 	Disconnect();
 
 	str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
+	str_copy(g_Config.m_UiServerAddress, pAddress, sizeof(g_Config.m_UiServerAddress));
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
