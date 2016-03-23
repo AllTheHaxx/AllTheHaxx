@@ -63,7 +63,7 @@ void CEffects::ResetDamageIndicator()
 
 void CEffects::PowerupShine(vec2 Pos, vec2 size)
 {
-	if(!m_Add50hz)
+	if(!m_Add50hz || g_Config.m_GfxLowGraphics)
 		return;
 
 	CParticle p;
@@ -84,7 +84,7 @@ void CEffects::PowerupShine(vec2 Pos, vec2 size)
 
 void CEffects::SmokeTrail(vec2 Pos, vec2 Vel)
 {
-	if(!m_Add50hz)
+	if(!m_Add50hz || g_Config.m_GfxLowGraphics)
 		return;
 
 	float StartSize = 12.0f + frandom()*8;
