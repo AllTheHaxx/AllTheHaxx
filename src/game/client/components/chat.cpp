@@ -390,6 +390,16 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		if(!HideChat)
 			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 
+		if(g_Config.m_ClChatCrypt)
+		{
+			unsigned char aDecrypted[1024] = {};
+			int Len = PrivateDecrypt((unsigned char *)pMsg->m_pMessage, str_length(pMsg->m_pMessage), (unsigned char *)ReadPrivKey(m_pKeyPair), aDecrypted);
+			if(Len == -1)
+			{
+				dbg_msg("chatcrypt", "failed to private decrypt message");
+			}
+		}
+
 		if(g_Config.m_ClTransIn &&
 			str_length(pMsg->m_pMessage) > 4 &&
 			pMsg->m_ClientID != m_pClient->m_Snap.m_LocalClientID &&
@@ -1012,27 +1022,27 @@ RSA *CChat::CreateRSA(unsigned char *pKey, bool Public)
 int CChat::PublicEncrypt(unsigned char *pData, int Len, unsigned char *pKey, unsigned char *pEncrypted)
 {
 	RSA *pRSA = CreateRSA(pKey, true);
-	int Res = RSA_public_encrypt(Len, pData, pEncrypted, pRSA, RSA_PKCS1_PADDING); // <-- crashes right here
+	int Res = RSA_public_encrypt(Len, pData, pEncrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING);
 	return Res;
 }
 
 int CChat::PrivateDecrypt(unsigned char *pEncData, int Len, unsigned char *pKey, unsigned char *pDecrypted)
 {
 	RSA *pRSA = CreateRSA(pKey, false);
-	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, pRSA, RSA_PKCS1_PADDING);
+	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING);
 	return Res;
 }
 
 int CChat::PrivateEncrypt(unsigned char *pData, int Len, unsigned char *pKey, unsigned char *pEncrypted)
 {
 	RSA *pRSA = CreateRSA(pKey, false);
-	int Res = RSA_private_encrypt(Len, pData, pEncrypted, pRSA, RSA_PKCS1_PADDING);
+	int Res = RSA_private_encrypt(Len, pData, pEncrypted, pRSA, RSA_PKCS1_OAEP_PADDING);
 	return Res;
 }
 
 int CChat::PublicDecrypt(unsigned char *pEncData, int Len, unsigned char *pKey, unsigned char *pDecrypted)
 {
 	RSA *pRSA = CreateRSA(pKey, true);
-	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, pRSA, RSA_PKCS1_PADDING);
+	int Res = RSA_private_decrypt(Len, pEncData, pDecrypted, pRSA, RSA_PKCS1_OAEP_PADDING);
 	return Res;
 }
