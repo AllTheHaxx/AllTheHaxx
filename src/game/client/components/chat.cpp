@@ -408,8 +408,8 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 				str_format(aBuf, sizeof(aBuf), "%x", aEncrypted[i]);
 				str_append(aMessage, aBuf, sizeof(aMessage));
 			}
-			aMessage[256] = '\0';
-			dbg_msg("decrypted", "%s", aMessage);
+			//aMessage[256] = '\0';
+			dbg_msg("decrypted", "%s", aEncrypted);
 
 			if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
 			{
@@ -943,15 +943,33 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	if(g_Config.m_ClChatCrypt && pLine[0] != '/')
 	{
 		mem_zero(aMessage, sizeof(aMessage));
-		for(int i = 0; aEncrypted[i]; i++)
+		for(int i = 0; i < 1024; i++)
 		{
 			char aBuf[3];
 			str_format(aBuf, sizeof(aBuf), "%x", aEncrypted[i]);
 			str_append(aMessage, aBuf, sizeof(aMessage));
 		}
-		aMessage[256] = '\0';
-		dbg_msg("crypted", "%s", aMessage);
+		//aMessage[256] = '\0';
+		dbg_msg("encrypted", "%s", aMessage);
 		//str_copy(aMessage, (char *)aEncrypted, sizeof(aMessage));
+
+		unsigned char aDecrypted[1024] = {0};
+		for(int i = 0, j = 0; j < 1024; i++, j+=2)
+		{
+			char aBuf[3];
+			str_copy(aBuf, &aMessage[j], sizeof(aBuf));
+			aDecrypted[i] = strtol(aBuf, 0, 16);
+		}
+		mem_zero(aMessage, sizeof(aMessage));
+		for(int i = 0; i < 1024; i++)
+		{
+			char aBuf[3];
+			str_format(aBuf, sizeof(aBuf), "%x", aDecrypted[i]);
+			str_append(aMessage, aBuf, sizeof(aMessage));
+		}
+		//aMessage[256] = '\0';
+		dbg_msg("decrypted", "%s", aMessage);
+
 	}
 	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
