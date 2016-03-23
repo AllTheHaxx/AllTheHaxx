@@ -34,7 +34,7 @@ CChat::CChat()
 	m_pTranslator = new CTranslator();
 	m_pTranslator->Init();
 
-	m_pKeyPair = GenerateKeyPair(512, 3);
+	m_pKeyPair = GenerateKeyPair(1024, 3);
 }
 
 void CChat::OnReset()
