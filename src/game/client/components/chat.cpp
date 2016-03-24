@@ -112,12 +112,31 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 	((CChat *)pUserData)->m_Show = pResult->GetInteger(0) != 0;
 }
 
+void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChat *)pUserData)->GenerateKeyPair(512, 3); // hardcoded, yay!
+}
+
+void CChat::ConSaveKeys(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChat *)pUserData)->SaveKeys(((CChat *)pUserData)->m_pKeyPair);
+}
+
+void CChat::ConLoadKeys(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChat *)pUserData)->LoadKeys();
+}
+
 void CChat::OnConsoleInit()
 {
 	Console()->Register("say", "r[message]", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
 	Console()->Register("say_team", "r[message]", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
+
+	Console()->Register("generate_rsa_keys", "", CFGFLAG_CLIENT, ConGenKeys, this, "Generate RSA keys for chat crypt");
+	Console()->Register("save_rsa_keys", "", CFGFLAG_CLIENT, ConSaveKeys, this, "Save RSA keys for chat crypt");
+	Console()->Register("load_rsa_keys", "", CFGFLAG_CLIENT, ConLoadKeys, this, "Load RSA keys for chat crypt");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
