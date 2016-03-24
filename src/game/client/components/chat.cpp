@@ -117,6 +117,11 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 {
+	if(pResult->GetInteger(1) % 2 == 0)
+	{
+		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "please use a odd number as exponent.");
+		return;
+	}
 	((CChat *)pUserData)->GenerateKeyPair(pResult->GetInteger(0), pResult->GetInteger(1));
 }
 
