@@ -98,8 +98,10 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 		((CChat*)pUserData)->EnableMode(0);
 	else if(str_comp(pMode, "team") == 0)
 		((CChat*)pUserData)->EnableMode(1);
+	else if(str_comp(pMode, "flag") == 0)
+		((CChat*)pUserData)->EnableMode(2);
 	else
-		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
+		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all, team or flags as mode");
 
 	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
 		((CChat*)pUserData)->m_Input.Set(pResult->GetString(1));
@@ -138,10 +140,8 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 			if(m_LastChatSend+time_freq() < time_get())
 			{
-				if(g_Config.m_ClFlagChat)
-				{
+				if(m_Mode == MODE_FLAG)
 					m_CryptSendQueue = std::string(m_Input.GetString());
-				}
 				else
 					Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
 				AddEntry = true;
@@ -155,7 +155,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			if(AddEntry)
 			{
 				CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry)+m_Input.GetLength());
-				pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
+				pEntry->m_Team = m_Mode == MODE_TEAM ? 1 : 0;
 				mem_copy(pEntry->m_aText, m_Input.GetString(), m_Input.GetLength()+1);
 			}
 		}
@@ -312,7 +312,9 @@ void CChat::EnableMode(int Team)
 
 	if(m_Mode == MODE_NONE)
 	{
-		if(Team)
+		if(Team == 2)
+			m_Mode = MODE_FLAG;
+		else if(Team == 1)
 			m_Mode = MODE_TEAM;
 		else
 			m_Mode = MODE_ALL;
@@ -680,6 +682,8 @@ void CChat::OnRender()
 			TextRender()->TextEx(&Cursor, Localize("All"), -1);
 		else if(m_Mode == MODE_TEAM)
 			TextRender()->TextEx(&Cursor, Localize("Team"), -1);
+		else if(m_Mode == MODE_FLAG)
+			TextRender()->TextEx(&Cursor, Localize("Flag"), -1);
 		else
 			TextRender()->TextEx(&Cursor, Localize("Chat"), -1);
 

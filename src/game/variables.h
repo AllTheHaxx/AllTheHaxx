@@ -184,6 +184,7 @@ MACRO_CONFIG_STR(ClTransOutSrc, cl_trans_out_src, 32, "en", CFGFLAG_CLIENT|CFGFL
 MACRO_CONFIG_STR(ClTransOutDst, cl_trans_out_dest, 32, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should outgoing messages be translated?")
 
 // chatcrypt
+MACRO_CONFIG_INT(ClChatCrypt, cl_chat_crypt, 0, 0, 1, CFGFLAG_CLIENT, "Crypted chat messages (anti-logging-admin)")
 MACRO_CONFIG_INT(ClFlagChat, cl_flag_chat, 0, 0, 1, CFGFLAG_CLIENT, "Playerflag-Chat (anti-logging-admin), Players must be nearby!")
 MACRO_CONFIG_INT(ClFlagChatPause, cl_flag_chat_pause, 3, 1, 10, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Speed of the flagchat; 1=high, 10= low; the faster the more errors will occur.")
 
