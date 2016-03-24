@@ -185,8 +185,8 @@ MACRO_CONFIG_STR(ClTransOutDst, cl_trans_out_dest, 32, "ru", CFGFLAG_CLIENT|CFGF
 
 // chatcrypt
 MACRO_CONFIG_INT(ClChatCrypt, cl_chat_crypt, 0, 0, 1, CFGFLAG_CLIENT, "Crypted chat messages (anti-logging-admin)")
-MACRO_CONFIG_INT(ClFlagChat, cl_flag_chat, 0, 0, 1, CFGFLAG_CLIENT, "Playerflag-Chat (anti-logging-admin), Players must be nearby!")
-MACRO_CONFIG_INT(ClFlagChatPause, cl_flag_chat_pause, 3, 1, 10, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Speed of the flagchat; 1=high, 10= low; the faster the more errors will occur.")
+MACRO_CONFIG_INT(ClFlagChat, cl_flag_chat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Receive flagchat (anti-logging-admin), players must be nearby")
+MACRO_CONFIG_INT(ClFlagChatPause, cl_flag_chat_pause, 3, 1, 10, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Speed of the flagchat; 1=high, 10= low; the faster the more errors will occur")
 
 //
 MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Scoreboard fading time")

@@ -1292,18 +1292,18 @@ void CGameClient::OnNewSnapshot()
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
 				}
 				
-				if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
+				if(g_Config.m_ClFlagChat && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
 				{
 					int serial = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 24;
 					
 					char msg = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 16;
 					msg -= serial << 8;
 
-					dbg_msg("Dennis", "Num = %d Serial = %d Char = %c Size = %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags, serial, msg, m_HiddenMessages[Item.m_ID].size());
+					//dbg_msg("Dennis", "Num = %d Serial = %d Char = %c Size = %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags, serial, msg, m_HiddenMessages[Item.m_ID].size());
 					if(m_HiddenMessages[Item.m_ID].size() == serial)
 						m_HiddenMessages[Item.m_ID] += msg;
 					else if(serial > m_HiddenMessages[Item.m_ID].size())
-					{//correct errors D:
+					{// correct errors D:
 						for(int i = 0; i < serial - m_HiddenMessages[Item.m_ID].size(); i++)
 						{
 							m_HiddenMessages[Item.m_ID] += '_';
@@ -1311,11 +1311,11 @@ void CGameClient::OnNewSnapshot()
 						m_HiddenMessages[Item.m_ID] += msg;
 					}
 				}
-				else
+				else if(g_Config.m_ClFlagChat)
 				{
 					if(m_HiddenMessages[Item.m_ID][0])
 					{
-						dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
+						//dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
 						m_pChat->AddLine(Item.m_ID, 0, m_HiddenMessages[Item.m_ID].c_str(), true);
 						m_HiddenMessages[Item.m_ID].clear();
 					}
