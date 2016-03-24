@@ -397,34 +397,9 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		if(!HideChat)
 			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 
-		if(g_Config.m_ClChatCrypt)
-		{
-			unsigned char aEncrypted[1024] = {0};
-			unsigned char aDecrypted[1024] = {};
-			for(int i = 0, j = 0; pMsg->m_pMessage[j]; i++, j+=2)
-			{
-				char aBuf[3];
-				str_copy(aBuf, &pMsg->m_pMessage[j], sizeof(aBuf));
-				aEncrypted[i] = strtol(aBuf, 0, 16);
-			}
-
-			char aMessage[1024] = {0};
-			for(int i = 0; aEncrypted[i]; i++)
-			{
-				char aBuf[3];
-				str_format(aBuf, sizeof(aBuf), "%02x", aEncrypted[i]);
-				str_append(aMessage, aBuf, sizeof(aMessage));
-			}
-			//aMessage[256] = '\0';
-			//dbg_msg("decrypted", "%s", aEncrypted);
-
-			if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
-			{
-				dbg_msg("chatcrypt", "failed to private decrypt message");
-			}
-
-			AddLine(pMsg->m_ClientID, 0, (char *)aDecrypted, true);
-		}
+		char *pDecrypted = DecryptMsg(pMsg->m_pMessage);
+		if(pDecrypted)
+			AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
 
 		if(g_Config.m_ClTransIn &&
 			str_length(pMsg->m_pMessage) > 4 &&
@@ -927,27 +902,6 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	m_LastChatSend = time_get();
 
-	//dbg_msg("dbg", "%s\n\n%s", ReadPubKey(m_pKeyPair), ReadPrivKey(m_pKeyPair));
-
-	unsigned char aEncrypted[1024] = {};
-	if(g_Config.m_ClChatCrypt)
-	{
-		int Len;
-		if((Len = RSA_public_encrypt(str_length(pLine)+1, (unsigned char*)pLine, (unsigned char*)aEncrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING)) == -1)
-		{
-			dbg_msg("chatcrypt", "failed to public encrypt message");
-		}
-
-		// ya, this works. wuw.
-		/*unsigned char aDecrypted[1024] = {};
-		if(RSA_private_decrypt(str_length((char *)aEncrypted), (unsigned char*)aEncrypted, (unsigned char*)aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
-		{
-			dbg_msg("chatcrypt", "failed to private decrypt message");
-		}
-
-		dbg_msg("dasd", (char *)aDecrypted);*/
-	}
-
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
 
@@ -955,19 +909,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		return;
 
 	if(g_Config.m_ClChatCrypt && pLine[0] != '/')
-	{
-		mem_zero(aMessage, sizeof(aMessage));
-		for(int i = 0; aEncrypted[i]; i++)
-		{
-			char aBuf[3];
-			str_format(aBuf, sizeof(aBuf), "%02x", aEncrypted[i]);
-			str_append(aMessage, aBuf, sizeof(aMessage));
-		}
-		aMessage[256] = '\0';
-		//dbg_msg("crypted", "%s", aMessage);
-		//aMessage[256] = '\0';
-
-	}
+		str_copy(aMessage, EncryptMsg(pLine), sizeof(aMessage));
 	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
 		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
@@ -1013,6 +955,57 @@ char *CChat::ReadPrivKey(RSA *pKeyPair)
 	BIO_read(pBio, PEMKey, KeyLen);
 	
 	return PEMKey;
+}
+
+char *CChat::EncryptMsg(const char *pMsg)
+{
+	char *pHex = new char[512];
+
+	unsigned char aEncrypted[512] = {};
+	if(RSA_public_encrypt(str_length(pMsg)+1, (unsigned char*)pMsg, (unsigned char*)aEncrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
+	{
+		dbg_msg("chatcrypt", "failed to public encrypt message");
+	}
+
+	mem_zero(pHex, sizeof(pHex));
+	for(int i = 0; aEncrypted[i]; i++)
+	{
+		char aBuf[3];
+		str_format(aBuf, sizeof(aBuf), "%02x", aEncrypted[i]);
+		str_append(pHex, aBuf, 512);
+	}
+
+	return pHex;
+}
+
+char *CChat::DecryptMsg(const char *pMsg)
+{
+	char *pHex = new char[512];
+	char *pClear = new char[512];
+
+	unsigned char aEncrypted[1024] = {0};
+	unsigned char aDecrypted[1024] = {};
+	for(int i = 0, j = 0; pMsg[j]; i++, j+=2)
+	{
+		char aBuf[3];
+		str_copy(aBuf, &pMsg[j], sizeof(aBuf));
+		aEncrypted[i] = strtol(aBuf, 0, 16);
+	}
+
+	for(int i = 0; aEncrypted[i]; i++)
+	{
+		char aBuf[3];
+		str_format(aBuf, sizeof(aBuf), "%02x", aEncrypted[i]);
+		str_append(pHex, aBuf, 512);
+	}
+
+	if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) != -1)
+	{
+		str_copy(pClear, (char *)aDecrypted, 512);
+		return pClear; 
+	}
+	else
+		return 0;
 }
 
 void CChat::SaveKeys(RSA *pKeyPair)
