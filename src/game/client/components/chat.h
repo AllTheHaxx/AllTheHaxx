@@ -98,7 +98,7 @@ class CChat : public CComponent
 	// crypt stuff
 	RSA *m_pKeyPair;
 	bool m_GotKeys;
-	RSA *GenerateKeyPair(int Bytes, int Exp);
+	void GenerateKeyPair(int Bytes, int Exp);
 	char *ReadPubKey(RSA *pKeyPair);
 	char *ReadPrivKey(RSA *pKeyPair);
 	char *EncryptMsg(const char *pMsg);

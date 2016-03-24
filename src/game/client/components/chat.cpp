@@ -117,7 +117,7 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->GenerateKeyPair(512, 3); // hardcoded, yay!
+	((CChat *)pUserData)->GenerateKeyPair(256, 3); // hardcoded, yay!
 }
 
 void CChat::ConSaveKeys(IConsole::IResult *pResult, void *pUserData)
@@ -937,7 +937,7 @@ bool CChat::HandleTCommands(const char *pMsg)
 void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	m_LastChatSend = time_get();
-	LoadKeys();
+
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
 
@@ -961,11 +961,10 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 // chat crypt stuff below //
 ////////////////////////////
 
-RSA *CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like 512 bytes and Exp = 3
+void CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like 512 bytes and Exp = 3
 {
-	RSA *pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
+	m_pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
 	m_GotKeys = true;
-	return pKeyPair;
 }
 
 char *CChat::ReadPubKey(RSA *pKeyPair)
@@ -1004,7 +1003,7 @@ char *CChat::EncryptMsg(const char *pMsg)
 	char *pHex = new char[512];
 
 	unsigned char aEncrypted[512] = {};
-	if(RSA_public_encrypt(str_length(pMsg)+1, (unsigned char*)pMsg, (unsigned char*)aEncrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) == -1)
+	if(RSA_public_encrypt(str_length(pMsg)+1, (unsigned char*)pMsg, (unsigned char*)aEncrypted, m_pKeyPair, RSA_PKCS1_PADDING) == -1)
 	{
 		dbg_msg("chatcrypt", "failed to public encrypt message");
 	}
@@ -1044,7 +1043,7 @@ char *CChat::DecryptMsg(const char *pMsg)
 		str_append(pHex, aBuf, 512);
 	}
 
-	if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_OAEP_PADDING) != -1)
+	if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_PADDING) != -1)
 	{
 		str_copy(pClear, (char *)aDecrypted, 512);
 		return pClear; 
