@@ -20,6 +20,7 @@ CCamera::CCamera()
 	m_CamType = CAMTYPE_UNDEFINED;
 	m_ZoomSet = false;
 	m_Zoom = 1.0;
+	m_WantedZoom = 1.0f;
 	m_RotationCenter = vec2(500.0f, 500.0f);
 }
 
@@ -39,10 +40,13 @@ void CCamera::OnRender()
 		OnReset();
 	}
 
+	smooth_set(&m_Zoom, m_WantedZoom, (0.005f/Client()->RenderFrameTime())*105.0f, 0);
+
 	// update camera center
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		m_Zoom = 0.7f;
+		m_WantedZoom = 0.7f;
 		static vec2 Dir = vec2(1.0f, 0.0f);
 
 		if(distance(m_Center, m_RotationCenter) <= (float)g_Config.m_ClRotationRadius+0.5f)
@@ -121,6 +125,8 @@ void CCamera::OnReset()
 	{
 		m_Zoom *= ZoomStep;
 	}
+
+	m_WantedZoom = m_Zoom;
 }
 
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
@@ -129,7 +135,9 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		((CCamera *)pUserData)->m_Zoom *= ZoomStep;
+	{
+		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*ZoomStep;
+	}
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
@@ -137,7 +145,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		((CCamera *)pUserData)->m_Zoom *= 1/ZoomStep;
+		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*(1/ZoomStep);
 }
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 {

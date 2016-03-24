@@ -23,6 +23,7 @@ public:
 	vec2 m_RotationCenter;
 	bool m_ZoomSet;
 	float m_Zoom;
+	float m_WantedZoom;
 
 	CCamera();
 	virtual void OnRender();

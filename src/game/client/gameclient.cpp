@@ -812,7 +812,7 @@ void CGameClient::OnRender()
 			else
 				ExtraZoom = (abs(m_Snap.m_pLocalCharacter->m_VelY) / 10000.0f) / 3.0f;
 			
-			smooth_set(&m_pCamera->m_Zoom, 1.0f + ExtraZoom, (0.005f/Client()->RenderFrameTime())*105.0f, 0);
+			m_pCamera->m_WantedZoom = 1.0f + ExtraZoom;
 		}
 	}
 
