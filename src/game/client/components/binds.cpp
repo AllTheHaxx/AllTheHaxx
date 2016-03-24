@@ -128,6 +128,7 @@ void CBinds::SetDefaults()
 	Bind('t', "+show_chat; chat all");
 	Bind('y', "+show_chat; chat team");
 	Bind('z', "+show_chat; chat team"); // For German keyboards
+	Bind('f', "+show_chat; chat flag");
 	Bind('u', "+show_chat");
 	Bind('i', "+show_chat; chat all /c ");
 
