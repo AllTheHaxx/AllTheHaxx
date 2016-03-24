@@ -527,11 +527,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 				Highlighted = true;
 		}
 
-
+		m_aLines[m_CurrentLine].m_Hidden = false;
 		if(!Hidden)
 			m_aLines[m_CurrentLine].m_Highlighted = Highlighted;
 		else
-			m_aLines[m_CurrentLine].m_Hidden = Hidden;
+			m_aLines[m_CurrentLine].m_Hidden = true;
 
 		if(ClientID == -1) // server message
 		{
