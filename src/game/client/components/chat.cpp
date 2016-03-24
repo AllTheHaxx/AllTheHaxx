@@ -34,6 +34,7 @@ CChat::CChat()
 	m_pTranslator = new CTranslator();
 	m_pTranslator->Init();
 
+	m_GotKeys = false;
 	//m_pKeyPair = GenerateKeyPair(512, 3);
 }
 
@@ -949,6 +950,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 RSA *CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like 512 bytes and Exp = 3
 {
 	RSA *pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
+	m_GotKeys = true;
 	return pKeyPair;
 }
 
@@ -999,6 +1001,12 @@ char *CChat::EncryptMsg(const char *pMsg)
 
 char *CChat::DecryptMsg(const char *pMsg)
 {
+	if(!m_GotKeys)
+	{
+		m_pClient->m_pHud->PushNotification("Generate or load keys first!");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "generate or load keys first");
+	}
+
 	char *pHex = new char[512];
 	char *pClear = new char[512];
 
@@ -1029,12 +1037,23 @@ char *CChat::DecryptMsg(const char *pMsg)
 
 void CChat::SaveKeys(RSA *pKeyPair)
 {
+	if(!m_GotKeys)
+	{
+		m_pClient->m_pHud->PushNotification("No keys to save!");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "no keys to save");
+	}
+
 	FILE *pPubFile;
 	pPubFile = fopen ("rsa_pub.key", "w");
 	if(pPubFile != NULL)
 	{
 		fputs(ReadPubKey(pKeyPair), pPubFile);
 		fclose(pPubFile);
+	}
+	else
+	{
+		m_pClient->m_pHud->PushNotification("Couldn't save public key!");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't save public key");
 	}
 
 	FILE *pPrivFile;
@@ -1044,6 +1063,11 @@ void CChat::SaveKeys(RSA *pKeyPair)
 		fputs(ReadPrivKey(pKeyPair), pPrivFile);
 		fclose(pPrivFile);
 	}
+	else
+	{
+		m_pClient->m_pHud->PushNotification("Couldn't save private key!");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't save private key");
+	}
 }
 
 void CChat::LoadKeys()
@@ -1051,10 +1075,26 @@ void CChat::LoadKeys()
 	m_pKeyPair = RSA_new();
 
 	FILE *pPubFile = fopen("rsa_pub.key", "rb");
-	PEM_read_RSAPublicKey(pPubFile, &m_pKeyPair, NULL, NULL);
-
+	if(pPubFile)
+		PEM_read_RSAPublicKey(pPubFile, &m_pKeyPair, NULL, NULL);
+	else
+	{
+		m_pClient->m_pHud->PushNotification("Couldn't load public key!");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't load public key");
+		return;
+	}
+	
 	FILE *pPrivFile = fopen("rsa_priv.key", "rb");
-	PEM_read_RSAPrivateKey(pPrivFile, &m_pKeyPair, NULL, NULL);
+	if(pPrivFile)
+		PEM_read_RSAPrivateKey(pPrivFile, &m_pKeyPair, NULL, NULL);
+	else
+	{
+		m_pClient->m_pHud->PushNotification("Couldn't load private key!");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't load private key");
+		return;
+	}
+
+	m_GotKeys = true;
 }
 
 /*  ++++ PADDINGS ++++
