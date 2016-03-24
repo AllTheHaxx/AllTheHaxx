@@ -446,6 +446,38 @@ void CClient::SendMapRequest()
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
+void CClient::SendPlayerInfo(bool Start)
+{
+	if(Start)
+	{
+		CNetMsg_Cl_StartInfo Msg;
+		Msg.m_pName = g_Config.m_PlayerName;
+		Msg.m_pClan = g_Config.m_PlayerClan;
+		Msg.m_Country = g_Config.m_PlayerCountry;
+		Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
+		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+		CMsgPacker Packer(Msg.MsgID());
+		Msg.Pack(&Packer);
+		SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+	}
+	else
+	{
+		CNetMsg_Cl_ChangeInfo Msg;
+		Msg.m_pName = g_Config.m_PlayerName;
+		Msg.m_pClan = g_Config.m_PlayerClan;
+		Msg.m_Country = g_Config.m_PlayerCountry;
+		Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
+		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+		CMsgPacker Packer(Msg.MsgID());
+		Msg.Pack(&Packer);
+		SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+	}
+}
+
 void CClient::RconAuth(const char *pName, const char *pPassword)
 {
 	if(RconAuthed())

@@ -233,6 +233,8 @@ public:
 	void SendReady();
 	void SendMapRequest();
 
+	virtual void SendPlayerInfo(bool Start);
+
 	virtual bool RconAuthed() { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
 	virtual bool UseTempRconCommands() { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword);

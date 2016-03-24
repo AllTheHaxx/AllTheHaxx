@@ -260,7 +260,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DummyConnected", &IClient::DummyConnected)
 			.addFunction("DummyConnecting", &IClient::DummyConnecting)
 
-			.addFunction("SendInfo", &CGameClient::SendInfo)
+			.addFunction("SendInfo", &IClient::SendPlayerInfo)
 
 			.addFunction("RconAuth", &IClient::RconAuth)
 			.addFunction("RconAuthed", &IClient::RconAuthed)
