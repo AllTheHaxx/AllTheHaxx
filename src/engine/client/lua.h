@@ -39,6 +39,7 @@ public:
 	void Init(IClient *pClient, IStorage *pStorage);
 	void AddUserscript(const char *pFilename);
 	void LoadFolder();
+	void LoadFolder(const char *pFolder);
 	void SortLuaFiles();
 
 	static int ErrorFunc(lua_State *L);

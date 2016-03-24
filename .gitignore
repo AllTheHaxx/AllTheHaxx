@@ -24,10 +24,8 @@ twping*
 versionsrv*
 
 Debug
-bam
-build server.bat
-buildlog.txt
-bam.exe
+lua
+*.txt
 *.bat
 .cproject
 .project
@@ -59,8 +57,6 @@ bam.exe
 *.db-journal
 *.pdf
 *.key
-lua
-crash_*.txt
 
 DDNet*
 AllTheHaxx*

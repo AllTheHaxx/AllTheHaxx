@@ -78,15 +78,20 @@ void CLua::AddUserscript(const char *pFilename)
 
 void CLua::LoadFolder()
 {
+	LoadFolder("lua");
+}
+
+void CLua::LoadFolder(const char *pFolder)
+{
 	//char FullDir[256];
 	//str_format(FullDir, sizeof(FullDir), "lua");
 
-	dbg_msg("Lua", "Loading Folder");
+	dbg_msg("Lua", "Loading Folder '%s'", pFolder);
 	CLua::LuaLoadHelper * pParams = new CLua::LuaLoadHelper;
 	pParams->pLua = this;
-	pParams->pString = "lua";
+	pParams->pString = pFolder;
 
-	m_pStorage->ListDirectory(IStorage::TYPE_ALL, "lua", LoadFolderCallback, pParams);
+	m_pStorage->ListDirectory(IStorage::TYPE_ALL, pFolder, LoadFolderCallback, pParams);
 
 	delete pParams;
 
@@ -107,7 +112,10 @@ int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pU
 	str_format(File, sizeof(File), "%s/%s", pFullDir, pName);
 	//dbg_msg("Lua", "-> Found File %s", File);
 
-	pSelf->AddUserscript(File);
+	if(IsDir)
+		pParams->pLua->LoadFolder(File);
+	else
+		pSelf->AddUserscript(File);
 	return 0;
 }
 
