@@ -322,7 +322,7 @@ void CGhost::Save()
 	char aBuf[256];
 	str_format(aFilename, sizeof(aFilename), "%s_%s_%.3f_%08x.gho", Client()->GetCurrentMap(), aName, m_BestTime, Client()->GetCurrentMapCrc());
 	str_format(aBuf, sizeof(aBuf), "ghosts/%s", aFilename);
-	IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(!File)
 		return;
 
@@ -381,7 +381,7 @@ void CGhost::Save()
 	{
 		char aFile[256];
 		str_format(aFile, sizeof(aFile), "ghosts/%s", m_pClient->m_pMenus->m_OwnGhost->m_aFilename);
-		Storage()->RemoveFile(aFile, IStorage::TYPE_SAVE);
+		Storage()->RemoveFile(aFile, IStorageTW::TYPE_SAVE);
 
 		m_pClient->m_pMenus->m_lGhosts.remove(*m_pClient->m_pMenus->m_OwnGhost);
 	}
@@ -427,7 +427,7 @@ bool CGhost::GetInfo(const char* pFilename, CGhostHeader *pHeader)
 {
 	char aFilename[256];
 	str_format(aFilename, sizeof(aFilename), "ghosts/%s", pFilename);
-	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if(!File)
 		return 0;
 
@@ -441,7 +441,7 @@ void CGhost::Load(const char* pFilename, int ID)
 {
 	char aFilename[256];
 	str_format(aFilename, sizeof(aFilename), "ghosts/%s", pFilename);
-	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if(!File)
 		return;
 

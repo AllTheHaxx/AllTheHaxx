@@ -13,7 +13,7 @@
 	{ printf("LUA EXCEPTION: %s\n", e.what()); } }
 
 class IClient;
-class IStorage;
+class IStorageTW;
 class CLua;
 
 class CLuaFile

@@ -7,7 +7,7 @@
 // compiled-in data-dir path
 #define DATA_DIR "data"
 
-class CStorage : public IStorage
+class CStorage : public IStorageTW
 {
 public:
 	enum
@@ -439,7 +439,7 @@ public:
 		return pBuffer;
 	}
 
-	static IStorage *Create(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+	static IStorageTW *Create(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
 	{
 		CStorage *p = new CStorage();
 		if(p && p->Init(pApplicationName, StorageType, NumArgs, ppArguments))
@@ -452,9 +452,9 @@ public:
 	}
 };
 
-IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments) { return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments); }
+IStorageTW *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments) { return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments); }
 
-IStorage *CreateLocalStorage()
+IStorageTW *CreateLocalStorage()
 {
 	CStorage *pStorage = new CStorage();
 	if(pStorage)

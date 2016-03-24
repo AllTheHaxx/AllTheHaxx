@@ -172,7 +172,7 @@ void CSnapIDPool::FreeID(int ID)
 }
 
 
-void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* pServer)
+void CServerBan::InitServerBan(IConsole *pConsole, IStorageTW *pStorage, CServer* pServer)
 {
 	CNetBan::Init(pConsole, pStorage);
 
@@ -1551,7 +1551,7 @@ int CServer::LoadMap(const char *pMapName)
 		return 0;*/
 
 	// check for valid standard map
-	if(!m_MapChecker.ReadAndValidateMap(Storage(), aBuf, IStorage::TYPE_ALL))
+	if(!m_MapChecker.ReadAndValidateMap(Storage(), aBuf, IStorageTW::TYPE_ALL))
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapchecker", "invalid standard map");
 		return 0;
@@ -1570,7 +1570,7 @@ int CServer::LoadMap(const char *pMapName)
 		{
 			char aPath[256];
 			str_format(aPath, sizeof(aPath), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, i);
-			Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
+			Storage()->RemoveFile(aPath, IStorageTW::TYPE_SAVE);
 		}
 	}
 
@@ -1588,7 +1588,7 @@ int CServer::LoadMap(const char *pMapName)
 
 	// load complete map into memory for download
 	{
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL);
 		m_CurrentMapSize = (unsigned int)io_length(File);
 		if(m_pCurrentMapData)
 			mem_free(m_pCurrentMapData);
@@ -1909,7 +1909,7 @@ void CServer::SaveDemo(int ClientID, float Time)
 		char aNewFilename[256];
 		str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, ClientID);
 		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%5.2f.demo", m_aCurrentMap, m_aClients[ClientID].m_aName, Time);
-		Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
+		Storage()->RenameFile(aOldFilename, aNewFilename, IStorageTW::TYPE_SAVE);
 	}
 }
 
@@ -1931,7 +1931,7 @@ void CServer::StopRecord(int ClientID)
 
 		char aFilename[128];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, ClientID);
-		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
+		Storage()->RemoveFile(aFilename, IStorageTW::TYPE_SAVE);
 	}
 }
 
@@ -2103,7 +2103,7 @@ void CServer::RegisterCommands()
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 
 	// register console commands
 	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
@@ -2189,7 +2189,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER|CFGFLAG_ECON);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
+	IStorageTW *pStorage = CreateStorage("Teeworlds", IStorageTW::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
 
 	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);
@@ -2221,7 +2221,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pServer->RegisterCommands();
 
 	// execute autoexec file
-	IOHANDLE file = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE file = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(file)
 	{
 		io_close(file);
@@ -2276,7 +2276,7 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 
 char *CServer::GetAnnouncementLine(char const *pFileName)
 {
-	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		std::vector<char*> v;

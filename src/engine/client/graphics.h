@@ -6,7 +6,7 @@
 class CGraphics_OpenGL : public IEngineGraphics
 {
 protected:
-	class IStorage *m_pStorage;
+	class IStorageTW *m_pStorage;
 	class IConsole *m_pConsole;
 
 	//

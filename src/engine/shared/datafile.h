@@ -14,10 +14,10 @@ public:
 
 	bool IsOpen() const { return m_pDataFile != 0; }
 
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Open(class IStorageTW *pStorage, const char *pFilename, int StorageType);
 	bool Close();
 
-	static bool GetCrcSize(class IStorage *pStorage, const char *pFilename, int StorageType, unsigned *pCrc, unsigned *pSize);
+	static bool GetCrcSize(class IStorageTW *pStorage, const char *pFilename, int StorageType, unsigned *pCrc, unsigned *pSize);
 
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
@@ -81,8 +81,8 @@ public:
 	CDataFileWriter();
 	~CDataFileWriter();
 	void Init();
-	bool OpenFile(class IStorage *pStorage, const char *pFilename);
-	bool Open(class IStorage *pStorage, const char *Filename);
+	bool OpenFile(class IStorageTW *pStorage, const char *pFilename);
+	bool Open(class IStorageTW *pStorage, const char *Filename);
 	int AddData(int Size, void *pData);
 	int AddDataSwapped(int Size, void *pData);
 	int AddItem(int Type, int ID, int Size, void *pData);

@@ -680,7 +680,7 @@ void CMenus::DemolistPopulate()
 {
 	m_lDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
-		m_DemolistStorageType = IStorage::TYPE_ALL;
+		m_DemolistStorageType = IStorageTW::TYPE_ALL;
 	Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 	m_lDemos.sort_range();
 }

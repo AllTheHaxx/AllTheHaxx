@@ -224,7 +224,7 @@ void CMapLayers::OnRender()
 				Client()->GetServerInfo(&CurrentServerInfo);
 				char aFilename[256];
 				str_format(aFilename, sizeof(aFilename), "dumps/tilelayer_dump_%s-%d-%d-%dx%d.txt", CurrentServerInfo.m_aMap, g, l, pTMap->m_Width, pTMap->m_Height);
-				IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+				IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 				if(File)
 				{
 					for(int y = 0; y < pTMap->m_Height; y++)

@@ -440,7 +440,7 @@ void CClient::SendMapRequest()
 {
 	if(m_MapdownloadFile)
 		io_close(m_MapdownloadFile);
-	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
 	Msg.AddInt(m_MapdownloadChunk);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
@@ -942,7 +942,7 @@ void CClient::ServerInfoRequest()
 
 int CClient::LoadData()
 {
-	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, IGraphics::TEXLOAD_NORESAMPLE);
+	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, IGraphics::TEXLOAD_NORESAMPLE);
 	return 1;
 }
 
@@ -1221,7 +1221,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
 	// search for the map within subfolders
 	char aFilename[128];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
-	if(Storage()->FindFile(aFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
+	if(Storage()->FindFile(aFilename, "maps", IStorageTW::TYPE_ALL, aBuf, sizeof(aBuf)))
 		pError = LoadMap(pMapName, aBuf, WantedCrc);
 
 	return pError;
@@ -1301,7 +1301,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
 
-			IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 			if (newsFile)
 			{
 				io_write(newsFile, m_aNews, sizeof(m_aNews));
@@ -1331,7 +1331,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				{
 					bool ListChanged = true;
 
-					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_SAVE);
+					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 					if (File)
 					{
 						char aBuf2[16384];
@@ -1344,7 +1344,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 					// decompression successful, write plain file
 					if (ListChanged)
 					{
-						IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+						IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 						if (File)
 						{
 							io_write(File, aBuf, PlainLength);
@@ -1664,7 +1664,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
 						str_format(aUrl, sizeof(aUrl), "http://%s/%s", g_Config.m_ClDDNetMapServer, aEscaped);
 						m_pMapdownloadTask = new CFetchTask(true);
-						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
 					}
 					else
 						SendMapRequest();
@@ -2643,7 +2643,7 @@ void CClient::InitInterfaces()
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pIRC = Kernel()->RequestInterface<IIRC>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
@@ -2659,7 +2659,7 @@ void CClient::InitInterfaces()
 	m_Friends.Init();
 	m_Foes.Init(true);
 
-	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if (newsFile)
 	{
 		io_read(newsFile, m_aNews, NEWS_SIZE);
@@ -3276,7 +3276,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
+	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorageTW::TYPE_ALL);
 }
 
 void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)
@@ -3494,7 +3494,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// create the components
 	IEngine *pEngine = CreateEngine("Teeworlds");
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
+	IStorageTW *pStorage = CreateStorage("Teeworlds", IStorageTW::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
@@ -3546,7 +3546,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->InitInterfaces();
 
 	// execute config file
-	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		io_close(File);
@@ -3564,7 +3564,7 @@ int main(int argc, const char **argv) // ignore_convention
 	}*/
 
 	// execute autoexec file
-	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		io_close(File);

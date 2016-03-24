@@ -15,7 +15,7 @@
 
 void CCountryFlags::LoadCountryflagsIndexfile()
 {
-	IOHANDLE File = Storage()->OpenFile("countryflags/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = Storage()->OpenFile("countryflags/index.txt", IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!File)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "couldn't open index file");
@@ -62,7 +62,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		if(g_Config.m_ClLoadCountryFlags)
 		{
 			str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
-			if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+			if(!Graphics()->LoadPNG(&Info, aBuf, IStorageTW::TYPE_ALL))
 			{
 				char aMsg[128];
 				str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);

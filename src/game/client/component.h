@@ -18,7 +18,7 @@ protected:
 	class IGraphics *Graphics() const { return m_pClient->Graphics(); }
 	class ITextRender *TextRender() const { return m_pClient->TextRender(); }
 	class IInput *Input() const { return m_pClient->Input(); }
-	class IStorage *Storage() const { return m_pClient->Storage(); }
+	class IStorageTW *Storage() const { return m_pClient->Storage(); }
 	class CUI *UI() const { return m_pClient->UI(); }
 	class ISound *Sound() const { return m_pClient->Sound(); }
 	class CRenderTools *RenderTools() const { return m_pClient->RenderTools(); }

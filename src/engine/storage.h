@@ -5,7 +5,7 @@
 
 #include "kernel.h"
 
-class IStorage : public IInterface
+class IStorageTW : public IInterface
 {
 	MACRO_INTERFACE("storage", 0)
 public:
@@ -33,8 +33,8 @@ public:
 	virtual const char* GetBinaryPath(const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
 };
 
-extern IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);
-extern IStorage *CreateLocalStorage();
+extern IStorageTW *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);
+extern IStorageTW *CreateLocalStorage();
 
 
 #endif

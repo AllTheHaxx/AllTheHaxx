@@ -26,7 +26,7 @@ CLua::~CLua()
 	m_pLuaFiles.clear();
 }
 
-void CLua::Init(IClient * pClient, IStorage * pStorage)
+void CLua::Init(IClient * pClient, IStorageTW * pStorage)
 {
 	m_pClient = pClient;
 	m_pCClient = (CClient*)pClient;
@@ -91,7 +91,7 @@ void CLua::LoadFolder(const char *pFolder)
 	pParams->pLua = this;
 	pParams->pString = pFolder;
 
-	m_pStorage->ListDirectory(IStorage::TYPE_ALL, pFolder, LoadFolderCallback, pParams);
+	m_pStorage->ListDirectory(IStorageTW::TYPE_ALL, pFolder, LoadFolderCallback, pParams);
 
 	delete pParams;
 

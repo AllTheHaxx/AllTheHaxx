@@ -1085,7 +1085,7 @@ void CGameConsole::Dump(int Type)
 	str_timestamp(aDate, sizeof(aDate));
 	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt",
 			Type == CONSOLETYPE_REMOTE ? "remote_console" : "local_console", aDate);
-	IOHANDLE io = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	IOHANDLE io = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(io)
 	{
 		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry;

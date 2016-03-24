@@ -284,7 +284,7 @@ int CSound::Init()
 {
 	m_SoundEnabled = 0;
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 
 	SDL_AudioSpec Format, FormatOut;
 
@@ -542,7 +542,7 @@ int CSound::LoadOpus(const char *pFilename)
 	if(!m_pStorage)
 		return -1;
 
-	ms_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	ms_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!ms_File)
 	{
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
@@ -593,7 +593,7 @@ int CSound::LoadWV(const char *pFilename)
 	if(!m_pStorage)
 		return -1;
 
-	ms_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	ms_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!ms_File)
 	{
 		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);

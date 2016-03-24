@@ -20,7 +20,7 @@
 
 class IClient;
 class CClient;
-class IStorage;
+class IStorageTW;
 class IGameClient;
 class CGameClient;
 class CLuaFile;
@@ -30,13 +30,13 @@ using namespace luabridge;
 class CLua
 {
 	array<CLuaFile*> m_pLuaFiles;
-	IStorage *m_pStorage;
+	IStorageTW *m_pStorage;
 
 public:
     CLua();
     ~CLua();
 	
-	void Init(IClient *pClient, IStorage *pStorage);
+	void Init(IClient *pClient, IStorageTW *pStorage);
 	void AddUserscript(const char *pFilename);
 	void LoadFolder();
 	void LoadFolder(const char *pFolder);
@@ -55,7 +55,7 @@ public:
 	void SetGameClient(IGameClient *pGameClient);
 	array<CLuaFile*> &GetLuaFiles() { return m_pLuaFiles; }
 
-	IStorage *Storage() const { return m_pStorage; }
+	IStorageTW *Storage() const { return m_pStorage; }
 
 	struct LuaLoadHelper
 	{

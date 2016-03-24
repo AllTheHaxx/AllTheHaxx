@@ -915,9 +915,9 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderName);
-				if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
+				if(pEditor->Storage()->CreateFolder(aBuf, IStorageTW::TYPE_SAVE))
 				{
-					pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
+					pEditor->FilelistPopulate(IStorageTW::TYPE_SAVE);
 					return 1;
 				}
 				else
@@ -1059,14 +1059,14 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 			g_Config.m_ClEditor = 0;
 		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
-			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
+			pEditor->InvokeFileDialog(IStorageTW::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		{
 			pEditor->Reset();
 			pEditor->m_aFileName[0] = 0;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-			pEditor->CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+			pEditor->CallbackSaveMap(pEditor->m_aFileSaveName, IStorageTW::TYPE_SAVE, pEditor);
 		pEditor->m_PopupEventWasActivated = false;
 		return 1;
 	}

@@ -151,7 +151,7 @@ void CSkins::OnInit()
 {
 	// load skins
 	m_aSkins.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, this);
+	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "skins", SkinScan, this);
 	if(!m_aSkins.size())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");

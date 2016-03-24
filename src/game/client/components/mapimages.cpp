@@ -40,7 +40,7 @@ void CMapImages::OnMapLoad()
 			char Buf[256];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		}
 		else
 		{
@@ -75,7 +75,7 @@ void CMapImages::LoadBackground(class IMap *pMap)
 			char Buf[256];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			str_format(Buf, sizeof(Buf), "mapres/%s.png", pName);
-			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+			m_aTextures[i] = Graphics()->LoadTexture(Buf, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		}
 		else
 		{
@@ -90,9 +90,9 @@ int CMapImages::GetEntities()
 {
 	if(m_EntitiesTextures == -1)
 	{
-		m_EntitiesTextures = Graphics()->LoadTexture("editor/entities_clear.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		m_EntitiesTextures = Graphics()->LoadTexture("editor/entities_clear.png", IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		if(m_EntitiesTextures == -1)
-			m_EntitiesTextures = Graphics()->LoadTexture("editor/entities.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+			m_EntitiesTextures = Graphics()->LoadTexture("editor/entities.png", IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	}
 	return m_EntitiesTextures;
 }

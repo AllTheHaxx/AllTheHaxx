@@ -49,7 +49,7 @@ public:
 	{
 		char aFile[64];
 		str_format(aFile, sizeof(aFile), "identities/%s", m_aIdentities[Ident].m_aFilename);
-		Storage()->RemoveFile(aFile, IStorage::TYPE_SAVE);
+		Storage()->RemoveFile(aFile, IStorageTW::TYPE_SAVE);
 		m_aIdentities.remove_index(Ident);
 	}
 	inline int GetIdentID(const char *pName)

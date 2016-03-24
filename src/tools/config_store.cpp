@@ -5,9 +5,9 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
+void Process(IStorageTW *pStorage, const char *pMapName, const char *pConfigName)
 {
-	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	array<char *> aLines;
 	char *pSettings = NULL;
 	if(!File)
@@ -41,7 +41,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	}
 
 	CDataFileReader Reader;
-	Reader.Open(pStorage, pMapName, IStorage::TYPE_ALL);
+	Reader.Open(pStorage, pMapName, IStorageTW::TYPE_ALL);
 
 	CDataFileWriter Writer;
 	Writer.Init();

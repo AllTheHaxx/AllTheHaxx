@@ -261,12 +261,12 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 	Button2.VSplitLeft(5.0f, 0, &Button2);
 	if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button))
 	{
-		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+		IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
 		str_replace_char(aBuf, sizeof(aBuf), ':', '_');
 
-		IOHANDLE f = pStorage->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		IOHANDLE f = pStorage->OpenFile(aBuf, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 		if(!f)
 			dbg_msg("serverconfig", "failed to open '%s' for writing", aBuf);
 		else
@@ -298,7 +298,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 
 		Items.clear();
 		mem_zero(aEditBoxBuffer, sizeof(aEditBoxBuffer));
-		IOHANDLE f = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+		IOHANDLE f = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL);
 		if(f)
 		{
 			char aBuffer[1024], aIn[128];
@@ -1718,7 +1718,7 @@ void CMenus::GhostlistPopulate()
 {
 	m_OwnGhost = 0;
 	m_lGhosts.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "ghosts", GhostlistFetchCallback, this);
+	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "ghosts", GhostlistFetchCallback, this);
 
 	for(int i = 0; i < m_lGhosts.size(); i++)
 	{

@@ -454,8 +454,8 @@ public:
 	void CreateDefault(int EntitiesTexture);
 
 	// io
-	int Save(class IStorage *pStorage, const char *pFilename);
-	int Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	int Save(class IStorageTW *pStorage, const char *pFilename);
+	int Load(class IStorageTW *pStorage, const char *pFilename, int StorageType);
 
 	// DDRace
 
@@ -601,7 +601,7 @@ class CEditor : public IEditor
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 	class ISound *m_pSound;
-	class IStorage *m_pStorage;
+	class IStorageTW *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
 public:
@@ -611,7 +611,7 @@ public:
 	class IGraphics *Graphics() { return m_pGraphics; };
 	class ISound *Sound() { return m_pSound; }
 	class ITextRender *TextRender() { return m_pTextRender; };
-	class IStorage *Storage() { return m_pStorage; };
+	class IStorageTW *Storage() { return m_pStorage; };
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 

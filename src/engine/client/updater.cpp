@@ -23,7 +23,7 @@ CUpdater::CUpdater()
 void CUpdater::Init()
 {
 	m_pClient = Kernel()->RequestInterface<IClient>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 	#if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5, 1) <= 0;
@@ -159,7 +159,7 @@ void CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update.json", aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		char aBuf[4096*4];

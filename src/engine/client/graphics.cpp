@@ -547,7 +547,7 @@ void CGraphics_OpenGL::ScreenshotDirect(const char *pFilename)
 		char aWholePath[1024];
 		png_t Png; // ignore_convention
 
-		IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
+		IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aWholePath, sizeof(aWholePath));
 		if(File)
 			io_close(File);
 
@@ -855,7 +855,7 @@ void CGraphics_OpenGL::QuadsText(float x, float y, float Size, const char *pText
 
 int CGraphics_OpenGL::Init()
 {
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
 	// Set all z to -5.0f

@@ -25,7 +25,7 @@ void CRaceDemo::Stop()
 
 	char aFilename[512];
 	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
-	Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
+	Storage()->RemoveFile(aFilename, IStorageTW::TYPE_SAVE);
 
 	m_Time = 0;
 	m_RaceState = RACE_NONE;
@@ -167,7 +167,7 @@ void CRaceDemo::CheckDemo()
 				// delete old demo
 				char aFilename[512];
 				str_format(aFilename, sizeof(aFilename), "demos/%s.demo", m_pClient->m_pMenus->m_lDemos[i].m_aName);
-				Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
+				Storage()->RemoveFile(aFilename, IStorageTW::TYPE_SAVE);
 			}
 
 			m_Time = 0;
@@ -208,7 +208,7 @@ void CRaceDemo::SaveDemo(const char* pDemo)
 
 	str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
 
-	Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
+	Storage()->RenameFile(aOldFilename, aNewFilename, IStorageTW::TYPE_SAVE);
 
 	dbg_msg("racedemo", "Saved better demo");
 }

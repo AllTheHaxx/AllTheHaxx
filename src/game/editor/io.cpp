@@ -213,10 +213,10 @@ struct CSoundSource_DEPRECATED
 
 int CEditor::Save(const char *pFilename)
 {
-	return m_Map.Save(Kernel()->RequestInterface<IStorage>(), pFilename);
+	return m_Map.Save(Kernel()->RequestInterface<IStorageTW>(), pFilename);
 }
 
-int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
+int CEditorMap::Save(class IStorageTW *pStorage, const char *pFileName)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
@@ -581,10 +581,10 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 int CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
-	return m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	return m_Map.Load(Kernel()->RequestInterface<IStorageTW>(), pFileName, StorageType);
 }
 
-int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
+int CEditorMap::Load(class IStorageTW *pStorage, const char *pFileName, int StorageType)
 {
 	CDataFileReader DataFile;
 	//DATAFILE *df = datafile_load(filename);
@@ -669,7 +669,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 					// load external
 					CEditorImage ImgInfo(m_pEditor);
-					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
+					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorageTW::TYPE_ALL))
 					{
 						*pImg = ImgInfo;
 						pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
@@ -724,7 +724,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					str_format(aBuf, sizeof(aBuf),"mapres/%s.opus", pName);
 
 					// load external
-					IOHANDLE SoundFile = pStorage->OpenFile(pName, IOFLAG_READ, IStorage::TYPE_ALL);
+					IOHANDLE SoundFile = pStorage->OpenFile(pName, IOFLAG_READ, IStorageTW::TYPE_ALL);
 					if(SoundFile)
 					{
 						// read the whole file into memory
@@ -1230,7 +1230,7 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	NewMap.m_pEditor = this;
 
 	int Err;
-	Err = NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	Err = NewMap.Load(Kernel()->RequestInterface<IStorageTW>(), pFileName, StorageType);
 	if(!Err)
 		return Err;
 

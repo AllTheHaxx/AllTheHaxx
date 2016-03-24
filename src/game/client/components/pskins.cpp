@@ -53,7 +53,7 @@ void CpSkins::OnInit()
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "particles.png");
 	CImageInfo Info;
-	if(!Graphics()->LoadPNG(&Info, aBuf,IStorage::TYPE_ALL))
+	if(!Graphics()->LoadPNG(&Info, aBuf,IStorageTW::TYPE_ALL))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load default particles");
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
@@ -71,7 +71,7 @@ void CpSkins::OnInit()
 	}
 	m_aSkins.add(DefaultSkin);
 	
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "particles", SkinScan, this);
+	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "particles", SkinScan, this);
 		
 	if(!m_aSkins.size())
 	{

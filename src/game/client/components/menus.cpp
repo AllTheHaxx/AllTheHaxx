@@ -2329,7 +2329,7 @@ void CMenus::RenderBackground()
 	//Graphics()->Clear(1,1,1);
 	//render_sunrays(0,0);
 	if(gs_TextureBlob == -1)
-		gs_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		gs_TextureBlob = Graphics()->LoadTexture("blob.png", IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 
 	float sw = 300*Graphics()->ScreenAspect();

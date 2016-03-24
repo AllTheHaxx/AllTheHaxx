@@ -63,7 +63,7 @@ bool CMapChecker::IsMapValid(const char *pMapName, unsigned MapCrc, unsigned Map
 	return StandardMap?false:true;
 }
 
-bool CMapChecker::ReadAndValidateMap(IStorage *pStorage, const char *pFilename, int StorageType)
+bool CMapChecker::ReadAndValidateMap(IStorageTW *pStorage, const char *pFilename, int StorageType)
 {
 	bool LoadedMapInfo = false;
 	bool StandardMap = false;

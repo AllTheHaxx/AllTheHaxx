@@ -646,10 +646,10 @@ void CServerBrowser::SaveCache()
 	if(m_NumServers < 1)
 		return;
 
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 
 	// open file
-	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(!File)
 	{
 		dbg_msg("browser", "failed to open cache file for writing");
@@ -683,7 +683,7 @@ void CServerBrowser::SaveCache()
 
 bool CServerBrowser::LoadCache()
 {
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 
 	// clear out everything
 	m_ServerlistHeap.Reset();
@@ -697,7 +697,7 @@ bool CServerBrowser::LoadCache()
 	m_CurrentToken = (m_CurrentToken+1)&0xff;
 
 	// open file TODO: Use teeworlds's storage for this!
-	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!File)
 	{
 		dbg_msg("browser", "opening cache file failed.");
@@ -1117,8 +1117,8 @@ void CServerBrowser::LoadDDNet()
 	m_NumDDNetTypes = 0;
 
 	// load ddnet server list
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-	IOHANDLE File = pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_ALL);
+	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
+	IOHANDLE File = pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_ALL);
 
 	if(File)
 	{

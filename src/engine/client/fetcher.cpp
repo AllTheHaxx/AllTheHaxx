@@ -20,7 +20,7 @@ CFetcher::CFetcher()
 
 bool CFetcher::Init()
 {
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	if(!curl_global_init(CURL_GLOBAL_DEFAULT) && (m_pHandle = curl_easy_init()))
 		return true;
 	return false;

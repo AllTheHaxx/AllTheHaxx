@@ -9,7 +9,7 @@ CConfiguration g_Config;
 
 class CConfig : public IConfig
 {
-	IStorage *m_pStorage;
+	IStorageTW *m_pStorage;
 	IOHANDLE m_ConfigFile;
 
 	struct CCallback
@@ -47,7 +47,7 @@ public:
 
 	virtual void Init()
 	{
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
+		m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 		Reset();
 	}
 
@@ -66,7 +66,7 @@ public:
 	{
 		if(!m_pStorage || !g_Config.m_ClSaveSettings)
 			return;
-		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE ".tmp", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE ".tmp", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 
 		if(!m_ConfigFile)
 			return;
@@ -87,7 +87,7 @@ public:
 
 		io_close(m_ConfigFile);
 		m_ConfigFile = 0;
-		m_pStorage->RenameFile(CONFIG_FILE ".tmp", CONFIG_FILE, IStorage::TYPE_SAVE);
+		m_pStorage->RenameFile(CONFIG_FILE ".tmp", CONFIG_FILE, IStorageTW::TYPE_SAVE);
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)

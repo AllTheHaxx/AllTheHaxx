@@ -98,7 +98,7 @@ void CFileCollection::BuildTimestring(int64 Timestamp, char *pTimestring)
 	pTimestring[0] = (Timestamp&0xF)+'0';
 }
 
-void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries)
+void CFileCollection::Init(IStorageTW *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries)
 {
 	mem_zero(m_aTimestamps, sizeof(m_aTimestamps));
 	m_NumTimestamps = 0;
@@ -111,7 +111,7 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 	str_copy(m_aPath, pPath, sizeof(m_aPath));
 	m_pStorage = pStorage;
 
-	m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, FilelistCallback, this);
+	m_pStorage->ListDirectory(IStorageTW::TYPE_SAVE, m_aPath, FilelistCallback, this);
 }
 
 void CFileCollection::AddEntry(int64 Timestamp)
@@ -129,7 +129,7 @@ void CFileCollection::AddEntry(int64 Timestamp)
 			if(m_aFileDesc[0] == '\0') // consider an empty file desc as a wild card
 			{
 				m_Remove = m_aTimestamps[0];
-				m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, RemoveCallback, this);
+				m_pStorage->ListDirectory(IStorageTW::TYPE_SAVE, m_aPath, RemoveCallback, this);
 			}
 			else
 			{
@@ -138,7 +138,7 @@ void CFileCollection::AddEntry(int64 Timestamp)
 				BuildTimestring(m_aTimestamps[0], aTimestring);
 
 				str_format(aBuf, sizeof(aBuf), "%s/%s_%s%s", m_aPath, m_aFileDesc, aTimestring, m_aFileExt);
-				m_pStorage->RemoveFile(aBuf, IStorage::TYPE_SAVE);
+				m_pStorage->RemoveFile(aBuf, IStorageTW::TYPE_SAVE);
 			}
 		}
 
@@ -237,7 +237,7 @@ int CFileCollection::RemoveCallback(const char *pFilename, int IsDir, int Storag
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%s/%s", pThis->m_aPath, pFilename);
-		pThis->m_pStorage->RemoveFile(aBuf, IStorage::TYPE_SAVE);
+		pThis->m_pStorage->RemoveFile(aBuf, IStorageTW::TYPE_SAVE);
 		pThis->m_Remove = -1;
 		return 1;
 	}

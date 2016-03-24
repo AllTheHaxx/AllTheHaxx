@@ -16,7 +16,7 @@ private:
 	LOCK m_Lock;
 	CFetchTask *m_pFirst;
 	CFetchTask *m_pLast;
-	class IStorage *m_pStorage;
+	class IStorageTW *m_pStorage;
 public:
 	CFetcher();
 	virtual bool Init();

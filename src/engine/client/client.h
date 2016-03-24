@@ -66,7 +66,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IGameClient *m_pGameClient;
 	IEngineMap *m_pMap;
 	IConsole *m_pConsole;
-	IStorage *m_pStorage;
+	IStorageTW *m_pStorage;
 	IFetcher *m_pFetcher;
 	IUpdater *m_pUpdater;
 	IEngineMasterServer *m_pMasterServer;
@@ -216,7 +216,7 @@ public:
 	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
-	IStorage *Storage() { return m_pStorage; }
+	IStorageTW *Storage() { return m_pStorage; }
 	IFetcher *Fetcher() { return m_pFetcher; }
 	IUpdater *Updater() { return m_pUpdater; }
 	IIRC *IRC() { return m_pIRC; }

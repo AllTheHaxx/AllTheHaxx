@@ -180,7 +180,7 @@ void CGameClient::OnConsoleInit()
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pDemoPlayer = Kernel()->RequestInterface<IDemoPlayer>();
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
@@ -403,7 +403,7 @@ void CGameClient::OnInit()
 	if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
 		str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
 		pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
-	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorageTW::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
 		io_close(File);
@@ -439,7 +439,7 @@ void CGameClient::OnInit()
 		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages)
 		{
 			SET_LOAD_LABEL_V("Loading Textures (%i/%i): \"%s\"", i-m_All.m_Num+1, g_pData->m_NumImages, g_pData->m_aImages[i-m_All.m_Num].m_pFilename);
-			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		}
 
 		// load background map when textures have finished
@@ -647,7 +647,7 @@ void CGameClient::OnReset()
 
 	if(m_ResetConfig)
 	{
-		IOHANDLE File = Storage()->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+		IOHANDLE File = Storage()->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
 		if(File)
 		{
 			io_close(File);
@@ -1079,7 +1079,7 @@ void CGameClient::OnEnterGame()
 	str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
 	str_replace_char(aBuf, sizeof(aBuf), ':', '_');
 
-	IOHANDLE file = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE file = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(file)
 	{
 		io_close(file);

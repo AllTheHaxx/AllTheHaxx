@@ -52,7 +52,7 @@ void CcSkins::OnInit()
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "gui_cursor.png");
 	CImageInfo Info;
-	if(!Graphics()->LoadPNG(&Info, aBuf,IStorage::TYPE_ALL))
+	if(!Graphics()->LoadPNG(&Info, aBuf,IStorageTW::TYPE_ALL))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load default cursor");
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
@@ -70,7 +70,7 @@ void CcSkins::OnInit()
 	}
 	m_aSkins.add(DefaultSkin);
 	
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "cursor", SkinScan, this);
+	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "cursor", SkinScan, this);
 		
 	if(!m_aSkins.size())
 	{

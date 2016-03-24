@@ -491,7 +491,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID)
 			return;
 
 	if(!m_pStorage)
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
+		m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	if(!m_pStorage)
 		return;
 
@@ -503,7 +503,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID)
 	m_pFirstExec = &ThisFile;
 
 	// exec the file
-	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorageTW::TYPE_ALL);
 
 	char aBuf[128];
 	if(File)

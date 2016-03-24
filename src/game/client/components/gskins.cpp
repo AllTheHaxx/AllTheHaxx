@@ -52,7 +52,7 @@ void CgSkins::OnInit()
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "game.png");
 	CImageInfo Info;
-	if(!Graphics()->LoadPNG(&Info, aBuf,IStorage::TYPE_ALL))
+	if(!Graphics()->LoadPNG(&Info, aBuf,IStorageTW::TYPE_ALL))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load default gameskin");
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
@@ -70,7 +70,7 @@ void CgSkins::OnInit()
 	}
 	m_aSkins.add(DefaultSkin);
 	
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "gameskins", SkinScan, this);
+	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "gameskins", SkinScan, this);
 		
 	if(!m_aSkins.size())
 	{

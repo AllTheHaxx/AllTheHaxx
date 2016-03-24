@@ -10,7 +10,7 @@
 
 
 
-class CStorage : public IStorage
+class CStorage : public IStorageTW
 {
 public:
 	char m_aApplicationSavePath[512];
@@ -31,7 +31,7 @@ public:
 
 	virtual IOHANDLE OpenFile(const char *pFilename, int Flags, char *pBuffer = 0, int BufferSize = 0);
 
-	static IStorage *Create(const char *pApplicationName, const char *pArgv0)
+	static IStorageTW *Create(const char *pApplicationName, const char *pArgv0)
 	{
 		CStorage *p = new CStorage();
 		if(p->Init(pApplicationName, pArgv0))
@@ -43,6 +43,6 @@ public:
 	}
 };
 
-IStorage *CreateStorage(const char *pApplicationName, const char *pArgv0);
+IStorageTW *CreateStorage(const char *pApplicationName, const char *pArgv0);
 
 #endif

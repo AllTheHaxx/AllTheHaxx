@@ -7,7 +7,7 @@
 void CIdentity::OnInit()
 {
 	m_aIdentities.clear();
-	Storage()->ListDirectory(IStorage::TYPE_SAVE, "identities", FindIDFiles, this);
+	Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "identities", FindIDFiles, this);
 	if(!m_aIdentities.size())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", "failed to load identities.");
@@ -54,8 +54,8 @@ void CIdentity::SaveIdents()
 			char NewName[512];
 			str_format(OldName, sizeof(OldName), "identities/%s", pEntry->m_aFilename);
 			str_format(NewName, sizeof(NewName), "identities/%s", aFilename);
-			Storage()->RenameFile(OldName, NewName, IStorage::TYPE_SAVE);
-			Storage()->RemoveFile(OldName, IStorage::TYPE_SAVE);
+			Storage()->RenameFile(OldName, NewName, IStorageTW::TYPE_SAVE);
+			Storage()->RemoveFile(OldName, IStorageTW::TYPE_SAVE);
 
 			//str_format(aBuf, sizeof(aBuf), "renamed '%s' to %s", pEntry->m_aFilename, aFilename);
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", aBuf);
@@ -63,7 +63,7 @@ void CIdentity::SaveIdents()
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", aBuf);
 		str_format(aBuf, sizeof(aBuf), "identities/%s", aFilename);
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 		
 		if(!File)
 		{
@@ -113,7 +113,7 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 	str_format(aFilePath, sizeof(aFilePath), "identities/%s", pName);
 	str_format(aFileName, sizeof(aFileName), pName);
 
-	IOHANDLE File = pSelf->Storage()->OpenFile(aFilePath, IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE File = pSelf->Storage()->OpenFile(aFilePath, IOFLAG_READ, IStorageTW::TYPE_SAVE);
 
 	if(File)
 	{

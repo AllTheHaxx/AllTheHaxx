@@ -2562,22 +2562,22 @@ void CGameContext::DeleteTempfile()
 {
 	if(m_aDeleteTempfile[0] != 0)
 	{
-		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-		pStorage->RemoveFile(m_aDeleteTempfile, IStorage::TYPE_SAVE);
+		IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
+		pStorage->RemoveFile(m_aDeleteTempfile, IStorageTW::TYPE_SAVE);
 		m_aDeleteTempfile[0] = 0;
 	}
 }
 
 void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 {
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 
 	char aConfig[128];
 	char aTemp[128];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
 	str_format(aTemp, sizeof(aTemp), "%s.temp.%d", pNewMapName, pid());
 
-	IOHANDLE File = pStorage->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile(aConfig, IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!File)
 	{
 		// No map-specific config, just return.
@@ -2609,7 +2609,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	}
 
 	CDataFileReader Reader;
-	Reader.Open(pStorage, pNewMapName, IStorage::TYPE_ALL);
+	Reader.Open(pStorage, pNewMapName, IStorageTW::TYPE_ALL);
 
 	CDataFileWriter Writer;
 	Writer.Init();

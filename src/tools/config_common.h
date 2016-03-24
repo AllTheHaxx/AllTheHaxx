@@ -4,7 +4,7 @@
 int main(int argc, const char **argv)
 {
 	dbg_logger_stdout();
-	IStorage *pStorage = CreateLocalStorage();
+	IStorageTW *pStorage = CreateLocalStorage();
 	if(argc == 1)
 	{
 		dbg_msg("Usage", "%s FILE1 [ FILE2... ]", argv[0]);
