@@ -7,12 +7,12 @@
 #include <game/client/lineinput.h>
 
 // much crypto
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
-#include <openssl/rsa.h>
-#include <openssl/evp.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
+#include <engine/external/openssl/pem.h>
+#include <engine/external/openssl/ssl.h>
+#include <engine/external/openssl/rsa.h>
+#include <engine/external/openssl/evp.h>
+#include <engine/external/openssl/bio.h>
+#include <engine/external/openssl/err.h>
 // -----------
 
 #include "translator.h"
