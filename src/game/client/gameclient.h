@@ -407,6 +407,8 @@ private:
 	int m_ShowOthers[2];
 
 	bool m_ResetConfig;
+	
+	std::string m_HiddenMessages[MAX_CLIENTS];
 };
 
 

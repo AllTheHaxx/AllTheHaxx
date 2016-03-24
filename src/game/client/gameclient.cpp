@@ -1279,6 +1279,8 @@ void CGameClient::OnNewSnapshot()
 			{
 				const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_ID);
 				m_Snap.m_aCharacters[Item.m_ID].m_Cur = *((const CNetObj_Character *)pData);
+				
+				//m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags;
 				if(pOld)
 				{
 					m_Snap.m_aCharacters[Item.m_ID].m_Active = true;
@@ -1288,6 +1290,35 @@ void CGameClient::OnNewSnapshot()
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
+				}
+				
+				if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
+				{
+					int serial = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 24;
+					
+					char msg = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 16;
+					msg -= serial << 8;
+
+					dbg_msg("Dennis", "Num = %d Serial = %d Char = %c Size = %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags, serial, msg, m_HiddenMessages[Item.m_ID].size());
+					if(m_HiddenMessages[Item.m_ID].size() == serial)
+						m_HiddenMessages[Item.m_ID] += msg;
+					else if(serial > m_HiddenMessages[Item.m_ID].size())
+					{//correct errors D:
+						for(int i = 0; i < serial - m_HiddenMessages[Item.m_ID].size(); i++)
+						{
+							m_HiddenMessages[Item.m_ID] += '_';
+						}
+						m_HiddenMessages[Item.m_ID] += msg;
+					}
+				}
+				else
+				{
+					if(m_HiddenMessages[Item.m_ID][0])
+					{
+						dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
+						m_pChat->AddLine(Item.m_ID, 0, m_HiddenMessages[Item.m_ID].c_str(), true);
+						m_HiddenMessages[Item.m_ID].clear();
+					}
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)

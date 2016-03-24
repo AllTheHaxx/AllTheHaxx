@@ -36,6 +36,7 @@ class CChat : public CComponent
 		char m_aName[64];
 		char m_aText[512];
 		bool m_Highlighted;
+		bool m_Hidden;
 	};
 
 	CLine m_aLines[MAX_LINES];
@@ -104,7 +105,7 @@ public:
 	bool IsShown() const { return m_Show; }
 	float Blend() const { return time_get() > m_aLines[m_CurrentLine].m_Time+14*time_freq() && !m_Show ? 1.0f-(time_get()-m_aLines[m_CurrentLine].m_Time-14*time_freq())/(2.0f*time_freq()) : 1.0f; }
 
-	void AddLine(int ClientID, int Team, const char *pLine);
+	void AddLine(int ClientID, int Team, const char *pLine, bool Hidden = false);
 
 	void EnableMode(int Team);
 
@@ -117,5 +118,7 @@ public:
 	virtual void OnRelease();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Event);
+	
+	std::string m_CryptSendQueue;
 };
 #endif

@@ -138,7 +138,12 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 			if(m_LastChatSend+time_freq() < time_get())
 			{
-				Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
+				if(g_Config.m_ClFlagChat)
+				{
+					m_CryptSendQueue = std::string(m_Input.GetString());
+				}
+				else
+					Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
 				AddEntry = true;
 			}
 			else if(m_PendingChatCounter < 3)
@@ -443,7 +448,7 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
-void CChat::AddLine(int ClientID, int Team, const char *pLine)
+void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 {
 	if(*pLine == 0 || (ClientID != -1 && ClientID != -1337 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
 		m_pClient->m_aClients[ClientID].m_ChatIgnore ||
@@ -523,7 +528,10 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		}
 
 
-		m_aLines[m_CurrentLine].m_Highlighted = Highlighted;
+		if(!Hidden)
+			m_aLines[m_CurrentLine].m_Highlighted = Highlighted;
+		else
+			m_aLines[m_CurrentLine].m_Hidden = Hidden;
 
 		if(ClientID == -1) // server message
 		{
@@ -794,6 +802,8 @@ void CChat::OnRender()
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 		else if (m_aLines[r].m_Team)
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+		else if(m_aLines[r].m_Hidden)
+			rgb = vec3(1.0f, 0.7f, 0.0f);
 		else
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 

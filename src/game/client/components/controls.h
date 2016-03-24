@@ -65,5 +65,8 @@ public:
     void SetDirLeft(int n) { m_InputDirectionLeft[g_Config.m_ClDummy] = n; }
     int GetDirRight() const { return m_InputDirectionRight[g_Config.m_ClDummy]; }
     int GetDirLeft() const { return m_InputDirectionLeft[g_Config.m_ClDummy]; }
+	
+	int m_NextHiddenCharCounter;
+	int m_HiddenCharSerialCount;
 };
 #endif

@@ -60,6 +60,8 @@ CControls::CControls()
 		m_UsingGamepad = false;
 	}
 #endif
+
+	m_NextHiddenCharCounter = 0;
 }
 
 void CControls::OnReset()
@@ -221,7 +223,24 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	
 	m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH;
-	
+		
+	if(m_pClient->m_pChat->m_CryptSendQueue.size())
+	{
+		int buf = m_pClient->m_pChat->m_CryptSendQueue[0] << 16;
+		int serial = m_HiddenCharSerialCount << 24;
+		m_InputData[g_Config.m_ClDummy].m_PlayerFlags += buf + serial;
+
+		//dbg_msg("Chat", "%c of %s : %d", m_pClient->m_pChat->m_CryptSendQueue.c_str()[0],m_pClient->m_pChat->m_CryptSendQueue.c_str(), m_InputData[g_Config.m_ClDummy].m_PlayerFlags);
+		m_NextHiddenCharCounter++;
+		if(m_NextHiddenCharCounter == g_Config.m_ClFlagChatPause)  //the chance to miss something at 3 chars is low but not 0
+		{
+			m_pClient->m_pChat->m_CryptSendQueue.erase(0, 1);
+			m_NextHiddenCharCounter = 0;
+			m_HiddenCharSerialCount++;
+		}
+	}
+	else
+		m_HiddenCharSerialCount = 0;
 
 	if(m_pClient->m_pScoreboard->Active())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
