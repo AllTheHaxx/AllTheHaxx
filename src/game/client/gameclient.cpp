@@ -800,6 +800,22 @@ void CGameClient::OnRender()
 	if(g_Config.m_ClDummy && !Client()->DummyConnected())
 		g_Config.m_ClDummy = 0;
 
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
+	if(str_find_nocase(CurrentServerInfo.m_aGameType, "race")) // only available on racing gametypes
+	{
+		if(g_Config.m_ClSmartZoom && Client()->State() == IClient::STATE_ONLINE && m_Snap.m_pLocalCharacter)
+		{
+			float ExtraZoom = 0.0f;
+			if(abs(m_Snap.m_pLocalCharacter->m_VelX) > abs(m_Snap.m_pLocalCharacter->m_VelY))
+				ExtraZoom = (abs(m_Snap.m_pLocalCharacter->m_VelX) / 10000.0f) / 4.0f;
+			else
+				ExtraZoom = (abs(m_Snap.m_pLocalCharacter->m_VelY) / 10000.0f) / 4.0f;
+			
+			smooth_set(&m_pCamera->m_Zoom, 1.0f + ExtraZoom, (0.005f/Client()->RenderFrameTime())*85.0f, 0);
+		}
+	}
+
 	// resend player and dummy info if it was filtered by server
 	if(Client()->State() == IClient::STATE_ONLINE && !m_pMenus->IsActive()) {
 		if(m_CheckInfo[0] == 0) {

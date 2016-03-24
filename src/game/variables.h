@@ -151,6 +151,7 @@ MACRO_CONFIG_INT(ClUiShowExtraBar, cl_ui_extra_bar, 0, 0, 1, CFGFLAG_CLIENT|CFGF
 MACRO_CONFIG_INT(ClGoreStyleTeeColors, cl_gore_style_tee_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gore: use Tee color")
 MACRO_CONFIG_INT(ClGoreStyleDropWeapons, cl_gore_style_drop_weapons, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gore: Drop weapons")
 MACRO_CONFIG_INT(ClGoreStyle, cl_gore_style, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Gore Mod")
+MACRO_CONFIG_INT(ClSmartZoom, cl_smart_zoom, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom in/out in a smart way, only on race gametypes")
 MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to irc on startup automatically")
 MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
 //MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
