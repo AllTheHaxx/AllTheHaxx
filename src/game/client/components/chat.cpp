@@ -34,7 +34,7 @@ CChat::CChat()
 	m_pTranslator = new CTranslator();
 	m_pTranslator->Init();
 
-	m_pKeyPair = GenerateKeyPair(512, 3);
+	//m_pKeyPair = GenerateKeyPair(512, 3);
 }
 
 void CChat::OnReset()
@@ -397,7 +397,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		if(!HideChat)
 			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 
-		char *pDecrypted = DecryptMsg(pMsg->m_pMessage);
+		char *pDecrypted = 0;//DecryptMsg(pMsg->m_pMessage);
 		if(pDecrypted)
 			AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
 
@@ -901,7 +901,7 @@ bool CChat::HandleTCommands(const char *pMsg)
 void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	m_LastChatSend = time_get();
-
+	LoadKeys();
 	char aMessage[1024];
 	str_copy(aMessage, pLine, sizeof(aMessage));
 
@@ -1011,7 +1011,7 @@ char *CChat::DecryptMsg(const char *pMsg)
 void CChat::SaveKeys(RSA *pKeyPair)
 {
 	FILE *pPubFile;
-	pPubFile = fopen ("rsa_pub.key","w");
+	pPubFile = fopen ("rsa_pub.key", "w");
 	if(pPubFile != NULL)
 	{
 		fputs(ReadPubKey(pKeyPair), pPubFile);
@@ -1019,7 +1019,7 @@ void CChat::SaveKeys(RSA *pKeyPair)
 	}
 
 	FILE *pPrivFile;
-	pPrivFile = fopen ("rsa_priv.key","w");
+	pPrivFile = fopen ("rsa_priv.key", "w");
 	if(pPrivFile != NULL)
 	{
 		fputs(ReadPrivKey(pKeyPair), pPrivFile);
@@ -1029,7 +1029,13 @@ void CChat::SaveKeys(RSA *pKeyPair)
 
 void CChat::LoadKeys()
 {
-	// TODO: diz.
+	m_pKeyPair = RSA_new();
+
+	FILE *pPubFile = fopen("rsa_pub.key", "rb");
+	PEM_read_RSAPublicKey(pPubFile, &m_pKeyPair, NULL, NULL);
+
+	FILE *pPrivFile = fopen("rsa_priv.key", "rb");
+	PEM_read_RSAPrivateKey(pPrivFile, &m_pKeyPair, NULL, NULL);
 }
 
 /*  ++++ PADDINGS ++++
