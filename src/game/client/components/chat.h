@@ -50,6 +50,7 @@ class CChat : public CComponent
 		MODE_ALL,
 		MODE_TEAM,
 		MODE_HIDDEN,
+		MODE_CRYPT,
 
 		CHAT_SERVER=0,
 		CHAT_HIGHLIGHT,

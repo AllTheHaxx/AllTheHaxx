@@ -99,10 +99,12 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 		((CChat*)pUserData)->EnableMode(0);
 	else if(str_comp(pMode, "team") == 0)
 		((CChat*)pUserData)->EnableMode(1);
-	else if(str_comp(pMode, "flag") == 0)
+	else if(str_comp(pMode, "hidden") == 0)
 		((CChat*)pUserData)->EnableMode(2);
+	else if(str_comp(pMode, "crypt") == 0)
+		((CChat*)pUserData)->EnableMode(3);
 	else
-		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all, team or flags as mode");
+		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all, team, hidden or crypt as mode");
 
 	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
 		((CChat*)pUserData)->m_Input.Set(pResult->GetString(1));
@@ -162,6 +164,12 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				if(m_Mode == MODE_HIDDEN)
 					m_CryptSendQueue = std::string(m_Input.GetString());
+				else if(m_Mode == MODE_CRYPT)
+				{
+					char *pEncrypted = EncryptMsg(m_Input.GetString());
+					if(pEncrypted)
+						Say(0, pEncrypted);
+				}
 				else
 					Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
 				AddEntry = true;
@@ -332,7 +340,9 @@ void CChat::EnableMode(int Team)
 
 	if(m_Mode == MODE_NONE)
 	{
-		if(Team == 2)
+		if(Team == 3)
+			m_Mode = MODE_CRYPT;
+		else if(Team == 2)
 			m_Mode = MODE_HIDDEN;
 		else if(Team == 1)
 			m_Mode = MODE_TEAM;
@@ -417,9 +427,13 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		if(!HideChat)
 			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 
-		char *pDecrypted = 0;//DecryptMsg(pMsg->m_pMessage);
-		if(pDecrypted)
-			AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
+		// try to decrypt everything we can
+		if(pMsg->m_ClientID != -1)
+		{
+			char *pDecrypted = DecryptMsg(pMsg->m_pMessage);
+			if(pDecrypted)
+				AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
+		}
 
 		if(g_Config.m_ClTransIn &&
 			str_length(pMsg->m_pMessage) > 4 &&
@@ -679,6 +693,8 @@ void CChat::OnRender()
 			TextRender()->TextEx(&Cursor, Localize("Team"), -1);
 		else if(m_Mode == MODE_HIDDEN)
 			TextRender()->TextEx(&Cursor, Localize("Hidden"), -1);
+		else if(m_Mode == MODE_CRYPT)
+			TextRender()->TextEx(&Cursor, Localize("Crypt"), -1);
 		else
 			TextRender()->TextEx(&Cursor, Localize("Chat"), -1);
 
@@ -928,9 +944,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	if(HandleTCommands(pLine))
 		return;
 
-	if(g_Config.m_ClChatCrypt && pLine[0] != '/')
-		str_copy(aMessage, EncryptMsg(pLine), sizeof(aMessage));
-	else if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
+	if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
 		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
 		return;
@@ -980,6 +994,13 @@ char *CChat::ReadPrivKey(RSA *pKeyPair)
 
 char *CChat::EncryptMsg(const char *pMsg)
 {
+	if(!m_GotKeys)
+	{
+		m_pClient->m_pHud->PushNotification("Generate or load keys first!");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "generate or load keys first");
+		return 0;
+	}
+
 	char *pHex = new char[512];
 
 	unsigned char aEncrypted[512] = {};
@@ -1002,10 +1023,7 @@ char *CChat::EncryptMsg(const char *pMsg)
 char *CChat::DecryptMsg(const char *pMsg)
 {
 	if(!m_GotKeys)
-	{
-		m_pClient->m_pHud->PushNotification("Generate or load keys first!");
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "generate or load keys first");
-	}
+		return 0;
 
 	char *pHex = new char[512];
 	char *pClear = new char[512];
@@ -1041,6 +1059,7 @@ void CChat::SaveKeys(RSA *pKeyPair)
 	{
 		m_pClient->m_pHud->PushNotification("No keys to save!");
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "no keys to save");
+		return;
 	}
 
 	FILE *pPubFile;
