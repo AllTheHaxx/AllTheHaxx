@@ -140,7 +140,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 			if(m_LastChatSend+time_freq() < time_get())
 			{
-				if(m_Mode == MODE_FLAG)
+				if(m_Mode == MODE_HIDDEN)
 					m_CryptSendQueue = std::string(m_Input.GetString());
 				else
 					Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
@@ -313,7 +313,7 @@ void CChat::EnableMode(int Team)
 	if(m_Mode == MODE_NONE)
 	{
 		if(Team == 2)
-			m_Mode = MODE_FLAG;
+			m_Mode = MODE_HIDDEN;
 		else if(Team == 1)
 			m_Mode = MODE_TEAM;
 		else
@@ -657,8 +657,8 @@ void CChat::OnRender()
 			TextRender()->TextEx(&Cursor, Localize("All"), -1);
 		else if(m_Mode == MODE_TEAM)
 			TextRender()->TextEx(&Cursor, Localize("Team"), -1);
-		else if(m_Mode == MODE_FLAG)
-			TextRender()->TextEx(&Cursor, Localize("Flag"), -1);
+		else if(m_Mode == MODE_HIDDEN)
+			TextRender()->TextEx(&Cursor, Localize("Hidden"), -1);
 		else
 			TextRender()->TextEx(&Cursor, Localize("Chat"), -1);
 

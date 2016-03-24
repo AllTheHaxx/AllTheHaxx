@@ -1300,11 +1300,11 @@ void CGameClient::OnNewSnapshot()
 					msg -= serial << 8;
 
 					//dbg_msg("Dennis", "Num = %d Serial = %d Char = %c Size = %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags, serial, msg, m_HiddenMessages[Item.m_ID].size());
-					if(m_HiddenMessages[Item.m_ID].size() == serial)
+					if((int)m_HiddenMessages[Item.m_ID].size() == serial)
 						m_HiddenMessages[Item.m_ID] += msg;
-					else if(serial > m_HiddenMessages[Item.m_ID].size())
+					else if(serial > (int)m_HiddenMessages[Item.m_ID].size())
 					{// correct errors D:
-						for(int i = 0; i < serial - m_HiddenMessages[Item.m_ID].size(); i++)
+						for(int i = 0; i < serial - (int)m_HiddenMessages[Item.m_ID].size(); i++)
 						{
 							m_HiddenMessages[Item.m_ID] += '_';
 						}
