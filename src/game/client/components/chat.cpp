@@ -117,7 +117,7 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->GenerateKeyPair(256, 3); // hardcoded, yay!
+	((CChat *)pUserData)->GenerateKeyPair(pResult->GetInteger(0), pResult->GetInteger(1));
 }
 
 void CChat::ConSaveKeys(IConsole::IResult *pResult, void *pUserData)
@@ -137,7 +137,7 @@ void CChat::OnConsoleInit()
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 
-	Console()->Register("generate_rsa_keys", "", CFGFLAG_CLIENT, ConGenKeys, this, "Generate RSA keys for chat crypt");
+	Console()->Register("generate_rsa_keys", "i[Bytes] i[Exponent]", CFGFLAG_CLIENT, ConGenKeys, this, "Usually bytes = 256 and exponent = 3");
 	Console()->Register("save_rsa_keys", "", CFGFLAG_CLIENT, ConSaveKeys, this, "Save RSA keys for chat crypt");
 	Console()->Register("load_rsa_keys", "", CFGFLAG_CLIENT, ConLoadKeys, this, "Load RSA keys for chat crypt");
 }
