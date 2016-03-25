@@ -127,12 +127,12 @@ void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConSaveKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->SaveKeys(((CChat *)pUserData)->m_pKeyPair);
+	((CChat *)pUserData)->SaveKeys(((CChat *)pUserData)->m_pKeyPair, pResult->GetString(0));
 }
 
 void CChat::ConLoadKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->LoadKeys();
+	((CChat *)pUserData)->LoadKeys(pResult->GetString(0));
 }
 
 void CChat::OnConsoleInit()
@@ -143,8 +143,8 @@ void CChat::OnConsoleInit()
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 
 	Console()->Register("generate_rsa_keys", "i[Bytes] i[Exponent]", CFGFLAG_CLIENT, ConGenKeys, this, "Usually bytes = 256 and exponent = 3");
-	Console()->Register("save_rsa_keys", "", CFGFLAG_CLIENT, ConSaveKeys, this, "Save RSA keys for chat crypt");
-	Console()->Register("load_rsa_keys", "", CFGFLAG_CLIENT, ConLoadKeys, this, "Load RSA keys for chat crypt");
+	Console()->Register("save_rsa_keys", "s[keyname]", CFGFLAG_CLIENT, ConSaveKeys, this, "Save RSA keys for chat crypt");
+	Console()->Register("load_rsa_keys", "s[keyname]", CFGFLAG_CLIENT, ConLoadKeys, this, "Load RSA keys for chat crypt");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
@@ -1057,7 +1057,7 @@ char *CChat::DecryptMsg(const char *pMsg)
 		return 0;
 }
 
-void CChat::SaveKeys(RSA *pKeyPair)
+void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 {
 	if(!m_GotKeys)
 	{
@@ -1066,8 +1066,13 @@ void CChat::SaveKeys(RSA *pKeyPair)
 		return;
 	}
 
+	char aPubKey[256];
+	char aPrivKey[256];
+	str_format(aPubKey, sizeof(aPubKey), "%s_pub.key", pKeyName);
+	str_format(aPrivKey, sizeof(aPrivKey), "%s_priv.key", pKeyName);
+
 	FILE *pPubFile;
-	pPubFile = fopen ("rsa_pub.key", "w");
+	pPubFile = fopen(aPubKey, "w");
 	if(pPubFile != NULL)
 	{
 		fputs(ReadPubKey(pKeyPair), pPubFile);
@@ -1080,7 +1085,7 @@ void CChat::SaveKeys(RSA *pKeyPair)
 	}
 
 	FILE *pPrivFile;
-	pPrivFile = fopen ("rsa_priv.key", "w");
+	pPrivFile = fopen(aPrivKey, "w");
 	if(pPrivFile != NULL)
 	{
 		fputs(ReadPrivKey(pKeyPair), pPrivFile);
@@ -1093,11 +1098,16 @@ void CChat::SaveKeys(RSA *pKeyPair)
 	}
 }
 
-void CChat::LoadKeys()
+void CChat::LoadKeys(const char *pKeyName)
 {
 	m_pKeyPair = RSA_new();
 
-	FILE *pPubFile = fopen("rsa_pub.key", "rb");
+	char aPubKey[256];
+	char aPrivKey[256];
+	str_format(aPubKey, sizeof(aPubKey), "%s_pub.key", pKeyName);
+	str_format(aPrivKey, sizeof(aPrivKey), "%s_priv.key", pKeyName);
+
+	FILE *pPubFile = fopen(aPubKey, "rb");
 	if(pPubFile)
 		PEM_read_RSAPublicKey(pPubFile, &m_pKeyPair, NULL, NULL);
 	else
@@ -1107,7 +1117,7 @@ void CChat::LoadKeys()
 		return;
 	}
 	
-	FILE *pPrivFile = fopen("rsa_priv.key", "rb");
+	FILE *pPrivFile = fopen(aPrivKey, "rb");
 	if(pPrivFile)
 		PEM_read_RSAPrivateKey(pPrivFile, &m_pKeyPair, NULL, NULL);
 	else

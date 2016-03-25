@@ -103,8 +103,8 @@ class CChat : public CComponent
 	char *ReadPrivKey(RSA *pKeyPair);
 	char *EncryptMsg(const char *pMsg);
 	char *DecryptMsg(const char *pMsg);
-	void SaveKeys(RSA *pKeyPair);
-	void LoadKeys();
+	void SaveKeys(RSA *pKeyPair, const char *pKeyName);
+	void LoadKeys(const char *pKeyName);
 
 public:
 	CChat();
