@@ -1068,8 +1068,8 @@ void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 
 	char aPubKey[256];
 	char aPrivKey[256];
-	str_format(aPubKey, sizeof(aPubKey), "%s_pub.key", pKeyName);
-	str_format(aPrivKey, sizeof(aPrivKey), "%s_priv.key", pKeyName);
+	str_format(aPubKey, sizeof(aPubKey), "rsa/%s_pub.key", pKeyName);
+	str_format(aPrivKey, sizeof(aPrivKey), "rsa/%s_priv.key", pKeyName);
 
 	FILE *pPubFile;
 	pPubFile = fopen(aPubKey, "w");
@@ -1104,8 +1104,8 @@ void CChat::LoadKeys(const char *pKeyName)
 
 	char aPubKey[256];
 	char aPrivKey[256];
-	str_format(aPubKey, sizeof(aPubKey), "%s_pub.key", pKeyName);
-	str_format(aPrivKey, sizeof(aPrivKey), "%s_priv.key", pKeyName);
+	str_format(aPubKey, sizeof(aPubKey), "rsa/%s_pub.key", pKeyName);
+	str_format(aPrivKey, sizeof(aPrivKey), "rsa/%s_priv.key", pKeyName);
 
 	FILE *pPubFile = fopen(aPubKey, "rb");
 	if(pPubFile)
