@@ -1,1 +1,22 @@
-Create symlinks to the lua files in this folder to add them to the client
+The lua files have been moved to an own repository. To get them back, do:
+
+	git submodule update --init
+
+Then...
+
+
+–––––––––––
+LINUX USERS
+–––––––––––
+open a shell within this folder and do
+
+	ln -s ../Lua-Scripts/ official
+
+then you can start the client and will see all the lua files back
+
+
+–––––––––––––
+WINDOWS USERS
+–––––––––––––
+Copy-paste all the files from "Lua-Scripts" in this folder's parent directory into this folder.
+I know, very inconvenient and static, but well... it's windows dude :\
