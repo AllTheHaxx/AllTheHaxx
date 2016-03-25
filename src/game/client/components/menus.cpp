@@ -1102,6 +1102,20 @@ static const char *s_apSayings[] = {
 		"You miss 100% of the shots you don't take",
 		"I'm too drunk to taste this chicken.",
 		"Panamera",
+		"Hercules Prima 5",
+		"Pirate at the weekend!",
+		"Why did the chicken cross the road?",
+		"Are you even trying?",
+		"What if everyone jumped at once?",
+		"What color is a mirror?",
+		"What if the moon was a disco ball?",
+		"Is your red the same red as my red?",
+		"Is anything real?",
+		"What is the speed of dark?",
+		"What is random?",
+		"Is the 5-second rule actually true?",
+		"How much does thor's hammer weigh?",
+		"How much does a shadow weigh?",
 };
 
 void CMenus::RenderLoading()
