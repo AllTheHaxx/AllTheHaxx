@@ -94,9 +94,9 @@ void CNamePlates::RenderNameplate(
 		if(g_Config.m_ClNamePlatesScore)
 		{
 			CUIRect Bg;
-			Bg.x = Position.x - tw2 / 2.0f            -1.0f;
+			Bg.x = Position.x - tw2 / 2.0f            -4.0f;
 			Bg.y = Position.y - FontSize*0.6f+2+28.0f +1.2f;
-			Bg.w = tw2                                +4.0f;
+			Bg.w = tw2                                +10.0f;
 			Bg.h = FontSize*0.6f+2                    +4.0f;
 			RenderTools()->DrawUIRect(&Bg, vec4(0.0f, 0.0f, 0.0f, a / 1.5f), CUI::CORNER_ALL, 10.0f);
 
