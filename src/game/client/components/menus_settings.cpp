@@ -730,6 +730,8 @@ static CKeyInfo gs_aKeys[] =
 	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
 	// ATH stuff
 	{ "Hookfly Dummy", "toggle cl_dummy_hook_fly 0 1", 0 },
+	{ "Zoom in", "zoom+", 0 },
+	{ "Zoom out", "zoom-", 0 },
 	{ "Toggle IRC", "+irc", 0 },
 	{ "Toggle Lua Console", "toggle_lua_console", 0 },
 	{ "Toggle Hotbar", "+hotbar", 0 },
@@ -2318,13 +2320,18 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClColorfulClient, ("Colorful Client"), g_Config.m_ClColorfulClient, &Button, "Makes everything look way more awesome!"))
+	if(DoButton_CheckBox(&g_Config.m_ClColorfulClient, ("Colorful Client"), g_Config.m_ClColorfulClient, &Button, Localize("Makes everything look way more awesome!")))
 		g_Config.m_ClColorfulClient ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClPathFinding, Localize("A* Path Finding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
 		g_Config.m_ClPathFinding ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button))
+		g_Config.m_ClSmartZoom ^= 1;
 
 	// extra binds!
 	{
@@ -2348,13 +2355,13 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 		CUIRect Background;
 		Left.HSplitTop(7.5f, 0, &Background);
-		Background.h = 23.0f*5+2.0f;
+		Background.h = 23.0f*7+2.0f;
 		RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
 		Left.HSplitTop(7.0f, 0, &Left);
 		Left.VMargin(10.0f, &Left);
 		Left.HSplitTop(5.0f, 0, &Left);
 
-		UiDoGetButtons(33, 38, Left);
+		UiDoGetButtons(33, 40, Left);
 		Left.h = 100.0f;
 	}
 	
