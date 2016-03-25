@@ -1114,6 +1114,7 @@ void CChat::LoadKeys(const char *pKeyName)
 	{
 		m_pClient->m_pHud->PushNotification("Couldn't load public key!");
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't load public key");
+		m_GotKeys = false;
 		return;
 	}
 
@@ -1124,6 +1125,7 @@ void CChat::LoadKeys(const char *pKeyName)
 	{
 		m_pClient->m_pHud->PushNotification("Couldn't load private key!");
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't load private key");
+		m_GotKeys = false;
 		return;
 	}
 
