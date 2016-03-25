@@ -217,6 +217,8 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		dbg_msg("", "++ example 'say some message' to chat with others.   ++");
 		dbg_msg("", "++ Press 'q' and then 'ENTER' to exit console mode!  ++");
 		dbg_msg("", "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+		SetActive(false);
 	}
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);

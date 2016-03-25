@@ -1116,7 +1116,7 @@ void CChat::LoadKeys(const char *pKeyName)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't load public key");
 		return;
 	}
-	
+
 	FILE *pPrivFile = fopen(aPrivKey, "rb");
 	if(pPrivFile)
 		PEM_read_RSAPrivateKey(pPrivFile, &m_pKeyPair, NULL, NULL);
