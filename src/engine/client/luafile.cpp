@@ -157,7 +157,7 @@ void CLuaFile::Init()
 	LUA_CALL_FUNC(m_pLuaState, "OnScriptInit", bool, success);
 	if(!success)
 	{
-		dbg_msg("Lua", "Script '%s' rejected being loaded", m_Filename.c_str());
+		dbg_msg("lua", "script '%s' rejected being loaded (did you return true?)", m_Filename.c_str());
 		Unload(true);
 		return;
 	}
@@ -502,14 +502,14 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		
 		//OOP ENDS HERE
 	;
-	dbg_msg("Lua", "Registering LuaBindings complete.");
+	dbg_msg("lua", "registering lua bindings complete");
 }
 
 luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 {
 	LuaRef func = getGlobal(m_pLuaState, pFuncName);
 	if(func == 0)
-		dbg_msg("Lua", "Error: Function '%s' not found in file '%s'", pFuncName, m_Filename.c_str());
+		dbg_msg("lua", "error: function '%s' not found in file '%s'", pFuncName, m_Filename.c_str());
 
 	return func;  // return 0 if the function is not found!
 }
