@@ -25,7 +25,6 @@ versionsrv*
 
 Debug
 lua
-rsa
 *.txt
 *.bat
 .cproject
