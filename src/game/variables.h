@@ -146,7 +146,7 @@ MACRO_CONFIG_INT(ClColorfulClient, cl_colorful_client, 1, 0, 1, CFGFLAG_SAVE|CFG
 MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show notifications")
 MACRO_CONFIG_INT(ClPathFinding, cl_path_finding, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")
 MACRO_CONFIG_INT(ClShowhudHealthAmmoBars, cl_showhud_healthammo_bars, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use bars for health and ammo")
-MACRO_CONFIG_INT(ClShowhudChatbox, cl_showhud_chatbox, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Nice background for the chat (alpha, 0-100)")
+MACRO_CONFIG_INT(ClShowhudChatbox, cl_showhud_chatbox, 34, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Nice background for the chat (alpha, 0-100)")
 MACRO_CONFIG_INT(ClUiShowExtraBar, cl_ui_extra_bar, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show the extra bar")
 MACRO_CONFIG_INT(ClGoreStyleTeeColors, cl_gore_style_tee_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gore: use Tee color")
 MACRO_CONFIG_INT(ClGoreStyleDropWeapons, cl_gore_style_drop_weapons, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gore: Drop weapons")
