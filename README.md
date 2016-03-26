@@ -13,6 +13,7 @@ Building
 
 To compile AllTheHaxx yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything).
 Make sure you have all the requirements that are needed by DDNet Client (listed below)
+*WINDOWS USERS:* if you should encounter any compiling problems, __please__ compile with MinGW!!
 
 --------------------------
 AllTheHaxx requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). Instead you can install these libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default. You can install all required dependencies on Debian and Ubuntu like this:
