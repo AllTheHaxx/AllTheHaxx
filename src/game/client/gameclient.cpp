@@ -326,6 +326,7 @@ void CGameClient::OnConsoleInit()
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
+	Console()->Register("luafile", "s[activate|deactivate] s[filename]", CFGFLAG_CLIENT, ConLuafile, this, "Toggle Luafiles (use their path)");
 
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
@@ -2229,6 +2230,32 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameClient*)pUserData)->SendKill(-1);
+}
+
+void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
+{
+	if(pResult->NumArguments() < 2)
+		return;
+
+
+	for(int n = 1; n < pResult->NumArguments(); n++)
+	{
+		int id = 0;
+		for(; id < ((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles().size(); id++)
+			if(str_comp_nocase(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id++]->GetFilename(), pResult->GetString(n)) == 0)
+				break;
+
+		if(str_comp_nocase(pResult->GetString(0), "activate") == 0)
+		{
+			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Init();
+		}
+		else if(str_comp_nocase(pResult->GetString(0), "deactivate") == 0)
+		{
+			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
+				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Unload();
+		}
+	}
 }
 
 void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
