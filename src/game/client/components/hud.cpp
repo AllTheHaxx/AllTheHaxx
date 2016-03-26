@@ -485,7 +485,14 @@ void CHud::RenderChatBox()
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, min(m_pClient->m_pChat->Blend(), (float)g_Config.m_ClShowhudChatbox/100.0f));
-	RenderTools()->DrawRoundRectExt(0.0f, HeightStart, LineWidth, HeightLimit, 5.0f, CUI::CORNER_R);
+	RenderTools()->DrawRoundRectExt(0.0f, HeightStart, LineWidth, HeightLimit, 5.0f, 
+										m_pClient->m_pChat->IsActive() ? CUI::CORNER_TR : CUI::CORNER_R);
+
+	if(m_pClient->m_pChat->IsActive())
+	{
+		Graphics()->SetColor(0.0f, 0.0f, 0.0f, min(m_pClient->m_pChat->Blend(), (float)g_Config.m_ClShowhudChatbox/65.0f));
+		RenderTools()->DrawRoundRectExt(0.0f, HeightStart + HeightLimit, LineWidth, 12.0f, 5.0f, CUI::CORNER_BR);
+	}
 	Graphics()->QuadsEnd();
 }
 
