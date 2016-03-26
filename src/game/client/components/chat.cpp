@@ -689,7 +689,7 @@ void CChat::OnRender()
 		// render chat input
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, 8.0f, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = Width-190.0f;
+		Cursor.m_LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
 		Cursor.m_MaxLines = 2;
 
 		if(m_Mode == MODE_ALL)
@@ -719,7 +719,7 @@ void CChat::OnRender()
 				Temp.m_Flags = 0;
 				TextRender()->TextEx(&Temp, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
 				TextRender()->TextEx(&Temp, "|", -1);
-				while(Temp.m_LineCount > 2)
+				while(Temp.m_LineCount > 1)
 				{
 					++m_ChatStringOffset;
 					Temp = Cursor;
