@@ -2240,10 +2240,23 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 
 	for(int n = 1; n < pResult->NumArguments(); n++)
 	{
-		int id = 0;
-		for(; id < ((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles().size(); id++)
-			if(str_comp_nocase(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id++]->GetFilename(), pResult->GetString(n)) == 0)
+		int id = -1;
+		for(int i = 0; i < ((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles().size(); i++)
+		{
+			if(str_comp_nocase(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[i]->GetFilename(), pResult->GetString(n)) == 0)
+			{
+				id = i;
 				break;
+			}
+		}
+
+		if(id == -1)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), Localize("There was no luafile with the name '%s' found!"), pResult->GetString(n));
+			((CGameClient*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", aBuf, false);
+			return;
+		}
 
 		if(str_comp_nocase(pResult->GetString(0), "activate") == 0)
 		{
@@ -2255,6 +2268,8 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
 				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Unload();
 		}
+		else
+			((CGameClient*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", Localize("You must give either 'activate' or 'deactivate' as first argument!"), false);
 	}
 }
 
