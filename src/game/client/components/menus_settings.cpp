@@ -730,6 +730,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
 	// ATH stuff
 	{ "Hookfly Dummy", "toggle cl_dummy_hook_fly 0 1", 0 },
+	{ "Toggle X-Ray", "toggle cl_overlay_entities 0 90", 0 },
 	{ "Zoom in", "zoom+", 0 },
 	{ "Zoom out", "zoom-", 0 },
 	{ "Toggle IRC", "+irc", 0 },
@@ -2330,7 +2331,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button, Localize("Highly recommended!")))
 		g_Config.m_ClSmartZoom ^= 1;
 
 	// extra binds!
@@ -2361,7 +2362,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 		Left.VMargin(10.0f, &Left);
 		Left.HSplitTop(5.0f, 0, &Left);
 
-		UiDoGetButtons(33, 40, Left);
+		UiDoGetButtons(33, 41, Left);
 		Left.h = 100.0f;
 	}
 	
