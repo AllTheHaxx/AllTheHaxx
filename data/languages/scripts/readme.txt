@@ -32,6 +32,6 @@ start of the file. Now you can move the file back to its original location.
 $ mv newspanish.txt ../spanish.txt
 
 
-Often people know bette phrases for translations where the english phrase was just
+Often people know better phrases for translations where the english phrase was just
 written again. To find these you can use find_unchanged.py
 $ python find_unchanged.py ../spanish.txt
