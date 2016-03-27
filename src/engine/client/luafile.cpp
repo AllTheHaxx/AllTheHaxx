@@ -490,8 +490,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		
 		.beginClass<CConfigProperties>("Config")   // g_Config stuff...
 			.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
-			.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)  //char-arrays
-			.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
+			.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)
+			.addStaticProperty("PlayerCountry", &CConfigProperties::GetConfigPlayerCountry, &CConfigProperties::SetConfigPlayerCountry)
 			
 			.addStaticProperty("Skin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
 			.addStaticProperty("PlayerColorBody", &CConfigProperties::GetConfigPlayerColorBody, &CConfigProperties::SetConfigPlayerColorBody)

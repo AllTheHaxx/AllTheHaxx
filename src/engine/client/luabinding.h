@@ -44,6 +44,9 @@ struct CConfigProperties
 	static std::string GetConfigPlayerClan() { return g_Config.m_PlayerClan; }
 	static void SetConfigPlayerClan(std::string clan) { str_copy(g_Config.m_PlayerClan, clan.c_str(), sizeof(g_Config.m_PlayerClan)); }
 	
+	static int GetConfigPlayerCountry() { return g_Config.m_PlayerCountry; }
+	static void SetConfigPlayerCountry(int c) { g_Config.m_PlayerCountry = c; }
+
 	static std::string GetConfigPlayerSkin() { return g_Config.m_ClPlayerSkin; }
 	static void SetConfigPlayerSkin(std::string skin) { str_copy(g_Config.m_ClPlayerSkin, skin.c_str(), sizeof(g_Config.m_ClPlayerSkin)); }
 	
