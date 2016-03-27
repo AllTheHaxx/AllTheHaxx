@@ -73,6 +73,8 @@
 #include "SDL.h"
 #if defined(CONF_FAMILY_WINDOWS)
 	#include "SDL_syswm.h"
+#else
+#include <fcntl.h>
 #endif
 #ifdef main
 #undef main
@@ -3030,10 +3032,10 @@ void CClient::Run()
 		SDL_Quit();
 	}
 	
-	#if defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS)
 	if(m_pInputThread)
 		FreeConsole();
-	#endif
+#endif
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
@@ -3695,14 +3697,21 @@ void CClient::InputThread(void * pUser)
 	char aData[128];
 	mem_zero(aData, sizeof(aData));
 	
-	#if defined(CONF_FAMILY_WINDOWS)
-		system("chcp 1252");
-	#endif
+#if defined(CONF_FAMILY_WINDOWS)
+	system("chcp 1252");
+#else
+	int flags = 0;
+	int fd = fileno(stdin);
+	flags = fcntl(fd, F_GETFL, 0);
+	flags |= O_NONBLOCK;
+	fcntl(fd, F_SETFL, flags);
+#endif
 	
 	while(1)
 	{
 		thread_sleep(100);
 		fgets(pInput, 200, stdin);
+		str_replace_char(aInput, sizeof(aInput), '\n', '\0');
 
 		#if defined(CONF_FAMILY_WINDOWS)
 			if(!str_utf8_check(pInput))
@@ -3731,6 +3740,7 @@ void CClient::InputThread(void * pUser)
 				pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
 		#else
 			pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
+			mem_zero(aInput, sizeof(aInput));
 		#endif
 	
 	}		
