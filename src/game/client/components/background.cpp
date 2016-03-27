@@ -48,8 +48,10 @@ void CBackground::LoadBackground()
 	if(time_get()-m_LastLoad < 10*time_freq())
 		return;
 
+	((IEngineMap*)Kernel()->RequestInterface<IEngineMap>())->SetActiveDataFile(3);
+
 	if(m_Loaded && m_pMap == m_pBackgroundMap)
-		m_pMap->Unload();
+		m_pMap->Unload(3);
 
 	m_Loaded = false;
 	m_pMap = m_pBackgroundMap;
@@ -59,7 +61,7 @@ void CBackground::LoadBackground()
 	str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
-	if(m_pMap->Load(aBuf))
+	if(m_pMap->Load(3, aBuf))
 	{
 		m_pLayers->m_pLayers->InitBackground(m_pMap);
 		m_pImages->LoadBackground(m_pMap);

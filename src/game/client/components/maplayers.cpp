@@ -123,7 +123,7 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 
 void CMapLayers::OnRender()
 {
-	if((Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK && !Client()->MapLoaded()) || Client()->State() == IClient::STATE_LOADING)
+	if((Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK && !Client()->MapLoaded(0)) || Client()->State() == IClient::STATE_LOADING)
 		return;
 
 	CUIRect Screen;

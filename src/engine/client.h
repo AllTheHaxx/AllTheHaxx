@@ -125,7 +125,7 @@ public:
 	virtual void EnterGame() = 0;
 
 	virtual void LoadBackgroundMap(const char *pName, const char *pFilename) = 0;
-	virtual bool MapLoaded() = 0;
+	virtual bool MapLoaded(int MapDataFile) = 0;
 
 	//
 	virtual const char *MapDownloadName() = 0;

@@ -18,6 +18,9 @@ public:
 	virtual void GetType(int Type, int *pStart, int *pNum) = 0;
 	virtual void *FindItem(int Type, int ID) = 0;
 	virtual int NumItems() = 0;
+	virtual void SetActiveDataFile(int n) = 0;
+	virtual int ActiveMapDataFile() = 0;
+
 };
 
 
@@ -25,10 +28,10 @@ class IEngineMap : public IMap
 {
 	MACRO_INTERFACE("enginemap", 0)
 public:
-	virtual bool Load(const char *pMapName) = 0;
-	virtual bool IsLoaded() = 0;
-	virtual void Unload() = 0;
-	virtual unsigned Crc() = 0;
+	virtual bool Load(int n, const char *pMapName) = 0;
+	virtual bool IsLoaded(int n) = 0;
+	virtual void Unload(int n) = 0;
+	virtual unsigned Crc(int n) = 0;
 };
 
 extern IEngineMap *CreateEngineMap();

@@ -811,7 +811,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_pConsole->DeregisterTempAll();
 	m_NetClient[0].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
-	m_pMap->Unload();
+	m_pMap->Unload(1);
 
 	// disable all downloads
 	m_MapdownloadChunk = 0;
@@ -832,6 +832,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = 0;
 	m_ReceivedSnapshots[g_Config.m_ClDummy] = 0;
+
+	m_pMap->SetActiveDataFile(0);
 }
 
 void CClient::Disconnect()
@@ -1142,14 +1144,14 @@ vec3 CClient::GetColorV3(int v)
 	return HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
 }
 
-bool CClient::MapLoaded()
+bool CClient::MapLoaded(int MapDataFile)
 {
-	return m_pMap->IsLoaded();
+	return m_pMap->IsLoaded(MapDataFile);
 }
 
 void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
 {
-	if(!m_pMap->Load(pFilename))
+	if(!m_pMap->Load(0, pFilename))
 		return;
 
 	char aBuf[256];
@@ -1157,27 +1159,27 @@ void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 
 	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
-	m_CurrentMapCrc = m_pMap->Crc();
+	m_CurrentMapCrc = m_pMap->Crc(0);
 }
 
-const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)
+const char *CClient::LoadMap(int MapDataFile, const char *pName, const char *pFilename, unsigned WantedCrc)
 {
 	static char aErrorMsg[128];
 
 	SetState(IClient::STATE_LOADING);
 
-	if(!m_pMap->Load(pFilename))
+	if(!m_pMap->Load(MapDataFile, pFilename))
 	{
 		str_format(aErrorMsg, sizeof(aErrorMsg), "map '%s' not found", pFilename);
 		return aErrorMsg;
 	}
 
 	// get the crc of the map
-	if(m_pMap->Crc() != WantedCrc)
+	if(m_pMap->Crc(MapDataFile) != WantedCrc)
 	{
-		str_format(aErrorMsg, sizeof(aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
+		str_format(aErrorMsg, sizeof(aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(MapDataFile), WantedCrc);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aErrorMsg);
-		m_pMap->Unload();
+		m_pMap->Unload(MapDataFile);
 		return aErrorMsg;
 	}
 
@@ -1191,14 +1193,14 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 	m_ReceivedSnapshots[g_Config.m_ClDummy] = 0;
 
 	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
-	m_CurrentMapCrc = m_pMap->Crc();
+	m_CurrentMapCrc = m_pMap->Crc(MapDataFile);
 
 	return 0x0;
 }
 
 
 
-const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
+const char *CClient::LoadMapSearch(int MapDataFile, const char *pMapName, int WantedCrc)
 {
 	const char *pError = 0;
 	char aBuf[512];
@@ -1208,13 +1210,13 @@ const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
 
 	// try the normal maps folder
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
-	pError = LoadMap(pMapName, aBuf, WantedCrc);
+	pError = LoadMap(MapDataFile, pMapName, aBuf, WantedCrc);
 	if(!pError)
 		return pError;
 
 	// try the downloaded maps
 	str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
-	pError = LoadMap(pMapName, aBuf, WantedCrc);
+	pError = LoadMap(MapDataFile, pMapName, aBuf, WantedCrc);
 	if(!pError)
 		return pError;
 
@@ -1222,7 +1224,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
 	char aFilename[128];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
 	if(Storage()->FindFile(aFilename, "maps", IStorageTW::TYPE_ALL, aBuf, sizeof(aBuf)))
-		pError = LoadMap(pMapName, aBuf, WantedCrc);
+		pError = LoadMap(MapDataFile, pMapName, aBuf, WantedCrc);
 
 	return pError;
 }
@@ -1631,7 +1633,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				DisconnectWithReason(pError);
 			else
 			{
-				pError = LoadMapSearch(pMap, MapCrc);
+				pError = LoadMapSearch(1, pMap, MapCrc);
 
 				if(!pError)
 				{
@@ -2243,7 +2245,7 @@ void CClient::FinishMapDownload()
 	m_MapdownloadTotalsize = -1;
 
 	// load map
-	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
+	pError = LoadMap(1, m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
 	if(!pError)
 	{
 		ResetMapDownload();
@@ -3239,7 +3241,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[1]<<16)|
 		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[2]<<8)|
 		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[3]);
-	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Crc);
+	pError = LoadMapSearch(2, m_DemoPlayer.Info()->m_Header.m_aMapName, Crc);
 	if(pError)
 	{
 		DisconnectWithReason(pError);

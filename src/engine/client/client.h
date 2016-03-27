@@ -298,11 +298,11 @@ public:
 
 	virtual const char *ErrorString();
 
-	bool MapLoaded();
+	bool MapLoaded(int MapDataFile);
 	void LoadBackgroundMap(const char *pName, const char *pFilename);
 
-	const char *LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc);
-	const char *LoadMapSearch(const char *pMapName, int WantedCrc);
+	const char *LoadMap(int MapDataFile, const char *pName, const char *pFilename, unsigned WantedCrc);
+	const char *LoadMapSearch(int MapDataFile, const char *pMapName, int WantedCrc);
 
 	static int PlayerScoreNameComp(const void *a, const void *b);
 

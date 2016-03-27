@@ -1352,7 +1352,7 @@ int CMenus::Render()
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 	}
 
-	if(!Client()->MapLoaded())// && Client()->State() != IClient::STATE_ONLINE)
+	if(!Client()->MapLoaded(0))// && Client()->State() != IClient::STATE_ONLINE)
 		RenderBackground();
 
 	CUIRect TabBar;
@@ -2240,7 +2240,7 @@ void CMenus::OnRender()
 		return;
 	}
 
-	if(!Client()->MapLoaded())
+	if(!Client()->MapLoaded(0))
 	{
 		Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
 
@@ -2252,6 +2252,10 @@ void CMenus::OnRender()
 		m_pClient->m_pCamera->m_Center = vec2(500.0f, 1000.0f);
 		m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 	}
+
+	if(((IEngineMap*)Kernel()->RequestInterface<IEngineMap>())->ActiveMapDataFile() != 0)
+		((IEngineMap*)Kernel()->RequestInterface<IEngineMap>())->SetActiveDataFile(0);
+
 
 	// update colors
 	vec3 Rgb = HslToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));

@@ -448,6 +448,7 @@ void CGameClient::OnInit()
 		{
 			SET_LOAD_LABEL("Loading Background Map");
 			Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
+			((IEngineMap*)Kernel()->RequestInterface<IEngineMap>())->SetActiveDataFile(0);
 		}
 
 		g_GameClient.m_pMenus->RenderLoading();
@@ -595,6 +596,7 @@ int CGameClient::OnSnapInput(int *pData)
 
 void CGameClient::OnConnected()
 {
+	((IEngineMap*)Kernel()->RequestInterface<IEngineMap>())->SetActiveDataFile(1);
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
 	m_pCollision = &m_Collision; // where fck
@@ -1062,6 +1064,14 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 	// EVENT CALL
 	LUA_FIRE_EVENT("OnStateChange", NewState, OldState);
+
+	if(NewState == IClient::STATE_OFFLINE)
+	{
+		((IEngineMap*)Kernel()->RequestInterface<IEngineMap>())->SetActiveDataFile(0);
+		m_Layers.Init(Kernel());
+		m_Collision.Init(Layers());
+		m_pCollision = &m_Collision; // where fck
+	}
 }
 
 void CGameClient::OnShutdown()

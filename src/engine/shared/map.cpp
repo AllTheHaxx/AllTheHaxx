@@ -7,41 +7,44 @@
 
 class CMap : public IEngineMap
 {
-	CDataFileReader m_DataFile;
+	int m_ActiveDataFile;
+	CDataFileReader m_DataFile[16];
 public:
-	CMap() {}
+	CMap() { m_ActiveDataFile = 0;}
 
-	virtual void *GetData(int Index) { return m_DataFile.GetData(Index); }
-	virtual int GetUncompressedDataSize(int Index) { return m_DataFile.GetUncompressedDataSize(Index); }
-	virtual void *GetDataSwapped(int Index) { return m_DataFile.GetDataSwapped(Index); }
-	virtual void UnloadData(int Index) { m_DataFile.UnloadData(Index); }
-	virtual void *GetItem(int Index, int *pType, int *pID) { return m_DataFile.GetItem(Index, pType, pID); }
-	virtual int GetItemSize(int Index) { return m_DataFile.GetItemSize(Index); }
-	virtual void GetType(int Type, int *pStart, int *pNum) { m_DataFile.GetType(Type, pStart, pNum); }
-	virtual void *FindItem(int Type, int ID) { return m_DataFile.FindItem(Type, ID); }
-	virtual int NumItems() { return m_DataFile.NumItems(); }
+	virtual void *GetData(int Index) { return m_DataFile[m_ActiveDataFile].GetData(Index); }
+	virtual int GetUncompressedDataSize(int Index) { return m_DataFile[m_ActiveDataFile].GetUncompressedDataSize(Index); }
+	virtual void *GetDataSwapped(int Index) { return m_DataFile[m_ActiveDataFile].GetDataSwapped(Index); }
+	virtual void UnloadData(int Index) { m_DataFile[m_ActiveDataFile].UnloadData(Index); }
+	virtual void *GetItem(int Index, int *pType, int *pID) { return m_DataFile[m_ActiveDataFile].GetItem(Index, pType, pID); }
+	virtual int GetItemSize(int Index) { return m_DataFile[m_ActiveDataFile].GetItemSize(Index); }
+	virtual void GetType(int Type, int *pStart, int *pNum) { m_DataFile[m_ActiveDataFile].GetType(Type, pStart, pNum); }
+	virtual void *FindItem(int Type, int ID) { return m_DataFile[m_ActiveDataFile].FindItem(Type, ID); }
+	virtual int NumItems() { return m_DataFile[m_ActiveDataFile].NumItems(); }
+	virtual void SetActiveDataFile(int n) { m_ActiveDataFile = n; }
+	virtual int ActiveMapDataFile() { return m_ActiveDataFile; }
 
-	virtual void Unload()
+	virtual void Unload(int n)
 	{
-		m_DataFile.Close();
+		m_DataFile[n].Close();
 	}
 
-	virtual bool Load(const char *pMapName)
+	virtual bool Load(int n, const char *pMapName)
 	{
 		IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 		if(!pStorage)
 			return false;
-		return m_DataFile.Open(pStorage, pMapName, IStorageTW::TYPE_ALL);
+		return m_DataFile[n].Open(pStorage, pMapName, IStorageTW::TYPE_ALL);
 	}
 
-	virtual bool IsLoaded()
+	virtual bool IsLoaded(int n)
 	{
-		return m_DataFile.IsOpen();
+		return m_DataFile[n].IsOpen();
 	}
 
-	virtual unsigned Crc()
+	virtual unsigned Crc(int n)
 	{
-		return m_DataFile.Crc();
+		return m_DataFile[n].Crc();
 	}
 };
 
