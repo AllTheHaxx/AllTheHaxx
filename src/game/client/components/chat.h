@@ -81,6 +81,8 @@ class CChat : public CComponent
 	int64 m_LastChatSend;
 	int64 m_aLastSoundPlayed[CHAT_NUM];
 
+	int64 m_LastDennisTrigger;
+
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConChat(IConsole::IResult *pResult, void *pUserData);
