@@ -2307,7 +2307,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	//Right.Margin(5.0f, &Right);
 
 	Left.HSplitTop(30.0f, &Button, &Left);
-	UI()->DoLabel(&Button, Localize("Haxx"), 20.0f, 0, Button.w);
+	UI()->DoLabelScaled(&Button, Localize("Haxx"), 20.0f, 0, -1);
 
 	Left.HSplitTop(7.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
@@ -2356,7 +2356,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 		CUIRect Background;
 		Left.HSplitTop(7.5f, 0, &Background);
-		Background.h = 23.0f*7+2.0f;
+		Background.h = 23.0f*8+2.0f;
 		RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
 		Left.HSplitTop(7.0f, 0, &Left);
 		Left.VMargin(10.0f, &Left);
@@ -2375,7 +2375,7 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 	MainView.Margin(5.0f, &MainView);
 
 	MainView.HSplitTop(30.0f, &Button, &MainView);
-	UI()->DoLabel(&Button, Localize("Chat"), 20.0f, 0, Button.w);
+	UI()->DoLabelScaled(&Button, Localize("Chat"), 20.0f, 0, -1);
 
 	MainView.HSplitTop(7.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
