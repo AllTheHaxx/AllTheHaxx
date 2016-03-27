@@ -38,6 +38,8 @@ public:
 struct CConfigProperties
 {
 	static CConfiguration * m_pConfig;
+
+
 	static std::string GetConfigPlayerName() { return g_Config.m_PlayerName; }
 	static void SetConfigPlayerName(std::string name) { str_copy(g_Config.m_PlayerName, name.c_str(), sizeof(g_Config.m_PlayerName)); }
 	
@@ -46,6 +48,7 @@ struct CConfigProperties
 	
 	static int GetConfigPlayerCountry() { return g_Config.m_PlayerCountry; }
 	static void SetConfigPlayerCountry(int c) { g_Config.m_PlayerCountry = c; }
+
 
 	static std::string GetConfigPlayerSkin() { return g_Config.m_ClPlayerSkin; }
 	static void SetConfigPlayerSkin(std::string skin) { str_copy(g_Config.m_ClPlayerSkin, skin.c_str(), sizeof(g_Config.m_ClPlayerSkin)); }

@@ -338,9 +338,15 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("PosY", &CNetObj_CharacterCore::m_Y, false)
 			.addData("VelX", &CNetObj_CharacterCore::m_VelX, false)
 			.addData("VelY", &CNetObj_CharacterCore::m_VelY, false)
+
+			.addData("Angle", &CNetObj_Character::m_Angle, false)
+			.addData("Direction", &CNetObj_Character::m_Direction, false)
+
+			.addData("Jumped", &CNetObj_CharacterCore::m_Jumped, false)
+
 			.addData("HookedPlayer", &CNetObj_CharacterCore::m_HookedPlayer, false)
 			.addData("HookState", &CNetObj_CharacterCore::m_HookState, false)
-			.addData("Jumped", &CNetObj_CharacterCore::m_Jumped, false)
+			.addData("HookTick", &CNetObj_CharacterCore::m_HookTick, false)
 		.endClass()
 		
 		.deriveClass<CNetObj_Character, CNetObj_CharacterCore>("CNetObj_Character")  //TODO: Ppb add the rest
