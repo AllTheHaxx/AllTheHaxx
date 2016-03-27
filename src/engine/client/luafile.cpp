@@ -494,9 +494,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addStaticData("PlayerCountry", &CConfigProperties::m_pConfig->m_PlayerCountry)  //ints
 			
 			.addStaticProperty("Skin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
-			.addStaticData("PlayerColorBody", &CConfigProperties::m_pConfig->m_ClPlayerColorBody)
-			.addStaticData("PlayerColorFeet", &CConfigProperties::m_pConfig->m_ClPlayerColorFeet)
-			.addStaticData("PlayerUseCustomColor", &CConfigProperties::m_pConfig->m_ClPlayerUseCustomColor)
+			.addStaticProperty("PlayerColorBody", &CConfigProperties::GetConfigPlayerColorBody, &CConfigProperties::SetConfigPlayerColorBody)
+			.addStaticProperty("PlayerColorFeet", &CConfigProperties::GetConfigPlayerColorFeet, &CConfigProperties::SetConfigPlayerColorFeet)
+			.addStaticProperty("PlayerUseCustomColor", &CConfigProperties::GetConfigPlayerUseCustomColor, &CConfigProperties::SetConfigPlayerUseCustomColor)
 		.endClass()
 		
 		

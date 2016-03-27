@@ -46,6 +46,15 @@ struct CConfigProperties
 	
 	static std::string GetConfigPlayerSkin() { return g_Config.m_ClPlayerSkin; }
 	static void SetConfigPlayerSkin(std::string skin) { str_copy(g_Config.m_ClPlayerSkin, skin.c_str(), sizeof(g_Config.m_ClPlayerSkin)); }
+	
+	static int GetConfigPlayerColorBody() { return g_Config.m_ClPlayerColorBody; }
+	static void SetConfigPlayerColorBody(int c) { g_Config.m_ClPlayerColorBody = c; }
+
+	static int GetConfigPlayerColorFeet() { return g_Config.m_ClPlayerColorFeet; }
+	static void SetConfigPlayerColorFeet(int c) { g_Config.m_ClPlayerColorFeet = c; }
+
+	static int GetConfigPlayerUseCustomColor() { return g_Config.m_ClPlayerUseCustomColor; }
+	static void SetConfigPlayerUseCustomColor(int c) { g_Config.m_ClPlayerUseCustomColor = c; }
 };
 
 #endif
