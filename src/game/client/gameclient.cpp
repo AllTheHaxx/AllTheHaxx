@@ -2268,8 +2268,15 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
 				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Unload();
 		}
+		else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
+		{
+			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Init();
+			else if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
+				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Unload();
+		}
 		else
-			((CGameClient*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", Localize("You must give either 'activate' or 'deactivate' as first argument!"), false);
+			((CGameClient*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", Localize("You must give either 'activate', 'deactivate' or 'toggle' as first argument!"), false);
 	}
 }
 
