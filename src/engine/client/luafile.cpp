@@ -385,6 +385,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("WantedWeapon", &CControls::GetWantedWeapon, &CControls::SetWantedWeapon)
 			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
+			.addProperty("MouseX", &CControls::GetMouseX, &CControls::SetMouseX)
+			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
 
 			.addFunction("KeyDown", &IInput::KeyDown)
 			.addFunction("KeyName", &IInput::KeyNameSTD)
