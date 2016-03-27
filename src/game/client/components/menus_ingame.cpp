@@ -7,6 +7,7 @@
 #include <engine/friends.h>
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
+#include <engine/storage.h>
 #include <engine/textrender.h>
 #include <engine/shared/config.h>
 
@@ -20,6 +21,7 @@
 #include <game/client/render.h>
 #include <game/client/ui.h>
 
+#include "identity.h"
 #include "menus.h"
 #include "motd.h"
 #include "spoofremote.h"
@@ -428,7 +430,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 #endif
 
 	// options
-	static int s_aPlayerIDs[MAX_CLIENTS][2] = {{0}};
+	static int s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -498,6 +500,23 @@ void CMenus::RenderPlayers(CUIRect MainView)
 				m_pClient->Friends()->RemoveFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
 			else
 				m_pClient->Friends()->AddFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
+		}
+
+		// copy ident
+		Item.m_Rect.VSplitLeft(Width-5.0f, &Button, &Item.m_Rect);
+		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
+		Button.VSplitLeft(Button.h, &Button, 0);
+		if(DoButton_Menu(&s_aPlayerIDs[Index][2], "ID", 0, &Button, "Add as new identity"))
+		{
+			CIdentity::CIdentEntry Entry;
+			mem_zero(&Entry, sizeof(Entry));
+			str_format(Entry.m_aName, sizeof(Entry.m_aName), m_pClient->m_aClients[Index].m_aName);
+			str_format(Entry.m_aClan, sizeof(Entry.m_aClan), m_pClient->m_aClients[Index].m_aClan);
+			str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), m_pClient->m_aClients[Index].m_aSkinName);
+			Entry.m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
+			Entry.m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
+			Entry.m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
+			m_pClient->m_pIdentity->AddIdent(Entry);
 		}
 	}
 
