@@ -789,19 +789,15 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// tab bar
 	{
-		TabBar.VSplitLeft(TabBar.w/3, &Button, &TabBar);
+		TabBar.VSplitLeft(TabBar.w/2, &Button, &TabBar);
 		static int s_Button0 = 0;
 		if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, 0))
 			s_ControlPage = 0;
 
-		TabBar.VSplitMid(&Button, &TabBar);
+		TabBar.VSplitRight(0, &Button, &TabBar);
 		static int s_Button1 = 0;
-		if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == 1, &Button, 0))
+		if(DoButton_MenuTab(&s_Button1, Localize("Player related"), s_ControlPage == 1, &Button, 0))
 			s_ControlPage = 1;
-
-		static int s_Button2 = 0;
-		if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == 2, &TabBar, 0))
-			s_ControlPage = 2;
 	}
 
 	// render page
@@ -811,9 +807,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	if(s_ControlPage == 0)
 		RenderServerControlServer(MainView);
 	else if(s_ControlPage == 1)
-		RenderServerControlKick(MainView, false);
-	else if(s_ControlPage == 2)
-		RenderServerControlKick(MainView, true);
+		RenderServerControlKick(MainView, m_FilterSpectators);
 
 	// vote menu
 	{
@@ -854,7 +848,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		{
 			if(s_ControlPage == 0)
 				m_pClient->m_pVoting->CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
-			else if(s_ControlPage == 1)
+			else if(!m_FilterSpectators)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
@@ -863,7 +857,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					//SetActive(false);
 				}
 			}
-			else if(s_ControlPage == 2)
+			else if(m_FilterSpectators)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
@@ -897,6 +891,25 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				UI()->SetActiveItem(&m_aCallvoteReason);
 			}
 		}
+
+		if(s_ControlPage == 1)
+		{
+			Bottom.VSplitRight(50.0f, &Bottom, 0);
+			Bottom.VSplitRight(95.0f, &Bottom, &Button);
+			Button.y += 2.0f;
+			static int s_SpecKickButton = 0;
+			if(DoButton_Menu(&s_SpecKickButton, m_FilterSpectators ? "Spectate" : "Kick", 0, &Button, 
+											m_FilterSpectators ? "Move player to the spectators" : "Kick player from the server"))
+			{
+				m_FilterSpectators ^= 1;
+			}
+
+			const char *pLabel = Localize("Action:");
+			Bottom.VSplitRight(60.0f, &Bottom, &Button);
+			Button.y += 3.0f;
+			UI()->DoLabelScaled(&Button, pLabel, 16.0f, -1);
+		}
+
 
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())

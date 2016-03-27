@@ -275,6 +275,7 @@ public:	int m_LoadTotal;
 	void RenderDemoList(CUIRect MainView);
 
 	// found in menus_ingame.cpp
+	bool m_FilterSpectators;
 	void RenderGame(CUIRect MainView);
 	void RenderGameExtra(CUIRect ButtonBar);
 	void RenderServerConfigCreator(CUIRect MainView);
