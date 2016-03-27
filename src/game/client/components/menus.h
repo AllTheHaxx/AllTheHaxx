@@ -326,6 +326,7 @@ public:	int m_LoadTotal;
 	void RenderHotbar(CUIRect MainView);
 	void RenderIdents(CUIRect MainView);
 	void RenderTrans(CUIRect MainView);
+	void RenderCrypt(CUIRect MainView);
 	static void ConKeyShortcut(IConsole::IResult *pResult, void *pUserData);
 
 	// found in menus_IRC.cpp

@@ -123,14 +123,14 @@ void CMenus::RenderTrans(CUIRect MainView)
 
 	MainView.HSplitTop(6.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(230.0f, &Button, 0);
+	Button.VSplitLeft(330.0f, &Button, 0);
 	Button.x += 4.0f;
 	if(DoButton_CheckBox(&g_Config.m_ClTransIn, Localize("Translate incoming messages"), g_Config.m_ClTransIn, &Button))
 		g_Config.m_ClTransIn ^= 1;
 
 	MainView.HSplitTop(1.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(230.0f, &Button, 0);
+	Button.VSplitLeft(330.0f, &Button, 0);
 	Button.x += 4.0f;
 	if(DoButton_CheckBox(&g_Config.m_ClTransOut, Localize("Translate outgoing messages"), g_Config.m_ClTransOut, &Button))
 		g_Config.m_ClTransOut ^= 1;
@@ -172,6 +172,65 @@ void CMenus::RenderTrans(CUIRect MainView)
 	DoEditBox(&g_Config.m_ClTransOutDst, &Button, g_Config.m_ClTransOutDst, sizeof(g_Config.m_ClTransOutDst), 14.0f, &s_OffsetOutDst);
 }
 
+void CMenus::RenderCrypt(CUIRect MainView)
+{
+	CUIRect Button, Label, Temp;
+
+	RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.5f, 0.0f, 0.64f), CUI::CORNER_R, 10.0f);
+
+	MainView.HSplitTop(8.0f, &Button, &Temp);
+	Button.VSplitMid(&Button, &Label);
+
+	MainView.HSplitTop(6.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(330.0f, &Button, 0);
+	Button.x += 4.0f;
+	if(DoButton_CheckBox(&g_Config.m_ClFlagChat, Localize("Receive hidden chat"), g_Config.m_ClFlagChat, &Button))
+		g_Config.m_ClFlagChat ^= 1;
+
+	MainView.HSplitTop(4.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(60.0f, &Label, &Button);
+	Button.VSplitLeft(264.0f, &Button, 0);
+	Label.x += 4.0f;
+	Button.x += 10.0f;
+	UI()->DoLabelScaled(&Label, "RSA key:", 14.0, -1);
+	static float s_OffsetKeyName = 0.0f;
+	static char aKeyName[32] = {};
+	DoEditBox(&aKeyName, &Button, aKeyName, 32, 14.0f, &s_OffsetKeyName, false, CUI::CORNER_ALL, Localize("Key name"));
+
+	MainView.HSplitTop(4.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(330.0f, &Button, 0);
+	Label.x += 4.0f;
+	Button.x += 5.0f;
+	static int s_GenButton = 0;
+	if(DoButton_Menu(&s_GenButton, Localize("Generate RSA key"), 0, &Button, Localize("Generates a new RSA key you can then save and share")))
+	{
+		// generate key here
+	}
+
+	MainView.HSplitTop(4.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(330.0f, &Button, 0);
+	Button.x += 5.0f;
+	static int s_LoadButton = 0;
+	if(DoButton_Menu(&s_LoadButton, Localize("Load RSA key"), 0, &Button, Localize("Load key with the name you entered above")))
+	{
+		// load key here
+	}
+
+	MainView.HSplitTop(4.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(330.0f, &Button, 0);
+	Button.x += 5.0f;
+	static int s_SaveButton = 0;
+	if(DoButton_Menu(&s_SaveButton, Localize("Save RSA key"), 0, &Button, Localize("Save key with the name you entered above")))
+	{
+		// save key here
+	}
+}
+
 void CMenus::RenderHotbar(CUIRect MainView)
 {
 	if(!m_HotbarActive)
@@ -200,4 +259,11 @@ void CMenus::RenderHotbar(CUIRect MainView)
 	t.x = MainView.w - t.w;
 	t.y = MainView.h / 2.0f - t.h / 2.0f;
 	RenderTrans(t);
+
+	CUIRect c;
+	MainView.HSplitTop(125.0f, &c, 0);
+	c.w = 342.0f;
+	c.x = 0.0f;
+	c.y = MainView.h / 2.0f - c.h / 2.0f;
+	RenderCrypt(c);
 }
