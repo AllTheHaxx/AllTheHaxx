@@ -354,6 +354,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Armor", &CNetObj_Character::m_Armor)
 			.addData("Health", &CNetObj_Character::m_Health)
 			.addData("Ammo", &CNetObj_Character::m_AmmoCount)
+
+			.addData("AttackTick", &CNetObj_Character::m_AttackTick)
 		.endClass()
 		
 		.beginClass<CCharacterCore>("CCharacterCore")
