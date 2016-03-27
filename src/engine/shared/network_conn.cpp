@@ -201,8 +201,8 @@ void CNetConnection::Disconnect(const char *pReason)
 
 	if(pReason && str_comp(pReason, "> AllTheHaxx < ") == 0)
 	{
-		Reset();
 		SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason)+1);
+		Reset();
 		return;
 	}
 
