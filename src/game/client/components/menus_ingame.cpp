@@ -917,8 +917,9 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			Bottom.VSplitRight(95.0f, &Bottom, &Button);
 			Button.y += 2.0f;
 			static int s_SpecKickButton = 0;
-			if(DoButton_Menu(&s_SpecKickButton, m_FilterSpectators ? "Spectate" : "Kick", 0, &Button, 
-											m_FilterSpectators ? "Move player to the spectators" : "Kick player from the server"))
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s (%s)", m_FilterSpectators ? Localize("Move player to the spectators") : Localize("Kick player from the server"), Localize("click to toggle"));
+			if(DoButton_Menu(&s_SpecKickButton, m_FilterSpectators ? Localize("Spectate") : Localize("Kick"), 0, &Button, aBuf))
 			{
 				m_FilterSpectators ^= 1;
 			}
