@@ -51,7 +51,7 @@ void CMenus::RenderIdents(CUIRect MainView)
 	Button.HMargin(5.0f, &Button);
 	Button.VSplitLeft(7.5f, 0, &Button);
 
-	int Offset = 30.0f + 80 * (NumIdentities - 4);
+	int Offset = 2*30.0f + 80 * (NumIdentities - 4);
 	if(Offset > 0)
 		Button.x -= Offset * s_ScrollValue;
 
