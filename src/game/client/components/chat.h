@@ -97,17 +97,6 @@ class CChat : public CComponent
 	CTranslator *m_pTranslator;
 	bool HandleTCommands(const char *pMsg);
 
-	// crypt stuff
-	RSA *m_pKeyPair;
-	bool m_GotKeys;
-	void GenerateKeyPair(int Bytes, int Exp);
-	char *ReadPubKey(RSA *pKeyPair);
-	char *ReadPrivKey(RSA *pKeyPair);
-	char *EncryptMsg(const char *pMsg);
-	char *DecryptMsg(const char *pMsg);
-	void SaveKeys(RSA *pKeyPair, const char *pKeyName);
-	void LoadKeys(const char *pKeyName);
-
 public:
 	CChat();
 
@@ -129,6 +118,17 @@ public:
 	virtual void OnRelease();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Event);
+
+	// crypt stuff
+	RSA *m_pKeyPair;
+	bool m_GotKeys;
+	void GenerateKeyPair(int Bytes, int Exp);
+	char *ReadPubKey(RSA *pKeyPair);
+	char *ReadPrivKey(RSA *pKeyPair);
+	char *EncryptMsg(const char *pMsg);
+	char *DecryptMsg(const char *pMsg);
+	void SaveKeys(RSA *pKeyPair, const char *pKeyName);
+	void LoadKeys(const char *pKeyName);
 	
 	std::string m_CryptSendQueue;
 };

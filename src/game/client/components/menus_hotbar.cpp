@@ -14,6 +14,7 @@
 #include <game/client/render.h>
 #include <game/client/gameclient.h>
 
+#include "chat.h"
 #include "menus.h"
 #include "skins.h"
 #include "identity.h"
@@ -205,9 +206,9 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	Label.x += 4.0f;
 	Button.x += 5.0f;
 	static int s_GenButton = 0;
-	if(DoButton_Menu(&s_GenButton, Localize("Generate RSA key"), 0, &Button, Localize("Generates a new RSA key you can then save and share")))
+	if(DoButton_Menu(&s_GenButton, Localize("Generate RSA key"), 0, &Button, Localize("Generates a (128 b) new RSA key you can then save and share")))
 	{
-		// generate key here
+		m_pClient->m_pChat->GenerateKeyPair(256, 3);
 	}
 
 	MainView.HSplitTop(4.0f, 0, &MainView);
@@ -217,7 +218,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	static int s_LoadButton = 0;
 	if(DoButton_Menu(&s_LoadButton, Localize("Load RSA key"), 0, &Button, Localize("Load key with the name you entered above")))
 	{
-		// load key here
+		m_pClient->m_pChat->LoadKeys(aKeyName);
 	}
 
 	MainView.HSplitTop(4.0f, 0, &MainView);
@@ -227,7 +228,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	static int s_SaveButton = 0;
 	if(DoButton_Menu(&s_SaveButton, Localize("Save RSA key"), 0, &Button, Localize("Save key with the name you entered above")))
 	{
-		// save key here
+		m_pClient->m_pChat->SaveKeys(m_pClient->m_pChat->m_pKeyPair, aKeyName);
 	}
 }
 
