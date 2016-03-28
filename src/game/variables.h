@@ -123,6 +123,7 @@ MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copy_moves, 0, 0, 1, CFGFLAG_CLIENT,
 // advanced dummy
 MACRO_CONFIG_INT(ClDummyHookFly, cl_dummy_hook_fly, 0, 0, 1, CFGFLAG_CLIENT, "Hook-fly with your dummy")
 MACRO_CONFIG_INT(ClDummyCopyMirror, cl_dummy_copy_mirror, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Wether dummy copys your moves like a mirroŕ")
+MACRO_CONFIG_INT(ClDummyAutoSwitch, cl_dummy_auto_switch, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "If enabled, you automatically switch to dummy when you connect him")
 
 // curl http download
 MACRO_CONFIG_INT(ClHTTPConnectTimeoutMs, cl_http_connect_timeout_ms, 2000, 0, 100000, CFGFLAG_CLIENT, "HTTP downloads: timeout for the connect phase in milliseconds (0 to disable)")
