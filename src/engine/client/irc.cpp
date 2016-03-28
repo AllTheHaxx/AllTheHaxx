@@ -1258,9 +1258,8 @@ void CIRC::SendGetServer(const char *to)
 
 void CIRC::SendVersion(const char *to)
 {
-	str_format(m_CmdToken, sizeof(m_CmdToken), "%ld", time_get());
 	SendRaw("NOTICE %s :VERSION AllTheHaxx %s; DDNet v%i; Teeworlds %s (%s); built on %s", to,
-			GAME_VERSION, GAME_NETVERSION, ALLTHEHAXX_VERSION, CLIENT_VERSIONNR, BUILD_DATE);
+			ALLTHEHAXX_VERSION, CLIENT_VERSIONNR, GAME_VERSION, GAME_NETVERSION, BUILD_DATE);
 }
 
 void CIRC::ExecuteCommand(const char *cmd, char *params)
