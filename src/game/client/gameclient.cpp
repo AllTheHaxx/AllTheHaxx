@@ -2237,13 +2237,14 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() < 2)
 		return;
 
+	CGameClient* pSelf = (CGameClient*)pUserData;
 
 	for(int n = 1; n < pResult->NumArguments(); n++)
 	{
 		int id = -1;
-		for(int i = 0; i < ((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles().size(); i++)
+		for(int i = 0; i < pSelf->Client()->Lua()->GetLuaFiles().size(); i++)
 		{
-			if(str_comp_nocase(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[i]->GetFilename(), pResult->GetString(n)) == 0)
+			if(str_comp_nocase(pSelf->Client()->Lua()->GetLuaFiles()[i]->GetFilename(), pResult->GetString(n)) == 0)
 			{
 				id = i;
 				break;
@@ -2254,29 +2255,37 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), Localize("There was no luafile with the name '%s' found!"), pResult->GetString(n));
-			((CGameClient*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", aBuf, false);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", aBuf, false);
 			return;
 		}
 
 		if(str_comp_nocase(pResult->GetString(0), "activate") == 0)
 		{
-			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
-				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Init();
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Init();
 		}
 		else if(str_comp_nocase(pResult->GetString(0), "deactivate") == 0)
 		{
-			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
-				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Unload();
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Unload();
 		}
 		else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
 		{
-			if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
-				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Init();
-			else if(((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
-				((CGameClient*)pUserData)->Client()->Lua()->GetLuaFiles()[id]->Unload();
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Init();
+			else if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Unload();
+
+			char aBuf[64];
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_ERROR)
+				str_format(aBuf, sizeof(aBuf), "Script '%s' failed to load", pResult->GetString(1));
+			else
+				str_format(aBuf, sizeof(aBuf), "Toggled script '%s' %s", pResult->GetString(1),
+						pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED ? "on" : "off");
+				pSelf->m_pHud->PushNotification(aBuf);
 		}
 		else
-			((CGameClient*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", Localize("You must give either 'activate', 'deactivate' or 'toggle' as first argument!"), false);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", Localize("You must give either 'activate', 'deactivate' or 'toggle' as first argument!"), false);
 	}
 }
 
