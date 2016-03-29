@@ -71,6 +71,9 @@ void CEmoticon::DrawCircle(float x, float y, float r, int Segments)
 
 void CEmoticon::OnRender()
 {
+	static float s_Val = 0.0;
+
+
 	if(!m_Active)
 	{
 		if(m_WasActive && m_SelectedEmote != -1)
@@ -78,15 +81,43 @@ void CEmoticon::OnRender()
 		if(m_WasActive && m_SelectedEyeEmote != -1)
 			EyeEmote(m_SelectedEyeEmote);
 		m_WasActive = false;
-		return;
+		smooth_set(&s_Val, 0.0f, (0.005f/Client()->RenderFrameTime())*30.0f);
+		if(s_Val < 0.001f)
+		{
+			s_Val = 0.0f;
+			return;
+		}
 	}
+	else
+	{
+		smooth_set(&s_Val, 1.0f, (0.005f/Client()->RenderFrameTime())*30.0f);
+		if(s_Val > 0.98f)
+			s_Val = 1.0f;
+	}
+
 
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 	{
 		m_Active = false;
 		m_WasActive = false;
+		s_Val = 0.0f;
 		return;
 	}
+
+	CUIRect Screen = *UI()->Screen();
+
+	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+
+	Graphics()->BlendNormal();
+
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0,0,0,0.3f);
+	DrawCircle(Screen.w/2, Screen.h/2, s_Val*190.0f, 64);
+	Graphics()->QuadsEnd();
+
+	if(!m_Active)
+		return;
 
 	m_WasActive = true;
 
@@ -104,21 +135,10 @@ void CEmoticon::OnRender()
 	else if(length(m_SelectorMouse) > 40.0f)
 		m_SelectedEyeEmote = (int)(SelectedAngle / (2*pi) * NUM_EMOTES);
 
-	CUIRect Screen = *UI()->Screen();
-
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-
-	Graphics()->BlendNormal();
-
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.3f);
-	DrawCircle(Screen.w/2, Screen.h/2, 190.0f, 64);
-	Graphics()->QuadsEnd();
-
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 	Graphics()->QuadsBegin();
 
+	// draw the emoticons in a circle
 	for (int i = 0; i < NUM_EMOTICONS; i++)
 	{
 		float Angle = 2*pi*i/NUM_EMOTICONS;
@@ -132,6 +152,7 @@ void CEmoticon::OnRender()
 		float NudgeX = 150.0f * cosf(Angle);
 		float NudgeY = 150.0f * sinf(Angle);
 		RenderTools()->SelectSprite(SPRITE_OOP + i);
+		Graphics()->SetColor(1.0,1.0,1.0,s_Val);
 		IGraphics::CQuadItem QuadItem(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY, Size, Size);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
