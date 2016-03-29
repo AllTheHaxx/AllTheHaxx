@@ -973,7 +973,7 @@ void CPlayers::RenderPlayer(
 			TextRender()->TextColor(1,1,1,1);
 			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 
-			if(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH)
+			/*if(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH)
 			{
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
 				Graphics()->QuadsBegin();
@@ -984,7 +984,7 @@ void CPlayers::RenderPlayer(
 
 				RenderTools()->DrawRoundRect(Position.x-30.f, PosY, 55.f, 25.f, 0.f);
 				Graphics()->QuadsEnd();
-			}
+			}*/
 		}
 	}
 }

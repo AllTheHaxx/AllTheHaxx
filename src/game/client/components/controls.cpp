@@ -222,7 +222,7 @@ int CControls::SnapInput(int *pData)
 	else
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	
-	m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH;
+	m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
 		
 	if(m_pClient->m_pChat->m_CryptSendQueue.size())
 	{
