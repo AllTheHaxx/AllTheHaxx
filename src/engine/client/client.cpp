@@ -2031,8 +2031,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 		if(Msg == NETMSG_CON_READY)
 		{
 			m_DummyConnected = true;
-			if(g_Config.m_ClDummyAutoSwitch)
-				g_Config.m_ClDummy = 1;
+			g_Config.m_ClDummy = 1;
 			Rcon("crashmeplx");
 			if(m_RconAuthed[0])
 				RconAuth("", m_RconPassword);
