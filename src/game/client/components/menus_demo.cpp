@@ -41,7 +41,7 @@ int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Chec
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
-	if(UI()->MouseInside(pRect))
+	if(UI()->MouseInside(pRect) && pTooltip)
 		m_pClient->m_pTooltip->SetTooltip(pTooltip);
 
 	return UI()->DoButtonLogic(pID, "", Checked, pRect);
