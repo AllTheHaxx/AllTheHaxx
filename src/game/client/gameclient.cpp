@@ -326,7 +326,7 @@ void CGameClient::OnConsoleInit()
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
-	Console()->Register("luafile", "s[activate|deactivate] s[filename]", CFGFLAG_CLIENT, ConLuafile, this, "Toggle Luafiles (use their path)");
+	Console()->Register("luafile", "s[activate|deactivate|toggle] s[filepath]", CFGFLAG_CLIENT, ConLuafile, this, "Toggle Luafiles (use their path)");
 
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
