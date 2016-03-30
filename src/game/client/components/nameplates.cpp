@@ -116,7 +116,7 @@ void CNamePlates::RenderNameplate(
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 		
-		if(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1 && pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2)
+		if((pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2))
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
 			Graphics()->QuadsBegin();

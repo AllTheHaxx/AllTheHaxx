@@ -26,7 +26,7 @@
 #include <engine/textrender.h>
 
 #include "players.h"
-//#include <stdio.h>
+
 
 void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset)
 {
@@ -939,13 +939,13 @@ void CPlayers::RenderPlayer(
 					TextRender()->TextColor(0.7f, 0.7f, 1.0f, a);
 			}
 
-			TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f, FontSize, aName, -1);
+			TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f-FontSize, FontSize, aName, -1);
 
 			if(g_Config.m_ClNameplatesClan)
 			{
 				const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
 				float tw_clan = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
-				TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y-FontSize-FontSizeClan-38.0f, FontSizeClan, pClan, -1);
+				TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y - FontSizeClan - 38.0f, FontSizeClan, pClan, -1);
 			}
 
 			if(g_Config.m_ClNamePlatesScore)
@@ -973,7 +973,8 @@ void CPlayers::RenderPlayer(
 			TextRender()->TextColor(1,1,1,1);
 			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 
-			/*if(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH)
+			// WE NEED THIS! otherwise there is no "ATH" with antiping enabled!
+			if((pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2))
 			{
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
 				Graphics()->QuadsBegin();
@@ -984,7 +985,7 @@ void CPlayers::RenderPlayer(
 
 				RenderTools()->DrawRoundRect(Position.x-30.f, PosY, 55.f, 25.f, 0.f);
 				Graphics()->QuadsEnd();
-			}*/
+			}
 		}
 	}
 }
