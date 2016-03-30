@@ -90,8 +90,9 @@ void CNamePlates::RenderNameplate(
 		{
 			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, aName, -1); // just name
 		}
-
-		if(g_Config.m_ClNamePlatesScore)
+		CServerInfo ServerInfo;
+		Client()->GetServerInfo(&ServerInfo);
+		if(g_Config.m_ClNamePlatesScore && !IsRace(&ServerInfo) && !IsDDNet(&ServerInfo))
 		{
 			CUIRect Bg;
 			Bg.x = Position.x - tw2 / 2.0f            -4.0f;

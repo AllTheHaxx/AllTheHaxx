@@ -948,7 +948,9 @@ void CPlayers::RenderPlayer(
 				TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y - FontSizeClan - 38.0f, FontSizeClan, pClan, -1);
 			}
 
-			if(g_Config.m_ClNamePlatesScore)
+			CServerInfo ServerInfo;
+			Client()->GetServerInfo(&ServerInfo);
+			if(g_Config.m_ClNamePlatesScore && !IsRace(&ServerInfo) && !IsDDNet(&ServerInfo))
 			{
 				CUIRect Bg;
 				Bg.x = Position.x - tw2 / 2.0f            -1.0f;
