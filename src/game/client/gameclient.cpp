@@ -646,7 +646,7 @@ void CGameClient::OnReset()
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
 
-	if(m_ResetConfig)
+	if(m_ResetConfig && g_Config.m_ClResetServerCfgOnDc)
 	{
 		IOHANDLE File = Storage()->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
 		if(File)
