@@ -232,7 +232,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass< CUIRect >("UIRect")
 			.addConstructor <void (*) ()> ()
 			.addConstructor <void (*) (float)> ()
-			.addConstructor <void (*) (const CUIRect&)> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
 			.addData("x", &CUIRect::x)
 			.addData("y", &CUIRect::y)
