@@ -152,6 +152,10 @@ MACRO_CONFIG_INT(ClGoreStyleTeeColors, cl_gore_style_tee_color, 0, 0, 1, CFGFLAG
 MACRO_CONFIG_INT(ClGoreStyleDropWeapons, cl_gore_style_drop_weapons, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gore: Drop weapons")
 MACRO_CONFIG_INT(ClGoreStyle, cl_gore_style, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Gore Mod")
 MACRO_CONFIG_INT(ClSmartZoom, cl_smart_zoom, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom in/out in a smart way, only on race gametypes")
+MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send \"Zzz\" emotes while being in console mode")
+MACRO_CONFIG_INT(ClResetServerCfgOnDc, cl_reset_server_cfg_on_disconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Discard config changes when disconnecting, use 'config_save' if you want to keep them")
+
+// irc
 MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to irc on startup automatically")
 MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
 //MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
@@ -167,9 +171,7 @@ MACRO_CONFIG_INT(ClIRCAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGF
 //
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
 MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console")
-
-MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send \"Zzz\" emotes while being in console mode")
-
+//
 MACRO_CONFIG_STR(GameTexture, game_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gameskin texture")
 MACRO_CONFIG_STR(GameParticles, particle_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Particle texture")
 MACRO_CONFIG_STR(GameEmoticons, emoticons_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Emoticons texture")

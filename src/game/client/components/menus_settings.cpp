@@ -2334,6 +2334,11 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button, Localize("Highly recommended!")))
 		g_Config.m_ClSmartZoom ^= 1;
 
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClConsoleModeEmotes, Localize("Console Mode Indicator"), g_Config.m_ClConsoleModeEmotes, &Button, Localize("Send Zzz emotes when in console mode")))
+		g_Config.m_ClConsoleModeEmotes ^= 1;
+
 	// extra binds!
 	{
 		// this is kinda slow, but whatever

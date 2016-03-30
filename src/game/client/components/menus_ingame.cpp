@@ -247,6 +247,17 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 	MainView.HSplitTop(10.0f, 0, &MainView);
 	TextRender()->Text(0, MainView.x+10.0f, MainView.y, 12.0f, Localize("Server-Dependent-Configuration Manager"), -1);
 
+	{
+		MainView.VSplitMid(&MainView, &Button);
+		MainView.w += Button.w;
+		static int s_Checkbox = 0;
+		Button.HSplitTop(20.0f, &Button, 0);
+		Button.VSplitRight(200.0f, 0, &Button);
+		Button.x -= 20.0f;
+		if(DoButton_CheckBox(&s_Checkbox, Localize("Reset on Disconnect"), g_Config.m_ClResetServerCfgOnDc, &Button, Localize("Discard config changes when disconnecting")))
+			g_Config.m_ClResetServerCfgOnDc ^= 1;
+	}
+
 	MainView.HSplitTop(10.0f, 0, &MainView);
 	MainView.Margin(20.0f, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
