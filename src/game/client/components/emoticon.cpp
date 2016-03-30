@@ -81,7 +81,7 @@ void CEmoticon::OnRender()
 		if(m_WasActive && m_SelectedEyeEmote != -1)
 			EyeEmote(m_SelectedEyeEmote);
 		m_WasActive = false;
-		smooth_set(&s_Val, 0.0f, (0.005f/Client()->RenderFrameTime())*30.0f);
+		smooth_set(&s_Val, 0.0f, (0.005f/Client()->RenderFrameTime())*25.0f);
 		if(s_Val < 0.001f)
 		{
 			s_Val = 0.0f;
@@ -90,8 +90,8 @@ void CEmoticon::OnRender()
 	}
 	else
 	{
-		smooth_set(&s_Val, 1.0f, (0.005f/Client()->RenderFrameTime())*30.0f);
-		if(s_Val > 0.98f)
+		smooth_set(&s_Val, 1.0f, (0.005f/Client()->RenderFrameTime())*25.0f);
+		if(s_Val > 0.995f)
 			s_Val = 1.0f;
 	}
 
@@ -110,14 +110,15 @@ void CEmoticon::OnRender()
 
 	Graphics()->BlendNormal();
 
+	// draw the big circle
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.3f);
+	Graphics()->SetColor(0,0,0,0.3f*s_Val);
 	DrawCircle(Screen.w/2, Screen.h/2, s_Val*190.0f, 64);
 	Graphics()->QuadsEnd();
 
-	if(!m_Active)
-		return;
+	//if(!m_Active)
+	//	return;
 
 	m_WasActive = true;
 
@@ -139,7 +140,15 @@ void CEmoticon::OnRender()
 	Graphics()->QuadsBegin();
 
 	// draw the emoticons in a circle
-	for (int i = 0; i < NUM_EMOTICONS; i++)
+	static float s_PopVal = 0.0f;
+	if(s_Val > 0.5f)
+		smooth_set(&s_PopVal, 1.0f, (0.005f/Client()->RenderFrameTime())*35.0f);
+	else
+		smooth_set(&s_PopVal, 0.0f, (0.005f/Client()->RenderFrameTime())*35.0f);
+	if(s_PopVal < 0.01f)
+		s_PopVal = 0.0f;
+
+	for(int i = 0; i < NUM_EMOTICONS; i++)
 	{
 		float Angle = 2*pi*i/NUM_EMOTICONS;
 		if (Angle > pi)
@@ -149,8 +158,8 @@ void CEmoticon::OnRender()
 
 		float Size = Selected ? 80.0f : 50.0f;
 
-		float NudgeX = 150.0f * cosf(Angle);
-		float NudgeY = 150.0f * sinf(Angle);
+		float NudgeX = s_PopVal*150.0f * cosf(Angle);
+		float NudgeY = s_PopVal*150.0f * sinf(Angle);
 		RenderTools()->SelectSprite(SPRITE_OOP + i);
 		Graphics()->SetColor(1.0,1.0,1.0,s_Val);
 		IGraphics::CQuadItem QuadItem(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY, Size, Size);
@@ -165,8 +174,8 @@ void CEmoticon::OnRender()
 	{
 		Graphics()->TextureSet(-1);
 		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0,1.0,1.0,0.3f);
-		DrawCircle(Screen.w/2, Screen.h/2, 100.0f, 64);
+		Graphics()->SetColor(1.0,1.0,1.0,s_PopVal*0.3f);
+		DrawCircle(Screen.w/2, Screen.h/2, min(s_Val*190.0f, 100.0f), 64);
 		Graphics()->QuadsEnd();
 
 		CTeeRenderInfo *pTeeInfo;
@@ -177,6 +186,7 @@ void CEmoticon::OnRender()
 
 		Graphics()->TextureSet(pTeeInfo->m_Texture);
 
+		// draw the eyeemotes in a circle
 		for (int i = 0; i < NUM_EMOTES; i++)
 		{
 			float Angle = 2*pi*i/NUM_EMOTES;
@@ -186,25 +196,30 @@ void CEmoticon::OnRender()
 			bool Selected = m_SelectedEyeEmote == i;
 
 			pTeeInfo->m_Size = Selected ? 64.0f : 48.0f;
+			pTeeInfo->m_Size *= s_PopVal;
 
-			float NudgeX = 70.0f * cosf(Angle);
-			float NudgeY = 70.0f * sinf(Angle);
-			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1,0), vec2(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY));
+			float NudgeX = s_PopVal*70.0f * cosf(Angle);
+			float NudgeY = s_PopVal*70.0f * sinf(Angle);
+			pTeeInfo->m_ColorBody.a = s_PopVal;
+			pTeeInfo->m_ColorFeet.a = s_PopVal;
+			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1,0), vec2(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY), true);
 		}
 
 		Graphics()->TextureSet(-1);
 		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0,0,0,0.3f);
-		DrawCircle(Screen.w/2, Screen.h/2, 30.0f, 64);
+		Graphics()->SetColor(0,0,0,s_PopVal*0.3f);
+		DrawCircle(Screen.w/2, Screen.h/2, min(s_Val*190.0f, 30.0f), 64);
 		Graphics()->QuadsEnd();
 	}
 	else
 		m_SelectedEyeEmote = -1;
 
+	if(!m_Active)
+		return;
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1, 1, 1, 1);
-	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x + Screen.w / 2, m_SelectorMouse.y + Screen.h / 2, 24, 24);
+	Graphics()->SetColor(1, 1, 1, s_Val*1);
+	IGraphics::CQuadItem QuadItem(s_Val*m_SelectorMouse.x + Screen.w / 2, s_Val*m_SelectorMouse.y + Screen.h / 2, 24, 24);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 }
