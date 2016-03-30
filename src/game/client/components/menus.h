@@ -42,6 +42,7 @@ class CMenus : public CComponent
 
 	friend class CGameConsole; // need this for IRC GUI
 	friend class CLuaBinding; // need this for lua
+	friend class CLuaFile; // need this for lua
 
 	static vec4 ms_GuiColor;
 	static vec4 ms_ColorTabbarInactiveOutgame;
