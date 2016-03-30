@@ -382,7 +382,7 @@ void CHud::PushNotification(const char *pMsg, vec4 Color)
 const char* CHud::GetNotification(int index)
 {
 	if(index < m_Notifications.size())
-		return m_Notifications[0].m_aMsg;
+		return m_Notifications[index].m_aMsg;
 	return 0;
 }
 
