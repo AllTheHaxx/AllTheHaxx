@@ -218,7 +218,7 @@ void CIRC::StartConnection() // call this from a thread only!
 		timeinfo = localtime(&rawtime);
 		str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
-
+		// XXX: here
 		for (int i=0; i < CurrentRecv; i++)
 		{
 			if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')
@@ -631,8 +631,11 @@ void CIRC::StartConnection() // call this from a thread only!
 									m_IRCComs.push_back(pNewQuery);
 
 									if(MsgType == MSG_TYPE_ACTION)
+									{
 										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
 												aMsgText.substr(8, -1).c_str());
+										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
+									}
 									else
 										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
 												aMsgText.c_str());
@@ -644,8 +647,11 @@ void CIRC::StartConnection() // call this from a thread only!
 										pCom->m_NumUnreadMsg++;
 
 									if(MsgType == MSG_TYPE_ACTION)
+									{
 										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
 												aMsgText.substr(8, -1).c_str());
+										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
+									}
 									else
 										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
 												aMsgText.c_str());
@@ -669,8 +675,11 @@ void CIRC::StartConnection() // call this from a thread only!
 										pCom->m_NumUnreadMsg++;
 
 									if(MsgType == MSG_TYPE_ACTION)
+									{
 										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
 												aMsgText.substr(8, -1).c_str());
+										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
+									}
 									else
 										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
 												aMsgText.c_str());
@@ -1346,7 +1355,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 		char aBuf[1024] = {0};
 		if (CmdListParams.size() >= 2)
 		{
-			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\x1%s",
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1%s",
 					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
 			CmdListParams.remove_index(0); // pop twice
 			CmdListParams.remove_index(0); //   -> the first two arguments
@@ -1356,12 +1365,31 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
 				CmdListParams.remove_index(0);
 			}
-			aBuf[str_length(aBuf)] = '\x1';
+			aBuf[str_length(aBuf)] = '\1';
 			SendRaw(aBuf);
 		}
 	}
-	else
-		SendRaw("%s %s", cmd, params);
+	else if(str_comp_nocase(cmd, "me") == 0)
+	{
+		char aBuf[1024] = {0};
+		if (CmdListParams.size() >= 1)
+		{
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION %s",
+					GetActiveCom()->GetType() == CIRCCom::TYPE_QUERY ?
+							((CComQuery*)GetActiveCom())->m_User : ((CComChan*)GetActiveCom())->m_Channel,
+					CmdListParams[0].c_str()); // first word
+			CmdListParams.remove_index(0); // pop
+			while(CmdListParams.size() > 0) // add all other arguments
+			{
+				str_append(aBuf, " ", sizeof(aBuf));
+				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
+				CmdListParams.remove_index(0);
+			}
+			aBuf[str_length(aBuf)] = '\1';
+			SendRaw(aBuf);
+		}
+	}
+	SendRaw("%s %s", cmd, params);
 }
 
 int CIRC::NumUnreadMessages(int *pArray)
