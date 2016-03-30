@@ -56,6 +56,7 @@ public:
 
 	void SelectSprite(struct CDataSprite *pSprite, int Flags=0, int sx=0, int sy=0);
 	void SelectSprite(int id, int Flags=0, int sx=0, int sy=0);
+	void SelectSpriteLua(int id, int Flags=0, int sx=0, int sy=0) { SelectSprite(id, Flags, sx, sy); }
 
 	void DrawSprite(float x, float y, float size);
 

@@ -592,9 +592,9 @@ void CHud::RenderVoting()
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
 #if defined(__ANDROID__)
-	CUIRect Base = {TextX, TextH - 8, TextW, 4};
+	CUIRect Base(TextX, TextH - 8, TextW, 4);
 #else
-	CUIRect Base = {5-Offset, 88, 100, 4};
+	CUIRect Base(5-Offset, 88, 100, 4);
 #endif
 	m_pClient->m_pVoting->RenderBars(Base, false);
 

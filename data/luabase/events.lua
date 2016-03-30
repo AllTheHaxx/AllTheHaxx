@@ -39,6 +39,16 @@ function OnChat(ID, Team, Message)
 	end
 end
 
+function OnChatSend(Team, Msg)
+	if Events["OnChatSend"] ~= nil then
+		for script, event in pairs(Events["OnChatSend"]) do
+			if event ~= nil then
+				event(Team, Message)
+			end
+		end
+	end
+end
+
 function OnConfigOpen(x, y, w, h)
 	if Events["OnConfigOpen"] ~= nil then
 		for script, event in pairs(Events["OnConfigOpen"]) do

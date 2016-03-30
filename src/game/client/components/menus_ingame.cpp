@@ -1817,10 +1817,10 @@ void CMenus::RenderGhost(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{-1,			" ",		2.0f,		{0}, {0}},
-		{COL_ACTIVE,	" ",		30.0f,		{0}, {0}},
-		{COL_NAME,		"Name",		300.0f,		{0}, {0}},
-		{COL_TIME,		"Time",		200.0f,		{0}, {0}},
+		{-1,			" ",		2.0f,		0, 0},
+		{COL_ACTIVE,	" ",		30.0f,		0, 0},
+		{COL_NAME,		"Name",		300.0f,		0, 0},
+		{COL_TIME,		"Time",		200.0f,		0, 0},
 	};
 
 	int NumCols = sizeof(s_aCols)/sizeof(CColumn);

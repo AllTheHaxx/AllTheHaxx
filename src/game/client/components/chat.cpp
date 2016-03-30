@@ -396,11 +396,21 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
+		bool HideChat = false;
 
 		// EVENT CALL
-		LUA_FIRE_EVENT("OnChat", pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage));
+		{
+			for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+			{
+				if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+					continue;
+				LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChat");
+				if(lfunc) try { HideChat |= lfunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)).cast<bool>(); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+			}
+			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChat");
+			if(confunc) try { confunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+		}
 
-		bool HideChat = false;
 
 		if(g_Config.m_ClNotifications)
 		{
@@ -973,6 +983,8 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	Msg.m_Team = Team;
 	Msg.m_pMessage = aMessage;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+
+	LUA_FIRE_EVENT("OnChatSend", Team, pLine);
 }
 
 ////////////////////////////
