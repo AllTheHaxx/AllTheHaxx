@@ -16,14 +16,15 @@ using namespace luabridge;
 CLua::CLua()
 {
 	CLuaBinding::m_pUiContainer = new CLuaBinding::UiContainer;
-	
 	CConfigProperties::m_pConfig = &g_Config;
+	m_pStorage = 0;
 }
 
 CLua::~CLua()
 {
 	m_pLuaFiles.delete_all();
 	m_pLuaFiles.clear();
+	delete CLuaBinding::m_pUiContainer;
 }
 
 void CLua::Init(IClient * pClient, IStorageTW * pStorage)
