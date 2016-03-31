@@ -179,7 +179,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		// ui namespace
 		.beginNamespace("_ui")
 			.addFunction("SetUiColor", &CLuaBinding::LuaSetUiColor)
-			.addFunction("DrawUiRect", &CLuaBinding::LuaDrawUiRect)
 			.addFunction("DoButton_Menu", &CLuaBinding::LuaDoButton_Menu)
 		.endNamespace()
 

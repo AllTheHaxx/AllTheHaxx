@@ -26,7 +26,6 @@ public:
 
 	// ui namespace
 	static void LuaSetUiColor(float r, float g, float b, float a);
-	static void LuaDrawUiRect(float x, float y, float w, float h, int corners, float rounding);
 	static int LuaDoButton_Menu(const char *pText, int Checked, float x, float y, float w, float h, const char *pTooltip, int Corners);
 
 	// graphics namespace
