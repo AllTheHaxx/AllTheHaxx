@@ -38,6 +38,13 @@ CChat::CChat()
 	//m_pKeyPair = GenerateKeyPair(512, 3);
 }
 
+CChat::~CChat()
+{
+	if(m_pTranslator)
+		delete m_pTranslator;
+	m_pTranslator = 0;
+}
+
 void CChat::OnReset()
 {
 	for(int i = 0; i < MAX_LINES; i++)
@@ -173,7 +180,11 @@ bool CChat::OnInput(IInput::CEvent Event)
 				{
 					char *pEncrypted = EncryptMsg(m_Input.GetString());
 					if(pEncrypted)
+					{
 						Say(0, pEncrypted);
+						delete[] pEncrypted;
+					}
+
 				}
 				else
 					Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
@@ -460,7 +471,10 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		{
 			char *pDecrypted = DecryptMsg(pMsg->m_pMessage);
 			if(pDecrypted)
+			{
 				AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
+				delete[] pDecrypted;
+			}
 		}
 
 		if(g_Config.m_ClTransIn &&
@@ -1100,8 +1114,10 @@ void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 	pPubFile = fopen(aPubKey, "w");
 	if(pPubFile != NULL)
 	{
-		fputs(ReadPubKey(pKeyPair), pPubFile);
+		char *pPupKey = ReadPubKey(pKeyPair);
+		fputs(pPupKey, pPubFile);
 		fclose(pPubFile);
+		delete[] pPupKey;
 	}
 	else
 	{
@@ -1113,8 +1129,10 @@ void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 	pPrivFile = fopen(aPrivKey, "w");
 	if(pPrivFile != NULL)
 	{
-		fputs(ReadPrivKey(pKeyPair), pPrivFile);
+		char *pPrivKey = ReadPrivKey(pKeyPair);
+		fputs(pPrivKey, pPrivFile);
 		fclose(pPrivFile);
+		delete[] pPrivKey;
 	}
 	else
 	{

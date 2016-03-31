@@ -99,6 +99,7 @@ class CChat : public CComponent
 
 public:
 	CChat();
+	~CChat();
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
 	int GetMode() const { return m_Mode; }
