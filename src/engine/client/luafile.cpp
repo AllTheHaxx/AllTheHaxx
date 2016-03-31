@@ -440,6 +440,13 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
 			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)
 		.endClass()
+
+		.beginClass<CGameClient::CSnapState::CSpectateInfo>("CSpectateInfo")
+			.addData("Active", &CGameClient::CSnapState::CSpectateInfo::m_Active)
+			.addData("SpectatorID", &CGameClient::CSnapState::CSpectateInfo::m_SpectatorID)
+			.addData("UsePosition", &CGameClient::CSnapState::CSpectateInfo::m_UsePosition)
+			.addData("Position", &CGameClient::CSnapState::CSpectateInfo::m_Position)
+		.endClass()
 		
 		.beginClass<CGameClient::CClientData>("CClientData")
 			.addData("Active", &CGameClient::CClientData::m_Active)
@@ -511,6 +518,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
 			.addVariable("Menus", &CLua::m_pCGameClient->m_pMenus, false)
 			.addVariable("Voting", &CLua::m_pCGameClient->m_pVoting, false)
+			.addVariable("SpecInfo", &CLua::m_pCGameClient->m_Snap.m_SpecInfo, false)
 			//.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
 			.addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
 			.addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
