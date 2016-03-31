@@ -10,7 +10,7 @@ class CHud : public CComponent
 	struct CNotification
 	{
 		char m_aMsg[256];
-		float m_SpawnTime;
+		int64 m_SpawnTime;
 		float m_xOffset;
 		vec4 m_Color;
 
