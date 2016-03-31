@@ -976,7 +976,7 @@ void CPlayers::RenderPlayer(
 			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 
 			// WE NEED THIS! otherwise there is no "ATH" with antiping enabled!
-			if((pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2))
+			if((pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2) && g_Config.m_ClShowATHUser)
 			{
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
 				Graphics()->QuadsBegin();
