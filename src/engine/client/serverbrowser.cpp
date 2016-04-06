@@ -933,8 +933,8 @@ void CServerBrowser::Update(bool ForceResort)
 			continue;
 		}
 
-		// no more then 10 concurrent requests
-		if(Count == m_CurrentMaxRequests)
+		// no more than 10 concurrent requests
+		if(Count >= m_CurrentMaxRequests)
 			break;
 
 		if(pEntry->m_RequestTime == 0)
@@ -964,9 +964,12 @@ void CServerBrowser::Update(bool ForceResort)
 		}
 
 		// update max-requests
-		m_CurrentMaxRequests = m_CurrentMaxRequests/2;
-		if(m_CurrentMaxRequests < 1)
+		m_CurrentMaxRequests /= 2;
+		if(m_CurrentMaxRequests <= 3)
+		{
 			m_CurrentMaxRequests = 1;
+			m_NeedRefresh = false;
+		}
 	}
 	else if(Count == 0 && m_CurrentMaxRequests == 1) // we reached the limit, just release all left requests. If a server sends us a packet, a new request will be added automatically, so we can delete all
 	{
