@@ -596,14 +596,7 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 	}
 	else if(Type == IServerBrowser::TYPE_INTERNET)
 	{
-		static bool AutoUncached = false;
-		if(g_Config.m_BrAutoCache && m_CacheExists && !AutoUncached)
-		{
-			AutoUncached = true;
-			LoadCache();
-		}
-		else
-			m_NeedRefresh = 1;
+		m_NeedRefresh = 1;
 	}
 	else if(Type == IServerBrowser::TYPE_FAVORITES)
 	{
@@ -677,7 +670,8 @@ void CServerBrowser::SaveCache()
 
 	io_close(File); // TODO: check if saving actually succeeded
 
-	dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
+	if(g_Config.m_Debug)
+		dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
 	m_CacheExists = true;
 }
 
@@ -695,6 +689,7 @@ bool CServerBrowser::LoadCache()
 	m_NumRequests = 0;
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 	m_CurrentToken = (m_CurrentToken+1)&0xff;
+	m_ServerlistType = IServerBrowser::TYPE_INTERNET;
 
 	// open file TODO: Use teeworlds's storage for this!
 	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_READ, IStorageTW::TYPE_ALL);
@@ -740,7 +735,8 @@ bool CServerBrowser::LoadCache()
 
 	io_close(File);
 
-	dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers); // TODO: check if saving actually succeeded
+	if(g_Config.m_Debug)
+		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers); // TODO: check if saving actually succeeded
 	//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
 	return true;
 }

@@ -789,10 +789,16 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_InternetButton=0;
 		if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
 		{
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+			{
+				if(ServerBrowser()->CacheExists())
+					ServerBrowser()->LoadCache();
+				else
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			}
+
 			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			NewPage = PAGE_INTERNET;
 			m_DoubleClickIndex = -1;
 		}
@@ -802,6 +808,9 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_LanButton=0;
 		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
 		{
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !ServerBrowser()->IsRefreshing())
+				ServerBrowser()->SaveCache();
+
 			m_pClient->m_pCamera->m_RotationCenter = vec2(1000.0f, 1000.0f);
 
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
@@ -815,6 +824,9 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_FavoritesButton=0;
 		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
 		{
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !ServerBrowser()->IsRefreshing())
+				ServerBrowser()->SaveCache();
+
 			m_pClient->m_pCamera->m_RotationCenter = vec2(1500.0f, 500.0f);
 
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
@@ -827,6 +839,9 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_RecentButton=0;
 		if(DoButton_MenuTab(&s_RecentButton, Localize("Recent"), m_ActivePage==PAGE_RECENT, &Button, CUI::CORNER_TR*(1-g_Config.m_BrShowDDNet)))
 		{
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !ServerBrowser()->IsRefreshing())
+				ServerBrowser()->SaveCache();
+
 			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 1000.0f);
 
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_RECENT)

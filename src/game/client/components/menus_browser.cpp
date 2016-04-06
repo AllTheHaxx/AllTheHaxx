@@ -550,7 +550,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static bool HasCached = false;
 		if(g_Config.m_BrAutoCache)
 		{
-			if(!HasCached && !ServerBrowser()->IsRefreshing() && m_ActivePage != PAGE_RECENT)
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !HasCached && !ServerBrowser()->IsRefreshing() && m_ActivePage != PAGE_RECENT)
 			{
 				ServerBrowser()->SaveCache();
 				HasCached = true;
