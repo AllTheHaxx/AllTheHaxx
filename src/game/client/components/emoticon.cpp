@@ -76,11 +76,14 @@ void CEmoticon::OnRender()
 
 	if(!m_Active)
 	{
-		if(m_WasActive && m_SelectedEmote != -1)
-			Emote(m_SelectedEmote);
-		if(m_WasActive && m_SelectedEyeEmote != -1)
-			EyeEmote(m_SelectedEyeEmote);
-		m_WasActive = false;
+		if(m_WasActive)
+		{
+			 if(m_SelectedEmote != -1)
+				 Emote(m_SelectedEmote);
+			 if(m_SelectedEyeEmote != -1)
+				 EyeEmote(m_SelectedEyeEmote);
+			m_WasActive = false;
+		}
 		smooth_set(&s_Val, 0.0f, (0.005f/Client()->RenderFrameTime())*25.0f);
 		if(s_Val < 0.001f)
 		{
@@ -117,10 +120,8 @@ void CEmoticon::OnRender()
 	DrawCircle(Screen.w/2, Screen.h/2, s_Val*190.0f, 64);
 	Graphics()->QuadsEnd();
 
-	if(!m_Active)
-		return;
-
-	m_WasActive = true;
+	if(m_Active)
+		m_WasActive = true;
 
 	if (length(m_SelectorMouse) > 170.0f)
 		m_SelectorMouse = normalize(m_SelectorMouse) * 170.0f;
@@ -179,11 +180,7 @@ void CEmoticon::OnRender()
 		Graphics()->QuadsEnd();
 
 		CTeeRenderInfo *pTeeInfo;
-		if(g_Config.m_ClDummy)
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_RenderInfo;
-		else
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_RenderInfo;
-
+		pTeeInfo = &m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
 		Graphics()->TextureSet(pTeeInfo->m_Texture);
 
 		// draw the eyeemotes in a circle
