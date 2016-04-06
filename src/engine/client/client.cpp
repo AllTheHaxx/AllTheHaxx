@@ -1037,10 +1037,10 @@ void CClient::DebugRender()
 		total = 42
 	*/
 	FrameTimeAvg = FrameTimeAvg*0.9f + m_RenderFrameTime*0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d mem %dk %d gfxmem: %dk fps: %3d",
+	str_format(aBuffer, sizeof(aBuffer), "ticks: curr=%8d pred=%8d  |  mem=%d,%dk in %d (%d)  |  gfxmem=%dk fps=%3d",
 		m_CurGameTick[g_Config.m_ClDummy], m_PredTick[g_Config.m_ClDummy],
-		mem_stats()->allocated/1024,
-		mem_stats()->total_allocations,
+		mem_stats()->allocated/1024, mem_stats()->allocated%1024,
+		mem_stats()->active_allocations, mem_stats()->total_allocations,
 		Graphics()->MemoryUsage()/1024,
 		(int)(1.0f/FrameTimeAvg + 0.5f));
 	Graphics()->QuadsText(2, 2, 16, aBuffer);
@@ -3625,6 +3625,41 @@ int main(int argc, const char **argv) // ignore_convention
 
 	if(pClient->m_Restarting)
 		shell_execute(argv[0]);
+
+
+	bool WantReport = false;
+	for(int i = 1; i < argc; i++) // ignore_convention
+	{
+		if(str_comp("-r", argv[i]) == 0 || str_comp("--report", argv[i]) == 0 || str_comp("--leaks", argv[i]) == 0) // ignore_convention
+		{
+			WantReport = true;
+			break;
+		}
+	}
+
+	// print memory leak report
+	if(WantReport)
+	{
+		dbg_msg("leakreport", "Total of %i bytes (%d kb) was not freed till exit. Backtrace:", mem_stats()->allocated, mem_stats()->allocated>>10);
+		MEMHEADER *conductor = mem_stats()->first;
+		int CurrSize = 0, CurrNum = 0;
+		while(conductor)
+		{
+			MEMHEADER *next = conductor->next;
+			CurrNum++;
+			CurrSize += conductor->size;
+			if(next && str_comp_nocase(conductor->filename, next->filename) == 0 && conductor->line == next->line)
+			{
+				conductor = next;
+				continue;
+			}
+
+			dbg_msg("leakreport", "%i bytes in %i from %s:%i", CurrSize, CurrNum, conductor->filename, conductor->line);
+			CurrNum = 0;
+			CurrSize = 0;
+			conductor = next;
+		}
+	}
 
 	return 0;
 }

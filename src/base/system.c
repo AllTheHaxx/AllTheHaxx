@@ -408,14 +408,14 @@ void dbg_logger_file(const char *filename)
 }
 /* */
 
-typedef struct MEMHEADER
+/*typedef struct MEMHEADER
 {
 	const char *filename;
 	int line;
 	int size;
 	struct MEMHEADER *prev;
 	struct MEMHEADER *next;
-} MEMHEADER;
+} MEMHEADER;*/
 
 typedef struct MEMTAIL
 {
@@ -450,6 +450,7 @@ void *mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 	if(first)
 		first->prev = header;
 	first = header;
+	memory_stats.first = header;
 
 	/*dbg_msg("mem", "++ %p", header+1); */
 	return header+1;

@@ -1234,11 +1234,21 @@ void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
 
+typedef struct MEMHEADER
+{
+	const char *filename;
+	int line;
+	int size;
+	struct MEMHEADER *prev;
+	struct MEMHEADER *next;
+} MEMHEADER;
+
 typedef struct
 {
 	int allocated;
 	int active_allocations;
 	int total_allocations;
+	MEMHEADER *first;
 } MEMSTATS;
 
 const MEMSTATS *mem_stats();
