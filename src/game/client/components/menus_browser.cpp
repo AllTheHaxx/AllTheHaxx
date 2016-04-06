@@ -518,9 +518,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	// render quick exclude
 	{
-		const char *pLabel = Localize("✗");
-		UI()->DoLabelScaled(&QuickExclude, pLabel, 12.0f, -1);
-		float w = TextRender()->TextWidth(0, 12.0f, pLabel, -1);
+		UI()->DoLabelScaled(&QuickExclude, "✗", 12.0f, -1);
+		float w = TextRender()->TextWidth(0, 12.0f, "✗", -1);
 		QuickExclude.VSplitLeft(w, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(QuickExclude.w-15.0f, &QuickExclude, &Button);
