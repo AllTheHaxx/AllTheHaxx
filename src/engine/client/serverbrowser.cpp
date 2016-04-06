@@ -734,6 +734,7 @@ bool CServerBrowser::LoadCache()
 		//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
 		Set(Addr, IServerBrowser::SET_TOKEN, m_CurrentToken, &pServerInfos[i]);
 	}
+	mem_free(pServerInfos);
 
 	if(g_Config.m_Debug)
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers); // TODO: check if saving actually succeeded
