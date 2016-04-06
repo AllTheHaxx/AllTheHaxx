@@ -3640,7 +3640,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// print memory leak report
 	if(WantReport)
 	{
-		dbg_msg("leakreport", "Total of %i bytes (%d kb) was not freed till exit. Backtrace:", mem_stats()->allocated, mem_stats()->allocated>>10);
+		dbg_msg("leakreport", "Total of %i bytes (%d kb) not freed upon exit. Backtrace:", mem_stats()->allocated, mem_stats()->allocated>>10);
 		MEMHEADER *conductor = mem_stats()->first;
 		int CurrSize = 0, CurrNum = 0;
 		while(conductor)

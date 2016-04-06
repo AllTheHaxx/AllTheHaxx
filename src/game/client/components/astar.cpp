@@ -30,7 +30,7 @@ CAStar::CAStar()
 
 CAStar::~CAStar()
 {
-
+	mem_free(m_pField);
 }
 
 void CAStar::OnReset() // is being called right after OnMapLoad()

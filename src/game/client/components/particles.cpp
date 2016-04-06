@@ -125,6 +125,7 @@ void CParticles::Update(float TimePassed)
 				m_aParticles[i].m_PrevPart = -1;
 				m_aParticles[i].m_NextPart = m_FirstFree;
 				m_FirstFree = i;
+				mem_free(m_aParticles[i].m_pData);
 			}
 
 			i = Next;
