@@ -691,7 +691,7 @@ bool CServerBrowser::LoadCache()
 	m_CurrentToken = (m_CurrentToken+1)&0xff;
 	m_ServerlistType = IServerBrowser::TYPE_INTERNET;
 
-	// open file TODO: Use teeworlds's storage for this!
+	// open file
 	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!File)
 	{
@@ -723,17 +723,17 @@ bool CServerBrowser::LoadCache()
 	m_ppServerlist = (CServerEntry **)mem_alloc(m_NumServerCapacity*sizeof(CServerEntry*), 1);
 
 	// read the data from the file into the serverlist
+	CServerInfo *pServerInfos = (CServerInfo*)mem_alloc(sizeof(CServerInfo)*NumServers, 0);
+	io_read(File, pServerInfos, sizeof(CServerInfo)*NumServers);
+	io_close(File);
+
 	for(int i = 0; i < NumServers; i++)
 	{
-		CServerInfo Info; NETADDR Addr;
-		net_addr_from_str(&Addr, Info.m_aAddress);
-
-		io_read(File, &Info, sizeof(CServerInfo));
+		NETADDR Addr;
+		net_addr_from_str(&Addr, pServerInfos[i].m_aAddress);
 		//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
-		Set(Addr, IServerBrowser::SET_TOKEN, m_CurrentToken, &Info);
+		Set(Addr, IServerBrowser::SET_TOKEN, m_CurrentToken, &pServerInfos[i]);
 	}
-
-	io_close(File);
 
 	if(g_Config.m_Debug)
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers); // TODO: check if saving actually succeeded
