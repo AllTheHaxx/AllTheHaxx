@@ -31,7 +31,7 @@ CChat::CChat()
 {
 	OnReset();
 
-	m_pTranslator = new CTranslator();
+	m_pTranslator = new(mem_alloc(sizeof(CTranslator), sizeof(void*))) CTranslator();
 	m_pTranslator->Init();
 
 	m_GotKeys = false;
@@ -41,7 +41,7 @@ CChat::CChat()
 CChat::~CChat()
 {
 	if(m_pTranslator)
-		delete m_pTranslator;
+		mem_free(m_pTranslator);
 	m_pTranslator = 0;
 }
 

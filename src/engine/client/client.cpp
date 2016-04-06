@@ -2228,10 +2228,9 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 
 void CClient::ResetMapDownload()
 {
-	if(m_pMapdownloadTask){
+	if(m_pMapdownloadTask)
 		delete m_pMapdownloadTask;
-		m_pMapdownloadTask = NULL;
-	}
+	m_pMapdownloadTask = 0;
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
 }

@@ -15,7 +15,7 @@ using namespace luabridge;
 
 CLua::CLua()
 {
-	CLuaBinding::m_pUiContainer = new CLuaBinding::UiContainer;
+	CLuaBinding::m_pUiContainer = new(mem_alloc(sizeof(CLuaBinding::UiContainer), sizeof(void*))) CLuaBinding::UiContainer;
 	CConfigProperties::m_pConfig = &g_Config;
 	m_pStorage = 0;
 }
@@ -24,10 +24,10 @@ CLua::~CLua()
 {
 	m_pLuaFiles.delete_all();
 	m_pLuaFiles.clear();
-	delete CLuaBinding::m_pUiContainer;
+	mem_free(CLuaBinding::m_pUiContainer);
 }
 
-void CLua::Init(IClient * pClient, IStorageTW * pStorage)
+void CLua::Init(IClient *pClient, IStorageTW *pStorage)
 {
 	m_pClient = pClient;
 	m_pCClient = (CClient*)pClient;
@@ -72,9 +72,13 @@ void CLua::AddUserscript(const char *pFilename)
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
 		return;
 
+	for(int i = 0; i < m_pLuaFiles.size(); i++)
+		if(str_comp(m_pLuaFiles[i]->GetFilename(), pFilename) == 0)
+			return;
+
 	std::string file = pFilename;
 	dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
-	m_pLuaFiles.add(new CLuaFile(this, file));
+	m_pLuaFiles.add(new(mem_alloc(sizeof(CLuaFile), sizeof(void*))) CLuaFile(this, file));
 }
 
 void CLua::LoadFolder()

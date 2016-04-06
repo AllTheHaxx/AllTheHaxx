@@ -5,6 +5,8 @@
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
 
+#include "base/system.h"
+
 #define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) { try { \
 	LuaRef func = getGlobal(LUA_STATE, FUNC_NAME); \
 	if(func) \
@@ -39,6 +41,8 @@ private:
 	bool m_ScriptHasSettings;
 
 public:
+	void operator delete(void *p) { mem_free(p); }
+
 	CLuaFile(CLua *pLua, std::string Filename);
 	~CLuaFile();
 	void Init();

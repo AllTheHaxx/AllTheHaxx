@@ -2522,10 +2522,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	CUIRect RefreshButton;
 	Button.VSplitRight(100.0f, &Button, &RefreshButton);
 	static int s_RefreshButton = 0;
-	if (DoButton_Menu(&s_RefreshButton, Localize("Reload Lua"), 0, &RefreshButton, "This will re-init the whole Lua API and unload all scripts!"))
+	if (DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files"))
 	{
-		Client()->Lua()->GetLuaFiles().delete_all();
-		Client()->Lua()->GetLuaFiles().clear();
 		Client()->Lua()->LoadFolder();
 	}
 	if(DoButton_CheckBox(&g_Config.m_ClLua, Localize("Use lua"), g_Config.m_ClLua, &Button))
@@ -2554,7 +2552,9 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		static int s_NumNodes = 0;
 		int HighlightIndex = 0;
-		UiDoListboxStart(&s_NumNodes, &MainView, 50.0f, Localize("Lua files"), "", NumLuaFiles, 1, OldSelected, s_ScrollValue);
+		CUIRect ListBox = MainView;
+		UiDoListboxStart(&s_NumNodes, &ListBox, 50.0f, Localize("Lua files"), "", NumLuaFiles, 1, OldSelected, s_ScrollValue);
+
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
@@ -2635,5 +2635,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 
 		UiDoListboxEnd(&s_ScrollValue, 0);
+
+		if(NumLuaFiles == 0)
+		{
+			CUIRect Label;
+			MainView.HSplitBottom(MainView.h/2+15.0f, 0, &Label);
+			UI()->DoLabelScaled(&Label, Localize("No files listed, click \"Refresh\" to reload the list"), 15.0f, 0, -1);
+		}
 	}
 }
