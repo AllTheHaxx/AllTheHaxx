@@ -11,6 +11,8 @@
 	#define WINVER 0x0501
 #endif
 
+#define NO_SDL_GLEXT
+#include <GL/glew.h>
 #include "SDL.h"
 #include "SDL_syswm.h"
 #if defined(__ANDROID__)

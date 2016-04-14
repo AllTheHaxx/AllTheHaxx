@@ -318,7 +318,10 @@ function build(settings)
 	server_settings = engine_settings:Copy()
 	client_settings = engine_settings:Copy()
 	launcher_settings = engine_settings:Copy()
-
+	
+	client_settings.cc.includes:Add("other/glew/include")
+	client_settings.link.libpath:Add("other/glew/lib")
+	
 	if family == "unix" then
 		if platform == "macosx" then
 			client_settings.link.frameworks:Add("OpenGL")
@@ -333,6 +336,7 @@ function build(settings)
 			client_settings.link.libs:Add("GLU")
 			client_settings.link.libs:Add("ssl")
 			client_settings.link.libs:Add("crypto")
+			client_settings.link.libs:Add("GLEW")
 		end
 
 	elseif family == "windows" then
@@ -346,6 +350,7 @@ function build(settings)
 		client_settings.link.libs:Add("winmm")
 		client_settings.link.libs:Add("libopusfile-0")
 		client_settings.link.libs:Add("curl")
+		client_settings.link.libs:Add("glew32")
 		
 		if config.compiler.driver == "cl" then
 			client_settings.link.libs:Add("libeay32")
