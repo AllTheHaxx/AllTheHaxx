@@ -86,19 +86,20 @@ void CLuaFile::OpenLua()
 	lua_atpanic(m_pLuaState, CLua::Panic);
 	lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
 
-	luaL_openlibs(m_pLuaState);
-/*	luaopen_base(m_pLuaState);
+	//luaL_openlibs(m_pLuaState);  //we don't need os lib!
+	
+	luaopen_base(m_pLuaState);	//base
 	luaopen_math(m_pLuaState);
 	luaopen_string(m_pLuaState);
-	luaopen_table(m_pLuaState);
-	//luaopen_io(m_pLua);
-	//luaopen_os(m_pLuaState);
-	//luaopen_package(m_pLua); // not sure whether we should load this
-	luaopen_debug(m_pLuaState);
-	luaopen_bit(m_pLuaState);
-	luaopen_jit(m_pLuaState);
-	luaopen_ffi(m_pLuaState); // don't know about this yet. could be a sand box leak.
-*/
+	luaopen_table(m_pLuaState);	//table operations
+	luaopen_io(m_pLuaState);	//input/output of fles
+	luaopen_debug(m_pLuaState);	//debug stuff for whatever... can be removed in further patches
+	luaopen_bit(m_pLuaState);	//bit operations
+	//luaopen_jit(m_pLuaState); //control the jit-compiler [don't needed]
+	luaopen_ffi(m_pLuaState);	//register and write own C-Functions and call them in lua (whoever needs that...)
+	
+	//luaopen_os(m_pLuaState);	//evil
+	//luaopen_package(m_pLua); // not sure whether we should load this //used for modules etc....
 }
 
 void CLuaFile::Init()
