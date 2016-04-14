@@ -729,6 +729,8 @@ static CKeyInfo gs_aKeys[] =
 	{ "Dummy Copy", "toggle cl_dummy_copy_moves 0 1", 0 },
 	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
 	// ATH stuff
+	{ "Hidden Chat", "chat hidden", 0 },
+	{ "Crypted Chat", "chat crypt", 0 },
 	{ "Hookfly Dummy", "toggle cl_dummy_hook_fly 0 1", 0 },
 	{ "Toggle X-Ray", "toggle cl_overlay_entities 0 90", 0 },
 	{ "Zoom in", "zoom+", 0 },
@@ -2361,13 +2363,13 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 		CUIRect Background;
 		Left.HSplitTop(7.5f, 0, &Background);
-		Background.h = 23.0f*8+2.0f;
+		Background.h = 23.0f*10+2.0f;
 		RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
 		Left.HSplitTop(7.0f, 0, &Left);
 		Left.VMargin(10.0f, &Left);
 		Left.HSplitTop(5.0f, 0, &Left);
 
-		UiDoGetButtons(33, 41, Left);
+		UiDoGetButtons(33, 43, Left);
 		Left.h = 100.0f;
 	}
 	
