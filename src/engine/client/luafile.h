@@ -39,11 +39,12 @@ private:
 	char m_aScriptTitle[64];
 	char m_aScriptInfo[128];
 	bool m_ScriptHasSettings;
+	bool m_ScriptAutoload;
 
 public:
 	void operator delete(void *p) { mem_free(p); }
 
-	CLuaFile(CLua *pLua, std::string Filename);
+	CLuaFile(CLua *pLua, std::string Filename, bool Autoload);
 	~CLuaFile();
 	void Init();
 	void Reset(bool error = false);
@@ -57,6 +58,8 @@ public:
 	const char* GetScriptTitle() const { return m_aScriptTitle; }
 	const char* GetScriptInfo() const { return m_aScriptInfo; }
 	bool GetScriptHasSettings() const { return m_ScriptHasSettings; }
+	bool GetScriptIsAutoload() const { return m_ScriptAutoload; }
+	bool SetScriptIsAutoload(bool NewVal) { bool ret = m_ScriptAutoload; m_ScriptAutoload = NewVal; return ret; }
 
 	CLua *Lua() const { return m_pLua; }
 	

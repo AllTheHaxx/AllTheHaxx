@@ -18,7 +18,7 @@
 #include <engine/serverbrowser.h>
 //#include <engine/client/client.h>
 
-CLuaFile::CLuaFile(CLua *pLua, std::string Filename) : m_pLua(pLua), m_Filename(Filename)
+CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
 {
 	m_pLuaState = 0;
 	m_State = LUAFILE_STATE_IDLE;

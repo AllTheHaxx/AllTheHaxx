@@ -2532,6 +2532,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	{
 		if(!(g_Config.m_ClLua ^= 1))
 		{
+			Client()->Lua()->SaveAutoloads();
 			Client()->Lua()->GetLuaFiles().delete_all();
 			Client()->Lua()->GetLuaFiles().clear();
 		}
@@ -2547,6 +2548,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		// display mode list
 		static float s_ScrollValue = 0;
 		static int pIDItem[128];
+		static int pIDCheckboxAutoload[128];
 		static int pIDButtonReload[128];
 		static int pIDButtonDeactivate[128];
 		static int pIDButtonSettings[128];
@@ -2584,8 +2586,14 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				Buttons.HMargin(15.0f, &Buttons);
 				Buttons.VMargin(5.0f, &Buttons);
 
+				Buttons.VSplitRight(5.0f, &Buttons, 0);
+				Buttons.VSplitRight(Buttons.h, &Buttons, &Button);
+				if (DoButton_CheckBox(&pIDCheckboxAutoload[i], "", L->GetScriptIsAutoload(), &Button, Localize("Autoload")))
+					L->SetScriptIsAutoload(!L->GetScriptIsAutoload());
+
 				if(L->State() == CLuaFile::LUAFILE_STATE_LOADED)
 				{
+					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
 					if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Deactivate"), false, &Button))
 					{
@@ -2601,7 +2609,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						L->Init();
 					}
 				}
-				else //if(L->State() == CLuaFile::LUAFILE_STATE_IDLE)
+				else
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
