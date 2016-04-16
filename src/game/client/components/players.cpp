@@ -940,7 +940,7 @@ void CPlayers::RenderPlayer(
 			}
 
 			// name + clan / only name
-			if(m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan[0] != '\0' && g_Config.m_ClNameplatesClan)
+			if(str_length(m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan) > 0 && g_Config.m_ClNameplatesClan)
 			{
 				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, aName, -1); // name above clan
 
@@ -988,7 +988,7 @@ void CPlayers::RenderPlayer(
 				float Alpha = sinf(Client()->GameTick()*0.025f);
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
-				float PosY = !g_Config.m_ClNameplatesClan ? Position.y - 3.f*FontSize : Position.y - 3*FontSize -38.f;
+				float PosY = !(str_length(m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan) > 0 && g_Config.m_ClNameplatesClan) ? Position.y - 3.f*FontSize : Position.y - 3*FontSize -38.f;
 
 				RenderTools()->DrawRoundRect(Position.x-30.f, PosY, 55.f, 25.f, 0.f);
 				Graphics()->QuadsEnd();
