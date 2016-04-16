@@ -6,7 +6,7 @@ Our own flavor of the popular [DDNet](https://github.com/ddnet/ddnet) client mod
 
 Development discussions happen on #AllTheHaxx on Quakenet ([»Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4)).
 
-You can get binary releases from [our website](https://AllTheHaxx.github.io/).
+You can get binary releases from [our website](https://AllTheHaxx.github.io/) or directly from our [Github releases](https://github.com/AllTheHaxx/AllTheHaxx/releases/).
 
 Building
 --------
@@ -14,7 +14,9 @@ Building
 To compile AllTheHaxx yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything).
 Make sure you have all the requirements that are needed by DDNet Client (listed below)
 
-__WINDOWS USERS:__ if you should encounter any compiling problems, *please* compile with MinGW!!
+__WINDOWS USERS:__
+
+If you should encounter any compiling problems, *please* compile with MinGW. You can follow this [tutorial for compiling Teeworlds with MinGW under Windows](https://www.teeworlds.com/forum/viewtopic.php?pid=117772#p117772).
 
 --------------------------
 AllTheHaxx requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). Instead you can install these libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default. You can install all required dependencies on Debian and Ubuntu like this:
