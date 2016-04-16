@@ -794,6 +794,8 @@ void CClient::Connect(const char *pAddress)
 
 	m_InputtimeMarginGraph.Init(-150.0f, 150.0f);
 	m_GametimeMarginGraph.Init(-150.0f, 150.0f);
+
+	((IServerBrowser*)Kernel()->RequestInterface<IServerBrowser>())->AddRecent(m_ServerAddress);
 }
 
 void CClient::DisconnectWithReason(const char *pReason)

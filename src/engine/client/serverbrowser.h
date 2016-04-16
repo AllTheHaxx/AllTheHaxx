@@ -3,7 +3,14 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
+#include <base/tl/sorted_array.h>
 #include <engine/serverbrowser.h>
+#include <engine/client/db_sqlite3.h>
+
+
+class CQueryRecent : public CQuery
+{
+};
 
 class CServerBrowser : public IServerBrowser
 {
@@ -80,12 +87,12 @@ public:
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNet();
-	int NumDDNetCountries() { return m_NumDDNetCountries; };
-	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; };
-	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; };
+	int NumDDNetCountries() { return m_NumDDNetCountries; }
+	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; }
+	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; }
 
 	int NumDDNetTypes() { return m_NumDDNetTypes; };
-	const char *GetDDNetType(int Index) { return m_aDDNetTypes[Index]; };
+	const char *GetDDNetType(int Index) { return m_aDDNetTypes[Index]; }
 
 	void DDNetFilterAdd(char *pFilter, const char *pName);
 	void DDNetFilterRem(char *pFilter, const char *pName);
@@ -104,9 +111,24 @@ public:
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
-	int GetCurrentType() { return m_ServerlistType; };
+	int GetCurrentType() { return m_ServerlistType; }
 
 private:
+	struct RecentServer
+	{
+		RecentServer() { m_ID = -1; mem_zero(&m_Addr, sizeof(NETADDR)); }
+		RecentServer(NETADDR addr, int id) : m_Addr(addr), m_ID(id) { }
+		NETADDR m_Addr;
+		int m_ID;
+		char m_LastJoined[20];
+		bool operator<(const RecentServer& other) const { return this->m_ID > other.m_ID; }
+		bool operator==(const RecentServer& other) const {
+			if(mem_comp(&this->m_Addr, &other, sizeof(NETADDR)) == 0)
+				return true;
+			return false;
+		}
+	};
+
 	CNetClient *m_pNetClient;
 	IMasterServer *m_pMasterServer;
 	class IConsole *m_pConsole;
@@ -120,8 +142,8 @@ private:
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
 	int m_NumFavoriteServers;
 
-	NETADDR m_aRecentServers[MAX_RECENT];
-	int m_NumRecentServers;
+	CSql *m_pRecentDB;
+	sorted_array<RecentServer> m_aRecentServers;
 
 	CDDNetCountry m_aDDNetCountries[MAX_DDNET_COUNTRIES];
 	int m_NumDDNetCountries;
@@ -136,14 +158,14 @@ private:
 	int m_NumRequests;
 	int m_MasterServerCount;
 
-	//used instead of g_Config.br_max_requests to get more servers
+	// used instead of g_Config.BrMaxRequests to get more servers
 	int m_CurrentMaxRequests;
 
 	int m_LastPacketTick;
 
 	int m_NeedRefresh;
 	bool m_NeedUpgrade;
-	bool m_CacheExists;  // TODO: HIERFÜR NEN GETTER MACHEN!!
+	bool m_CacheExists;
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
@@ -161,7 +183,7 @@ private:
 	int m_ServerlistType;
 	int64 m_BroadcastTime;
 
-	// sorting criterions
+	// sorting criteria
 	bool SortCompareName(int Index1, int Index2) const;
 	bool SortCompareMap(int Index1, int Index2) const;
 	bool SortComparePing(int Index1, int Index2) const;
