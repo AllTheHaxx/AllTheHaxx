@@ -128,7 +128,8 @@ void CMenusTooltip::OnRender()
 		Temp.y = UI()->MouseY() + 0.5f;
 		const float mtw = UI()->Screen()->w-Temp.x-10.0f;
 		const int lc = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, mtw);
-		Temp.w = min(mtw+2.5f, TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f);
+		const float tw = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f;
+		Temp.w = clamp(tw, tw < 5.0f ? mtw : tw, mtw+2.5f);
 		Temp.h = (FONT_SIZE)*lc+2.5;
 		Temp.Margin(-3.0f, &Temp);
 		RenderTools()->DrawUIRect(&Temp, vec4(0,0,0.2f,0.8f), CUI::CORNER_ALL, 2.5f);
