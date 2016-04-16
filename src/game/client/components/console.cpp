@@ -39,6 +39,7 @@
 #include "console.h"
 
 CGameConsole::CInstance * CGameConsole::m_pStatLuaConsole = 0;
+const char * CGameConsole::m_pSearchString = 0;
 
 CGameConsole::CInstance::CInstance(int Type)
 {
@@ -55,6 +56,7 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CompletionChosen = -1;
 	m_CompletionRenderOffset = 0.0f;
 	m_ReverseTAB = false;
+	m_CTRLPressed = false;
 
 	m_IsCommand = false;
 }
@@ -417,16 +419,41 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				}
 			}
 		}
+		else if(Event.m_Key == KEY_f)
+		{
+			if(m_CTRLPressed)
+			{
+				if(!m_pSearchString)
+					m_pSearchString = m_Input.GetString();
+				else
+					m_pSearchString = 0;
+			}
+		}
 		else if(Event.m_Key == KEY_LSHIFT)
 		{
-			m_ReverseTAB = true;
+			if(!m_CTRLPressed)
+				m_ReverseTAB = true;
+			Handled = true;
+		}
+		else if(Event.m_Key == KEY_LCTRL)
+		{
+			if(!m_ReverseTAB)
+				m_CTRLPressed = true;
 			Handled = true;
 		}
 	}
-	if((Event.m_Flags&IInput::FLAG_RELEASE) && Event.m_Key == KEY_LSHIFT)
+	if(Event.m_Flags&IInput::FLAG_RELEASE)
 	{
-		m_ReverseTAB = false;
-		Handled = true;
+		if(Event.m_Key == KEY_LSHIFT)
+		{
+			m_ReverseTAB = false;
+			Handled = true;
+		}
+		else if(Event.m_Key == KEY_LCTRL)
+		{
+			m_CTRLPressed = false;
+			Handled = true;
+		}
 	}
 
 	if(!Handled)
@@ -747,6 +774,8 @@ void CGameConsole::OnRender()
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
 		const char *pPrompt = "> ";
+		if(m_pSearchString)
+			pPrompt = "[CTRL+F] SEARCHING» ";
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE)
@@ -961,7 +990,36 @@ void CGameConsole::OnRender()
 					}
 
 					if(!Found)
-						TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					{
+						// highlight the parts that matches
+						if(m_pSearchString && m_pSearchString[0] != '\0')
+						{
+							const char *pText = pEntry->m_aText;
+							while(pText)
+							{
+								const char *pFoundStr = str_find_nocase(pText, m_pSearchString);
+								if(pFoundStr)
+								{
+									TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr-pText));
+									TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
+									TextRender()->TextEx(&Cursor, pFoundStr, str_length(m_pSearchString));
+									TextRender()->TextColor(1,1,1,1);
+									//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
+									pText = pFoundStr+str_length(m_pSearchString);
+								}
+								else
+								{
+									TextRender()->TextEx(&Cursor, pText, -1);
+									break;
+								}
+
+								if(pText > pEntry->m_aText + str_length(pEntry->m_aText)-1 || pText < pEntry->m_aText)
+									pText = 0;
+							}
+						}
+						else
+							TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					}
 				}
 				pEntry = pConsole->m_Backlog.Prev(pEntry);
 
