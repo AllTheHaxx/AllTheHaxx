@@ -39,6 +39,7 @@ config:Add(Opus.OptFind("opus", true))
 config:Add(Ogg.OptFind("ogg", true))
 config:Add(Mysql.OptFind("mysql", false))
 config:Add(OptString("websockets", false))
+config:Add(OptString("spoofing", false))
 config:Finalize("config.lua")
 
 -- data compiler
@@ -223,6 +224,10 @@ function build(settings)
 
 	if config.websockets.value then
 		settings.cc.defines:Add("WEBSOCKETS")
+	end
+	
+	if config.spoofing.value then
+		settings.cc.defines:Add("CONF_SPOOFING")
 	end
 
 	if config.compiler.driver == "cl" then

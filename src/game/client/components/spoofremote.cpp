@@ -30,7 +30,7 @@ CSpoofRemote::~CSpoofRemote()
 
 void CSpoofRemote::Reset()
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) // this ones are unix-only
 	m_pListenerThread = 0;
 	m_pWorkerThread = 0;
 	m_Socket = -1;
@@ -45,7 +45,7 @@ void CSpoofRemote::Reset()
 
 void CSpoofRemote::OnConsoleInit()
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	Console()->Register("spf_connect", "", CFGFLAG_CLIENT, ConConnect, (void *)this, "connect to teh zervor 4 h4xX0r");
 	Console()->Register("spf_disconnect", "", CFGFLAG_CLIENT, ConDisconnect, (void *)this, "disconnect from teh zervor 4 h4xX0r");
 	Console()->Register("spf_forceclose", "s", CFGFLAG_CLIENT, ConForceClose, (void *)this, "force-close the connection");
@@ -55,7 +55,7 @@ void CSpoofRemote::OnConsoleInit()
 
 void CSpoofRemote::OnInit()
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	if(!IsState(SPOOF_STATE_CONNECTING) && !IsConnected() && g_Config.m_ClSpoofAutoconnect)
 		Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
 #endif
@@ -63,7 +63,7 @@ void CSpoofRemote::OnInit()
 
 void CSpoofRemote::OnRender()
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	// nevar forgetti moms spaghetti
 	if(IsState(SPOOF_STATE_VOTEKICKALL))
 	{
@@ -118,7 +118,7 @@ void CSpoofRemote::OnRender()
 
 void CSpoofRemote::Connect(const char *pAddr, int Port)
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	m_State |= SPOOF_STATE_CONNECTING;
 
 	// Info
@@ -144,7 +144,7 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 
 void CSpoofRemote::Disconnect()
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	Console()->Print(0, "spfrmt", "disconnecting from zervor!", false);
 	Console()->Print(0, "spfrmt", "requesting threads to terminate...", false);
 	Reset();
@@ -156,7 +156,7 @@ void CSpoofRemote::Disconnect()
 
 void CSpoofRemote::CreateThreads(void *pUserData)
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(0, "spfrmt", "Connecting to zervor...", false);
@@ -200,7 +200,7 @@ void CSpoofRemote::ParseZervorMessage(const char *pMessage)
 
 void CSpoofRemote::Listener(void *pUserData)
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(0, "spfrmt", "started listener thread", false);
@@ -259,7 +259,7 @@ void CSpoofRemote::Listener(void *pUserData)
 
 void CSpoofRemote::Worker(void *pUserData)
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(0, "spfrmt", "started worker thread", false);
@@ -309,7 +309,7 @@ void CSpoofRemote::Worker(void *pUserData)
 
 void CSpoofRemote::SendCommand(const char *pCommand)
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	if(!pCommand)
 		return;
 
@@ -336,7 +336,7 @@ void CSpoofRemote::SendCommand(const char *pCommand)
 
 void CSpoofRemote::ConConnect(IConsole::IResult *pResult, void *pUserData)
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && defined(CONF_SPOOFING)
 	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
 	if(pSelf->IsConnected())
 		pSelf->Console()->Print(0, "spfrmt", "Disconnect first before opening a new connection!", false);

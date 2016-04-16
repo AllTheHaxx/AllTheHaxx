@@ -900,16 +900,19 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(30.0f, &Button, &Box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
-		static int s_BrowserButton=0;
-		if(DoButton_MenuTab(&s_BrowserButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, CUI::CORNER_TL))
+		static int s_BrowserButton=0; int BrowserCorners = CUI::CORNER_T;
+#if defined(CONF_SPOOFING)
+		BrowserCorners = CUI::CORNER_TL;
+#endif
+		if(DoButton_MenuTab(&s_BrowserButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, BrowserCorners))
 			NewPage = PAGE_BROWSER;
-
+#if defined(CONF_SPOOFING)
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_SpoofingButton=0;
 		if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_SPOOFING;
-
+#endif
 		CServerInfo tmp; Client()->GetServerInfo(&tmp);
 		if(IsDDNet(&tmp) || IsDDRace(&tmp))
 		{
