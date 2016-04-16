@@ -965,7 +965,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	return 0;
 }
 
-float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback)
+float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, void *pArgs, const char *pTooltip)
 {
 	CUIRect View = *pRect;
 	CUIRect Header, Label;
@@ -1007,9 +1007,13 @@ float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, 
 			m_pActiveDropdown = (int*)pID;
 	}
 
+	// tooltip
+	if(UI()->HotItem() == pID && pTooltip && pTooltip[0] != '\0')
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+
 	// render content of expanded menu
 	if(Active)
-		return HeaderHeight + pfnCallback(View, this);
+		return HeaderHeight + pfnCallback(View, this, pArgs);
 
 	return HeaderHeight;
 }

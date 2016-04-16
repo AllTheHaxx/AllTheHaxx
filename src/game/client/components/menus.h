@@ -38,7 +38,7 @@ public:
 
 class CMenus : public CComponent
 {
-	typedef float (*FDropdownCallback)(CUIRect View, void *pUser);
+	typedef float (*FDropdownCallback)(CUIRect View, void *pUser, void *pArgs);
 
 	friend class CGameConsole; // need this for IRC GUI
 	friend class CLuaBinding; // need this for lua
@@ -92,7 +92,7 @@ class CMenus : public CComponent
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, const char *pTooltip = 0);
 
-	float DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback);
+	float DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, void *pArgs, const char *pTooltip = "");
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View);
