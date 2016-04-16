@@ -9,6 +9,8 @@
 	#define WINVER 0x0501
 #endif
 
+#define NO_SDL_GLEXT
+#include <GL/glew.h>
 #include "SDL.h"
 #include "SDL_syswm.h"
 #if defined(__ANDROID__)
@@ -620,6 +622,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Width, int *Height
 	StartProcessor(m_pProcessor);
 
 	// issue init commands for OpenGL and SDL
+	glewInit(); dbg_msg("ASDÀSDASDASD", "\n\n\n\n BACKEND_SDL INIT\n\n\n");
 	CCommandBuffer CmdBuffer(1024, 512);
 	CCommandProcessorFragment_OpenGL::SCommand_Init CmdOpenGL;
 	CmdOpenGL.m_pTextureMemoryUsage = &m_TextureMemoryUsage;

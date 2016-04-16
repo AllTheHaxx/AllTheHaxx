@@ -880,7 +880,7 @@ int CGraphics_OpenGL::Init()
 	glAlphaFunc(GL_GREATER, 0);
 	glEnable(GL_ALPHA_TEST);
 	glDepthMask(0);
-
+	dbg_msg("ASDÀSDASDASD", "\n\n\n\n GRAPHICS INIT\n\n\n");
 	// create null texture, will get id=0
 	static const unsigned char aNullTextureData[] = {
 		0xff,0x00,0x00,0xff, 0xff,0x00,0x00,0xff, 0x00,0xff,0x00,0xff, 0x00,0xff,0x00,0xff,
