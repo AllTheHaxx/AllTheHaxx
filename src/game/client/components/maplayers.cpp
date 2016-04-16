@@ -198,8 +198,16 @@ void CMapLayers::OnRender()
 			if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
 				IsTuneLayer = true;
 
+			// this can actually happen
+			if(!pLayer)
+			{
+				dbg_msg("ERROR", "This is here to prevent a crash where pLayer == 0");
+				dbg_msg("ERROR", "pGroup->m_StartLayer = %i, l = %i, pGroup->m_NumLayers = ", pGroup->m_StartLayer, l, pGroup->m_NumLayers);
+				continue;
+			}
+
 			// skip rendering if detail layers if not wanted
-			if(pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && !IsGameLayer && (Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+			if((pLayer->m_Flags&LAYERFLAG_DETAIL) && !g_Config.m_GfxHighDetail && !IsGameLayer && (Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 				continue;
 
 			if(m_Type == -1)
