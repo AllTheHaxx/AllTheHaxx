@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <base/math.h>
 
 #include "luafile.h"
@@ -33,6 +35,7 @@ CLuaFile::~CLuaFile()
 void CLuaFile::Reset(bool error)
 {
 	m_UID = rand()%0xFFFF;
+	m_PermissionFlags = 0x0;
 	m_State = error ? LUAFILE_STATE_ERROR: LUAFILE_STATE_IDLE;
 
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
@@ -40,9 +43,53 @@ void CLuaFile::Reset(bool error)
 
 	m_ScriptHasSettings = false;
 
+	LoadPermissionFlags();
+
 	//if(m_pLuaState)
 	//	lua_close(m_pLuaState);
 	//m_pLuaState = luaL_newstate();
+}
+
+void CLuaFile::LoadPermissionFlags()
+{
+	std::ifstream f(m_Filename.c_str());
+	std::string line; bool searching = true;
+	while(std::getline(f, line))
+	{
+		if(line.find("]]") != std::string::npos)
+			break;
+
+		if(searching && line != "--[[#!")
+			continue;
+		if(searching)
+		{
+			searching = false;
+			continue;
+		}
+
+		// make sure we only get what we want
+		char aBuf[32]; char *p;
+		str_copy(aBuf, line.c_str(), sizeof(aBuf));
+		str_sanitize_strong(aBuf);
+		p = aBuf;
+		while(*p == ' ' || *p == '\t')
+			p++;
+
+		// some sort of syntax error there? just ignore the line
+		if(p++[0] != '#')
+			continue;
+
+		if(str_comp_nocase("io", p) == 0)
+			m_PermissionFlags |= LUAFILE_PERMISSION_IO;
+		if(str_comp_nocase("debug", p) == 0)
+			m_PermissionFlags |= LUAFILE_PERMISSION_DEBUG;
+		if(str_comp_nocase("ffi", p) == 0)
+			m_PermissionFlags |= LUAFILE_PERMISSION_FFI;
+		if(str_comp_nocase("os", p) == 0)
+			m_PermissionFlags |= LUAFILE_PERMISSION_OS;
+		if(str_comp_nocase("package", p) == 0)
+			m_PermissionFlags |= LUAFILE_PERMISSION_PACKAGE;
+	}
 }
 
 void CLuaFile::Unload(bool error)
@@ -86,20 +133,26 @@ void CLuaFile::OpenLua()
 	lua_atpanic(m_pLuaState, CLua::Panic);
 	lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
 
-	//luaL_openlibs(m_pLuaState);  //we don't need os lib!
-	
-	luaopen_base(m_pLuaState);	//base
-	luaopen_math(m_pLuaState);
-	luaopen_string(m_pLuaState);
-	luaopen_table(m_pLuaState);	//table operations
-	luaopen_io(m_pLuaState);	//input/output of fles
-	luaopen_debug(m_pLuaState);	//debug stuff for whatever... can be removed in further patches
-	luaopen_bit(m_pLuaState);	//bit operations
-	//luaopen_jit(m_pLuaState); //control the jit-compiler [don't needed]
-	luaopen_ffi(m_pLuaState);	//register and write own C-Functions and call them in lua (whoever needs that...)
-	
-	//luaopen_os(m_pLuaState);	//evil
-	//luaopen_package(m_pLua); // not sure whether we should load this //used for modules etc....
+	//luaL_openlibs(m_pLuaState);  // we don't need certain libs -> open them all manually
+
+	luaopen_base(m_pLuaState);	// base
+	luaopen_math(m_pLuaState);	// math.* functions
+	luaopen_string(m_pLuaState);// string.* functions
+	luaopen_table(m_pLuaState);	// table operations
+	luaopen_bit(m_pLuaState);	// bit operations
+	//luaopen_jit(m_pLuaState);	// control the jit-compiler [don't needed]
+
+	if(m_PermissionFlags&LUAFILE_PERMISSION_IO)
+		luaopen_io(m_pLuaState);	// input/output of files
+	if(m_PermissionFlags&LUAFILE_PERMISSION_DEBUG)
+		luaopen_debug(m_pLuaState);	// debug stuff for whatever... can be removed in further patches
+	if(m_PermissionFlags&LUAFILE_PERMISSION_FFI)
+		luaopen_ffi(m_pLuaState);	// register and write own C-Functions and call them in lua (whoever may need that...)
+	if(m_PermissionFlags&LUAFILE_PERMISSION_OS)
+		luaopen_os(m_pLuaState);	// evil
+	if(m_PermissionFlags&LUAFILE_PERMISSION_PACKAGE)
+		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
+
 }
 
 void CLuaFile::Init()
@@ -109,14 +162,15 @@ void CLuaFile::Init()
 
 	m_State = LUAFILE_STATE_IDLE;
 
+	LoadPermissionFlags();
 	OpenLua();
 
 	if(!LoadFile("data/luabase/events.lua")) // try the usual script file first
 	{
-		if(!LoadFile("data/lua/events.luac")) // try for the compiled file if script not found
+		//if(!LoadFile("data/lua/events.luac")) // try for the compiled file if script not found
 			m_State = LUAFILE_STATE_ERROR;
-		else
-			RegisterLuaCallbacks(m_pLuaState);
+		//else
+		//	RegisterLuaCallbacks(m_pLuaState);
 	}
 	else
 		RegisterLuaCallbacks(m_pLuaState);

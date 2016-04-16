@@ -2549,6 +2549,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		static float s_ScrollValue = 0;
 		static int pIDItem[128];
 		static int pIDCheckboxAutoload[128];
+		static int pIDButtonPermissions[128];
 		static int pIDButtonReload[128];
 		static int pIDButtonDeactivate[128];
 		static int pIDButtonSettings[128];
@@ -2591,11 +2592,38 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				if (DoButton_CheckBox(&pIDCheckboxAutoload[i], "", L->GetScriptIsAutoload(), &Button, Localize("Autoload")))
 					L->SetScriptIsAutoload(!L->GetScriptIsAutoload());
 
+				Buttons.VSplitRight(5.0f, &Buttons, 0);
+				Buttons.VSplitRight(Buttons.h, &Buttons, &Button);
+				{
+					int PermissionFlags = L->GetPermissionFlags();
+					char aTooltip[1024] = {0};
+					if(PermissionFlags == 0)
+						str_format(aTooltip, sizeof(aTooltip), "This script has no additional permissions and is thus considered safe.");
+					else
+					{
+						str_format(aTooltip, sizeof(aTooltip), "This script has the following additional permission:");
+
+						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_IO)
+							str_append(aTooltip, "\n\n- IO (Write and read files)", sizeof(aTooltip));
+						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_DEBUG)
+							str_append(aTooltip, "\n\n- DEBUG (Dunno what this is used for o.O)", sizeof(aTooltip));
+						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_FFI)
+							str_append(aTooltip, "\n\n- FFI (Execution of native code)", sizeof(aTooltip));
+						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_OS)
+							str_append(aTooltip, "\n\n- OS (Access to various operation system functionalities, BE CAREFUL!", sizeof(aTooltip));
+						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_PACKAGE)
+							str_append(aTooltip, "\n\n- PACKAGE (Modules)", sizeof(aTooltip));
+					}
+					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Button, aTooltip, CUI::CORNER_ALL, vec4(PermissionFlags > 0 ? .7f : .2f, PermissionFlags > 0 ? .2f : .7f, .2f, .8f)))
+						dbg_msg("blalballals", "%i (%i) | %s", PermissionFlags, L->GetPermissionFlags(), L->GetFilename());
+
+				}
+
 				if(L->State() == CLuaFile::LUAFILE_STATE_LOADED)
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
-					if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Deactivate"), false, &Button))
+					if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Deactivate"), 0, &Button))
 					{
 						L->Unload();
 						continue;
@@ -2603,7 +2631,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
-					if (DoButton_Menu(&pIDButtonReload[i], Localize("Reload"), false, &Button))
+					if (DoButton_Menu(&pIDButtonReload[i], Localize("Reload"), 0, &Button))
 					{
 						RenderLoadingLua();
 						L->Init();
@@ -2613,7 +2641,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
-					if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Activate"), false, &Button))
+					if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Activate"), 0, &Button))
 					{
 						RenderLoadingLua();
 						L->Init();
@@ -2631,7 +2659,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(100.0f, &Buttons, &Button);
-					if (DoButton_Menu(&pIDButtonSettings[i], Localize("Settings"), false, &Button))
+					if (DoButton_Menu(&pIDButtonSettings[i], Localize("Settings"), 0, &Button))
 					{
 						s_ActiveLuaSettings = i;
 					}
