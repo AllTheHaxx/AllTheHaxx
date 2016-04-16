@@ -1372,7 +1372,9 @@ int CMenus::Render()
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 	}
 
-	if(!Client()->MapLoaded())// && Client()->State() != IClient::STATE_ONLINE)
+	if(	!Client()->MapLoaded() ||
+			Client()->State() == IClient::STATE_CONNECTING ||
+			Client()->State() == IClient::STATE_LOADING)// && Client()->State() != IClient::STATE_ONLINE)
 		RenderBackground();
 
 	CUIRect TabBar;
