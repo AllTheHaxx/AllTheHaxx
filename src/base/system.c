@@ -2770,9 +2770,12 @@ void open_default_browser(const char *url)
 	str_skip_to_whitespace(aUrl);
 	
 	// make sure the string is sane
-	for(int i = 0; i < str_length(aUrl); i++)
-		if(aUrl[i] == ';' || aUrl[i] == '$' || aUrl[i] == '`' || aUrl[i] == '´')
-			aUrl[i] = '\0';
+	{
+		int i = 0;
+		for(; i < str_length(aUrl); i++)
+			if(aUrl[i] == ';' || aUrl[i] == '$' || aUrl[i] == '`')
+				aUrl[i] = '\0';
+	}
 
 #if defined(CONF_FAMILY_WINDOWS)
 	ShellExecuteA(NULL, "open", aUrl, NULL, NULL, SW_SHOWNORMAL);
