@@ -1047,7 +1047,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxVsync, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if you got performance problems")))
+	if(DoButton_CheckBox(&g_Config.m_GfxVsync, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if your game reacts too slow")))
 	{
 		g_Config.m_GfxVsync ^= 1;
 		CheckSettings = true;
@@ -1077,7 +1077,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxTextureCompression, Localize("Texture Compression"), g_Config.m_GfxTextureCompression, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxTextureCompression, Localize("Texture Compression"), g_Config.m_GfxTextureCompression, &Button, Localize("Disable this if you get blurry textures")))
 	{
 		g_Config.m_GfxTextureCompression ^= 1;
 		CheckSettings = true;
@@ -1090,7 +1090,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button, Localize("Disable fancy effects")))
+	if(DoButton_CheckBox(&g_Config.m_GfxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button, Localize("Disable fancy effects to gain more fps")))
 		g_Config.m_GfxLowGraphics ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
@@ -1100,22 +1100,22 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button, Localize("May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.")))
 		g_Config.m_GfxNoclip ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxQuadAsTriangle, Localize("Render quads as triangles"), g_Config.m_GfxQuadAsTriangle, &Button, Localize("fixes quad coloring on some GPUs")))
+	if(DoButton_CheckBox(&g_Config.m_GfxQuadAsTriangle, Localize("Render quads as triangles"), g_Config.m_GfxQuadAsTriangle, &Button, Localize("Fixes quad coloring on some GPUs")))
 		g_Config.m_GfxQuadAsTriangle ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Finished Bufferswapping"), g_Config.m_GfxFinish, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Wait for GL commands to finish"), g_Config.m_GfxFinish, &Button, Localize("Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.")))
 		g_Config.m_GfxFinish ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Graphics Threading Mode"), g_Config.m_GfxThreadedOld, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Threaded Graphics Mode"), g_Config.m_GfxThreadedOld, &Button, Localize("Enable this if the serverbrowser reloads in a strange, faltering way.\n~ Info for nerds: Uses 'CGraphics_Threaded' instead of 'CGraphics_SDL'")))
 		g_Config.m_GfxThreadedOld ^= 1;
 
 
