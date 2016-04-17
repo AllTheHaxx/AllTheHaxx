@@ -32,6 +32,30 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
+void CQueryRecent::OnData()
+{
+	while(Next()) // process everything
+	{
+		if(m_paRecentList) // we only have this when writing to the db
+		{
+			CServerBrowser::RecentServer e;
+			mem_zero(&e, sizeof(CServerBrowser::RecentServer));
+
+			e.m_ID = GetInt(GetID("id"));
+
+			const char *pAddrStr = GetText(GetID("addr"));
+			if(pAddrStr)
+				net_addr_from_str(&e.m_Addr, pAddrStr);
+
+			const char *pLastJoined = GetText(GetID("last_joined"));
+			if(pLastJoined)
+				str_copy(e.m_LastJoined, pLastJoined, sizeof(e.m_LastJoined));
+
+			m_paRecentList->add(e);
+		}
+	}
+}
+
 CServerBrowser::CServerBrowser()
 {
 	m_pMasterServer = 0;
@@ -54,6 +78,8 @@ CServerBrowser::CServerBrowser()
 	m_NeedRefresh = 0;
 	m_NeedUpgrade = 0;
 	m_CacheExists = true; // let's just assume this
+	m_aRecentServers.clear();
+	m_aRecentServers.hint_size(50);
 
 	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
@@ -78,15 +104,24 @@ CServerBrowser::CServerBrowser()
 
 	m_pRecentDB = new CSql("ath_recent.db");
 
-	char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS recent (" \
-		"id INTEGER PRIMARY KEY AUTOINCREMENT, " \
-		"addr TEXT NOT NULL UNIQUE, " \
-		"last_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
-	CQueryRecent *pQuery = new CQueryRecent();
-	pQuery->Query(m_pRecentDB, pQueryBuf);
-	sqlite3_free(pQueryBuf);
+	// make sure the "recent"-table exists
+	{
+		char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS recent (" \
+			"id INTEGER PRIMARY KEY, " \
+			"addr TEXT NOT NULL UNIQUE, " \
+			"last_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
+		CQueryRecent *pQuery = new CQueryRecent();
+		pQuery->Query(m_pRecentDB, pQueryBuf);
+		sqlite3_free(pQueryBuf);
+	}
 
-	// TODO! read the database into m_aRecentServers!
+	// read the entries from it
+	{
+		char *pQueryBuf = sqlite3_mprintf("SELECT * FROM recent` ORDER BY `last_joined` DESC;");
+		CQueryRecent *pQuery = new CQueryRecent(&m_aRecentServers);
+		pQuery->Query(m_pRecentDB, pQueryBuf);
+		sqlite3_free(pQueryBuf);
+	}
 }
 
 void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
@@ -1105,7 +1140,7 @@ inline void swap(T &a, T &b)
 	a = c;
 }*/
 
-void CServerBrowser::AddRecent(const NETADDR &Addr)
+void CServerBrowser::AddRecent(const NETADDR& Addr)
 {
 	// add the address into the database
 	{

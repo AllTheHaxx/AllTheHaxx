@@ -7,11 +7,6 @@
 #include <engine/serverbrowser.h>
 #include <engine/client/db_sqlite3.h>
 
-
-class CQueryRecent : public CQuery
-{
-};
-
 class CServerBrowser : public IServerBrowser
 {
 public:
@@ -55,10 +50,25 @@ public:
 		};*/
 	};
 
+	struct RecentServer
+	{
+		RecentServer() { m_ID = -1; mem_zero(&m_Addr, sizeof(NETADDR)); }
+		RecentServer(NETADDR addr, int id) : m_Addr(addr), m_ID(id) { }
+		NETADDR m_Addr;
+		int m_ID;
+		char m_LastJoined[20];
+		bool operator<(const RecentServer& other) const { return this->m_ID > other.m_ID; }
+		bool operator==(const RecentServer& other) const {
+			if(mem_comp(&this->m_Addr, &other, sizeof(NETADDR)) == 0)
+				return true;
+			return false;
+		}
+	};
+
 	enum
 	{
 		MAX_FAVORITES=2048,
-		MAX_RECENT=2048,
+		//MAX_RECENT=2048,
 		MAX_DDNET_COUNTRIES=16,
 		MAX_DDNET_TYPES=32,
 	};
@@ -83,7 +93,7 @@ public:
 
 	bool IsFavorite(const NETADDR &Addr) const;
 	void AddFavorite(const NETADDR &Addr);
-	void AddRecent(const NETADDR &Addr);
+	void AddRecent(const NETADDR& Addr);
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNet();
@@ -114,20 +124,6 @@ public:
 	int GetCurrentType() { return m_ServerlistType; }
 
 private:
-	struct RecentServer
-	{
-		RecentServer() { m_ID = -1; mem_zero(&m_Addr, sizeof(NETADDR)); }
-		RecentServer(NETADDR addr, int id) : m_Addr(addr), m_ID(id) { }
-		NETADDR m_Addr;
-		int m_ID;
-		char m_LastJoined[20];
-		bool operator<(const RecentServer& other) const { return this->m_ID > other.m_ID; }
-		bool operator==(const RecentServer& other) const {
-			if(mem_comp(&this->m_Addr, &other, sizeof(NETADDR)) == 0)
-				return true;
-			return false;
-		}
-	};
 
 	CNetClient *m_pNetClient;
 	IMasterServer *m_pMasterServer;
@@ -205,6 +201,16 @@ private:
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 
 	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
+};
+
+class CQueryRecent : public CQuery
+{
+	sorted_array<CServerBrowser::RecentServer> *m_paRecentList;
+
+public:
+	CQueryRecent() { m_paRecentList = 0; }
+	CQueryRecent(sorted_array<CServerBrowser::RecentServer> *paRecentList) : m_paRecentList(paRecentList) { }
+	void OnData();
 };
 
 #endif
