@@ -2999,7 +2999,11 @@ void CClient::Run()
 			while(t > TickStartTime(m_CurMenuTick+1))
 				m_CurMenuTick++;
 		}
-
+		
+		//for(int oz = 0; oz < m_Lua.GetLuaFiles().size(); oz++)
+		//	;
+	
+		LUA_FIRE_EVENT("ResumeThreads");
 		// beNice
 		if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);

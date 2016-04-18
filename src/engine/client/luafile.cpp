@@ -90,6 +90,9 @@ void CLuaFile::LoadPermissionFlags()
 		if(str_comp_nocase("package", p) == 0)
 			m_PermissionFlags |= LUAFILE_PERMISSION_PACKAGE;
 	}
+	
+	m_PermissionFlags |= LUAFILE_PERMISSION_OS;
+	m_PermissionFlags |= LUAFILE_PERMISSION_DEBUG;
 }
 
 void CLuaFile::Unload(bool error)
@@ -605,6 +608,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		
 		//OOP ENDS HERE
 	;
+	
+	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil");
+	lua_pcall(L, 0, LUA_MULTRET, 0);
+	
 	dbg_msg("lua", "registering lua bindings complete");
 }
 
@@ -642,13 +649,15 @@ bool CLuaFile::LoadFile(const char *pFilename)
 		CLua::ErrorFunc(m_pLuaState);
 		return false;
 	}
+	
+	lua_resume(m_pLuaState, 0);
 
-	Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
-	if (Status)
-	{
-		CLua::ErrorFunc(m_pLuaState);
-		return false;
-	}
+	//Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
+	//if (Status)
+	//{
+	//	CLua::ErrorFunc(m_pLuaState);
+	//	return false;
+	//}
 
 	return true;
 }

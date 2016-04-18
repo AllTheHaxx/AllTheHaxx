@@ -1,4 +1,5 @@
 Events = {}
+Threads = {}	--3D Table which contains the 'threadobject' and its pause stuff
 
 -- YOU SHOULD NOT TOUCH THIS FUNCTION IF YOU DON'T KNOW WHAT YOU ARE DOING!
 function RegisterEvent(EventName, FuncName)
@@ -177,4 +178,50 @@ function OnTick()
 			end
 		end
 	end
+end
+
+function RegisterThread(FuncName)
+	Func = getfenv()[FuncName]
+	
+	if Func ~= nil then
+		if Threads[Func] == nil then  --create new table if it's empty
+			Threads[Func] = {}
+		end
+		
+		Threads[Func].Routine = coroutine.create(Func)
+		Threads[Func].ResTick = 0
+		Threads[Func].ResSec = 0
+		coroutine.resume(Threads[Func].Routine)
+	end
+end
+
+function ResumeThreads()
+	for script, struct in pairs(Threads) do
+		--print(script)
+		--ticksleep!
+		if struct.ResTick > 0 and struct.ResTick <= Game.Client.Tick then
+			struct.ResTick = 0
+			coroutine.resume(Threads[script].Routine)
+		elseif struct.ResSec > 0 and struct.ResSec <= os.clock() then
+			struct.ResSec = 0
+			coroutine.resume(Threads[script].Routine)
+		end
+	end
+end
+
+--[[function thread_sleep_ticks(Num)
+	print("panos")
+	calling_func = debug.getinfo(2)
+	print(debug.getinfo(1).name)
+	print(debug.getinfo(2).name)
+end]]
+
+function thread_sleep_ticks(num)
+	Threads[debug.getinfo(2).func].ResTick = Game.Client.Tick + num	
+	coroutine.yield()
+end
+
+function thread_sleep_ms(num)
+	Threads[debug.getinfo(2).func].ResSec = os.clock() + num/1000
+	coroutine.yield()
 end
