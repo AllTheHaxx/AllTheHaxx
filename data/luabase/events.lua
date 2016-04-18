@@ -191,13 +191,23 @@ function RegisterThread(FuncName)
 		Threads[Func].Routine = coroutine.create(Func)
 		Threads[Func].ResTick = 0
 		Threads[Func].ResSec = 0
+		
+		--FOLLOWING CODE IS INFINITE LOOP PROTECTION!
+		--This creates a hook which can register up to 10000 events; if that value is exceeded, the script is cancelled!
+		--if there is some sort of sleeping function in that (so no infinite loop) then coroutine.resume will exit and the hook thus deleted!
+		debug.sethook(function() print("Please, don't use infinite loops as they will crash your client!") error("Infinite Loop") end, "", 20000)
+		
 		coroutine.resume(Threads[Func].Routine)
+		
+		debug.sethook()
+		
+		--END OF INFINITE LOOPS
+		--this stuff is genius mate
 	end
 end
 
 function ResumeThreads()
 	for script, struct in pairs(Threads) do
-		--print(script)
 		--ticksleep!
 		if struct.ResTick > 0 and struct.ResTick <= Game.Client.Tick then
 			struct.ResTick = 0
@@ -208,13 +218,6 @@ function ResumeThreads()
 		end
 	end
 end
-
---[[function thread_sleep_ticks(Num)
-	print("panos")
-	calling_func = debug.getinfo(2)
-	print(debug.getinfo(1).name)
-	print(debug.getinfo(2).name)
-end]]
 
 function thread_sleep_ticks(num)
 	Threads[debug.getinfo(2).func].ResTick = Game.Client.Tick + num	
