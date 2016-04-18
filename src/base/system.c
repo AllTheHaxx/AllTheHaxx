@@ -2762,13 +2762,20 @@ void open_default_browser(const char *url)
 {
 	char aUrl[255] = {0};
 	
-	// Only read the first string before whitespace for prevent injection
 	if (!url || url[0] == 0)
 		return;
 
+	// only read the first string before whitespace for prevent injection
 	str_copy(aUrl, url, sizeof(aUrl));
 	str_skip_to_whitespace(aUrl);
 	
+	// make sure the string is sane
+	{
+		int i = 0;
+		for(; i < str_length(aUrl); i++)
+			if(aUrl[i] == ';' || aUrl[i] == '$' || aUrl[i] == '`')
+				aUrl[i] = '\0';
+	}
 
 #if defined(CONF_FAMILY_WINDOWS)
 	ShellExecuteA(NULL, "open", aUrl, NULL, NULL, SW_SHOWNORMAL);

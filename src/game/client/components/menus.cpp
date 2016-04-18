@@ -128,7 +128,8 @@ void CMenusTooltip::OnRender()
 		Temp.y = UI()->MouseY() + 0.5f;
 		const float mtw = UI()->Screen()->w-Temp.x-10.0f;
 		const int lc = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, mtw);
-		Temp.w = min(mtw+2.5f, TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f);
+		const float tw = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f;
+		Temp.w = clamp(tw, tw < 5.0f ? mtw : tw, mtw+2.5f);
 		Temp.h = (FONT_SIZE)*lc+2.5;
 		Temp.Margin(-3.0f, &Temp);
 		RenderTools()->DrawUIRect(&Temp, vec4(0,0,0.2f,0.8f), CUI::CORNER_ALL, 2.5f);
@@ -899,16 +900,19 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(30.0f, &Button, &Box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
-		static int s_BrowserButton=0;
-		if(DoButton_MenuTab(&s_BrowserButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, CUI::CORNER_TL))
+		static int s_BrowserButton=0; int BrowserCorners = CUI::CORNER_T;
+#if defined(CONF_SPOOFING)
+		BrowserCorners = CUI::CORNER_TL;
+#endif
+		if(DoButton_MenuTab(&s_BrowserButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, BrowserCorners))
 			NewPage = PAGE_BROWSER;
-
+#if defined(CONF_SPOOFING)
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_SpoofingButton=0;
 		if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_SPOOFING;
-
+#endif
 		CServerInfo tmp; Client()->GetServerInfo(&tmp);
 		if(IsDDNet(&tmp) || IsDDRace(&tmp))
 		{
@@ -965,7 +969,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	return 0;
 }
 
-float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback)
+float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, void *pArgs, const char *pTooltip)
 {
 	CUIRect View = *pRect;
 	CUIRect Header, Label;
@@ -1007,9 +1011,13 @@ float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, 
 			m_pActiveDropdown = (int*)pID;
 	}
 
+	// tooltip
+	if(UI()->HotItem() == pID && pTooltip && pTooltip[0] != '\0')
+		m_pClient->m_pTooltip->SetTooltip(pTooltip);
+
 	// render content of expanded menu
 	if(Active)
-		return HeaderHeight + pfnCallback(View, this);
+		return HeaderHeight + pfnCallback(View, this, pArgs);
 
 	return HeaderHeight;
 }
@@ -1367,7 +1375,9 @@ int CMenus::Render()
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 	}
 
-	if(!Client()->MapLoaded())// && Client()->State() != IClient::STATE_ONLINE)
+	if(	!Client()->MapLoaded() ||
+			Client()->State() == IClient::STATE_CONNECTING ||
+			Client()->State() == IClient::STATE_LOADING)// && Client()->State() != IClient::STATE_ONLINE)
 		RenderBackground();
 
 	CUIRect TabBar;

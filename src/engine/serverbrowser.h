@@ -122,7 +122,7 @@ public:
 	virtual void AddFavorite(const NETADDR &Addr) = 0;
 	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
 
-	virtual void AddRecent(const NETADDR &Addr) = 0;
+	virtual void AddRecent(const NETADDR& Addr) = 0;
 
 	virtual int NumDDNetCountries() = 0;
 	virtual int GetDDNetCountryFlag(int Index) = 0;

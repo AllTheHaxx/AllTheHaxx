@@ -128,7 +128,7 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 			{
 				str_format(aBuf, sizeof(aBuf), "error while loading identity file");
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", aBuf);
-				io_close(File);
+				//io_close(File);
 				mem_zero(aEntryItems[i], sizeof(aEntryItems[i]));
 				break;
 			}

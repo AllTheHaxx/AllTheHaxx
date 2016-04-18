@@ -20,7 +20,7 @@ public:
 		};
 
 private:
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) // this ones are unix-only
 	// engine variables
 	void *m_pListenerThread;
 	void *m_pWorkerThread;

@@ -519,23 +519,35 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, in
 		// highlight the parts that matches
 		if(pHighlight && pHighlight[0] != '\0')
 		{
+			const char * const _pOrigText = pText;
+
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x + r->w/2-tw/2, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+			TextRender()->SetCursor(&Cursor, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Cursor.m_LineWidth = r->w;
-			const char *pStr = str_find_nocase(pText, pHighlight);
-			if(pStr)
+			while(pText)
 			{
-				TextRender()->TextEx(&Cursor, pText, (int)(pStr-pText));
-				TextRender()->TextColor(0.4f,0.4f,1.0f,1);
-				TextRender()->TextEx(&Cursor, pStr, str_length(pHighlight));
-				TextRender()->TextColor(1,1,1,1);
-				TextRender()->TextEx(&Cursor, pStr+str_length(pHighlight), -1);
+				const char *pFoundStr = str_find_nocase(pText, pHighlight);
+				if(pFoundStr)
+				{
+					TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr - pText));
+					TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
+					TextRender()->TextEx(&Cursor, pFoundStr, str_length(pHighlight));
+					TextRender()->TextColor(1, 1, 1, 1);
+					//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
+					pText = pFoundStr + str_length(pHighlight);
+				}
+				else
+				{
+					TextRender()->TextEx(&Cursor, pText, -1);
+					break;
+				}
+
+				if(pText > _pOrigText + str_length(_pOrigText) - 1 || pText < _pOrigText)
+					pText = 0;
 			}
-			else
-				TextRender()->TextEx(&Cursor, pText, -1);
 		}
 		else
-			TextRender()->Text(0, r->x + r->w/2-tw/2, r->y - Size/10, Size, pText, MaxWidth);
+			TextRender()->Text(0, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, pText, MaxWidth);
 	}
 	else if(Align < 0)
 	{

@@ -43,6 +43,7 @@ class CGameConsole : public CComponent
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
 		bool m_ReverseTAB;
+		bool m_CTRLPressed;
 
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
@@ -86,7 +87,7 @@ class CGameConsole : public CComponent
 	float TimeNow();
 	int m_PrintCBIndex;
 
-	char *m_pSearchString;
+	static const char *m_pSearchString;
 
 	int m_ConsoleType;
 	int m_ConsoleState;

@@ -1,6 +1,9 @@
+#include <fstream>
+
 #include <base/system.h>
 #include <engine/storage.h>
 #include <engine/client.h>
+#include <engine/console.h>
 
 #include "luabinding.h"
 #include "lua.h"
@@ -22,6 +25,8 @@ CLua::CLua()
 
 CLua::~CLua()
 {
+	SaveAutoloads();
+
 	m_pLuaFiles.delete_all();
 	m_pLuaFiles.clear();
 	mem_free(CLuaBinding::m_pUiContainer);
@@ -32,7 +37,21 @@ void CLua::Init(IClient *pClient, IStorageTW *pStorage)
 	m_pClient = pClient;
 	m_pCClient = (CClient*)pClient;
 	m_pStorage = pStorage;
+	m_aAutoloadFiles.clear();
+
 	LoadFolder();
+}
+
+void CLua::SaveAutoloads()
+{
+	char aFilePath[768];
+	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
+	str_append(aFilePath, "/luafiles.cfg", sizeof(aFilePath));
+	std::ofstream f(aFilePath, std::ios::out | std::ios::trunc);
+	for(int i = 0; i < m_pLuaFiles.size(); i++)
+		if(m_pLuaFiles[i]->GetScriptIsAutoload())
+			f << m_pLuaFiles[i]->GetFilename() << std::endl;
+	f.close();
 }
 
 void CLua::SortLuaFiles()
@@ -77,8 +96,16 @@ void CLua::AddUserscript(const char *pFilename)
 			return;
 
 	std::string file = pFilename;
+
+	bool Autoload = false;
+	for(int i = 0; i < m_aAutoloadFiles.size(); i++)
+		if(m_aAutoloadFiles[i] == file)
+			Autoload = true;
+
 	dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
-	m_pLuaFiles.add(new(mem_alloc(sizeof(CLuaFile), sizeof(void*))) CLuaFile(this, file));
+	int index = m_pLuaFiles.add( new( mem_alloc(sizeof(CLuaFile), sizeof(void*)) ) CLuaFile(this, file, Autoload) );
+	if(Autoload)
+		m_pLuaFiles[index]->Init();
 }
 
 void CLua::LoadFolder()
@@ -88,6 +115,22 @@ void CLua::LoadFolder()
 
 void CLua::LoadFolder(const char *pFolder)
 {
+	// get the files which should be auto-loaded from file
+	{
+		m_aAutoloadFiles.clear();
+		char aFilePath[768];
+		fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
+		str_append(aFilePath, "/luafiles.cfg", sizeof(aFilePath));
+		std::ifstream f(aFilePath);
+		if(f.is_open())
+		{
+			std::string line;
+			while(std::getline(f, line))
+				m_aAutoloadFiles.add(line);
+			f.close();
+		}
+	}
+
 	//char FullDir[256];
 	//str_format(FullDir, sizeof(FullDir), "lua");
 

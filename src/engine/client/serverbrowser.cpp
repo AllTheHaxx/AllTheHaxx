@@ -32,11 +32,38 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
+void CQueryRecent::OnData()
+{
+	while(Next()) // process everything
+	{
+		if(m_paRecentList) // we only have this when writing to the db
+		{
+			CServerBrowser::RecentServer e;
+			mem_zero(&e, sizeof(CServerBrowser::RecentServer));
+
+			e.m_ID = GetInt(GetID("id"));
+
+			const char *pAddrStr = GetText(GetID("addr"));
+			if(pAddrStr)
+				net_addr_from_str(&e.m_Addr, pAddrStr);
+
+			const char *pLastJoined = GetText(GetID("last_joined"));
+			if(pLastJoined)
+				str_copy(e.m_LastJoined, pLastJoined, sizeof(e.m_LastJoined));
+
+			m_paRecentList->add(e);
+		}
+	}
+}
+
 CServerBrowser::CServerBrowser()
 {
 	m_pMasterServer = 0;
 	m_ppServerlist = 0;
 	m_pSortedServerlist = 0;
+	m_pConsole = 0;
+	m_pFriends = 0;
+	m_pNetClient = 0;
 
 	m_NumFavoriteServers = 0;
 
@@ -45,15 +72,24 @@ CServerBrowser::CServerBrowser()
 	m_pFirstReqServer = 0; // request list
 	m_pLastReqServer = 0;
 	m_NumRequests = 0;
+	m_MasterServerCount = 0;
+	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 
 	m_NeedRefresh = 0;
 	m_NeedUpgrade = 0;
 	m_CacheExists = true; // let's just assume this
+	m_aRecentServers.clear();
+	m_aRecentServers.hint_size(50);
 
 	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
 	m_NumServers = 0;
 	m_NumServerCapacity = 0;
+
+	m_NumDDNetTypes = 0;
+	m_NumDDNetCountries = 0;
+
+	m_UpgradeProgression = 0;
 
 	m_Sorthash = 0;
 	m_aFilterString[0] = 0;
@@ -61,19 +97,30 @@ CServerBrowser::CServerBrowser()
 
 	// the token is to keep server refresh separated from each other
 	m_CurrentToken = 1;
+	m_LastPacketTick = 0;
 
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
 
-	char aFilePath[1024];
-	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
-	str_append(aFilePath, "/recent.cfg", sizeof(aFilePath));
-	IOHANDLE RecentFile = io_open(aFilePath, IOFLAG_READ);
-	if(RecentFile)
+	m_pRecentDB = new CSql("ath_recent.db");
+
+	// make sure the "recent"-table exists
 	{
-		io_read(RecentFile, m_aRecentServers, io_length(RecentFile));
-		m_NumRecentServers = io_length(RecentFile) / sizeof(NETADDR);
-		io_close(RecentFile);
+		char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS recent (" \
+			"id INTEGER PRIMARY KEY, " \
+			"addr TEXT NOT NULL UNIQUE, " \
+			"last_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
+		CQueryRecent *pQuery = new CQueryRecent();
+		pQuery->Query(m_pRecentDB, pQueryBuf);
+		sqlite3_free(pQueryBuf);
+	}
+
+	// read the entries from it
+	{
+		char *pQueryBuf = sqlite3_mprintf("SELECT * FROM recent` ORDER BY `last_joined` DESC;");
+		CQueryRecent *pQuery = new CQueryRecent(&m_aRecentServers);
+		pQuery->Query(m_pRecentDB, pQueryBuf);
+		sqlite3_free(pQueryBuf);
 	}
 }
 
@@ -605,8 +652,8 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 	}
 	else if(Type == IServerBrowser::TYPE_RECENT)
 	{
-		for(int i = 0; i < m_NumRecentServers; i++)
-			Set(m_aRecentServers[i], IServerBrowser::SET_RECENT, -1, 0);
+		for(int i = 0; i < m_aRecentServers.size(); i++)
+			Set(m_aRecentServers[i].m_Addr, IServerBrowser::SET_RECENT, -1, 0);
 	}
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
@@ -1085,29 +1132,32 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 	}
 }
 
-template<class T>
+/*template<class T>
 inline void swap(T &a, T &b)
 {
 	T c = b;
 	b = a;
 	a = c;
-}
+}*/
 
-void CServerBrowser::AddRecent(const NETADDR &Addr)
+void CServerBrowser::AddRecent(const NETADDR& Addr)
 {
-	for(int i = MAX_RECENT - 1; i > 0; i--)
-		swap(m_aRecentServers[i], m_aRecentServers[i - 1]);
-	m_aRecentServers[0] = Addr;
-	if(m_NumRecentServers < MAX_RECENT)
-		m_NumRecentServers++;
+	// add the address into the database
+	{
+		char aNetAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aNetAddrStr, sizeof(aNetAddrStr), Addr.port);
+		char *pQueryBuf = sqlite3_mprintf("INSERT OR REPLACE INTO recent (addr) VALUES ('%q');", aNetAddrStr);
+		CQueryRecent *pQuery = new CQueryRecent();
+		pQuery->Query(m_pRecentDB, pQueryBuf);
+		sqlite3_free(pQueryBuf);
+	}
 
-	//save recent to file
-	char aFilePath[1024];
-	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
-	str_append(aFilePath, "/recent.cfg", sizeof(aFilePath));
-	IOHANDLE RecentFile = io_open(aFilePath, IOFLAG_WRITE);
-	io_write(RecentFile, m_aRecentServers, sizeof(NETADDR) * m_NumRecentServers);
-	io_close(RecentFile);
+	// add it to our current session recent cache
+	RecentServer e(Addr, m_aRecentServers.size());
+	for(int i = 0; i < m_aRecentServers.size(); i++)
+		if(m_aRecentServers[i] == e)
+			m_aRecentServers.remove_index(i);
+	m_aRecentServers.add(e);
 }
 
 void CServerBrowser::LoadDDNet()

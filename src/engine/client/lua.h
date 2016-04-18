@@ -30,6 +30,7 @@ using namespace luabridge;
 class CLua
 {
 	array<CLuaFile*> m_pLuaFiles;
+	array<std::string> m_aAutoloadFiles;
 	IStorageTW *m_pStorage;
 
 public:
@@ -37,6 +38,7 @@ public:
     ~CLua();
 	
 	void Init(IClient *pClient, IStorageTW *pStorage);
+	void SaveAutoloads();
 	void AddUserscript(const char *pFilename);
 	void LoadFolder();
 	void LoadFolder(const char *pFolder);

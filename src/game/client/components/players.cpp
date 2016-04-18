@@ -939,13 +939,18 @@ void CPlayers::RenderPlayer(
 					TextRender()->TextColor(0.7f, 0.7f, 1.0f, a);
 			}
 
-			TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f-FontSize, FontSize, aName, -1);
-
-			if(g_Config.m_ClNameplatesClan)
+			// name + clan / only name
+			if(str_length(m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan) > 0 && g_Config.m_ClNameplatesClan)
 			{
+				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, aName, -1); // name above clan
+
 				const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
 				float tw_clan = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
 				TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y - FontSizeClan - 38.0f, FontSizeClan, pClan, -1);
+			}
+			else
+			{
+				TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, aName, -1); // only name
 			}
 
 			CServerInfo ServerInfo;
@@ -983,7 +988,7 @@ void CPlayers::RenderPlayer(
 				float Alpha = sinf(Client()->GameTick()*0.025f);
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
-				float PosY = !g_Config.m_ClNameplatesClan ? Position.y - 3.f*FontSize : Position.y - 3*FontSize -38.f;
+				float PosY = !(str_length(m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan) > 0 && g_Config.m_ClNameplatesClan) ? Position.y - 3.f*FontSize : Position.y - 3*FontSize -38.f;
 
 				RenderTools()->DrawRoundRect(Position.x-30.f, PosY, 55.f, 25.f, 0.f);
 				Graphics()->QuadsEnd();
