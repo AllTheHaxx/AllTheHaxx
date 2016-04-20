@@ -229,7 +229,7 @@ void CProjectile::FillInfo(CNetObj_Projectile *pProj)
 	pProj->m_VelX = (int)(m_Direction.x*100.0f);
 	pProj->m_VelY = (int)(m_Direction.y*100.0f);
 	pProj->m_StartTick = m_StartTick;
-	pProj->m_Type = m_Type;
+	pProj->m_WeaponType = m_Type;
 }
 
 void CProjectile::Snap(int SnappingClient)
@@ -301,5 +301,5 @@ void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
 	pProj->m_VelX = (int)(Angle * 1000000.0f);
 	pProj->m_VelY = Data;
 	pProj->m_StartTick = m_StartTick;
-	pProj->m_Type = m_Type;
+	pProj->m_WeaponType = m_Type;
 }
