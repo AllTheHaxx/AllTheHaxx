@@ -2615,7 +2615,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 							str_append(aTooltip, "\n\n- PACKAGE (Modules)", sizeof(aTooltip));
 					}
 					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Button, aTooltip, CUI::CORNER_ALL, vec4(PermissionFlags > 0 ? .7f : .2f, PermissionFlags > 0 ? .2f : .7f, .2f, .8f)))
-						dbg_msg("blalballals", "%i (%i) | %s", PermissionFlags, L->GetPermissionFlags(), L->GetFilename());
+						dbg_msg("lua/permissions", "'%s' | %i (%i)", L->GetFilename(), PermissionFlags, L->GetPermissionFlags());
 
 				}
 

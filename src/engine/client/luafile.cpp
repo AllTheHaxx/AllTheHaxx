@@ -91,8 +91,8 @@ void CLuaFile::LoadPermissionFlags()
 			m_PermissionFlags |= LUAFILE_PERMISSION_PACKAGE;
 	}
 	
-	m_PermissionFlags |= LUAFILE_PERMISSION_OS;
-	m_PermissionFlags |= LUAFILE_PERMISSION_DEBUG;
+	//m_PermissionFlags |= LUAFILE_PERMISSION_OS;
+	//m_PermissionFlags |= LUAFILE_PERMISSION_DEBUG;
 }
 
 void CLuaFile::Unload(bool error)
@@ -147,11 +147,11 @@ void CLuaFile::OpenLua()
 
 	if(m_PermissionFlags&LUAFILE_PERMISSION_IO)
 		luaopen_io(m_pLuaState);	// input/output of files
-	if(m_PermissionFlags&LUAFILE_PERMISSION_DEBUG)
+	//if(m_PermissionFlags&LUAFILE_PERMISSION_DEBUG) XXX
 		luaopen_debug(m_pLuaState);	// debug stuff for whatever... can be removed in further patches
 	if(m_PermissionFlags&LUAFILE_PERMISSION_FFI)
 		luaopen_ffi(m_pLuaState);	// register and write own C-Functions and call them in lua (whoever may need that...)
-	if(m_PermissionFlags&LUAFILE_PERMISSION_OS)
+	//if(m_PermissionFlags&LUAFILE_PERMISSION_OS) XXX
 		luaopen_os(m_pLuaState);	// evil
 	if(m_PermissionFlags&LUAFILE_PERMISSION_PACKAGE)
 		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
@@ -215,7 +215,7 @@ void CLuaFile::Init()
 	LUA_CALL_FUNC(m_pLuaState, "OnScriptInit", bool, success);
 	if(!success)
 	{
-		dbg_msg("lua", "script '%s' rejected being loaded (did you return true?)", m_Filename.c_str());
+		dbg_msg("lua", "script '%s' rejected being loaded, did 'OnScriptInit()' return true...?", m_Filename.c_str());
 		Unload(true);
 		return;
 	}
@@ -609,7 +609,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		//OOP ENDS HERE
 	;
 	
-	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil");
+	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil"); // TODO
 	lua_pcall(L, 0, LUA_MULTRET, 0);
 	
 	dbg_msg("lua", "registering lua bindings complete");
