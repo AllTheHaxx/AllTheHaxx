@@ -516,6 +516,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("SkinColor", &CGameClient::CClientData::m_SkinColor)
 			.addData("Team", &CGameClient::CClientData::m_Team)
 			.addData("Emote", &CGameClient::CClientData::m_Emoticon)
+			.addData("EmoteStart", &CGameClient::CClientData::m_EmoticonStart)
 			.addData("Friend", &CGameClient::CClientData::m_Friend)
 			.addData("Foe", &CGameClient::CClientData::m_Foe)
 			.addProperty("Name", &CGameClient::CClientData::GetName)
