@@ -1,4 +1,15 @@
-The lua files have been moved to an own repository. To get them back, do:
+
+–––––––––––––––––––––––––[ Troubleshooting ]–––––––––––––––––––––––––
+
+!!! The Client will only search for Lua scripts in this directory !!!
+1. If your scripts doesn't show up, make sure that the folder is called (exactly!) "lua"
+2. The client will recurse into subdirectories of an infinite depth when searching
+3. Only scripts with the file ending ".lua" will be listed, anything else is ignored!
+
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+The lua files have been moved to an own repository. To get them back,
+do this in the parent directory ("The AllTheHaxx folder"):
 
 	git submodule update --init
 
@@ -6,13 +17,16 @@ Then...
 
 
 –––––––––––
-LINUX USERS
+LINUX USERS (PRECONDITION: a filesystem which supports symbolic links, e.g. ext4)
 –––––––––––
-open a shell within this folder and do
+Open a shell within THIS folder ("lua") and do:
 
-	ln -s ../Lua-Scripts/ official
+	$ ln -sr ../Lua-Scripts/ official
 
 then you can start the client and will see all the lua files back
+
+So all in all, the following cli should do the job: (execute it in the directory of this info file)
+	$ cd ..;git submodule update --init;cd lua;ln -s ../Lua-Scripts/ official
 
 
 –––––––––––––
