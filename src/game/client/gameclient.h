@@ -400,8 +400,9 @@ public:
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
 	
 	CServerInfo m_CurrentServerInfo;
-	
+
 	static CClientData * LuaGetClientData(int ID) { return &CLua::m_pCGameClient->m_aClients[ID]; }
+	static CSnapState::CCharacterInfo * LuaGetCharacterInfo(int ID) { return &CLua::m_pCGameClient->m_Snap.m_aCharacters[ID]; }
 	
 private:
 	bool m_DDRaceMsgSent[2];

@@ -498,6 +498,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
 			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)
 		.endClass()
+		
+		.beginClass<CGameClient::CSnapState::CCharacterInfo>("CCharacterInfo")
+			.addData("Active", &CGameClient::CSnapState::CCharacterInfo::m_Active, false)
+			.addData("Cur", &CGameClient::CSnapState::CCharacterInfo::m_Cur, false)
+		.endClass()
 
 		.beginClass<CGameClient::CSnapState::CSpectateInfo>("CSpectateInfo")
 			.addData("Active", &CGameClient::CSnapState::CSpectateInfo::m_Active)
@@ -522,7 +527,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("Name", &CGameClient::CClientData::GetName)
 			.addProperty("Clan", &CGameClient::CClientData::GetClan)
 			.addProperty("SkinName", &CGameClient::CClientData::GetSkinName)
-			//.addProperty("Tee", &CGameClient::CClientData::GetCharSnap)
 			.addData("Tee", &CGameClient::CClientData::m_Predicted)
 		.endClass()
 
@@ -589,6 +593,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("LocalCID", &CLua::m_pCGameClient->m_Snap.m_LocalClientID, false)
 			.addVariable("Client", &CLua::m_pClient, false)
 			.addFunction("Players", &CGameClient::LuaGetClientData)
+			.addFunction("CharSnap", &CGameClient::LuaGetCharacterInfo)
 		.endNamespace()
 
 		.beginNamespace("Graphics")
