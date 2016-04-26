@@ -1036,14 +1036,18 @@ void CClient::DebugRender()
 		udp = 8
 		total = 42
 	*/
+	int YOFFSET = 130;
+	if(!g_Config.m_ClShowhud || !g_Config.m_ClShowhudHealthAmmo)
+		YOFFSET = 0;
+
 	FrameTimeAvg = FrameTimeAvg*0.9f + m_RenderFrameTime*0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: curr=%8d pred=%8d  |  mem=%d,%dk in %d (%d)  |  gfxmem=%dk fps=%3d",
-		m_CurGameTick[g_Config.m_ClDummy], m_PredTick[g_Config.m_ClDummy],
+	str_format(aBuffer, sizeof(aBuffer), "ticks: curr=%2d pred_offset=%d  |  mem=%6d,%3dk in %d (%d)  |  gfxmem=%dk fps=%3d",
+		m_CurGameTick[g_Config.m_ClDummy], m_PredTick[g_Config.m_ClDummy] - m_CurGameTick[g_Config.m_ClDummy],
 		mem_stats()->allocated/1024, mem_stats()->allocated%1024,
 		mem_stats()->active_allocations, mem_stats()->total_allocations,
 		Graphics()->MemoryUsage()/1024,
 		(int)(1.0f/FrameTimeAvg + 0.5f));
-	Graphics()->QuadsText(2, 2, 16, aBuffer);
+	Graphics()->QuadsText(2, YOFFSET+2, 16, aBuffer);
 
 
 	{
@@ -1059,7 +1063,7 @@ void CClient::DebugRender()
 		str_format(aBuffer, sizeof(aBuffer), "send: %3d %5d+%4d=%5d (%3d kbps) avg: %5d\nrecv: %3d %5d+%4d=%5d (%3d kbps) avg: %5d",
 			SendPackets, SendBytes, SendPackets*42, SendTotal, (SendTotal*8)/1024, SendBytes/SendPackets,
 			RecvPackets, RecvBytes, RecvPackets*42, RecvTotal, (RecvTotal*8)/1024, RecvBytes/RecvPackets);
-		Graphics()->QuadsText(2, 14, 16, aBuffer);
+		Graphics()->QuadsText(2, YOFFSET+14, 16, aBuffer);
 	}
 
 	// render rates
@@ -1072,7 +1076,7 @@ void CClient::DebugRender()
 			{
 				str_format(aBuffer, sizeof(aBuffer), "%4d %20s: %8d %8d %8d", i, GameClient()->GetItemName(i), m_SnapshotDelta.GetDataRate(i)/8, m_SnapshotDelta.GetDataUpdates(i),
 					(m_SnapshotDelta.GetDataRate(i)/m_SnapshotDelta.GetDataUpdates(i))/8);
-				Graphics()->QuadsText(2, 100+y*12, 16, aBuffer);
+				Graphics()->QuadsText(2, YOFFSET+100+y*12, 16, aBuffer);
 				y++;
 			}
 		}
@@ -1080,7 +1084,7 @@ void CClient::DebugRender()
 
 	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms",
 		(int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq()));
-	Graphics()->QuadsText(2, 70, 16, aBuffer);
+	Graphics()->QuadsText(2, YOFFSET+70, 16, aBuffer);
 	Graphics()->QuadsEnd();
 
 	// render graphs
