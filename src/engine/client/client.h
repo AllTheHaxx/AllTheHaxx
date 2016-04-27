@@ -118,7 +118,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_UseTempRconCommands;
 
 	// version-checking
-	char m_aVersionStr[10];
+	//char m_aVersionStr[10];
 
 	// pinging
 	int64 m_PingStartTime;
@@ -193,7 +193,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 		int m_State;
 		class CHostLookup m_VersionServeraddr;
-	} m_VersionInfo;
+	} m_VersionInfo; // NEEDED FOR DDNET SERVER LIST, DON'T REMOVE!
 
 	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }

@@ -6,8 +6,8 @@
 #include <vector>
 #include <string>
 
-#define CLIENT_EXEC "DDNet"
-#define SERVER_EXEC "DDNet-Server"
+#define CLIENT_EXEC "AllTheHaxx"
+#define SERVER_EXEC "AllTheHaxx-Server"
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define PLAT_EXT ".exe"
@@ -39,21 +39,31 @@ class CUpdater : public IUpdater
 	class IFetcher *m_pFetcher;
 
 	bool m_IsWinXP;
+	bool m_CheckOnly;
 
 	int m_State;
 	char m_Status[256];
 	int m_Percent;
 	char m_aLastFile[256];
 
+	char m_aVersion[10];
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
 
+	struct ExternalFile
+	{
+		std::string source;
+		std::vector< std::pair<std::string, std::string> > files; // pair: filename - destination
+	};
 	std::vector<std::string> m_AddedFiles;
 	std::vector<std::string> m_RemovedFiles;
+	std::vector<ExternalFile> m_ExternalFiles;
+
+	void Reset();
 
 	void AddNewFile(const char *pFile);
 	void AddRemovedFile(const char *pFile);
-	void FetchFile(const char *pFile, const char *pDestPath = 0);
+	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0);
 
 	void ParseUpdate();
 	void PerformUpdate();
@@ -66,11 +76,12 @@ public:
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
-	int GetCurrentState() { return m_State; };
-	char *GetCurrentFile() { return m_Status; };
-	int GetCurrentPercent() { return m_Percent; };
+	const char *GetLatestVersion() const { return m_aVersion; }
+	int GetCurrentState() const { return m_State; }
+	const char *GetCurrentFile() const { return m_Status; }
+	int GetCurrentPercent() const { return m_Percent; }
 
-	virtual void InitiateUpdate();
+	virtual void InitiateUpdate(bool CheckOnly = false, bool ForceRefresh = false);
 	void Init();
 	virtual void Update();
 	void WinXpRestart();

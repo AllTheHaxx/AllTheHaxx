@@ -19,11 +19,12 @@ public:
 	};
 
 	virtual void Update() = 0;
-	virtual void InitiateUpdate() = 0;
+	virtual void InitiateUpdate(bool CheckOnly = false, bool ForceRefresh = false) = 0;
 
-	virtual int GetCurrentState() = 0;
-	virtual char *GetCurrentFile() = 0;
-	virtual int GetCurrentPercent() = 0;
+	virtual const char *GetLatestVersion() const = 0;
+	virtual int GetCurrentState() const = 0;
+	virtual const char *GetCurrentFile() const = 0;
+	virtual int GetCurrentPercent() const = 0;
 };
 
 #endif

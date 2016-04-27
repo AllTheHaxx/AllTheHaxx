@@ -1323,18 +1323,18 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 		CUIRect Part;
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
-		char aBuf[64];
+		char aBuf[128];
 		int State = Updater()->GetCurrentState();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet %s is out!", Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), "New Version '%s' is out!", Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::CLEAN)
-			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
+			str_format(aBuf, sizeof(aBuf), Localize("Client version string: tw.%s-%s-ddnet.%s"), GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-			str_format(aBuf, sizeof(aBuf), "Downloading %s:", Updater()->GetCurrentFile());
+			str_format(aBuf, sizeof(aBuf), "Downloading '%s':", Updater()->GetCurrentFile());
 		else if(State == IUpdater::FAIL)
 		{
 			str_format(aBuf, sizeof(aBuf), "Failed to download a file! Restart client to retry...");
@@ -1342,7 +1342,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		}
 		else if(State == IUpdater::NEED_RESTART)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
+			str_format(aBuf, sizeof(aBuf), "AllTheHaxx updated!");
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
@@ -1387,7 +1387,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		char aBuf[64];
 		if(str_comp(Client()->LatestVersion(), "0") != 0)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out! Download it at ddnet.tw!"), Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), Localize("AllTheHaxx %s is out! Download it at allthehaxx.tk!"), Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else

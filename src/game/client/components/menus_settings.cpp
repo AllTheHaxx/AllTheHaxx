@@ -2210,10 +2210,10 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();
 
-		//Update Button
+		// update button
 		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is available:"), Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), Localize("New Client Version '%s' is available!"), Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
@@ -2223,7 +2223,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), Localize("Updating..."));
 		else if(State == IUpdater::NEED_RESTART){
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
+			str_format(aBuf, sizeof(aBuf), Localize("AllTheHaxx updated!"));
 			m_NeedRestartUpdate = true;
 		}
 		else

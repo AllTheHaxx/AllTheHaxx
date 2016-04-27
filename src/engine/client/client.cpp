@@ -303,8 +303,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_RconPassword[0] = '\0';
 
 	// version-checking
-	m_aVersionStr[0] = '0';
-	m_aVersionStr[1] = 0;
+	//m_aVersionStr[0] = '0';
+	//m_aVersionStr[1] = 0;
 
 	// pinging
 	m_PingStartTime = 0;
@@ -664,7 +664,7 @@ void CClient::SendInput()
 
 const char *CClient::LatestVersion()
 {
-	return m_aVersionStr;
+	return m_Updater.GetLatestVersion();
 }
 
 // TODO: OPT: do this alot smarter!
@@ -1253,8 +1253,8 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 	// version server
 	if(m_VersionInfo.m_State == CVersionInfo::STATE_READY && net_addr_comp(&pPacket->m_Address, &m_VersionInfo.m_VersionServeraddr.m_Addr) == 0)
 	{
-		// version info
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
+		// version info - depreciated
+/*		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_VERSION, sizeof(VERSIONSRV_VERSION)) == 0)
 		{
 			char *pVersionData = (char*)pPacket->m_pData + sizeof(VERSIONSRV_VERSION);
@@ -1297,7 +1297,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Packet.m_Flags = NETSENDFLAG_CONNLESS;
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 		}
-
+*/
 		// news
 		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
@@ -2617,6 +2617,7 @@ void CClient::VersionUpdate()
 void CClient::CheckVersionUpdate()
 {
 	m_VersionInfo.m_State = CVersionInfo::STATE_START;
+	m_Updater.InitiateUpdate(true, true);
 }
 
 void CClient::RegisterInterfaces()
@@ -2659,6 +2660,7 @@ void CClient::InitInterfaces()
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();
+	m_Updater.InitiateUpdate(true); // true makes it be blocking -> safe
 #endif
 
 	m_Friends.Init();
