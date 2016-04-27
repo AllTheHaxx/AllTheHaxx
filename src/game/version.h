@@ -10,6 +10,6 @@
 static const char GAME_ATH_VERSION[10] = "ath.0.13"; // for updater
 
 // do not modify these, they belong to ddnet
-static const char GAME_RELEASE_VERSION[8] = "9.3";
+static const char GAME_RELEASE_VERSION[8] = "9.3.1";
 #define CLIENT_VERSIONNR 903
 #endif

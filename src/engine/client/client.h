@@ -55,7 +55,7 @@ class CQueryNames : public CQuery
 };
 
 
-class CClient : public IClient, public CDemoPlayer::IListner
+class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
 	IEngine *m_pEngine;
@@ -340,6 +340,7 @@ public:
 
 	static void Con_Quit(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoPlay(IConsole::IResult *pResult, void *pUserData);
+	static void Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_SaveConfig(IConsole::IResult *pResult, void *pUserData);
@@ -387,7 +388,7 @@ public:
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
-	virtual void DemoSlice(const char *pDstPath);
+	virtual void DemoSlice(const char *pDstPath, bool RemoveChat);
 
 	void RequestDDNetSrvList();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
