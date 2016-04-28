@@ -102,6 +102,20 @@ void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *
 	aBuffer[5] = 0xff;
 	mem_copy(&aBuffer[6], pData, DataSize);
 	net_udp_send(Socket, pAddr, aBuffer, 6+DataSize);
+
+	if(g_Config.m_ClSniffSndConnless)
+	{
+		char aAppend[8];
+		char aPckt[1024];
+		for(int i = 0; i < 6+DataSize; i++)
+		{
+			str_format(aAppend, sizeof(aAppend), "\\x%02x", aBuffer[i]);
+			str_append(aPckt, aAppend, sizeof(aPckt));
+		}
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
+		dbg_msg("sniff", "size=%d type='snd-connless' to='%s' data='%s'", DataSize, aAddrStr, aPckt);
+	}
 }
 
 void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken)
@@ -166,6 +180,20 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 			io_flush(ms_DataLogSent);
 		}
 	}
+
+	if(g_Config.m_ClSniffSndConn)
+	{
+		char aAppend[8];
+		char aPckt[1024];
+		for(int i = 0; i < 6+pPacket->m_DataSize; i++)
+		{
+			str_format(aAppend, sizeof(aAppend), "\\x%02x", aBuffer[i]);
+			str_append(aPckt, aAppend, sizeof(aPckt));
+		}
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
+		dbg_msg("sniff", "size=%d type='snd-conn' to='%s' data='%s'", pPacket->m_DataSize, aAddrStr, aPckt);
+	}
 }
 
 // TODO: rename this function
@@ -186,6 +214,35 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		io_write(ms_DataLogRecv, &Size, sizeof(Size));
 		io_write(ms_DataLogRecv, pBuffer, Size);
 		io_flush(ms_DataLogRecv);
+	}
+
+	if(pPacket->m_Flags&NET_PACKETFLAG_CONNLESS)
+	{
+		if(g_Config.m_ClSniffRecvConnless)
+		{
+			char aAppend[8];
+			char aPckt[1024];
+			for(int i = 0; i < 6+pPacket->m_DataSize; i++)
+			{
+				str_format(aAppend, sizeof(aAppend), "\\x%02x", pBuffer[i]);
+				str_append(aPckt, aAppend, sizeof(aPckt));
+			}
+			dbg_msg("sniff", "size=%d type='recv-connless' data='%s'", pPacket->m_DataSize, aPckt);
+		}
+	}
+	else
+	{
+		if(g_Config.m_ClSniffRecvConn)
+		{
+			char aAppend[8];
+			char aPckt[1024];
+			for(int i = 0; i < 6+pPacket->m_DataSize; i++)
+			{
+				str_format(aAppend, sizeof(aAppend), "\\x%02x", pBuffer[i]);
+				str_append(aPckt, aAppend, sizeof(aPckt));
+			}
+			dbg_msg("sniff", "size=%d type='recv-conn' data='%s'", pPacket->m_DataSize, aPckt);
+		}
 	}
 
 	// read the packet

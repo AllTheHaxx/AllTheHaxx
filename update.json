@@ -1,0 +1,21 @@
+[
+  {
+    "version": "ath.0.13",
+    "client": true,
+    "download": ["data/languages/index.txt", "data/languages/persian.txt", "data/fonts/DejavuWenQuanYiMicroHei.ttf", "data/languages/index.txt", "data/languages/simplified_chinese.txt", "data/languages/japanese.txt", "data/languages/korean.txt", "data/fonts/DejavuWenQuanYiMicroHei.ttf", "data/mapres/basic_freeze.png", "data/mapres/ddmax_freeze.png", "data/mapres/ddnet_start.png", "data/mapres/ddnet_tiles.png", "data/mapres/ddnet_walls.png", "data/mapres/desert_background.png", "data/mapres/desert_mountains_new_background.png", "data/mapres/desert_mountains_new_foreground.png", "data/mapres/fadeout.png", "data/mapres/font_teeworlds_alt.png", "data/mapres/font_teeworlds.png", "data/mapres/generic_clear.png", "data/mapres/generic_lamps.png", "data/mapres/generic_unhookable_0.7.png", "data/mapres/grass_doodads_0.7.png", "data/mapres/grass_main_0.7.png", "data/mapres/entities.png", "data/mapres/light.png", "data/mapres/mixed_tiles.png", "data/mapres/round_tiles.png", "data/mapres/snow_mountain.png"],
+    "remove": ["data/fonts/DejaVuSans.ttf"],
+    "external":
+    [
+      {
+        "source": "~Lua-Scripts/master",
+        "files": ["Calc.lua"],
+        "dests": ["lua/katze/"],
+      },
+      {
+        "source": "~stuffility/master",
+        "files": ["LuaManual.pdf", "ATHManual.pdf"],
+        "dests": ["alatestonika/",  "alatestonika/"],
+      },
+    ],
+  },
+]
