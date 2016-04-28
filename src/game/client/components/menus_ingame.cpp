@@ -855,7 +855,8 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button2);
 			static float Offset = 0.0f;
 			//static char aFilterString[25];
-			if(DoEditBox(&m_aFilterString, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search"))) {
+			if(DoEditBox(&m_aFilterString, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
+			{
 				// TODO: Implement here
 			}
 
@@ -866,7 +867,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				{
 					m_aFilterString[0] = 0;
 					UI()->SetActiveItem(&m_aFilterString);
-					//Client()->ServerBrowserUpdate(); // why dafuq should this be??
+					Client()->ServerBrowserUpdate();
 				}
 			}
 		}
