@@ -77,6 +77,8 @@ CMenus::CMenus()
 	m_NeedSendinfo = false;
 	m_NeedSendDummyinfo = false;
 	m_MenuActive = true;
+	m_HotbarActive = false;
+	m_HotbarWasActive = false;
 	m_UseMouseButtons = true;
 
 	m_EscapePressed = false;
@@ -1070,6 +1072,7 @@ static const char *s_apSayings[] = {
 		"100+ commits per week!",
 		GAME_NETVERSION,
 		"Build on " BUILD_DATE,
+		"Version " ALLTHEHAXX_VERSION,
 		"Searching for ideas...",
 		"(mooning) (sheep) (dog)",
 		".calc 2^10*5e3",
@@ -1150,18 +1153,7 @@ static const char *s_apSayings[] = {
 
 void CMenus::RenderLoading()
 {
-	// TODO: not supported right now due to separate render thread
-
-	//static int64 LastLoadRender = 0;
 	float Percent = m_LoadCurrent++/(float)m_LoadTotal;
-
-	// make sure that we don't render for each little thing we load
-	// because that will slow down loading if we have vsync
-	// even my 850mhz cpu can handle this
-	/*if(time_get()-LastLoadRender < time_freq()/60)
-		return;*/
-
-	//LastLoadRender = time_get();
 
 	// need up date this here to get correct
 	vec3 Rgb = HslToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
@@ -1315,21 +1307,15 @@ void CMenus::OnInit()
 	// */
 
 	if(g_Config.m_ClShowWelcome)
+	{
 		m_Popup = POPUP_LANGUAGE;
-
-	g_Config.m_ClShowWelcome = 0;
+		g_Config.m_ClShowWelcome = 0;
+	}
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
-
-	// setup load amount
-	//m_LoadCurrent = 0;
-	//m_LoadTotal = g_pData->m_NumImages;
-	//if(!g_Config.m_ClThreadsoundloading)
-		//m_LoadTotal += g_pData->m_NumSounds;
-	//m_LoadTotal = 100; // some approx number so that we don't divide m_LoadCurrent by zero
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
@@ -2214,7 +2200,6 @@ void CMenus::OnStateChange(int NewState, int OldState)
 		m_DownloadLastCheckTime = time_get();
 		m_DownloadLastCheckSize = 0;
 		m_DownloadSpeed = 0.0f;
-		//client_serverinfo_request();
 	}
 	else if(NewState == IClient::STATE_CONNECTING)
 		m_Popup = POPUP_CONNECTING;
@@ -2229,23 +2214,6 @@ extern "C" void font_debug_render();
 
 void CMenus::OnRender()
 {
-	/*
-	// text rendering test stuff
-	render_background();
-
-	CTextCursor cursor;
-	TextRender()->SetCursor(&cursor, 10, 10, 20, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
-
-	TextRender()->SetCursor(&cursor, 10, 30, 15, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
-
-	//Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->QuadsDrawTL(60, 60, 5000, 5000);
-	Graphics()->QuadsEnd();
-	return;*/
-
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
@@ -2501,10 +2469,8 @@ bool CMenus::LockInput(IInput::CEvent e)
 {
 	if(m_HotbarActive || m_IRCActive)
 	{
-		if(e.m_Flags&IInput::FLAG_PRESS && (e.m_Key == KEY_MOUSE_1 || e.m_Key == KEY_MOUSE_2))
-		{
+		if((e.m_Flags&IInput::FLAG_PRESS) && (e.m_Key == KEY_MOUSE_1 || e.m_Key == KEY_MOUSE_2))
 			return true;
-		}
 	}
 	return false;
 }
