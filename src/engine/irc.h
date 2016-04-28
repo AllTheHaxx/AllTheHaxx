@@ -25,8 +25,11 @@ public:
 
 	std::vector<std::string> m_Buffer;
 	int m_NumUnreadMsg;
+	char m_Name[25]; // channel/user
 
 	unsigned int GetType() const { return m_Type; }
+
+	void AddMessage(const char *fmt, ...);
 
 protected:
 	unsigned int m_Type;
@@ -40,7 +43,7 @@ public:
 
 	std::list<std::string> m_Users;
 	std::string m_Topic;
-	char m_Channel[25];
+	const char *Channel() const { return m_Name; }
 };
 
 
@@ -48,7 +51,7 @@ class CComQuery : public CIRCCom
 {
 public:
 	CComQuery() : CIRCCom(CIRCCom::TYPE_QUERY) { }
-	char m_User[25];
+	const char *User() const { return m_Name; }
 };
 
 
@@ -67,8 +70,8 @@ public:
     enum
     {
         STATE_DISCONNECTED=0,
+		STATE_CONNECTING,
         STATE_CONNECTED,
-        STATE_CONNECTING,
         STATE_AWAY,
 
 		// for CTCP messages

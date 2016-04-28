@@ -175,14 +175,14 @@ void CMenus::RenderIRC(CUIRect MainView)
 				char aTab[255];
 				if(pCom->m_NumUnreadMsg)
 				{
-					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->m_Channel, pCom->m_NumUnreadMsg);
+					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->Channel(), pCom->m_NumUnreadMsg);
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
 						m_pClient->IRC()->SetActiveCom(i);
 				}
 				else
 				{
 					FadeVal[i] = 0.0f; Add[i] = true;
-					str_copy(aTab, pChan->m_Channel, sizeof(aTab));
+					str_copy(aTab, pChan->Channel(), sizeof(aTab));
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->IRC()->GetActiveCom(), &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0))
 						m_pClient->IRC()->SetActiveCom(i);
 				}
@@ -203,20 +203,20 @@ void CMenus::RenderIRC(CUIRect MainView)
 				char aTab[255];
 				if(pCom->m_NumUnreadMsg)
 				{
-					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->m_User, pCom->m_NumUnreadMsg);
+					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->User(), pCom->m_NumUnreadMsg);
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
 						m_pClient->IRC()->SetActiveCom(i);
 				}
 				else
 				{
 					FadeVal[i] = 0.0f; Add[i] = true;
-					str_copy(aTab, pQuery->m_User, sizeof(aTab));
+					str_copy(aTab, pQuery->User(), sizeof(aTab));
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->IRC()->GetActiveCom(), &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0))
 						m_pClient->IRC()->SetActiveCom(i);
 				}
 			}
 
-			if(i > 0 && pCom == m_pClient->IRC()->GetActiveCom() && m_pClient->IRC()->GetNumComs() > 2 && str_comp_nocase(((CComChan*)pCom)->m_Channel, "#AllTheHaxx"))
+			if(i > 0 && pCom == m_pClient->IRC()->GetActiveCom() && m_pClient->IRC()->GetNumComs() > 2 && str_comp_nocase(((CComChan*)pCom)->Channel(), "#AllTheHaxx"))
 			{
 				Button.VSplitRight(ButtonBox.h, 0, &Button);
 				Button.Margin(3.0f, &Button);
@@ -349,7 +349,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 
 			static int s_Chat = 0;
 			static float s_ChatScrollValue = 100.0f;
-			UiDoListboxStart(&s_Chat, &Chat, 12.0f, pQuery->m_User, "", pQuery->m_Buffer.size(), 1, -1,
+			UiDoListboxStart(&s_Chat, &Chat, 12.0f, pQuery->User(), "", pQuery->m_Buffer.size(), 1, -1,
 					s_ChatScrollValue);
 			for(size_t i = 0; i < pQuery->m_Buffer.size(); i++)
 			{
@@ -360,7 +360,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
 
-			if(str_comp_nocase(pQuery->m_User, "@status") != 0)
+			if(str_comp_nocase(pQuery->User(), "@status") != 0)
 			{
 				CUIRect ButtonQS;
 				Chat.VSplitRight(32.0f, 0x0, &ButtonQS);
@@ -376,7 +376,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				static int s_ButtonQSLog = 0;
 				if(UI()->DoButtonLogic(&s_ButtonQSLog, "", 0, &ButtonQS))
 				{
-					m_pClient->IRC()->SendGetServer(pQuery->m_User);
+					m_pClient->IRC()->SendGetServer(pQuery->User());
 				}
 			}
 		}

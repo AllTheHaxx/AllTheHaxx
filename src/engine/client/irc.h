@@ -18,6 +18,8 @@ class CIRC : public IIRC
 		void* user;
 	};
 
+	int64 m_StartTime;
+
 public:
     CIRC();
 
@@ -37,6 +39,8 @@ public:
     int GetNumComs() { return m_IRCComs.size(); }
     bool CanCloseCom(CIRCCom *pCom);
 
+    template<class TCOM>
+    TCOM* OpenCom(const char *pName, bool SwitchTo = true, int UnreadMessages = 0);
     void OpenQuery(const char *to);
     void JoinTo(const char *to, const char *pass = "");
     void SetTopic(const char *topic);
