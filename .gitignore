@@ -59,6 +59,8 @@ rsa
 *.pdf
 *.key
 
+update.json
+
 DDNet*
 AllTheHaxx*
 
