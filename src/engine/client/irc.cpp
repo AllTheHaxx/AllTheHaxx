@@ -814,7 +814,14 @@ void CIRC::StartConnection() // call this from a thread only!
 							CComChan *pChan = static_cast<CComChan*>(pCom);
 							if (pChan)
 							{
-								pChan->AddMessage("*** '%s' sets mode '%s' on '%s'", aNickFrom.c_str(), aMode.c_str(), aNickTo.c_str());
+								char aGenericTerm[32] = {0};
+								str_format(aGenericTerm, sizeof(aGenericTerm), "%s %s %s",
+										aMode.c_str()[0] == '+' ? "gives" : "removes",
+											aMode.c_str()[1] == 'o' ? "operator" :
+											aMode.c_str()[1] == 'v' ? "voice" :
+											aMode.c_str()[1] == 'b' ? "a ban" : "unknown",
+										aMode.c_str()[0] == '+' ? "to" : "from");
+								pChan->AddMessage("*** '%s' %s '%s' (mode%s)", aNickFrom.c_str(), aGenericTerm, aNickTo.c_str(), aMode.c_str());
 
 								std::string aNewNick = aNickTo;
 								std::string aNickToVoz = aNickTo; aNickToVoz.insert(0, "+");
