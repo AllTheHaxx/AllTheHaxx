@@ -280,6 +280,7 @@ public:	int m_LoadTotal;
 	void RenderGame(CUIRect MainView);
 	void RenderGameExtra(CUIRect ButtonBar);
 	void RenderServerConfigCreator(CUIRect MainView);
+	void RenderSnifferSettings(CUIRect MainView);
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerControl(CUIRect MainView);

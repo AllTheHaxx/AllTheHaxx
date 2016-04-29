@@ -103,7 +103,7 @@ void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *
 	mem_copy(&aBuffer[6], pData, DataSize);
 	net_udp_send(Socket, pAddr, aBuffer, 6+DataSize);
 
-	if(g_Config.m_ClSniffSndConnless)
+	if(g_Config.m_ClSniffSendConnless)
 	{
 		char aAppend[8];
 		char aPckt[1024];
@@ -181,7 +181,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 		}
 	}
 
-	if(g_Config.m_ClSniffSndConn)
+	if(g_Config.m_ClSniffSendConn)
 	{
 		char aAppend[8];
 		char aPckt[1024];

@@ -375,8 +375,8 @@ MACRO_CONFIG_INT(ClHideConsole, cl_hide_console, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_C
 MACRO_CONFIG_INT(ClConsoleMode, cl_console_mode, 0, 0, 1, CFGFLAG_CLIENT, "Console only mode")
 
 // sniffing
-MACRO_CONFIG_INT(ClSniffSndConn, cl_sniff_snd_conn, 0, 0, 1, CFGFLAG_CLIENT, "Sniff outgoing conn packets")
-MACRO_CONFIG_INT(ClSniffSndConnless, cl_sniff_snd_connless, 0, 0, 1, CFGFLAG_CLIENT, "Sniff outgoing connless packets")
+MACRO_CONFIG_INT(ClSniffSendConn, cl_sniff_send_conn, 0, 0, 1, CFGFLAG_CLIENT, "Sniff outgoing conn packets")
+MACRO_CONFIG_INT(ClSniffSendConnless, cl_sniff_send_connless, 0, 0, 1, CFGFLAG_CLIENT, "Sniff outgoing connless packets")
 MACRO_CONFIG_INT(ClSniffRecvConn, cl_sniff_recv_conn, 0, 0, 1, CFGFLAG_CLIENT, "Sniff incoming conn packets")
 MACRO_CONFIG_INT(ClSniffRecvConnless, cl_sniff_recv_connless, 0, 0, 1, CFGFLAG_CLIENT, "Sniff incoming connless packets")
 

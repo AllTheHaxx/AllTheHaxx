@@ -184,8 +184,14 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	CUIRect Button;
 	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
-	// static variables for submenus
-	static int s_ShowServerConfig = 0;
+	// submenus
+	enum
+	{
+		EXTRAS_NONE = 0,
+		EXTRAS_SERVERCONFIG_CREATOR,
+		EXTRAS_SNIFFER_SETTINGS
+	};
+	static int s_ExtrasPage = EXTRAS_NONE;
 
 	// render submenus
 	Button = ButtonBar;
@@ -194,8 +200,10 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	Button.Margin(50.0f, &Button);
 	Button.y = ButtonBar.y + ButtonBar.h;
 
-	if(s_ShowServerConfig)
+	if(s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR)
 		RenderServerConfigCreator(Button);
+	else if(s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS)
+		RenderSnifferSettings(Button);
 
 	// button bar
 	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
@@ -232,8 +240,14 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
 	static int s_ServerConfigButton = 0;
-	if(DoButton_Menu(&s_ServerConfigButton, Localize("Server Config"), s_ShowServerConfig, &Button, "Execute commands when joining this server"))
-		s_ShowServerConfig ^= 1;
+	if(DoButton_Menu(&s_ServerConfigButton, Localize("Server Config"), s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR, &Button, "Execute commands when joining this server"))
+		s_ExtrasPage = s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR ? EXTRAS_NONE : EXTRAS_SERVERCONFIG_CREATOR;
+
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
+	static int s_SnifferSettingsButton = 0;
+	if(DoButton_Menu(&s_SnifferSettingsButton, Localize("Network Sniffer"), s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS, &Button, "Packet sniffing settings"))
+		s_ExtrasPage = s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS ? EXTRAS_NONE : EXTRAS_SNIFFER_SETTINGS;
 
 }
 
@@ -377,6 +391,48 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 	}
 
 	UiDoListboxEnd(&s_ScrollVal, 0);
+}
+
+void CMenus::RenderSnifferSettings(CUIRect MainView)
+{
+	CUIRect Button;
+	MainView.VSplitLeft(MainView.w/3, 0, &MainView);
+	MainView.VSplitRight(MainView.w/2, &MainView, 0);
+	MainView.HSplitMid(&MainView, 0);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+
+	MainView.HSplitTop(10.0f, 0, &MainView);
+	TextRender()->Text(0, MainView.x+10.0f, MainView.y, 12.0f, Localize("Packet sniffer settings"), -1);
+
+	{
+		MainView.Margin(10.0f, &MainView);
+		MainView.HSplitTop(20.0f, 0, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		static int s_Checkbox = 0;
+		if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff outgoing conn packets"), g_Config.m_ClSniffSendConn, &Button))
+			g_Config.m_ClSniffSendConn ^= 1;
+	}
+	{
+			MainView.HSplitTop(7.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			static int s_Checkbox = 0;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff outgoing connless packets"), g_Config.m_ClSniffSendConnless, &Button))
+				g_Config.m_ClSniffSendConnless ^= 1;
+	}
+	{
+			MainView.HSplitTop(7.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			static int s_Checkbox = 0;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff incoming conn packets"), g_Config.m_ClSniffRecvConn, &Button))
+				g_Config.m_ClSniffRecvConn ^= 1;
+	}
+	{
+			MainView.HSplitTop(7.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			static int s_Checkbox = 0;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff incoming connless packets"), g_Config.m_ClSniffRecvConnless, &Button))
+				g_Config.m_ClSniffRecvConnless ^= 1;
+	}
 }
 
 void CMenus::RenderPlayers(CUIRect MainView)
