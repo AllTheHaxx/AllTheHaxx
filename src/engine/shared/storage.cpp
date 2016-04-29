@@ -68,6 +68,11 @@ public:
 				fs_makedir("rsa");
 			}
 			fs_makedir(GetPath(TYPE_SAVE, "dumps", aPath, sizeof(aPath)));
+			fs_makedir(GetPath(TYPE_SAVE, "dumps/console_local", aPath, sizeof(aPath)));
+			fs_makedir(GetPath(TYPE_SAVE, "dumps/console_remote", aPath, sizeof(aPath)));
+			fs_makedir(GetPath(TYPE_SAVE, "dumps/memory", aPath, sizeof(aPath)));
+			fs_makedir(GetPath(TYPE_SAVE, "dumps/tilelayer", aPath, sizeof(aPath)));
+			fs_makedir(GetPath(TYPE_SAVE, "dumps/network", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "demos", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "demos/auto", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "editor", aPath, sizeof(aPath)));

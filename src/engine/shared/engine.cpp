@@ -29,7 +29,7 @@ public:
 		char aBuf[32];
 		str_timestamp(aBuf, sizeof(aBuf));
 		char aFilename[128];
-		str_format(aFilename, sizeof(aFilename), "dumps/memory_%s.txt", aBuf);
+		str_format(aFilename, sizeof(aFilename), "dumps/memory/%s.txt", aBuf);
 		mem_debug_dump(pEngine->m_pStorage->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE));
 	}
 
@@ -47,8 +47,8 @@ public:
 			char aBuf[32];
 			str_timestamp(aBuf, sizeof(aBuf));
 			char aFilenameSent[128], aFilenameRecv[128];
-			str_format(aFilenameSent, sizeof(aFilenameSent), "dumps/network_sent_%s.txt", aBuf);
-			str_format(aFilenameRecv, sizeof(aFilenameRecv), "dumps/network_recv_%s.txt", aBuf);
+			str_format(aFilenameSent, sizeof(aFilenameSent), "dumps/network/sent_%s.netdmp", aBuf);
+			str_format(aFilenameRecv, sizeof(aFilenameRecv), "dumps/network/recv_%s.netdmp", aBuf);
 			CNetBase::OpenLog(pEngine->m_pStorage->OpenFile(aFilenameSent, IOFLAG_WRITE, IStorageTW::TYPE_SAVE),
 								pEngine->m_pStorage->OpenFile(aFilenameRecv, IOFLAG_WRITE, IStorageTW::TYPE_SAVE));
 			pEngine->m_Logging = true;

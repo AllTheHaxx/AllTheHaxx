@@ -1141,8 +1141,8 @@ void CGameConsole::Dump(int Type)
 	char aDate[20];
 
 	str_timestamp(aDate, sizeof(aDate));
-	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt",
-			Type == CONSOLETYPE_REMOTE ? "remote_console" : "local_console", aDate);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s.txt",
+			Type == CONSOLETYPE_REMOTE ? "console_remote" : "console_local", aDate);
 	IOHANDLE io = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(io)
 	{
