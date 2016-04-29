@@ -156,10 +156,10 @@ MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_C
 MACRO_CONFIG_INT(ClResetServerCfgOnDc, cl_reset_server_cfg_on_disconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Discard config changes when disconnecting, use 'config_save' if you want to keep them")
 
 // irc
-MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to irc on startup automatically")
-MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
+MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to IRC on startup automatically")
+MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 16, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
 //MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
-MACRO_CONFIG_STR(ClIRCUser, cl_irc_user, 32, "allthehaxx", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC username")
+MACRO_CONFIG_STR(ClIRCUser, cl_irc_user, 10, "allthehax", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC user")
 MACRO_CONFIG_STR(ClIRCPass, cl_irc_password, 16, "nopwset", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC password")
 MACRO_CONFIG_STR(ClIRCQAuthName, cl_irc_q_auth_name, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q name")
 MACRO_CONFIG_STR(ClIRCQAuthPass, cl_irc_q_auth_pass, 11, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q password")
