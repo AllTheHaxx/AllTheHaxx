@@ -5,7 +5,7 @@
 #include "generated/nethash.cpp"
 #define GAME_VERSION "0.6.3"
 #define BUILD_DATE __DATE__ ", " __TIME__
-#define ALLTHEHAXX_VERSION "beta-13 (v0.9-X3 / ath.0.13) #" GIT_SHORTREV_HASH
+#define ALLTHEHAXX_VERSION "beta-13 (v0.9-3) #" GIT_SHORTREV_HASH
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
 static const char GAME_ATH_VERSION[10] = "ath.0.13"; // for updater
 
