@@ -413,25 +413,25 @@ void CMenus::RenderSnifferSettings(CUIRect MainView)
 			g_Config.m_ClSniffSendConn ^= 1;
 	}
 	{
-			MainView.HSplitTop(7.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			static int s_Checkbox = 0;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff outgoing connless packets"), g_Config.m_ClSniffSendConnless, &Button))
-				g_Config.m_ClSniffSendConnless ^= 1;
+		MainView.HSplitTop(7.0f, 0, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		static int s_Checkbox = 0;
+		if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff outgoing connless packets"), g_Config.m_ClSniffSendConnless, &Button))
+			g_Config.m_ClSniffSendConnless ^= 1;
 	}
 	{
-			MainView.HSplitTop(7.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			static int s_Checkbox = 0;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff incoming conn packets"), g_Config.m_ClSniffRecvConn, &Button))
-				g_Config.m_ClSniffRecvConn ^= 1;
+		MainView.HSplitTop(7.0f, 0, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		static int s_Checkbox = 0;
+		if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff incoming conn packets"), g_Config.m_ClSniffRecvConn, &Button))
+			g_Config.m_ClSniffRecvConn ^= 1;
 	}
 	{
-			MainView.HSplitTop(7.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			static int s_Checkbox = 0;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff incoming connless packets"), g_Config.m_ClSniffRecvConnless, &Button))
-				g_Config.m_ClSniffRecvConnless ^= 1;
+		MainView.HSplitTop(7.0f, 0, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		static int s_Checkbox = 0;
+		if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff incoming connless packets"), g_Config.m_ClSniffRecvConnless, &Button))
+			g_Config.m_ClSniffRecvConnless ^= 1;
 	}
 }
 
