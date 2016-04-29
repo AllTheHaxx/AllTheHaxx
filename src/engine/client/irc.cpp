@@ -601,40 +601,23 @@ void CIRC::StartConnection() // call this from a thread only!
 							reply.from = aMsgFrom;
 							reply.params = aMsgText;
 
-							// TODO refractor:
-							// this is commented out because it checks if we are talking to ourselves...?
-							// we can't talk to ourselves, so this can most likely be removed.
-							/*if(aMsgChan == m_Nick)
+
 							{
-								CIRCCom *pCom = GetCom(aMsgFrom);
-								if(!pCom)
-									pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false);
-
-								if(pCom != GetActiveCom())
-									pCom->m_NumUnreadMsg++;
-
-								if(MsgType == MSG_TYPE_ACTION)
+								dbg_msg("ASDASD", "Chan=%s, From=%s", aMsgChan.c_str(), aMsgFrom.c_str());
+								CIRCCom *pCom;
+								if(aMsgChan == m_Nick) // this is the case for private chats ("Query"s)
 								{
-									str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
-											aMsgText.substr(8, -1).c_str());
-									str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
+									pCom = GetCom(aMsgFrom);
+									if(!pCom)
+										pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false);
 								}
 								else
-									str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
-											aMsgText.c_str());
-								pCom->m_Buffer.push_back(aBuff);
-
-								if(pCom == GetActiveCom())
 								{
-									aMsgFrom.insert(0, "<");
-									aMsgFrom.append("> ");
-									aMsgFrom.insert(0, aTime);
-									m_pGameClient->OnMessageIRC("", aMsgFrom.c_str(), aMsgText.c_str());
+									pCom = GetCom(aMsgChan);
+									if(!pCom)
+										pCom = OpenCom<CComChan>(aMsgChan.c_str(), false);
 								}
-							}
-							else */
-							{
-								CIRCCom *pCom = GetCom(aMsgChan);
+
 								if(pCom)
 								{
 									if(pCom != GetActiveCom())
