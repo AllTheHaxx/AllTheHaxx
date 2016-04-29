@@ -364,11 +364,11 @@ void CIRC::StartConnection() // call this from a thread only!
 						del = aMsgFServer.find_first_of("!");
 						std::string aMsgFrom = aMsgFServer.substr(0,del);
 
-						if (aMsgFrom == m_Nick)
+						if (aMsgFrom == m_Nick) // we (were) joined a channel
 						{
 							OpenCom<CComChan>(aMsgChannel.c_str());
 						}
-						else
+						else if(aMsgFrom != "circleci-bot") // ignore the ci bot
 						{
 							CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChannel));
 							if(pChan)
@@ -389,7 +389,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						std::string aMsgFrom = aMsgFServer.substr(0,del);
 						char aBuff[255];
 
-						if (aMsgFrom == m_Nick)
+						if (aMsgFrom == m_Nick) // we (were) left a channel
 						{
 							CIRCCom *pCom = GetCom(aMsgChannel);
 							if (pCom)
@@ -400,7 +400,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								SetActiveCom(m_IRCComs.size()-1);
 							}
 						}
-						else
+						else if(aMsgFrom != "circleci-bot") // ignore the ci bot
 						{
 							CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChannel));
 							if (pChan)
@@ -493,7 +493,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						del = aMsgFServer.find_first_of("!");
 						std::string aMsgFrom = aMsgFServer.substr(0, del);
 
-						if(MsgType == MSG_TYPE_TWSERVER)
+						if(MsgType == MSG_TYPE_TWSERVER) // somebody wants to know our server
 						{
 							if(aMsgChan == m_Nick)
 							{
@@ -544,7 +544,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								}
 							}
 						}
-						else if(MsgType == MSG_TYPE_GET_TWSERVER)
+						else if(MsgType == MSG_TYPE_GET_TWSERVER) // somebody sent us his server
 						{
 							if(aMsgChan == m_Nick)
 							{
@@ -555,7 +555,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									SendServer(aMsgFrom.c_str(), CleanMsg.c_str());
 							}
 						}
-						else if(MsgType == MSG_TYPE_CTCP)
+						else if(MsgType == MSG_TYPE_CTCP) // custom ctcp message
 						{
 							array<std::string> CmdListParams;
 							char aBuf[512]; char *Ptr;
@@ -595,7 +595,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								SendRaw(aBuf);
 							}
 						}
-						else
+						else // normal message
 						{
 							reply.channel = aMsgChan;
 							reply.from = aMsgFrom;
@@ -603,7 +603,7 @@ void CIRC::StartConnection() // call this from a thread only!
 
 							// TODO refractor:
 							// this is commented out because it checks if we are talking to ourselves...?
-							//We can't talk to ourselves, so may 99% sure be removed.
+							// we can't talk to ourselves, so this can most likely be removed.
 							/*if(aMsgChan == m_Nick)
 							{
 								CIRCCom *pCom = GetCom(aMsgFrom);
@@ -681,7 +681,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							reply.from = aMsgFrom;
 							reply.params = aMsgText;
 
-							if(aMsgChan == m_Nick)
+							/*if(aMsgChan == m_Nick) // TODO refractor: sending ourselves a NOTICE??
 							{
 								CIRCCom *pCom = GetCom(aMsgFrom);
 								std::replace(aMsgText.begin(), aMsgText.end(), '\1', ' ');
@@ -710,7 +710,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									}
 								}
 							}
-							else
+							else*/
 							{
 								CIRCCom *pCom = GetCom(aMsgChan);
 								if(pCom)
@@ -747,7 +747,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						del = NetData.find_first_of(":", 1);
 						std::string aMsgNewNick = NetData.substr(del+1, NetData.length()-del-1);
 
-						if (aMsgOldNick == m_Nick)
+						if(aMsgOldNick == m_Nick) // our name has changed
 							m_Nick = aMsgNewNick;
 
 						std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
@@ -888,12 +888,13 @@ void CIRC::StartConnection() // call this from a thread only!
 						CIRCCom *pCom = GetCom(aChannel);
 						if (pCom && pCom->GetType() == CIRCCom::TYPE_CHANNEL)
 						{
-							if (aNickTo == m_Nick)
+							if (aNickTo == m_Nick) // we got kicked
 							{
 								m_IRCComs.remove(pCom);
 								mem_free(pCom);
 								pCom=0x0;
 								SetActiveCom(0);
+								GetActiveCom()->AddMessage("You got kicked from channel '%s', Reason: '%s'", aChannel.c_str(), aKickReason.c_str());
 							}
 							else
 							{
@@ -928,8 +929,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						else
 							str_format(aBuff, sizeof(aBuff), "%s", aMsgText.c_str());
 
-						CIRCCom *pCom = GetCom("@Status");
-						pCom->m_Buffer.push_back(aBuff);
+						GetCom("@Status")->m_Buffer.push_back(aBuff);
 					}
 
 					CallHooks(aMsgID.c_str(), &reply);
@@ -938,7 +938,7 @@ void CIRC::StartConnection() // call this from a thread only!
 				NetData.clear();
 				continue;
 			}
-			NetData+=aNetBuff[i];
+			NetData += aNetBuff[i];
 		}
 	}
 
