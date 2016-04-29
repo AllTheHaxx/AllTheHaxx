@@ -90,7 +90,7 @@ void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDe
 	if(pSource[0] == '~')
 		str_format(aBuf, sizeof(aBuf), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource+1, pFile);
 	else
-		str_format(aBuf, sizeof(aBuf), "https://github.com/%s/%s", pSource, pFile);
+		str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/%s/%s", pSource, pFile);
 
 	dbg_msg("updater", "fetching file from '%s'", aBuf);
 	char aDestPath[512] = {0};
