@@ -426,7 +426,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						std::string aMsgFrom = aMsgFServer.substr(0,del);
 						char aBuff[255];
 
-						if (aMsgFrom != m_Nick)
+						if (aMsgFrom != m_Nick) // this applies only for channels, not for queries
 						{
 							std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
 							while (it != m_IRCComs.end())
@@ -450,7 +450,8 @@ void CIRC::StartConnection() // call this from a thread only!
 								str_format(aBuff, sizeof(aBuff), "+%s", aMsgFrom.c_str());
 								pChan->m_Users.remove(std::string(aBuff));
 
-								pChan->AddMessage("%s*** '%s' quit (%s)", aTime, aMsgFrom.c_str(), aMsgText.c_str());
+								if(aMsgFrom != "circleci-bot") // ignore the ci bot
+									pChan->AddMessage("%s*** '%s' quit (%s)", aTime, aMsgFrom.c_str(), aMsgText.c_str());
 
 								++it;
 							}
