@@ -211,12 +211,7 @@ void CIRC::StartConnection() // call this from a thread only!
 	char LastPong[255]={0};
 	while ((CurrentRecv = net_tcp_recv(m_Socket, aNetBuff, sizeof(aNetBuff))) >= 0 && m_State == STATE_CONNECTED)
 	{
-		ReplyData reply; char aTime[32];
-		time_t rawtime;
-		struct tm *timeinfo;
-		time(&rawtime);
-		timeinfo = localtime(&rawtime);
-		str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+		ReplyData reply;
 
 		// XXX: here
 		for (int i=0; i < CurrentRecv; i++)
@@ -235,7 +230,8 @@ void CIRC::StartConnection() // call this from a thread only!
 					if (aMsgID.compare("PING") == 0)
 					{
 						SendRaw("PONG %s :%s", LastPong, aMsgText.c_str());
-						dbg_msg("engine/IRC", "Ping? Pong!");
+						if(g_Config.m_Debug)
+							dbg_msg("engine/IRC", "Ping? Pong!");
 						LastPong[0]=0;
 					}
 					else if (aMsgID.compare("PONG") == 0)
@@ -375,7 +371,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							{
 								pChan->m_Users.push_back(aMsgFrom);
 								pChan->m_Users.sort();
-								pChan->AddMessage("%s*** '%s' has joined %s", aTime, aMsgFrom.c_str(), aMsgChannel.c_str());
+								pChan->AddMessage("*** '%s' has joined %s", aMsgFrom.c_str(), aMsgChannel.c_str());
 							}
 						}
 
@@ -411,7 +407,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								str_format(aBuff, sizeof(aBuff), "+%s", aMsgFrom.c_str());
 								pChan->m_Users.remove(std::string(aBuff));
 
-								pChan->AddMessage("%s*** '%s' part %s", aTime, aMsgFrom.c_str(), aMsgChannel.c_str());
+								pChan->AddMessage("*** '%s' left %s", aMsgFrom.c_str(), aMsgChannel.c_str());
 							}
 						}
 
@@ -451,7 +447,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								pChan->m_Users.remove(std::string(aBuff));
 
 								if(aMsgFrom != "circleci-bot") // ignore the ci bot
-									pChan->AddMessage("%s*** '%s' quit (%s)", aTime, aMsgFrom.c_str(), aMsgText.c_str());
+									pChan->AddMessage("*** '%s' has quit (%s)", aMsgFrom.c_str(), aMsgText.c_str());
 
 								++it;
 							}
@@ -474,7 +470,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						if (pChan)
 						{
 							pChan->m_Topic = aMsgText;
-							pChan->AddMessage("%s*** '%s' has changed topic to '%s'", aTime, aMsgFrom.c_str(), aMsgText.c_str());
+							pChan->AddMessage("*** '%s' changed topic to '%s'", aMsgFrom.c_str(), aMsgText.c_str());
 						}
 
 						reply.channel = aMsgChan;
@@ -571,7 +567,15 @@ void CIRC::StartConnection() // call this from a thread only!
 							if(str_comp_nocase(CmdListParams[0].c_str(), "version") == 0)
 								SendVersion(aMsgFrom.c_str());
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "time") == 0)
+							{
+								char aTime[32];
+								time_t rawtime;
+								struct tm *timeinfo;
+								time(&rawtime);
+								timeinfo = localtime(&rawtime);
+								str_format(aTime, sizeof(aTime), "%02d:%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 								SendRaw("NOTICE %s :TIME %s (zone: %i)", aMsgFrom.c_str(), aTime, timezone);
+							}
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "playerinfo") == 0)
 							{
 								str_format(aBuf, sizeof(aBuf), "NOTICE %s :PLAYERINFO", aMsgFrom.c_str());
@@ -604,7 +608,6 @@ void CIRC::StartConnection() // call this from a thread only!
 
 
 							{
-								dbg_msg("ASDASD", "Chan=%s, From=%s", aMsgChan.c_str(), aMsgFrom.c_str());
 								CIRCCom *pCom;
 								if(aMsgChan == m_Nick) // this is the case for private chats ("Query"s)
 								{
@@ -626,14 +629,14 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									if(MsgType == MSG_TYPE_ACTION)
 									{
-										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
+										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str(),
 												aMsgText.substr(8, -1).c_str());
 										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
 									}
 									else
-										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
+										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str(),
 												aMsgText.c_str());
-									pCom->m_Buffer.push_back(aBuff);
+									pCom->AddMessage(aBuff);
 								}
 
 								if(pCom == GetActiveCom())
@@ -642,7 +645,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									aMsgChan.append("] ");
 									aMsgFrom.insert(0, "<");
 									aMsgFrom.append("> ");
-									aMsgFrom.insert(0, aTime);
+									//aMsgFrom.insert(0, aTime);
 									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 								}
 							}
@@ -703,12 +706,10 @@ void CIRC::StartConnection() // call this from a thread only!
 										pCom->m_NumUnreadMsg++;
 
 									if(MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "%s*** %s: %s", aTime, aMsgFrom.c_str(),
-												aMsgText.substr(8, -1).c_str());
+										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "%s<%s> %s", aTime, aMsgFrom.c_str(),
-												aMsgText.c_str());
-									pCom->m_Buffer.push_back(aBuff);
+										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str(), aMsgText.c_str());
+									pCom->AddMessage(aBuff);
 								}
 
 								if(pCom == GetActiveCom())
@@ -717,7 +718,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									aMsgChan.append("] ");
 									aMsgFrom.insert(0, "<");
 									aMsgFrom.append("> ");
-									aMsgFrom.insert(0, aTime);
+									//aMsgFrom.insert(0, aTime);
 									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 								}
 							}
@@ -743,7 +744,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								if (str_comp_nocase(pQuery->m_Name, aMsgOldNick.c_str()) == 0)
 								{
 									str_copy(pQuery->m_Name, aMsgNewNick.c_str(), sizeof(pQuery->m_Name));
-									pQuery->AddMessage( "*** '%s' has changed nick to '%s'", aMsgOldNick.c_str(), aMsgNewNick.c_str());
+									pQuery->AddMessage( "*** '%s' changed their nick to '%s'", aMsgOldNick.c_str(), aMsgNewNick.c_str());
 								}
 							}
 							else if ((*it)->GetType() == CIRCCom::TYPE_CHANNEL)
@@ -776,7 +777,7 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									if(got)
 									{
-										pChan->AddMessage("*** '%s' has changed nick to '%s'", aMsgOldNick.c_str(), aMsgNewNick.c_str());
+										pChan->AddMessage("*** '%s' changed their nick to '%s'", aMsgOldNick.c_str(), aMsgNewNick.c_str());
 										pChan->m_Users.sort();
 										break;
 									}
@@ -1001,6 +1002,13 @@ void CIRCCom::AddMessage(const char *fmt, ...)
 	if(!fmt || fmt[0] == 0)
 		return;
 
+	char aTime[32];
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+
 	va_list args;
 	char aMsg[768];
 
@@ -1012,7 +1020,7 @@ void CIRCCom::AddMessage(const char *fmt, ...)
 	#endif
 	va_end(args);
 
-	m_Buffer.push_back(std::string(aMsg));
+	m_Buffer.push_back(std::string(aTime) + std::string(aMsg));
 }
 
 void CIRC::JoinTo(const char *to, const char *pass)
@@ -1127,7 +1135,7 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 			CComQuery *pQuery = static_cast<CComQuery*>((*it));
 			if (str_comp_nocase(pQuery->m_Name, "@Status") == 0)
 			{
-				pQuery->AddMessage("** You can't send messages to '@Status'!", GetNick(), msg);
+				pQuery->AddMessage("*** You can't send messages to '@Status'!", GetNick(), msg);
 				return;
 			}
 
@@ -1151,18 +1159,10 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 	if (pCom)
 	{
 		if (type == MSG_TYPE_ACTION)
-			str_format(aBuff, sizeof(aBuff),"*** %s: %s", GetNick(), msg);
+			str_format(aBuff, sizeof(aBuff),"* %s %s", GetNick(), msg); // XXX: This seems to be useless...? (broken)
 		else
-		{
-			char aTime[16];
-			time_t rawtime;
-			struct tm *timeinfo;
-			time(&rawtime);
-			timeinfo = localtime(&rawtime);
-			str_format(aTime, sizeof(aTime), "[%02d:%02d:%02d] ", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-			str_format(aBuff, sizeof(aBuff),"%s<%s> %s", aTime, GetNick(), msg);
-		}
-		pCom->m_Buffer.push_back(aBuff);
+			str_format(aBuff, sizeof(aBuff),"<%s> %s", GetNick(), msg);
+		pCom->AddMessage(aBuff);
 	}
 }
 
@@ -1344,21 +1344,27 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 	else if(str_comp_nocase(cmd, "me") == 0)
 	{
 		char aBuf[1024] = {0};
+		char aMsg[768] = {0};
 		if (CmdListParams.size() >= 1)
 		{
+			str_format(aMsg, sizeof(aMsg), "%s", CmdListParams[0].c_str()); // first word
+			CmdListParams.remove_index(0); // pop
+			while(CmdListParams.size() > 0) // add all other arguments to the message
+			{
+				str_append(aMsg, " ", sizeof(aMsg));
+				str_append(aMsg, CmdListParams[0].c_str(), sizeof(aMsg));
+				CmdListParams.remove_index(0);
+			}
+
 			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION %s",
 					GetActiveCom()->GetType() == CIRCCom::TYPE_QUERY ?
 							((CComQuery*)GetActiveCom())->m_Name : ((CComChan*)GetActiveCom())->m_Name,
-					CmdListParams[0].c_str()); // first word
-			CmdListParams.remove_index(0); // pop
-			while(CmdListParams.size() > 0) // add all other arguments
-			{
-				str_append(aBuf, " ", sizeof(aBuf));
-				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
-				CmdListParams.remove_index(0);
-			}
+					aMsg); // message text
+
+
 			aBuf[str_length(aBuf)] = '\1';
 			SendRaw(aBuf);
+			GetActiveCom()->AddMessage("* %s %s", m_Nick.c_str(), aMsg);
 		}
 	}
 	SendRaw("%s %s", cmd, params);
