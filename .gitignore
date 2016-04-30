@@ -54,6 +54,7 @@ versionsrv??*
 *.key
 *.lua
 update.json
+autoexec.cfg
 
 DDNet??*
 AllTheHaxx??*
