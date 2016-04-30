@@ -71,7 +71,8 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 				if(m_aServerMotd[i+1] == 'n')
 				{
 					m_aServerMotd[i] = '\0';
-					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
+					if(g_Config.m_ClPrintMotd)
+						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 					m_aServerMotd[i] = ' ';
 					m_aServerMotd[i+1] = '\n';
 					i++;
@@ -79,7 +80,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 				}
 			}
 		}
-		if(*pLast)
+		if(*pLast && g_Config.m_ClPrintMotd)
 			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
@@ -91,7 +92,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 
 bool CMotd::OnInput(IInput::CEvent Event)
 {
-	if(IsActive() && Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
+	if(IsActive() && (Event.m_Flags&IInput::FLAG_PRESS) && Event.m_Key == KEY_ESCAPE)
 	{
 		Clear();
 		return true;
