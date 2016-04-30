@@ -21,8 +21,13 @@ function RegisterEvent(EventName, ...)
     end
 end
 
-function RemoveEvent(EventName, FuncName)
-    if Events[EventName] ~= nil then
+function RemoveEvent(EventName, ...)
+    FuncNames = {...}
+    if #FuncNames < 1 or Events[EventName] == nil then
+        return
+    end
+    
+    for i, FuncName in next, FuncNames do
         Events[EventName][FuncName] = nil
     end
 end
