@@ -1041,6 +1041,7 @@ static const char *s_apSayings[] = {
 		"1338 - Gone Too Far",
 		"1338 - One Step Ahead",
 		"1338 - Crossing Boarders",
+		"1338 - Eine Idee weiter",
 		"0x53A-0x539=0x1",
 		"Waiting for 0.7!",
 		"YAA, SPAß IM LEBEN!",
