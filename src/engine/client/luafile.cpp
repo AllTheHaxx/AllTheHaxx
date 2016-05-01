@@ -227,6 +227,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.addFunction("Import", &CLuaBinding::LuaImport)
 		.addFunction("KillScript", &CLuaBinding::LuaKillScript)
+		//.addFunction("print", &CLuaFile::LuaPrintOverride)
 
 		// client namespace
 		.beginNamespace("_client")

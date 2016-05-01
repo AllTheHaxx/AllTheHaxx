@@ -5,6 +5,7 @@ Threads = {}    --3D Table which contains the 'threadobject' and its pause stuff
 function RegisterEvent(EventName, ...)
     FuncNames = {...}
     if #FuncNames < 1 then
+        print("RegisterEvent(\"" .. EventName .. ") called without additional arguments")
         return
     end
     
@@ -17,6 +18,8 @@ function RegisterEvent(EventName, ...)
         
         if Func ~= nil then
             Events[EventName][FuncName] = Func
+        else
+            print("Tried to register function '" .. FuncName .. "' (a nil value) for event " .. EventName)
         end
     end
 end

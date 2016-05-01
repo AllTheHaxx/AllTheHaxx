@@ -47,6 +47,13 @@ bool CLuaBinding::LuaKillScript(int UID)
 	return true;
 }
 
+void CLuaFile::LuaPrintOverride(std::string str)
+{
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "LUA|%s", m_Filename.c_str()+4);
+	dbg_msg(aBuf, "%s", str.c_str());
+}
+
 // external info
 int CLuaBinding::LuaGetPlayerScore(int ClientID)
 {

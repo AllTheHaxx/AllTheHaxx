@@ -79,6 +79,8 @@ public:
 	
 	static void RegisterLuaCallbacks(lua_State * L);
 
+	void LuaPrintOverride(std::string str);
+
 private:
 	void OpenLua();
 	bool LoadFile(const char *pFilename);
