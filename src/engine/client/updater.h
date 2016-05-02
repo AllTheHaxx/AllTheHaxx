@@ -3,11 +3,11 @@
 
 #include <engine/updater.h>
 #include <engine/fetcher.h>
-#include <vector>
+#include <map>
 #include <string>
 
-#define CLIENT_EXEC "AllTheHaxx"
-#define SERVER_EXEC "AllTheHaxx-Server"
+#define CLIENT_EXEC "DDNet"
+#define SERVER_EXEC "DDNet-Server"
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define PLAT_EXT ".exe"
@@ -35,38 +35,28 @@
 class CUpdater : public IUpdater
 {
 	class IClient *m_pClient;
-	class IStorageTW *m_pStorage;
+	class IStorage *m_pStorage;
 	class IFetcher *m_pFetcher;
 
 	bool m_IsWinXP;
-	bool m_CheckOnly;
 
 	int m_State;
 	char m_Status[256];
 	int m_Percent;
 	char m_aLastFile[256];
 
-	char m_aVersion[10];
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
 
-	struct ExternalFile
-	{
-		std::string source;
-		std::vector< std::pair<std::string, std::string> > files; // pair: filename - destination
-	};
-	std::vector<std::string> m_AddedFiles;
-	std::vector<std::string> m_RemovedFiles;
-	std::vector<ExternalFile> m_ExternalFiles;
+	std::map<std::string, bool> m_FileJobs;
 
-	void Reset();
-
-	void AddNewFile(const char *pFile);
-	void AddRemovedFile(const char *pFile);
-	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0);
+	void AddFileJob(const char *pFile, bool job);
+	void FetchFile(const char *pFile, const char *pDestPath = 0);
+	void MoveFile(const char *pFile);
 
 	void ParseUpdate();
 	void PerformUpdate();
+	void CommitUpdate();
 
 	void ReplaceClient();
 	void ReplaceServer();
@@ -76,12 +66,11 @@ public:
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
-	const char *GetLatestVersion() const { return m_aVersion; }
-	int GetCurrentState() const { return m_State; }
-	const char *GetCurrentFile() const { return m_Status; }
-	int GetCurrentPercent() const { return m_Percent; }
+	int GetCurrentState() { return m_State; };
+	char *GetCurrentFile() { return m_Status; };
+	int GetCurrentPercent() { return m_Percent; };
 
-	virtual void InitiateUpdate(bool CheckOnly = false, bool ForceRefresh = false);
+	virtual void InitiateUpdate();
 	void Init();
 	virtual void Update();
 	void WinXpRestart();
