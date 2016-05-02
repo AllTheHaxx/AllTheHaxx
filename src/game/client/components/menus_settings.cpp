@@ -1482,7 +1482,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("HUD"),
 		Localize("Identities"),
 		Localize("Texture"),
-		("DDNet"),
+		Localize("Misc."),
 		Localize("Lua")
 	};
 
