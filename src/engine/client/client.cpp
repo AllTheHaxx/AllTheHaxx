@@ -664,8 +664,7 @@ void CClient::SendInput()
 
 const char *CClient::LatestVersion()
 {
-	//return m_Updater.GetLatestVersion();
-	return "0"; //TODO:XXX:IMPLELEMT AGAIN
+	return m_Updater.GetLatestVersion();
 }
 
 // TODO: OPT: do this alot smarter!
@@ -2622,7 +2621,7 @@ void CClient::VersionUpdate()
 void CClient::CheckVersionUpdate()
 {
 	m_VersionInfo.m_State = CVersionInfo::STATE_START;
-	//m_Updater.InitiateUpdate(true, true);  //||TODO:XXX:IMPLEMENT AGAIN!!
+	m_Updater.InitiateUpdate(true, true);
 }
 
 void CClient::RegisterInterfaces()
@@ -2665,7 +2664,7 @@ void CClient::InitInterfaces()
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();
-	//m_Updater.InitiateUpdate(true); // true makes it be blocking -> safe //||TODO:XXX:IMPLEMENT AGAIN!!
+	m_Updater.InitiateUpdate(true); // true makes it be blocking -> safe
 #endif
 
 	m_Friends.Init();

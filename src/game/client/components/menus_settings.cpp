@@ -23,6 +23,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
 #include <game/localization.h>
+#include <game/version.h>
 
 #include "binds.h"
 #include "camera.h"
@@ -2231,12 +2232,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
 
-	//Updater
+	// Updater
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	{
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
-		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+		bool NeedUpdate = Client()->LatestVersion()[2] && str_comp(Client()->LatestVersion(), GAME_ATH_VERSION) != 0;
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();
 

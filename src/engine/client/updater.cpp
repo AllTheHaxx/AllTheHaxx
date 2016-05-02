@@ -18,6 +18,9 @@ CUpdater::CUpdater()
 	m_pFetcher = NULL;
 	m_State = CLEAN;
 	m_Percent = 0;
+	m_CheckOnly = false;
+	m_aVersion[0] = '0';
+	m_aVersion[1] = '\0';
 }
 
 void CUpdater::Init()
@@ -64,15 +67,26 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	delete pTask;
 }
 
-void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
+void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath)
 {
-	char aBuf[256], aPath[256];
-	str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdate2Server, pFile);
+	char aBuf[256], aDestPath[512] = {0};
+	if(pSource[0] == '~')
+		str_format(aBuf, sizeof(aBuf), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource+1, pFile);
+	else
+		str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/%s/%s", pSource, pFile);
+
+	//dbg_msg("updater", "fetching file from '%s'", aBuf);
 	if(!pDestPath)
 		pDestPath = pFile;
-	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);
+	str_format(aDestPath, sizeof(aDestPath), "update/%s", pDestPath);
+	if(aDestPath[str_length(aDestPath)-1] == '/' || aDestPath[str_length(aDestPath)-1] == '\\')
+	{
+		fs_makedir(aDestPath);
+		str_append(aDestPath, pFile, sizeof(aDestPath));
+	}
+
 	CFetchTask *Task = new CFetchTask(false);
-	m_pFetcher->QueueAdd(Task, aBuf, aPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->QueueAdd(Task, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
  
 void CUpdater::MoveFile(const char *pFile)
@@ -91,6 +105,7 @@ void CUpdater::MoveFile(const char *pFile)
 	{
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
 		m_pStorage->RenameBinaryFile(aBuf, pFile);
+		//dbg_msg("updater", "moving '%s' to '%s'", aBuf, pFile);
 	}
 }
 
@@ -118,39 +133,41 @@ void CUpdater::ReplaceClient()
 {
 	dbg_msg("updater", "Replacing " PLAT_CLIENT_EXEC);
 
-	//Replace running executable by renaming twice...
+	// replace running executable by renaming twice...
 	if(!m_IsWinXP)
 	{
-		m_pStorage->RemoveBinaryFile("DDNet.old");
-		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
-		m_pStorage->RenameBinaryFile("update/DDNet.tmp", PLAT_CLIENT_EXEC);
+		m_pStorage->RemoveBinaryFile(CLIENT_EXEC ".old");
+		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, CLIENT_EXEC ".old");
+		m_pStorage->RenameBinaryFile("update/" CLIENT_EXEC ".tmp", PLAT_CLIENT_EXEC);
 	}
-	#if !defined(CONF_FAMILY_WINDOWS)
-		char aPath[512];
-		m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
-		char aBuf[512];
-		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-		if (system(aBuf))
-			dbg_msg("updater", "Error setting client executable bit");
-	#endif
+
+#if !defined(CONF_FAMILY_WINDOWS)
+	char aPath[512];
+	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
+	char aBuf[512];
+	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+	if(system(aBuf))
+		dbg_msg("updater", "Error setting client executable bit");
+#endif
 }
 
 void CUpdater::ReplaceServer()
 {
 	dbg_msg("updater", "Replacing " PLAT_SERVER_EXEC);
 
-	//Replace running executable by renaming twice...
-	m_pStorage->RemoveBinaryFile("DDNet-Server.old");
-	m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, "DDNet-Server.old");
-	m_pStorage->RenameBinaryFile("update/DDNet-Server.tmp", PLAT_SERVER_EXEC);
-	#if !defined(CONF_FAMILY_WINDOWS)
-		char aPath[512];
-		m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
-		char aBuf[512];
-		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-		if (system(aBuf))
-			dbg_msg("updater", "Error setting server executable bit");
-	#endif
+	// replace running executable by renaming twice...
+	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
+	m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
+	m_pStorage->RenameBinaryFile("update/" SERVER_EXEC ".tmp", PLAT_SERVER_EXEC);
+
+#if !defined(CONF_FAMILY_WINDOWS)
+	char aPath[512];
+	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
+	char aBuf[512];
+	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+	if(system(aBuf))
+		dbg_msg("updater", "Error setting server executable bit");
+#endif
 }
 
 void CUpdater::ParseUpdate()
@@ -172,8 +189,12 @@ void CUpdater::ParseUpdate()
 			{
 				const json_value *pTemp;
 				const json_value *pCurrent = json_array_get(pVersions, i);
-				if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
+				if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_ATH_VERSION))
 				{
+					// if we don't know the latest version yet, get it
+					if(m_aVersion[0] == '0' && m_aVersion[1] == '\0')
+						str_copy(m_aVersion, json_string_get(json_object_get(pCurrent, "version")), sizeof(m_aVersion));
+
 					if(json_boolean_get(json_object_get(pCurrent, "client")))
 						m_ClientUpdate = true;
 					if(json_boolean_get(json_object_get(pCurrent, "server")))
@@ -188,6 +209,30 @@ void CUpdater::ParseUpdate()
 						for(int j = 0; j < json_array_length(pTemp); j++)
 							AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
 					}
+					if((pTemp = json_object_get(pCurrent, "external"))->type == json_array)
+					{
+						for(int j = 0; j < json_array_length(pTemp); j++)
+						{
+							const json_value *pFiles, *pDests, *pArr = json_array_get(pTemp, j);
+
+							if((pFiles = json_object_get(pArr, "files"))->type == json_array
+							&& (pDests = json_object_get(pArr, "dests"))->type == json_array)
+							{
+								// add the list of files to the entry
+								std::map<string, string> e;
+								std::string source(json_string_get(json_object_get(pArr, "source")));
+								for(int k = 0; k < json_array_length(pFiles); k++)
+								{
+									std::string file(json_string_get(json_array_get(pFiles, k)));
+									e[file] = string(json_string_get(json_array_get(pDests, k)));
+									//dbg_msg("DEBUG|updater", "External (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
+								}
+
+								// store the entry
+								m_ExternalFiles[source] = e;
+							}
+						}
+					}
 				}
 				else
 					break;
@@ -196,10 +241,19 @@ void CUpdater::ParseUpdate()
 	}
 }
 
-void CUpdater::InitiateUpdate()
+void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 {
-	m_State = GETTING_MANIFEST;
-	FetchFile("update.json");
+	m_CheckOnly = CheckOnly;
+
+	// get the version info if we don't have any yet
+	if((m_aVersion[0] == '0' && m_aVersion[1] == '\0') || ForceRefresh)
+	{
+		m_State = GETTING_MANIFEST;
+		dbg_msg("updater", "refreshing version info");
+		FetchFile("~stuffility/master", "update.json");
+	}
+	else
+		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step
 }
 
 void CUpdater::PerformUpdate()
@@ -207,12 +261,22 @@ void CUpdater::PerformUpdate()
 	m_State = PARSING_UPDATE;
 	dbg_msg("updater", "Parsing update.json");
 	ParseUpdate();
+	if(m_CheckOnly)
+	{
+		m_CheckOnly = false;
+		m_State = CLEAN;
+		return;
+	}
+
+	dbg_msg("updater", "Starting download, got %i file jobs and %i external jobs", m_FileJobs.size(), m_ExternalFiles.size());
 	m_State = DOWNLOADING;
 
 	const char *aLastFile;
 	aLastFile = "";
-	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it){
-		if(it->second){
+	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it)
+	{
+		if(it->second)
+		{
 			aLastFile = it->first.c_str();
 			break;
 		}
@@ -220,11 +284,11 @@ void CUpdater::PerformUpdate()
 
 	for(map<string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
 	{
-		if(it->second)
+		if(it->second == JOB_ADD) // add/update file
 		{
 			const char *pFile = it->first.c_str();
 			size_t len = str_length(pFile);
-			if(!str_comp_nocase(pFile + len - 4, ".dll"))
+			if(str_comp_nocase(pFile + len - 4, ".dll") == 0)
 			{
 #if defined(CONF_FAMILY_WINDOWS)
 				char aBuf[512];
@@ -237,23 +301,33 @@ void CUpdater::PerformUpdate()
 			}
 			else
 			{
-				FetchFile(pFile);
+				FetchFile("~AllTheHaxx/master", pFile);
 			}
 			aLastFile = pFile;
 		}
-		else
+		else // remove file
 			m_pStorage->RemoveBinaryFile(it->first.c_str());
 	}
 
-	if(m_ServerUpdate)
+	// fetch all external files
+	for(map<string, map<string, string> >::iterator it = m_ExternalFiles.begin(); it != m_ExternalFiles.end(); ++it)
+		for(map<string, string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
+		{
+			FetchFile(it->first.c_str(), file->first.c_str(), file->second.c_str());
+			aLastFile = file->first.c_str();
+		}
+
+	/*if(m_ServerUpdate)
 	{
-		FetchFile(PLAT_SERVER_DOWN, "DDNet-Server.tmp");
-		aLastFile = "DDNet-Server.tmp";
-	}
+		FetchFile(PLAT_SERVER_DOWN, SERVER_EXEC ".tmp");
+		aLastFile = SERVER_EXEC ".tmp";
+	}*/
+
 	if(m_ClientUpdate)
 	{
-		FetchFile(PLAT_CLIENT_DOWN, "DDNet.tmp");
-		aLastFile = "DDNet.tmp";
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "AllTheHaxx/releases/download/%s", m_aVersion);
+		FetchFile(aBuf, PLAT_CLIENT_DOWN, "AllTheHaxx.tmp");
 	}
 
 	str_copy(m_aLastFile, aLastFile, sizeof(m_aLastFile));
@@ -262,8 +336,20 @@ void CUpdater::PerformUpdate()
 void CUpdater::CommitUpdate()
 {
 	for(map<std::string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
-		if(it->second)
+		if(it->second == JOB_ADD)
 			MoveFile(it->first.c_str());
+
+	for(map<std::string, map<std::string, std::string> >::iterator it = m_ExternalFiles.begin(); it != m_ExternalFiles.end(); ++it)
+		for(map<std::string, std::string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
+		{
+			string destPath;
+			if(file->second.c_str()[str_length(file->second.c_str())-1] == '/' ||
+					file->second.c_str()[str_length(file->second.c_str())-1] == '\\')
+				destPath = string(file->second + file->first).c_str(); // append the filename to the dest folder path
+			else
+				destPath = file->second; // the full path is already given
+			MoveFile(destPath.c_str());
+		}
 
 	if(m_ClientUpdate)
 		ReplaceClient();
@@ -287,7 +373,7 @@ void CUpdater::WinXpRestart()
 		if(!bhFile)
 			return;
 		char bBuf[512];
-		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\n:_T\r\nmove /y \"update\\DDNet.tmp\" \"DDNet.exe\"\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
+		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"" CLIENT_EXEC ".exe\"\r\nif exist \"" CLIENT_EXEC ".exe\" goto _R\r\n:_T\r\nmove /y \"update\\" CLIENT_EXEC ".tmp\" \"" CLIENT_EXEC ".exe\"\r\nif not exist \"" CLIENT_EXEC ".exe\" goto _T\r\nstart " CLIENT_EXEC ".exe\r\ndel \"du.bat\"\r\n");
 		io_write(bhFile, bBuf, str_length(bBuf));
 		io_close(bhFile);
 		shell_execute(aBuf);

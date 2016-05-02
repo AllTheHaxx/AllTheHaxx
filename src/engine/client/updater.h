@@ -6,8 +6,8 @@
 #include <map>
 #include <string>
 
-#define CLIENT_EXEC "DDNet"
-#define SERVER_EXEC "DDNet-Server"
+#define CLIENT_EXEC "AllTheHaxx"
+#define SERVER_EXEC "AllTheHaxx-Server"
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define PLAT_EXT ".exe"
@@ -32,6 +32,9 @@
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
+#define JOB_ADD true
+#define JOB_REMOVE false
+
 class CUpdater : public IUpdater
 {
 	class IClient *m_pClient;
@@ -48,10 +51,14 @@ class CUpdater : public IUpdater
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
 
+	bool m_CheckOnly;
+	char m_aVersion[10];
+
 	std::map<std::string, bool> m_FileJobs;
+	std::map<std::string, std::map<std::string, std::string> > m_ExternalFiles; // source - dlpath, dest
 
 	void AddFileJob(const char *pFile, bool job);
-	void FetchFile(const char *pFile, const char *pDestPath = 0);
+	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0);
 	void MoveFile(const char *pFile);
 
 	void ParseUpdate();
@@ -66,11 +73,13 @@ public:
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
-	int GetCurrentState() { return m_State; };
-	char *GetCurrentFile() { return m_Status; };
-	int GetCurrentPercent() { return m_Percent; };
+	const char *GetLatestVersion() const { return m_aVersion; }
 
-	virtual void InitiateUpdate();
+	int GetCurrentState() const { return m_State; };
+	char *GetCurrentFile() { return m_Status; };
+	int GetCurrentPercent() const { return m_Percent; };
+
+	virtual void InitiateUpdate(bool CheckOnly = false, bool ForceRefresh = false);
 	void Init();
 	virtual void Update();
 	void WinXpRestart();

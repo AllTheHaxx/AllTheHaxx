@@ -6,6 +6,7 @@ objs
 lua
 rsa
 src/game/generated
+update/
 
 crapnet??*
 config_store??*
@@ -53,7 +54,7 @@ versionsrv??*
 *.pdf
 *.key
 *.lua
-update.json
+
 autoexec.cfg
 
 DDNet??*

@@ -1342,8 +1342,14 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		}
 		else if(State == IUpdater::CLEAN)
 			str_format(aBuf, sizeof(aBuf), Localize("Client version string: tw.%s-%s-ddnet.%s"), GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
-		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
+		else if(State == IUpdater::GETTING_MANIFEST)
+			str_format(aBuf, sizeof(aBuf), "Refreshing version info...:");
+		else if(State == IUpdater::GOT_MANIFEST || State == IUpdater::PARSING_UPDATE)
+			str_format(aBuf, sizeof(aBuf), "Checking out files...");
+		else if(State >= IUpdater::DOWNLOADING && State < IUpdater::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Downloading '%s':", Updater()->GetCurrentFile());
+		else if(State == IUpdater::MOVE_FILES)
+			str_format(aBuf, sizeof(aBuf), "Installing '%s'", Updater()->GetCurrentFile());
 		else if(State == IUpdater::FAIL)
 		{
 			str_format(aBuf, sizeof(aBuf), "Failed to download a file! Restart client to retry...");
