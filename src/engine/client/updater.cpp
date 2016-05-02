@@ -23,7 +23,7 @@ CUpdater::CUpdater()
 void CUpdater::Init()
 {
 	m_pClient = Kernel()->RequestInterface<IClient>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 	#if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5, 1) <= 0;
@@ -67,7 +67,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
 	char aBuf[256], aPath[256];
-	str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdateServer, pFile);
+	//str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdateServer, pFile);
 	if(!pDestPath)
 		pDestPath = pFile;
 	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);
@@ -155,7 +155,7 @@ void CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		char aBuf[4096*4];

@@ -35,7 +35,7 @@
 class CUpdater : public IUpdater
 {
 	class IClient *m_pClient;
-	class IStorage *m_pStorage;
+	class IStorageTW *m_pStorage;
 	class IFetcher *m_pFetcher;
 
 	bool m_IsWinXP;

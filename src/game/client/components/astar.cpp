@@ -51,7 +51,7 @@ void CAStar::OnPlayerDeath()
 	for(int i = m_Path.size(); i >= 0; i--)
 	{
 		// better make a SAFE CAAAAAAALLLL
-		if(distance(m_Path[i], m_LastPos) < ClosestNode && !Collision()->IntersectLine(m_Path[i], m_LastPos, 0x0, 0x0, false))
+		if(distance(m_Path[i], m_LastPos) < ClosestNode && !Collision()->IntersectLine(m_Path[i], m_LastPos, 0x0, 0x0))
 		{
 			ClosestNode = distance(m_Path[i], m_LastPos);
 			ClosestID = i;
@@ -125,7 +125,7 @@ int CAStar::GetStart()
 		{
 			// hack. but apperently this can indeed happen
 			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_BEGIN)
-				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
+				aTiles[NumTiles++] = Collision()->GetIndex(x*32, y*32);
 			else
 				continue;
 		}
@@ -148,7 +148,7 @@ int CAStar::GetFinish()
 		{
 			// hack. but apperently this can indeed happen
 			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_END)
-				aTiles[NumTiles++] = Collision()->GetIndex(vec2(x*32, y*32));
+				aTiles[NumTiles++] = Collision()->GetIndex(x*32, y*32);
 			else
 				continue;
 		}
@@ -223,9 +223,9 @@ void CAStar::FillGrid(bool NoFreeze)
 		for(int x = 0; x < Collision()->GetWidth(); x++)
 		{
 			if(Collision()->CheckPoint(x * 32, y * 32) || (NoFreeze && Collision()->GetIndex(x, y) == TILE_FREEZE))
-				m_pField[Collision()->GetIndex(vec2(x*32, y*32))] = 0;
+				m_pField[Collision()->GetIndex(x*32, y*32)] = 0;
 			else
-				m_pField[Collision()->GetIndex(vec2(x*32, y*32))] = 1;
+				m_pField[Collision()->GetIndex(x*32, y*32)] = 1;
 		}
 	}
 }

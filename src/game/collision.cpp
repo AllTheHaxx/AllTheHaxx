@@ -150,7 +150,6 @@ int CCollision::GetTile(int x, int y)
 	return 0;
 }
 
-/*<<<! HEAD
 int CCollision::GetTileRaw(int x, int y)
 {
 	if(!m_pTiles)
@@ -168,8 +167,6 @@ int CCollision::GetTileRaw(int x, int y)
 //	return GetTile(x, y)&COLFLAG_SOLID;
 //}
 //
-=======
->>>>>>> merge-nosdl2*/
 
 // TODO: rewrite this smarter!
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision)
