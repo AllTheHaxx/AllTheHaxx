@@ -641,7 +641,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	// Might fix problems with Windows HighDPI scaling
+#if defined(CONF_PLATFORM_WINDOWS)
 	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+#endif
 
 	m_pWindow = SDL_CreateWindow(
 		pName,
