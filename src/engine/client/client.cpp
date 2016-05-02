@@ -850,7 +850,7 @@ bool CClient::DummyConnected()
 
 bool CClient::DummyConnecting()
 {
-	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick();
+	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 1 > GameTick();
 }
 
 void CClient::DummyConnect()
