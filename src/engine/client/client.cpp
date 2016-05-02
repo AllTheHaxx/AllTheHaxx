@@ -665,7 +665,7 @@ void CClient::SendInput()
 const char *CClient::LatestVersion()
 {
 	//return m_Updater.GetLatestVersion();
-	return 0; //TODO:XXX:IMPLELEMT AGAIN
+	return "0"; //TODO:XXX:IMPLELEMT AGAIN
 }
 
 // TODO: OPT: do this alot smarter!
