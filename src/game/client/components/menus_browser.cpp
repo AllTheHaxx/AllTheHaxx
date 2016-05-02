@@ -61,6 +61,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		COL_VERSION,
 	};
 
+//<<<! HEAD
 	static CColumn s_aCols[] = {
 		{-1,			-1,						" ",		-1, 2.0f, 0, 0, 0},
 		{COL_FLAG_LOCK,	-1,						" ",		-1, 14.0f, 0, 0, 0},
@@ -71,6 +72,18 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{COL_PLAYERS,	IServerBrowser::SORT_NUMPLAYERS,	"Players",	1, 60.0f, 0, 0, 0},
 		{-1,			-1,						" ",		1, 10.0f, 0, 0, 0},
 		{COL_PING,		IServerBrowser::SORT_PING,		"Ping",		1, 40.0f, FIXED, 0, 0},
+/*=======
+	CColumn s_aCols[] = {
+		{-1,			-1,						" ",		-1, 2.0f, 0, {0}, {0}},
+		{COL_FLAG_LOCK,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
+		{COL_FLAG_FAV,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
+		{COL_NAME,		IServerBrowser::SORT_NAME,		"Name",		0, 50.0f, 0, {0}, {0}},	// Localize - these strings are localized within CLocConstString
+		{COL_GAMETYPE,	IServerBrowser::SORT_GAMETYPE,	"Type",		1, 50.0f, 0, {0}, {0}},
+		{COL_MAP,		IServerBrowser::SORT_MAP,			"Map", 		1, 100.0f + (Headers.w - 480) / 8, 0, {0}, {0}},
+		{COL_PLAYERS,	IServerBrowser::SORT_NUMPLAYERS,	"Players",	1, 60.0f, 0, {0}, {0}},
+		{-1,			-1,						" ",		1, 10.0f, 0, {0}, {0}},
+		{COL_PING,		IServerBrowser::SORT_PING,		"Ping",		1, 40.0f, FIXED, {0}, {0}},
+>>>>>>> ddnet/master*/
 #if defined(__ANDROID__)
 		{-1,			-1,						" ",		1, 50.0f, 0, 0, 0}, // Scrollbar
 #endif
@@ -166,17 +179,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = -1;
 		}
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
 			s_ScrollValue -= 3.0f/ScrollNum;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
 			s_ScrollValue += 3.0f/ScrollNum;
 	}
 	else
 		ScrollNum = 0;
 
-	if(Input()->KeyDown(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
+	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
 	{
-		if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
 		else
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
@@ -439,24 +452,20 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					vec3 hsl = vec3(1.0f, 1.0f, 1.0f);
 
-					if (!str_comp(pItem->m_aGameType, "DM")
-							|| !str_comp(pItem->m_aGameType, "TDM")
-							|| !str_comp(pItem->m_aGameType, "CTF"))
-						hsl = vec3(0.33f, 1.0f, 0.75f); // Vanilla
-					else if (str_find_nocase(pItem->m_aGameType, "catch"))
-						hsl = vec3(0.17f, 1.0f, 0.75f); // Catch
-					else if (str_find_nocase(pItem->m_aGameType, "idm")
-							|| str_find_nocase(pItem->m_aGameType, "itdm")
-							|| str_find_nocase(pItem->m_aGameType, "ictf"))
-						hsl = vec3(0.00f, 1.0f, 0.75f); // Instagib
-					else if (str_find_nocase(pItem->m_aGameType, "fng"))
-						hsl = vec3(0.83f, 1.0f, 0.75f); // FNG
+					if (IsVanilla(pItem))
+						hsl = vec3(0.33f, 1.0f, 0.75f);
+					else if (IsCatch(pItem))
+						hsl = vec3(0.17f, 1.0f, 0.75f);
+					else if (IsInsta(pItem))
+						hsl = vec3(0.00f, 1.0f, 0.75f);
+					else if (IsFNG(pItem))
+						hsl = vec3(0.83f, 1.0f, 0.75f);
 					else if (IsDDNet(pItem))
-						hsl = vec3(0.58f, 1.0f, 0.75f); // DDNet
+						hsl = vec3(0.58f, 1.0f, 0.75f);
 					else if (IsDDRace(pItem))
-						hsl = vec3(0.75f, 1.0f, 0.75f); // DDRace
+						hsl = vec3(0.75f, 1.0f, 0.75f);
 					else if (IsRace(pItem))
-						hsl = vec3(0.46f, 1.0f, 0.75f); // Race
+						hsl = vec3(0.46f, 1.0f, 0.75f);
 
 					vec3 rgb = HslToRgb(hsl);
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
@@ -1408,7 +1417,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely")) || Input()->KeyPressed(KEY_F5))
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely")) || Input()->KeyPress(KEY_F5) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

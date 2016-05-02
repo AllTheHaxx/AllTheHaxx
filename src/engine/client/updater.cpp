@@ -67,7 +67,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
 	char aBuf[256], aPath[256];
-	//str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdateServer, pFile);
+	str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdate2Server, pFile);
 	if(!pDestPath)
 		pDestPath = pFile;
 	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);
@@ -79,7 +79,8 @@ void CUpdater::MoveFile(const char *pFile)
 {
 	char aBuf[256];
 	size_t len = str_length(pFile);
-	if(!str_comp(pFile + len - 4, ".dll"))
+
+	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
 		m_pStorage->RenameBinaryFile(pFile, aBuf);
@@ -221,8 +222,24 @@ void CUpdater::PerformUpdate()
 	{
 		if(it->second)
 		{
-			FetchFile(it->first.c_str());
-			aLastFile = it->first.c_str();
+			const char *pFile = it->first.c_str();
+			size_t len = str_length(pFile);
+			if(!str_comp_nocase(pFile + len - 4, ".dll"))
+			{
+#if defined(CONF_FAMILY_WINDOWS)
+				char aBuf[512];
+				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
+				str_copy(aBuf + len - 4, "-" PLAT_NAME, sizeof(aBuf) - len + 4); // -win32
+				str_append(aBuf, pFile + len - 4, sizeof(aBuf)); // .dll
+				FetchFile(aBuf, pFile);
+#endif
+				// Ignore DLL downloads on other platforms, on Linux we statically link anyway
+			}
+			else
+			{
+				FetchFile(pFile);
+			}
+			aLastFile = pFile;
 		}
 		else
 			m_pStorage->RemoveBinaryFile(it->first.c_str());
@@ -270,7 +287,7 @@ void CUpdater::WinXpRestart()
 		if(!bhFile)
 			return;
 		char bBuf[512];
-		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\nrename \"DDNet.tmp\" \"DDNet.exe\"\r\n:_T\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
+		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\n:_T\r\nmove /y \"update\\DDNet.tmp\" \"DDNet.exe\"\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
 		io_write(bhFile, bBuf, str_length(bBuf));
 		io_close(bhFile);
 		shell_execute(aBuf);

@@ -103,7 +103,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_RenderFrames;
 
 	NETADDR m_ServerAddress;
-	int m_WindowMustRefocus;
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
 	bool m_AutoStatScreenshotRecycle;
@@ -354,6 +353,10 @@ public:
 	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void Con_Panic(IConsole::IResult *pResult, void *pUserData);
 
@@ -376,6 +379,12 @@ public:
 	void AutoStatScreenshot_Cleanup();
 
 	void ServerBrowserUpdate();
+
+	// gfx
+	void SwitchWindowScreen(int Index);
+	void ToggleFullscreen();
+	void ToggleWindowBordered();
+	void ToggleWindowVSync();
 
 	// DDRace
 

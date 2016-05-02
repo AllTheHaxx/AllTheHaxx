@@ -46,12 +46,12 @@ CLayerTiles::~CLayerTiles()
 	delete [] m_pTiles;
 }
 
-CTile CLayerTiles::GetTile(int x, int y, bool force)
+CTile CLayerTiles::GetTile(int x, int y)
 {
 	return m_pTiles[y*m_Width+x];
 }
 
-void CLayerTiles::SetTile(int x, int y, CTile tile, bool force)
+void CLayerTiles::SetTile(int x, int y, CTile tile)
 {
 	m_pTiles[y*m_Width+x] = tile;
 }
@@ -188,7 +188,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y*pGrabbed->m_Width+x] = GetTile(r.x+x, r.y+y);
 
 		// copy the tele data
-		if(!m_pEditor->Input()->KeyPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
@@ -215,7 +215,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y*pGrabbed->m_Width+x] = GetTile(r.x+x, r.y+y);
 
 		// copy the speedup data
-		if(!m_pEditor->Input()->KeyPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
@@ -248,7 +248,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y*pGrabbed->m_Width+x] = GetTile(r.x+x, r.y+y);
 
 		// copy the switch data
-		if(!m_pEditor->Input()->KeyPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
@@ -279,7 +279,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y*pGrabbed->m_Width+x] = GetTile(r.x+x, r.y+y);
 
 		// copy the tiles
-		if(!m_pEditor->Input()->KeyPressed(KEY_SPACE))
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
@@ -619,6 +619,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			case 9:
 				Result = TILE_TELECHECKINEVIL;
 				break;
+			case 10:
+				Result = TILE_THROUGH_CUT;
 			default:
 				break;
 		}
@@ -632,8 +634,10 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				int h = min(gl->m_Height, m_Height);
 				for(int y = 0; y < h; y++)
 					for(int x = 0; x < w; x++)
-						if(m_pTiles[y*m_Width+x].m_Index)
-							gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR+Result;
+						if(GetTile(x, y).m_Index) {
+							CTile result_tile = {(unsigned char)Result};
+							gl->SetTile(x, y, result_tile);
+						}
 			}
 			else if (m_pEditor->m_Map.m_pTeleLayer)
 			{
@@ -1300,20 +1304,26 @@ CLayerFront::CLayerFront(int w, int h)
 	m_Front = 1;
 }
 
-CTile CLayerFront::GetTile(int x, int y, bool force)
+void CLayerFront::SetTile(int x, int y, CTile tile)
 {
-	if(!force && GetTile(x, y, true).m_Index == TILE_THROUGH_CUT) {
-		CTile air = {TILE_AIR, 0, 0, 0};
-		return air;
-	} else {
-		return m_pTiles[y*m_Width+x];
+	if(tile.m_Index == TILE_THROUGH_CUT) {
+		CTile nohook = {TILE_NOHOOK};
+		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, nohook);
+	} else if(tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT) {
+		CTile air = {TILE_AIR};
+		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, air);
 	}
-}
-
-void CLayerFront::SetTile(int x, int y, CTile tile, bool force)
-{
-	if(force || (GetTile(x, y, true).m_Index != TILE_THROUGH_CUT && tile.m_Index != TILE_THROUGH_CUT))
-		m_pTiles[y*m_Width+x] = tile;
+	if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(tile.m_Index)) {
+		CLayerTiles::SetTile(x, y, tile);
+	} else {
+		CTile air = {TILE_AIR};
+		CLayerTiles::SetTile(x, y, air);
+		if(!m_pEditor->m_PreventUnusedTilesWasWarned) {
+			m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_PREVENTUNUSEDTILES;
+			m_pEditor->m_PopupEventActivated = true;
+			m_pEditor->m_PreventUnusedTilesWasWarned = true;
+		}
+	}
 }
 
 void CLayerFront::Resize(int NewW, int NewH)

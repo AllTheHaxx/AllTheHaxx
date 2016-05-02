@@ -1830,6 +1830,24 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 }
 
+int fs_makedir_rec_for(const char *path)
+{
+	char buffer[1024*2];
+	char *p;
+	str_copy(buffer, path, sizeof(buffer));
+	for(p = buffer; *p != '\0'; p++)
+	{
+		if(*p == '/' && *(p + 1) != '\0')
+		{
+			*p = '\0';
+			if(fs_makedir(buffer) < 0)
+				return -1;
+			*p = '/';
+		}
+	}
+	return 0;
+}
+
 int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)

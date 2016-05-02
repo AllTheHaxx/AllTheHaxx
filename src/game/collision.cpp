@@ -106,17 +106,6 @@ void CCollision::Init(class CLayers *pLayers)
 					m_pSwitch[i].m_Type = 0;
 			}
 		}
-		if(m_pFront)
-		{
-			// remove unused tiles from front layer
-			Index = m_pFront[i].m_Index;
-			if(Index <= TILE_NPH_START && !(Index == TILE_DEATH || (Index >= TILE_NOLASER && Index <= TILE_THROUGH) || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
-				m_pFront[i].m_Index = 0;
-		}
-		// remove unused tiles from game layer
-		Index = m_pTiles[i].m_Index;
-		if(Index <= TILE_NPH_START && !((Index >= TILE_SOLID && Index <= TILE_NOLASER) || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
-				m_pTiles[i].m_Index = 0;
 	}
 
 	if(m_NumSwitchers)
@@ -700,8 +689,8 @@ vec2 CCollision::CpSpeed(int Index, int Flags)
 
 int CCollision::GetPureMapIndex(float x, float y)
 {
-	int Nx = clamp((int)x/32, 0, m_Width-1);
-	int Ny = clamp((int)y/32, 0, m_Height-1);
+	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
+	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 	return Ny*m_Width+Nx;
 }
 

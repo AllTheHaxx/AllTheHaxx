@@ -7,7 +7,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <climits>
-#include <csignal>
+//#include <csignal>
+#include <locale.h> //setlocale
 
 #include <base/math.h>
 #include <base/vmath.h>
@@ -288,7 +289,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	m_GameTickSpeed = SERVER_TICK_SPEED;
 
-	m_WindowMustRefocus = 0;
 	m_SnapCrcErrors = 0;
 	m_AutoScreenshotRecycle = false;
 	m_AutoStatScreenshotRecycle = false;
@@ -2584,6 +2584,10 @@ void CClient::Update()
 	// update the server browser
 	m_ServerBrowser.Update(m_ResortServerBrowser);
 	m_ResortServerBrowser = false;
+
+	// update gameclient
+	if(!m_EditorActive)
+		GameClient()->OnUpdate();
 }
 
 void CClient::VersionUpdate()
@@ -2697,10 +2701,7 @@ void CClient::Run()
 
 	// init graphics
 	{
-		if(g_Config.m_GfxThreadedOld)
-			m_pGraphics = CreateEngineGraphicsThreaded();
-		else
-			m_pGraphics = CreateEngineGraphics();
+		m_pGraphics = CreateEngineGraphicsThreaded();
 
 		bool RegisterFail = false;
 		RegisterFail = RegisterFail || !Kernel()->RegisterInterface(static_cast<IEngineGraphics*>(m_pGraphics)); // register graphics as both
@@ -2745,22 +2746,27 @@ void CClient::Run()
 	// init the input
 	Input()->Init();
 
-	// init the components
-	GameClient()->OnInit();
-
 	// start refreshing addresses while we load
 	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
 
-	// init lua
-	m_Lua.Init(this, Storage());
-	m_Lua.SetGameClient(GameClient());
+	// init the editor
+	m_pEditor->Init();
 
 	// load data
 	if(!LoadData())
 		return;
 
-	//
-	m_FpsGraph.Init(0.0f, 200.0f);
+	GameClient()->OnInit();
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+
+	// init lua
+	m_Lua.Init(this, Storage());
+	m_Lua.SetGameClient(GameClient());
+
+	m_pInputThread = thread_init(InputThread, this);
 
 	// connect to the server if wanted
 	/*
@@ -2768,8 +2774,16 @@ void CClient::Run()
 		Connect(config.cl_connect);
 	config.cl_connect[0] = 0;
 	*/
-	
-	m_pInputThread = thread_init(InputThread, this);
+
+	//
+	m_FpsGraph.Init(0.0f, 200.0f);
+
+	// never start with the editor
+	g_Config.m_ClEditor = 0;
+
+	// process pending commands
+	m_pConsole->StoreCommands(false);
+
 
 	bool LastD = false;
 	bool LastQ = false;
@@ -2906,28 +2920,23 @@ void CClient::Run()
 		}
 
 		// panic quit button and restart
-		if(CtrlShiftKey('q', LastQ))
+		if(CtrlShiftKey(KEY_Q, LastQ))
 		{
 			Quit();
 			break;
 		}
 
-		if(CtrlShiftKey('d', LastD))
+		if(CtrlShiftKey(KEY_D, LastD))
 			g_Config.m_Debug ^= 1;
 
-		if(CtrlShiftKey('g', LastG))
+		if(CtrlShiftKey(KEY_G, LastG))
 			g_Config.m_DbgGraphs ^= 1;
 
-		if(CtrlShiftKey('e', LastE))
+		if(CtrlShiftKey(KEY_E, LastE))
 		{
 			g_Config.m_ClEditor = g_Config.m_ClEditor^1;
 			Input()->MouseModeRelative();
 		}
-
-		/*
-		if(!gfx_window_open())
-			break;
-		*/
 
 		// render
 		{
@@ -2984,6 +2993,7 @@ void CClient::Run()
 					}
 					m_pGraphics->Swap();
 				}
+				Input()->NextFrame();
 			}
 			if(Input()->VideoRestartNeeded())
 			{
@@ -3050,12 +3060,12 @@ void CClient::Run()
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
 {
-	if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && !Last && Input()->KeyPressed(Key))
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && !Last && Input()->KeyIsPressed(Key))
 	{
 		Last = true;
 		return true;
 	}
-	else if (Last && !Input()->KeyPressed(Key))
+	else if (Last && !Input()->KeyIsPressed(Key))
 		Last = false;
 
 	return false;
@@ -3401,6 +3411,90 @@ void CClient::Con_Panic(IConsole::IResult *pResult, void *pUserData)
 	g_Config.m_ClConsoleMode = 0;
 }
 
+void CClient::SwitchWindowScreen(int Index)
+{
+	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
+	if(g_Config.m_GfxFullscreen)
+	{
+		ToggleFullscreen();
+		if(Graphics()->SetWindowScreen(Index))
+			g_Config.m_GfxScreen = Index;
+		ToggleFullscreen();
+	}
+	else
+	{
+		if(Graphics()->SetWindowScreen(Index))
+			g_Config.m_GfxScreen = Index;
+	}
+}
+
+void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pSelf->Graphics() && pResult->NumArguments())
+	{
+		if(g_Config.m_GfxScreen != pResult->GetInteger(0))
+			pSelf->SwitchWindowScreen(pResult->GetInteger(0));
+	}
+	else
+		pfnCallback(pResult, pCallbackUserData);
+}
+
+void CClient::ToggleFullscreen()
+{
+	if(Graphics()->Fullscreen(g_Config.m_GfxFullscreen^1))
+		g_Config.m_GfxFullscreen ^= 1;
+}
+
+void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pSelf->Graphics() && pResult->NumArguments())
+	{
+		if(g_Config.m_GfxFullscreen != pResult->GetInteger(0))
+			pSelf->ToggleFullscreen();
+	}
+	else
+		pfnCallback(pResult, pCallbackUserData);
+}
+
+void CClient::ToggleWindowBordered()
+{
+	g_Config.m_GfxBorderless ^= 1;
+	Graphics()->SetWindowBordered(!g_Config.m_GfxBorderless);
+}
+
+void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pSelf->Graphics() && pResult->NumArguments())
+	{
+		if(!g_Config.m_GfxFullscreen && (g_Config.m_GfxBorderless != pResult->GetInteger(0)))
+			pSelf->ToggleWindowBordered();
+	}
+	else
+		pfnCallback(pResult, pCallbackUserData);
+}
+
+void CClient::ToggleWindowVSync()
+{
+	if(Graphics()->SetVSync(g_Config.m_GfxVsync^1))
+		g_Config.m_GfxVsync ^= 1;
+}
+
+void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pSelf->Graphics() && pResult->NumArguments())
+	{
+		if(g_Config.m_GfxVsync != pResult->GetInteger(0))
+			pSelf->ToggleWindowVSync();
+	}
+	else
+		pfnCallback(pResult, pCallbackUserData);
+>>>>>>> ddnet/master
+}
+
 void CClient::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -3445,6 +3539,11 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
+
+	m_pConsole->Chain("gfx_screen", ConchainWindowScreen, this);
+	m_pConsole->Chain("gfx_fullscreen", ConchainFullscreen, this);
+	m_pConsole->Chain("gfx_borderless", ConchainWindowBordered, this);
+	m_pConsole->Chain("gfx_vsync", ConchainWindowVSync, this);
 
 	// DDRace
 
@@ -3629,6 +3728,9 @@ int main(int argc, const char **argv) // ignore_convention
 	if(g_Config.m_ClHideConsole)
 		FreeConsole();
 #endif
+
+	// For XOpenIM in SDL2: https://bugzilla.libsdl.org/show_bug.cgi?id=3102
+	setlocale(LC_ALL, "");
 
 	// run the client
 	dbg_msg("client", "starting...");

@@ -7,7 +7,8 @@
 
 #include <string>
 
-extern const char g_aaKeyStrings[512][16];
+const int g_MaxKeys = 512;
+extern const char g_aaKeyStrings[g_MaxKeys][20];
 
 class IInput : public IInterface
 {
@@ -17,8 +18,9 @@ public:
 	{
 	public:
 		int m_Flags;
-		int m_Unicode;
 		int m_Key;
+		char m_aText[32];
+		int m_InputCount;
 	};
 
 protected:
@@ -31,34 +33,18 @@ protected:
 	int m_NumEvents;
 	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
 
-	//quick access to input
-	struct
-	{
-		unsigned char m_Presses;
-		unsigned char m_Releases;
-	} m_aInputCount[2][1024];
-
-	unsigned char m_aInputState[2][1024];
-	int m_InputCurrent;
-	bool m_InputDispatched;
-
-	int KeyWasPressed(int Key) { return m_aInputState[m_InputCurrent^1][Key]; }
-
 public:
 	enum
 	{
 		FLAG_PRESS=1,
 		FLAG_RELEASE=2,
-		FLAG_REPEAT=4
+		FLAG_REPEAT=4,
+		FLAG_TEXT=8,
 	};
 
 	// events
 	int NumEvents() const { return m_NumEvents; }
-	void ClearEvents()
-	{
-		m_NumEvents = 0;
-		m_InputDispatched = true;
-	}
+	virtual bool IsEventValid(CEvent *pEvent) const = 0;
 	CEvent GetEvent(int Index) const
 	{
 		if(Index < 0 || Index >= m_NumEvents)
@@ -70,17 +56,25 @@ public:
 	}
 
 	// keys
+/*<<<! HEAD
 	int KeyPressed(int Key) { return m_aInputState[m_InputCurrent][Key]; }
 	int KeyReleases(int Key) { return m_aInputCount[m_InputCurrent][Key].m_Releases; }
 	int KeyPresses(int Key) { return m_aInputCount[m_InputCurrent][Key].m_Presses; }
 	int KeyDown(int Key) { return KeyPressed(Key)&&!KeyWasPressed(Key); }
-	const char *KeyName(int Key) { return (Key >= 0 && Key < 512) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
+=======*/
+	virtual bool KeyIsPressed(int Key) const = 0;
+	virtual bool KeyPress(int Key, bool CheckCounter=false) const = 0;
+	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
 	std::string KeyNameSTD(int Key) { return std::string(KeyName(Key)); }
+	virtual void Clear() = 0;
+//>>>>>>> ddnet/master
 
 	//
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual int MouseDoubleClick() = 0;
+	virtual const char* GetClipboardText() = 0;
+	virtual void SetClipboardText(const char *Text) = 0;
 
 	virtual void MouseRelative(float *x, float *y) = 0;
 };
@@ -92,6 +86,7 @@ class IEngineInput : public IInput
 public:
 	virtual void Init() = 0;
 	virtual int Update() = 0;
+	virtual void NextFrame() = 0;
 	virtual int VideoRestartNeeded() = 0;
 };
 

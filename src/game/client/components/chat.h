@@ -112,6 +112,8 @@ public:
 
 	void Say(int Team, const char *pLine, bool NoTrans = false);
 
+	void SayChat(const char *pLine);
+
 	virtual void OnReset();
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);

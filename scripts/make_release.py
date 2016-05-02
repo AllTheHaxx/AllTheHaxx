@@ -68,7 +68,7 @@ if include_data and not use_bundle:
 	copydir("data", package_dir)
 	if platform[:3] == "win":
 		shutil.copy("other/config_directory.bat", package_dir)
-		shutil.copy("SDL.dll", package_dir)
+		shutil.copy("SDL2.dll", package_dir)
 		shutil.copy("freetype.dll", package_dir)
 		if platform == "win32":
 		    shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
@@ -132,8 +132,8 @@ if use_bundle:
 	#shutil.copy("other/icons/Teeworlds.icns", clientbundle_resource_dir)
 	shutil.copy(name+exe_ext, clientbundle_bin_dir)
 	os.system("install_name_tool -change /opt/X11/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib " + binary_path)
-	os.system("install_name_tool -change /Library/Frameworks/SDL.framework/SDL @executable_path/../Frameworks/SDL.framework/SDL  " + binary_path)
-	os.system("cp -R /Library/Frameworks/SDL.framework " + clientbundle_framework_dir)
+	os.system("install_name_tool -change /Library/Frameworks/SDL2.framework/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2  " + binary_path)
+	os.system("cp -R /Library/Frameworks/SDL2.framework " + clientbundle_framework_dir)
 	os.system("cp /opt/X11/lib/libfreetype.6.dylib " + clientbundle_framework_dir)
 	file(os.path.join(clientbundle_content_dir, "Info.plist"), "w").write("""
 <?xml version="1.0" encoding="UTF-8"?>

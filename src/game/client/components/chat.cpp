@@ -159,6 +159,42 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+	{
+		const char *Text = Input()->GetClipboardText();
+		if(Text)
+		{
+			// if the text has more than one line, we send all lines except the last one
+			// the last one is set as in the text field
+			char Line[256];
+			int i, Begin = 0;
+			for(i = 0; i < str_length(Text); i++)
+			{
+				if(Text[i] == '\n')
+				{
+					int max = i - Begin + 1;
+					if(max > (int)sizeof(Line))
+						max = sizeof(Line);
+					str_copy(Line, Text + Begin, max);
+					Begin = i+1;
+					SayChat(Line);
+					while(Text[i] == '\n') i++;
+				}
+			}
+			int max = i - Begin + 1;
+			if(max > (int)sizeof(Line))
+				max = sizeof(Line);
+			str_copy(Line, Text + Begin, max);
+			Begin = i+1;
+			m_Input.Add(Line);
+		}
+	}
+
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
+	{
+		Input()->SetClipboardText(m_Input.GetString());
+	}
+
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
 		m_Mode = MODE_NONE;
@@ -295,7 +331,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 			m_PlaceholderLength = str_length(pSeparator)+str_length(pCompletionString);
 			m_OldChatStringLength = m_Input.GetLength();
-			m_Input.Set(aBuf);
+			m_Input.Set(aBuf); // TODO: Use Add instead
 			m_Input.SetCursorOffset(m_PlaceholderOffset+m_PlaceholderLength);
 			m_InputUpdate = true;
 		}
@@ -365,7 +401,7 @@ void CChat::EnableMode(int Team)
 		else
 			m_Mode = MODE_ALL;
 
-		Input()->ClearEvents();
+		Input()->Clear();
 		m_CompletionChosen = -1;
 		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
 	}
@@ -1181,3 +1217,29 @@ void CChat::LoadKeys(const char *pKeyName)
 	RSA_SSLV23_PADDING
 	RSA_NO_PADDING - raw RSA crypto
 */
+
+void CChat::SayChat(const char *pLine)
+{
+	if(!pLine || str_length(pLine) < 1)
+		return;
+
+	bool AddEntry = false;
+
+	if(m_LastChatSend+time_freq() < time_get())
+	{
+		Say(m_Mode == MODE_ALL ? 0 : 1, pLine);
+		AddEntry = true;
+	}
+	else if(m_PendingChatCounter < 3)
+	{
+		++m_PendingChatCounter;
+		AddEntry = true;
+	}
+
+	if(AddEntry)
+	{
+		CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry)+str_length(pLine)-1);
+		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
+		mem_copy(pEntry->m_aText, pLine, str_length(pLine));
+	}
+}

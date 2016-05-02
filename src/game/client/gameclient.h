@@ -105,8 +105,12 @@ protected:
 	CLayers m_Layers;
 	class CCollision m_Collision;
 	CUI m_UI;
-private:
-	void DispatchInput();
+//<<<! HEAD
+//private:
+//	void DispatchInput();
+//=======
+//>>>>>>> ddnet/master
+
 	void ProcessEvents();
 	void UpdatePositions();
 
@@ -306,6 +310,7 @@ public:
 	// hooks
 	virtual void OnConnected();
 	virtual void OnRender();
+	virtual void OnUpdate();
 	virtual void OnDummyDisconnect();
 	virtual void OnRelease();
 	virtual void OnInit();
