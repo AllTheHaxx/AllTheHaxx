@@ -2890,14 +2890,14 @@ void CClient::Run()
 		if(!g_Config.m_ClConsoleMode)
 			Sound()->Update();
 
-		// release focus
-		if(!m_pGraphics->WindowActive())
+		// release focus TODO::XXX::REIMPLEMENT
+	/*	if(!m_pGraphics->WindowActive())
 		{
 			if(m_WindowMustRefocus == 0)
 				Input()->MouseModeAbsolute();
 			m_WindowMustRefocus = 1;
 		}
-		else if (g_Config.m_DbgFocus && Input()->KeyPressed(KEY_ESCAPE))
+		else if (g_Config.m_DbgFocus && Input()->KeyPress(KEY_ESCAPE))
 		{
 			Input()->MouseModeAbsolute();
 			m_WindowMustRefocus = 1;
@@ -2912,13 +2912,13 @@ void CClient::Run()
 				m_WindowMustRefocus++;
 			}
 
-			if(m_WindowMustRefocus >= 3 || Input()->KeyPressed(KEY_MOUSE_1))
+			if(m_WindowMustRefocus >= 3 || Input()->KeyPress(KEY_MOUSE_1))
 			{
 				Input()->MouseModeRelative();
 				m_WindowMustRefocus = 0;
 			}
 		}
-
+*/
 		// panic quit button and restart
 		if(CtrlShiftKey(KEY_Q, LastQ))
 		{
@@ -3492,7 +3492,6 @@ void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, I
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
->>>>>>> ddnet/master
 }
 
 void CClient::RegisterCommands()

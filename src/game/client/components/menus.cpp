@@ -616,10 +616,10 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current,
 
 	if(UI()->MouseInside(&Rail) || Inside)
 	{
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
-			ReturnValue -= Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
-		else if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			ReturnValue += Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+			ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
 	}
 
 	return clamp(ReturnValue, 0.0f, 1.0f);
@@ -710,10 +710,10 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 
 	if(UI()->MouseInside(&Rail) || Inside)
 	{
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
-			ReturnValue += Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
-		else if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			ReturnValue -= Input()->KeyPressed(KEY_LSHIFT) ? 0.01f : 0.05f;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+			ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
 	}
 
 	return clamp(ReturnValue, 0.0f, 1.0f);

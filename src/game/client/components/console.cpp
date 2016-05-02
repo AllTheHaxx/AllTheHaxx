@@ -457,7 +457,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				}
 			}
 		}
-		else if(Event.m_Key == KEY_f)
+		else if(Event.m_Key == KEY_F)
 		{
 			if(m_CTRLPressed)
 			{
@@ -779,9 +779,9 @@ void CGameConsole::OnRender()
 	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*Screen.h;
 	{
 		int Buttons = 0;
-		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+		if(Input()->KeyPress(KEY_MOUSE_1)) Buttons |= 1;
+		if(Input()->KeyPress(KEY_MOUSE_2)) Buttons |= 2;
+		if(Input()->KeyPress(KEY_MOUSE_3)) Buttons |= 4;
 
 #if defined(__ANDROID__)
 		static int ButtonsOneFrameDelay = 0; // For Android touch input

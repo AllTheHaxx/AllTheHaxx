@@ -217,20 +217,20 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		Button.VSplitRight(20.0f, &Button, 0);
-		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect Ban Timeout"), g_Config.m_ClReconnectBanTimeout);
+		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect when server is full"), g_Config.m_ClReconnectFull);
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClReconnectBanTimeout = max(5,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectBanTimeout, &Button, g_Config.m_ClReconnectBanTimeout/120.0f)*120.0f));
+		g_Config.m_ClReconnectFull = max(5,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectFull, &Button, g_Config.m_ClReconnectFull/180.0f)*180.0f));
 
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		Button.VSplitRight(20.0f, &Button, 0);
-		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect Full Timeout"), g_Config.m_ClReconnectFullTimeout);
+		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect on connection timeout"), g_Config.m_ClReconnectTimeout);
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClReconnectFullTimeout = max(1,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectFullTimeout, &Button, g_Config.m_ClReconnectFullTimeout/120.0f)*120.0f));
+		g_Config.m_ClReconnectTimeout = max(1,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout/180.0f)*180.0f));
 
 #if defined(CONF_FAMILY_WINDOWS)
 		Left.HSplitTop(20.0f, 0, &Left);
@@ -974,7 +974,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static int s_GfxTextureQuality = g_Config.m_GfxTextureQuality;
 	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
-	static int s_GfxThreadedOld = g_Config.m_GfxThreadedOld;
+	//static int s_GfxThreadedOld = g_Config.m_GfxThreadedOld;
 
 	CUIRect ModeList;
 	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
@@ -1126,10 +1126,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Wait for GL commands to finish"), g_Config.m_GfxFinish, &Button, Localize("Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.")))
 		g_Config.m_GfxFinish ^= 1;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Threaded Graphics Mode"), g_Config.m_GfxThreadedOld, &Button, Localize("Enable this if the serverbrowser reloads in a strange, faltering way.\n~ Info for nerds: Uses 'CGraphics_Threaded' instead of 'CGraphics_SDL'")))
-		g_Config.m_GfxThreadedOld ^= 1;
+	//MainView.HSplitTop(3.0f, 0, &MainView);
+	//MainView.HSplitTop(20.0f, &Button, &MainView);
+	//if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Threaded Graphics Mode"), g_Config.m_GfxThreadedOld, &Button, Localize("Enable this if the serverbrowser reloads in a strange, faltering way.\n~ Info for nerds: Uses 'CGraphics_Threaded' instead of 'CGraphics_SDL'")))
+	//	g_Config.m_GfxThreadedOld ^= 1;
 
 
 	// check if the new settings require a restart
@@ -1141,8 +1141,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxVsync == g_Config.m_GfxVsync &&
 			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 			s_GfxTextureQuality == g_Config.m_GfxTextureQuality &&
-			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
-			s_GfxThreadedOld == g_Config.m_GfxThreadedOld)
+			s_GfxTextureCompression == g_Config.m_GfxTextureCompression)// &&
+			//s_GfxThreadedOld == g_Config.m_GfxThreadedOld)
 			m_NeedRestartGraphics = false;
 		else
 			m_NeedRestartGraphics = true;

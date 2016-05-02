@@ -134,9 +134,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 		// scroll through the tabs
 		if(UI()->MouseInside(&ButtonBox))
 		{
-			if(m_pClient->Input()->KeyDown(KEY_MOUSE_WHEEL_UP))
+			if(m_pClient->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 				m_pClient->IRC()->NextRoom();
-			else if(m_pClient->Input()->KeyDown(KEY_MOUSE_WHEEL_DOWN))
+			else if(m_pClient->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 				m_pClient->IRC()->PrevRoom();
 		}
 
@@ -155,7 +155,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		//	}
 
 			// close using middle mouse button
-			if(UI()->MouseInside(&Button) && m_pClient->Input()->KeyDown(KEY_MOUSE_3) &&
+			if(UI()->MouseInside(&Button) && m_pClient->Input()->KeyPress(KEY_MOUSE_3) &&
 					m_pClient->IRC()->CanCloseCom(m_pClient->IRC()->GetCom(i)))
 				m_pClient->IRC()->Part(g_Config.m_ClIRCLeaveMsg, m_pClient->IRC()->GetCom(i));
 

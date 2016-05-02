@@ -822,9 +822,10 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 	#endif
 }
 
+// TODO::XXX::REIMPLEMENT
 void CGraphicsBackend_SDL_OpenGL::HideWindow()
 {
-	// get window handle
+/*	// get window handle
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
 	if(!SDL_GetWMInfo(&info))
@@ -843,12 +844,12 @@ void CGraphicsBackend_SDL_OpenGL::HideWindow()
 		else
 			win = info.info.x11.wmwindow;
 		XUnmapWindow(dpy, win);
-	#endif
+	#endif*/
 }
 
 void CGraphicsBackend_SDL_OpenGL::UnhideWindow()
 {
-	// get window handle
+/*	// get window handle
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
 	if(!SDL_GetWMInfo(&info))
@@ -867,7 +868,7 @@ void CGraphicsBackend_SDL_OpenGL::UnhideWindow()
 		else
 			win = info.info.x11.wmwindow;
 		XMapWindow(dpy, win);
-	#endif
+	#endif*/
 }
 
 

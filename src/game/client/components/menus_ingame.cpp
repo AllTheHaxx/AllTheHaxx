@@ -278,7 +278,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 	Button.VSplitMid(&Button, &Button2);
 	Button.VSplitRight(10.0f, &Button, 0); Button2.VSplitLeft(10.0f, 0, &Button2);
 	static int s_AddEntryButton = 0;
-	if(DoButton_Menu(&s_AddEntryButton, Localize("Add"), 0, &Button) || (UI()->MouseInside(&MainView) && Input()->KeyDown(KEY_RETURN)))
+	if(DoButton_Menu(&s_AddEntryButton, Localize("Add"), 0, &Button) || (UI()->MouseInside(&MainView) && Input()->KeyPress(KEY_RETURN)))
 	{
 		CListboxItem n;
 		Items.add(n);
