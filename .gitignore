@@ -8,18 +8,18 @@ rsa
 src/game/generated
 update/
 
-crapnet??*
-config_store??*
-config_retrieve??*
-dilate??*
-fake_server??*
-map_resave??*
-map_version??*
-mastersrv??*
-packetgen??*
-tileset_border??*
-twping??*
-versionsrv??*
+crapnet*
+config_store*
+config_retrieve*
+dilate*
+fake_server*
+map_resave*
+map_version*
+mastersrv*
+packetgen*
+tileset_border*
+twping*
+versionsrv*
 
 *.txt
 *.bat
@@ -57,8 +57,8 @@ versionsrv??*
 
 autoexec.cfg
 
-DDNet??*
-AllTheHaxx??*
+DDNet*
+AllTheHaxx*
 
 other/luajit/LuaJIT-2.0.2/src/host/buildvm
 other/luajit/LuaJIT-2.0.2/src/host/buildvm_arch.h
