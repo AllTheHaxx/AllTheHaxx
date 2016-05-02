@@ -452,7 +452,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	TextRender()->Text(0, Motd.x+x, Motd.y+y, 16, m_pClient->m_pMotd->m_aServerMotd, (int)Motd.w);
 }
 
-bool CMenus::RenderServerControlServer(CUIRect MainView)
+void CMenus::RenderServerControlServer(CUIRect MainView)
 {
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
@@ -493,14 +493,12 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		NumVoteOptions++;
 	}
 
-	bool Call;
-	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, &Call);
+	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(s_CurVoteOption < Total)
 		m_CallvoteSelectedOption = aIndices[s_CurVoteOption];
-	return Call;
 }
 
-bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
+void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 {
 	int NumOptions = 0;
 	int Selected = -1;
@@ -546,10 +544,8 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		}
 	}
 
-	bool Call;
-	Selected = UiDoListboxEnd(&s_ScrollValue, &Call);
+	Selected = UiDoListboxEnd(&s_ScrollValue, 0);
 	m_CallvoteSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
-	return Call;
 }
 
 void CMenus::RenderServerControl(CUIRect MainView)
@@ -598,13 +594,12 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	MainView.HSplitBottom(ms_ButtonHeight + 5*2, &MainView, &Bottom);
 	Bottom.HMargin(5.0f, &Bottom);
 
-	bool Call = false;
 	if(s_ControlPage == 0)
-		Call = RenderServerControlServer(MainView);
+		RenderServerControlServer(MainView);
 	else if(s_ControlPage == 1)
-		Call = RenderServerControlKick(MainView, false);
+		RenderServerControlKick(MainView, false);
 	else if(s_ControlPage == 2)
-		Call = RenderServerControlKick(MainView, true);
+		RenderServerControlKick(MainView, true);
 
 	// vote menu
 	{
@@ -643,13 +638,10 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
 		static int s_CallVoteButton = 0;
-		if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || Call)
+		if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button))
 		{
 			if(s_ControlPage == 0)
-			{
 				m_pClient->m_pVoting->CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
-				SetActive(false);
-			}
 			else if(s_ControlPage == 1)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
