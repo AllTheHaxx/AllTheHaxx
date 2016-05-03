@@ -207,6 +207,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	// - SQL
 	CSql *m_pDatabase;
 
+#if defined(CONF_FAMILY_UNIX)
+	CFifo m_Fifo;
+#endif
+
 public:
 	IClient *Client() { return this; }
 	IEngine *Engine() { return m_pEngine; }

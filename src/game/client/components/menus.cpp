@@ -80,6 +80,7 @@ CMenus::CMenus()
 	m_HotbarActive = false;
 	m_HotbarWasActive = false;
 	m_UseMouseButtons = true;
+	m_MouseSlow = false;
 
 	m_EscapePressed = false;
 	m_EnterPressed = false;
@@ -573,6 +574,9 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current,
 		if(!UI()->MouseButton(0))
 			UI()->SetActiveItem(0);
 
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			m_MouseSlow = true;
+
 		float Min = pRect->y;
 		float Max = pRect->h-Handle.h;
 		float Cur = UI()->MouseY()-OffsetY;
@@ -643,6 +647,9 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 	{
 		if(!UI()->MouseButton(0))
 			UI()->SetActiveItem(0);
+
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			m_MouseSlow = true;
 
 		float Min = pRect->x;
 		float Max = pRect->w-Handle.w;
@@ -1358,6 +1365,8 @@ int CMenus::Render()
 {
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+
+	m_MouseSlow = false;
 
 	static bool s_First = true;
 	if(s_First)
@@ -2143,8 +2152,16 @@ bool CMenus::OnMouseMove(float x, float y)
 	m_MousePos.y = y;
 #else
 	UI()->ConvertMouseMove(&x, &y);
-	m_MousePos.x += x;
-	m_MousePos.y += y;
+	if(m_MouseSlow)
+	{
+		m_MousePos.x += x * 0.05f;
+		m_MousePos.y += y * 0.05f;
+	}
+	else
+	{
+		m_MousePos.x += x;
+		m_MousePos.y += y;
+	}
 #endif
 	if(m_MousePos.x < 0) m_MousePos.x = 0;
 	if(m_MousePos.y < 0) m_MousePos.y = 0;

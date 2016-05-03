@@ -887,7 +887,9 @@ void CServerBrowser::Update(bool ForceResort)
 			Packet.m_Address = Addr;
 			m_pNetClient->Send(&Packet);
 			if(g_Config.m_Debug)
-				dbg_msg("client_srvbrowse", "Count-Request sent to %d", i);
+			{
+				dbg_msg("client_srvbrowse", "count-request sent to %d", i);
+			}
 		}
 	}
 
@@ -931,8 +933,9 @@ void CServerBrowser::Update(bool ForceResort)
 			m_pNetClient->Send(&Packet);
 		}
 		if(g_Config.m_Debug)
-			dbg_msg("client_srvbrowse", "ServerCount: %d, requesting server list", m_MasterServerCount);
-
+		{
+			dbg_msg("client_srvbrowse", "servercount: %d, requesting server list", m_MasterServerCount);
+		}
 		m_LastPacketTick = 0;
 	}
 	else if(m_MasterServerCount > -1)
@@ -1194,7 +1197,7 @@ void CServerBrowser::LoadDDNet()
 
 				if (pSrv->type != json_object || pTypes->type != json_object || pName->type != json_string || pFlagID->type != json_integer)
 				{
-					dbg_msg("client_srvbrowse", "Invalid attributes");
+					dbg_msg("client_srvbrowse", "invalid attributes");
 					continue;
 				}
 

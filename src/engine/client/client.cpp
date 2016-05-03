@@ -45,7 +45,7 @@
 #include <engine/shared/protocol.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
-#include <engine/shared/fifoconsole.h>
+#include <engine/shared/fifo.h>
 
 #include <engine/client/irc.h>
 
@@ -840,7 +840,8 @@ void CClient::Disconnect()
 {
 	if(m_DummyConnected)
 		DummyDisconnect("> AllTheHaxx < ");
-	DisconnectWithReason("> AllTheHaxx < ");
+	if(m_State != IClient::STATE_OFFLINE)
+		DisconnectWithReason("> AllTheHaxx < ");
 }
 
 bool CClient::DummyConnected()
@@ -1395,7 +1396,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		{
 			m_pMasterServer->SetCount(ServerID, ServerCount);
 			if(g_Config.m_Debug)
-				dbg_msg("MasterCount", "Server %d got %d servers", ServerID, ServerCount);
+				dbg_msg("mastercount", "server %d got %d servers", ServerID, ServerCount);
 		}
 	}
 	// server list from master server
@@ -2565,7 +2566,7 @@ void CClient::Update()
 			FinishMapDownload();
 		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
 		{
-			dbg_msg("webdl", "HTTP failed falling back to gameserver.");
+			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
 			SendMapRequest();
 		}
@@ -2783,6 +2784,9 @@ void CClient::Run()
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
+#endif
 
 	bool LastD = false;
 	bool LastQ = false;
@@ -3020,6 +3024,11 @@ void CClient::Run()
 		//	;
 	
 		LUA_FIRE_EVENT("ResumeThreads");
+
+#if defined(CONF_FAMILY_UNIX)
+		m_Fifo.Update();
+#endif
+
 		// beNice
 		if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);
@@ -3039,6 +3048,10 @@ void CClient::Run()
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
 	}
+
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Shutdown();
+#endif
 
 	GameClient()->OnShutdown();
 	Disconnect();
@@ -3718,10 +3731,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pClient->Engine()->InitLogfile();
 
-#if defined(CONF_FAMILY_UNIX)
-	FifoConsole *fifoConsole = new FifoConsole(pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
-#endif
-
 #if defined(CONF_FAMILY_WINDOWS)
 	if(g_Config.m_ClHideConsole)
 		FreeConsole();
@@ -3733,10 +3742,6 @@ int main(int argc, const char **argv) // ignore_convention
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
-
-#if defined(CONF_FAMILY_UNIX)
-	delete fifoConsole;
-#endif
 
 	// write down the config and quit
 	pConfig->Save();
