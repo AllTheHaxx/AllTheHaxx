@@ -827,50 +827,52 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 // TODO::XXX::REIMPLEMENT
 void CGraphicsBackend_SDL_OpenGL::HideWindow()
 {
-/*	// get window handle
+	// get window handle
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
-	if(!SDL_GetWMInfo(&info))
+	if(SDL_GetWindowWMInfo(m_pWindow, &info) != SDL_TRUE)
 	{
 		dbg_msg("gfx", "unable to obtain window handle");
+		dbg_msg("gfx", "SDL ERROR: %s", SDL_GetError());
 		return;
 	}
 
-	#if defined(CONF_FAMILY_WINDOWS)
-		ShowWindow(info.window, SW_HIDE);
-	#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
-		Display *dpy = info.info.x11.display;
+//#if defined(CONF_FAMILY_WINDOWS)
+		SDL_HideWindow(m_pWindow);
+//#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
+/*		Display *dpy = info.info.x11.display;
 		Window win;
 		if(m_pScreenSurface->flags & SDL_FULLSCREEN)
 			win = info.info.x11.fswindow;
 		else
 			win = info.info.x11.wmwindow;
-		XUnmapWindow(dpy, win);
-	#endif*/
+		XUnmapWindow(dpy, win);*/
+//#endif
 }
 
 void CGraphicsBackend_SDL_OpenGL::UnhideWindow()
 {
-/*	// get window handle
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	if(!SDL_GetWMInfo(&info))
-	{
-		dbg_msg("gfx", "unable to obtain window handle");
-		return;
-	}
+	// get window handle
+	/*	SDL_SysWMinfo info;
+		SDL_VERSION(&info.version);
+		if(SDL_GetWindowWMInfo(m_pWindow, &info) != SDL_TRUE)
+		{
+			dbg_msg("gfx", "unable to obtain window handle");
+			dbg_msg("gfx", "SDL ERROR: %s", SDL_GetError());
+			return;
+		}*/
 
-	#if defined(CONF_FAMILY_WINDOWS)
-		ShowWindow(info.window, SW_RESTORE);
-	#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
-		Display *dpy = info.info.x11.display;
+//#if defined(CONF_FAMILY_WINDOWS)
+		SDL_ShowWindow(m_pWindow);
+//#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
+/*		Display *dpy = info.info.x11.display;
 		Window win;
 		if(m_pScreenSurface->flags & SDL_FULLSCREEN)
 			win = info.info.x11.fswindow;
 		else
 			win = info.info.x11.wmwindow;
-		XMapWindow(dpy, win);
-	#endif*/
+		XMapWindow(dpy, win);*/
+//#endif
 }
 
 
