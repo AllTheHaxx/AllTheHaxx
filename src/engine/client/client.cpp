@@ -357,6 +357,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 		m_LastDummyConnectTime = 0;
 
 	m_DDNetSrvListTokenSet = false;
+	m_ReconnectTime = 0;
+
 
 	m_pDatabase = new CSql();
 
@@ -705,7 +707,17 @@ void CClient::SetState(int s)
 	}
 	m_State = s;
 	if(Old != s)
+	{
 		GameClient()->OnStateChange(m_State, Old);
+
+		if(s == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
+		{
+			if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
+				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
+			else if(g_Config.m_ClReconnectTimeout > 0 && str_find_nocase(ErrorString(), "Timeout"))
+				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
+		}
+	}
 }
 
 // called when the map is loaded and we should init for a new round
@@ -2588,6 +2600,12 @@ void CClient::Update()
 	// update gameclient
 	if(!m_EditorActive)
 		GameClient()->OnUpdate();
+
+	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
+	{
+		Connect(g_Config.m_UiServerAddress);
+		m_ReconnectTime = 0;
+	}
 }
 
 void CClient::VersionUpdate()
