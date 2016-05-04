@@ -2139,6 +2139,9 @@ bool CMenus::OnMouseMove(float x, float y)
 
 bool CMenus::OnInput(IInput::CEvent e)
 {
+	if(m_MouseUnlocked)
+		return false;
+
 	m_LastInput = time_get();
 
 	// special handle esc and enter for popup purposes
@@ -2457,7 +2460,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	r.h = h;
 	UI()->DoLabel(&r, Localize(pCaption), 32.0f, 0, -1);
 
-	if (total>0)
+	if (total > 0 )
 	{
 		float Percent = current/(float)total;
 		Graphics()->TextureSet(-1);
@@ -2487,5 +2490,11 @@ void CMenus::ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData)
 	CMenus *pSelf = (CMenus *)pUserData;
 
 	if(pResult->GetInteger(0) != 0)
-		pSelf->Input()->MouseModeAbsolute();
+	{
+		if(pSelf->m_MouseUnlocked ^= true)
+			pSelf->Input()->MouseModeAbsolute();
+		else
+			pSelf->Input()->MouseModeRelative();
+
+	}
 }
