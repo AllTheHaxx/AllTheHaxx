@@ -11,12 +11,16 @@ class CSpectator : public CComponent
 	enum
 	{
 		NO_SELECTION=-3,
+
+		SORT_BY_SCORE=0,
+		SORT_BY_NAME
 	};
 
 	bool m_Active;
 	bool m_WasActive;
 
 	int m_SelectedSpectatorID;
+	int m_Sortation;
 	vec2 m_SelectorMouse;
 
 	float m_OldMouseX;

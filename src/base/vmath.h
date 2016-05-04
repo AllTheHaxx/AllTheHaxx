@@ -206,10 +206,10 @@ template<typename T>
 class vector4_base
 {
 public:
-	union { T x,r; };
-	union { T y,g; };
-	union { T z,b; };
-	union { T w,a; };
+	union { T x,   r; };
+	union { T y,   g; };
+	union { T z,u, b; };
+	union { T w,v, a; };
 
 	vector4_base() {}
 	vector4_base(T nx, T ny, T nz, T nw)
