@@ -10,12 +10,14 @@
 class CAStar : public CComponent
 {
 	bool m_MapReloaded;
+
 protected:
 	class CCollision *Collision() const { return m_pClient->Collision(); }
-	class IClient *Client() { return m_pClient->Client(); }
+	class IClient *Client() const { return m_pClient->Client(); }
 
-	int GetStart();
-	int GetFinish();
+	int GetTileAreaCenter(int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
+	int GetStart() { return GetTileAreaCenter(TILE_BEGIN); }
+	int GetFinish() { return GetTileAreaCenter(TILE_END); }
 	void FillGrid(bool NoFreeze);
 	void BuildPath();
 

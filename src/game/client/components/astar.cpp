@@ -30,7 +30,8 @@ CAStar::CAStar()
 
 CAStar::~CAStar()
 {
-	mem_free(m_pField);
+	if(m_pField)
+		mem_free(m_pField);
 }
 
 void CAStar::OnReset() // is being called right after OnMapLoad()
@@ -40,28 +41,29 @@ void CAStar::OnReset() // is being called right after OnMapLoad()
 	m_PathFound = false;
 }
 
-void CAStar::OnPlayerDeath()
+void CAStar::OnPlayerDeath() // TODO!! FIX THIS!!
 {
 	if(!m_PathFound || !g_Config.m_ClPathFinding)
 		return;
 
 	// fitness calculation
-	int ClosestNode = 1337*1337;
+	float ClosestNode = -1.0f;
 	int ClosestID = -1;
 	for(int i = m_Path.size(); i >= 0; i--)
 	{
-		// better make a SAFE CAAAAAAALLLL
-		if(distance(m_Path[i], m_LastPos) < ClosestNode && !Collision()->IntersectLine(m_Path[i], m_LastPos, 0x0, 0x0))
+		//dbg_msg("wtf", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].x, m_Path[i].y);
+		if((distance<float>(m_LastPos, m_Path[i]) < ClosestNode || ClosestNode < 0.0f) && !Collision()->IntersectLine(m_LastPos, m_Path[i], 0x0, 0x0))
 		{
-			ClosestNode = distance(m_Path[i], m_LastPos);
+			ClosestNode = distance<float>(m_LastPos, m_Path[i]);
 			ClosestID = i;
+			//dbg_msg("FOUND NEW CLOSEST NODE", "i=%i with dist=%.2f", ClosestID, ClosestNode);
 		}
 	}
 
 	if(g_Config.m_ClNotifications && ClosestID != -1)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i (%.2f%%)", m_Path.size()-ClosestID, (((float)m_Path.size()-(float)ClosestID)/(float)m_Path.size())*100.0f);
+		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", m_Path.size()-ClosestID, m_Path.size(), ((float)(m_Path.size()-ClosestID)/(float)m_Path.size())*100.0f);
 		m_pClient->m_pHud->PushNotification(aBuf);
 	}
 }
@@ -114,68 +116,69 @@ void CAStar::OnRender()
 	Graphics()->QuadsEnd();
 }
 
-int CAStar::GetStart()
+int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
 {
-	size_t NumTiles = 0;
-	int aTiles[128];
+	if(x < 0 || y < 0)
+		return -1;
 
-	for(int y = 0; y < Collision()->GetHeight(); y++)
+	if(w < 1 || w > Collision()->GetWidth()-x)
+		w = Collision()->GetWidth()-x;
+	if(h < 1 || h > Collision()->GetHeight()-y)
+		h = Collision()->GetHeight()-y;
+
+	size_t NumTiles = 0;
+	//int *aTiles = (int*)mem_alloc((w-x)*(h-y)*sizeof(int), 0); // <--that gonna be better but unsafer (leakyleak :0)
+	int aTiles[255];
+
+	//dbg_msg("path/tilefinder", "Searching for tile=%i in AREA=(x%02i y%02i w%02i h%02i)", TileID, x, y, w, h);
+	for(int iy=y; iy < h; iy++)
 	{
-		for(int x = 0; x < Collision()->GetWidth(); x++)
+		for(int ix=x; ix < w; ix++)
 		{
-			// hack. but apperently this can indeed happen
-			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_BEGIN)
-				aTiles[NumTiles++] = Collision()->GetIndex(x*32, y*32);
-			else
-				continue;
+			if(Collision()->GetTileRaw(ix*32, iy*32) == TileID)
+			{
+				//dbg_msg("path/tilefinder", "Found: tile=%i at x=%i y=%i", TileID, ix, iy);
+				aTiles[NumTiles++] = iy*w+ix;
+			}
 		}
 	}
 
-	if(NumTiles)
-		return aTiles[NumTiles/2]; // some tile from the middle
-	else
-		return -1;
+	int middle = NumTiles > 0 ? aTiles[NumTiles/2] : -1;
+	//mem_free(aTiles);
+	return middle;
 }
 
-int CAStar::GetFinish()
-{
-	size_t NumTiles = 0;
-	int aTiles[128];
-
-	for(int y = 0; y < Collision()->GetHeight(); y++)
-	{
-		for(int x = 0; x < Collision()->GetWidth(); x++)
-		{
-			// hack. but apperently this can indeed happen
-			if(NumTiles < sizeof(aTiles)/sizeof(int) && x < Collision()->GetWidth() && y < Collision()->GetHeight() && Collision()->GetIndex(x, y) == TILE_END)
-				aTiles[NumTiles++] = Collision()->GetIndex(x*32, y*32);
-			else
-				continue;
-		}
-	}
-
-	if(NumTiles)
-		return aTiles[NumTiles/2]; // some tile from the middle
-	else
-		return -1;
-}
 
 void CAStar::BuildPath()
 {
-//#if defined(CONF_FAMILY_UNIX)
+	if(!g_Config.m_ClPathFinding)
+		return;
+
+	int SolutionLength = -1;
+	int *pSolution = 0;
 	int Start = GetStart();
 	int Finish = GetFinish();
-	int SolutionLength = 0;
-	int *pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
-	dbg_msg("path", "start=%i finish=%i solution length=%i", Start, Finish, SolutionLength);
 
-	if(SolutionLength == -1) // try again ignoring freeze
+/*	if(Start == -1)
+		dbg_msg("path", "didn't find start tile");
+	if(Finish == -1)
+		dbg_msg("path", "didn't find finish tile");
+*/
+	if(Start >= 0 && Finish >= 0)
+	{
+		FillGrid(true);
+		pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
+		dbg_msg("path", "start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
+	}
+
+	if(SolutionLength == -1) // try again, ignoring freeze
 	{
 		FillGrid(false);
 		pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
+		dbg_msg("path", "ignored freeze: start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
 	}
 
-	if(g_Config.m_ClNotifications && g_Config.m_ClPathFinding)
+	if(g_Config.m_ClNotifications)
 	{
 		if(SolutionLength != -1)
 		{
@@ -209,10 +212,9 @@ void CAStar::BuildPath()
 		}
 		free(pSolution);
 	}
-//#endif
 }
 
-void CAStar::FillGrid(bool NoFreeze)
+void CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
 {
 	if(m_pField)
 		mem_free(m_pField);
@@ -222,10 +224,8 @@ void CAStar::FillGrid(bool NoFreeze)
 	{
 		for(int x = 0; x < Collision()->GetWidth(); x++)
 		{
-			if(Collision()->CheckPoint(x * 32, y * 32) || (NoFreeze && Collision()->GetIndex(x, y) == TILE_FREEZE))
-				m_pField[Collision()->GetIndex(x*32, y*32)] = 0;
-			else
-				m_pField[Collision()->GetIndex(x*32, y*32)] = 1;
+			m_pField[y*Collision()->GetWidth()+x] =
+					(Collision()->CheckPoint(x * 32, y * 32) || (NoFreeze && Collision()->GetTileRaw(x*32, y*32) == TILE_FREEZE)) ? 0 : 1;
 		}
 	}
 }
