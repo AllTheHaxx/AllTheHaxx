@@ -72,7 +72,7 @@ void CHud::RenderGameTimer()
 		if(Time >= 60*60*24) // 60sec x 60min x 24h = 1 day
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d:%02d", Time/60/60/24, (Time%86400)/3600, (Time/60)%60, (Time)%60);
 		else if(Time >= 60*60) // 60sec x 60 min = 1 hour
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time/60/24, (Time/60)%60, Time%60);
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d:%02d", Time/60/60, (Time/60)%60, Time%60);
 		else // only min:sec
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time/60, Time%60);
 
