@@ -151,8 +151,11 @@ int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
 
 void CAStar::BuildPath()
 {
-	if(!g_Config.m_ClPathFinding)
-		return;
+	{
+		CServerInfo Info; Client()->GetServerInfo(&Info);
+		if(!g_Config.m_ClPathFinding || !(IsRace(&Info) || IsDDNet(&Info)))
+			return;
+	}
 
 	int SolutionLength = -1;
 	int *pSolution = 0;
