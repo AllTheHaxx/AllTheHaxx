@@ -731,7 +731,7 @@ void CGraphicsBackend_SDL_OpenGL::Minimize()
 
 void CGraphicsBackend_SDL_OpenGL::Maximize()
 {
-	// TODO: SDL
+	SDL_MaximizeWindow(m_pWindow);
 }
 
 bool CGraphicsBackend_SDL_OpenGL::Fullscreen(bool State)
