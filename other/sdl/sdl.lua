@@ -33,11 +33,6 @@ SDL = {
 			if option.use_pkgconfig == true then
 				settings.cc.flags:Add("`pkg-config sdl2 --cflags`")
 				settings.link.flags:Add("`pkg-config sdl2 --libs`")
-			else
-				settings.cc.includes:Add(SDL.basepath .. "/include")
-				settings.link.libpath:Add(SDL.basepath .. "/unix/x86_64")
-				settings.link.libs:Add("SDL2")
-				settings.link.libs:Add("SDL2main")
 			end
 
 			if option.use_osxframework == true then
@@ -46,6 +41,7 @@ SDL = {
 			end
 
 			if option.use_winlib > 0 then
+				settings.cc.includes:Add(SDL.basepath .. "/include")
 				if option.use_winlib == 32 then
 					settings.link.libpath:Add(SDL.basepath .. "/lib32")
 				else
