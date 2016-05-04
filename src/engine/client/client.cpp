@@ -2827,7 +2827,7 @@ void CClient::Run()
 			{
 				m_pGraphics->HideWindow();
 				
-				if(strncmp(Info.m_aGameType, "DD", 2) == 0)
+				if(str_comp_num(Info.m_aGameType, "DD", 2) == 0)
 				{
 					//eye emote
 					CNetMsg_Cl_Say Msg;
@@ -2840,7 +2840,7 @@ void CClient::Run()
 			{
 				m_pGraphics->UnhideWindow();
 				
-				if(strncmp(Info.m_aGameType, "DD", 2) == 0)
+				if(str_comp_num(Info.m_aGameType, "DD", 2) == 0)
 				{
 					//eye emote
 					CNetMsg_Cl_Say Msg;
