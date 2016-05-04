@@ -49,7 +49,8 @@ public:
 	bool m_Restarting; // set this to make the client restart on the next quit
 
 	int m_LocalIDs[2];
-	char m_aNews[NEWS_SIZE];
+	//char m_aNews[NEWS_SIZE]; // ATH NEWS ARE IN CUpdater!!
+	char m_aNewsDDNet[NEWS_SIZE];
 	int64 m_ReconnectTime;
 
 	CNetObj_PlayerInput m_DummyInput;
@@ -186,6 +187,7 @@ public:
 
 	//
 	virtual const char *ErrorString() = 0;
+	virtual const char *News() = 0;
 	virtual const char *LatestVersion() = 0;
 	virtual bool ConnectionProblems() = 0;
 

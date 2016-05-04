@@ -3,6 +3,7 @@
 
 #include <engine/updater.h>
 #include <engine/fetcher.h>
+#include <versionsrv/versionsrv.h>
 #include <map>
 #include <string>
 
@@ -52,7 +53,9 @@ class CUpdater : public IUpdater
 	bool m_ServerUpdate;
 
 	bool m_CheckOnly;
+
 	char m_aVersion[10];
+	char m_aNews[NEWS_SIZE];
 
 	std::map<std::string, bool> m_FileJobs;
 	std::map<std::string, std::map<std::string, std::string> > m_ExternalFiles; // source - dlpath, dest
@@ -74,6 +77,7 @@ public:
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
 	const char *GetLatestVersion() const { return m_aVersion; }
+	const char *GetNews() const { return m_aNews; }
 
 	int GetCurrentState() const { return m_State; };
 	char *GetCurrentFile() { return m_Status; };

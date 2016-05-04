@@ -1267,29 +1267,10 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 	if(m_VersionInfo.m_State == CVersionInfo::STATE_READY && net_addr_comp(&pPacket->m_Address, &m_VersionInfo.m_VersionServeraddr.m_Addr) == 0)
 	{
 		// version info - depreciated
-/*		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
+		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_VERSION, sizeof(VERSIONSRV_VERSION)) == 0)
 		{
-			char *pVersionData = (char*)pPacket->m_pData + sizeof(VERSIONSRV_VERSION);
-			int aCurVersion[] = {0,0,0}, aNewVersion[] = {0,0,0};
-			sscanf(pVersionData, "%d.%d.%d", aNewVersion, aNewVersion+1, aNewVersion+2);
-			sscanf(GAME_RELEASE_VERSION, "%d.%d.%d", aCurVersion, aCurVersion+1, aCurVersion+2);
-			bool VersionMatch = mem_comp(aCurVersion, aNewVersion, sizeof aCurVersion) >= 0;
-
-			char aVersion[sizeof(GAME_RELEASE_VERSION)];
-			str_copy(aVersion, pVersionData, sizeof(aVersion));
-
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "version does %s (%s)",
-				VersionMatch ? "match" : "NOT match",
-				aVersion);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/version", aBuf);
-
-			// assume version is out of date when version-data doesn't match
-			if(!VersionMatch)
-				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
-
-			// request the news
+			// request the ddnet news
 			CNetChunk Packet;
 			mem_zero(&Packet, sizeof(Packet));
 			Packet.m_ClientID = -1;
@@ -1301,7 +1282,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			RequestDDNetSrvList();
 
-			// request the map version list now
+			// request the map version list
 			mem_zero(&Packet, sizeof(Packet));
 			Packet.m_ClientID = -1;
 			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
@@ -1310,20 +1291,20 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Packet.m_Flags = NETSENDFLAG_CONNLESS;
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 		}
-*/
+
 		// news
 		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
 		{
-			if (mem_comp(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
-				g_Config.m_UiPage = CMenus::PAGE_NEWS;
+			if (mem_comp(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
+				g_Config.m_UiPage = CMenus::PAGE_NEWS_DDNET;
 
-			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
+			mem_copy(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
 
 			IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 			if (newsFile)
 			{
-				io_write(newsFile, m_aNews, sizeof(m_aNews));
+				io_write(newsFile, m_aNewsDDNet, sizeof(m_aNewsDDNet));
 				io_close(newsFile);
 			}
 		}
@@ -2692,7 +2673,7 @@ void CClient::InitInterfaces()
 	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if (newsFile)
 	{
-		io_read(newsFile, m_aNews, NEWS_SIZE);
+		io_read(newsFile, m_aNewsDDNet, NEWS_SIZE);
 		io_close(newsFile);
 	}
 }

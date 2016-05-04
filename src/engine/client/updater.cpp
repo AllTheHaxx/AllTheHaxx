@@ -5,6 +5,7 @@
 #include <engine/client.h>
 #include <engine/external/json-parser/json.h>
 #include <game/version.h>
+#include <game/client/components/menus.h>
 
 #include <stdlib.h> // system
 
@@ -50,7 +51,45 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(*a == '/')
 			b = a + 1;
 	b = b ? b : pTask->Dest();
-	if(!str_comp(b, "update.json"))
+	if(!str_comp(b, "ath-news.txt"))
+	{
+		// dig out whether ATH news have been updated
+
+		char aOldNews[NEWS_SIZE] = {0};
+		char aNewsBackupPath[512];
+
+		// read the old news
+		IOHANDLE newsFile = pUpdate->m_pStorage->OpenFile("ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+		if(newsFile)
+		{
+			io_read(newsFile, aOldNews, NEWS_SIZE);
+			io_close(newsFile);
+			newsFile = NULL;
+		}
+
+		// read the new news
+		newsFile = io_open("update/ath-news.txt", IOFLAG_READ);
+		if(newsFile)
+		{
+			io_read(newsFile, pUpdate->m_aNews, NEWS_SIZE);
+			io_close(newsFile);
+			newsFile = NULL;
+		}
+
+		// dig out whether news have been updated
+		if(str_comp(aOldNews, pUpdate->m_aNews))
+		{
+			g_Config.m_UiPage = CMenus::PAGE_NEWS_ATH;
+
+			// backup the new news file
+			newsFile = pUpdate->m_pStorage->OpenFile("ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+			io_write(newsFile, pUpdate->m_aNews, sizeof(m_aNews));
+			io_flush(newsFile);
+			io_close(newsFile);
+			newsFile = NULL;
+		}
+	}
+	else if(!str_comp(b, "update.json"))
 	{
 		if(pTask->State() == CFetchTask::STATE_DONE)
 			pUpdate->m_State = GOT_MANIFEST;
@@ -251,6 +290,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 		m_State = GETTING_MANIFEST;
 		dbg_msg("updater", "refreshing version info");
 		FetchFile("~stuffility/master", "update.json");
+		FetchFile("~stuffility/master", "ath-news.txt");
 	}
 	else
 		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step

@@ -811,9 +811,9 @@ int CMenus::RenderMenubar(CUIRect r)
 		// offline menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static int s_NewsButton=0;
-		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
+		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS_ATH || m_ActivePage==PAGE_NEWS_DDNET, &Button, CUI::CORNER_T))
 		{
-			NewPage = PAGE_NEWS;
+			NewPage = PAGE_NEWS_ATH;
 			m_DoubleClickIndex = -1;
 		}
 		Box.VSplitLeft(10.0f, 0, &Box);
@@ -1269,12 +1269,31 @@ void CMenus::RenderNews(CUIRect MainView)
 	// Show news once after each version or news update
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
-	MainView.HSplitTop(15.0f, 0, &MainView);
+	// tabbar
+	{
+		CUIRect Tab1, Tab2;
+		MainView.HSplitTop(20.0f, &Tab1, &MainView);
+		Tab1.VSplitMid(&Tab1, &Tab2);
+		static int s_ButtonNewsATH = 0;
+		if(DoButton_MenuTab(&s_ButtonNewsATH, "AllTheHaxx News", g_Config.m_UiPage == PAGE_NEWS_ATH, &Tab1, CUI::CORNER_L, vec4(0.2f, 0.2f, 0.7f, ms_ColorTabbarActive.a), vec4(0.2f, 0.2f, 0.7f, ms_ColorTabbarInactive.a)))
+			g_Config.m_UiPage = PAGE_NEWS_ATH;
+
+		static int s_ButtonNewsDDNet = 0;
+		if(DoButton_MenuTab(&s_ButtonNewsDDNet, "DDNet News", g_Config.m_UiPage == PAGE_NEWS_DDNET, &Tab2, CUI::CORNER_R, vec4(0.2f, 0.2f, 0.7f, ms_ColorTabbarActive.a), vec4(0.2f, 0.2f, 0.7f, ms_ColorTabbarInactive.a)))
+			g_Config.m_UiPage = PAGE_NEWS_DDNET;
+	}
+
+	MainView.HSplitTop( 15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
 
 	CUIRect Label;
 
-	std::istringstream f(Client()->m_aNews);
+	std::istringstream f;
+	if(g_Config.m_UiPage == PAGE_NEWS_ATH)
+		f.str(Client()->News());
+	else if(g_Config.m_UiPage == PAGE_NEWS_DDNET)
+		f.str(Client()->m_aNewsDDNet);
+
 	std::string line;
 	while (std::getline(f, line))
 	{
@@ -1432,7 +1451,7 @@ int CMenus::Render()
 		RenderMenubar(TabBar);
 
 		// make sure the ui page didn't go wild
-		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
+		if(g_Config.m_UiPage < PAGE_NEWS_ATH || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
 			if(m_pClient->ServerBrowser()->CacheExists())
 				m_pClient->ServerBrowser()->LoadCache();
@@ -1466,7 +1485,7 @@ int CMenus::Render()
 			else if(m_GamePage == PAGE_BROWSER)
 				RenderInGameBrowser(MainView);
 		}
-		else if(g_Config.m_UiPage == PAGE_NEWS)
+		else if(g_Config.m_UiPage == PAGE_NEWS_ATH || g_Config.m_UiPage == PAGE_NEWS_DDNET)
 			RenderNews(MainView);
 		else if(g_Config.m_UiPage == PAGE_INTERNET)
 			RenderServerbrowser(MainView);

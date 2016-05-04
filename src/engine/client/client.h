@@ -256,6 +256,7 @@ public:
 	virtual int *GetInput(int Tick);
 	virtual bool InputExists(int Tick);
 
+	const char *News() { return m_Updater.GetNews(); }
 	const char *LatestVersion();
 	void VersionUpdate();
 	void CheckVersionUpdate();
