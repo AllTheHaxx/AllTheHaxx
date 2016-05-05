@@ -3068,11 +3068,23 @@ void CClient::Run()
 	}
 	
 	if(m_pInputThread)
+	{
 #if defined(CONF_FAMILY_WINDOWS)
 		FreeConsole();
 #else
 		thread_destroy(m_pInputThread);
 #endif
+	}
+
+	if(m_Updater.GetCurrentState() == IUpdater::CLEAN)
+	{
+		// do cleanups - much hack.
+#if defined(CONF_FAMILY_UNIX)
+		system("rm -rf update");
+#elif defined(CONF_FAMILY_WINDOWS)
+		system("rd update /S /Q");
+#endif
+	}
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
@@ -3751,13 +3763,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
-
-	// do cleanups - much hack.
-#if defined(CONF_FAMILY_UNIX)
-	system("rm -rf update");
-#elif defined(CONF_FAMILY_WINDOWS)
-	system("rd update /S /Q");
-#endif
 
 	if(pClient->m_Restarting)
 		shell_execute(argv[0]);
