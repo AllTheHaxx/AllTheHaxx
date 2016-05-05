@@ -2765,7 +2765,8 @@ void CClient::Run()
 	m_Lua.Init(this, Storage());
 	m_Lua.SetGameClient(GameClient());
 
-	m_pInputThread = thread_init(InputThread, this);
+	if((m_pInputThread = thread_init(InputThread, this)))
+		thread_detach(m_pInputThread);
 
 	// connect to the server if wanted
 	/*
@@ -2886,6 +2887,7 @@ void CClient::Run()
 		// update input
 		if(Input()->Update())
 			break;	// SDL_QUIT
+
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		Updater()->Update();
 #endif
@@ -2894,7 +2896,7 @@ void CClient::Run()
 		if(!g_Config.m_ClConsoleMode)
 			Sound()->Update();
 
-		// release focus TODO::XXX::REIMPLEMENT
+		// release focus TODO::XXX::REIMPLEMENT (if this is needed)
 	/*	if(!m_pGraphics->WindowActive())
 		{
 			if(m_WindowMustRefocus == 0)
@@ -3065,9 +3067,11 @@ void CClient::Run()
 		SDL_Quit();
 	}
 	
-#if defined(CONF_FAMILY_WINDOWS)
 	if(m_pInputThread)
+#if defined(CONF_FAMILY_WINDOWS)
 		FreeConsole();
+#else
+		thread_destroy(m_pInputThread);
 #endif
 }
 
@@ -3747,6 +3751,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// write down the config and quit
 	pConfig->Save();
 
+	fs_remove("update");
+
 	if(pClient->m_Restarting)
 		shell_execute(argv[0]);
 
@@ -3846,7 +3852,7 @@ void CClient::RequestDDNetSrvList()
 	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 }
 
-void CClient::InputThread(void * pUser)
+void CClient::InputThread(void *pUser)
 {
 	CClient *pSelf = (CClient *)pUser;
 	char aInput[64];
