@@ -59,7 +59,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		char aNewsBackupPath[512];
 
 		// read the old news
-		IOHANDLE newsFile = pUpdate->m_pStorage->OpenFile("ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+		IOHANDLE newsFile = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
 		if(newsFile)
 		{
 			io_read(newsFile, aOldNews, NEWS_SIZE);
@@ -82,14 +82,14 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			g_Config.m_UiPage = CMenus::PAGE_NEWS_ATH;
 
 			// backup the new news file
-			newsFile = pUpdate->m_pStorage->OpenFile("ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+			newsFile = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
 			io_write(newsFile, pUpdate->m_aNews, sizeof(m_aNews));
 			io_flush(newsFile);
 			io_close(newsFile);
 			newsFile = NULL;
 		}
 	}
-	else if(!str_comp(b, "update2.json"))
+	else if(!str_comp(b, "update.json"))
 	{
 		if(pTask->State() == CFetchTask::STATE_DONE)
 			pUpdate->m_State = GOT_MANIFEST;
@@ -212,7 +212,7 @@ void CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update2.json", aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		char aBuf[4096*4];
@@ -299,7 +299,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 	{
 		m_State = GETTING_MANIFEST;
 		dbg_msg("updater", "refreshing version info");
-		FetchFile("~stuffility/master", "update2.json");
+		FetchFile("~stuffility/master", "update.json");
 		FetchFile("~stuffility/master", "ath-news.txt");
 	}
 	else
@@ -309,7 +309,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 void CUpdater::PerformUpdate()
 {
 	m_State = PARSING_UPDATE;
-	dbg_msg("updater", "parsing update2.json");
+	dbg_msg("updater", "parsing update.json");
 	ParseUpdate();
 	if(m_CheckOnly)
 	{

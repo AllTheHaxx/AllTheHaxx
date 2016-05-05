@@ -689,7 +689,7 @@ void CServerBrowser::SaveCache()
 	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 
 	// open file
-	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(!File)
 	{
 		dbg_msg("browser", "failed to open cache file for writing");
@@ -739,7 +739,7 @@ bool CServerBrowser::LoadCache()
 	m_ServerlistType = IServerBrowser::TYPE_INTERNET;
 
 	// open file
-	IOHANDLE File = pStorage->OpenFile("serverlistcache", IOFLAG_READ, IStorageTW::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!File)
 	{
 		dbg_msg("browser", "opening cache file failed.");
@@ -1171,7 +1171,7 @@ void CServerBrowser::LoadDDNet()
 
 	// load ddnet server list
 	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
-	IOHANDLE File = pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_ALL);
 
 	if(File)
 	{

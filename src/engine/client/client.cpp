@@ -1301,7 +1301,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			mem_copy(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
 
-			IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+			IOHANDLE newsFile = m_pStorage->OpenFile("tmp/cache/ddnet-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 			if (newsFile)
 			{
 				io_write(newsFile, m_aNewsDDNet, sizeof(m_aNewsDDNet));
@@ -1331,7 +1331,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				{
 					bool ListChanged = true;
 
-					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_SAVE);
+					IOHANDLE File = m_pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 					if (File)
 					{
 						char aBuf2[16384];
@@ -1344,7 +1344,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 					// decompression successful, write plain file
 					if (ListChanged)
 					{
-						IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+						IOHANDLE File = m_pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 						if (File)
 						{
 							io_write(File, aBuf, PlainLength);
