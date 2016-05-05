@@ -30,6 +30,7 @@ public:
 		m_aDatadir[0] = 0;
 		m_aUserdir[0] = 0;
 	}
+	virtual ~CStorage() {};
 
 	int Init(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
 	{
