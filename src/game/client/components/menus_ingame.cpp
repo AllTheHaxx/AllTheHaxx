@@ -217,7 +217,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	// render buttons
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
-	static int s_ConModeButton = 0;
+/*	static int s_ConModeButton = 0; ///XXX::TODO::REIMPLEMENT!
 	if(DoButton_Menu(&s_ConModeButton, Localize("Console Mode"), 0, &Button, "Enter console mode (very low CPU usage, no graphics)"))
 	{
 		g_Config.m_ClConsoleMode ^= 1;
@@ -230,7 +230,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 
 		SetActive(false);
 	}
-
+*/
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
 	static int s_OpenChatButton = 0;
