@@ -3575,6 +3575,7 @@ static CClient *CreateClient()
 	return new(pClient) CClient;
 }
 
+
 /*
 	Server Time
 	Client Mirror Time
@@ -3751,7 +3752,12 @@ int main(int argc, const char **argv) // ignore_convention
 	// write down the config and quit
 	pConfig->Save();
 
-	fs_remove("update");
+	// do cleanups - much hack.
+#if defined(CONF_FAMILY_UNIX)
+	system("rm -rf update");
+#elif defined(CONF_FAMILY_WINDOWS)
+	system("rd update /S /Q");
+#endif
 
 	if(pClient->m_Restarting)
 		shell_execute(argv[0]);
