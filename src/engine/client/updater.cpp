@@ -89,7 +89,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			newsFile = NULL;
 		}
 	}
-	else if(!str_comp(b, "update.json"))
+	else if(!str_comp(b, "update2.json"))
 	{
 		if(pTask->State() == CFetchTask::STATE_DONE)
 			pUpdate->m_State = GOT_MANIFEST;
@@ -212,7 +212,7 @@ void CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update2.json", aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		char aBuf[4096*4];
@@ -262,8 +262,18 @@ void CUpdater::ParseUpdate()
 								std::string source(json_string_get(json_object_get(pArr, "source")));
 								for(int k = 0; k < json_array_length(pFiles); k++)
 								{
-									std::string file(json_string_get(json_array_get(pFiles, k)));
-									e[file] = string(json_string_get(json_array_get(pDests, k)));
+									const char *pTmpStr1 = json_string_get(json_array_get(pFiles, k));
+									const char *pTmpStr2 = json_string_get(json_array_get(pDests, k));
+									if(!pTmpStr1 || !pTmpStr2)
+									{
+										dbg_msg("updater/ERROR", "Failed to extract data :");
+										dbg_msg("updater/ERROR", "k=%i file=%p dest=%p", k, pTmpStr1, pTmpStr2);
+										continue;
+									}
+									try {
+										std::string file(pTmpStr1);
+										e[file] = string(pTmpStr2);
+									} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
 									//dbg_msg("DEBUG|updater", "External (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
 								}
 
@@ -289,7 +299,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 	{
 		m_State = GETTING_MANIFEST;
 		dbg_msg("updater", "refreshing version info");
-		FetchFile("~stuffility/master", "update.json");
+		FetchFile("~stuffility/master", "update2.json");
 		FetchFile("~stuffility/master", "ath-news.txt");
 	}
 	else
@@ -299,7 +309,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 void CUpdater::PerformUpdate()
 {
 	m_State = PARSING_UPDATE;
-	dbg_msg("updater", "parsing update.json");
+	dbg_msg("updater", "parsing update2.json");
 	ParseUpdate();
 	if(m_CheckOnly)
 	{
