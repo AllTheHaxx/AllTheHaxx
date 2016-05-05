@@ -21,6 +21,8 @@
 
 #include <engine/external/json-parser/json.h>
 
+#include <game/client/components/menus.h>
+
 #include "serverbrowser.h"
 class SortWrap
 {
@@ -258,6 +260,8 @@ void CServerBrowser::Filter()
 		else if(g_Config.m_BrFilterVersionStrict && g_Config.m_BrFilterVersion[0] && str_comp_nocase(m_ppServerlist[i]->m_Info.m_aVersion, g_Config.m_BrFilterVersion))
 			Filtered = 1;
 		else if(!g_Config.m_BrFilterVersionStrict && g_Config.m_BrFilterVersion[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aVersion, g_Config.m_BrFilterVersion))
+			Filtered = 1;
+		else if(g_Config.m_BrShowDDNet && g_Config.m_UiPage != CMenus::PAGE_DDNET && g_Config.m_UiPage != CMenus::PAGE_FAVORITES && str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, "[DDRaceNetwork]"))
 			Filtered = 1;
 		else
 		{
@@ -750,7 +754,8 @@ bool CServerBrowser::LoadCache()
 	// get version
 	{
 		char v; io_read(File, &v, 1);
-		dbg_msg("browser", "loading serverlist from cache...");
+		if(g_Config.m_Debug)
+			dbg_msg("browser", "loading serverlist from cache...");
 		if(v != CACHE_VERSION)
 			dbg_msg("cache", "file version doesn't match, we may fail! (%i != %i)", v, CACHE_VERSION);
 	}

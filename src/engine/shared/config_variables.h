@@ -55,6 +55,7 @@ MACRO_CONFIG_STR(BrFilterGametype, br_filter_gametype, 128, "", CFGFLAG_SAVE|CFG
 MACRO_CONFIG_STR(BrFilterVersion, br_filter_version, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Game version to filter")
 MACRO_CONFIG_INT(BrFilterGametypeStrict, br_filter_gametype_strict, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Strict gametype filter")
 MACRO_CONFIG_INT(BrFilterVersionStrict, br_filter_version_strict, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Strict version filter")
+//MACRO_CONFIG_INT(BrFilterDDRaceNetwork, br_filter_ddracenetwork, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Don't show official DDRaceNetwork servers in this list (use the DDNet browser instead)")
 MACRO_CONFIG_STR(BrFilterServerAddress, br_filter_serveraddress, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server address to filter")
 MACRO_CONFIG_INT(BrFilterPure, br_filter_pure, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-standard servers in browser")
 MACRO_CONFIG_INT(BrFilterPureMap, br_filter_pure_map, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-standard maps in browser")

@@ -657,6 +657,11 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterVersionStrict, Localize("Strict version filter"), g_Config.m_BrFilterVersionStrict, &Button))
 		g_Config.m_BrFilterVersionStrict ^= 1;
 
+	/*ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
+	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterDDRaceNetwork, Localize("Hide DDRaceNetwork"), g_Config.m_BrFilterDDRaceNetwork, &Button, Localize("Activate this if you use the DDNet serverbrowser")))
+		g_Config.m_BrFilterDDRaceNetwork ^= 1;*/
+
 	ServerFilter.HSplitTop(7.0f, 0, &ServerFilter);
 
 	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
@@ -904,6 +909,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterGametypeStrict = 0;
 		g_Config.m_BrFilterVersion[0] = 0;
 		g_Config.m_BrFilterVersionStrict = 0;
+		//g_Config.m_BrFilterDDRaceNetwork = 0;
 		g_Config.m_BrFilterServerAddress[0] = 0;
 		g_Config.m_BrFilterPure = 0;
 		g_Config.m_BrFilterPureMap = 0;
@@ -1344,7 +1350,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else if(State == IUpdater::CLEAN)
 			str_format(aBuf, sizeof(aBuf), Localize("Client version string: tw.%s-%s-ddnet.%s"), GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
 		else if(State == IUpdater::GETTING_MANIFEST)
-			str_format(aBuf, sizeof(aBuf), "Refreshing version info...:");
+			str_format(aBuf, sizeof(aBuf), "Refreshing version info...");
 		else if(State == IUpdater::GOT_MANIFEST || State == IUpdater::PARSING_UPDATE)
 			str_format(aBuf, sizeof(aBuf), "Checking out files...");
 		else if(State >= IUpdater::DOWNLOADING && State < IUpdater::NEED_RESTART)
@@ -1398,7 +1404,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 		}
-#else
+/*#else // XXX no official android and osx support.
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
 		if(str_comp(Client()->LatestVersion(), "0") != 0)
@@ -1409,7 +1415,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);*/
 #endif
 		// button area
 		//StatusBox.VSplitRight(80.0f, &StatusBox, 0);
@@ -1518,6 +1524,12 @@ void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserDat
 		((CMenus *)pUserData)->FriendlistOnUpdate();
 		((CMenus *)pUserData)->Client()->ServerBrowserUpdate();
 	}
+}
+
+void CMenus::ConchainDDraceNetworkFilterUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	((CMenus *)pUserData)->Client()->ServerBrowserUpdate();
 }
 
 void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

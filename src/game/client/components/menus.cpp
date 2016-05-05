@@ -1366,6 +1366,7 @@ void CMenus::OnInit()
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
+	Console()->Chain("br_show_ddnet", ConchainDDraceNetworkFilterUpdate, this);
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
