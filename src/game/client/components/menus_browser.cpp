@@ -719,6 +719,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	}
 
 	// additional settings
+	if(g_Config.m_UiPage != PAGE_DDNET)
 	{
 		ServerFilter.HSplitTop(20.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(15.0f, &Button, &ServerFilter);
