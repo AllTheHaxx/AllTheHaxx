@@ -13,7 +13,10 @@
 #endif
 
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
-static const char GAME_ATH_VERSION[10] = "0.14"; // for updater
+
+// for updater
+static const char GAME_ATH_VERSION[10] = "0.14";
+#define GAME_ATH_VERSION_NUMERIC 140
 
 // do not modify these, they belong to ddnet
 static const char GAME_RELEASE_VERSION[8] = "10.0.1";

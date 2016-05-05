@@ -51,6 +51,7 @@ class CUpdater : public IUpdater
 
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
+	int m_NumericVersion;
 
 	bool m_CheckOnly;
 

@@ -9,6 +9,8 @@
 
 #include <stdlib.h> // system
 
+#define UPDATE_MANIFEST "update.json"
+
 using std::string;
 using std::map;
 
@@ -22,6 +24,11 @@ CUpdater::CUpdater()
 	m_CheckOnly = false;
 	m_aVersion[0] = '0';
 	m_aVersion[1] = '\0';
+	m_NumericVersion = 0;
+
+	m_IsWinXP = false;
+	m_ClientUpdate = false;
+	m_ServerUpdate = false;
 }
 
 void CUpdater::Init()
@@ -29,11 +36,11 @@ void CUpdater::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
-	#if defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5, 1) <= 0;
-	#else
+#else
 	m_IsWinXP = false;
-	#endif
+#endif
 }
 
 void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
@@ -89,7 +96,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			newsFile = NULL;
 		}
 	}
-	else if(!str_comp(b, "update.json"))
+	else if(!str_comp(b, UPDATE_MANIFEST))
 	{
 		if(pTask->State() == CFetchTask::STATE_DONE)
 			pUpdate->m_State = GOT_MANIFEST;
@@ -212,7 +219,7 @@ void CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
 	{
 		char aBuf[4096*4];
@@ -224,13 +231,17 @@ void CUpdater::ParseUpdate()
 
 		if(pVersions && pVersions->type == json_array)
 		{
-			for(int i = 0; i < json_array_length(pVersions); i++)
+			for(int i = json_array_length(pVersions)-1; i >= 0 ; i--) // read the file bottom-top to enable phased updates
 			{
 				const json_value *pTemp;
 				const json_value *pCurrent = json_array_get(pVersions, i);
 				if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_ATH_VERSION))
 				{
-					// if we don't know the latest version yet, get it
+					m_NumericVersion = json_int_get(json_object_get(pCurrent, "numeric"));
+					if(!(m_NumericVersion > GAME_ATH_VERSION_NUMERIC)) // don't update to older versions
+						continue;
+
+					// get the next version we can update to
 					if(m_aVersion[0] == '0' && m_aVersion[1] == '\0')
 						str_copy(m_aVersion, json_string_get(json_object_get(pCurrent, "version")), sizeof(m_aVersion));
 
@@ -252,27 +263,27 @@ void CUpdater::ParseUpdate()
 					{
 						for(int j = 0; j < json_array_length(pTemp); j++)
 						{
-							const json_value *pFiles, *pDests, *pArr = json_array_get(pTemp, j);
+							const json_value *pFiles, *pArr = json_array_get(pTemp, j);
+							const char  *pSourceStr = json_string_get(json_object_get(pArr, "source")),
+										*pDestStr   = json_string_get(json_object_get(pArr, "dest"));
 
-							if((pFiles = json_object_get(pArr, "files"))->type == json_array
-							&& (pDests = json_object_get(pArr, "dests"))->type == json_array)
+							if(pSourceStr && pDestStr && (pFiles = json_object_get(pArr, "files"))->type == json_array)
 							{
 								// add the list of files to the entry
 								std::map<string, string> e;
 								std::string source(json_string_get(json_object_get(pArr, "source")));
 								for(int k = 0; k < json_array_length(pFiles); k++)
 								{
-									const char *pTmpStr1 = json_string_get(json_array_get(pFiles, k));
-									const char *pTmpStr2 = json_string_get(json_array_get(pDests, k));
-									if(!pTmpStr1 || !pTmpStr2)
+									const char *pFileStr = json_string_get(json_array_get(pFiles, k));
+									if(!pFileStr)
 									{
-										dbg_msg("updater/ERROR", "Failed to extract data :");
-										dbg_msg("updater/ERROR", "k=%i file=%p dest=%p", k, pTmpStr1, pTmpStr2);
+										dbg_msg("updater/ERROR", "Failed to extract json data :");
+										dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, pFileStr);
 										continue;
 									}
 									try {
-										std::string file(pTmpStr1);
-										e[file] = string(pTmpStr2);
+										std::string file(pFileStr);
+										e[file] = string(pDestStr);
 									} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
 									//dbg_msg("DEBUG|updater", "External (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
 								}
@@ -282,9 +293,8 @@ void CUpdater::ParseUpdate()
 							}
 						}
 					}
+					break; // phased updates; only upgrade one version per update (can be annoying, but is alot safer!)
 				}
-				else
-					break;
 			}
 		}
 	}
@@ -299,7 +309,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 	{
 		m_State = GETTING_MANIFEST;
 		dbg_msg("updater", "refreshing version info");
-		FetchFile("~stuffility/master", "update.json");
+		FetchFile("~stuffility/master", UPDATE_MANIFEST);
 		FetchFile("~stuffility/master", "ath-news.txt");
 	}
 	else
@@ -309,7 +319,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 void CUpdater::PerformUpdate()
 {
 	m_State = PARSING_UPDATE;
-	dbg_msg("updater", "parsing update.json");
+	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
 	ParseUpdate();
 	if(m_CheckOnly)
 	{
@@ -345,7 +355,7 @@ void CUpdater::PerformUpdate()
 				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
 				str_copy(aBuf + len - 4, "-" PLAT_NAME, sizeof(aBuf) - len + 4); // -win32
 				str_append(aBuf, pFile + len - 4, sizeof(aBuf)); // .dll
-				FetchFile(aBuf, pFile);
+				FetchFile("~stuffility/master/updatebin", aBuf, pFile);
 #endif
 				// Ignore DLL downloads on other platforms, on Linux we statically link anyway
 			}
@@ -363,6 +373,10 @@ void CUpdater::PerformUpdate()
 	for(map<string, map<string, string> >::iterator it = m_ExternalFiles.begin(); it != m_ExternalFiles.end(); ++it)
 		for(map<string, string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
+#if not defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
+			if(str_comp_nocase(file->first.c_str() + str_length(file->first.c_str()) - 4, ".dll") == 0)
+				continue;
+#endif
 			FetchFile(it->first.c_str(), file->first.c_str(), file->second.c_str());
 			aLastFile = file->first.c_str();
 		}
