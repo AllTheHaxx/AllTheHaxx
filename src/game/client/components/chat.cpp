@@ -146,7 +146,7 @@ void CChat::OnConsoleInit()
 {
 	Console()->Register("say", "r[message]", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
 	Console()->Register("say_team", "r[message]", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
-	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
+	Console()->Register("chat", "s['all'|'team'|'hidden'|'crypt'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 
 	Console()->Register("generate_rsa_keys", "i[Bytes] i[Exponent]", CFGFLAG_CLIENT, ConGenKeys, this, "Usually bytes = 256 and exponent = 3");
@@ -159,7 +159,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V)) // copy
 	{
 		const char *Text = Input()->GetClipboardText();
 		if(Text)
@@ -190,10 +190,40 @@ bool CChat::OnInput(IInput::CEvent Event)
 		}
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C)) // paste
 	{
 		Input()->SetClipboardText(m_Input.GetString());
 	}
+
+	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump in front of spaces, special characters and upper case letters
+	{
+		int SearchDirection = 0;
+		if(Input()->KeyPress(KEY_LEFT))
+			SearchDirection = -1;
+		else if(Input()->KeyPress(KEY_RIGHT))
+			SearchDirection = 1;
+
+		if(SearchDirection != 0)
+		{
+			int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
+			for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+			{
+				int next = i+SearchDirection;
+				if(	(m_Input.GetString()[next] == ' ') ||
+					(m_Input.GetString()[next] >= 32 && m_Input.GetString()[next] <= 47) || // special character
+					(m_Input.GetString()[next] >= 58 && m_Input.GetString()[next] <= 64) || // special character
+					(m_Input.GetString()[next] >= 91 && m_Input.GetString()[next] <= 96) || // special character
+					((m_Input.GetString()[next] >= 65 && m_Input.GetString()[next] <= 90)   // upper case
+							&& !(m_Input.GetString()[i] >= 65 && m_Input.GetString()[i] <= 90)))
+				{
+					FoundAt = i;
+					break;
+				}
+			}
+			m_Input.SetCursorOffset(FoundAt);
+		}
+	}
+
 
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
