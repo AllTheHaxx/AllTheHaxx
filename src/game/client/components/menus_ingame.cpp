@@ -149,17 +149,33 @@ void CMenus::RenderGame(CUIRect MainView)
 	}
 
 	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(150.0f, &Button, &ButtonBar);
-
-	static int s_DemoButton = 0;
-	bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
-	if(DoButton_Menu(&s_DemoButton, Localize(Recording ? "Stop record" : "Record demo"), 0, &Button))	// Localize("Stop record");Localize("Record demo");
 	{
-		if(!Recording)
-			Client()->DemoRecorder_Start(Client()->GetCurrentMap(), true, RECORDER_MANUAL);
-		else
-			Client()->DemoRecorder_Stop(RECORDER_MANUAL);
+		bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
+		ButtonBar.VSplitLeft(150.0f + (Recording ? -ButtonBar.h/2.0f : ButtonBar.h/2.0f), &Button, &ButtonBar);
+
+		static int s_DemoButton = 0;
+		if(DoButton_Menu(&s_DemoButton, Localize(Recording ? "Stop record" : "Record demo"), 0, &Button, "", Recording ? CUI::CORNER_L : CUI::CORNER_ALL))	// Localize("Stop record");Localize("Record demo");
+		{
+			if(!Recording)
+				Client()->DemoRecorder_Start(Client()->GetCurrentMap(), true, RECORDER_MANUAL);
+			else
+				Client()->DemoRecorder_Stop(RECORDER_MANUAL);
+		}
+
+		if(Recording)
+		{
+			ButtonBar.VSplitLeft(ButtonBar.h, &Button, &ButtonBar);
+			static float s_FadeEnding = 0;
+			static int s_DemoButton = 0;
+			float FadeVal = max(0.0f, s_FadeEnding-Client()->LocalTime())/1.5f;
+			if(DoButton_Menu(&s_DemoButton, "✰", 0, &Button, Localize("Add a demo marker"), CUI::CORNER_R, vec4(1-FadeVal*0.8f, 1-FadeVal*0.8f, 1-FadeVal*0.3f, 0.8f)))
+			{
+				Client()->DemoRecorder_AddDemoMarker(RECORDER_MANUAL);
+				s_FadeEnding = Client()->LocalTime()+1.5f;
+			}
+		}
 	}
+
 
 	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(170.0f, &Button, &ButtonBar);
