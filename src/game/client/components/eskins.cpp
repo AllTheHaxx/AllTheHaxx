@@ -9,6 +9,8 @@
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 
+#include <game/generated/client_data.h>
+
 #include "eskins.h"
 
 int CeSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -80,6 +82,11 @@ void CeSkins::OnInit()
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
 		m_aSkins.add(DummySkin);
 	}
+}
+
+void CeSkins::OnReset()
+{
+	g_pData->m_aImages[IMAGE_EMOTICONS].m_Id = Get(Find(g_Config.m_GameEmoticons))->m_Texture;
 }
 
 int CeSkins::Num()

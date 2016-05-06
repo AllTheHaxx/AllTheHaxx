@@ -9,6 +9,8 @@
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 
+#include <game/generated/client_data.h>
+
 #include "gskins.h"
 
 int CgSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -80,6 +82,11 @@ void CgSkins::OnInit()
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
 		m_aSkins.add(DummySkin);
 	}
+}
+
+void CgSkins::OnReset()
+{
+	g_pData->m_aImages[IMAGE_GAME].m_Id = Get(Find(g_Config.m_GameTexture))->m_Texture;
 }
 
 int CgSkins::Num()

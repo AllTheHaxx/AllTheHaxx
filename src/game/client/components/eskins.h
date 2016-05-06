@@ -19,6 +19,7 @@ public:
 	};
 
 	void OnInit();
+	void OnReset();
 
 	vec3 GetColorV3(int v);
 	vec4 GetColorV4(int v);
