@@ -21,6 +21,21 @@ void CIdentity::SaveIdents()
 		CIdentEntry *pEntry = GetIdent(i);
 		char aBuf[512];
 
+		// cleanup identity files from old versions
+		if(pEntry->m_aFilename[3] == '_')
+		{
+			char aPath[256];
+			str_format(aBuf, sizeof(aBuf), "identities/%s", pEntry->m_aFilename);
+			IOHANDLE tmp = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_SAVE, aPath, sizeof(aPath));
+			if(tmp)
+			{
+				io_close(tmp);
+				bool ret = fs_remove(aPath);
+				dbg_msg("ident/cleanup", "removing '%s' %s", aPath, ret ? "failed" : "succeeded");
+			}
+			dbg_msg("ident/cleanup", "unknown error occurred; identity '%s' may be duplicate now.", pEntry->m_aName);
+		}
+
 		str_format(aBuf, sizeof(aBuf), "identities/%03i.id", i);
 		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 		if(!File)
