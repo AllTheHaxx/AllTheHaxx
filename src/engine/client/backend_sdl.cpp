@@ -645,10 +645,13 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 #endif
 
+	if(g_Config.m_InpMouseOld)
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
+
 	m_pWindow = SDL_CreateWindow(
 		pName,
-		SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen),
-		SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen),
+		SDL_WINDOWPOS_UNDEFINED_DISPLAY(g_Config.m_GfxScreen),
+		SDL_WINDOWPOS_UNDEFINED_DISPLAY(g_Config.m_GfxScreen),
 		*pWidth,
 		*pHeight,
 		SdlFlags);
@@ -756,8 +759,8 @@ bool CGraphicsBackend_SDL_OpenGL::SetWindowScreen(int Index)
 		if(SDL_GetDisplayBounds(Index, &ScreenPos) == 0)
 		{
 			SDL_SetWindowPosition(m_pWindow,
-				SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
-				SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+				SDL_WINDOWPOS_UNDEFINED_DISPLAY(Index),
+				SDL_WINDOWPOS_UNDEFINED_DISPLAY(Index));
 			return true;
 		}
 	}

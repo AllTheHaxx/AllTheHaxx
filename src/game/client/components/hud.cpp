@@ -329,11 +329,10 @@ void CHud::RenderTextInfo()
 		str_format(aBuf, sizeof(aBuf), "%d", (int)m_AverageFPS); //
 		TextRender()->Text(0, m_Width-5-TextRender()->TextWidth(0, 9, aBuf, -1), m_Height-14*UI()->Scale(), 9, aBuf, -1);
 	}
-
-	if(g_Config.m_ClShowping)
+	if(g_Config.m_ClShowpred)
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d", clamp(m_pClient->m_Snap.m_pLocalInfo->m_Latency, 0, 1000));
+		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
 		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,aBuf,-1), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1);
 	}
 }

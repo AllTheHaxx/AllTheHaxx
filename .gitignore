@@ -17,6 +17,7 @@ map_resave*
 map_version*
 mastersrv*
 packetgen*
+serverlaunch_*
 tileset_border*
 twping*
 versionsrv*
