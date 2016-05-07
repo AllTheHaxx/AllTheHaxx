@@ -16,6 +16,7 @@ CFetcher::CFetcher()
 	m_Lock = lock_create();
 	m_pFirst = NULL;
 	m_pLast = NULL;
+	m_pThHandle = NULL;
 }
 
 bool CFetcher::Init()
@@ -144,13 +145,13 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSDATA, pTask);
 	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSFUNCTION, &CFetcher::ProgressCallback);
 
-	dbg_msg("fetcher", "downloading %s", pTask->m_aDest);
+	dbg_msg("fetcher", "downloading to '%s'", pTask->m_aDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;
 	int ret = curl_easy_perform(m_pHandle);
 	io_close(File);
 	if(ret != CURLE_OK)
 	{
-		dbg_msg("fetcher", "task failed. libcurl error: %s", aErr);
+		dbg_msg("fetcher", "task failed. (URL='%s') libcurl error: %s", pTask->m_aUrl, aErr);
 		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? CFetchTask::STATE_ABORTED : CFetchTask::STATE_ERROR;
 	}
 	else

@@ -9,7 +9,7 @@
 
 #include <stdlib.h> // system
 
-#define UPDATE_MANIFEST "update.json"
+#define UPDATE_MANIFEST "update15.json"
 
 using std::string;
 using std::map;
@@ -22,13 +22,12 @@ CUpdater::CUpdater()
 	m_State = CLEAN;
 	m_Percent = 0;
 	m_CheckOnly = false;
-	m_aVersion[0] = '0';
-	m_aVersion[1] = '\0';
+	m_aLatestVersion[0] = '0';
+	m_aLatestVersion[1] = '\0';
 	m_NumericVersion = 0;
 
 	m_IsWinXP = false;
-	m_ClientUpdate = false;
-	m_ServerUpdate = false;
+	m_ClientUpdate = false; //XXX
 }
 
 void CUpdater::Init()
@@ -38,8 +37,6 @@ void CUpdater::Init()
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 #if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5, 1) <= 0;
-#else
-	m_IsWinXP = false;
 #endif
 }
 
@@ -116,10 +113,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath)
 {
 	char aBuf[256], aDestPath[512] = {0};
-	if(pSource[0] == '~')
-		str_format(aBuf, sizeof(aBuf), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource+1, pFile);
-	else
-		str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/%s/%s", pSource, pFile);
+	str_format(aBuf, sizeof(aBuf), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource, pFile);
 
 	//dbg_msg("updater", "fetching file from '%s'", aBuf);
 	if(!pDestPath)
@@ -170,9 +164,9 @@ void CUpdater::Update()
 	}
 }
 
-void CUpdater::AddFileJob(const char *pFile, bool job)
+void CUpdater::AddFileRemoveJob(const char *pFile, bool job)
 {
-	m_FileJobs[string(pFile)] = job;
+	m_FileRemoveJobs.push_back(string(pFile));
 }
 
 void CUpdater::ReplaceClient()
@@ -197,25 +191,6 @@ void CUpdater::ReplaceClient()
 #endif
 }
 
-void CUpdater::ReplaceServer()
-{
-	dbg_msg("updater", "replacing " PLAT_SERVER_EXEC);
-
-	// replace running executable by renaming twice...
-	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
-	m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
-	m_pStorage->RenameBinaryFile("update/" SERVER_EXEC ".tmp", PLAT_SERVER_EXEC);
-
-#if !defined(CONF_FAMILY_WINDOWS)
-	char aPath[512];
-	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
-	char aBuf[512];
-	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-	if(system(aBuf))
-		dbg_msg("updater", "ERROR: failed to set server executable bit");
-#endif
-}
-
 void CUpdater::ParseUpdate()
 {
 	char aPath[512];
@@ -231,7 +206,7 @@ void CUpdater::ParseUpdate()
 
 		if(pVersions && pVersions->type == json_array)
 		{
-			for(int i = json_array_length(pVersions)-1; i >= 0 ; i--) // read the file bottom-top to enable phased updates
+			for(int i = 0; i < json_array_length(pVersions) ; i++)
 			{
 				const json_value *pTemp;
 				const json_value *pCurrent = json_array_get(pVersions, i);
@@ -241,40 +216,33 @@ void CUpdater::ParseUpdate()
 					if(!(m_NumericVersion > GAME_ATH_VERSION_NUMERIC)) // don't update to older versions
 						continue;
 
-					// get the next version we can update to
-					if(m_aVersion[0] == '0' && m_aVersion[1] == '\0')
-						str_copy(m_aVersion, json_string_get(json_object_get(pCurrent, "version")), sizeof(m_aVersion));
+					// get the latest version if we don't have it already
+					if(m_aLatestVersion[0] == '0' && m_aLatestVersion[1] == '\0')
+						str_copy(m_aLatestVersion, json_string_get(json_object_get(pCurrent, "version")), sizeof(m_aLatestVersion));
 
-					if(json_boolean_get(json_object_get(pCurrent, "client")))
-						m_ClientUpdate = true;
-					if(json_boolean_get(json_object_get(pCurrent, "server")))
-						m_ServerUpdate = true;
-					if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
-					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
-					}
 					if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
 					{
 						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
+							AddFileRemoveJob(json_string_get(json_array_get(pTemp, j)), false);
 					}
-					if((pTemp = json_object_get(pCurrent, "external"))->type == json_array)
+					if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
 					{
 						for(int j = 0; j < json_array_length(pTemp); j++)
 						{
-							const json_value *pFiles, *pArr = json_array_get(pTemp, j);
-							const char  *pSourceStr = json_string_get(json_object_get(pArr, "source")),
-										*pDestStr   = json_string_get(json_object_get(pArr, "dest"));
+							const json_value *pJsonFiles, *pJsonArr = json_array_get(pTemp, j);
+							const char  *pRepoStr = json_string_get(json_object_get(pJsonArr, "repo")),
+										*pTreeStr = json_string_get(json_object_get(pJsonArr, "tree")),
+										*pDestStr = json_string_get(json_object_get(pJsonArr, "dest"));
 
-							if(pSourceStr && pDestStr && (pFiles = json_object_get(pArr, "files"))->type == json_array)
+							if(pRepoStr && pTreeStr && pDestStr &&
+									(pJsonFiles = json_object_get(pJsonArr, "files"))->type == json_array)
 							{
 								// add the list of files to the entry
 								std::map<string, string> e;
-								std::string source(json_string_get(json_object_get(pArr, "source")));
-								for(int k = 0; k < json_array_length(pFiles); k++)
+								std::string source(string(pRepoStr) + "/" + string(pTreeStr));
+								for(int k = 0; k < json_array_length(pJsonFiles); k++)
 								{
-									const char *pFileStr = json_string_get(json_array_get(pFiles, k));
+									const char *pFileStr = json_string_get(json_array_get(pJsonFiles, k));
 									if(!pFileStr)
 									{
 										dbg_msg("updater/ERROR", "Failed to extract json data :");
@@ -282,18 +250,28 @@ void CUpdater::ParseUpdate()
 										continue;
 									}
 									try {
+										#if !defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
+											if(str_comp_nocase(pFileStr + str_length(pFileStr) - 4, ".dll") == 0) // TODO: 64 bit support when time has come
+												continue;
+										#endif
 										std::string file(pFileStr);
-										e[file] = string(pDestStr);
+										if(std::find(m_FileRemoveJobs.begin(), m_FileRemoveJobs.end(), string(pDestStr)+file) == m_FileRemoveJobs.end()) // only add the elements that are not on the remove list
+											e[file] = string(pDestStr);
+										//dbg_msg("DEBUG|updater", "DOWNLOAD (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
 									} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
-									//dbg_msg("DEBUG|updater", "External (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
 								}
 
 								// store the entry
-								m_ExternalFiles[source] = e;
+								m_FileDownloadJobs[source] = e;
+							}
+							else
+							{
+								dbg_msg("updater/ERROR", "Failed to extract json data :");
+								dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
 							}
 						}
 					}
-					break; // phased updates; only upgrade one version per update (can be annoying, but is alot safer!)
+					// get all previous updates that me missed
 				}
 			}
 		}
@@ -305,12 +283,12 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 	m_CheckOnly = CheckOnly;
 
 	// get the version info if we don't have any yet
-	if((m_aVersion[0] == '0' && m_aVersion[1] == '\0') || ForceRefresh)
+	if((m_aLatestVersion[0] == '0' && m_aLatestVersion[1] == '\0') || ForceRefresh)
 	{
 		m_State = GETTING_MANIFEST;
 		dbg_msg("updater", "refreshing version info");
-		FetchFile("~stuffility/master", UPDATE_MANIFEST);
-		FetchFile("~stuffility/master", "ath-news.txt");
+		FetchFile("stuffility/master", UPDATE_MANIFEST);
+		FetchFile("stuffility/master", "ath-news.txt");
 	}
 	else
 		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step
@@ -321,6 +299,14 @@ void CUpdater::PerformUpdate()
 	m_State = PARSING_UPDATE;
 	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
 	ParseUpdate();
+
+	// do cleanups - much hack.
+#if defined(CONF_FAMILY_UNIX)
+		system("rm -rf update");
+#elif defined(CONF_FAMILY_WINDOWS)
+		system("rd update /S /Q");
+#endif
+
 	if(m_CheckOnly)
 	{
 		m_CheckOnly = false;
@@ -328,69 +314,32 @@ void CUpdater::PerformUpdate()
 		return;
 	}
 
-	dbg_msg("updater", "Starting download, got %i file jobs and %i external jobs", m_FileJobs.size(), m_ExternalFiles.size());
+	dbg_msg("updater", "Starting download, got %i file remove jobs and download jobs from %i repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size());
 	m_State = DOWNLOADING;
 
 	const char *aLastFile;
 	aLastFile = "";
-	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it)
+
+	// remove files
+	for(std::vector<string>::iterator it = m_FileRemoveJobs.begin(); it != m_FileRemoveJobs.end(); ++it)
 	{
-		if(it->second)
-		{
-			aLastFile = it->first.c_str();
-			break;
-		}
+		m_pStorage->RemoveBinaryFile(it->c_str());
 	}
 
-	for(map<string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
+	// fetch all download files
+	for(map<string, map<string, string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
 	{
-		if(it->second == JOB_ADD) // add/update file
-		{
-			const char *pFile = it->first.c_str();
-			size_t len = str_length(pFile);
-			if(str_comp_nocase(pFile + len - 4, ".dll") == 0)
-			{
-#if defined(CONF_FAMILY_WINDOWS)
-				char aBuf[512];
-				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
-				str_copy(aBuf + len - 4, "-" PLAT_NAME, sizeof(aBuf) - len + 4); // -win32
-				str_append(aBuf, pFile + len - 4, sizeof(aBuf)); // .dll
-				FetchFile("~stuffility/master/updatebin", aBuf, pFile);
-#endif
-				// Ignore DLL downloads on other platforms, on Linux we statically link anyway
-			}
-			else
-			{
-				FetchFile("~AllTheHaxx/master", pFile);
-			}
-			aLastFile = pFile;
-		}
-		else // remove file
-			m_pStorage->RemoveBinaryFile(it->first.c_str());
-	}
-
-	// fetch all external files
-	for(map<string, map<string, string> >::iterator it = m_ExternalFiles.begin(); it != m_ExternalFiles.end(); ++it)
 		for(map<string, string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
-#if not defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
-			if(str_comp_nocase(file->first.c_str() + str_length(file->first.c_str()) - 4, ".dll") == 0)
-				continue;
-#endif
 			FetchFile(it->first.c_str(), file->first.c_str(), file->second.c_str());
 			aLastFile = file->first.c_str();
 		}
-
-	/*if(m_ServerUpdate)
-	{
-		FetchFile(PLAT_SERVER_DOWN, SERVER_EXEC ".tmp");
-		aLastFile = SERVER_EXEC ".tmp";
-	}*/
+	}
 
 	if(m_ClientUpdate)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "AllTheHaxx/releases/download/%s", m_aVersion);
+		str_format(aBuf, sizeof(aBuf), "AllTheHaxx/releases/download/%s", m_aLatestVersion);
 		FetchFile(aBuf, PLAT_CLIENT_DOWN, "AllTheHaxx.tmp");
 	}
 
@@ -399,11 +348,7 @@ void CUpdater::PerformUpdate()
 
 void CUpdater::CommitUpdate()
 {
-	for(map<std::string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
-		if(it->second == JOB_ADD)
-			MoveFile(it->first.c_str());
-
-	for(map<std::string, map<std::string, std::string> >::iterator it = m_ExternalFiles.begin(); it != m_ExternalFiles.end(); ++it)
+	for(map<std::string, map<std::string, std::string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
 		for(map<std::string, std::string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
 			string destPath;
@@ -417,8 +362,6 @@ void CUpdater::CommitUpdate()
 
 	if(m_ClientUpdate)
 		ReplaceClient();
-	if(m_ServerUpdate)
-		ReplaceServer();
 	if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
 		m_State = NEED_RESTART;
 	else

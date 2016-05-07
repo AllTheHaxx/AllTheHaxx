@@ -28,6 +28,7 @@ class CFetchTask
 	bool m_Abort;
 	bool m_CanTimeout;
 	int m_StorageType;
+
 public:
 	CFetchTask(bool canTimeout);
 

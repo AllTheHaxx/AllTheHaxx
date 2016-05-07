@@ -5,6 +5,7 @@
 #include <engine/fetcher.h>
 #include <versionsrv/versionsrv.h>
 #include <map>
+#include <vector>
 #include <string>
 
 #define CLIENT_EXEC "AllTheHaxx"
@@ -33,8 +34,8 @@
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
-#define JOB_ADD true
-#define JOB_REMOVE false
+//#define JOB_ADD true
+//#define JOB_REMOVE false
 
 class CUpdater : public IUpdater
 {
@@ -50,18 +51,17 @@ class CUpdater : public IUpdater
 	char m_aLastFile[256];
 
 	bool m_ClientUpdate;
-	bool m_ServerUpdate;
 	int m_NumericVersion;
 
 	bool m_CheckOnly;
 
-	char m_aVersion[10];
+	char m_aLatestVersion[10];
 	char m_aNews[NEWS_SIZE];
 
-	std::map<std::string, bool> m_FileJobs;
-	std::map<std::string, std::map<std::string, std::string> > m_ExternalFiles; // source - dlpath, dest
+	std::vector<std::string> m_FileRemoveJobs;
+	std::map<std::string, std::map<std::string, std::string> > m_FileDownloadJobs; // source - dlpath, dest
 
-	void AddFileJob(const char *pFile, bool job);
+	void AddFileRemoveJob(const char *pFile, bool job);
 	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0);
 	void MoveFile(const char *pFile);
 
@@ -70,14 +70,13 @@ class CUpdater : public IUpdater
 	void CommitUpdate();
 
 	void ReplaceClient();
-	void ReplaceServer();
 
 public:
 	CUpdater();
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
-	const char *GetLatestVersion() const { return m_aVersion; }
+	const char *GetLatestVersion() const { return m_aLatestVersion; }
 	const char *GetNews() const { return m_aNews; }
 
 	int GetCurrentState() const { return m_State; };
