@@ -668,7 +668,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							reply.from = aMsgFrom;
 							reply.params = aMsgText;
 
-							/*if(aMsgChan == m_Nick) // TODO refractor: sending ourselves a NOTICE??
+							if(aMsgChan == m_Nick) // TODO refractor: sending ourselves a NOTICE??
 							{
 								CIRCCom *pCom = GetCom(aMsgFrom);
 								std::replace(aMsgText.begin(), aMsgText.end(), '\1', ' ');
@@ -681,23 +681,12 @@ void CIRC::StartConnection() // call this from a thread only!
 										pCom->m_NumUnreadMsg++;
 
 									if(MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "%s->> %s: %s", aTime, aMsgFrom.c_str(),
-												aMsgText.substr(8, -1).c_str());
+										pCom->AddMessage(aMsgText.substr(8, -1).c_str());
 									else
-										str_format(aBuff, sizeof(aBuff), "%s-%s- %s", aTime, aMsgFrom.c_str(),
-												aMsgText.c_str());
-									pCom->m_Buffer.push_back(aBuff);
-
-									if(pCom == GetActiveCom())
-									{
-										aMsgFrom.insert(0, "<");
-										aMsgFrom.append("> ");
-										aMsgFrom.insert(0, aTime);
-										m_pGameClient->OnMessageIRC("", aMsgFrom.c_str(), aMsgText.c_str());
-									}
+										pCom->AddMessage(aMsgText.c_str());
 								}
 							}
-							else*/
+							else
 							{
 								CIRCCom *pCom = GetCom(aMsgChan);
 								if(pCom)
@@ -981,7 +970,7 @@ TCOM* CIRC::OpenCom(const char *pName, bool SwitchTo, int UnreadMessages)
 {
 	// XXX: hack to suppress opening of the useless tabs at startup
 	if(!g_Config.m_ClIRCGetStartupMsgs &&
-			time_get() < m_StartTime+time_freq() && // give it a second; should be enough
+			time_get() < m_StartTime+time_freq()*2 && // give it a couple of seconds; should be enough
 			str_comp_nocase(pName, "#AllTheHaxx") != 0 &&
 			str_comp_nocase(pName, "@Status") != 0)
 		return 0;
@@ -1367,7 +1356,8 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 			GetActiveCom()->AddMessage("* %s %s", m_Nick.c_str(), aMsg);
 		}
 	}
-	SendRaw("%s %s", cmd, params);
+	else
+		SendRaw("%s %s", cmd, params);
 }
 
 int CIRC::NumUnreadMessages(int *pArray)
