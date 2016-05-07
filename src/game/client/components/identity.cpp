@@ -19,57 +19,17 @@ void CIdentity::SaveIdents()
 	for(int i = 0; i < NumIdents(); i++)
 	{
 		CIdentEntry *pEntry = GetIdent(i);
-		bool Rename = false;
-		char aFilename[64];
 		char aBuf[512];
 
-		if(pEntry->m_aFilename[0] == '\0')
-			str_format(aFilename, sizeof(aFilename), "%03d_%s.id", i, pEntry->m_aName);
-		else
-		{
-			if(!(str_isdigit(pEntry->m_aFilename[0]) && str_isdigit(pEntry->m_aFilename[1]) && str_isdigit(pEntry->m_aFilename[2]) && pEntry->m_aFilename[3] == '_'))
-			{
-				str_format(aFilename, sizeof(aFilename), "%03d_%s.id", i, pEntry->m_aName);
-				Rename = true;
-			}
-			else
-			{ 
-				char aNewIndex[4];
-				char aOldIndex[4];
-				str_format(aNewIndex, sizeof(aNewIndex), "%03d", i);
-				str_format(aOldIndex, sizeof(aOldIndex), pEntry->m_aFilename);
-				str_format(aFilename, sizeof(aFilename), pEntry->m_aFilename);
-				if(str_toint(aNewIndex) != str_toint(aOldIndex))
-				{
-					for(int i = 0; i < 3; i++)
-						aFilename[i] = aNewIndex[i];
-					Rename = true;
-				}
-			}
-		}
-
-		if(Rename)
-		{
-			char OldName[512];
-			char NewName[512];
-			str_format(OldName, sizeof(OldName), "identities/%s", pEntry->m_aFilename);
-			str_format(NewName, sizeof(NewName), "identities/%s", aFilename);
-			Storage()->RenameFile(OldName, NewName, IStorageTW::TYPE_SAVE);
-			Storage()->RemoveFile(OldName, IStorageTW::TYPE_SAVE);
-
-			//str_format(aBuf, sizeof(aBuf), "renamed '%s' to %s", pEntry->m_aFilename, aFilename);
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", aBuf);
-		}
-
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", aBuf);
-		str_format(aBuf, sizeof(aBuf), "identities/%s", aFilename);
+		str_format(aBuf, sizeof(aBuf), "identities/%03i.id", i);
 		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
-		
 		if(!File)
 		{
-			io_close(File);
+			dbg_msg("ident/ERROR", "failed to open file '%s' for writing; cannot save identity '%s'", aBuf, pEntry->m_aName);
 			continue;
 		}
+
+		dbg_msg("ident", "saving %s:%s", aBuf, pEntry->m_aName);
 
 		char aTeeEntry[NUM_ENTRIES][64];
 
@@ -85,14 +45,6 @@ void CIdentity::SaveIdents()
 		
 		for(int j = 0; j < NUM_ENTRIES; j++)
 		{
-			if(!File)
-			{
-				str_format(aBuf, sizeof(aBuf), "failed to save '%s'", aFilename);
-				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", aBuf);
-				io_close(File);
-				mem_zero(aTeeEntry[j], sizeof(aTeeEntry[j]));
-				break;
-			}
 			io_write(File, aTeeEntry[j], str_length(aTeeEntry[j]));
 			io_write_newline(File);
 		}
