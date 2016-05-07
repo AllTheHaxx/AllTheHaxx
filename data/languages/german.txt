@@ -688,9 +688,6 @@ Show quads
 Map sound volume
 == Lautstärke von Mapsounds
 
-✗
-== ✗
-
 Countries
 == Ländern
 
@@ -787,9 +784,6 @@ Ghost
 Check now
 == Aktualisieren
 
-DDNet Client updated!
-== Der DDNet Client wurde aktualisiert!
-
 Background (regular)
 == Hintergrund (Normal)
 
@@ -801,9 +795,6 @@ Show other players' key presses
 
 System message
 == Server-Nachricht
-
-DDNet %s is available:
-== DDNet %s ist verfügbar:
 
 Updating...
 == Aktualisieren...
@@ -825,9 +816,6 @@ Timeout code
 
 Use DDRace Scoreboard
 == Benutze das DDRace Scoreboard
-
-DDNet %s is out! Download it at ddnet.tw!
-== DDNet %s ist jetzt auf ddnet.tw verfügbar!
 
 Default zoom
 == Normal-Zoom
@@ -909,50 +897,23 @@ Load
 A* Path Finding
 == A* Wegfinder
 
-Grab IPs
-== 
-
 Just update the info of the entries
 == Aktualisiert nur die Infos der Einträge
-
-Flood with the players IP to ban him
-== 
-
-Grabs
-== 
 
 Connect to server
 == Verbinde zum Server
 
-Kill
-== 
-
-Connect to the spoofing-server
-== 
-
 Makes everything look way more awesome!
 == Damit sieht alles gleich viel besser aus!
 
-M15C 5TUFF
-== 
-
 Show map decoration elements
 == Kartendekorationen anzeigen
-
-Key name
-== 
-
-General queries
-== 
 
 Send
 == Senden
 
 Connect to the Chat automatically on startup
 == Verbinde beim Starten automatisch zum Chat
-
-Fire the laz0r!!!
-== 
 
 Save Skin as new Identity
 == Skin als neue Identität speichern
@@ -963,26 +924,11 @@ Allow others to join you
 Select a name
 == Wähle einen Namen
 
-Play sound notification
-== 
-
-Disconnect packet from server to client
-== 
-
-Reconnect Ban Timeout
-== 
-
-You are now out of the solo part.
-== 
-
 Settings
 == Einstellungen
 
 Use lua
 == Lua aktivieren
-
-Enable irc chat sound
-== 
 
 Connect dummy
 == Dummy verbinden
@@ -993,17 +939,8 @@ Automatically take game over screenshot
 Server-Dependent-Configuration Manager
 == Manager für Serverabhängige Konfiguration
 
-Use a custom IP as source address
-== 
-
 Manual %3d:%02d  
 == Manuel %3d:%02d  
-
-Finished Bufferswapping
-== 
-
-Zervor status
-== 
 
 Exclude
 == Ausschließen
@@ -1014,17 +951,8 @@ Generate new Code
 Deactivate
 == Deaktivieren
 
-Q Auth Name
-== 
-
-Loading AllTheHaxx
-== 
-
 Show notifications
 == Benachrichtigungen zeigen
-
-Spoofing
-== 
 
 Please use a different name
 == Bitte wähle einen anderen Namen
@@ -1032,32 +960,11 @@ Please use a different name
 Use Identity
 == Identität verwenden
 
-Gameplay
-== 
-
 Recent
 == Zuletzt
 
 An error occured while loading
 == Beim Laden ist ein Fehler aufgetreten
-
-Cache Manager
-== 
-
-Laser
-== 
-
-Grab dummy IPs
-== 
-
-Particles
-== 
-
-none
-== 
-
-Votebot 'Yes'
-== 
 
 Refresh the serverlist completely
 == Die Serverliste komplett erneuern
@@ -1068,35 +975,17 @@ Smooths graphics at the expense of FPS
 Follow
 == Folgen
 
-Nick:
-== 
-
-Gameskin
-== 
-
-Disable this if you got performance problems
-== Deaktiviere dies falls du Performance Probleme hast
-
 Perform the actions for all players
 == Die Aktion auf alle Spieler anwenden
 
 Hidden
 == Versteckt
 
-Generates a new RSA key you can then save and share
-== Generiert einen neuen RSA-Key den du anschließend speichern und teilen kannst
-
-Show tiles layers from BG map
-== 
-
 Types
 == Typen
 
 Clan plates size
 == Größe der Clans
-
-Disable fancy effects
-== Schalte schicke, aufwändige Effekte ab
 
 Modes
 == Modi
@@ -1106,12 +995,6 @@ Save the serverlist
 
 Send a chat message
 == Sende eine Chat Nachricht
-
-Threaded sound loading
-== 
-
-Non-Vanilla Skins only
-== 
 
 Race %3d:%02d  
 == Rennen %3d:%02d  
@@ -1134,38 +1017,17 @@ Identities
 Save RSA key
 == RSA Key speichern
 
-Tee controlling related
-== 
-
 Load key with the name you entered above
 == Schlüssel mit dem Namen, den du oben eingegeben hast, laden
 
-Render when inactive
-== 
-
-Frags
-== 
-
-DUMMY SH1T
-== 
-
-Z3RV0R T00LZ
-== 
-
 Automatically take statboard screenshot
 == Automatisch ein Bild vom Statboard machen
-
-Fetch IPs
-== 
 
 Loading Lua Script
 == Lade Lua Skript
 
 Allow Vanilla Skins only
 == Nur Standard-Skins erlauben
-
-Vote 'Yes'
-== 
 
 Hide console window
 == Verstecke Konsole
@@ -1179,9 +1041,6 @@ Vanilla Skins only
 Move player to the spectators
 == Spieler zu Zuschauer machen
 
-Stop flooding
-== 
-
 Show other ATH user
 == Markiere Spieler, die ATH benutzen
 
@@ -1191,41 +1050,11 @@ Suicides
 Highly recommended!
 == Wärmstens empfohlen!
 
-Reload Lua
-== Lua neu laden
-
 Enable Timeout Protection
 == Timeout-Protection nutzen
 
-Haxx
-== 
-
-Lua
-== 
-
-Disconnect packet from client to server
-== 
-
-Connect dummies
-== 
-
-Net
-== 
-
 Are you sure?
 == Bist du sicher?
-
-Username
-== 
-
-FPM
-== 
-
-Smart zoom
-== 
-
-Spree
-== 
 
 Join
 == Folgen
@@ -1236,17 +1065,8 @@ Borderless window
 Cursor
 == Mauszeiger
 
-Start flooding
-== 
-
 Find and visualize the shortest path to the finish on Race Maps
 == Finde den kürzesten Weg auf Race Maps und zeige ihn an
-
-Server Config
-== 
-
-Chatbox Alpha
-== 
 
 Receive hidden chat
 == Hidden-Chat erhalten
@@ -1263,9 +1083,6 @@ Player related
 Use
 == Benutze
 
-Emoticons
-== 
-
 Texture
 == Texturen
 
@@ -1278,17 +1095,11 @@ Load the saved serverlist
 Translate incoming messages
 == Übersetze eingehende Nachrichten
 
-Votebot 'No'
-== 
-
 Kick player from the server
 == Spieler vom Server kicken
 
 Reset
 == Zurücksetzen
-
-Send a chat message from the dummies
-== 
 
 Render quads as triangles
 == Quads als Dreiecke rendern
@@ -1308,9 +1119,6 @@ Demo
 Translate outgoing messages
 == Übersetze ausgehende Nachrichten
 
-Timeout
-== 
-
 Save key with the name you entered above
 == Speichere Schlüssel unter dem Namen, den du oben eingegeben hast
 
@@ -1323,14 +1131,8 @@ Rejoin the current server
 Auto %3d:%02d  
 == Automatisch %3d:%02d  
 
-Stressing
-== 
-
 Load RSA key
 == Lade RSA Schlüssel
-
-Disconnect dummies
-== 
 
 Time in seconds to refresh the infos
 == Zeit in Sekunden, bis die Infos erneuert werden
@@ -1344,40 +1146,370 @@ Low Graphics Mode
 Enable spawn sound
 == Spawn-Sound abspielen
 
-Leave Message
-== 
-
-fixes quad coloring on some GPUs
-== 
-
-Reconnect Full Timeout
-== 
-
 Connect automatically
 == Automatisch verbinden
 
 Please wait...
 == Bitte warten...
 
+New Identity '%s' created!
+== Neue Identität '%s' erstellt!
+
+Show health + ammo as bars
+== Leben und Munition als Balken zeigen
+
+Save
+== Speichern
+
+Reload
+== Neu Laden
+
+Gather Statistics
+== Statistiken sammeln
+
+Enter your f1 commands here...
+== Gebe deine F1-Befehle hier ein...
+
+
+##### generated by copy_fix.py, please translate this #####
+
+Disable fancy effects to gain more fps
+== Deaktiviert ausgefallene Grafikeffekte um mehr FPS zu erreichen
+
+Zoom in
+== Ranzoomen
+
+AllTheHaxx updated!
+== AllTheHaxx wurde aktualisiert!
+
+Key name
+== Tastenbezeichnung
+
+Sorted by score
+== Nach Score sortiert
+
+Send Zzz emotes when in console mode
+== Zzz emots senden wenn im Console Mode
+
+Play sound notification
+== Sound Benachrichtigung abspielen
+
+Enable irc chat sound
+== IRC chat sound aktivieren
+
+Reconnect on connection timeout
+== Bei Verbindungsabbruch automatisch neu verbinden
+
+Wait for GL commands to finish
+== Auf Abarbeitung von GL-Kommandos warten
+
+Fixes quad coloring on some GPUs
+== Behebt auf manchen GPUs Probleme mit der Quad Färbung
+
+Loading AllTheHaxx
+== AllTheHaxx wird geladen
+
+Add a demo marker
+== Füge einen Demo Marker hinzu
+
+Zoom out
+== Rauszoomen
+
+Cache Manager
+== Cache Manager
+
+Laser
+== Laser
+
+Reset on Disconnect
+== Beim Disconnecten zurücksetzen
+
+Particles
+== Partikel
+
+none
+== keine
+
+Gameskin
+== Gameskin
+
+Hookfly Dummy
+== Dummy Hookfly
+
+Non-Vanilla Skins only
+== Nur nicht-standard Skins
+
+Sorted by name
+== Nach Name sortiert
+
+Toggle Hotbar
+== Hotbar umschalten
+
+Frags
+== Kills
+
+Lua
+== Lua
+
+You must give either 'activate', 'deactivate' or 'toggle' as first argument!
+== Du must entweder 'activate', 'deactivate' oder 'toggle' als erstes Argument angeben!
+
+seconds
+== Sekunden
+
+Chatbox Alpha
+== Chatbox Durchsichtigkeit
+
+New Client Version '%s' is available!
+== Neue Client Version '%s' ist verfügbar!
+
+Hidden Chat
+== Versteckter Chat
+
+Emoticons
+== Emoticons
+
+Screen
+== Bildschirm
+
+Disable this if you get blurry textures
+== Deaktiviere dies wenn die Texturen verschwommen erscheinen
+
+AllTheHaxx %s is out! Download it at allthehaxx.tk!
+== AllTheHaxx %s ist draußen! Hol es dir auf AllTheHaxx.tk!
+
+Client version string: tw.%s-%s-ddnet.%s
+== Client Version: tw.%s-%s-ddnet.%s
+
+Reconnect when server is full
+== Neu verbinden wenn der Server voll ist
+
+Kick
+== Kicken
+
+Action:
+== Aktion:
+
+click to toggle
+== klicke zum umschalten
+
+Generates a (128 b) new RSA key you can then save and share
+== Generiert einen neuen (128 bit) RSA Schlüssel, den du anschließend speichern und teilen kannst
+
+Disable this if your game reacts too slow
+== Deaktiviere dies, wenn dein Spiel zu langsam reagiert
+
+There was no luafile with the name '%s' found!
+== Es wurde kein Luafile mit dem Namen '%s' gefunden!
+
+Reconnect
+== Neu verbinden
+
+
+##### generated by copy_fix.py, please translate this #####
+
+Sniff outgoing connless packets
+== 
+
+Grab IPs
+== 
+
+Flood with the players IP to ban him
+== 
+
+Packet sniffer settings
+== 
+
+Grabs
+== 
+
+Autoload
+== 
+
+Kill
+== 
+
+Connect to the spoofing-server
+== 
+
+M15C 5TUFF
+== 
+
+Sniff incoming conn packets
+== 
+
+General queries
+== 
+
+second
+== 
+
+Fetch player IPs from master
+== 
+
+Fire the laz0r!!!
+== 
+
+Disconnect packet from server to client
+== 
+
+You are now out of the solo part.
+== 
+
+Use a custom IP as source address
+== 
+
+Zervor status
+== 
+
+Q Auth Name
+== 
+
+Spoofing
+== 
+
+Wait before try for
+== 
+
+Hide DDRaceNetwork
+== 
+
+Gameplay
+== 
+
+Grab dummy IPs
+== 
+
+Votebot 'Yes'
+== 
+
+Nick:
+== 
+
+Show tiles layers from BG map
+== 
+
+Send (Dummies)
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Unlock Mouse
+== 
+
+Network Sniffer
+== 
+
+Tee controlling related
+== 
+
+Misc.
+== 
+
+Render when inactive
+== 
+
+DUMMY SH1T
+== 
+
+Z3RV0R T00LZ
+== 
+
+Fetch IPs
+== 
+
+Toggle Lua Console
+== 
+
+Sniff incoming connless packets
+== 
+
+Vote 'Yes'
+== 
+
+Toggle IRC
+== 
+
+Stop flooding
+== 
+
+Haxx
+== 
+
+Sniff outgoing conn packets
+== 
+
+May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.
+== 
+
+Disconnect packet from client to server
+== 
+
+Connect dummies
+== 
+
+Net
+== 
+
+Username
+== 
+
+Stressing
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Toggle X-Ray
+== 
+
+Activate this if you use the DDNet serverbrowser
+== 
+
+Start flooding
+== 
+
+Server Config
+== 
+
+Hammerfly Dummy
+== 
+
+Votebot 'No'
+== 
+
+Smart zoom
+== 
+
+Send a chat message from the dummies
+== 
+
+Timeout
+== 
+
+Disconnect dummies
+== 
+
+Leave Message
+== 
+
 Force disconnect
+== 
+
+Discard config changes when disconnecting
 == 
 
 Print to console
 == 
 
-Kick
-== 
-
-New Identity '%s' created!
-== Neue Identität '%s' erstellt!
-
-Fetch player IPs from master
-== 
-
-Action:
-== 
-
-click to toggle
+Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.
 == 
 
 Ingame sens.
@@ -1389,20 +1521,8 @@ Q Auth Pass
 IRC Chat
 == 
 
-Show health + ammo as bars
-== Leben und Munition als Balken zeigen
-
 Vote-kick all
 == 
-
-Save
-== Speichern
-
-Reload
-== Neu Laden
-
-Gather Statistics
-== Statistiken sammeln
 
 View player IPs (run Fetch IPs first)
 == 
@@ -1410,23 +1530,17 @@ View player IPs (run Fetch IPs first)
 Chat message:
 == 
 
-Old Graphics Threading Mode
-== 
-
 clear
 == 
 
-Send (Dummies)
+Crypted Chat
+== 
+
+Console Mode Indicator
 == 
 
 Render graphics when window is in background
 == 
-
-Reconnect
-== 
-
-Enter your f1 commands here...
-== Gebe deine F1-Befehle hier ein...
 
 Vote 'No'
 == 

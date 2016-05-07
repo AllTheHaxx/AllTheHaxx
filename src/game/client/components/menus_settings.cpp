@@ -748,6 +748,8 @@ static CKeyInfo gs_aKeys[] =
 	Localize("Pistol");Localize("Shotgun");Localize("Grenade");Localize("Rifle");Localize("Next weapon");Localize("Prev. weapon");
 	Localize("Vote yes");Localize("Vote no");Localize("Chat");Localize("Team chat");Localize("Show chat");Localize("Emoticon");
 	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Respawn");
+	Localize("Hammerfly Dummy");Localize("Hidden Chat");Localize("Crypted Chat");Localize("Hookfly Dummy");Localize("Toggle X-Ray");Localize("Zoom in");
+	Localize("Zoom out");Localize("Toggle IRC");Localize("Toggle Lua Console");Localize("Toggle Hotbar");Localize("Unlock Mouse");
 */
 
 const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
@@ -1126,12 +1128,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Wait for GL commands to finish"), g_Config.m_GfxFinish, &Button, Localize("Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.")))
 		g_Config.m_GfxFinish ^= 1;
-
-	//MainView.HSplitTop(3.0f, 0, &MainView);
-	//MainView.HSplitTop(20.0f, &Button, &MainView);
-	//if(DoButton_CheckBox(&g_Config.m_GfxThreadedOld, Localize("Old Threaded Graphics Mode"), g_Config.m_GfxThreadedOld, &Button, Localize("Enable this if the serverbrowser reloads in a strange, faltering way.\n~ Info for nerds: Uses 'CGraphics_Threaded' instead of 'CGraphics_SDL'")))
-	//	g_Config.m_GfxThreadedOld ^= 1;
-
 
 	// check if the new settings require a restart
 	if(CheckSettings)
