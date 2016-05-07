@@ -430,7 +430,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Allow Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &Right))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		m_NeedRestartSkins = true;
+		m_NeedRestartSkins ^= true;
 	}
 
 	Dummy.HSplitTop(5.0f, 0, &Dummy);
@@ -1067,6 +1067,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(Graphics()->GetNumScreens() > 1)
 	{
 		int NumScreens = Graphics()->GetNumScreens();
+		MainView.HSplitTop(3.0f, 0, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		int Screen_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxScreen, Localize("Screen"), g_Config.m_GfxScreen, &Button);
 		if(Screen_MouseButton == 1) //inc
@@ -2174,8 +2175,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		g_Config.m_ClShowDirection ^= 1;
 	}
 
+	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
+	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button, Localize("Use old mouse mode (warp mouse instead of raw input)")))
 	{
 		g_Config.m_InpMouseOld ^= 1;
 		CheckSettings = true;
