@@ -25,9 +25,9 @@ CUpdater::CUpdater()
 	m_aLatestVersion[0] = '0';
 	m_aLatestVersion[1] = '\0';
 	m_NumericVersion = 0;
-
 	m_IsWinXP = false;
-	m_ClientUpdate = false; //XXX
+
+	m_ClientUpdate = true; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
 }
 
 void CUpdater::Init()
