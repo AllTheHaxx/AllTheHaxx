@@ -109,6 +109,8 @@ MACRO_CONFIG_STR(UiDemoSelected, ui_demo_selected, 256, "", CFGFLAG_CLIENT|CFGFL
 
 MACRO_CONFIG_INT(GfxNoclip, gfx_noclip, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Disable clipping")
 
+MACRO_CONFIG_INT(ClVirtualClient, cl_vclient, 0, 0, MAX_VIRTUAL_CLIENTS-1, CFGFLAG_CLIENT, "The virtual client to use")
+
 // dummy
 MACRO_CONFIG_STR(ClDummyName, dummy_name, 16, "haxxless dummy", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the Dummy")
 MACRO_CONFIG_STR(ClDummyClan, dummy_clan, 12, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clan of the Dummy")

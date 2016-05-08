@@ -10,8 +10,8 @@
 class CControls : public CComponent
 {
 public:
-	vec2 m_MousePos[2];
-	vec2 m_TargetPos[2];
+	vec2 m_MousePos[NUM_VIRTUAL_CLIENTS];
+	vec2 m_TargetPos[NUM_VIRTUAL_CLIENTS];
 	float m_OldMouseX;
 	float m_OldMouseY;
 	SDL_Joystick *m_Joystick;
@@ -24,11 +24,11 @@ public:
 
 	int m_AmmoCount[NUM_WEAPONS];
 
-	CNetObj_PlayerInput m_InputData[2];
-	CNetObj_PlayerInput m_LastData[2];
-	int m_InputDirectionLeft[2];
-	int m_InputDirectionRight[2];
-	int m_ShowHookColl[2];
+	CNetObj_PlayerInput m_InputData[NUM_VIRTUAL_CLIENTS];
+	CNetObj_PlayerInput m_LastData[NUM_VIRTUAL_CLIENTS];
+	int m_InputDirectionLeft[NUM_VIRTUAL_CLIENTS];
+	int m_InputDirectionRight[NUM_VIRTUAL_CLIENTS];
+	int m_ShowHookColl[NUM_VIRTUAL_CLIENTS];
 	int m_LastDummy;
 	int m_OtherFire;
 
@@ -47,28 +47,28 @@ public:
 	void ResetInput(int dummy);
 
 	// lua
-	int GetDirection() const { return m_InputData[g_Config.m_ClDummy].m_Direction; }
-	void SetDirection(int n) { m_InputData[g_Config.m_ClDummy].m_Direction = n; }
-	int GetFire() const { return m_InputData[g_Config.m_ClDummy].m_Fire; }
-	void SetFire(int n) { m_InputData[g_Config.m_ClDummy].m_Fire = n; }
-	int GetHook() const { return m_InputData[g_Config.m_ClDummy].m_Hook; }
-	void SetHook(int n) { m_InputData[g_Config.m_ClDummy].m_Hook = n; }
-	int GetJump() const { return m_InputData[g_Config.m_ClDummy].m_Jump; }
-	void SetJump(int n) { m_InputData[g_Config.m_ClDummy].m_Jump = n; }
-	int GetWantedWeapon() const { return m_InputData[g_Config.m_ClDummy].m_WantedWeapon; }
-	void SetWantedWeapon(int n) { m_InputData[g_Config.m_ClDummy].m_WantedWeapon = n; }
-	int GetTargetX() const { return m_InputData[g_Config.m_ClDummy].m_TargetX; }
-	void SetTargetX(int n) { m_InputData[g_Config.m_ClDummy].m_TargetX = n; }
-	int GetTargetY() const { return m_InputData[g_Config.m_ClDummy].m_TargetY; }
-	void SetMouseX(int n) { m_MousePos[g_Config.m_ClDummy].x = n; }
-	int GetMouseX() const { return m_MousePos[g_Config.m_ClDummy].x; }
-	void SetMouseY(int n) { m_MousePos[g_Config.m_ClDummy].y = n; }
-	int GetMouseY() const { return m_MousePos[g_Config.m_ClDummy].y; }
-	void SetTargetY(int n) { m_InputData[g_Config.m_ClDummy].m_TargetY = n; }
-	void SetDirRight(int n) { m_InputDirectionRight[g_Config.m_ClDummy] = n; }
-    void SetDirLeft(int n) { m_InputDirectionLeft[g_Config.m_ClDummy] = n; }
-    int GetDirRight() const { return m_InputDirectionRight[g_Config.m_ClDummy]; }
-    int GetDirLeft() const { return m_InputDirectionLeft[g_Config.m_ClDummy]; }
+	int GetDirection() const { return m_InputData[CURR_VIRTUAL_CLIENT].m_Direction; }
+	void SetDirection(int n) { m_InputData[CURR_VIRTUAL_CLIENT].m_Direction = n; }
+	int GetFire() const { return m_InputData[CURR_VIRTUAL_CLIENT].m_Fire; }
+	void SetFire(int n) { m_InputData[CURR_VIRTUAL_CLIENT].m_Fire = n; }
+	int GetHook() const { return m_InputData[CURR_VIRTUAL_CLIENT].m_Hook; }
+	void SetHook(int n) { m_InputData[CURR_VIRTUAL_CLIENT].m_Hook = n; }
+	int GetJump() const { return m_InputData[CURR_VIRTUAL_CLIENT].m_Jump; }
+	void SetJump(int n) { m_InputData[CURR_VIRTUAL_CLIENT].m_Jump = n; }
+	int GetWantedWeapon() const { return m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon; }
+	void SetWantedWeapon(int n) { m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon = n; }
+	int GetTargetX() const { return m_InputData[CURR_VIRTUAL_CLIENT].m_TargetX; }
+	void SetTargetX(int n) { m_InputData[CURR_VIRTUAL_CLIENT].m_TargetX = n; }
+	int GetTargetY() const { return m_InputData[CURR_VIRTUAL_CLIENT].m_TargetY; }
+	void SetMouseX(int n) { m_MousePos[CURR_VIRTUAL_CLIENT].x = n; }
+	int GetMouseX() const { return m_MousePos[CURR_VIRTUAL_CLIENT].x; }
+	void SetMouseY(int n) { m_MousePos[CURR_VIRTUAL_CLIENT].y = n; }
+	int GetMouseY() const { return m_MousePos[CURR_VIRTUAL_CLIENT].y; }
+	void SetTargetY(int n) { m_InputData[CURR_VIRTUAL_CLIENT].m_TargetY = n; }
+	void SetDirRight(int n) { m_InputDirectionRight[CURR_VIRTUAL_CLIENT] = n; }
+    void SetDirLeft(int n) { m_InputDirectionLeft[CURR_VIRTUAL_CLIENT] = n; }
+    int GetDirRight() const { return m_InputDirectionRight[CURR_VIRTUAL_CLIENT]; }
+    int GetDirLeft() const { return m_InputDirectionLeft[CURR_VIRTUAL_CLIENT]; }
 	
 	int m_NextHiddenCharCounter;
 	int m_HiddenCharSerialCount;

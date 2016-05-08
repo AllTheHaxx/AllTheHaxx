@@ -19,10 +19,12 @@
 #include "console.h"
 #include "controls.h"
 
-enum { LEFT_JOYSTICK_X = 0, LEFT_JOYSTICK_Y = 1,
-	RIGHT_JOYSTICK_X = 2, RIGHT_JOYSTICK_Y = 3,
-	SECOND_RIGHT_JOYSTICK_X = 20, SECOND_RIGHT_JOYSTICK_Y = 21,
-	NUM_JOYSTICK_AXES = 22 };
+enum
+{ 	LEFT_JOYSTICK_X = 0,			LEFT_JOYSTICK_Y = 1,
+	RIGHT_JOYSTICK_X = 2,			RIGHT_JOYSTICK_Y = 3,
+	SECOND_RIGHT_JOYSTICK_X = 20,	SECOND_RIGHT_JOYSTICK_Y = 21,
+	NUM_JOYSTICK_AXES = 22
+};
 
 CControls::CControls()
 {
@@ -79,6 +81,12 @@ void CControls::OnReset()
 
 void CControls::ResetInput(int dummy)
 {
+	if(dummy >= NUM_VIRTUAL_CLIENTS)
+	{
+		dbg_msg("ERROR", "CControls::ResetInput(%i) call exceeded vclient limit", dummy);
+		return;
+	}
+
 	m_LastData[dummy].m_Direction = 0;
 	//m_LastData.m_Hook = 0;
 	// simulate releasing the fire button
@@ -100,7 +108,7 @@ void CControls::OnRelease()
 void CControls::OnPlayerDeath()
 {
 	if (g_Config.m_ClResetWantedWeaponOnDeath)
-		m_LastData[g_Config.m_ClDummy].m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
+		m_LastData[CURR_VIRTUAL_CLIENT].m_WantedWeapon = m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon = 0;
 	for( int i = 0; i < NUM_WEAPONS; i++ )
 		m_AmmoCount[i] = 0;
 	m_JoystickTapTime = 0; // Do not launch hook on first tap
@@ -174,7 +182,7 @@ static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserDat
 {
 	CInputSet *pSet = (CInputSet *)pUserData;
 	ConKeyInputCounter(pResult, pSet);
-	pSet->m_pControls->m_InputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
+	pSet->m_pControls->m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon = 0;
 }
 
 void CControls::OnConsoleInit()
@@ -203,7 +211,7 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 	{
 		CNetMsg_Sv_WeaponPickup *pMsg = (CNetMsg_Sv_WeaponPickup *)pRawMsg;
 		if(g_Config.m_ClAutoswitchWeapons)
-			m_InputData[g_Config.m_ClDummy].m_WantedWeapon = pMsg->m_Weapon+1;
+			m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon = pMsg->m_Weapon+1;
 		// We don't really know ammo count, until we'll switch to that weapon, but any non-zero count will suffice here
 		m_AmmoCount[pMsg->m_Weapon%NUM_WEAPONS] = 10;
 	}
@@ -216,21 +224,21 @@ int CControls::SnapInput(int *pData)
 
 	// update player state
 	if(m_pClient->m_pChat->IsActive())
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
+		m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags = PLAYERFLAG_CHATTING;
 	else if(m_pClient->m_pMenus->IsActive())
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
+		m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
+		m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	
-	m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
+	m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
 		
 	if(m_pClient->m_pChat->m_CryptSendQueue.size())
 	{
 		int buf = m_pClient->m_pChat->m_CryptSendQueue[0] << 16;
 		int serial = m_HiddenCharSerialCount << 24;
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags += buf + serial;
+		m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags += buf + serial;
 
-		//dbg_msg("Chat", "%c of %s : %d", m_pClient->m_pChat->m_CryptSendQueue.c_str()[0],m_pClient->m_pChat->m_CryptSendQueue.c_str(), m_InputData[g_Config.m_ClDummy].m_PlayerFlags);
+		//dbg_msg("Chat", "%c of %s : %d", m_pClient->m_pChat->m_CryptSendQueue.c_str()[0],m_pClient->m_pChat->m_CryptSendQueue.c_str(), m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags);
 		m_NextHiddenCharCounter++;
 		if(m_NextHiddenCharCounter == g_Config.m_ClFlagChatPause)  //the chance to miss something at 3 chars is low but not 0
 		{
@@ -243,25 +251,25 @@ int CControls::SnapInput(int *pData)
 		m_HiddenCharSerialCount = 0;
 
 	if(m_pClient->m_pScoreboard->Active())
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
+		m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
 
-	if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)
+	if(m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags != PLAYERFLAG_PLAYING)
 		m_JoystickTapTime = 0; // Do not launch hook on first tap
 
-	if (m_pClient->m_pControls->m_ShowHookColl[g_Config.m_ClDummy])
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_AIM;
+	if (m_pClient->m_pControls->m_ShowHookColl[CURR_VIRTUAL_CLIENT])
+		m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags |= PLAYERFLAG_AIM;
 
-	if(m_LastData[g_Config.m_ClDummy].m_PlayerFlags != m_InputData[g_Config.m_ClDummy].m_PlayerFlags)
+	if(m_LastData[CURR_VIRTUAL_CLIENT].m_PlayerFlags != m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags)
 		Send = true;
 
-	m_LastData[g_Config.m_ClDummy].m_PlayerFlags = m_InputData[g_Config.m_ClDummy].m_PlayerFlags;
+	m_LastData[CURR_VIRTUAL_CLIENT].m_PlayerFlags = m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags;
 
 	// we freeze the input if chat or menu is activated
-	if(!(m_InputData[g_Config.m_ClDummy].m_PlayerFlags&PLAYERFLAG_PLAYING))
+	if(!(m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags&PLAYERFLAG_PLAYING))
 	{
-		ResetInput(g_Config.m_ClDummy);
+		ResetInput(CURR_VIRTUAL_CLIENT);
 
-		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
+		mem_copy(pData, &m_InputData[CURR_VIRTUAL_CLIENT], sizeof(m_InputData[0]));
 
 		// send once a second just to be sure
 		if(time_get() > LastSendTime + time_freq())
@@ -269,91 +277,91 @@ int CControls::SnapInput(int *pData)
 	}
 	else
 	{
-		m_InputData[g_Config.m_ClDummy].m_TargetX = (int)m_MousePos[g_Config.m_ClDummy].x;
-		m_InputData[g_Config.m_ClDummy].m_TargetY = (int)m_MousePos[g_Config.m_ClDummy].y;
-		if(!m_InputData[g_Config.m_ClDummy].m_TargetX && !m_InputData[g_Config.m_ClDummy].m_TargetY)
+		m_InputData[CURR_VIRTUAL_CLIENT].m_TargetX = (int)m_MousePos[CURR_VIRTUAL_CLIENT].x;
+		m_InputData[CURR_VIRTUAL_CLIENT].m_TargetY = (int)m_MousePos[CURR_VIRTUAL_CLIENT].y;
+		if(!m_InputData[CURR_VIRTUAL_CLIENT].m_TargetX && !m_InputData[CURR_VIRTUAL_CLIENT].m_TargetY)
 		{
-			m_InputData[g_Config.m_ClDummy].m_TargetX = 1;
-			m_MousePos[g_Config.m_ClDummy].x = 1;
+			m_InputData[CURR_VIRTUAL_CLIENT].m_TargetX = 1;
+			m_MousePos[CURR_VIRTUAL_CLIENT].x = 1;
 		}
 
 		// set direction
-		m_InputData[g_Config.m_ClDummy].m_Direction = 0;
-		if(m_InputDirectionLeft[g_Config.m_ClDummy] && !m_InputDirectionRight[g_Config.m_ClDummy])
-			m_InputData[g_Config.m_ClDummy].m_Direction = -1;
-		if(!m_InputDirectionLeft[g_Config.m_ClDummy] && m_InputDirectionRight[g_Config.m_ClDummy])
-			m_InputData[g_Config.m_ClDummy].m_Direction = 1;
+		m_InputData[CURR_VIRTUAL_CLIENT].m_Direction = 0;
+		if(m_InputDirectionLeft[CURR_VIRTUAL_CLIENT] && !m_InputDirectionRight[CURR_VIRTUAL_CLIENT])
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Direction = -1;
+		if(!m_InputDirectionLeft[CURR_VIRTUAL_CLIENT] && m_InputDirectionRight[CURR_VIRTUAL_CLIENT])
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Direction = 1;
 
 		// moonwalk, bitch please!
 		{
-			if(m_InputDirectionLeft[g_Config.m_ClDummy] && m_InputDirectionRight[g_Config.m_ClDummy])
-				m_InputData[g_Config.m_ClDummy].m_Direction = m_LastData[g_Config.m_ClDummy].m_Direction ? -m_LastData[g_Config.m_ClDummy].m_Direction : 1;
+			if(m_InputDirectionLeft[CURR_VIRTUAL_CLIENT] && m_InputDirectionRight[CURR_VIRTUAL_CLIENT])
+				m_InputData[CURR_VIRTUAL_CLIENT].m_Direction = m_LastData[CURR_VIRTUAL_CLIENT].m_Direction ? -m_LastData[CURR_VIRTUAL_CLIENT].m_Direction : 1;
 		}
 
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)
 		{
 			CNetObj_PlayerInput *DummyInput = &Client()->m_DummyInput;
-			DummyInput->m_Direction = m_InputData[g_Config.m_ClDummy].m_Direction * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
-			DummyInput->m_Hook = m_InputData[g_Config.m_ClDummy].m_Hook;
-			DummyInput->m_Jump = m_InputData[g_Config.m_ClDummy].m_Jump;
-			DummyInput->m_PlayerFlags = m_InputData[g_Config.m_ClDummy].m_PlayerFlags;
-			DummyInput->m_TargetX = m_InputData[g_Config.m_ClDummy].m_TargetX * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
-			DummyInput->m_TargetY = m_InputData[g_Config.m_ClDummy].m_TargetY;
-			DummyInput->m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon;
+			DummyInput->m_Direction = m_InputData[CURR_VIRTUAL_CLIENT].m_Direction * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
+			DummyInput->m_Hook = m_InputData[CURR_VIRTUAL_CLIENT].m_Hook;
+			DummyInput->m_Jump = m_InputData[CURR_VIRTUAL_CLIENT].m_Jump;
+			DummyInput->m_PlayerFlags = m_InputData[CURR_VIRTUAL_CLIENT].m_PlayerFlags;
+			DummyInput->m_TargetX = m_InputData[CURR_VIRTUAL_CLIENT].m_TargetX * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
+			DummyInput->m_TargetY = m_InputData[CURR_VIRTUAL_CLIENT].m_TargetY;
+			DummyInput->m_WantedWeapon = m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon;
 
 
 
-			DummyInput->m_Fire += m_InputData[g_Config.m_ClDummy].m_Fire - m_LastData[g_Config.m_ClDummy].m_Fire;
-			DummyInput->m_NextWeapon += m_InputData[g_Config.m_ClDummy].m_NextWeapon - m_LastData[g_Config.m_ClDummy].m_NextWeapon;
-			DummyInput->m_PrevWeapon += m_InputData[g_Config.m_ClDummy].m_PrevWeapon - m_LastData[g_Config.m_ClDummy].m_PrevWeapon;
+			DummyInput->m_Fire += m_InputData[CURR_VIRTUAL_CLIENT].m_Fire - m_LastData[CURR_VIRTUAL_CLIENT].m_Fire;
+			DummyInput->m_NextWeapon += m_InputData[CURR_VIRTUAL_CLIENT].m_NextWeapon - m_LastData[CURR_VIRTUAL_CLIENT].m_NextWeapon;
+			DummyInput->m_PrevWeapon += m_InputData[CURR_VIRTUAL_CLIENT].m_PrevWeapon - m_LastData[CURR_VIRTUAL_CLIENT].m_PrevWeapon;
 
-			m_InputData[!g_Config.m_ClDummy] = *DummyInput;
+			m_InputData[CURR_VIRTUAL_CLIENT^MAX_VIRTUAL_CLIENTS] = *DummyInput;
 		}
 
 		// stress testing
 		if(g_Config.m_DbgStress)
 		{
 			float t = Client()->LocalTime();
-			mem_zero(&m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
+			mem_zero(&m_InputData[CURR_VIRTUAL_CLIENT], sizeof(m_InputData[0]));
 
-			m_InputData[g_Config.m_ClDummy].m_Direction = ((int)t/2)&1;
-			m_InputData[g_Config.m_ClDummy].m_Jump = ((int)t);
-			m_InputData[g_Config.m_ClDummy].m_Fire = ((int)(t*10));
-			m_InputData[g_Config.m_ClDummy].m_Hook = ((int)(t*2))&1;
-			m_InputData[g_Config.m_ClDummy].m_WantedWeapon = ((int)t)%NUM_WEAPONS;
-			m_InputData[g_Config.m_ClDummy].m_TargetX = (int)(sinf(t*3)*100.0f);
-			m_InputData[g_Config.m_ClDummy].m_TargetY = (int)(cosf(t*3)*100.0f);
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Direction = ((int)t/2)&1;
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Jump = ((int)t);
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Fire = ((int)(t*10));
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Hook = ((int)(t*2))&1;
+			m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon = ((int)t)%NUM_WEAPONS;
+			m_InputData[CURR_VIRTUAL_CLIENT].m_TargetX = (int)(sinf(t*3)*100.0f);
+			m_InputData[CURR_VIRTUAL_CLIENT].m_TargetY = (int)(cosf(t*3)*100.0f);
 		}
 
 		LUA_FIRE_EVENT("OnSnapInput");
 
 		// check if we need to send input
-		if(m_InputData[g_Config.m_ClDummy].m_Direction != m_LastData[g_Config.m_ClDummy].m_Direction) Send = true;
-		else if(m_InputData[g_Config.m_ClDummy].m_Jump != m_LastData[g_Config.m_ClDummy].m_Jump) Send = true;
-		else if(m_InputData[g_Config.m_ClDummy].m_Fire != m_LastData[g_Config.m_ClDummy].m_Fire) Send = true;
-		else if(m_InputData[g_Config.m_ClDummy].m_Hook != m_LastData[g_Config.m_ClDummy].m_Hook) Send = true;
-		else if(m_InputData[g_Config.m_ClDummy].m_WantedWeapon != m_LastData[g_Config.m_ClDummy].m_WantedWeapon) Send = true;
-		else if(m_InputData[g_Config.m_ClDummy].m_NextWeapon != m_LastData[g_Config.m_ClDummy].m_NextWeapon) Send = true;
-		else if(m_InputData[g_Config.m_ClDummy].m_PrevWeapon != m_LastData[g_Config.m_ClDummy].m_PrevWeapon) Send = true;
+		if(m_InputData[CURR_VIRTUAL_CLIENT].m_Direction != m_LastData[CURR_VIRTUAL_CLIENT].m_Direction) Send = true;
+		else if(m_InputData[CURR_VIRTUAL_CLIENT].m_Jump != m_LastData[CURR_VIRTUAL_CLIENT].m_Jump) Send = true;
+		else if(m_InputData[CURR_VIRTUAL_CLIENT].m_Fire != m_LastData[CURR_VIRTUAL_CLIENT].m_Fire) Send = true;
+		else if(m_InputData[CURR_VIRTUAL_CLIENT].m_Hook != m_LastData[CURR_VIRTUAL_CLIENT].m_Hook) Send = true;
+		else if(m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon != m_LastData[CURR_VIRTUAL_CLIENT].m_WantedWeapon) Send = true;
+		else if(m_InputData[CURR_VIRTUAL_CLIENT].m_NextWeapon != m_LastData[CURR_VIRTUAL_CLIENT].m_NextWeapon) Send = true;
+		else if(m_InputData[CURR_VIRTUAL_CLIENT].m_PrevWeapon != m_LastData[CURR_VIRTUAL_CLIENT].m_PrevWeapon) Send = true;
 
 		// send at at least 10hz
 		if(time_get() > LastSendTime + time_freq()/25)
 			Send = true;
 
 		if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalCharacter->m_Weapon == WEAPON_NINJA
-			&& (m_InputData[g_Config.m_ClDummy].m_Direction || m_InputData[g_Config.m_ClDummy].m_Jump || m_InputData[g_Config.m_ClDummy].m_Hook))
+			&& (m_InputData[CURR_VIRTUAL_CLIENT].m_Direction || m_InputData[CURR_VIRTUAL_CLIENT].m_Jump || m_InputData[CURR_VIRTUAL_CLIENT].m_Hook))
 			Send = true;
 	}
 
 	// copy and return size
-	m_LastData[g_Config.m_ClDummy] = m_InputData[g_Config.m_ClDummy];
+	m_LastData[CURR_VIRTUAL_CLIENT] = m_InputData[CURR_VIRTUAL_CLIENT];
 
 	if(!Send)
 		return 0;
 
 	LastSendTime = time_get();
-	mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
+	mem_copy(pData, &m_InputData[CURR_VIRTUAL_CLIENT], sizeof(m_InputData[0]));
 	return sizeof(m_InputData[0]);
 }
 
@@ -387,10 +395,10 @@ void CControls::OnRender()
 			if( RunPressed )
 			{
 				if( m_JoystickTapTime + time_freq() > CurTime ) // Tap in less than 1 second to jump
-					m_InputData[g_Config.m_ClDummy].m_Jump = 1;
+					m_InputData[CURR_VIRTUAL_CLIENT].m_Jump = 1;
 			}
 			else
-				m_InputData[g_Config.m_ClDummy].m_Jump = 0;
+				m_InputData[CURR_VIRTUAL_CLIENT].m_Jump = 0;
 			m_JoystickTapTime = CurTime;
 		}
 
@@ -398,31 +406,31 @@ void CControls::OnRender()
 
 		if( RunPressed )
 		{
-			m_InputDirectionLeft[g_Config.m_ClDummy] = (RunX < -JOYSTICK_RUN_DISTANCE);
-			m_InputDirectionRight[g_Config.m_ClDummy] = (RunX > JOYSTICK_RUN_DISTANCE);
+			m_InputDirectionLeft[CURR_VIRTUAL_CLIENT] = (RunX < -JOYSTICK_RUN_DISTANCE);
+			m_InputDirectionRight[CURR_VIRTUAL_CLIENT] = (RunX > JOYSTICK_RUN_DISTANCE);
 		}
 
 		// Move 500ms in the same direction, to prevent speed bump when tapping
 		if( !RunPressed && m_JoystickTapTime + time_freq() / 2 > CurTime )
 		{
-			m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
-			m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+			m_InputDirectionLeft[CURR_VIRTUAL_CLIENT] = 0;
+			m_InputDirectionRight[CURR_VIRTUAL_CLIENT] = 0;
 		}
 
 		if( HookPressed )
 		{
-			m_MousePos[g_Config.m_ClDummy] = vec2(HookX / 30, HookY / 30);
+			m_MousePos[CURR_VIRTUAL_CLIENT] = vec2(HookX / 30, HookY / 30);
 			ClampMousePos();
-			m_InputData[g_Config.m_ClDummy].m_Hook = 1;
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Hook = 1;
 		}
 		else
 		{
-			m_InputData[g_Config.m_ClDummy].m_Hook = 0;
+			m_InputData[CURR_VIRTUAL_CLIENT].m_Hook = 0;
 		}
 
 		if( AimPressed )
 		{
-			m_MousePos[g_Config.m_ClDummy] = vec2(AimX / 30, AimY / 30);
+			m_MousePos[CURR_VIRTUAL_CLIENT] = vec2(AimX / 30, AimY / 30);
 			ClampMousePos();
 		}
 
@@ -431,9 +439,9 @@ void CControls::OnRender()
 			// Fire when releasing joystick
 			if( !AimPressed )
 			{
-				m_InputData[g_Config.m_ClDummy].m_Fire ++;
-				if( (bool)(m_InputData[g_Config.m_ClDummy].m_Fire % 2) != AimPressed )
-					m_InputData[g_Config.m_ClDummy].m_Fire ++;
+				m_InputData[CURR_VIRTUAL_CLIENT].m_Fire ++;
+				if( (bool)(m_InputData[CURR_VIRTUAL_CLIENT].m_Fire % 2) != AimPressed )
+					m_InputData[CURR_VIRTUAL_CLIENT].m_Fire ++;
 				FireWasPressed = true;
 			}
 		}
@@ -448,8 +456,8 @@ void CControls::OnRender()
 		int RunY = SDL_JoystickGetAxis(m_Gamepad, LEFT_JOYSTICK_Y);
 		if( m_UsingGamepad )
 		{
-			m_InputDirectionLeft[g_Config.m_ClDummy] = (RunX < -GAMEPAD_DEAD_ZONE);
-			m_InputDirectionRight[g_Config.m_ClDummy] = (RunX > GAMEPAD_DEAD_ZONE);
+			m_InputDirectionLeft[CURR_VIRTUAL_CLIENT] = (RunX < -GAMEPAD_DEAD_ZONE);
+			m_InputDirectionRight[CURR_VIRTUAL_CLIENT] = (RunX > GAMEPAD_DEAD_ZONE);
 		}
 
 		// Get input from right joystick
@@ -457,7 +465,7 @@ void CControls::OnRender()
 		int AimY = SDL_JoystickGetAxis(m_Gamepad, RIGHT_JOYSTICK_Y);
 		if( abs(AimX) > GAMEPAD_DEAD_ZONE || abs(AimY) > GAMEPAD_DEAD_ZONE )
 		{
-			m_MousePos[g_Config.m_ClDummy] = vec2(AimX / 30, AimY / 30);
+			m_MousePos[CURR_VIRTUAL_CLIENT] = vec2(AimX / 30, AimY / 30);
 			ClampMousePos();
 		}
 
@@ -476,7 +484,7 @@ void CControls::OnRender()
 		// Keep track of ammo count, we know weapon ammo only when we switch to that weapon, this is tracked on server and protocol does not track that
 		m_AmmoCount[m_pClient->m_Snap.m_pLocalCharacter->m_Weapon%NUM_WEAPONS] = m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
 		// Autoswitch weapon if we're out of ammo
-		if( (m_InputData[g_Config.m_ClDummy].m_Fire % 2 != 0 || FireWasPressed) &&
+		if( (m_InputData[CURR_VIRTUAL_CLIENT].m_Fire % 2 != 0 || FireWasPressed) &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount == 0 &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA )
@@ -490,17 +498,17 @@ void CControls::OnRender()
 					break;
 			}
 			if( w != m_pClient->m_Snap.m_pLocalCharacter->m_Weapon )
-				m_InputData[g_Config.m_ClDummy].m_WantedWeapon = w+1;
+				m_InputData[CURR_VIRTUAL_CLIENT].m_WantedWeapon = w+1;
 		}
 	}
 
 	// update target pos
 	if(m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
-		m_TargetPos[g_Config.m_ClDummy] = m_pClient->m_LocalCharacterPos + m_MousePos[g_Config.m_ClDummy];
+		m_TargetPos[CURR_VIRTUAL_CLIENT] = m_pClient->m_LocalCharacterPos + m_MousePos[CURR_VIRTUAL_CLIENT];
 	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
-		m_TargetPos[g_Config.m_ClDummy] = m_pClient->m_Snap.m_SpecInfo.m_Position + m_MousePos[g_Config.m_ClDummy];
+		m_TargetPos[CURR_VIRTUAL_CLIENT] = m_pClient->m_Snap.m_SpecInfo.m_Position + m_MousePos[CURR_VIRTUAL_CLIENT];
 	else
-		m_TargetPos[g_Config.m_ClDummy] = m_MousePos[g_Config.m_ClDummy];
+		m_TargetPos[CURR_VIRTUAL_CLIENT] = m_MousePos[CURR_VIRTUAL_CLIENT];
 }
 
 bool CControls::OnMouseMove(float x, float y)
@@ -515,11 +523,11 @@ bool CControls::OnMouseMove(float x, float y)
 	{
 		m_OldMouseX = x;
 		m_OldMouseY = y;
-		m_MousePos[g_Config.m_ClDummy] = vec2((x - Graphics()->Width()/2), (y - Graphics()->Height()/2));
+		m_MousePos[CURR_VIRTUAL_CLIENT] = vec2((x - Graphics()->Width()/2), (y - Graphics()->Height()/2));
 		ClampMousePos();
 	}
 #else
-	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
+	m_MousePos[CURR_VIRTUAL_CLIENT] += vec2(x, y); // TODO: ugly
 	ClampMousePos();
 #endif
 
@@ -530,8 +538,8 @@ void CControls::ClampMousePos()
 {
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
 	{
-		m_MousePos[g_Config.m_ClDummy].x = clamp(m_MousePos[g_Config.m_ClDummy].x, 200.0f, Collision()->GetWidth()*32-200.0f);
-		m_MousePos[g_Config.m_ClDummy].y = clamp(m_MousePos[g_Config.m_ClDummy].y, 200.0f, Collision()->GetHeight()*32-200.0f);
+		m_MousePos[CURR_VIRTUAL_CLIENT].x = clamp(m_MousePos[CURR_VIRTUAL_CLIENT].x, 200.0f, Collision()->GetWidth()*32-200.0f);
+		m_MousePos[CURR_VIRTUAL_CLIENT].y = clamp(m_MousePos[CURR_VIRTUAL_CLIENT].y, 200.0f, Collision()->GetHeight()*32-200.0f);
 	}
 	else
 	{
@@ -541,7 +549,7 @@ void CControls::ClampMousePos()
 		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		float MouseMax = min(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
 
-		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
-			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;
+		if(length(m_MousePos[CURR_VIRTUAL_CLIENT]) > MouseMax)
+			m_MousePos[CURR_VIRTUAL_CLIENT] = normalize(m_MousePos[CURR_VIRTUAL_CLIENT])*MouseMax;
 	}
 }

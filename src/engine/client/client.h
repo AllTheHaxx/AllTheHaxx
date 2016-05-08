@@ -5,6 +5,9 @@
 
 #include "db_sqlite3.h"
 
+//#define MAX_VIRTUAL_CLIENTS 10
+//#define MAX_ONLINE_CLIENTS MAX_VIRTUAL_CLIENTS*2
+
 class CGraph
 {
 public:
@@ -78,7 +81,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
 	};
 
-	class CNetClient m_NetClient[3];
+	class CNetClient m_NetClient[NUM_VIRTUAL_CLIENTS+1];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
@@ -110,9 +113,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
 
-	int m_AckGameTick[2];
-	int m_CurrentRecvTick[2];
-	int m_RconAuthed[2];
+	int m_AckGameTick[NUM_VIRTUAL_CLIENTS];
+	int m_CurrentRecvTick[NUM_VIRTUAL_CLIENTS];
+	int m_RconAuthed[NUM_VIRTUAL_CLIENTS];
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
 
@@ -126,7 +129,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMap[256];
 	unsigned m_CurrentMapCrc;
 
-	bool m_TimeoutCodeSent[2];
+	bool m_TimeoutCodeSent[NUM_VIRTUAL_CLIENTS];
 
 	//
 	char m_aCmdConnect[256];
@@ -142,7 +145,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadTotalsize;
 
 	// time
-	CSmoothTime m_GameTime[2];
+	CSmoothTime m_GameTime[NUM_VIRTUAL_CLIENTS];
 	CSmoothTime m_PredictedTime;
 
 	// input
@@ -152,9 +155,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int m_Tick; // the tick that the input is for
 		int64 m_PredictedTime; // prediction latency when we sent this input
 		int64 m_Time;
-	} m_aInputs[2][200];
+	} m_aInputs[NUM_VIRTUAL_CLIENTS][200];
 
-	int m_CurrentInput[2];
+	int m_CurrentInput[NUM_VIRTUAL_CLIENTS];
 	bool m_LastDummy;
 	bool m_LastDummy2;
 	CNetObj_PlayerInput HammerInput;
@@ -165,14 +168,14 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CGraph m_FpsGraph;
 
 	// the game snapshots are modifiable by the game
-	class CSnapshotStorage m_SnapshotStorage[2];
-	CSnapshotStorage::CHolder *m_aSnapshots[2][NUM_SNAPSHOT_TYPES];
+	class CSnapshotStorage m_SnapshotStorage[NUM_VIRTUAL_CLIENTS];
+	CSnapshotStorage::CHolder *m_aSnapshots[NUM_VIRTUAL_CLIENTS][NUM_SNAPSHOT_TYPES];
 
-	int m_ReceivedSnapshots[2];
+	int m_ReceivedSnapshots[NUM_VIRTUAL_CLIENTS];
 	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE];
 
 	class CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][NUM_VIRTUAL_CLIENTS][CSnapshot::MAX_SIZE];
 
 	class CSnapshotDelta m_SnapshotDelta;
 
@@ -238,7 +241,7 @@ public:
 
 	virtual void SendPlayerInfo(bool Start);
 
-	virtual bool RconAuthed() { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
+	virtual bool RconAuthed() { return m_RconAuthed[CURR_VIRTUAL_CLIENT] != 0; }
 	virtual bool UseTempRconCommands() { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword);
 	virtual void Rcon(const char *pCmd);
@@ -278,6 +281,7 @@ public:
 	virtual bool DummyConnecting();
 	void DummyInfo();
 	int m_DummyConnected;
+	int m_NumVirtualClients;
 	int m_LastDummyConnectTime;
 	int m_Fire;
 
@@ -409,7 +413,7 @@ public:
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 	
 	static void InputThread(void *pUser);
-	void * m_pInputThread;
+	void *m_pInputThread;
 
 	virtual IFriends* Foes() {return &m_Foes; }
 };

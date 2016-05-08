@@ -39,6 +39,7 @@ config:Add(Opus.OptFind("opus", true))
 config:Add(Ogg.OptFind("ogg", true))
 config:Add(Mysql.OptFind("mysql", false))
 config:Add(OptString("websockets", false))
+config:Add(OptString("vclients", 10))
 config:Add(OptString("spoofing", false))
 config:Finalize("config.lua")
 
@@ -229,6 +230,10 @@ function build(settings)
 	if config.spoofing.value then
 		settings.cc.defines:Add("CONF_SPOOFING")
 	end
+	
+	settings.cc.defines:Add("MAX_VIRTUAL_CLIENTS=" .. config.vclients.value)
+	settings.cc.defines:Add("NUM_VIRTUAL_CLIENTS=" .. config.vclients.value*2)
+	settings.cc.defines:Add("CURR_VIRTUAL_CLIENT=g_Config.m_ClVirtualClient+g_Config.m_ClDummy*MAX_VIRTUAL_CLIENTS")
 
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")

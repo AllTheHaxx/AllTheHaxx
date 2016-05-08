@@ -162,7 +162,7 @@ const char *CGameClient::Version() { return GAME_VERSION; }
 const char *CGameClient::NetVersion() { return GAME_NETVERSION; }
 const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjName(Type); }
 
-const CNetObj_PlayerInput &CGameClient::getPlayerInput(int dummy)
+const CNetObj_PlayerInput &CGameClient::GetPlayerInput(int dummy)
 {
 	return m_pControls->m_InputData[dummy];
 }
@@ -2439,13 +2439,13 @@ vec2 CLocalProjectile::GetPos(float Time)
 			break;
 
 		case WEAPON_SHOTGUN:
-			Curvature = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_ShotgunCurvature;
-			Speed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_ShotgunSpeed;
+			Curvature = m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_ShotgunCurvature;
+			Speed = m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_ShotgunSpeed;
 			break;
 
 		case WEAPON_GUN:
-			Curvature = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_GunCurvature;
-			Speed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_GunSpeed;
+			Curvature = m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_GunCurvature;
+			Speed = m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_GunSpeed;
 			break;
 	}
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
@@ -2479,7 +2479,7 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 	if(m_Owner >= 0 && Target >= 0 && m_pGameClient->m_aClients[m_Owner].m_Active && m_pGameClient->m_aClients[Target].m_Active && !m_pGameClient->m_Teams.CanCollide(m_Owner, Target))
 		isWeaponCollide = true;
 
-	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_PlayerCollision || m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_PlayerHooking);
 
 	if(((Target >= 0 && (m_Owner >= 0 ? OwnerCanProbablyHitOthers : 1 || Target == m_Owner)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
 	{
@@ -2507,11 +2507,11 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 	{
 		int Lifetime = 0;
 		if(m_Weapon == WEAPON_GRENADE)
-			Lifetime = m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED;
+			Lifetime = m_pGameClient->m_Tuning[CURR_VIRTUAL_CLIENT].m_GrenadeLifetime * SERVER_TICK_SPEED;
 		else if(m_Weapon == WEAPON_GUN)
-			Lifetime = m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED;
+			Lifetime = m_pGameClient->m_Tuning[CURR_VIRTUAL_CLIENT].m_GrenadeLifetime * SERVER_TICK_SPEED;
 		else if(m_Weapon == WEAPON_SHOTGUN)
-			Lifetime = m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunLifetime * SERVER_TICK_SPEED;
+			Lifetime = m_pGameClient->m_Tuning[CURR_VIRTUAL_CLIENT].m_ShotgunLifetime * SERVER_TICK_SPEED;
 		int LifeSpan = Lifetime - (CurrentTick - m_StartTick);
 		if(LifeSpan == -1)
 		{
@@ -2529,7 +2529,7 @@ void CLocalProjectile::CreateExplosion(vec2 Pos, int LocalClientID)
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
 
-	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_PlayerCollision || m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_PlayerHooking);
 
 	for(int c = 0; c < MAX_CLIENTS; c++)
 	{
@@ -2547,7 +2547,7 @@ void CLocalProjectile::CreateExplosion(vec2 Pos, int LocalClientID)
 			ForceDir = normalize(Diff);
 		l = 1-clamp((l-InnerRadius)/(Radius-InnerRadius), 0.0f, 1.0f);
 
-		float Strength = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_ExplosionStrength;
+		float Strength = m_pWorld->m_Tuning[CURR_VIRTUAL_CLIENT].m_ExplosionStrength;
 		float Dmg = Strength * l;
 
 		if((int)Dmg)
@@ -2566,10 +2566,10 @@ CWeaponData *CGameClient::FindWeaponData(int TargetTick)
 	return NULL;
 }
 
-void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
+void CGameClient::FindWeaker(bool IsWeaker[NUM_VIRTUAL_CLIENTS][MAX_CLIENTS])
 {
 	// attempts to detect strong/weak against the player we are hooking
-	static int DirAccumulated[2][MAX_CLIENTS] = {{0}};
+	static int DirAccumulated[NUM_VIRTUAL_CLIENTS][MAX_CLIENTS] = {{0}};
 	if(!m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Active || !m_Snap.m_paPlayerInfos[m_Snap.m_LocalClientID])
 		return;
 	int HookedPlayer = m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev.m_HookedPlayer;
@@ -2581,7 +2581,7 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 		for(int dir = 0; dir < 2; dir++)
 		{
 			CWorldCore World;
-			World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
+			World.m_Tuning[CURR_VIRTUAL_CLIENT] = m_Tuning[CURR_VIRTUAL_CLIENT];
 
 			CCharacterCore OtherChar;
 			OtherChar.Init(&World, Collision(), &m_Teams);
@@ -2614,9 +2614,9 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 		}
 		const float Low = 0.0001, High = 0.07;
 		if(PredictErr[1] < Low && PredictErr[0] > High)
-			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], 1);
+			DirAccumulated[CURR_VIRTUAL_CLIENT][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[CURR_VIRTUAL_CLIENT][HookedPlayer], 1);
 		else if(PredictErr[0] < Low && PredictErr[1] > High)
-			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], -1);
-		IsWeaker[g_Config.m_ClDummy][HookedPlayer] = (DirAccumulated[g_Config.m_ClDummy][HookedPlayer] > 0);
+			DirAccumulated[CURR_VIRTUAL_CLIENT][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[CURR_VIRTUAL_CLIENT][HookedPlayer], -1);
+		IsWeaker[CURR_VIRTUAL_CLIENT][HookedPlayer] = (DirAccumulated[CURR_VIRTUAL_CLIENT][HookedPlayer] > 0);
 	}
 }

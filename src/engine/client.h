@@ -27,16 +27,16 @@ protected:
 	int m_State;
 
 	// quick access to time variables
-	int m_PrevGameTick[2];
-	int m_CurGameTick[2];
-	float m_GameIntraTick[2];
-	float m_GameTickTime[2];
+	int m_PrevGameTick[NUM_VIRTUAL_CLIENTS];
+	int m_CurGameTick[NUM_VIRTUAL_CLIENTS];
+	float m_GameIntraTick[NUM_VIRTUAL_CLIENTS];
+	float m_GameTickTime[NUM_VIRTUAL_CLIENTS];
 
 	int m_CurMenuTick;
 	int64 m_MenuStartTime;
 
-	int m_PredTick[2];
-	float m_PredIntraTick[2];
+	int m_PredTick[NUM_VIRTUAL_CLIENTS];
+	float m_PredIntraTick[NUM_VIRTUAL_CLIENTS];
 
 	float m_LocalTime;
 	float m_RenderFrameTime;
@@ -48,7 +48,8 @@ protected:
 public:
 	bool m_Restarting; // set this to make the client restart on the next quit
 
-	int m_LocalIDs[2];
+	int m_LocalIDs[NUM_VIRTUAL_CLIENTS];
+
 	//char m_aNews[NEWS_SIZE]; // ATH NEWS ARE IN CUpdater!!
 	char m_aNewsDDNet[NEWS_SIZE];
 	int64 m_ReconnectTime;
@@ -88,13 +89,13 @@ public:
 	inline int State() const { return m_State; }
 
 	// tick time access
-	inline int PrevGameTick() const { return m_PrevGameTick[g_Config.m_ClDummy]; }
-	inline int GameTick() const { return m_CurGameTick[g_Config.m_ClDummy]; }
+	inline int PrevGameTick() const { return m_PrevGameTick[CURR_VIRTUAL_CLIENT]; }
+	inline int GameTick() const { return m_CurGameTick[CURR_VIRTUAL_CLIENT]; }
 	inline int MenuTick() const { return m_CurMenuTick; }
-	inline int PredGameTick() const { return m_PredTick[g_Config.m_ClDummy]; }
-	inline float IntraGameTick() const { return m_GameIntraTick[g_Config.m_ClDummy]; }
-	inline float PredIntraGameTick() const { return m_PredIntraTick[g_Config.m_ClDummy]; }
-	inline float GameTickTime() const { return m_GameTickTime[g_Config.m_ClDummy]; }
+	inline int PredGameTick() const { return m_PredTick[CURR_VIRTUAL_CLIENT]; }
+	inline float IntraGameTick() const { return m_GameIntraTick[CURR_VIRTUAL_CLIENT]; }
+	inline float PredIntraGameTick() const { return m_PredIntraTick[CURR_VIRTUAL_CLIENT]; }
+	inline float GameTickTime() const { return m_GameTickTime[CURR_VIRTUAL_CLIENT]; }
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access
@@ -243,7 +244,7 @@ public:
 	virtual int OnSnapInput(int *pData) = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
 	virtual void ResetDummyInput() = 0;
-	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy) = 0;
+	virtual const CNetObj_PlayerInput &GetPlayerInput(int dummy) = 0;
 
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;

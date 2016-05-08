@@ -115,14 +115,14 @@ protected:
 	void UpdatePositions();
 
 	int m_PredictedTick;
-	int m_LastNewPredictedTick[2];
+	int m_LastNewPredictedTick[NUM_VIRTUAL_CLIENTS];
 
 	int m_LastRoundStartTick;
 
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
 
-	int m_CheckInfo[2];
+	int m_CheckInfo[NUM_VIRTUAL_CLIENTS];
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
@@ -161,10 +161,10 @@ public:
 	bool m_SuppressEvents;
 	bool m_NewTick;
 	bool m_NewPredictedTick;
-	int m_FlagDropTick[2];
+	int m_FlagDropTick[NUM_VIRTUAL_CLIENTS];
 
 	// TODO: move this
-	CTuningParams m_Tuning[2];
+	CTuningParams m_Tuning[NUM_VIRTUAL_CLIENTS];
 
 	enum
 	{
@@ -190,7 +190,7 @@ public:
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
-		const CNetObj_Flag *m_paFlags[2];
+		const CNetObj_Flag *m_paFlags[NUM_VIRTUAL_CLIENTS];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
 		int m_GameDataSnapID;
@@ -203,7 +203,7 @@ public:
 
 		int m_LocalClientID;
 		int m_NumPlayers;
-		int m_aTeamSize[2];
+		int m_aTeamSize[NUM_VIRTUAL_CLIENTS];
 
 		// spectate data
 		struct CSpectateInfo
@@ -334,7 +334,7 @@ public:
 	virtual const char *Version();
 	virtual const char *NetVersion();
 
-	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy);
+	virtual const CNetObj_PlayerInput &GetPlayerInput(int dummy);
 
 
 	// actions
@@ -398,9 +398,9 @@ public:
 	CWeaponData *GetWeaponData(int Tick) { return &m_aWeaponData[((Tick%150)+150)%150]; }
 	CWeaponData *FindWeaponData(int TargetTick);
 
-	void FindWeaker(bool IsWeaker[2][MAX_CLIENTS]);
+	void FindWeaker(bool IsWeaker[NUM_VIRTUAL_CLIENTS][MAX_CLIENTS]);
 
-	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking); }
+	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_Tuning[CURR_VIRTUAL_CLIENT].m_PlayerCollision || m_Tuning[CURR_VIRTUAL_CLIENT].m_PlayerHooking); }
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 
