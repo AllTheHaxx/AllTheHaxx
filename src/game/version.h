@@ -8,16 +8,16 @@
 #define BUILD_DATE __DATE__ ", " __TIME__
 
 #ifdef GIT_SHORTREV_HASH
-	#define ALLTHEHAXX_VERSION "beta-14.3 #" GIT_SHORTREV_HASH
+	#define ALLTHEHAXX_VERSION "beta-14.4 #" GIT_SHORTREV_HASH
 #else
-	#define ALLTHEHAXX_VERSION "beta-14.3 custom"
+	#define ALLTHEHAXX_VERSION "beta-14.4 custom"
 #endif
 
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
 
 // for updater
-static const char GAME_ATH_VERSION[10] = "0.14.3";
-#define GAME_ATH_VERSION_NUMERIC 143
+static const char GAME_ATH_VERSION[10] = "0.14.4";
+#define GAME_ATH_VERSION_NUMERIC 144
 
 // do not modify these, they belong to ddnet
 static const char GAME_RELEASE_VERSION[8] = "10.0.2";
