@@ -280,6 +280,13 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_pGameClient = 0;
 	m_pMap = 0;
 	m_pConsole = 0;
+	m_pEngine = 0;
+	m_pFetcher = 0;
+	m_pUpdater = 0;
+	m_pStorage = 0;
+	m_pMasterServer = 0;
+	m_pIRC = 0;
+	m_pInputThread = 0;
 
 	m_RenderFrameTime = 0.0001f;
 	m_RenderFrameTimeLow = 1.0f;
@@ -308,6 +315,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	// pinging
 	m_PingStartTime = 0;
+	m_LocalStartTime = 0;
 
 	//
 	m_aCurrentMap[0] = 0;
@@ -350,6 +358,10 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_SnapshotStorage[1].Init();
 	m_ReceivedSnapshots[0] = 0;
 	m_ReceivedSnapshots[1] = 0;
+	m_SnapshotParts = 0;
+
+	m_UseTempRconCommands = 0;
+	m_ResortServerBrowser = false;
 
 	m_VersionInfo.m_State = CVersionInfo::STATE_INIT;
 
@@ -358,7 +370,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	m_DDNetSrvListTokenSet = false;
 	m_ReconnectTime = 0;
-
+	m_DummyConnected = 0;
 
 	m_pDatabase = new CSql();
 
