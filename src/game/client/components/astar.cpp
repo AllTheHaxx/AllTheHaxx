@@ -25,6 +25,8 @@ CAStar::CAStar()
 	m_pField = NULL;
 	m_PathFound = false;
 	m_MapReloaded = false;
+	m_ThreadShouldExit = false;
+	m_pThread = 0;
 	OnReset();
 }
 
@@ -37,7 +39,6 @@ CAStar::~CAStar()
 void CAStar::OnReset() // is being called right after OnMapLoad()
 {
 	m_Path.clear();
-	m_LineItems.clear();
 	m_PathFound = false;
 }
 
@@ -51,7 +52,7 @@ void CAStar::OnPlayerDeath() // TODO!! FIX THIS!!
 	int ClosestID = -1;
 	for(int i = m_Path.size(); i >= 0; i--)
 	{
-		//dbg_msg("wtf", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].x, m_Path[i].y);
+		//dbg_msg("debug", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].x, m_Path[i].y);
 		if((distance<float>(m_LastPos, m_Path[i]) < ClosestNode || ClosestNode < 0.0f) && !Collision()->IntersectLine(m_LastPos, m_Path[i], 0x0, 0x0))
 		{
 			ClosestNode = distance<float>(m_LastPos, m_Path[i]);
@@ -83,13 +84,15 @@ void CAStar::OnRender()
 
 		if(activationTime && time_get() > activationTime+time_freq())
 		{
-			FillGrid(true);
-			BuildPath();
+			//FillGrid(true);
+			m_pThread = thread_init(BuildPath, this);
+			//thread_detach(m_pThread);
 			activationTime = 0;
 		}
 		else
 			m_MapReloaded = false;
 	}
+
 
 	const CNetObj_Character * pPlayerChar = m_pClient->m_Snap.m_pLocalCharacter;
 	const CNetObj_Character * pPrevChar = m_pClient->m_Snap.m_pLocalPrevCharacter;
@@ -104,6 +107,7 @@ void CAStar::OnRender()
 	Graphics()->BlendAdditive();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
 	Graphics()->QuadsBegin();
+
 	for(int i = 0; i < m_Path.size(); i++)
 	{
 		int aSprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
@@ -149,18 +153,20 @@ int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
 }
 
 
-void CAStar::BuildPath()
+void CAStar::BuildPath(void *pUser)
 {
+	CAStar* pSelf = (CAStar*)pUser;
+
 	{
-		CServerInfo Info; Client()->GetServerInfo(&Info);
+		CServerInfo Info; pSelf->Client()->GetServerInfo(&Info);
 		if(!g_Config.m_ClPathFinding || !(IsRace(&Info) || IsDDNet(&Info)))
 			return;
 	}
 
 	int SolutionLength = -1;
 	int *pSolution = 0;
-	int Start = GetStart();
-	int Finish = GetFinish();
+	int Start = pSelf->GetStart();
+	int Finish = pSelf->GetFinish();
 
 /*	if(Start == -1)
 		dbg_msg("path", "didn't find start tile");
@@ -169,15 +175,15 @@ void CAStar::BuildPath()
 */
 	if(Start >= 0 && Finish >= 0)
 	{
-		FillGrid(true);
-		pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
+		pSelf->FillGrid(true);
+		pSolution = astar_compute((const char *)pSelf->m_pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
 		dbg_msg("path", "start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
 	}
 
 	if(SolutionLength == -1) // try again, ignoring freeze
 	{
-		FillGrid(false);
-		pSolution = astar_compute((const char *)m_pField, &SolutionLength, Collision()->GetWidth(), Collision()->GetHeight(), Start, Finish);
+		pSelf->FillGrid(false);
+		pSolution = astar_compute((const char *)pSelf->m_pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
 		dbg_msg("path", "ignored freeze: start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
 	}
 
@@ -187,29 +193,24 @@ void CAStar::BuildPath()
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "Found path. Length: %i", SolutionLength);
-			m_pClient->m_pHud->PushNotification(aBuf);
+			pSelf->m_pClient->m_pHud->PushNotification(aBuf);
 		}
 		else
-			m_pClient->m_pHud->PushNotification("No possible path found.");
+			pSelf->m_pClient->m_pHud->PushNotification("No possible path found.");
 	}
 	
 	if(pSolution)
 	{
 		if(SolutionLength > 0)
 		{
-			m_PathFound = true;
-			for(int i = 0; i < SolutionLength; i++)
-				m_Path.add(Collision()->GetPos(pSolution[i]));
-			for(int i = 0; i < m_Path.size()-1; i++)
+			pSelf->m_PathFound = true;
+			for(int i = SolutionLength; i >= 0 ; i--)
 			{
-				for(int j = 0; j < 7; j++)
+				pSelf->m_Path.add(pSelf->Collision()->GetPos(pSolution[i]));
+				thread_sleep(10);
+				if(pSelf->m_ThreadShouldExit)
 				{
-					IGraphics::CLineItem l;
-					l.m_X0 = m_Path[i].x+j;
-					l.m_X1 = m_Path[i+1].x+j;
-					l.m_Y0 = m_Path[i].y+j;
-					l.m_Y1 = m_Path[i+1].y+j;
-					m_LineItems.add(l);
+					return;
 				}
 			}
 		}
@@ -231,6 +232,18 @@ void CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
 					(Collision()->CheckPoint(x * 32, y * 32) || (NoFreeze && Collision()->GetTileRaw(x*32, y*32) == TILE_FREEZE)) ? 0 : 1;
 		}
 	}
+}
+
+void CAStar::OnStateChange(int NewState, int OldState)
+{
+	if(m_pThread)
+	{
+		m_ThreadShouldExit = true;
+		thread_destroy(m_pThread);
+		m_pThread = 0;
+		m_ThreadShouldExit = false;
+	}
+	m_Path.clear();
 }
 
 void CAStar::OnMapLoad()
