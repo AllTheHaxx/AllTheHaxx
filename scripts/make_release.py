@@ -7,7 +7,7 @@ if len(sys.argv) != 3:
 	print(sys.argv[0], "VERSION PLATFORM")
 	sys.exit(-1)
 
-name = "AllTheHaxx"
+name = "DDNet"
 version = sys.argv[1]
 platform = sys.argv[2]
 exe_ext = ""
@@ -114,12 +114,12 @@ if use_bundle:
 			os.system("lipo -create -output "+bin+" "+" ".join(to_lipo))
 
 	# create Teeworlds appfolder
-	clientbundle_content_dir = os.path.join(package_dir, "AllTheHaxx.app/Contents")
+	clientbundle_content_dir = os.path.join(package_dir, "DDNet.app/Contents")
 	clientbundle_bin_dir = os.path.join(clientbundle_content_dir, "MacOS")
 	clientbundle_resource_dir = os.path.join(clientbundle_content_dir, "Resources")
 	clientbundle_framework_dir = os.path.join(clientbundle_content_dir, "Frameworks")
 	binary_path = clientbundle_bin_dir + "/" + name+exe_ext
-	os.mkdir(os.path.join(package_dir, "AllTheHaxx.app"))
+	os.mkdir(os.path.join(package_dir, "DDNet.app"))
 	os.mkdir(clientbundle_content_dir)
 	os.mkdir(clientbundle_bin_dir)
 	os.mkdir(clientbundle_resource_dir)
@@ -143,9 +143,9 @@ if use_bundle:
         <key>CFBundleDevelopmentRegion</key>
         <string>English</string>
         <key>CFBundleExecutable</key>
-        <string>AllTheHaxx</string>
+        <string>DDNet</string>
         <key>CFBundleIconFile</key>
-        <string>AllTheHaxx</string>
+        <string>DDNet</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundlePackageType</key>
@@ -155,17 +155,19 @@ if use_bundle:
         <key>CFBundleVersion</key>
         <string>%s</string>
         <key>CFBundleIdentifier</key>
-        <string>org.AllTheHaxxTW.app</string>
+        <string>org.DDNetClient.app</string>
+        <key>NSHighResolutionCapable</key>
+        <true/>
 </dict>
 </plist>
 	""" % (version))
 	file(os.path.join(clientbundle_content_dir, "PkgInfo"), "w").write("APPL????")
 
 	# create Teeworlds Server appfolder
-	serverbundle_content_dir = os.path.join(package_dir, "AllTheHaxx-Server.app/Contents")
+	serverbundle_content_dir = os.path.join(package_dir, "DDNet-Server.app/Contents")
 	serverbundle_bin_dir = os.path.join(serverbundle_content_dir, "MacOS")
 	serverbundle_resource_dir = os.path.join(serverbundle_content_dir, "Resources")
-	os.mkdir(os.path.join(package_dir, "AllTheHaxx-Server.app"))
+	os.mkdir(os.path.join(package_dir, "DDNet-Server.app"))
 	os.mkdir(serverbundle_content_dir)
 	os.mkdir(serverbundle_bin_dir)
 	os.mkdir(serverbundle_resource_dir)
@@ -184,9 +186,9 @@ if use_bundle:
         <key>CFBundleDevelopmentRegion</key>
         <string>English</string>
         <key>CFBundleExecutable</key>
-        <string>AllTheHaxx_server</string>
+        <string>DDNet_server</string>
         <key>CFBundleIconFile</key>
-        <string>AllTheHaxx-Server</string>
+        <string>DDNet-Server</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundlePackageType</key>
@@ -218,7 +220,7 @@ if use_xz:
 if use_dmg:
 	print("making disk image")
 	os.system("rm -f %s.dmg %s_temp.dmg" % (package, package))
-	os.system("hdiutil create -srcfolder %s -volname AllTheHaxx -quiet %s_temp" % (package_dir, package))
+	os.system("hdiutil create -srcfolder %s -volname DDNet -quiet %s_temp" % (package_dir, package))
 	os.system("hdiutil convert %s_temp.dmg -format UDBZ -o %s.dmg -quiet" % (package, package))
 	os.system("rm -f %s_temp.dmg" % package)
 	
