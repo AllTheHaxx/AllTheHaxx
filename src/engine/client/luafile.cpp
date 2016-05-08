@@ -306,6 +306,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("HMargin", &CUIRect::HMargin)
 		.endClass()
 
+		.beginClass< IGraphics::CLineItem >("LineItem")
+			.addConstructor <void (*) ()> ()
+			.addConstructor <void (*) (float, float, float, float)> ()
+		.endClass()
+
 		//OOP BEGINS HERE		
 		//ICLIENT
 		.beginClass<IClient>("IClient")
@@ -536,6 +541,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("QuadsEnd", &IGraphics::QuadsEnd)
 			.addFunction("LinesBegin", &IGraphics::LinesBegin)
 			.addFunction("LinesEnd", &IGraphics::LinesEnd)
+			.addFunction("LinesDraw", &IGraphics::LinesDraw)
 			
 			.addFunction("SetRotation", &IGraphics::QuadsSetRotation)
 			.addFunction("SetColor", &IGraphics::SetColor)
