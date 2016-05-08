@@ -1116,7 +1116,7 @@ static const char *s_apSayings[] = {
 		"Guaranteed to be 420% verkeckt!",
 		"CI Status: PASSED",
 		"rm -rf /",
-		"Markdown supported     ...not...",
+		"Markdown supported",
 		"You can click links!",
 		"Keep it up-to-date all the time",
 		"Join the chat!",
@@ -1171,7 +1171,7 @@ static const char *s_apSayings[] = {
 		"What is the speed of dark?",
 		"What is random?",
 		"Is the 5-second rule actually true?",
-		"How much does thor's hammer weigh?",
+		"How much does Thor's hammer weigh?",
 		"How much does a shadow weigh?",
 		"ReD go TW!!!",
 		"At least I got me for life",
@@ -1180,6 +1180,24 @@ static const char *s_apSayings[] = {
 		"If you get kicked out of the bars just hit the boulevard.",
 		"Flipping balisong...",
 		"Shoutout to my son Fruchti!",
+		"Random != Random",
+		"The smooth loading screen isn't threadsafe :(",
+		"Shaders would be awesome!",
+		"SDL2 <3",
+		"8th May 2016 – 100 issues closed! (27 to go)",
+		"Computers doesn't make mistakes; it's always the programmer's fault :\\",
+		"git stash pop stash@{0}",
+		"Splashtexts for teh lulz ^^",
+		"Was he drunk...?",
+		"...no.",
+		"What is a 'Neologism' ??",
+		"How could you know that?!",
+		"The spelling is 'whether', NOT 'wether'!!!",
+		"\"Zwei Russen sind besser als einer\"",
+		"[20:49:00] Prinzessin Meskalin: ReD + 11 min = rip",
+		"[21:00:00] ReD: auutsch",
+		"\"Red nur du ReD\"",
+		"BAUM!",
 };
 
 void CMenus::RenderLoading()
@@ -1253,9 +1271,25 @@ void CMenus::RenderLoading()
 	c.w = w;
 	c.h = h;
 	size_t n = rand()%(sizeof(s_apSayings)/sizeof(s_apSayings[0]));
-	static char *pSaying;
+	static const char *pSaying;
 	if(!pSaying)
 		pSaying = (char*)s_apSayings[n];
+
+	{
+		time_t rawtime;
+		struct tm* timeinfo;
+
+		time ( &rawtime );
+		timeinfo = localtime ( &rawtime );
+
+		// for teh lulz
+		if(timeinfo->tm_mday == 20 && timeinfo->tm_mon == 12)
+			pSaying = "Happy Birthday xush' :D";
+		else if(timeinfo->tm_mday == 16 && timeinfo->tm_mon == 10)
+			pSaying = "Happy Birthday Henritees :D";
+		else if(timeinfo->tm_mday == 24 && timeinfo->tm_mon == 10)
+			pSaying = "Happy Birthday FuroS :D";
+	}
 
 	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
 
