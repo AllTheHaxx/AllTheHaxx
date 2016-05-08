@@ -33,7 +33,8 @@ void CIdentity::SaveIdents()
 				bool ret = fs_remove(aPath);
 				dbg_msg("ident/cleanup", "removing '%s' %s", aPath, ret ? "failed" : "succeeded");
 			}
-			dbg_msg("ident/cleanup", "unknown error occurred; identity '%s' may be duplicate now.", pEntry->m_aName);
+			else
+				dbg_msg("ident/cleanup", "unknown error occurred; identity '%s' may be duplicate now.", pEntry->m_aName);
 		}
 
 		str_format(aBuf, sizeof(aBuf), "identities/%03i.id", i);
