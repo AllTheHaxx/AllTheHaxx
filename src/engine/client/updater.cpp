@@ -1,4 +1,6 @@
-#include "updater.h"
+#include <stdlib.h> // system
+#include <algorithm>
+
 #include <base/system.h>
 #include <engine/fetcher.h>
 #include <engine/storage.h>
@@ -7,7 +9,7 @@
 #include <game/version.h>
 #include <game/client/components/menus.h>
 
-#include <stdlib.h> // system
+#include "updater.h"
 
 #define UPDATE_MANIFEST "update15.json"
 
@@ -87,7 +89,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 			// backup the new news file
 			newsFile = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
-			io_write(newsFile, pUpdate->m_aNews, sizeof(m_aNews));
+			io_write(newsFile, pUpdate->m_aNews, sizeof(pUpdate->m_aNews));
 			io_flush(newsFile);
 			io_close(newsFile);
 			newsFile = NULL;
