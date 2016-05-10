@@ -574,7 +574,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								time(&rawtime);
 								timeinfo = localtime(&rawtime);
 								str_format(aTime, sizeof(aTime), "%02d:%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-								SendRaw("NOTICE %s :TIME %s (zone: %i)", aMsgFrom.c_str(), aTime, timezone);
+								SendRaw("NOTICE %s :TIME %s (zone: %i)", aMsgFrom.c_str(), aTime, timeinfo->tm_zone);
 							}
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "playerinfo") == 0)
 							{
