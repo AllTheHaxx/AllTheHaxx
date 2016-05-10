@@ -153,6 +153,8 @@ MACRO_CONFIG_INT(ClGoreStyleTeeColors, cl_gore_style_tee_color, 0, 0, 1, CFGFLAG
 MACRO_CONFIG_INT(ClGoreStyleDropWeapons, cl_gore_style_drop_weapons, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gore: Drop weapons")
 MACRO_CONFIG_INT(ClGoreStyle, cl_gore_style, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Gore Mod")
 MACRO_CONFIG_INT(ClSmartZoom, cl_smart_zoom, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom in/out in a smart way, only on race gametypes")
+MACRO_CONFIG_INT(ClCinematicCamera, cl_cinematic_camera, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth spectator cam movement")
+MACRO_CONFIG_INT(ClCinematicCameraDelay, cl_cinematic_camera_delay, 40, 1, 1000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How long it should take for the cinematic camera to move")
 MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send \"Zzz\" emotes while being in console mode")
 MACRO_CONFIG_INT(ClResetServerCfgOnDc, cl_reset_server_cfg_on_disconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Discard config changes when disconnecting, use 'config_save' if you want to keep them")
 

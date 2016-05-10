@@ -21,7 +21,9 @@ CCamera::CCamera()
 	m_ZoomSet = false;
 	m_Zoom = 1.0;
 	m_WantedZoom = 1.0f;
+	m_WantedCenter = vec2(0.0f, 0.0f);
 	m_RotationCenter = vec2(500.0f, 500.0f);
+	m_GodlikeSpec = false;
 }
 
 void CCamera::OnRender()
@@ -54,14 +56,17 @@ void CCamera::OnRender()
 			// do little rotation
 			float RotPerTick = 360.0f/(float)g_Config.m_ClRotationSpeed * Client()->RenderFrameTime();
 			Dir = rotate(Dir, RotPerTick);
-			m_Center = m_RotationCenter+Dir*(float)g_Config.m_ClRotationRadius;
+			m_WantedCenter = m_RotationCenter+Dir*(float)g_Config.m_ClRotationRadius/**(length(m_Center)/length(m_WantedCenter))*/;
+			//m_WantedCenter = vec2(0.0f, 0.0f);
 		}
 		else
-		{
-			Dir = normalize(m_RotationCenter-m_Center);
-			m_Center += Dir*(500.0f*Client()->RenderFrameTime());
-			Dir = normalize(m_Center-m_RotationCenter);
-		}
+			m_WantedCenter = m_RotationCenter;
+		//else ///// THIS PART IS DONE BY THE CINEMATIC CAMERA /////
+		//{
+		//	Dir = normalize(m_RotationCenter-m_WantedCenter);
+		//	m_WantedCenter += Dir*(500.0f*Client()->RenderFrameTime());
+		//	Dir = normalize(m_WantedCenter-m_RotationCenter);
+		//}
 	}
 	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && !m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
 	{
@@ -72,7 +77,35 @@ void CCamera::OnRender()
 			m_pClient->m_pControls->ClampMousePos();
 			m_CamType = CAMTYPE_SPEC;
 		}
-		m_Center = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+
+		if(m_GodlikeSpec && false) // TODO: this needs some more work.
+		{
+			vec2 Middlwerd(0.0f, 0.0f);
+			int Num = 0;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				CGameClient::CClientData *pClient = &m_pClient->m_aClients[i];
+				if(!pClient->m_Active || pClient->m_Team == TEAM_SPECTATORS)
+					continue;
+				Num++;
+				vec2 Pos = mix(pClient->m_Predicted.m_Pos, pClient->m_PrevPredicted.m_Pos, 0.5f);
+				Middlwerd += Pos*32;
+				//dbg_msg("debug", "Player '%s' at (%.1f, %.1f)", pClient->m_aName, Pos.x, Pos.y);
+			}
+
+			if(Middlwerd.x > 0.0f && Middlwerd.y > 0.0f)
+			{
+				Middlwerd.x /= Num;
+				Middlwerd.y /= Num;
+				m_WantedCenter = Middlwerd;
+				dbg_msg("Middlwert", "(%.1f %.1f)", Middlwerd.x, Middlwerd.y);
+			}
+			else
+				m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+		}
+		else
+			m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+		//dbg_msg("center", "(%.1f %.1f) wanted (%.1f %.1f)", m_Center.x, m_Center.y, m_WantedCenter.x, m_WantedCenter.y);
 	}
 	else
 	{
@@ -96,10 +129,20 @@ void CCamera::OnRender()
 		}
 
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + CameraOffset;
+			m_WantedCenter = m_pClient->m_Snap.m_SpecInfo.m_Position + CameraOffset;
 		else
-			m_Center = m_pClient->m_LocalCharacterPos + CameraOffset;
+			m_WantedCenter = m_pClient->m_LocalCharacterPos + CameraOffset;
 	}
+
+	if(m_WantedCenter != vec2(0.0f, 0.0f) &&
+			((g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active) || Client()->State() == IClient::STATE_OFFLINE))
+	{
+		const float delay = (Client()->State() == IClient::STATE_OFFLINE ? 50.0f : g_Config.m_ClCinematicCameraDelay) * (0.005f/Client()->RenderFrameTime());
+		smooth_set(&m_Center.x, m_WantedCenter.x, delay);
+		smooth_set(&m_Center.y, m_WantedCenter.y, delay);
+	}
+	else
+		m_Center = m_WantedCenter;
 
 	m_PrevCenter = m_Center;
 }
@@ -108,7 +151,8 @@ void CCamera::OnConsoleInit()
 {
 	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
-	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
+	Console()->Register("zoom", "?i", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset or set");
+	//Console()->Register("godlike_spec", "", CFGFLAG_CLIENT, ConToggleGodlikeSpec, this, "Toggle godlike spectator cam");
 }
 
 const float ZoomStep = 0.866025f;
@@ -127,6 +171,7 @@ void CCamera::OnReset()
 	}
 
 	m_WantedZoom = m_Zoom;
+	m_WantedCenter = vec2(0.0f, 0.0f);
 }
 
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
@@ -153,4 +198,10 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
 	((CCamera *)pUserData)->OnReset();
+}
+
+void CCamera::ConToggleGodlikeSpec(IConsole::IResult *pResult, void *pUserData)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	pSelf->m_GodlikeSpec ^= true;
 }

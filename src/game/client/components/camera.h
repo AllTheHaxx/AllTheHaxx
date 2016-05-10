@@ -19,7 +19,9 @@ class CCamera : public CComponent
 	vec2 m_PrevCenter;
 
 public:
+	bool m_GodlikeSpec;
 	vec2 m_Center;
+	vec2 m_WantedCenter;
 	vec2 m_RotationCenter;
 	bool m_ZoomSet;
 	float m_Zoom;
@@ -37,6 +39,8 @@ private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleGodlikeSpec(IConsole::IResult *pResult, void *pUserData);
+
 };
 
 #endif
