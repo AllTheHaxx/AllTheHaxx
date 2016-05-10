@@ -1339,6 +1339,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				// do decompression of serverlist
 				if (uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
 				{
+					aBuf[DstLen] = '\0';
 					bool ListChanged = true;
 
 					IOHANDLE File = m_pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_SAVE);
@@ -2968,13 +2969,19 @@ void CClient::Run()
 				m_EditorActive = false;
 
 			Update();
+			int64 Now = time_get();
 
-			if(!g_Config.m_ClConsoleMode && (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
+//<<<! HEAD
+//			if(!g_Config.m_ClConsoleMode && (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
+//=======
+			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen())
+				&& (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle())
+				&& (!g_Config.m_GfxRefreshRate || Now >= m_LastRenderTime + time_freq() / g_Config.m_GfxRefreshRate))
+//>>>>>>> ddnet/master
 			{
 				m_RenderFrames++;
 
 				// update frametime
-				int64 Now = time_get();
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
 				if(m_RenderFrameTime < m_RenderFrameTimeLow)
 					m_RenderFrameTimeLow = m_RenderFrameTime;
