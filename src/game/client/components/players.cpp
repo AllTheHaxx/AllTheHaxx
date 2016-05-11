@@ -7,6 +7,7 @@
 #include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/client/lua.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
 
@@ -16,6 +17,7 @@
 #include <game/client/ui.h>
 #include <game/client/render.h>
 
+#include <game/client/components/console.h>
 #include <game/client/components/flow.h>
 #include <game/client/components/skins.h>
 #include <game/client/components/effects.h>
@@ -836,7 +838,9 @@ void CPlayers::RenderPlayer(
 		}
 	}
 
+	LUA_FIRE_EVENT("PreRenderPlayer", Player, Position, Direction, OtherTeam);
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, OtherTeam);
+	LUA_FIRE_EVENT("PostRenderPlayer", Player, Position, Direction, OtherTeam);
 
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{

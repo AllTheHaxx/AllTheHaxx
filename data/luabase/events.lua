@@ -165,6 +165,26 @@ function OnRenderScoreboard(FadeVal)
     end
 end
 
+function PreRenderPlayer(Player, Position, Direction, OtherTeam)
+	if Events["PreRenderPlayer"] ~= nil then
+		for script, event in pairs(Events["PreRenderPlayer"]) do
+			if event ~= nil then
+				event(Player, Position, Direction, OtherTeam)
+			end
+		end
+	end
+end
+
+function PostRenderPlayer(Player, Position, Direction, OtherTeam)
+	if Events["PostRenderPlayer"] ~= nil then
+		for script, event in pairs(Events["PostRenderPlayer"]) do
+			if event ~= nil then
+				event(Player, Position, Direction, OtherTeam)
+			end
+		end
+	end
+end
+
 function OnSnapInput()
     if Events["OnSnapInput"] ~= nil then
         for script, event in pairs(Events["OnSnapInput"]) do
