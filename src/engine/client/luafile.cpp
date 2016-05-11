@@ -443,11 +443,14 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 		
 		.deriveClass<CNetObj_Character, CNetObj_CharacterCore>("CNetObj_Character")  //TODO: Ppb add the rest
-			.addData("Weapon", &CNetObj_Character::m_Weapon)
-			.addData("Armor", &CNetObj_Character::m_Armor)
-			.addData("Health", &CNetObj_Character::m_Health)
-			.addData("Ammo", &CNetObj_Character::m_AmmoCount)
+			.addData("PlayerFlags", &CNetObj_Character::m_PlayerFlags)
 
+			.addData("Health", &CNetObj_Character::m_Health)
+			.addData("Armor", &CNetObj_Character::m_Armor)
+			.addData("Ammo", &CNetObj_Character::m_AmmoCount)
+			.addData("Weapon", &CNetObj_Character::m_Weapon)
+
+			.addData("Emote", &CNetObj_Character::m_Emote)
 			.addData("AttackTick", &CNetObj_Character::m_AttackTick)
 		.endClass()
 		
