@@ -165,21 +165,21 @@ function OnRenderScoreboard(FadeVal)
     end
 end
 
-function PreRenderPlayer(Player, Position, Direction, OtherTeam)
+function PreRenderPlayer(ID, PosX, PosY, DirX, DirY, OtherTeam)
 	if Events["PreRenderPlayer"] ~= nil then
 		for script, event in pairs(Events["PreRenderPlayer"]) do
 			if event ~= nil then
-				event(Player, Position, Direction, OtherTeam)
+				event(ID, PosX, PosY, DirX, DirY, OtherTeam)
 			end
 		end
 	end
 end
 
-function PostRenderPlayer(Player, Position, Direction, OtherTeam)
+function PostRenderPlayer(ID, PosX, PosY, DirX, DirY, OtherTeam)
 	if Events["PostRenderPlayer"] ~= nil then
 		for script, event in pairs(Events["PostRenderPlayer"]) do
 			if event ~= nil then
-				event(Player, Position, Direction, OtherTeam)
+				event(ID, PosX, PosY, DirX, DirY, OtherTeam)
 			end
 		end
 	end

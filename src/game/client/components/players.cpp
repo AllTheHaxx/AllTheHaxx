@@ -838,9 +838,9 @@ void CPlayers::RenderPlayer(
 		}
 	}
 
-	LUA_FIRE_EVENT("PreRenderPlayer", Player, Position, Direction, OtherTeam);
+	LUA_FIRE_EVENT("PreRenderPlayer", pInfo.m_ClientID, Position.x, Position.y, Direction.x, Direction.y, OtherTeam);
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, OtherTeam);
-	LUA_FIRE_EVENT("PostRenderPlayer", Player, Position, Direction, OtherTeam);
+	LUA_FIRE_EVENT("PostRenderPlayer", pInfo.m_ClientID, Position.x, Position.y, Direction.x, Direction.y, OtherTeam);
 
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
