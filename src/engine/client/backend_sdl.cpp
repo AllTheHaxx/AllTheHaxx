@@ -628,10 +628,10 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 #endif
 	}
 
-	if(Flags&IGraphicsBackend::INITFLAG_HIGHDPI)
+	/*if(Flags&IGraphicsBackend::INITFLAG_HIGHDPI)
 		SdlFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
 	else
-		SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+		SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");*/
 
 	// set gl attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -655,8 +655,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 =======
 >>>>>>> ddnet/master*/
 
-	if(g_Config.m_InpMouseOld)
-		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
+	//if(g_Config.m_InpMouseOld)
+	//	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
 
 	m_pWindow = SDL_CreateWindow(
 		pName,
@@ -681,7 +681,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
+	//SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
 	SDL_GL_MakeCurrent(NULL, NULL);
 
