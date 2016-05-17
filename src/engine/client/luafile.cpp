@@ -251,6 +251,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		// global types
 		.beginClass< vector2_base<int> >("vec2")
 			.addConstructor <void (*) (int, int)> ()
+			.addFunction("__add", &vector2_base<int>::operator+)
+			.addFunction("__sub", &vector2_base<int>::operator-)
+			.addFunction("__mul", &vector2_base<int>::operator*)
+			.addFunction("__div", &vector2_base<int>::operator/)
+			.addFunction("__eq", &vector2_base<int>::operator==)
 			.addData("x", &vector2_base<int>::x)
 			.addData("y", &vector2_base<int>::y)
 		.endClass()

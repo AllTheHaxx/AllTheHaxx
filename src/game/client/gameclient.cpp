@@ -2488,7 +2488,7 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = CurrentTick;
-			m_Pos = NewPos+(-(m_Direction*4));
+			m_Pos = NewPos+(m_Direction*(-4));
 			if (m_Bouncing == 1)
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
