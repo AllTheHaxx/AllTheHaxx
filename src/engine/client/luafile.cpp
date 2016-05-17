@@ -275,6 +275,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginClass< vector2_base<float> >("vec2f")
 			.addConstructor <void (*) (float, float)> ()
+			.addFunction("__add", &vector2_base<float>::operator+)
+			.addFunction("__sub", &vector2_base<float>::operator-)
+			.addFunction("__mul", &vector2_base<float>::operator*)
+			.addFunction("__div", &vector2_base<float>::operator/)
+			.addFunction("__eq", &vector2_base<float>::operator==)
 			.addData("x", &vector2_base<float>::x)
 			.addData("y", &vector2_base<float>::y)
 		.endClass()
