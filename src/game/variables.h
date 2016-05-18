@@ -200,6 +200,8 @@ MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 1000
 MACRO_CONFIG_INT(ClRotationRadius, cl_rotation_radius, 30, 1, 500, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Camera rotation radius")
 MACRO_CONFIG_INT(ClRotationSpeed, cl_rotation_speed, 40, 1, 120, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Camera rotations in seconds")
 
+MACRO_CONFIG_INT(ClChatAvatar, cl_chat_avatar, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render a small avatar in front of every chat message")
+
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")
 MACRO_CONFIG_STR(SvMotd, sv_motd, 900, "", CFGFLAG_SERVER, "Message of the day to display for the clients")
