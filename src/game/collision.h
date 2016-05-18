@@ -98,6 +98,8 @@ public:
 
 	// lua
 	int Distance(vec2 s, vec2 e) { return distance(s, e); }
+	vec2 Normalize(vec2 v) { return normalize(v); }
+	vec2 ClosestPointOnLine(vec2 s, vec2 e, vec2 v) { return closest_point_on_line(s, e, v); }
 
 private:
 

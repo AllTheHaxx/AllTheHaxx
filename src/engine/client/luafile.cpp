@@ -340,6 +340,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		//ICLIENT
 		.beginClass<IClient>("IClient")
 			.addProperty("Tick", &IClient::GameTick)
+			.addProperty("IntraGameTick", &IClient::IntraGameTick)
 			.addProperty("LocalTime", &IClient::LocalTime)
 
 			.addFunction("Connect", &IClient::Connect)
@@ -411,6 +412,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("GetMapHeight", &CCollision::GetHeight)
 
 			.addFunction("Distance", &CCollision::Distance)
+			.addFunction("Normalize", &CCollision::Normalize)
+			.addFunction("ClosestPointOnLine", &CCollision::ClosestPointOnLine)
 
 			.addFunction("GetTile", &CCollision::GetTileRaw)
 
