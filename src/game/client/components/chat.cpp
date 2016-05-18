@@ -926,7 +926,6 @@ void CChat::OnRender()
 		else
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 
-		// render color Line
         if(g_Config.m_ClChatAvatar && m_aLines[r].m_ClientID != -1)
         {
             CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_aLines[r].m_ClientID];
