@@ -18,8 +18,6 @@
 #include "effects.h"
 #include "hud.h"
 
-// TODO: make all of this shit optional
-
 CAStar::CAStar()
 {
 	m_pField = NULL;
@@ -223,6 +221,7 @@ void CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
 	if(m_pField)
 		mem_free(m_pField);
 
+	// feed the grid with data from the map
 	m_pField = (char *)mem_alloc(Collision()->GetWidth() * Collision()->GetHeight() * sizeof(char), 1);
 	for(int y = 0; y < Collision()->GetHeight(); y++)
 	{
