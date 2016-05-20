@@ -878,7 +878,7 @@ void CChat::OnRender()
 		float Blend = Now > m_aLines[r].m_Time+14*time_freq() && !m_Show ? 1.0f-(Now-m_aLines[r].m_Time-14*time_freq())/(2.0f*time_freq()) : 1.0f;
 
 		// reset the cursor
-		TextRender()->SetCursor(&Cursor, Begin + (g_Config.m_ClChatAvatar ? 2.5f : 0.0f), y, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, Begin + (g_Config.m_ClChatAvatar ? 3.0f : 0.0f), y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 
 		// render name
