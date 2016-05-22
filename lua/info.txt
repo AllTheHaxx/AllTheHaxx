@@ -17,7 +17,7 @@ Then...
 
 
 –––––––––––
-LINUX USERS (PRECONDITION: a filesystem which supports symbolic links, e.g. ext4)
+LINUX USERS (PRECONDITION: A filesystem which supports symbolic links, e.g. ext4)
 –––––––––––
 Open a shell within THIS folder ("lua") and do:
 
