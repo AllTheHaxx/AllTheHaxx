@@ -1598,11 +1598,22 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		g_Config.m_ClDDRaceScoreBoard ^= 1;
 	}
 
-	Left.HSplitTop(3.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if (DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
 	{
-		g_Config.m_ClShowIDs ^= 1;
+		CUIRect Second;
+		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitMid(&Button, &Second);
+		Button.w -= 2.5f; Second.w -= 2.5f;
+		Second.x += 2.5f;
+		if (DoButton_CheckBox(&g_Config.m_ClShowIDsScoreboard, Localize("Show IDs in Scoreboard"), g_Config.m_ClShowIDsScoreboard, &Button))
+		{
+			g_Config.m_ClShowIDsScoreboard ^= 1;
+		}
+
+		if (DoButton_CheckBox(&g_Config.m_ClShowIDsChat, Localize("Show IDs in Chat"), g_Config.m_ClShowIDsChat, &Second))
+		{
+			g_Config.m_ClShowIDsChat ^= 1;
+		}
 	}
 
 	Right.HSplitTop(3.0f, 0, &Right);

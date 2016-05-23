@@ -134,7 +134,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 		if(Multiple)
 			str_append(aBuffer, ", ", sizeof(aBuffer));
-		if(g_Config.m_ClShowIDs)
+		if(g_Config.m_ClShowIDsScoreboard)
 		{
 			char aId[5];
 			str_format(aId,sizeof(aId),"%d: ",pInfo->m_ClientID);
@@ -491,7 +491,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 0.0f;
-		if(g_Config.m_ClShowIDs)
+		if(g_Config.m_ClShowIDsScoreboard)
 		{
 			char aId[64] = "";
 			if (pInfo->m_ClientID >= 10)
