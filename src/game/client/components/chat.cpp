@@ -1064,13 +1064,29 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		return;
 	}
 
+	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
+	{
+		bool SendChat = true;
+		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+		{
+			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				continue;
+			LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChatSend");
+			if(lfunc) try { SendChat = lfunc(Team, pLine); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+		}
+		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
+		if(confunc) try { SendChat = confunc(Team, pLine); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+
+		if(!SendChat)
+			return;
+	}
+
+
 	// send chat message
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;
 	Msg.m_pMessage = aMessage;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
-
-	LUA_FIRE_EVENT("OnChatSend", Team, pLine);
 }
 
 ////////////////////////////
