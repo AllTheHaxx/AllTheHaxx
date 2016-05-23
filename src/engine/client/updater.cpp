@@ -57,6 +57,10 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(*a == '/')
 			b = a + 1;
 	b = b ? b : pTask->Dest();
+
+	if(pTask->State() == CFetchTask::STATE_ERROR)
+		pUpdate->m_State = FAIL;
+
 	if(!str_comp(b, "ath-news.txt"))
 	{
 		// dig out whether ATH news have been updated
@@ -95,19 +99,12 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			newsFile = NULL;
 		}
 	}
-	else if(!str_comp(b, UPDATE_MANIFEST))
+	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
-		if(pTask->State() == CFetchTask::STATE_DONE)
+		if(str_comp(b, UPDATE_MANIFEST) == 0)
 			pUpdate->m_State = GOT_MANIFEST;
-		else if(pTask->State() == CFetchTask::STATE_ERROR)
-			pUpdate->m_State = FAIL;
-	}
-	else if(!str_comp(b, pUpdate->m_aLastFile))
-	{
-		if(pTask->State() == CFetchTask::STATE_DONE)
+		else if(str_comp(b, pUpdate->m_aLastFile) == 0)
 			pUpdate->m_State = MOVE_FILES;
-		else if(pTask->State() == CFetchTask::STATE_ERROR)
-			pUpdate->m_State = FAIL;
 	}
 	delete pTask;
 }
@@ -116,6 +113,25 @@ void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDe
 {
 	char aBuf[256], aDestPath[512] = {0};
 	str_format(aBuf, sizeof(aBuf), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource, pFile);
+
+	//dbg_msg("updater", "fetching file from '%s'", aBuf);
+	if(!pDestPath)
+		pDestPath = pFile;
+	str_format(aDestPath, sizeof(aDestPath), "update/%s", pDestPath);
+	if(aDestPath[str_length(aDestPath)-1] == '/' || aDestPath[str_length(aDestPath)-1] == '\\')
+	{
+		fs_makedir(aDestPath);
+		str_append(aDestPath, pFile, sizeof(aDestPath));
+	}
+
+	CFetchTask *Task = new CFetchTask(false);
+	m_pFetcher->QueueAdd(Task, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+}
+
+void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
+{
+	char aBuf[256], aDestPath[512] = {0};
+	str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/AllTheHaxx/releases/download/%s/%s", m_aLatestVersion, pFile);
 
 	//dbg_msg("updater", "fetching file from '%s'", aBuf);
 	if(!pDestPath)
@@ -340,12 +356,14 @@ void CUpdater::PerformUpdate()
 
 	if(m_ClientUpdate)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "AllTheHaxx/releases/download/%s", m_aLatestVersion);
-		FetchFile(aBuf, PLAT_CLIENT_DOWN, "AllTheHaxx.tmp");
+		FetchExecutable(PLAT_CLIENT_DOWN, "AllTheHaxx.tmp");
+		aLastFile = "AllTheHaxx.tmp";
 	}
 
 	str_copy(m_aLastFile, aLastFile, sizeof(m_aLastFile));
+
+	if(g_Config.m_Debug)
+		dbg_msg("updater/debug", "last file is '%s'", m_aLastFile);
 }
 
 void CUpdater::CommitUpdate()

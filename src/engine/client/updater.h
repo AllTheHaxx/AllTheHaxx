@@ -62,7 +62,8 @@ class CUpdater : public IUpdater
 	std::map<std::string, std::map<std::string, std::string> > m_FileDownloadJobs; // source - dlpath, dest
 
 	void AddFileRemoveJob(const char *pFile, bool job);
-	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0);
+	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0); // files from repos
+	void FetchExecutable(const char *pFile, const char *pDestPath); // executables from release sections
 	void MoveFile(const char *pFile);
 
 	void ParseUpdate();
