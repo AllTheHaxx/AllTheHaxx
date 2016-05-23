@@ -2681,7 +2681,7 @@ void CClient::InitInterfaces()
 	m_Friends.Init();
 	m_Foes.Init(true);
 
-	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE);
+	IOHANDLE newsFile = m_pStorage->OpenFile("tmp/cache/ddnet-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if (newsFile)
 	{
 		io_read(newsFile, m_aNewsDDNet, NEWS_SIZE);
