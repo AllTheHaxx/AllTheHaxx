@@ -1075,7 +1075,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 			if(lfunc) try { SendChat = lfunc(Team, pLine); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
 		}
 		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
-		if(confunc) try { SendChat = confunc(Team, pLine); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+		if(confunc) try { confunc(Team, pLine); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
 
 		if(!SendChat)
 			return;
