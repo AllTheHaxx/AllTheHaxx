@@ -32,5 +32,5 @@ So all in all, the following cli should do the job: (execute it in the directory
 –––––––––––––
 WINDOWS USERS
 –––––––––––––
-Copy-paste all the files from "Lua-Scripts" in this folder's parent directory into this folder.
+Copy & paste all the files from "Lua-Scripts" in this folder's parent directory into this folder.
 I know, very inconvenient and static, but well... it's windows dude :\
