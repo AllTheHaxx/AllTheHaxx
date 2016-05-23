@@ -215,23 +215,37 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		g_Config.m_ClCpuThrottle= round_to_int(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 
-		Left.HSplitTop(20.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Label, &Left);
-		Button.VSplitRight(20.0f, &Button, 0);
-		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect when server is full"), g_Config.m_ClReconnectFull);
-		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-		Left.HSplitTop(20.0f, &Button, 0);
-		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClReconnectFull = max(5,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectFull, &Button, g_Config.m_ClReconnectFull/180.0f)*180.0f));
+		{
+			CUIRect Checkbox;
+			static int s_CheckboxPID[2] = {0};
+			Left.HSplitTop(20.0f, 0, &Left);
+			Left.HSplitTop(20.0f, &Label, &Left);
+			Button.VSplitRight(20.0f, &Button, 0);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect when server is full"), g_Config.m_ClReconnectFull);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			Left.HSplitTop(20.0f, &Button, 0);
+			Button.HMargin(2.0f, &Button);
+			Button.VSplitLeft(Button.h, &Checkbox, &Button);
+			if(DoButton_CheckBox(&s_CheckboxPID[0], "", g_Config.m_ClReconnectFull, &Checkbox))
+				g_Config.m_ClReconnectFull = g_Config.m_ClReconnectFull ? 0 : 5;
+			Button.VSplitLeft(Button.h/2, 0, &Button);
+			if(g_Config.m_ClReconnectFull)
+				g_Config.m_ClReconnectFull = max(5, round_to_int(DoScrollbarH(&g_Config.m_ClReconnectFull, &Button, g_Config.m_ClReconnectFull/180.0f)*180.0f));
 
-		Left.HSplitTop(20.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Label, &Left);
-		Button.VSplitRight(20.0f, &Button, 0);
-		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect on connection timeout"), g_Config.m_ClReconnectTimeout);
-		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-		Left.HSplitTop(20.0f, &Button, 0);
-		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClReconnectTimeout = max(1,round_to_int(DoScrollbarH(&g_Config.m_ClReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout/180.0f)*180.0f));
+			Left.HSplitTop(20.0f, 0, &Left);
+			Left.HSplitTop(20.0f, &Label, &Left);
+			Button.VSplitRight(20.0f, &Button, 0);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Reconnect on connection timeout"), g_Config.m_ClReconnectTimeout);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			Left.HSplitTop(20.0f, &Button, 0);
+			Button.HMargin(2.0f, &Button);
+			Button.VSplitLeft(Button.h, &Checkbox, &Button);
+			if(DoButton_CheckBox(&s_CheckboxPID[1], "", g_Config.m_ClReconnectTimeout, &Checkbox))
+				g_Config.m_ClReconnectTimeout = g_Config.m_ClReconnectTimeout ? 0 : 10;
+			Button.VSplitLeft(Button.h/2, 0, &Button);
+			if(g_Config.m_ClReconnectTimeout)
+				g_Config.m_ClReconnectTimeout = max(5, round_to_int(DoScrollbarH(&g_Config.m_ClReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout/180.0f)*180.0f));
+		}
 
 #if defined(CONF_FAMILY_WINDOWS)
 		Left.HSplitTop(20.0f, 0, &Left);
