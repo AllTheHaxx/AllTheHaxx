@@ -1,4 +1,4 @@
-Teeworlds language scripts by DoNe
+Teeworlds language scripts by timakro
 
 These scripts can help you to improve the language files. This is a short tutorial
 about how to use the scripts.
@@ -33,5 +33,5 @@ $ mv newspanish.txt ../spanish.txt
 
 
 Often people know better phrases for translations where the english phrase was just
-written again. To find these you can use find_unchanged.py
+copied. To find these you can use find_unchanged.py
 $ python find_unchanged.py ../spanish.txt

@@ -499,6 +499,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			m_CompletionChosen = -1;
 			str_copy(m_aCompletionBuffer, m_Input.GetString(), sizeof(m_aCompletionBuffer));
+			m_CompletionRenderOffset = 0.0f;
 		}
 
 		std::string line(m_Input.GetString());
@@ -1109,7 +1110,8 @@ void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
 
 bool CGameConsole::OnInput(IInput::CEvent Event)
 {
-	if(m_ConsoleState != CONSOLE_OPEN)
+	// accept input when opening, but not at first frame to discard the input that caused the console to open
+	if(m_ConsoleState != CONSOLE_OPEN && (m_ConsoleState != CONSOLE_OPENING || m_StateChangeEnd == TimeNow()+m_StateChangeDuration))
 		return false;
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;

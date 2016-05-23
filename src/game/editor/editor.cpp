@@ -1178,43 +1178,53 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Bottom.VSplitLeft(10.0f, &Button, &TB_Bottom);
 
-		// do tele button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_TeleButton = 0;
-		CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-
-		if(DoButton_Ex(&s_TeleButton, "Teleporter", (pS && pS->m_Tele)?0:-1, &Button, 0, "Teleporter", CUI::CORNER_ALL))
+		// do tele/tune/switch/speedup button
 		{
-			static int s_TelePopupID = 0;
-			UiInvokePopupMenu(&s_TelePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 23, PopupTele);
-		}
-		// do speedup button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_SpeedupButton = 0;
-		if(DoButton_Ex(&s_SpeedupButton, "Speedup", (pS && pS->m_Speedup)?0:-1, &Button, 0, "Speedup", CUI::CORNER_ALL))
-		{
-			static int s_SpeedupPopupID = 0;
-			UiInvokePopupMenu(&s_SpeedupPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 53, PopupSpeedup);
-		}
-		// do switch button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_SwitchButton = 0;
-		if(DoButton_Ex(&s_SwitchButton, "Switcher", (pS && pS->m_Switch)?0:-1, &Button, 0, "Switcher", CUI::CORNER_ALL))
-		{
-			static int s_SwitchPopupID = 0;
-			UiInvokePopupMenu(&s_SwitchPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 36, PopupSwitch);
-		}
-		// do tuning button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_TuneButton = 0;
-		if(DoButton_Ex(&s_TuneButton, "Tune", (pS && pS->m_Tune)?0:-1, &Button, 0, "Tune", CUI::CORNER_ALL))
-		{
-			static int s_TunePopupID = 0;
-			UiInvokePopupMenu(&s_TunePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 90, PopupTune);
+			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+			{
+				int (*pPopupFunc)(CEditor *peditor, CUIRect View) = NULL;
+				const char *aButtonName = "Modifier";
+				float Height = 0.0f;
+				int Checked = -1;
+				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
+				if(pS)
+				{
+					if(pS == m_Map.m_pSwitchLayer)
+					{
+						aButtonName = "Switch";
+						pPopupFunc = PopupSwitch;
+						Height = 36;
+						Checked = 0;
+					}
+					else if(pS == m_Map.m_pSpeedupLayer)
+					{
+						aButtonName = "Speedup";
+						pPopupFunc = PopupSpeedup;
+						Height = 53;
+						Checked = 0;
+					}
+					else if(pS == m_Map.m_pTuneLayer)
+					{
+						aButtonName = "Tune";
+						pPopupFunc = PopupTune;
+						Height = 23;
+						Checked = 0;
+					}
+					else if(pS == m_Map.m_pTeleLayer)
+					{
+						aButtonName = "Tele";
+						pPopupFunc = PopupTele;
+						Height = 23;
+						Checked = 0;
+					}
+				}
+				static int s_ModifierButton = 0;
+				if(DoButton_Ex(&s_ModifierButton, aButtonName, Checked, &Button, 0, aButtonName, CUI::CORNER_ALL))
+				{
+					static int s_ModifierPopupID = 0;
+					UiInvokePopupMenu(&s_ModifierPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, pPopupFunc);
+				}
+			}
 		}
 	}
 
@@ -2411,7 +2421,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					}
 
 					CLayerGroup *g = GetSelectedGroup();
-					if(g)
+					if(!m_ShowPicker && g)
 					{
 						m_Brush.m_OffsetX += g->m_OffsetX;
 						m_Brush.m_OffsetY += g->m_OffsetY;
@@ -4393,7 +4403,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 			ToolBar.VSplitLeft(12.0f, &Button, &ToolBar);
 			static int s_SyncButton;
-			if(DoButton_Editor(&s_SyncButton, pEnvelope->m_Synchronized?"X":"", 0, &Button, 0, "Enable envelope synchronization between clients"))
+			if(DoButton_Editor(&s_SyncButton, pEnvelope->m_Synchronized?"X":"", 0, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
 				pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
 
 			ToolBar.VSplitLeft(4.0f, &Button, &ToolBar);

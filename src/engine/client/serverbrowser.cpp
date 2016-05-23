@@ -1359,6 +1359,7 @@ bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)
 void CServerBrowser::DDNetCountryFilterClean()
 {
 	char aNewList[128];
+	aNewList[0] = '\0';
 
 	for(int i = 0; i < m_NumDDNetCountries; i++)
 	{
@@ -1377,6 +1378,7 @@ void CServerBrowser::DDNetCountryFilterClean()
 void CServerBrowser::DDNetTypeFilterClean()
 {
 	char aNewList[128];
+	aNewList[0] = '\0';
 
 	for(int i = 0; i < m_NumDDNetTypes; i++)
 	{

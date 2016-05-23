@@ -216,13 +216,13 @@ public:	int m_LoadTotal;
 				{
 					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
 														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_filenames(m_aFilename, Other.m_aFilename) < 0;
+														str_comp_nocase(m_aFilename, Other.m_aFilename) < 0;
 				}
 				else
 				{
 					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
 														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_filenames(m_aFilename, Other.m_aFilename) > 0;
+														str_comp_nocase(m_aFilename, Other.m_aFilename) > 0;
 				}
 			}
 		}

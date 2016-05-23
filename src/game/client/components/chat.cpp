@@ -860,12 +860,26 @@ void CChat::OnRender()
 		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_Show)
 			break;
 
+		char aName[64] = "";
+		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID != -1 && m_aLines[r].m_aName[0] != '\0')
+		{
+			if (m_aLines[r].m_ClientID >= 10)
+				str_format(aName, sizeof(aName),"%d: ", m_aLines[r].m_ClientID);
+			else
+				str_format(aName, sizeof(aName)," %d: ", m_aLines[r].m_ClientID);
+			str_append(aName, m_aLines[r].m_aName,sizeof(aName));
+		}
+		else
+		{
+			str_copy(aName, m_aLines[r].m_aName, sizeof(aName));
+		}
+
 		// get the y offset (calculate it if we haven't done that yet)
 		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
 		{
 			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
+			TextRender()->TextEx(&Cursor, aName, -1);
 			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
 			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
 		}
@@ -904,12 +918,12 @@ void CChat::OnRender()
 		else
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, Blend);
 
-		// friends always in green
+		// friends always in green // TODO: settings pls!
 		if(m_aLines[r].m_ClientID > 0 && m_aLines[r].m_ClientID < MAX_CLIENTS && g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aName, m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aClan, true))
 			TextRender()->TextColor(0,0.7f,0,Blend);
 		else if (m_aLines[r].m_ClientID == -1337) // translator in blue
 			TextRender()->TextColor(0.2f,0.2f,0.7f,Blend);
-		TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
+		TextRender()->TextEx(&Cursor, aName, -1);
 
 		// render line
 		vec3 rgb;

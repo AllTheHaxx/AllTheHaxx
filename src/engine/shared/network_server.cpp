@@ -210,7 +210,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, sizeof(aBuf), SecurityToken);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, SecurityToken);
 		return -1; // failed to add client
 	}
 
@@ -596,7 +596,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				// drop invalid ctrl packets
 				if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL &&
 						m_RecvUnpacker.m_Data.m_DataSize == 0)
-					return 0;
+					continue;
 
 				// normal packet, find matching slot
 				int Slot = GetClientSlot(Addr);
