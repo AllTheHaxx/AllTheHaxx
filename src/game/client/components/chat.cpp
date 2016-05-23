@@ -1080,18 +1080,18 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 
 	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
 	{
-		bool SendChat = true;
+		bool DiscardChat = false;
 		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 		{
 			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
 				continue;
 			LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChatSend");
-			if(lfunc) try { SendChat = lfunc(Team, pLine); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+			if(lfunc) try { if(lfunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
 		}
 		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
-		if(confunc) try { confunc(Team, pLine); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+		if(confunc) try { if(confunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
 
-		if(!SendChat)
+		if(DiscardChat)
 			return;
 	}
 
