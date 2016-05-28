@@ -67,6 +67,7 @@
 #include "components/pskins.h"
 #include "components/eskins.h"
 #include "components/cskins.h"
+#include "components/drawing.h"
 
 #include <base/system.h>
 #include "components/race_demo.h"
@@ -137,6 +138,7 @@ static CgSkins gs_gSkins;
 static CpSkins gs_pSkins;
 static CeSkins gs_eSkins;
 static CcSkins gs_cSkins;
+static CDrawing gs_Drawing;
 
 static CPlayers gs_Players;
 static CNamePlates gs_NamePlates;
@@ -281,6 +283,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_pParticles->m_RenderGeneral);
 	m_All.Add(&gs_LuaRender11); // lua
 	m_All.Add(m_pDamageind);
+	m_All.Add(&gs_Drawing);
 	m_All.Add(&gs_LuaRender12); // lua
 	m_All.Add(m_pHud);
 	m_All.Add(&gs_LuaRender13); // lua
