@@ -677,7 +677,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 				m_aLines[m_CurrentLine].m_NameColor = TEAM_BLUE;
 				m_aLines[m_CurrentLine].m_Highlighted = false;
 				m_aLines[m_CurrentLine].m_Team = 0;
-				Highlighted = false;
+				Highlighted = true;
 			}
 			else if (Team == 3) // whisper recv
 			{
