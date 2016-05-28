@@ -513,10 +513,14 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
 
 			.addFunction("KeyPress", &IInput::KeyPress)
+			.addFunction("KeyIsPressed", &IInput::KeyIsPressed)
 			.addFunction("KeyName", &IInput::KeyNameSTD)
+			.addFunction("GetClipboardText", &IInput::GetClipboardTextSTD)
+			.addFunction("GetClipboardText", &IInput::SetClipboardTextSTD)
 
 			.addFunction("MouseModeRelative", &IInput::MouseModeRelative)
 			.addFunction("MouseModeAbsolute", &IInput::MouseModeAbsolute)
+			.addFunction("MouseDoubleClick", &IInput::MouseDoubleClick)
 		.endClass()
 		
 		//Server Infos

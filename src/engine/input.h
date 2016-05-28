@@ -73,8 +73,12 @@ public:
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual int MouseDoubleClick() = 0;
+
 	virtual const char* GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *Text) = 0;
+	// used for lua
+	std::string GetClipboardTextSTD() { return std::string(GetClipboardText()); }
+	void SetClipboardTextSTD(std::string Text) { SetClipboardText(Text.c_str()); }
 
 	virtual void MouseRelative(float *x, float *y) = 0;
 };
