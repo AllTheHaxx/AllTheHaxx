@@ -95,6 +95,12 @@ public:
 	void SetClipboardTextSTD(std::string Text) { SetClipboardText(Text.c_str()); }
 
 	virtual void MouseRelative(float *x, float *y) = 0;
+
+	virtual void SimulateKeyPress(int Key) = 0;
+	virtual void SimulateKeyPressSTD(std::string Key) = 0;
+	virtual void SimulateKeyRelease(int Key) = 0;
+	virtual void SimulateKeyReleaseSTD(std::string Key) = 0;
+
 };
 
 

@@ -511,20 +511,27 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
 			.addProperty("MouseX", &CControls::GetMouseX, &CControls::SetMouseX)
 			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
+		.endClass()
 
+		.beginClass<IInput>("IInput")
 			.addFunction("KeyPress", &IInput::KeyPress)
 			.addFunction("KeyIsPressed", &IInput::KeyIsPressedLua)
 			.addFunction("KeyName", &IInput::KeyNameSTD)
 			.addFunction("KeyID", &IInput::GetKeyID)
 			.addFunction("GetClipboardText", &IInput::GetClipboardTextSTD)
-			.addFunction("GetClipboardText", &IInput::SetClipboardTextSTD)
+			.addFunction("SetClipboardText", &IInput::SetClipboardTextSTD)
 
 			.addFunction("MouseModeRelative", &IInput::MouseModeRelative)
 			.addFunction("MouseModeAbsolute", &IInput::MouseModeAbsolute)
 			.addFunction("MouseDoubleClick", &IInput::MouseDoubleClick)
+
+			.addFunction("SimulateKeyPressDirect", &IInput::SimulateKeyPress)
+			.addFunction("SimulateKeyPress", &IInput::SimulateKeyPressSTD)
+			.addFunction("SimulateKeyReleaseDirect", &IInput::MouseDoubleClick)
+			.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
 		.endClass()
 		
-		//Server Infos
+		// serverinfo
 		.beginClass<CServerInfo>("CServerInfo")
 			.addProperty("GameMode", &CServerInfo::LuaGetGameType)
 			.addProperty("Name", &CServerInfo::LuaGetName)
@@ -611,7 +618,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("IntersectCharacter", &CGameClient::IntersectCharacterLua)
 		.endClass()
 		
-		//MAIN NAMESPACE
+		// MAIN NAMESPACE
 		.beginNamespace("TW")
 			.addVariable("Game", &CLua::m_pCGameClient, false)
 			.addVariable("Client", &CLua::m_pClient, false)
@@ -640,8 +647,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("CharSnap", &CGameClient::LuaGetCharacterInfo)
 		.endNamespace()
 
-		.beginNamespace("Graphics")
-			.addVariable("Engine", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
+		.beginNamespace("Engine")
+			.addVariable("Graphics", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
+			.addVariable("Input", &CLua::m_pCGameClient->m_pInput) //dunno, this should be maybe an own subspace :O
 		.endNamespace()
 		
 		// g_Config stuff... EVERYTHING AT ONCE!
@@ -660,9 +668,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 #undef MACRO_CONFIG_STR
 #undef MACRO_CONFIG_INT
 		
-		
 
-		//OOP ENDS HERE
+		// OOP ENDS HERE
 	;
 
 	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil"); // TODO

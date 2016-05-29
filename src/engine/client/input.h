@@ -44,6 +44,11 @@ public:
 	virtual const char* GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
 
+	virtual void SimulateKeyPress(int Key) { AddEvent(0, Key, FLAG_PRESS); }
+	virtual void SimulateKeyPressSTD(std::string Key) { int id = GetKeyID(Key); if(id < 0) return; AddEvent(0, id, FLAG_PRESS); }
+	virtual void SimulateKeyRelease(int Key) { AddEvent(0, Key, FLAG_RELEASE); }
+	virtual void SimulateKeyReleaseSTD(std::string Key) { int id = GetKeyID(Key); if(id < 0) return; AddEvent(0, id, FLAG_RELEASE); }
+
 	virtual int Update();
 	virtual void NextFrame();
 
