@@ -644,21 +644,27 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Engine", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
 		.endNamespace()
 		
-		.beginClass<CConfigProperties>("Config")   // g_Config stuff...
-			.addStaticProperty("PlayerName", &CConfigProperties::GetConfigPlayerName, &CConfigProperties::SetConfigPlayerName)
-			.addStaticProperty("PlayerClan", &CConfigProperties::GetConfigPlayerClan, &CConfigProperties::SetConfigPlayerClan)
-			.addStaticProperty("PlayerCountry", &CConfigProperties::GetConfigPlayerCountry, &CConfigProperties::SetConfigPlayerCountry)
-			
-			.addStaticProperty("Skin", &CConfigProperties::GetConfigPlayerSkin, &CConfigProperties::SetConfigPlayerSkin)
-			.addStaticProperty("PlayerColorBody", &CConfigProperties::GetConfigPlayerColorBody, &CConfigProperties::SetConfigPlayerColorBody)
-			.addStaticProperty("PlayerColorFeet", &CConfigProperties::GetConfigPlayerColorFeet, &CConfigProperties::SetConfigPlayerColorFeet)
-			.addStaticProperty("PlayerUseCustomColor", &CConfigProperties::GetConfigPlayerUseCustomColor, &CConfigProperties::SetConfigPlayerUseCustomColor)
+		// g_Config stuff... EVERYTHING AT ONCE!
+#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) \
+			.addStaticProperty(#Name, &CConfigProperties::GetConfig_##Name, &CConfigProperties::SetConfig_##Name) \
+			.addStaticProperty(#ScriptName, &CConfigProperties::GetConfig_##Name, &CConfigProperties::SetConfig_##Name)
+
+#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) \
+			.addStaticProperty(#Name, &CConfigProperties::GetConfig_##Name, &CConfigProperties::SetConfig_##Name) \
+			.addStaticProperty(#ScriptName, &CConfigProperties::GetConfig_##Name, &CConfigProperties::SetConfig_##Name)
+
+		.beginClass<CConfigProperties>("Config")
+			#include <engine/shared/config_variables.h>
 		.endClass()
+
+#undef MACRO_CONFIG_STR
+#undef MACRO_CONFIG_INT
 		
 		
+
 		//OOP ENDS HERE
 	;
-	
+
 	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil"); // TODO
 	lua_pcall(L, 0, LUA_MULTRET, 0);
 	

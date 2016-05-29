@@ -38,28 +38,18 @@ struct CConfigProperties
 {
 	static CConfiguration * m_pConfig;
 
+#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) \
+		static std::string GetConfig_##Name() { if(!((Save)&CFGFLAG_CLIENT)) throw "invalid config type (this is not a client variable)"; return g_Config.m_##Name; } \
+		static void SetConfig_##Name(std::string var) { if(!((Save)&CFGFLAG_CLIENT)) throw "invalid config type (this is not a client variable)"; str_copy(g_Config.m_##Name, var.c_str(), sizeof(g_Config.m_##Name)); }
 
-	static std::string GetConfigPlayerName() { return g_Config.m_PlayerName; }
-	static void SetConfigPlayerName(std::string name) { str_copy(g_Config.m_PlayerName, name.c_str(), sizeof(g_Config.m_PlayerName)); }
-	
-	static std::string GetConfigPlayerClan() { return g_Config.m_PlayerClan; }
-	static void SetConfigPlayerClan(std::string clan) { str_copy(g_Config.m_PlayerClan, clan.c_str(), sizeof(g_Config.m_PlayerClan)); }
-	
-	static int GetConfigPlayerCountry() { return g_Config.m_PlayerCountry; }
-	static void SetConfigPlayerCountry(int c) { g_Config.m_PlayerCountry = c; }
+#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) \
+		static int GetConfig_##Name() { if(!((Save)&CFGFLAG_CLIENT)) throw "invalid config type (this is not a client variable)"; return g_Config.m_##Name; } \
+		static void SetConfig_##Name(int var) { if(!((Save)&CFGFLAG_CLIENT)) throw "invalid config type (this is not a client variable)"; if (var < Min || var > Max) throw "config int override out of range"; g_Config.m_##Name = var; }
 
+#include <engine/shared/config_variables.h>
 
-	static std::string GetConfigPlayerSkin() { return g_Config.m_ClPlayerSkin; }
-	static void SetConfigPlayerSkin(std::string skin) { str_copy(g_Config.m_ClPlayerSkin, skin.c_str(), sizeof(g_Config.m_ClPlayerSkin)); }
-	
-	static int GetConfigPlayerColorBody() { return g_Config.m_ClPlayerColorBody; }
-	static void SetConfigPlayerColorBody(int c) { g_Config.m_ClPlayerColorBody = c; }
-
-	static int GetConfigPlayerColorFeet() { return g_Config.m_ClPlayerColorFeet; }
-	static void SetConfigPlayerColorFeet(int c) { g_Config.m_ClPlayerColorFeet = c; }
-
-	static int GetConfigPlayerUseCustomColor() { return g_Config.m_ClPlayerUseCustomColor; }
-	static void SetConfigPlayerUseCustomColor(int c) { g_Config.m_ClPlayerUseCustomColor = c; }
+#undef MACRO_CONFIG_STR
+#undef MACRO_CONFIG_INT
 };
 
 #endif
