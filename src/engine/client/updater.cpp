@@ -22,6 +22,7 @@ CUpdater::CUpdater()
 	m_pStorage = NULL;
 	m_pFetcher = NULL;
 	m_State = CLEAN;
+	str_copy(m_aError, "a file", sizeof(m_aError));
 	m_Percent = 0;
 	m_CheckOnly = false;
 	m_aLatestVersion[0] = '0';
@@ -59,7 +60,14 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	b = b ? b : pTask->Dest();
 
 	if(pTask->State() == CFetchTask::STATE_ERROR)
-		pUpdate->m_State = FAIL;
+	{
+		if(str_comp(b, "ath-news.txt") != 0) // news are allowed to fail...
+			pUpdate->m_State = FAIL;
+		else
+			str_copy(pUpdate->m_aNews, Localize("|<<< Failed to download news >>>|\nNews will automatically be loaded\non next client startif available"), sizeof(pUpdate->m_aNews));
+		str_format(pUpdate->m_aError, sizeof(pUpdate->m_aError), "'%s'", b);
+		pUpdate->m_pStorage->RemoveBinaryFile(b); // delete the empty file dummy
+	}
 
 	if(!str_comp(b, "ath-news.txt"))
 	{
@@ -189,19 +197,19 @@ void CUpdater::AddFileRemoveJob(const char *pFile, bool job)
 
 void CUpdater::ReplaceClient()
 {
-	dbg_msg("updater", "replacing " PLAT_CLIENT_EXEC);
+	dbg_msg("updater", "replacing %s", CURR_FILE_NAME);
 
 	// replace running executable by renaming twice...
 	if(!m_IsWinXP)
 	{
 		m_pStorage->RemoveBinaryFile(CLIENT_EXEC ".old");
-		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, CLIENT_EXEC ".old");
-		m_pStorage->RenameBinaryFile("update/" CLIENT_EXEC ".tmp", PLAT_CLIENT_EXEC);
+		m_pStorage->RenameBinaryFile(CURR_FILE_NAME, CLIENT_EXEC ".old");
+		m_pStorage->RenameBinaryFile("update/" CLIENT_EXEC ".tmp", CURR_FILE_NAME);
 	}
 
 #if !defined(CONF_FAMILY_WINDOWS)
 	char aPath[512];
-	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
+	m_pStorage->GetBinaryPath(CURR_FILE_NAME, aPath, sizeof aPath);
 	char aBuf[512];
 	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 	if(system(aBuf))

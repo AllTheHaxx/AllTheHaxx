@@ -22,6 +22,7 @@ public:
 	char m_aUserdir[MAX_PATH_LENGTH];
 	char m_aCurrentdir[MAX_PATH_LENGTH];
 	char m_aBinarydir[MAX_PATH_LENGTH];
+	char m_aExecutableName[128];
 
 	CStorage()
 	{
@@ -34,6 +35,9 @@ public:
 
 	int Init(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
 	{
+		// get executable name
+		ExtractExecutableName(ppArguments[0]);
+
 		// get userdir
 		fs_storage_path(pApplicationName, m_aUserdir, sizeof(m_aUserdir));
 
@@ -126,6 +130,21 @@ public:
 
 		if(!m_NumPaths)
 			dbg_msg("storage", "no paths found in storage.cfg");
+	}
+
+	void ExtractExecutableName(const char *pArgv0)
+	{
+		unsigned int Pos = ~0U;
+		for(unsigned i = 0; pArgv0[i]; i++)
+			if(pArgv0[i] == '/' || pArgv0[i] == '\\')
+				Pos = i;
+		if(Pos < MAX_PATH_LENGTH)
+		{
+			str_copy(m_aExecutableName, &pArgv0[Pos+1], sizeof(m_aExecutableName));
+			dbg_msg("storage", "executable name is '%s'", m_aExecutableName);
+		}
+		else
+			dbg_msg("storage", "huh? couldn't get executable name! what went wrong??");
 	}
 
 	void AddDefaultPaths()
@@ -455,6 +474,11 @@ public:
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pDir);
 		return pBuffer;
+	}
+
+	const char* GetExecutableName() const
+	{
+		return m_aExecutableName;
 	}
 
 	static IStorageTW *Create(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)

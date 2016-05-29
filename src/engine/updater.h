@@ -24,6 +24,7 @@ public:
 
 	virtual const char *GetLatestVersion() const = 0;
 	virtual const char *GetNews() const = 0;
+	virtual const char *GetFailedFile() const = 0;
 
 	virtual int GetCurrentState() const = 0;
 	virtual char *GetCurrentFile() = 0;

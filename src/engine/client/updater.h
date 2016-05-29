@@ -31,8 +31,9 @@
 #define PLAT_CLIENT_DOWN CLIENT_EXEC "-" PLAT_NAME PLAT_EXT
 #define PLAT_SERVER_DOWN SERVER_EXEC "-" PLAT_NAME PLAT_EXT
 
-#define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
-#define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
+#define CURR_FILE_NAME m_pStorage->GetExecutableName()
+//#define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
+//#define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
 //#define JOB_ADD true
 //#define JOB_REMOVE false
@@ -49,6 +50,7 @@ class CUpdater : public IUpdater
 	char m_Status[256];
 	int m_Percent;
 	char m_aLastFile[256];
+	char m_aError[256];
 
 	bool m_ClientUpdate;
 	int m_NumericVersion;
@@ -79,6 +81,7 @@ public:
 
 	const char *GetLatestVersion() const { return m_aLatestVersion; }
 	const char *GetNews() const { return m_aNews; }
+	const char *GetFailedFile() const { return m_aError; }
 
 	int GetCurrentState() const { return m_State; };
 	char *GetCurrentFile() { return m_Status; };
