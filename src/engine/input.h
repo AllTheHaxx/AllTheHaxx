@@ -63,11 +63,17 @@ public:
 	int KeyDown(int Key) { return KeyPressed(Key)&&!KeyWasPressed(Key); }
 =======*/
 	virtual bool KeyIsPressed(int Key) const = 0;
+	bool KeyIsPressedLua(std::string KeyName) const { return KeyIsPressed(GetKeyID(KeyName)); }
 	virtual bool KeyPress(int Key, bool CheckCounter=false) const = 0;
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
-	std::string KeyNameSTD(int Key) { return std::string(KeyName(Key)); }
+	std::string KeyNameSTD(int Key) const { return std::string(KeyName(Key)); }
+	int GetKeyID(std::string KeyName) const
+	{
+		for(int i = 0; i < g_MaxKeys; i++)
+			if(KeyNameSTD(i) == KeyName)
+				return i;
+	}
 	virtual void Clear() = 0;
-//>>>>>>> ddnet/master
 
 	//
 	virtual void MouseModeRelative() = 0;

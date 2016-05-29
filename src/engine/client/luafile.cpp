@@ -513,8 +513,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
 
 			.addFunction("KeyPress", &IInput::KeyPress)
-			.addFunction("KeyIsPressed", &IInput::KeyIsPressed)
+			.addFunction("KeyIsPressed", &IInput::KeyIsPressedLua)
 			.addFunction("KeyName", &IInput::KeyNameSTD)
+			.addFunction("KeyID", &IInput::GetKeyID)
 			.addFunction("GetClipboardText", &IInput::GetClipboardTextSTD)
 			.addFunction("GetClipboardText", &IInput::SetClipboardTextSTD)
 
