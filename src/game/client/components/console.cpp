@@ -31,9 +31,9 @@
 
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
-#include <game/client/components/controls.h>
-#include <game/client/components/menus.h>
 
+#include "controls.h"
+#include "binds.h"
 #include "menus.h"
 #include "irc.h"
 #include "console.h"
@@ -687,6 +687,43 @@ void CGameConsole::OnRender()
 	float ConsoleMaxHeight = Screen.h*3/5.0f;
 	float ConsoleHeight;
 
+	if(m_pClient->m_pMenus->MouseUnlocked())
+	{
+		CUIRect Warning, Text;
+		float Fade = (sin(Client()->LocalTime())+1)/4+0.5f;
+		Screen.HSplitTop(200.0f, &Warning, 0);
+		Warning.Margin(Warning.w/3, &Warning);
+		Warning.HMargin(Warning.h/3, &Warning);
+		RenderTools()->DrawUIRect(&Warning, vec4(0,0,0,Fade), 0, 0.0f);
+		TextRender()->TextColor(1,1,1,Fade);
+
+		Warning.HMargin(-10.0f, &Text);
+		//UI()->DoLabelScaled(&Text, Localize("MOUSE UNLOCKED"), 17.0f, 0, Warning.w-5.0f);
+		{
+			const float SIZE = 27.0f;
+			const char *pText = Localize("MOUSE UNLOCKED");
+			const float w = TextRender()->TextWidth(0, SIZE, pText, str_length(pText));
+			TextRender()->Text(0, Text.x+Text.w/2-w/2, Text.y+Text.h+SIZE/2, SIZE, pText, Text.w);
+		}
+
+		Warning.HSplitMid(&Text, &Warning);
+		//RenderTools()->DrawUIRect(&Text, vec4(1,0,0,Fade), 0, 0.0f);
+		{
+			const float SIZE = 17.0f;
+
+			char aBuf[256];
+			const char *pBoundKey = m_pClient->m_pBinds->GetKey("+unlock_mouse");
+			if(pBoundKey && pBoundKey[0] != '\0')
+				str_format(aBuf, sizeof(aBuf), Localize("Press %s to switch back to ingame mouse"), pBoundKey);
+			else
+				str_format(aBuf, sizeof(aBuf), Localize("Use the command 'unlock_mouse'"), pBoundKey);
+			//UI()->DoLabelScaled(&Text, aBuf, 17.0f, 0, Warning.w-5.0f);
+
+			const float w = TextRender()->TextWidth(0, SIZE, aBuf, str_length(aBuf));
+			TextRender()->Text(0, Text.x+Text.w/2-w/2, Text.y+Text.h+SIZE/2, SIZE, aBuf, Text.w);
+		}
+	}
+
 	float Progress = (TimeNow()-(m_StateChangeEnd-m_StateChangeDuration))/float(m_StateChangeDuration);
 
 	if (Progress >= 1.0f)
@@ -1127,7 +1164,7 @@ bool CGameConsole::OnInput(IInput::CEvent Event)
 void CGameConsole::Toggle(int Type)
 {
 	if(m_ConsoleType != Type && (m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING))
-			Input()->MouseModeRelative();
+		;//Input()->MouseModeRelative();
 	else
 	{
 		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_OPEN)
@@ -1144,7 +1181,7 @@ void CGameConsole::Toggle(int Type)
 
 		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
-			Input()->MouseModeAbsolute();
+			//Input()->MouseModeAbsolute();
 			m_pClient->m_pMenus->UseMouseButtons(false);
 			m_ConsoleState = CONSOLE_OPENING;
 			/*// reset controls - no don't do it because we want swag!
@@ -1152,7 +1189,7 @@ void CGameConsole::Toggle(int Type)
 		}
 		else
 		{
-			Input()->MouseModeRelative();
+			;//Input()->MouseModeRelative();
 			m_pClient->m_pMenus->UseMouseButtons(true);
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
@@ -1161,13 +1198,8 @@ void CGameConsole::Toggle(int Type)
 
 	m_ConsoleType = Type;
 
-	if(m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING)
-	{
-		Input()->MouseModeRelative();
-	}
-
-	if(m_ConsoleState == CONSOLE_CLOSED)
-		Input()->MouseModeRelative();
+	if(m_ConsoleState == CONSOLE_CLOSING && m_pClient->m_pMenus->MouseUnlocked())
+		m_pClient->m_pMenus->ToggleMouseMode();
 }
 
 void CGameConsole::Dump(int Type)

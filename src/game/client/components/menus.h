@@ -353,7 +353,10 @@ public:	int m_LoadTotal;
 
 	static void ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData);
 public:
+	void ToggleMouseMode();
+	void SetUnlockMouseMode(bool unlocked);
 	void RenderBackground();
+	bool MouseUnlocked() const { return m_MouseUnlocked; }
 
 	void UseMouseButtons(bool Use) { m_UseMouseButtons = Use; }
 

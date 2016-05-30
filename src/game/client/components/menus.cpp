@@ -2543,16 +2543,25 @@ bool CMenus::LockInput(IInput::CEvent e)
 	return false;
 }
 
+void CMenus::ToggleMouseMode()
+{
+	SetUnlockMouseMode(!m_MouseUnlocked);
+}
+
+void CMenus::SetUnlockMouseMode(bool unlock)
+{
+	if((m_MouseUnlocked = unlock))
+		Input()->MouseModeAbsolute();
+	else
+		Input()->MouseModeRelative();
+}
+
 void CMenus::ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData)
 {
 	CMenus *pSelf = (CMenus *)pUserData;
 
 	if(pResult->GetInteger(0) != 0)
 	{
-		if(pSelf->m_MouseUnlocked ^= true)
-			pSelf->Input()->MouseModeAbsolute();
-		else
-			pSelf->Input()->MouseModeRelative();
-
+		pSelf->ToggleMouseMode();
 	}
 }
