@@ -308,6 +308,7 @@ public:	int m_LoadTotal;
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// found in menus_settings.cpp
+	void (CMenus::*m_pfnAppearanceSubpage)(CUIRect MainView);
 	void RenderLanguageSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);
 	void RenderSettingsPlayer(CUIRect MainView);
@@ -317,6 +318,10 @@ public:	int m_LoadTotal;
 	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettingsHaxx(CUIRect MainView);
+	void RenderSettingsAppearance(CUIRect MainView);
+	void RenderSettingsAppearanceHUD(CUIRect MainView);
+	void RenderSettingsAppearanceTexture(CUIRect MainView);
+	bool RenderSettingsBackToAppearance(CUIRect *pMainView);
 	void RenderSettingsIRC(CUIRect MainView);
 	void RenderSettingsLua(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
@@ -412,11 +417,16 @@ public:
 		PAGE_SETTINGS_GRAPHICS,
 		PAGE_SETTINGS_SOUND,
 		PAGE_SETTINGS_HAXX,
-		PAGE_SETTINGS_HUD,
-		PAGE_SETTINGS_CHAT,
+		PAGE_SETTINGS_APPEARANCE,
 		PAGE_SETTINGS_IDENTITIES,
-		PAGE_SETTINGS_DDNET,
-		PAGE_SETTINGS_INFO // TODO: implement info page, should contain tabs "about" and "help"
+		PAGE_SETTINGS_MISC,
+		PAGE_SETTINGS_LUA,
+		PAGE_SETTINGS_ALL, // TODO: implement page with all vars on it
+		PAGE_SETTINGS_INFO, // TODO: implement info page, should contain tabs "about" and "help"
+
+		PAGE_APPEARANCE_OVERVIEW=0,
+		PAGE_APPEARANCE_HUD,
+		PAGE_APPEARANCE_TEXTURE,
 	};
 
 	// DDRace

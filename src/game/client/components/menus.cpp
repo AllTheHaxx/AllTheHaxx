@@ -72,6 +72,8 @@ CMenus::CMenus()
 	m_ActivePage = PAGE_INTERNET;
 	m_GamePage = PAGE_GAME;
 
+	m_pfnAppearanceSubpage = 0;
+
 	m_NeedRestartGraphics = false;
 	m_NeedRestartSound = false;
 	m_NeedSendinfo = false;

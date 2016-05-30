@@ -1511,9 +1511,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Graphics"),
 		Localize("Sound"),
 		("Haxx"),
-		Localize("HUD"),
+		Localize("Appearance"),
 		Localize("Identities"),
-		Localize("Texture"),
 		Localize("Misc."),
 		Localize("Lua")
 	};
@@ -1549,14 +1548,12 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(g_Config.m_UiSettingsPage == 7)
 		RenderSettingsHaxx(MainView);
 	else if(g_Config.m_UiSettingsPage == 8)
-		RenderSettingsHUD(MainView);
+		RenderSettingsAppearance(MainView);
 	else if(g_Config.m_UiSettingsPage == 9)
 		RenderSettingsIdent(MainView);
 	else if(g_Config.m_UiSettingsPage == 10)
-		RenderSettingsTexture(MainView);
-	else if(g_Config.m_UiSettingsPage == 11)
 		RenderSettingsDDNet(MainView);
-	else if	(g_Config.m_UiSettingsPage == 12)
+	else if	(g_Config.m_UiSettingsPage == 11)
 		RenderSettingsLua(MainView);
 
 	if(m_NeedRestartUpdate)
@@ -2464,6 +2461,56 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	}
 	
 	RenderSettingsIRC(Right);
+}
+
+void CMenus::RenderSettingsAppearance(CUIRect MainView)
+{
+	if(m_pfnAppearanceSubpage)
+	{
+		if(RenderSettingsBackToAppearance(&MainView))
+		(*this.*m_pfnAppearanceSubpage)(MainView);
+		return;
+	}
+
+	CUIRect Left, Right, Button;
+	MainView.VSplitMid(&Left, &Right);
+
+	static int s_Buttons[16] = {0};
+	unsigned int index = 0;
+
+#define DO_NEXT_BUTTON(BASERECT, TITLE, CALLBACK) \
+	Left.HSplitTop(10.0f, 0, &BASERECT); \
+	Left.HSplitTop(50.0f, &Button, &BASERECT); \
+	if(DoButton_MenuTab(&s_Buttons[index++], TITLE, 0, &Button, CUI::CORNER_ALL)) \
+		m_pfnAppearanceSubpage = &CMenus::CALLBACK
+
+	DO_NEXT_BUTTON(Left, "HUD", RenderSettingsAppearanceHUD);
+	DO_NEXT_BUTTON(Left, Localize("Textures"), RenderSettingsAppearanceTexture);
+
+//	RenderTools()->DrawUIRect(&Button, vec4(0,1,1,1), 0, 0);
+}
+
+void CMenus::RenderSettingsAppearanceHUD(CUIRect MainView)
+{
+	RenderTools()->DrawUIRect(&MainView, vec4(1,0,1,1), 0, 0);
+}
+
+void CMenus::RenderSettingsAppearanceTexture(CUIRect MainView)
+{
+	RenderTools()->DrawUIRect(&MainView, vec4(0,1,1,1), 0, 0);
+}
+
+bool CMenus::RenderSettingsBackToAppearance(CUIRect *pMainView)
+{
+	CUIRect Button;
+	pMainView->HSplitTop(30.0f, &Button, pMainView);
+	static int s_Button = 0;
+	if(DoButton_MenuTab(&s_Button, Localize("< Back"), 0, &Button, CUI::CORNER_ALL, vec4(0.7f, 0.7f, 0.2f, 0.9f), vec4(0.7f, 0.7f, 0.2f, 0.6f)))
+	{
+		m_pfnAppearanceSubpage = 0;
+		return false;
+	}
+	return true;
 }
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)
