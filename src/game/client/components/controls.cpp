@@ -353,7 +353,18 @@ int CControls::SnapInput(int *pData)
 		return 0;
 
 	LastSendTime = time_get();
-	mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
+
+	// remove the hookline flag from the sent data
+	CServerInfo ServerInfo; Client()->GetServerInfo(&ServerInfo); dbg_msg("gametype", "%s and found? %p", ServerInfo.m_aGameType, str_find_nocase(ServerInfo.m_aGameType, "stitch"));
+	if((!g_Config.m_ClSendHookline || str_find_nocase(ServerInfo.m_aGameType, "stitch")) && (m_InputData[g_Config.m_ClDummy].m_PlayerFlags & PLAYERFLAG_AIM))
+	{
+		m_InputData[g_Config.m_ClDummy].m_PlayerFlags ^= PLAYERFLAG_AIM;
+		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
+		m_InputData[g_Config.m_ClDummy].m_PlayerFlags ^= PLAYERFLAG_AIM;
+	}
+	else
+		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
+
 	return sizeof(m_InputData[0]);
 }
 
