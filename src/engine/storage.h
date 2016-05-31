@@ -19,6 +19,13 @@ public:
 		STORAGETYPE_CLIENT,
 	};
 
+	template<class T> struct CLoadHelper // this is really useful to list dirs recursively
+	{
+		T *pSelf;
+		const char *pFullDir;
+
+	};
+
 	virtual void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser) = 0;
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser) = 0;
 	virtual IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0) = 0;

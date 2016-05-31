@@ -469,6 +469,7 @@ public:
 
 		if(FT_New_Face(m_FTLibrary, pFont->m_aFilename, 0, &pFont->m_FtFace))
 		{
+			dbg_msg("engine/font", "failed to load '%s'", pFont->m_aFilename);
 			mem_free(pFont);
 			return NULL;
 		}

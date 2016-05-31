@@ -28,6 +28,7 @@
 #include "binds.h"
 #include "camera.h"
 #include "countryflags.h"
+#include "fontmgr.h"
 #include "menus.h"
 #include "identity.h"
 #include "skins.h"
@@ -2468,7 +2469,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	if(m_pfnAppearanceSubpage)
 	{
 		if(RenderSettingsBackToAppearance(&MainView))
-		(*this.*m_pfnAppearanceSubpage)(MainView);
+			(*this.*m_pfnAppearanceSubpage)(MainView);
+		else
+			m_pfnAppearanceSubpage = 0;
 		return;
 	}
 
@@ -2481,35 +2484,100 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 #define DO_NEXT_BUTTON(BASERECT, TITLE, CALLBACK) \
 	Left.HSplitTop(10.0f, 0, &BASERECT); \
 	Left.HSplitTop(50.0f, &Button, &BASERECT); \
+	TextRender()->Text(0, Button.x+Button.w-TextRender()->TextWidth(0, Button.h, ">", 1)-10.0f, Button.y-Button.h/3.6f, Button.h, ">", 9999); \
 	if(DoButton_MenuTab(&s_Buttons[index++], TITLE, 0, &Button, CUI::CORNER_ALL)) \
 		m_pfnAppearanceSubpage = &CMenus::CALLBACK
 
 	DO_NEXT_BUTTON(Left, "HUD", RenderSettingsAppearanceHUD);
 	DO_NEXT_BUTTON(Left, Localize("Textures"), RenderSettingsAppearanceTexture);
+	DO_NEXT_BUTTON(Left, Localize("Fonts"), RenderSettingsAppearanceFont);
 
 //	RenderTools()->DrawUIRect(&Button, vec4(0,1,1,1), 0, 0);
 }
 
 void CMenus::RenderSettingsAppearanceHUD(CUIRect MainView)
 {
-	RenderTools()->DrawUIRect(&MainView, vec4(1,0,1,1), 0, 0);
+	//RenderTools()->DrawUIRect(&MainView, vec4(1,0,1,1), 0, 0); // debuggi ^^
+	RenderSettingsDDNet(MainView);
 }
 
 void CMenus::RenderSettingsAppearanceTexture(CUIRect MainView)
 {
-	RenderTools()->DrawUIRect(&MainView, vec4(0,1,1,1), 0, 0);
+	//RenderTools()->DrawUIRect(&MainView, vec4(0,1,1,1), 0, 0);
+	RenderSettingsTexture(MainView);
+}
+
+void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
+{
+	//RenderTools()->DrawUIRect(&MainView, vec4(1,1,0,1), 0, 0);
+	const int NUM_FONTS = m_pClient->m_pFontMgr->GetNumFonts();
+
+	{
+		char aBuf[64];
+		CUIRect OptionsBar, Button;
+		MainView.VSplitRight(MainView.w/3, &MainView, &OptionsBar);
+		OptionsBar.x += 5.0f;
+
+		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
+		str_format(aBuf, sizeof(aBuf), Localize("%i fonts installed, %i loaded."), NUM_FONTS, m_pClient->m_pFontMgr->GetNumLoadedFonts());
+		Button.x += 10.0f;
+		UI()->DoLabelScaled(&Button, aBuf, Button.h-5.0f, -1, Button.w-3.0f);
+
+		OptionsBar.HSplitTop(10.0f, &Button, &OptionsBar);
+		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
+		static int s_ReloadButton = 0;
+		if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button))
+			m_pClient->m_pFontMgr->ReloadFontlist();
+
+		OptionsBar.HSplitTop(10.0f, &Button, &OptionsBar);
+		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
+		static int s_Checkbox = 0;
+		if(DoButton_CheckBox(&s_Checkbox, Localize("Preload fonts on starup"), g_Config.m_FtPreloadFonts, &Button))
+			g_Config.m_FtPreloadFonts ^= 1;
+	}
+
+	const int SELECTED = m_pClient->m_pFontMgr->GetSelectedFontIndex();
+	static int pIDItem[128] = {0};
+	static int s_Listbox = 0;
+	static float s_ScrollValue = 0.0f;
+	UiDoListboxStart(&s_Listbox, &MainView, 30.0f, Localize("Font Selector"), 0, NUM_FONTS, 1, SELECTED, s_ScrollValue, CUI::CORNER_ALL);
+	for(int i = 0; i < NUM_FONTS; i++)
+	{
+		const char *FilePath = m_pClient->m_pFontMgr->GetFontPath(i);
+		if(!FilePath || FilePath[0] == '\0') continue;
+
+		CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
+
+		if(Item.m_Visible)
+		{
+			if((i%2) && i != SELECTED)
+				RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0,0,0,0.35f), CUI::CORNER_ALL, 4.0f);
+			//UI()->DoLabelScaled(&Item.m_Rect, FilePath, Item.m_Rect.h-10.0f, -1, -1, 0, m_pClient->m_pFontMgr->GetFont(i));
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, Item.m_Rect.x, Item.m_Rect.y, 17.0f, TEXTFLAG_RENDER);
+			Cursor.m_pFont = m_pClient->m_pFontMgr->GetFont(i);
+			if(m_pClient->m_pFontMgr->GetFont(i))
+				TextRender()->TextColor(1,1,0.85f, 1);
+			else
+				TextRender()->TextColor(1,1,1,1);
+			TextRender()->TextEx(&Cursor, FilePath, -1);
+		}
+	}
+
+	int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+	if(NewSelected != SELECTED)
+		m_pClient->m_pFontMgr->ActivateFont(NewSelected);
+
 }
 
 bool CMenus::RenderSettingsBackToAppearance(CUIRect *pMainView)
 {
 	CUIRect Button;
-	pMainView->HSplitTop(30.0f, &Button, pMainView);
+	pMainView->HSplitTop(20.0f, &Button, pMainView);
+	pMainView->HSplitTop(10.0f, 0, pMainView);
 	static int s_Button = 0;
 	if(DoButton_MenuTab(&s_Button, Localize("< Back"), 0, &Button, CUI::CORNER_ALL, vec4(0.7f, 0.7f, 0.2f, 0.9f), vec4(0.7f, 0.7f, 0.2f, 0.6f)))
-	{
-		m_pfnAppearanceSubpage = 0;
 		return false;
-	}
 	return true;
 }
 

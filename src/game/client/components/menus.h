@@ -321,6 +321,7 @@ public:	int m_LoadTotal;
 	void RenderSettingsAppearance(CUIRect MainView);
 	void RenderSettingsAppearanceHUD(CUIRect MainView);
 	void RenderSettingsAppearanceTexture(CUIRect MainView);
+	void RenderSettingsAppearanceFont(CUIRect MainView);
 	bool RenderSettingsBackToAppearance(CUIRect *pMainView);
 	void RenderSettingsIRC(CUIRect MainView);
 	void RenderSettingsLua(CUIRect MainView);

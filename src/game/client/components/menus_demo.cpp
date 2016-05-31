@@ -468,6 +468,11 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	CUIRect View = *pRect;
 	CUIRect Header, Footer;
 
+	if(!pTitle)
+		pTitle = "";
+	if(!pBottomText)
+		pBottomText = "";
+
 	// draw header
 	View.HSplitTop(ms_ListheaderHeight, &Header, &View);
 	RenderTools()->DrawUIRect(&Header, vec4(1,1,1,0.25f), Corner, 5.0f);

@@ -382,6 +382,7 @@ public:
 	class CpSkins *m_ppSkins;
 	class CeSkins *m_peSkins;
 	class CcSkins *m_pcSkins;
+	class CFontMgr *m_pFontMgr;
 	class CUI *m_pUi;
 
 	// DDRace

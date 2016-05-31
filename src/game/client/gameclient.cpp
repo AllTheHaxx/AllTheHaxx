@@ -68,6 +68,7 @@
 #include "components/eskins.h"
 #include "components/cskins.h"
 #include "components/drawing.h"
+#include "components/fontmgr.h"
 
 #include <base/system.h>
 #include "components/race_demo.h"
@@ -139,6 +140,7 @@ static CpSkins gs_pSkins;
 static CeSkins gs_eSkins;
 static CcSkins gs_cSkins;
 static CDrawing gs_Drawing;
+static CFontMgr gs_FontMgr;
 
 static CPlayers gs_Players;
 static CNamePlates gs_NamePlates;
@@ -230,6 +232,7 @@ void CGameClient::OnConsoleInit()
 	m_ppSkins = &::gs_pSkins;
 	m_peSkins = &::gs_eSkins;
 	m_pcSkins = &::gs_cSkins;
+	m_pFontMgr = &::gs_FontMgr;
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
@@ -313,6 +316,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_LuaRender25); // lua
 	m_All.Add(m_pGameConsole);
 	m_All.Add(&gs_LuaRender26); // lua
+	m_All.Add(m_pFontMgr);
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key
@@ -401,7 +405,8 @@ void CGameClient::OnInit()
 		Client()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
 	// load default font
-	static CFont *pDefaultFont = 0;
+	m_pFontMgr->Init();
+/*	static CFont *pDefaultFont = 0;
 	char aFilename[512];
 	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
 	if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
@@ -416,7 +421,7 @@ void CGameClient::OnInit()
 	}
 	if(!pDefaultFont)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
-
+*/
 	// init all components
 
 	char aBuf[256];
