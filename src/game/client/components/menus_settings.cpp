@@ -3,6 +3,7 @@
 #include "SDL.h" // SDL_VIDEO_DRIVER_X11
 
 #include <base/tl/string.h>
+#include <base/tl/array.h>
 
 #include <base/math.h>
 
@@ -1515,7 +1516,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Appearance"),
 		Localize("Identities"),
 		Localize("Misc."),
-		Localize("Lua")
+		Localize("Lua"),
+		Localize("All")
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1556,6 +1558,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsDDNet(MainView);
 	else if	(g_Config.m_UiSettingsPage == 11)
 		RenderSettingsLua(MainView);
+	else if	(g_Config.m_UiSettingsPage == 12)
+		RenderSettingsAll(MainView);
 
 	if(m_NeedRestartUpdate)
 	{
@@ -2886,4 +2890,169 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("No files listed, click \"Refresh\" to reload the list"), 15.0f, 0, -1);
 		}
 	}
+}
+
+
+// sort arrays
+template<class T>
+void sort_simple_array(array<T> *pArray)
+{
+	const int NUM = pArray->size();
+	if(NUM < 2)
+		return;
+
+	for(int curr = 0; curr < NUM-1; curr++)
+	{
+		int minIndex = curr;
+		for(int i = curr + 1; i < NUM; i++)
+		{
+			int c = 4;
+			for(; str_uppercase((*pArray)[i].pName[c]) == str_uppercase((*pArray)[minIndex].pName[c]); c++);
+			if(str_uppercase((*pArray)[i].pName[c]) < str_uppercase((*pArray)[minIndex].pName[c]))
+				minIndex = i;
+		}
+
+		if(minIndex != curr)
+		{
+			T temp = (*pArray)[curr];
+			(*pArray)[curr] = (*pArray)[minIndex];
+			(*pArray)[minIndex] = temp;
+		}
+	}
+}
+
+struct ConfigVar
+{
+	const char *pName;
+	int Type;
+	const char *pTooltip;
+};
+
+struct ConfigInt : public ConfigVar
+{
+	int *pValue;
+	int Default;
+	int Min;
+	int Max;
+};
+
+struct ConfigString : public ConfigVar
+{
+	char *pStr;
+	const char *pDef;
+	int MaxLength;
+};
+
+void CMenus::RenderSettingsAll(CUIRect MainView)
+{
+	static array<ConfigInt> s_IntVars;
+	static array<ConfigString> s_StringVars;
+
+	if(s_IntVars.size() == 0)
+	{
+
+#define MACRO_CONFIG_INT(NAME,SCRIPTNAME,DEF,MIN,MAX,SAVE,DESC) \
+		if((SAVE)&CFGFLAG_CLIENT) \
+		{ \
+			ConfigInt e; \
+			e.pName = #SCRIPTNAME; \
+			e.Type = 1; \
+			e.pValue = &g_Config.m_##NAME; \
+			e.pTooltip = DESC; \
+			e.Default = DEF; \
+			e.Min = MIN; \
+			e.Max = MAX; \
+			s_IntVars.add(e); \
+		}
+
+
+#define MACRO_CONFIG_STR(NAME,SCRIPTNAME,LEN,DEF,SAVE,DESC) \
+		if((SAVE)&CFGFLAG_CLIENT) \
+		{ \
+			ConfigString e; \
+			e.pName = #SCRIPTNAME; \
+			e.Type = 2; \
+			e.pTooltip = DESC; \
+			e.pStr = g_Config.m_##NAME; \
+			e.pDef = DEF; \
+			e.MaxLength = LEN; \
+			s_StringVars.add(e); \
+		}
+
+#include <engine/shared/config_variables.h>
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_STR
+
+		sort_simple_array<ConfigInt>(&s_IntVars);
+		sort_simple_array<ConfigString>(&s_StringVars);
+
+	} // end of one-time-initialization thingy
+
+
+	static int s_Listbox = 0;
+	static float s_ScrollVal = 0.0f;
+	static int s_IDs[1024] = {0};
+	static int s_ScrollbarIDs[1024] = {0};
+	static int s_EditboxIDs[1024] = {0};
+	static float s_EditboxOffsets[1024] = {0};
+	CUIRect Test; MainView.Margin(20.0f, &Test);
+	UiDoListboxStart(&s_Listbox, &MainView, 40.0f, Localize("-- Collection of all config variables --"), Localize("(only for advanced players - be careful!)"), s_IntVars.size()+s_StringVars.size(), 1, -1, s_ScrollVal);
+	int i;
+	for(i = 0; i < s_IntVars.size(); i++) // INT VARS VIA SLIDER
+	{
+		if(i >= 1024)
+			break;
+
+		CListboxItem Item = UiDoListboxNextItem(&s_IDs[i], 0);
+
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Button, Text;
+
+		ConfigInt *var = &s_IntVars[i];
+		int *pVal = var->pValue;
+		if(!pVal)
+		{
+			dbg_msg("WTF", "%i %p %s", i, var, var->pName);
+			continue;
+		}
+		Item.m_Rect.VSplitLeft(Item.m_Rect.w/3, &Text, &Button);
+		UI()->DoLabelScaled(&Text, var->pName, 13.0f, -1, Text.w-5.0f);
+		Button.Margin(12.0f, &Button);
+		///**(var->pValue) = */round_to_int((var->Max-var->Min)*DoScrollbarH(&s_IDs[i], &Button, (*(var->pValue))/(var->Max-var->Min), var->pTooltip, *(var->pValue)));
+		*pVal = max(var->Min, round_to_int((var->Max)*DoScrollbarH(&s_ScrollbarIDs[i], &Button, (float)*pVal/(float)var->Max, var->pTooltip, *pVal)));
+	}
+	for(int j = 0; j < s_StringVars.size(); j++) // STRING VARS VIA EDITBOX
+	{
+		if(i+j >= 1024)
+			break;
+
+		CListboxItem Item = UiDoListboxNextItem(&s_IDs[i+j], 0);
+
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Button, Text;
+		ConfigString *var = &s_StringVars[j];
+		if(!(var->pStr))
+		{
+			dbg_msg("so ne", "kacke %s", var->pName);
+			continue;
+		}
+		Item.m_Rect.VSplitLeft(Item.m_Rect.w/3, &Text, &Button);
+		UI()->DoLabelScaled(&Text, var->pName, 13.0f, -1, Text.w-5.0f);
+		Button.Margin(7.0f, &Button);
+		Button.VSplitRight(Button.w/3, &Button, &Text); Text.x+=2.5f;
+		DoEditBox(&s_EditboxIDs[j], &Button, var->pStr, var->MaxLength, 13.0f, &s_EditboxOffsets[j], false, CUI::CORNER_ALL, 0, -1, var->pTooltip);
+		Text.VSplitRight(100.0f, &Text, &Button);
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), Localize("Length: %i/%i"), str_length(var->pStr), var->MaxLength-1);
+		UI()->DoLabelScaled(&Text, aBuf, 12.0f, -1, Text.w-5.0f);
+		static int s_ResetButtons[1024] = {0};
+		if(DoButton_Menu(&s_ResetButtons[j], Localize("Default"), 0, &Button, var->pDef))
+			str_copy(var->pStr, var->pDef, var->MaxLength);
+	}
+
+	UiDoListboxEnd(&s_ScrollVal, 0);
 }

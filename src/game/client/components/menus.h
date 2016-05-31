@@ -325,6 +325,7 @@ public:	int m_LoadTotal;
 	bool RenderSettingsBackToAppearance(CUIRect *pMainView);
 	void RenderSettingsIRC(CUIRect MainView);
 	void RenderSettingsLua(CUIRect MainView);
+	void RenderSettingsAll(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 
 	void RenderLoadingLua();
