@@ -527,7 +527,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addFunction("SimulateKeyPressDirect", &IInput::SimulateKeyPress)
 			.addFunction("SimulateKeyPress", &IInput::SimulateKeyPressSTD)
-			.addFunction("SimulateKeyReleaseDirect", &IInput::MouseDoubleClick)
+			.addFunction("SimulateKeyReleaseDirect", &IInput::SimulateKeyRelease)
 			.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
 		.endClass()
 		
