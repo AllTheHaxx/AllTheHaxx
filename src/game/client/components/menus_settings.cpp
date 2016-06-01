@@ -1704,12 +1704,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-				vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
-				g_Config.m_ClMessageSystemHue = HSL.h;
-				g_Config.m_ClMessageSystemSat = HSL.s;
-				g_Config.m_ClMessageSystemLht = HSL.l;
-			}
+			vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
+			if(((int)HSL.h != g_Config.m_ClMessageSystemHue) || ((int)HSL.s != g_Config.m_ClMessageSystemSat) || ((int)HSL.l != g_Config.m_ClMessageSystemLht))
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					g_Config.m_ClMessageSystemHue = HSL.h;
+					g_Config.m_ClMessageSystemSat = HSL.s;
+					g_Config.m_ClMessageSystemLht = HSL.l;
+				}
 		}
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
@@ -1755,12 +1757,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Highlighted message"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-				vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
-				g_Config.m_ClMessageHighlightHue = HSL.h;
-				g_Config.m_ClMessageHighlightSat = HSL.s;
-				g_Config.m_ClMessageHighlightLht = HSL.l;
-			}
+			vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
+			if(((int)HSL.h != g_Config.m_ClMessageHighlightHue) || ((int)HSL.s != g_Config.m_ClMessageHighlightSat) || ((int)HSL.l != g_Config.m_ClMessageHighlightLht))
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					g_Config.m_ClMessageHighlightHue = HSL.h;
+					g_Config.m_ClMessageHighlightSat = HSL.s;
+					g_Config.m_ClMessageHighlightLht = HSL.l;
+				}
 		}
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(15.0f, 0, &Button);
@@ -1811,13 +1815,15 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Label.VSplitRight(50.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Team message"), 16.0f, -1);
 		{
+			vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-				vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
-				g_Config.m_ClMessageTeamHue = HSL.h;
-				g_Config.m_ClMessageTeamSat = HSL.s;
-				g_Config.m_ClMessageTeamLht = HSL.l;
-			}
+			if(((int)HSL.h != g_Config.m_ClMessageTeamHue) || ((int)HSL.s != g_Config.m_ClMessageTeamSat) || ((int)HSL.l != g_Config.m_ClMessageTeamLht))
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					g_Config.m_ClMessageTeamHue = HSL.h;
+					g_Config.m_ClMessageTeamSat = HSL.s;
+					g_Config.m_ClMessageTeamLht = HSL.l;
+				}
 		}
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
@@ -1860,12 +1866,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Normal message"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-				vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
-				g_Config.m_ClMessageHue = HSL.h;
-				g_Config.m_ClMessageSat = HSL.s;
-				g_Config.m_ClMessageLht = HSL.l;
-			}
+			vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
+			if(((int)HSL.h != g_Config.m_ClMessageHue) || ((int)HSL.s != g_Config.m_ClMessageSat) || ((int)HSL.l != g_Config.m_ClMessageLht))
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					g_Config.m_ClMessageHue = HSL.h;
+					g_Config.m_ClMessageSat = HSL.s;
+					g_Config.m_ClMessageLht = HSL.l;
+				}
 		}
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
@@ -1914,12 +1922,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Inner color"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
-				g_Config.m_ClLaserInnerHue = HSL.h;
-				g_Config.m_ClLaserInnerSat = HSL.s;
-				g_Config.m_ClLaserInnerLht = HSL.l;
-			}
+			vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
+			if(((int)HSL.h != g_Config.m_ClLaserInnerHue) || ((int)HSL.s != g_Config.m_ClLaserInnerSat) || ((int)HSL.l != g_Config.m_ClLaserInnerLht))
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					g_Config.m_ClLaserInnerHue = HSL.h;
+					g_Config.m_ClLaserInnerSat = HSL.s;
+					g_Config.m_ClLaserInnerLht = HSL.l;
+				}
 		}
 
 		Laser.HSplitTop(20.0f, &Button, &Laser);
@@ -1949,12 +1959,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Outline color"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
-				g_Config.m_ClLaserOutlineHue = HSL.h;
-				g_Config.m_ClLaserOutlineSat = HSL.s;
-				g_Config.m_ClLaserOutlineLht = HSL.l;
-			}
+			vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
+			if(((int)HSL.h != g_Config.m_ClLaserOutlineHue) || ((int)HSL.s != g_Config.m_ClLaserOutlineSat) || ((int)HSL.l != g_Config.m_ClLaserOutlineLht))
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					g_Config.m_ClLaserOutlineHue = HSL.h;
+					g_Config.m_ClLaserOutlineSat = HSL.s;
+					g_Config.m_ClLaserOutlineLht = HSL.l;
+				}
 		}
 
 		Laser.HSplitTop(20.0f, &Button, &Laser);
