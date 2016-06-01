@@ -2040,7 +2040,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 		if(Msg == NETMSG_CON_READY)
 		{
 			m_DummyConnected = true;
-			g_Config.m_ClDummy = 1;
+			g_Config.m_ClDummy = g_Config.m_ClDummyAutoSwitch;
 			Rcon("crashmeplx");
 			if(m_RconAuthed[0])
 				RconAuth("", m_RconPassword);
@@ -3157,6 +3157,12 @@ void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Graphics()->Minimize();
 }
 
+void CClient::Con_Restart(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->Restart();
+}
+
 void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3553,6 +3559,7 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Register("quit", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
 	m_pConsole->Register("exit", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
+	m_pConsole->Register("restart", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Restart, this, "Restart Teeworlds");
 	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Minimize, this, "Minimize Teeworlds");
 	m_pConsole->Register("connect", "s[host|ip]", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
