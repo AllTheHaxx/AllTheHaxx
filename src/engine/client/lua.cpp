@@ -25,11 +25,7 @@ CLua::CLua()
 
 CLua::~CLua()
 {
-	SaveAutoloads();
-
-	m_pLuaFiles.delete_all();
-	m_pLuaFiles.clear();
-	mem_free(CLuaBinding::m_pUiContainer);
+	Shutdown();
 }
 
 void CLua::Init(IClient *pClient, IStorageTW *pStorage)
@@ -39,7 +35,16 @@ void CLua::Init(IClient *pClient, IStorageTW *pStorage)
 	m_pStorage = pStorage;
 	m_aAutoloadFiles.clear();
 
-	LoadFolder();
+	//LoadFolder(); // we can't do it that early
+}
+
+void CLua::Shutdown()
+{
+	SaveAutoloads();
+
+	m_pLuaFiles.delete_all();
+	m_pLuaFiles.clear();
+	mem_free(CLuaBinding::m_pUiContainer);
 }
 
 void CLua::SaveAutoloads()

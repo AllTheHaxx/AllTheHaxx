@@ -48,6 +48,7 @@ public:
     ~CLua();
 	
 	void Init(IClient *pClient, IStorageTW *pStorage);
+	void Shutdown();
 	void SaveAutoloads();
 	void AddUserscript(const char *pFilename);
 	void LoadFolder();

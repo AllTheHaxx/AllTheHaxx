@@ -3061,6 +3061,13 @@ void CClient::Run()
 
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
+
+		static bool LuaFinalInitDone = false;
+		if(!LuaFinalInitDone)
+		{
+			LuaFinalInitDone = true;
+			m_Lua.LoadFolder();
+		}
 	}
 
 #if defined(CONF_FAMILY_UNIX)
@@ -3070,6 +3077,7 @@ void CClient::Run()
 	GameClient()->OnShutdown();
 	Disconnect();
 
+	m_Lua.Shutdown();
 	m_pGraphics->Shutdown();
 	m_pSound->Shutdown();
 
