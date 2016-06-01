@@ -689,6 +689,7 @@ void CGameConsole::OnRender()
 
 	if(m_pClient->m_pMenus->MouseUnlocked())
 	{
+		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 		CUIRect Warning, Text;
 		float Fade = (sin(Client()->LocalTime())+1)/4+0.5f;
 		Screen.HSplitTop(200.0f, &Warning, 0);
