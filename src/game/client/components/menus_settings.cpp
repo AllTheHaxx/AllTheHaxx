@@ -1513,7 +1513,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Graphics"),
 		Localize("Sound"),
 		("Haxx"),
-		Localize("Appearance"),
+		m_pfnAppearanceSubpage == NULL ? Localize("Appearance") : Localize("< back"),
 		Localize("Identities"),
 		Localize("Misc."),
 		Localize("Lua"),
@@ -1528,8 +1528,14 @@ void CMenus::RenderSettings(CUIRect MainView)
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(UI()->MouseInside(&Button))
 			Button.w += 5.0f;
-		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R))
+		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R,
+				i == 8 && m_pfnAppearanceSubpage ? vec4(0.8f, 0.6f, 0.25f, ms_ColorTabbarActive.a) : ms_ColorTabbarActive
+				))
+		{
+			if(i == 8 && m_pfnAppearanceSubpage)
+				m_pfnAppearanceSubpage = 0;
 			g_Config.m_UiSettingsPage = i;
+		}
 	}
 
 	MainView.Margin(10.0f, &MainView);
@@ -2472,10 +2478,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 {
 	if(m_pfnAppearanceSubpage)
 	{
-		if(RenderSettingsBackToAppearance(&MainView))
+		//if(RenderSettingsBackToAppearance(&MainView))
 			(*this.*m_pfnAppearanceSubpage)(MainView);
-		else
-			m_pfnAppearanceSubpage = 0;
+		//else
+		//	m_pfnAppearanceSubpage = 0;
 		return;
 	}
 
@@ -2499,10 +2505,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 //	RenderTools()->DrawUIRect(&Button, vec4(0,1,1,1), 0, 0);
 }
 
-void CMenus::RenderSettingsAppearanceHUD(CUIRect MainView)
+void CMenus::RenderSettingsAppearanceHUD(CUIRect MainView) // here will be more tabs and stuff I think
 {
 	//RenderTools()->DrawUIRect(&MainView, vec4(1,0,1,1), 0, 0); // debuggi ^^
-	RenderSettingsDDNet(MainView);
+	RenderSettingsHUD(MainView);
 }
 
 void CMenus::RenderSettingsAppearanceTexture(CUIRect MainView)
