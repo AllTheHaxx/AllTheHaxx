@@ -2498,7 +2498,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	}
 
 	CUIRect Left, Right, Button;
-	MainView.VSplitMid(&Left, &Right);
+	//MainView.VSplitMid(&Left, &Right);
+	MainView.VMargin(MainView.w/3, &Left);
 
 	static int s_Buttons[16] = {0};
 	unsigned int index = 0;
