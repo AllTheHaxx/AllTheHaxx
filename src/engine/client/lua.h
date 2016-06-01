@@ -14,7 +14,7 @@
 			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED) \
 				continue; \
 			LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc(EVENTNAME); \
-			if(lfunc) try { lfunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } \
+			if(lfunc) try { lfunc(__VA_ARGS__); } catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[ijdfg]); } \
 		} \
 		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, EVENTNAME); \
 		if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } \
@@ -35,6 +35,14 @@ class CLua
 	array<std::string> m_aAutoloadFiles;
 	IStorageTW *m_pStorage;
 
+	struct LuaErrorCounter
+	{
+		CLuaFile* culprit;
+		int count;
+	};
+
+	array<LuaErrorCounter> m_ErrorCounter;
+
 public:
     CLua();
     ~CLua();
@@ -49,6 +57,7 @@ public:
 
 	static int ErrorFunc(lua_State *L);
     static int Panic(lua_State *L);
+    int HandleException(std::exception &e, CLuaFile*);
 
 	static CClient * m_pCClient;
 	static IClient *m_pClient;

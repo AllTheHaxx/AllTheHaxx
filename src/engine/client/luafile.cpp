@@ -24,6 +24,7 @@ CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLu
 {
 	m_pLuaState = 0;
 	m_State = LUAFILE_STATE_IDLE;
+	m_pErrorStr = 0;
 	Reset();
 }
 
@@ -119,7 +120,8 @@ void CLuaFile::Unload(bool error)
 	}
 	catch(std::exception &e)
 	{
-		printf("LUA EXCEPTION: %s\n", e.what());
+		//printf("LUA EXCEPTION: %s\n", e.what());
+		m_pLua->HandleException(e, this);
 	}
 
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);

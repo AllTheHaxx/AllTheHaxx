@@ -39,6 +39,8 @@ public:
 		LUAFILE_NUM_PERMISSIONS
 	};
 
+	const char *m_pErrorStr;
+
 private:
 	CLua *m_pLua;
 	lua_State *m_pLuaState;

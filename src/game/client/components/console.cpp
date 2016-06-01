@@ -204,7 +204,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 				{
 					str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
 					
-					if(!strcmp(ErrorMsg, "attempt to call a string value"))  //HACKISH SOLUTION : Try recompile pLine with a print!
+					if(!str_comp(ErrorMsg, "attempt to call a string value"))  //HACKISH SOLUTION : Try recompile pLine with a print!
 					{
 						Status = 0;
 						
@@ -215,30 +215,30 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 						Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
 					}
 				}			
-				}
-				catch(std::exception &e)  //just to be sure...
-				{
-					PrintLine(e.what());
-				}
-				catch(...)
-				{
-					PrintLine("An unknown error occured!");
-				}
-				
-				/*m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
-				//add this to the history :3
-				char *pEntry = m_History.Allocate(m_LuaHandler.m_FullLine.size()+1);
-				mem_copy(pEntry, m_LuaHandler.m_FullLine.c_str(), m_LuaHandler.m_FullLine.size()+1);*/
+			}
+			catch(std::exception &e)  //just to be sure...
+			{
+				PrintLine(e.what());
+			}
+			catch(...)
+			{
+				PrintLine("An unknown error occured!");
+			}
 
-				
-				m_LuaHandler.m_FullLine = "";
-				m_LuaHandler.m_ScopeCount = 0;
-				
-				if(Status)
-				{
-					str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
-					PrintLine(ErrorMsg);
-				}
+			/*m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
+			//add this to the history :3
+			char *pEntry = m_History.Allocate(m_LuaHandler.m_FullLine.size()+1);
+			mem_copy(pEntry, m_LuaHandler.m_FullLine.c_str(), m_LuaHandler.m_FullLine.size()+1);*/
+
+
+			m_LuaHandler.m_FullLine = "";
+			m_LuaHandler.m_ScopeCount = 0;
+
+			if(Status)
+			{
+				str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
+				PrintLine(ErrorMsg);
+			}
 		}
 		else if(m_LuaHandler.m_ScopeCount < 0)
 		{

@@ -478,7 +478,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 				if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
 					continue;
 				LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChat");
-				if(lfunc) try { HideChat |= lfunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)).cast<bool>(); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+				if(lfunc) try { HideChat |= lfunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)).cast<bool>(); } catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[ijdfg]); }
 			}
 			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChat");
 			if(confunc) try { confunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }

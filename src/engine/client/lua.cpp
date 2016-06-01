@@ -167,6 +167,30 @@ int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pU
 	return 0;
 }
 
+int CLua::HandleException(std::exception &e, CLuaFile* culprit)
+{
+	for(int i = 0; i < m_ErrorCounter.size(); i++)
+	{
+		if(m_ErrorCounter[i].culprit == culprit)
+		{
+			dbg_msg("lua|EXCEPTION", "{%i/511} %s", m_ErrorCounter[i].count, e.what());
+			if(++m_ErrorCounter[i].count < 512)
+				return m_ErrorCounter[i].count;
+			m_ErrorCounter[i].count = 0;
+			culprit->m_pErrorStr = "Error count limit exceeded (too many exceptions thrown)";
+			culprit->Unload(true);
+			dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", culprit->GetFilename());
+		}
+	}
+
+	LuaErrorCounter x;
+	x.culprit = culprit;
+	x.count = 1;
+	m_ErrorCounter.add(x);
+
+	return 1;
+}
+
 int CLua::Panic(lua_State *L)
 {
 	dbg_break();

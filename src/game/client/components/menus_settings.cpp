@@ -2743,7 +2743,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 		catch(std::exception &e)
 		{
-			printf("LUA EXCEPTION: %s\n", e.what());
+			Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]);
 			s_ActiveLuaSettings = -1;
 		}
 		return;
@@ -2879,8 +2879,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				if(L->State() == CLuaFile::LUAFILE_STATE_ERROR)
 				{
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
-					Buttons.VSplitRight(100.0f, &Buttons, &Button);
-					UI()->DoLabel(&Button, Localize("An error occured while loading"), 10.0f, -1, Button.w, 0);
+					Buttons.VSplitRight(200.0f, &Buttons, &Button);
+					UI()->DoLabel(&Button, L->m_pErrorStr && L->m_pErrorStr[0] != '\0' ? L->m_pErrorStr : Localize("An error occured"), 10.0f, -1, Button.w, 0);
 				}
 
 				if (L->GetScriptHasSettings())
