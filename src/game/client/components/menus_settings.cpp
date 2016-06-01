@@ -1517,7 +1517,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Identities"),
 		Localize("Misc."),
 		Localize("Lua"),
-		Localize("All")
+		//Localize("All")
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1558,8 +1558,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsDDNet(MainView);
 	else if	(g_Config.m_UiSettingsPage == 11)
 		RenderSettingsLua(MainView);
-	else if	(g_Config.m_UiSettingsPage == 12)
-		RenderSettingsAll(MainView);
+	//else if	(g_Config.m_UiSettingsPage == 12)
+	//	RenderSettingsAll(MainView);
 
 	if(m_NeedRestartUpdate)
 	{
