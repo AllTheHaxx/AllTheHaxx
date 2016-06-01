@@ -423,7 +423,7 @@ public:
 		PAGE_SETTINGS_IDENTITIES,
 		PAGE_SETTINGS_MISC,
 		PAGE_SETTINGS_LUA,
-		PAGE_SETTINGS_ALL, // TODO: implement page with all vars on it
+		PAGE_SETTINGS_ALL, // TODO: fix the page with all vars on it
 		PAGE_SETTINGS_INFO, // TODO: implement info page, should contain tabs "about" and "help"
 
 		PAGE_APPEARANCE_OVERVIEW=0,
