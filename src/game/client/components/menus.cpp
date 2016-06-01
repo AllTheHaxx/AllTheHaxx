@@ -1286,11 +1286,11 @@ void CMenus::RenderLoading()
 
 		// for teh lulz
 		if(timeinfo->tm_mday == 20 && timeinfo->tm_mon == 12)
-			pSaying = "Happy Birthday xush' :D";
+			pSaying = "Happy Birthday, xush' :D (December 20th)";
 		else if(timeinfo->tm_mday == 16 && timeinfo->tm_mon == 10)
-			pSaying = "Happy Birthday Henritees :D";
+			pSaying = "Happy Birthday, Henritees :D (October 10th)";
 		else if(timeinfo->tm_mday == 24 && timeinfo->tm_mon == 10)
-			pSaying = "Happy Birthday FuroS :D";
+			pSaying = "Happy Birthday, FuroS :D (October 24th)";
 	}
 
 	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
