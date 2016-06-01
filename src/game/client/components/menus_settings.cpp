@@ -2718,9 +2718,10 @@ void CMenus::RenderLoadingLua()
 
 void CMenus::RenderSettingsLua(CUIRect MainView)
 {
-	CUIRect Button;
+	CUIRect Button, QuickSearch;
 	static int s_ActiveLuaSettings = -1;
 
+	MainView.HSplitBottom(30.0f, &MainView, &QuickSearch);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 
 	if(s_ActiveLuaSettings >= 0)
@@ -2790,9 +2791,14 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
-			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
 			CLuaFile *L = Client()->Lua()->GetLuaFiles()[i];
-			if(!L) continue;
+			if(!L)
+				continue;
+
+			if(g_Config.m_ClLuaFilterString[0] != '\0' && (!str_find_nocase(L->GetFilename(), g_Config.m_ClLuaFilterString) && !str_find_nocase(L->GetScriptTitle(), g_Config.m_ClLuaFilterString)))
+				continue;
+
+			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
 
 			if(Item.m_Visible)
 			{
@@ -2803,9 +2809,11 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				vec4 Color = L->State() == CLuaFile::LUAFILE_STATE_ERROR ? vec4(0.7f,0,0,0.3f) :
 						L->State() == CLuaFile::LUAFILE_STATE_LOADED ? vec4(0,0.7f,0,0.3f) : vec4(0,0,0,0.3f);
 
-				HighlightIndex++;
-				if (HighlightIndex % 2 == 0)
+				if(++HighlightIndex > 1)
+				{
 					Color.a += 0.2f;
+					HighlightIndex = 0;
+				}
 
 				RenderTools()->DrawUIRect(&Item.m_Rect, Color, CUI::CORNER_ALL, 5.0f);
 
@@ -2893,9 +2901,9 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					}
 				}
 				if (L->GetScriptTitle()[0] != '\0')
-					UI()->DoLabelScaled(&LabelTitle, L->GetScriptTitle(), 16.0f, -1);
+					UI()->DoLabelScaled(&LabelTitle, L->GetScriptTitle(), 16.0f, -1, LabelTitle.w, g_Config.m_ClLuaFilterString);
 				else
-					UI()->DoLabelScaled(&LabelTitle, L->GetFilename(), 16.0f, -1);
+					UI()->DoLabelScaled(&LabelTitle, L->GetFilename(), 16.0f, -1, LabelTitle.w, g_Config.m_ClLuaFilterString);
 				UI()->DoLabelScaled(&LabelInfo, L->GetScriptInfo(), 14.0f, -1);
 			}
 		}
@@ -2907,6 +2915,31 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			CUIRect Label;
 			MainView.HSplitBottom(MainView.h/2+15.0f, 0, &Label);
 			UI()->DoLabelScaled(&Label, Localize("No files listed, click \"Refresh\" to reload the list"), 15.0f, 0, -1);
+		}
+	}
+
+	// render quick search
+	{
+		CUIRect QuickSearchClearButton;
+		//MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
+		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
+		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
+		UI()->DoLabelScaled(&QuickSearch, "⚲", 14.0f, -1);
+		float wSearch = TextRender()->TextWidth(0, 14.0f, "⚲", -1);
+		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
+		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
+		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
+		static float Offset = 0.0f;
+		DoEditBox(&g_Config.m_ClLuaFilterString, &QuickSearch, g_Config.m_ClLuaFilterString, sizeof(g_Config.m_ClLuaFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search"));
+
+		// clear button
+		{
+			static int s_ClearButton = 0;
+			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
+			{
+				g_Config.m_ClLuaFilterString[0] = 0;
+				UI()->SetActiveItem(&g_Config.m_ClLuaFilterString);
+			}
 		}
 	}
 }
