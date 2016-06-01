@@ -1288,7 +1288,7 @@ void CMenus::RenderLoading()
 		if(timeinfo->tm_mday == 20 && timeinfo->tm_mon == 12)
 			pSaying = "Happy Birthday, xush' :D (December 20th)";
 		else if(timeinfo->tm_mday == 16 && timeinfo->tm_mon == 10)
-			pSaying = "Happy Birthday, Henritees :D (October 10th)";
+			pSaying = "Happy Birthday, Henritees :D (October 16th)";
 		else if(timeinfo->tm_mday == 24 && timeinfo->tm_mon == 10)
 			pSaying = "Happy Birthday, FuroS :D (October 24th)";
 	}
