@@ -1160,7 +1160,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("High-DPI screen support (experimental)"), g_Config.m_GfxHighdpi, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("High-DPI screen support"), g_Config.m_GfxHighdpi, &Button, Localize("Be careful: experimental")))
 	{
 		g_Config.m_GfxHighdpi ^= 1;
 		CheckSettings = true;
@@ -1217,6 +1217,27 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		*pColorSlider[s] = (int)(k*255.0f);
 		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
 	}
+
+	MainView.HSplitTop(20.0f, 0, &MainView);
+
+	MainView.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
+	Text.HMargin(-2.75f, &Text);
+	Text.h += 2.75f;
+	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
+
+	MainView.VMargin(15.0f, &MainView);
+	MainView.HSplitTop(20.0f, &Text, &MainView);
+	UI()->DoLabelScaled(&Text, Localize("UI Scale"), 14.0f, -1);
+
+	MainView.HSplitTop(10.0f, 0, &MainView);
+	MainView.HSplitTop(15.0f, &Text, &MainView);
+	static int s_Scrollbar = 0;
+	static int s_NewVal = g_Config.m_UiScale; // proxy it to not instantly change the ui size
+	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != (void*)&s_Scrollbar) // if it has been changed in f1
+		s_NewVal = g_Config.m_UiScale;
+	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_Scrollbar, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("If you happen to mess it up so that this slider\nis not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
+	if(UI()->ActiveItem() != (void*)&s_Scrollbar)
+		g_Config.m_UiScale = s_NewVal;
 }
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
