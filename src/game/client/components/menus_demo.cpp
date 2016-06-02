@@ -515,13 +515,16 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 		Num = 0;
 	if(Num > 0)
 	{
+		static float s_NewVal = gs_ListBoxScrollValue;
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
-			gs_ListBoxScrollValue -= 3.0f/Num;
+			s_NewVal -= 3.0f/Num;
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
-			gs_ListBoxScrollValue += 3.0f/Num;
+			s_NewVal += 3.0f/Num;
 
-		if(gs_ListBoxScrollValue < 0.0f) gs_ListBoxScrollValue = 0.0f;
-		if(gs_ListBoxScrollValue > 1.0f) gs_ListBoxScrollValue = 1.0f;
+		if(s_NewVal < 0.0f) s_NewVal = 0.0f;
+		if(s_NewVal > 1.0f) s_NewVal = 1.0f;
+		smooth_set(&gs_ListBoxScrollValue, s_NewVal, (0.005f/Client()->RenderFrameTime())*23.0f);
+
 	}
 
 	Scroll.HMargin(5.0f, &Scroll);
