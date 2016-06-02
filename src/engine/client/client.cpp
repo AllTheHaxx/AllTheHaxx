@@ -1480,8 +1480,8 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 		// don't add invalid info to the server browser list
 		if(Info.m_NumClients < 0 || /*Info.m_NumClients > MAX_CLIENTS ||*/ Info.m_MaxClients < 0 || /*Info.m_MaxClients > MAX_CLIENTS ||*/
-			Info.m_NumPlayers < 0 || Info.m_NumPlayers > Info.m_NumClients || Info.m_MaxPlayers < 0 || Info.m_MaxPlayers > Info.m_MaxClients ||
-			Info.m_NumPlayers > Info.m_MaxPlayers || Info.m_NumClients > Info.m_MaxClients)
+			Info.m_NumPlayers < 0 || Info.m_NumPlayers > Info.m_NumClients || Info.m_MaxPlayers < 0 || Info.m_MaxPlayers > Info.m_MaxClients/* ||
+			Info.m_NumPlayers > Info.m_MaxPlayers || Info.m_NumClients > Info.m_MaxClients*/)
 			return;
 
 		net_addr_str(&pPacket->m_Address, Info.m_aAddress, sizeof(Info.m_aAddress), true);
