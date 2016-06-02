@@ -676,7 +676,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current,
 	pRect->HMargin(5.0f, &Rail);
 	RenderTools()->DrawUIRect(&Rail, vec4(1,1,1,0.25f), 0, 0.0f);
 
-	if(Value == -11383873)
+	if(Value == ~0)
 	{
 		CUIRect Slider = Handle;
 		if(Inside || (UI()->HotItem() == pID && UI()->MouseButton(0)) || UI()->ActiveItem() == pID)
