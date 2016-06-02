@@ -193,7 +193,7 @@ private:
 
 	//
 	void Filter();
-	void Sort();
+	void Sort(bool IgnoreLazy=false);
 	int SortHash() const;
 
 	CServerEntry *Add(const NETADDR &Addr);

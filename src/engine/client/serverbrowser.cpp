@@ -375,12 +375,15 @@ int CServerBrowser::SortHash() const
 	return i;
 }
 
-void CServerBrowser::Sort()
+void CServerBrowser::Sort(bool IgnoreLazy)
 {
 	int i;
 
 	// create filtered list
 	Filter();
+
+	if(!IgnoreLazy && g_Config.m_BrLazySorting && IsRefreshing())
+		return;
 
 	// sort
 	if(g_Config.m_BrSort == IServerBrowser::SORT_NAME)
@@ -816,7 +819,7 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i), took %.2fms", pSelf->m_NumServers, NumServers, ((time_get()-StartTime)*1000)/(float)time_freq()); // TODO: check if saving actually succeeded
 	//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
 	pSelf->m_ServerdataLocked = false;
-	pSelf->Sort();
+	pSelf->Sort(true);
 	return;// true;
 }
 
