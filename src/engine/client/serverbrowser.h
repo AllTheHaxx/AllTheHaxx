@@ -79,7 +79,8 @@ public:
 	void Refresh(int Type, int NoReload=false);
 	void AbortRefresh() { m_pFirstReqServer = 0; m_NumRequests = 0; } // dunno if something needs to be cleaned up here...?
 	void SaveCache();
-	bool LoadCache();
+	void LoadCache();
+	static void LoadCacheThread(void *pUser);
 	bool CacheExists() const { return m_CacheExists; }
 	bool IsRefreshing() const;
 	bool IsRefreshingMasters() const;
@@ -179,6 +180,8 @@ private:
 
 	int m_ServerlistType;
 	int64 m_BroadcastTime;
+
+	bool m_ServerdataLocked;
 
 	// sorting criteria
 	bool SortCompareName(int Index1, int Index2) const;

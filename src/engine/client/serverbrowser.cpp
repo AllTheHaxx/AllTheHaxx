@@ -76,6 +76,7 @@ CServerBrowser::CServerBrowser()
 	m_NumRequests = 0;
 	m_MasterServerCount = 0;
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+	m_ServerdataLocked = false;
 
 	m_NeedRefresh = 0;
 	m_NeedUpgrade = 0;
@@ -198,6 +199,8 @@ bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 
 void CServerBrowser::Filter()
 {
+	if(m_ServerdataLocked)
+		return;
 	int i = 0, p = 0;
 	m_NumSortedServers = 0;
 
@@ -403,6 +406,8 @@ void CServerBrowser::Sort()
 
 void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
 {
+	if(m_ServerdataLocked)
+		return;
 	if(pEntry->m_pPrevReq || pEntry->m_pNextReq || m_pFirstReqServer == pEntry)
 	{
 		if(pEntry->m_pPrevReq)
@@ -423,6 +428,8 @@ void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
 
 CServerBrowser::CServerEntry *CServerBrowser::Find(const NETADDR &Addr)
 {
+	if(m_ServerdataLocked)
+		return 0;
 	CServerEntry *pEntry = m_aServerlistIp[Addr.ip[0]];
 
 	for(; pEntry; pEntry = pEntry->m_pNextIp)
@@ -435,6 +442,8 @@ CServerBrowser::CServerEntry *CServerBrowser::Find(const NETADDR &Addr)
 
 void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 {
+	if(m_ServerdataLocked)
+		return;
 	// add it to the list of servers that we should request info from
 	pEntry->m_pPrevReq = m_pLastReqServer;
 	if(m_pLastReqServer)
@@ -593,6 +602,8 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 
 void CServerBrowser::Refresh(int Type, int NoReload)
 {
+	if(m_ServerdataLocked)
+		return;
 	if(NoReload || Type < 0)
 	{
 		if(NoReload == 1 && !IsRefreshing())
@@ -726,29 +737,42 @@ void CServerBrowser::SaveCache()
 	m_CacheExists = true;
 }
 
-bool CServerBrowser::LoadCache()
+void CServerBrowser::LoadCache()
 {
-	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
+	if(m_ServerdataLocked)
+		return;
+	m_ServerdataLocked = true;
+	void *pThread = thread_init(LoadCacheThread, this);
+	thread_detach(pThread);
+}
+
+void CServerBrowser::LoadCacheThread(void *pUser)
+{
+	CServerBrowser *pSelf = (CServerBrowser *)pUser;
+	IStorageTW *pStorage = pSelf->Kernel()->RequestInterface<IStorageTW>();
+
+	int64 StartTime = time_get();
 
 	// clear out everything
-	m_ServerlistHeap.Reset();
-	m_NumServers = 0;
-	m_NumSortedServers = 0;
-	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
-	m_pFirstReqServer = 0;
-	m_pLastReqServer = 0;
-	m_NumRequests = 0;
-	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-	m_CurrentToken = (m_CurrentToken+1)&0xff;
-	m_ServerlistType = IServerBrowser::TYPE_INTERNET;
+	pSelf->m_ServerlistHeap.Reset();
+	pSelf->m_NumServers = 0;
+	pSelf->m_NumSortedServers = 0;
+	mem_zero(pSelf->m_aServerlistIp, sizeof(pSelf->m_aServerlistIp));
+	pSelf->m_pFirstReqServer = 0;
+	pSelf->m_pLastReqServer = 0;
+	pSelf->m_NumRequests = 0;
+	pSelf->m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+	pSelf->m_CurrentToken = (pSelf->m_CurrentToken+1)&0xff;
+	pSelf->m_ServerlistType = IServerBrowser::TYPE_INTERNET;
 
 	// open file
 	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(!File)
 	{
 		dbg_msg("browser", "opening cache file failed.");
-		m_CacheExists = false;
-		return false;
+		pSelf->m_CacheExists = false;
+		pSelf->m_ServerdataLocked = false;
+		return;// false;
 	}
 
 	// get version
@@ -765,14 +789,14 @@ bool CServerBrowser::LoadCache()
 	io_read(File, &NumServers, sizeof(NumServers));
 	//dbg_msg("browser", "serverlist cache entries: %i", NumServers);
 
-	mem_zero(m_ppServerlist, m_NumServerCapacity);
+	mem_zero(pSelf->m_ppServerlist, pSelf->m_NumServerCapacity);
 
 	// get length of array
-	io_read(File, &m_NumServerCapacity, sizeof(m_NumServerCapacity));
+	io_read(File, &pSelf->m_NumServerCapacity, sizeof(pSelf->m_NumServerCapacity));
 
 	// get rid of current serverlist and create a new one
-	mem_free(m_ppServerlist);
-	m_ppServerlist = (CServerEntry **)mem_alloc(m_NumServerCapacity*sizeof(CServerEntry*), 1);
+	mem_free(pSelf->m_ppServerlist);
+	pSelf->m_ppServerlist = (CServerEntry **)mem_alloc(pSelf->m_NumServerCapacity*sizeof(CServerEntry*), 1);
 
 	// read the data from the file into the serverlist
 	CServerInfo *pServerInfos = (CServerInfo*)mem_alloc(sizeof(CServerInfo)*NumServers, 0);
@@ -784,14 +808,16 @@ bool CServerBrowser::LoadCache()
 		NETADDR Addr;
 		net_addr_from_str(&Addr, pServerInfos[i].m_aAddress);
 		//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
-		Set(Addr, IServerBrowser::SET_TOKEN, m_CurrentToken, &pServerInfos[i]);
+		pSelf->Set(Addr, IServerBrowser::SET_TOKEN, pSelf->m_CurrentToken, &pServerInfos[i]);
 	}
 	mem_free(pServerInfos);
 
 	if(g_Config.m_Debug)
-		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i)", m_NumServers, NumServers); // TODO: check if saving actually succeeded
+		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i), took %.2fms", pSelf->m_NumServers, NumServers, ((time_get()-StartTime)*1000)/(float)time_freq()); // TODO: check if saving actually succeeded
 	//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
-	return true;
+	pSelf->m_ServerdataLocked = false;
+	pSelf->Filter();
+	return;// true;
 }
 
 void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const
@@ -854,6 +880,8 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 
 void CServerBrowser::Request(const NETADDR &Addr) const
 {
+	if(m_ServerdataLocked)
+		return;
 	// call both because we can't know what kind the server is
 	RequestImpl64(Addr, 0);
 	RequestImpl(Addr, 0);
@@ -862,6 +890,8 @@ void CServerBrowser::Request(const NETADDR &Addr) const
 
 void CServerBrowser::Update(bool ForceResort)
 {
+	if(m_ServerdataLocked)
+		return;
 	int64 Timeout = time_freq();
 	int64 Now = time_get();
 	int Count;

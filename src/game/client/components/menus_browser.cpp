@@ -260,7 +260,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		int ItemIndex = i;
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
-		if(pItem->m_NumClients > pItem->m_MaxClients) // make sure we have only sane entries
+		if(!pItem || pItem->m_NumClients > pItem->m_MaxClients) // make sure we have only sane entries
 			continue;
 		NumPlayers += g_Config.m_BrFilterSpectators ? pItem->m_NumPlayers : pItem->m_NumClients;
 		CUIRect Row;
@@ -559,7 +559,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static bool HasCached = false;
 		if(g_Config.m_BrAutoCache)
 		{
-			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !HasCached && !ServerBrowser()->IsRefreshing() && m_ActivePage != PAGE_RECENT)
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !HasCached && !ServerBrowser()->IsRefreshing() && m_ActivePage == PAGE_INTERNET)
 			{
 				ServerBrowser()->SaveCache();
 				HasCached = true;
@@ -1484,6 +1484,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
+		if(m_ActivePage == PAGE_INTERNET)
 		{
 			CUIRect Right;
 			Button.VSplitMid(&Button, &Right);
@@ -1497,8 +1498,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, Localize("Load the saved serverlist"), CUI::CORNER_R))
 			{
 				if(m_ActivePage != PAGE_RECENT)
-					if(!ServerBrowser()->LoadCache())
-						Console()->Print(0, "browser", "failed to load cache file", false);
+					/*if(!*/ServerBrowser()->LoadCache()/*)
+						Console()->Print(0, "browser", "failed to load cache file", false)*/;
 			}
 		}
 
