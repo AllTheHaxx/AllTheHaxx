@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <map>
+
 #include <base/tl/string.h>
 
 #include <base/math.h>
@@ -515,16 +517,32 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 		Num = 0;
 	if(Num > 0)
 	{
-		static float s_NewVal = gs_ListBoxScrollValue;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
-			s_NewVal -= 3.0f/Num;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
-			s_NewVal += 3.0f/Num;
+		static std::map<const void*, float> s_NewVals; // maybe a map seems hacky, but it's a convenient way to get it to work
 
-		if(s_NewVal < 0.0f) s_NewVal = 0.0f;
-		if(s_NewVal > 1.0f) s_NewVal = 1.0f;
-		smooth_set(&gs_ListBoxScrollValue, s_NewVal, (0.005f/Client()->RenderFrameTime())*23.0f);
+		// the following makes sure that we initialize the stuff with zero
+		try
+		{
+			s_NewVals.at(pID);
+		}
+		catch(std::out_of_range& e)
+		{
+			s_NewVals[pID] = 0.0f;
+		}
 
+		float& s_NewVal = s_NewVals[pID];
+		if(UI()->ActiveItem() == pID || UI()->MouseInside(&Scroll)) // do not intervene the scrollbar's own logic
+			s_NewVal = gs_ListBoxScrollValue;
+		else
+		{
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+				s_NewVal -= 3.0f/Num;
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+				s_NewVal += 3.0f/Num;
+
+			if(s_NewVal < 0.0f) s_NewVal = 0.0f;
+			if(s_NewVal > 1.0f) s_NewVal = 1.0f;
+			smooth_set(&gs_ListBoxScrollValue, s_NewVal, (0.005f/Client()->RenderFrameTime())*23.0f);
+		}
 	}
 
 	Scroll.HMargin(5.0f, &Scroll);
