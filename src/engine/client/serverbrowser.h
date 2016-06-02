@@ -77,6 +77,7 @@ public:
 
 	// interface functions
 	void Refresh(int Type, int NoReload=false);
+	void AbortRefresh() { m_pFirstReqServer = 0; m_NumRequests = 0; } // dunno if something needs to be cleaned up here...?
 	void SaveCache();
 	bool LoadCache();
 	bool CacheExists() const { return m_CacheExists; }

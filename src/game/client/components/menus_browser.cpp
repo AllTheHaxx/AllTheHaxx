@@ -1422,19 +1422,28 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);*/
 #endif
 		// button area
+		CUIRect AbortButton;
 		//StatusBox.VSplitRight(80.0f, &StatusBox, 0);
 		StatusBox.VSplitRight(170.0f, &StatusBox, &ButtonArea);
 		//ButtonArea.VSplitRight(150.0f, 0, &ButtonArea);
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
-		static int s_RefreshButton = 0;
+		if(ServerBrowser()->IsRefreshing())
+		{
+			Button.VSplitRight(Button.h, &Button, &AbortButton);
+			static int s_AbortButton = 0;
+			if(DoButton_Menu(&s_AbortButton, "×", 0, &AbortButton, 0, CUI::CORNER_R))
+				ServerBrowser()->AbortRefresh();
+		}
+
 		if(ServerBrowser()->IsRefreshing())
 			str_format(aBuf, sizeof(aBuf), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
 		else
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely")) || Input()->KeyPress(KEY_F5) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		static int s_RefreshButton = 0;
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely"), ServerBrowser()->IsRefreshing() ? CUI::CORNER_L : CUI::CORNER_ALL) || Input()->KeyPress(KEY_F5) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

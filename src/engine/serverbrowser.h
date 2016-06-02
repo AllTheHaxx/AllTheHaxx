@@ -109,6 +109,7 @@ public:
 	};
 
 	virtual void Refresh(int Type, int NoReload=0) = 0;
+	virtual void AbortRefresh() = 0;
 	virtual void SaveCache() = 0;
 	virtual bool LoadCache() = 0;
 	virtual bool IsRefreshing() const = 0;
