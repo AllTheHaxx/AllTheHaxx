@@ -2718,10 +2718,10 @@ void CMenus::RenderLoadingLua()
 
 void CMenus::RenderSettingsLua(CUIRect MainView)
 {
-	CUIRect Button, QuickSearch;
+	CUIRect Button, BottomBar;
 	static int s_ActiveLuaSettings = -1;
 
-	MainView.HSplitBottom(30.0f, &MainView, &QuickSearch);
+	MainView.HSplitBottom(30.0f, &MainView, &BottomBar);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 
 	if(s_ActiveLuaSettings >= 0)
@@ -2771,6 +2771,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		return;
 
 
+	static int ShowActiveOnly = 0;
 	{
 		int NumLuaFiles = Client()->Lua()->GetLuaFiles().size();
 
@@ -2796,6 +2797,11 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				continue;
 
 			if(g_Config.m_ClLuaFilterString[0] != '\0' && (!str_find_nocase(L->GetFilename(), g_Config.m_ClLuaFilterString) && !str_find_nocase(L->GetScriptTitle(), g_Config.m_ClLuaFilterString)))
+				continue;
+
+			if(ShowActiveOnly == 1 && L->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				continue;
+			else if(ShowActiveOnly == 2 && L->State() == CLuaFile::LUAFILE_STATE_LOADED)
 				continue;
 
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
@@ -2920,9 +2926,9 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 	// render quick search
 	{
-		CUIRect QuickSearchClearButton;
+		CUIRect QuickSearch, QuickSearchClearButton;
 		//MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
-		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
+		BottomBar.VSplitLeft(240.0f, &QuickSearch, &BottomBar);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 		UI()->DoLabelScaled(&QuickSearch, "⚲", 14.0f, -1);
 		float wSearch = TextRender()->TextWidth(0, 14.0f, "⚲", -1);
@@ -2941,6 +2947,20 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				UI()->SetActiveItem(&g_Config.m_ClLuaFilterString);
 			}
 		}
+	}
+
+	// render dings button
+	{
+		CUIRect Checkbox;
+		BottomBar.VSplitLeft(10.0f, 0, &BottomBar);
+		BottomBar.VSplitLeft(240.0f, &Checkbox, &BottomBar);
+		Checkbox.HSplitTop(5.0f, 0, &Checkbox);
+
+		static int s_Checkbox = 0;
+		const char *pStr = ShowActiveOnly == 0 ? Localize("Shows all files") : ShowActiveOnly == 1 ? Localize("Shows active scripts only") : ShowActiveOnly == 2 ? Localize("Shows inactive scripts only") : "epic fail";
+		if(DoButton_CheckBox_Number(&s_Checkbox, pStr, ShowActiveOnly, &BottomBar, Localize("click to toggle")))
+			if(++ShowActiveOnly > 2)
+				ShowActiveOnly = 0;
 	}
 }
 
