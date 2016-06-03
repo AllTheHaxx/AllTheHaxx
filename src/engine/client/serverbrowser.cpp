@@ -382,7 +382,7 @@ void CServerBrowser::Sort(bool IgnoreLazy)
 	// create filtered list
 	Filter();
 
-	if(!IgnoreLazy && g_Config.m_BrLazySorting && IsRefreshing())
+	if(!IgnoreLazy && g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90)
 		return;
 
 	// sort
