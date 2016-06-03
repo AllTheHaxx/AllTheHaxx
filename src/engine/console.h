@@ -95,6 +95,7 @@ public:
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false) = 0;
+	virtual void Printf(int Level, const char *pFrom, const char *fmt, ...) = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 

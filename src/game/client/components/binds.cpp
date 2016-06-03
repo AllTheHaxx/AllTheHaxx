@@ -225,8 +225,7 @@ void CBinds::ConFindBind(IConsole::IResult *pResult, void *pUserData)
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		return;
 	}
-	str_format(aBuf, sizeof(aBuf), "command '%s' isn't bound to any key", pResult->GetString(0));
-	pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+	pBinds->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "command '%s' isn't bound to any key", pResult->GetString(0));
 }
 
 void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
@@ -241,8 +240,7 @@ void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		return;
 	}
-	str_format(aBuf, sizeof(aBuf), "No command bound to key %s", pResult->GetString(0));
-	pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+	pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "no command bound to key %s", pResult->GetString(0));
 
 }
 
