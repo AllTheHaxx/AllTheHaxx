@@ -262,7 +262,7 @@ void CConsole::Printf(int Level, const char *pFrom, const char *format, ...)
 #if defined(CONF_FAMILY_WINDOWS)
 	va_list ap;
 	va_start(ap, format);
-	ret = _vsnprintf(buffer, sizeof(buffer), format, ap);
+	_vsnprintf(buffer, sizeof(buffer), format, ap);
 	va_end(ap);
 #else
 	va_list ap;
