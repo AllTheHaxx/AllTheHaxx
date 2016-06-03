@@ -1139,7 +1139,7 @@ static const char *s_apSayings[] = {
 		"...REISUB!",
 		"Do you get the insiders...? :D",
 		"Ask if you need something!",
-		"Ignore the spoofing tab!!!",
+		//"Ignore the spoofing tab!!!",
 		"Brain.exe has stopped working",
 		"Read error: Could not access data at address 0x00000000",
 		"Do you play an instrument?",
@@ -1182,7 +1182,7 @@ static const char *s_apSayings[] = {
 		"Is the 5-second rule actually true?",
 		"How much does Thor's hammer weigh?",
 		"How much does a shadow weigh?",
-		"ReD go TW!!!",
+		"ReD go TW!!!\n\n...ReD no gone TW D:\n→RIP RED! GRR #nokatze",
 		"At least I got me for life",
 		"SIDEKICKS!",
 		"Drunk driving is okay if you buckle up.",
@@ -1207,6 +1207,12 @@ static const char *s_apSayings[] = {
 		"[21:00:00] ReD: auutsch",
 		"\"Red nur du ReD\"",
 		"BAUM!",
+		"Uhh, got a brain freeze :0",
+		"epppiiiiccc",
+		"Gimme dat muzic!",
+		"...it's evolving!",
+		"When will the Aliens find us?"
+		"Gotta get more sleep :("
 };
 
 void CMenus::RenderLoading()
