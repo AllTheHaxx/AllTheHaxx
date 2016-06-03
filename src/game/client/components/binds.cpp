@@ -162,7 +162,9 @@ void CBinds::OnConsoleInit()
 	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
-	Console()->Register("dump_binds", "", CFGFLAG_CLIENT, ConDumpBinds, this, "Dump binds");
+	Console()->Register("find_bind", "r[command]", CFGFLAG_CLIENT, ConFindBind, this, "Find the key the command is bind to");
+	Console()->Register("dump_bind", "s[key]", CFGFLAG_CLIENT, ConDumpBind, this, "Dump a single bind");
+	Console()->Register("dump_binds", "", CFGFLAG_CLIENT, ConDumpBinds, this, "Dump all binds");
 
 	// default bindings
 	SetDefaults();
@@ -210,6 +212,39 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 	pBinds->UnbindAll();
 }
 
+
+void CBinds::ConFindBind(IConsole::IResult *pResult, void *pUserData)
+{
+	CBinds *pBinds = (CBinds *)pUserData;
+	char aBuf[1024];
+	for(int i = 0; i < KEY_LAST; i++)
+	{
+		if(pBinds->m_aaKeyBindings[i][0] == 0 || str_comp_nocase(pResult->GetString(0), pBinds->m_aaKeyBindings[i]))
+			continue;
+		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_aaKeyBindings[i]);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		return;
+	}
+	str_format(aBuf, sizeof(aBuf), "command '%s' isn't bound to any key", pResult->GetString(0));
+	pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+}
+
+void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
+{
+	CBinds *pBinds = (CBinds *)pUserData;
+	char aBuf[1024];
+	for(int i = 0; i < KEY_LAST; i++)
+	{
+		if(pBinds->m_aaKeyBindings[i][0] == 0 || str_comp_nocase(pResult->GetString(0), pBinds->Input()->KeyName(i)))
+			continue;
+		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_aaKeyBindings[i]);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		return;
+	}
+	str_format(aBuf, sizeof(aBuf), "No command bound to key %s", pResult->GetString(0));
+	pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+
+}
 
 void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 {
