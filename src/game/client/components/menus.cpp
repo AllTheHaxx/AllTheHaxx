@@ -2175,6 +2175,9 @@ void CMenus::OnReset()
 
 bool CMenus::OnMouseMove(float x, float y)
 {
+	if(m_MouseUnlocked)
+		return false;
+
 	m_LastInput = time_get();
 
 	if((!m_MenuActive && !m_HotbarActive && !m_IRCActive) || !m_pClient->m_pGameConsole->IsClosed())

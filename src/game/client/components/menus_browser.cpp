@@ -320,7 +320,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			else if(SelectHitBox.y+SelectHitBox.h > OriginalView.y+OriginalView.h) // bottom
 				SelectHitBox.h = OriginalView.y+OriginalView.h-SelectHitBox.y;
 
-			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox))
+			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox) && !m_MouseUnlocked)
 			{
 				NewSelected = ItemIndex;
 #if defined(__ANDROID__)
@@ -492,7 +492,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 #if defined(__ANDROID__)
 		if(DoubleClicked)
 #else
-		if(Input()->MouseDoubleClick())
+		if(Input()->MouseDoubleClick() && !m_MouseUnlocked)
 #endif
 			Client()->Connect(g_Config.m_UiServerAddress);
 	}
