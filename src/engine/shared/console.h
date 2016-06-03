@@ -57,6 +57,7 @@ class CConsole : public IConsole
 	static void Con_Exec(IResult *pResult, void *pUserData);
 	static void ConToggle(IResult *pResult, void *pUser);
 	static void ConToggleStroke(IResult *pResult, void *pUser);
+	static void ConDefault(IResult *pResult, void *pUser);
 	static void ConCommandAccess(IResult *pResult, void *pUser);
 	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 

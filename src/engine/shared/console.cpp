@@ -770,6 +770,36 @@ void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
 		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
+void CConsole::ConDefault(IConsole::IResult *pResult, void *pUser)
+{
+	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	char aBuf[128] = {0};
+
+#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) \
+		if(str_comp(pResult->GetString(i), #ScriptName) == 0) { \
+			str_format(aBuf, sizeof(aBuf), "reset %s: %i -> %i", #ScriptName, g_Config.m_##Name, Def); \
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf); \
+			g_Config.m_##Name = Def; \
+			continue; \
+		}
+
+#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) \
+	if(str_comp(pResult->GetString(i), #ScriptName) == 0) { \
+		str_format(aBuf, sizeof(aBuf), "reset %s: '%s' -> '%s'", #ScriptName, g_Config.m_##Name, Def); \
+		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf); \
+		str_copy(g_Config.m_##Name, Def, Len); \
+		continue; \
+	}
+
+	for(int i = 0; i < pResult->NumArguments(); i++)
+	{
+		#include "config_variables.h"
+	}
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_STR
+}
+
 CConsole::CConsole(int FlagMask)
 {
 	m_FlagMask = FlagMask;
@@ -793,6 +823,7 @@ CConsole::CConsole(int FlagMask)
 
 	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
 	Register("+toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
+	Register("default", "s[config-option]", CFGFLAG_CLIENT, ConDefault, this, "Reset a config value to it's default value");
 
 	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
