@@ -213,7 +213,7 @@ void CIRC::StartConnection() // call this from a thread only!
 	{
 		ReplyData reply;
 
-		dbg_msg(".", "%s", aNetBuff);// XXX: here
+		//dbg_msg(".", "%s", aNetBuff);// XXX: here
 		for (int i=0; i < CurrentRecv; i++)
 		{
 			if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')

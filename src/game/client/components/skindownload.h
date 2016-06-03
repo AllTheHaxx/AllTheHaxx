@@ -14,9 +14,18 @@ class CSkinDownload : public CComponent
 	class IFetcher *m_pFetcher;
 	class IStorageTW *m_pStorage;
 
+	struct SkinDbUrl
+	{
+		int prior;
+		std::string url;
+		bool operator<(const SkinDbUrl& other) { return this->prior < other.prior; }
+	};
+	sorted_array<SkinDbUrl> m_SkinDbUrls;
+
 	struct SkinFetchTask
 	{
 		std::string SkinName;
+		int url;
 		int Progress;
 		int64 FinishTime;
 		int State;
@@ -31,7 +40,9 @@ public:
 	void OnRender();
 
 	void RequestSkin(int *pDestID, const char *pName);
-	void FetchSkin(const char *pName, int *pDestID = 0);
+	void FetchSkin(const char *pName, int *pDestID = 0, int url = 0);
+
+	void LoadUrls();
 
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);

@@ -1,4 +1,7 @@
 
+#include <sstream>
+#include <fstream>
+
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 
@@ -14,6 +17,8 @@ void CSkinDownload::OnInit()
 {
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
+
+	LoadUrls();
 }
 
 void CSkinDownload::OnRender()
@@ -52,7 +57,13 @@ void CSkinDownload::OnRender()
 
 		Screen.HSplitTop(5.0f, 0, &Screen);
 		Screen.HSplitTop(13.5f, &Button, &Screen);
-		UI()->DoLabelScaled(&Button, it->second.SkinName.c_str(), 12.0f, -1);
+		char aBuf[128];
+		if(it->second.url > 0)
+			str_format(aBuf, sizeof(aBuf), "%s from alternative '%s'", it->second.SkinName.c_str(), it->second.url);
+		else
+			str_format(aBuf, sizeof(aBuf), "%s", it->second.SkinName.c_str());
+
+		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 		TextRender()->TextColor(1,1,1,1);
 
 		if(it->second.State == CFetchTask::STATE_RUNNING)
@@ -88,9 +99,17 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 	{
 		pSelf->m_pStorage->RemoveBinaryFile(dest); // delete the empty file dummy
 		dbg_msg("skinfetcher/debug", "download failed: '%s'", dest);
-		if(pTaskHandler->pDestID)
-			*(pTaskHandler->pDestID) = pSelf->GameClient()->m_pSkins->Find("default");
-		pSelf->m_FailedTasks.add(pTaskHandler->SkinName);
+		if(pTaskHandler->url+1 < pSelf->m_SkinDbUrls.size())
+		{
+			pSelf->FetchSkin(pTaskHandler->SkinName.c_str(), pTaskHandler->pDestID, pTaskHandler->url+1);
+			dbg_msg("skinfetcher/debug", "trying next url (%i/%i): '%s'", pTaskHandler->url+2, pSelf->m_SkinDbUrls.size(), pSelf->m_SkinDbUrls[pTaskHandler->url+1].url.c_str());
+		}
+		else
+		{
+			if(pTaskHandler->pDestID)
+				*(pTaskHandler->pDestID) = pSelf->GameClient()->m_pSkins->Find("default");
+			pSelf->m_FailedTasks.add(pTaskHandler->SkinName);
+		}
 	}
 
 	if(pTask->State() == CFetchTask::STATE_DONE)
@@ -136,12 +155,19 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	FetchSkin(pName, pDestID);
 }
 
-void CSkinDownload::FetchSkin(const char *pName, int *pDestID)
+void CSkinDownload::FetchSkin(const char *pName, int *pDestID, int url)
 {
-	char aBuf[256], aDestPath[256] = {0}, aFullPath[512] = {0};
-	str_format(aBuf, sizeof(aBuf), "https://ddnet.tw/skins/skin/%s.png", pName);
+	if(url >= m_SkinDbUrls.size())
+		return;
 
-	//dbg_msg("skinfetcher", "fetching file from '%s'", aBuf);
+	char aBuf[256], aDestPath[256] = {0}, aFullPath[512] = {0};
+
+	str_copy(aDestPath, m_SkinDbUrls[url].url.c_str(), sizeof(aDestPath));
+	if(aDestPath[str_length(aDestPath)-1] != '/')
+		str_append(aDestPath, "/", sizeof(aDestPath));
+	str_format(aBuf, sizeof(aBuf), "%s%s.png", aDestPath, pName);
+	dbg_msg("skinfetcher/debug", "fetching file from '%s'", aBuf);
+
 	str_format(aDestPath, sizeof(aDestPath), "downloadedskins/%s.png", pName);
 	IOHANDLE f = Storage()->OpenFile(aDestPath, IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aFullPath, sizeof(aFullPath));
 	if(f)
@@ -158,11 +184,49 @@ void CSkinDownload::FetchSkin(const char *pName, int *pDestID)
 	CFetchTask *pTask = new CFetchTask(false);
 	SkinFetchTask Task;
 	Task.SkinName = std::string(pName);
+	Task.url = url;
 	Task.Progress = 0;
 	Task.FinishTime = -1;
 	Task.pDestID = pDestID;
 	m_FetchTasks[pTask] = Task;
 	m_pFetcher->QueueAdd(pTask, aBuf, aFullPath, -2, this, &CSkinDownload::CompletionCallback, &CSkinDownload::ProgressCallback);
+}
+
+void CSkinDownload::LoadUrls()
+{
+	m_SkinDbUrls.clear();
+
+	int prior = 0;
+	std::string line;
+	std::ifstream file(g_Config.m_ClSkinDbFile);
+	if(file.is_open())
+	{
+		while(std::getline(file, line))
+		{
+			if(line == "" || line.c_str()[0] == '#')
+				continue;
+
+			SkinDbUrl e;
+			//line = line.replace(line.begin(), line.end(), "\n", "\0");
+			e.prior = prior++;
+			e.url = line;
+			m_SkinDbUrls.add_unsorted(e);
+		}
+		file.close();
+
+		m_SkinDbUrls.sort_range();
+		dbg_msg("skinfetcher", "loaded %i urls from file '%s'", prior, g_Config.m_ClSkinDbFile);
+	}
+	else
+		dbg_msg("skinfetcher/error", "failed to open url file '%s', using ddnet's database only", g_Config.m_ClSkinDbFile);
+
+	if(m_SkinDbUrls.size() == 0)
+	{
+		SkinDbUrl e;
+		e.prior = 0;
+		e.url = std::string("https://ddnet.tw/skins/skin/");
+		m_SkinDbUrls.add(e);
+	}
 }
 
 void CSkinDownload::ConFetchSkin(IConsole::IResult *pResult, void *pUserData)
