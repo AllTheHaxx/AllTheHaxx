@@ -213,7 +213,7 @@ void CIRC::StartConnection() // call this from a thread only!
 	{
 		ReplyData reply;
 
-		// XXX: here
+		dbg_msg(".", "%s", aNetBuff);// XXX: here
 		for (int i=0; i < CurrentRecv; i++)
 		{
 			if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')
@@ -1310,6 +1310,24 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 		CIRCCom *pCom = GetActiveCom();
 		if (pCom)
 			pCom->m_Buffer.clear();
+	}
+	else if (str_comp_nocase(cmd, "msg") == 0)
+	{
+		char aBuf[1024] = {0};
+		if (CmdListParams.size() >= 2)
+		{
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :%s",
+					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
+			CmdListParams.remove_index(0); // pop twice
+			CmdListParams.remove_index(0); //   -> the first two arguments
+			while(CmdListParams.size() > 0) // add all other arguments
+			{
+				str_append(aBuf, " ", sizeof(aBuf));
+				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
+				CmdListParams.remove_index(0);
+			}
+			SendRaw(aBuf);
+		}
 	}
 	else if (str_comp_nocase(cmd, "ctcp") == 0)
 	{
