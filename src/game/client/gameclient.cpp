@@ -69,6 +69,7 @@
 #include "components/cskins.h"
 #include "components/drawing.h"
 #include "components/fontmgr.h"
+#include "components/skindownload.h"
 
 #include <base/system.h>
 #include "components/race_demo.h"
@@ -141,6 +142,7 @@ static CeSkins gs_eSkins;
 static CcSkins gs_cSkins;
 static CDrawing gs_Drawing;
 static CFontMgr gs_FontMgr;
+static CSkinDownload gs_SkinDownload;
 
 static CPlayers gs_Players;
 static CNamePlates gs_NamePlates;
@@ -203,6 +205,7 @@ void CGameClient::OnConsoleInit()
 	m_pTooltip = &::gs_Tooltip;
 	m_pHud = &::gs_Hud;
 	m_pSkins = &::gs_Skins;
+	m_pSkinDownload = &::gs_SkinDownload;
 	m_pCountryFlags = &::gs_CountryFlags;
 	m_pChat = &::gs_Chat;
 	m_pFlow = &::gs_Flow;
@@ -289,6 +292,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Drawing);
 	m_All.Add(&gs_LuaRender12); // lua
 	m_All.Add(m_pHud);
+	m_All.Add(m_pSkinDownload);
 	m_All.Add(&gs_LuaRender13); // lua
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_LuaRender14); // lua
@@ -1251,6 +1255,7 @@ void CGameClient::OnNewSnapshot()
 				if(m_aClients[ClientID].m_SkinID < 0)
 				{
 					m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find("default");
+					g_GameClient.m_pSkinDownload->RequestSkin(&m_aClients[ClientID].m_SkinID, m_aClients[ClientID].m_aSkinName);
 					if(m_aClients[ClientID].m_SkinID < 0)
 						m_aClients[ClientID].m_SkinID = 0;
 				}

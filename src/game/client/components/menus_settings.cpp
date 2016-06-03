@@ -384,9 +384,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
 
-	bool CheckSettings = false;
-	static int s_ClVanillaSkinsOnly = g_Config.m_ClVanillaSkinsOnly;
-
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
@@ -446,7 +443,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Allow Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &Right))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		m_NeedRestartSkins ^= true;
+		GameClient()->m_pSkins->RefreshSkinList();
+		s_InitSkinlist = true;
 	}
 
 	Dummy.HSplitTop(5.0f, 0, &Dummy);
@@ -507,14 +505,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			s_StartTime = -1.0f;
 			s_SkinSaveAsIdentClicked = 0;
 		}
-	}
-
-	if(CheckSettings)
-	{
-		if(s_ClVanillaSkinsOnly == g_Config.m_ClVanillaSkinsOnly)
-			m_NeedRestartSkins = false;
-		else
-			m_NeedRestartSkins = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -686,11 +676,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			m_NeedSendinfo = true;
 	}
 
-	// render quick search
+	// render quick search and refresh (bottom bar)
 	{
+		CUIRect Refresh;
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
-		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
+		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &Refresh);
 		UI()->DoLabelScaled(&QuickSearch, "⚲", 14.0f, -1);
 		float wSearch = TextRender()->TextWidth(0, 14.0f, "⚲", -1);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -709,6 +700,15 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
 				s_InitSkinlist = true;
 			}
+		}
+
+		Refresh.VSplitLeft(5.0f, 0, &Refresh);
+		Refresh.VSplitLeft(150.0f, &Refresh, 0);
+		static int s_RefreshButton = 0;
+		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Refresh))
+		{
+			GameClient()->m_pSkins->RefreshSkinList();
+			s_InitSkinlist = true;
 		}
 	}
 }
@@ -1594,7 +1594,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
+	else if(m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 	{
 		static int s_ButtonRestart = 0;
 		if(DoButton_Menu(&s_ButtonRestart, Localize("You must restart the game for all settings to take effect."), 0, &RestartWarning, 0, CUI::CORNER_ALL, vec4(0.75f, 0.18f, 0.18f, 0.83f)))

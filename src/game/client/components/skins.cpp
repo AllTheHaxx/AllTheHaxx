@@ -33,7 +33,8 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			return 0;
 	}
 
-	CSkins *pSelf = (CSkins *)pUser;
+	IStorageTW::CLoadHelper<CSkins> *pLoadHelper = (IStorageTW::CLoadHelper<CSkins> *)pUser;
+	CSkins *pSelf = pLoadHelper->pSelf;
 
 	int l = str_length(pName);
 	if(l < 4 || IsDir || str_comp(pName+l-4, ".png") != 0)
@@ -49,12 +50,11 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	}
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
+	str_format(aBuf, sizeof(aBuf), "%s/%s", pLoadHelper->pFullDir, pName);
 	CImageInfo Info;
 	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to load skin from %s", pName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "failed to load skin from %s", aBuf);
 		return 0;
 	}
 
@@ -136,12 +136,10 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, min((int)sizeof(Skin.m_aName),l-3));
-	if(g_Config.m_Debug)
-	{
-		str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.m_aName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-	}
 	pSelf->m_aSkins.add(Skin);
+
+	if(g_Config.m_Debug)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "loaded skin %s", Skin.m_aName);
 
 	return 0;
 }
@@ -150,9 +148,27 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 void CSkins::OnInit()
 {
 	// load skins
-	m_aSkins.clear();
-	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "skins", SkinScan, this);
-	if(!m_aSkins.size())
+	RefreshSkinList();
+}
+
+void CSkins::RefreshSkinList(bool clear)
+{
+	if(clear)
+		Clear();
+
+	IStorageTW::CLoadHelper<CSkins> *pLoadHelper = new IStorageTW::CLoadHelper<CSkins>;
+	pLoadHelper->pSelf = this;
+
+	pLoadHelper->pFullDir = "skins";
+	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "skins", SkinScan, pLoadHelper);
+
+	if(!g_Config.m_ClVanillaSkinsOnly)
+	{
+		pLoadHelper->pFullDir = "downloadedskins";
+		Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "downloadedskins", SkinScan, pLoadHelper);
+	}
+
+	if(m_aSkins.size() == 0)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
@@ -162,6 +178,8 @@ void CSkins::OnInit()
 		DummySkin.m_BloodColor = vec3(1.0f, 1.0f, 1.0f);
 		m_aSkins.add(DummySkin);
 	}
+
+	delete pLoadHelper;
 }
 
 int CSkins::Num()
@@ -182,6 +200,17 @@ int CSkins::Find(const char *pName)
 			return i;
 	}
 	return -1;
+}
+
+void CSkins::Clear()
+{
+	while(m_aSkins.size() > 0)
+	{
+		Graphics()->UnloadTexture(m_aSkins[0].m_OrgTexture);
+		Graphics()->UnloadTexture(m_aSkins[0].m_ColorTexture);
+		m_aSkins.remove_index_fast(0);
+	}
+	m_aSkins.clear();
 }
 
 vec3 CSkins::GetColorV3(int v)

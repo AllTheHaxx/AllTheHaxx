@@ -160,6 +160,7 @@ MACRO_CONFIG_INT(ClCinematicCameraDelay, cl_cinematic_camera_delay, 40, 1, 1000,
 MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send \"Zzz\" emotes while being in console mode")
 MACRO_CONFIG_INT(ClResetServerCfgOnDc, cl_reset_server_cfg_on_disconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Discard config changes when disconnecting, use 'config_save' if you want to keep them")
 MACRO_CONFIG_INT(ClSendHookline, cl_send_hookline, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send the hookline (forced-off on stitch-* gamemodes)")
+MACRO_CONFIG_INT(ClFetchSkins, cl_skin_fetcher, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Fetch missing skins from the ddnet database automatically as they are needed")
 MACRO_CONFIG_INT(FtPreloadFonts, ft_preload_fonts, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Load all fonts in 'data/fonts/' into memory on client start (enables font-preview!)")
 
 // irc

@@ -352,6 +352,7 @@ public:
 	class CMenusTooltip *m_pTooltip;
 	class CHud *m_pHud;
 	class CSkins *m_pSkins;
+	class CSkinDownload *m_pSkinDownload;
 	class CCountryFlags *m_pCountryFlags;
 	class CFlow *m_pFlow;
 	class CChat *m_pChat;

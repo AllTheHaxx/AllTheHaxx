@@ -21,12 +21,14 @@ public:
 	};
 
 	void OnInit();
+	void RefreshSkinList(bool clear = true);
 
 	vec3 GetColorV3(int v);
 	vec4 GetColorV4(int v);
 	int Num();
 	const CSkin *Get(int Index);
 	int Find(const char *pName);
+	void Clear();
 
 private:
 	sorted_array<CSkin> m_aSkins;
