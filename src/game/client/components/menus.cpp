@@ -816,6 +816,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_NewsButton=0;
 		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS_ATH || m_ActivePage==PAGE_NEWS_DDNET, &Button, CUI::CORNER_T))
 		{
+			m_pClient->m_pCamera->m_RotationCenter = vec2(300.0f, 300.0f);
+
 			NewPage = PAGE_NEWS_ATH;
 			m_DoubleClickIndex = -1;
 		}
@@ -893,6 +895,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			static int s_DDNetButton=0;
 			if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
 			{
+				m_pClient->m_pCamera->m_RotationCenter = vec2(1300.0f, 1300.0f);
+
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 				NewPage = PAGE_DDNET;
@@ -905,6 +909,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_DemosButton=0;
 		if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
 		{
+			m_pClient->m_pCamera->m_RotationCenter = vec2(400.0f, 1500.0f);
+
 			DemolistPopulate();
 			NewPage = PAGE_DEMOS;
 			m_DoubleClickIndex = -1;
