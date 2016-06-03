@@ -166,23 +166,26 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	int Num = (int)(View.h/s_aCols[0].m_Rect.h) + 1;
 	static int s_ScrollBar = 0;
-	static float s_ScrollValue = 0;
+	static float s_ScrollValue = 0, s_WantedScrollValue = 0.0f;
 
 	Scroll.HMargin(5.0f, &Scroll);
+	float LastScrollValue = s_ScrollValue;
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+	if(s_ScrollValue != LastScrollValue)
+		s_WantedScrollValue = s_ScrollValue;
 
 	int ScrollNum = NumServers-Num+1;
 	if(ScrollNum > 0)
 	{
 		if(m_ScrollOffset >= 0)
 		{
-			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
+			s_WantedScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = -1;
 		}
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
-			s_ScrollValue -= 3.0f/ScrollNum;
+			s_WantedScrollValue -= Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f/ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f/ScrollNum : 3.0f/ScrollNum;
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
-			s_ScrollValue += 3.0f/ScrollNum;
+			s_WantedScrollValue += Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f/ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f/ScrollNum : 3.0f/ScrollNum;
 	}
 	else
 		ScrollNum = 0;
@@ -207,19 +210,19 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(NewIndex > -1 && NewIndex < NumServers)
 			{
 				//scroll
-				float IndexY = View.y - s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h + NewIndex*s_aCols[0].m_Rect.h;
+				float IndexY = View.y - s_WantedScrollValue*ScrollNum*s_aCols[0].m_Rect.h + NewIndex*s_aCols[0].m_Rect.h;
 				int Scroll = View.y > IndexY ? -1 : View.y+View.h < IndexY+s_aCols[0].m_Rect.h ? 1 : 0;
 				if(Scroll)
 				{
 					if(Scroll < 0)
 					{
 						int NumScrolls = (View.y-IndexY+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
-						s_ScrollValue -= (1.0f/ScrollNum)*NumScrolls;
+						s_WantedScrollValue -= (1.0f/ScrollNum)*NumScrolls;
 					}
 					else
 					{
 						int NumScrolls = (IndexY+s_aCols[0].m_Rect.h-(View.y+View.h)+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
-						s_ScrollValue += (1.0f/ScrollNum)*NumScrolls;
+						s_WantedScrollValue += (1.0f/ScrollNum)*NumScrolls;
 					}
 				}
 
@@ -236,8 +239,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 	}
 
-	if(s_ScrollValue < 0) s_ScrollValue = 0;
-	if(s_ScrollValue > 1) s_ScrollValue = 1;
+	if(s_WantedScrollValue < 0) s_WantedScrollValue = 0;
+	if(s_WantedScrollValue > 1) s_WantedScrollValue = 1;
+	smooth_set(&s_ScrollValue, s_WantedScrollValue, (0.005f/Client()->RenderFrameTime())*27.0f);
 
 	// set clipping
 	UI()->ClipEnable(&View);
@@ -1348,7 +1352,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::CLEAN)
-			str_format(aBuf, sizeof(aBuf), Localize("Client version string: tw.%s-%s-ddnet.%s"), GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
+			str_format(aBuf, sizeof(aBuf), "Client version string: tw.%s-%s-ddnet.%s", GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
 		else if(State == IUpdater::GETTING_MANIFEST)
 			str_format(aBuf, sizeof(aBuf), "Refreshing version info...");
 		else if(State == IUpdater::GOT_MANIFEST || State == IUpdater::PARSING_UPDATE)
