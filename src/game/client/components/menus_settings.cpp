@@ -2973,18 +2973,40 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 	}
 
-	// render dings button
+	// render script-activation-filter button
 	{
+		static const char *s_apLabels[] = {
+				Localize("Showing all files"),
+				Localize("Showing active scripts only"),
+				Localize("Showing inactive scripts only")
+		};
+
+		static float Width = -1;
+		if(Width < 0)
+			for(int i = 0; i < 2; i++)
+				Width = max(Width, TextRender()->TextWidth(0, BottomBar.h-10.0f, s_apLabels[i], -1));
+
 		CUIRect Checkbox;
 		BottomBar.VSplitLeft(10.0f, 0, &BottomBar);
-		BottomBar.VSplitLeft(240.0f, &Checkbox, &BottomBar);
+		BottomBar.VSplitLeft(Width-5.0f, &Checkbox, &BottomBar);
 		Checkbox.HSplitTop(5.0f, 0, &Checkbox);
 
 		static int s_Checkbox = 0;
-		const char *pStr = ShowActiveOnly == 0 ? Localize("Shows all files") : ShowActiveOnly == 1 ? Localize("Shows active scripts only") : ShowActiveOnly == 2 ? Localize("Shows inactive scripts only") : "epic fail";
-		if(DoButton_CheckBox_Number(&s_Checkbox, pStr, ShowActiveOnly, &BottomBar, Localize("click to toggle")))
-			if(++ShowActiveOnly > 2)
-				ShowActiveOnly = 0;
+		int MouseButton = DoButton_CheckBox_Number(&s_Checkbox, s_apLabels[ShowActiveOnly], ShowActiveOnly, &Checkbox)-1;
+		if(MouseButton >= 0)
+		{
+			switch (MouseButton)
+			{
+			case 0:
+				if(++ShowActiveOnly > 2)
+					ShowActiveOnly = 0;
+			break;
+			case 1:
+				if(--ShowActiveOnly < 0)
+					ShowActiveOnly = 2;
+			break;
+			}
+		}
 	}
 }
 
