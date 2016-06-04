@@ -138,7 +138,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	else
 		*pDestID = DefaultSkin;
 
-	if(!g_Config.m_ClFetchSkins)
+	if(!g_Config.m_ClSkinFetcher)
 	{
 		*pDestID = DefaultSkin;
 		return;
@@ -231,5 +231,9 @@ void CSkinDownload::LoadUrls()
 
 void CSkinDownload::ConFetchSkin(IConsole::IResult *pResult, void *pUserData)
 {
-	((CSkinDownload *)pUserData)->FetchSkin(pResult->GetString(0));
+	CSkinDownload *pSelf = (CSkinDownload *)pUserData;
+	if(!g_Config.m_ClSkinFetcher)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "skinfetcher", "You must turn on cl_skin_fetcher to use this command");
+	else
+		pSelf->FetchSkin(pResult->GetString(0));
 }

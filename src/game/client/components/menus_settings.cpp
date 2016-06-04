@@ -2472,6 +2472,11 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClConsoleModeEmotes, Localize("Console Mode Indicator"), g_Config.m_ClConsoleModeEmotes, &Button, Localize("Send Zzz emotes when in console mode")))
 		g_Config.m_ClConsoleModeEmotes ^= 1;
 
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClSkinFetcher, Localize("Skin Fetcher"), g_Config.m_ClSkinFetcher, &Button, Localize("Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server")))
+		g_Config.m_ClSkinFetcher ^= 1;
+
 	// extra binds!
 	{
 		// this is kinda slow, but whatever
