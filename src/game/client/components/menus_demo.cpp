@@ -580,13 +580,11 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow()
 	// make sure that only those in view can be selected
 	if(Item.m_Rect.y+Item.m_Rect.h > gs_ListBoxOriginalView.y)
 	{
-
-		if(Item.m_HitRect.y < Item.m_HitRect.y) // clip the selection
+		if(Item.m_HitRect.y < gs_ListBoxOriginalView.y)
 		{
 			Item.m_HitRect.h -= gs_ListBoxOriginalView.y-Item.m_HitRect.y;
 			Item.m_HitRect.y = gs_ListBoxOriginalView.y;
 		}
-
 	}
 	else
 		Item.m_Visible = 0;
