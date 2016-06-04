@@ -429,6 +429,12 @@ int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CU
 			SetActiveItem(pID);
 			ButtonUsed = 1;
 		}
+
+		if(MouseButton(3))
+		{
+			SetActiveItem(pID);
+			ButtonUsed = 3;
+		}
 	}
 
 	if(Inside)
