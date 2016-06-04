@@ -517,19 +517,15 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 		Num = 0;
 	if(Num > 0)
 	{
-		static std::map<const void*, float> s_NewVals; // maybe a map seems hacky, but it's a convenient way to get it to work
+		static std::map<const void*, std::pair<float, float> > s_NewVals; // maybe a map seems hacky, but it's a convenient way to get it to work
 
-		// the following makes sure that we initialize the stuff with zero
-		try
+		// initialize
+		if(s_NewVals.find(pID) == s_NewVals.end())
 		{
-			s_NewVals.at(pID);
-		}
-		catch(std::out_of_range& e)
-		{
-			s_NewVals[pID] = 0.0f;
+			s_NewVals[pID] = std::pair<float, float>(0.0f, 0.0f);
 		}
 
-		float& s_NewVal = s_NewVals[pID];
+		float& s_NewVal = s_NewVals[pID].first;
 		if(UI()->ActiveItem() == pID || UI()->MouseInside(&Scroll)) // do not intervene the scrollbar's own logic
 			s_NewVal = gs_ListBoxScrollValue;
 		else
@@ -541,7 +537,14 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 
 			if(s_NewVal < 0.0f) s_NewVal = 0.0f;
 			if(s_NewVal > 1.0f) s_NewVal = 1.0f;
+			if(gs_ListBoxScrollValue != s_NewVals[pID].second) // move freely
+			{
+				float old = s_NewVal;
+				s_NewVal = gs_ListBoxScrollValue;
+				gs_ListBoxScrollValue = old;
+			}
 			smooth_set(&gs_ListBoxScrollValue, s_NewVal, (0.005f/Client()->RenderFrameTime())*23.0f);
+			s_NewVals[pID].second = gs_ListBoxScrollValue;
 		}
 	}
 
@@ -630,8 +633,10 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 					int NewIndex = -1;
 					if(m_aInputEvents[i].m_Flags&IInput::FLAG_PRESS)
 					{
-						if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = gs_ListBoxNewSelected + 1;
-						if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = gs_ListBoxNewSelected - 1;
+						if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = clamp(gs_ListBoxNewSelected + gs_ListBoxItemsPerRow, 0, gs_ListBoxNumItems);
+						if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = clamp(gs_ListBoxNewSelected - gs_ListBoxItemsPerRow, 0, gs_ListBoxNumItems);
+						if(m_aInputEvents[i].m_Key == KEY_RIGHT && gs_ListBoxItemsPerRow > 1) NewIndex = clamp(gs_ListBoxNewSelected + 1, 0, gs_ListBoxNumItems);
+						if(m_aInputEvents[i].m_Key == KEY_LEFT && gs_ListBoxItemsPerRow > 1) NewIndex = clamp(gs_ListBoxNewSelected - 1, 0, gs_ListBoxNumItems);
 					}
 					if(NewIndex > -1 && NewIndex < gs_ListBoxNumItems)
 					{
