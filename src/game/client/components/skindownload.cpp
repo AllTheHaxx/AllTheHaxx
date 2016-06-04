@@ -215,7 +215,7 @@ void CSkinDownload::LoadUrls()
 		file.close();
 
 		m_SkinDbUrls.sort_range();
-		dbg_msg("skinfetcher", "loaded %i urls from file '%s'", prior, g_Config.m_ClSkinDbFile);
+		dbg_msg("skinfetcher", "loaded %i url%s from file '%s'", prior, prior > 1 ? "s" : "", g_Config.m_ClSkinDbFile);
 	}
 	else
 		dbg_msg("skinfetcher/error", "failed to open url file '%s', using ddnet's database only", g_Config.m_ClSkinDbFile);
