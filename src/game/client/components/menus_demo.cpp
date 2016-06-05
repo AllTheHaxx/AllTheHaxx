@@ -624,7 +624,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
 			}
-			else if(KeyEvents)
+			else if(KeyEvents && UI()->MouseInside(&gs_ListBoxOriginalView))
 			{
 				for(int i = 0; i < m_NumInputEvents; i++)
 				{
