@@ -418,6 +418,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("ClosestPointOnLine", &CCollision::ClosestPointOnLine)
 
 			.addFunction("GetTile", &CCollision::GetTileRaw)
+			.addFunction("CheckPoint", &CCollision::CheckPointLua)
 
 			.addFunction("IntersectLine", &CCollision::IntersectLine)
 			.addFunction("MovePoint", &CCollision::MovePoint)
@@ -455,7 +456,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("TakenChoice", &CVoting::TakenChoice)
 		.endClass()
 
-		//Local player Infos
+		// local playerinfo
 		.beginClass<CNetObj_CharacterCore>("CNetObj_CharacterCore")  //TODO : Add the whole class!
 			.addData("PosX", &CNetObj_CharacterCore::m_X, false)
 			.addData("PosY", &CNetObj_CharacterCore::m_Y, false)
@@ -503,6 +504,22 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Reset", &CCharacterCore::Reset)
 		.endClass()
 		
+		.beginClass<CTuneParam>("CTuneParam")
+			.addProperty("Value", &CTuneParam::Get)
+		.endClass()
+
+
+#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) \
+	.addData(#Name, &CTuningParams::m_##Name) \
+	.addData(#ScriptName, &CTuningParams::m_##Name)
+
+		.beginClass<CTuningParams>("CTuningParams")
+			#include <game/tuning.h>
+		.endClass()
+
+#undef MACRO_TUNING_PARAM
+
+
 		.beginClass<CControls>("CControls")
 			.addProperty("Direction", &CControls::GetDirection, &CControls::SetDirection)
 			.addProperty("Fire", &CControls::GetFire, &CControls::SetFire)
@@ -647,6 +664,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Client", &CLua::m_pClient, false)
 			.addFunction("Players", &CGameClient::LuaGetClientData)
 			.addFunction("CharSnap", &CGameClient::LuaGetCharacterInfo)
+			.addFunction("Tuning", &CGameClient::LuaGetTuning)
 		.endNamespace()
 
 		.beginNamespace("Engine")

@@ -410,6 +410,7 @@ public:
 
 	static CClientData * LuaGetClientData(int ID) { return &CLua::m_pCGameClient->m_aClients[ID]; }
 	static CSnapState::CCharacterInfo * LuaGetCharacterInfo(int ID) { return &CLua::m_pCGameClient->m_Snap.m_aCharacters[ID]; }
+	static CTuningParams * LuaGetTuning() { return &CLua::m_pCGameClient->m_Tuning[g_Config.m_ClDummy]; }
 	
 private:
 	bool m_DDRaceMsgSent[2];
