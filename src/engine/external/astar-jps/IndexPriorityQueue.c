@@ -1,35 +1,37 @@
-#include <base/system.h>
-//#if defined(CONF_FAMILY_UNIX)
-#include "IndexPriorityQueue.h"
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 
+#include <base/system.h>
+
+#include "IndexPriorityQueue.h"
+
+
 int smallestPowerOfTwoAfter (int x)
 {
-        if (x < 0)
-                return 0;
-        x |= x >> 1;
-        x |= x >> 2;
-        x |= x >> 4;
-        x |= x >> 8;
-        x |= x >> 16;
-        return x+1;
+	if (x < 0)
+		return 0;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+	return x+1;
 }
 
 int makeSpace (queue *q, size_t size)
 {
-        unsigned int newAllocated = smallestPowerOfTwoAfter (size * sizeof(item));
+	unsigned int newAllocated = smallestPowerOfTwoAfter (size * sizeof(item));
 
-        if (newAllocated <= q->allocated)
-                return 0;
+	if (newAllocated <= q->allocated)
+		return 0;
 
-        q->root = realloc (q->root, newAllocated);
-        if (NULL == q->root)
-                exit (1); // I'm a bloody Haskell programmer, I don't have any business trying to do anything fancy when realloc fails
+	q->root = (item *) realloc (q->root, newAllocated);
+	if (NULL == q->root)
+		exit (1); // I'm a bloody Haskell programmer, I don't have any business trying to do anything fancy when realloc fails
 
-        q->allocated = newAllocated;
-        return newAllocated;
+	q->allocated = newAllocated;
+	return newAllocated;
 }
 
 int placeAtEnd (queue *q, item item)
@@ -59,7 +61,7 @@ void siftUp (queue *q, int i)
 	q->root[i] = q->root[p];
 	q->root[p] = swap;
 
-	return siftUp (q, p);
+	/*return */siftUp (q, p);
 }
 
 void insert (queue *q, int value, double pri)
@@ -70,10 +72,10 @@ void insert (queue *q, int value, double pri)
 	i.value = value;
 	i.priority = pri;
 
-        newAllocated = smallestPowerOfTwoAfter ((value + 1) * sizeof(int));
+	newAllocated = smallestPowerOfTwoAfter ((value + 1) * sizeof(int));
 
-        if ((value + 1) * sizeof (int) > q->indexAllocated) {
-		q->index = realloc (q->index, newAllocated);
+	if ((value + 1) * sizeof (int) > q->indexAllocated) {
+		q->index = (int *) realloc (q->index, newAllocated);
 		if (NULL == q->index)
 			exit (1);
 		for (j = q->indexAllocated / sizeof (int); j < newAllocated / sizeof (int); j++)
@@ -110,7 +112,7 @@ void siftDown (queue *q, int i)
 	q->root[i] = q->root[c];
 	q->root[c] = swap;
 
-	return siftDown (q, c);
+	/*return */siftDown (q, c);
 }
 
 void deleteMin (queue *q)
@@ -182,5 +184,3 @@ void freeQueue (queue* q)
 	free (q->index);
 	free (q);
 }
-
-//#endif

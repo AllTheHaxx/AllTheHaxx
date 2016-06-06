@@ -107,7 +107,9 @@ void CLua::AddUserscript(const char *pFilename)
 		if(m_aAutoloadFiles[i] == file)
 			Autoload = true;
 
-	dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
+	if(g_Config.m_Debug)
+		dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
+
 	int index = m_pLuaFiles.add( new( mem_alloc(sizeof(CLuaFile), sizeof(void*)) ) CLuaFile(this, file, Autoload) );
 	if(Autoload)
 		m_pLuaFiles[index]->Init();
