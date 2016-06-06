@@ -3926,7 +3926,7 @@ void CClient::InputThread(void *pUser)
 					//dbg_msg("Client", "%s", Temp);
 					int Size = str_utf8_encode(Temp, static_cast<const unsigned char>(*pInput++));
 							
-					if(Length+Size < sizeof(aData))
+					if((unsigned int)(Length+Size) < sizeof(aData))
 					{
 						mem_copy(aData+Length, &Temp, Size);
 						Length += Size;
