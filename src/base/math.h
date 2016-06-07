@@ -15,9 +15,10 @@ inline T clamp(T val, T min, T max)
 	return val;
 }
 
-inline float sign(float f)
+template <typename T>
+inline T sign(T v)
 {
-	return f<0.0f?-1.0f:1.0f;
+	return v<0.0f?-1.0f:1.0f;
 }
 
 inline int round_to_int(float f)

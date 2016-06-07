@@ -494,6 +494,83 @@ void CGraphics_Threaded::ScreenshotDirect()
 	}
 }
 
+void CGraphics_Threaded::ShaderSet(int ShaderID)
+{
+	dbg_assert(m_ActiveShader == 0, "Called Graphics()->ShaderSet twice");
+	dbg_assert(ShaderID < NUM_SHADERS && ShaderID >= 0, "Called Graphics()->ShaderSet with invalid ShaderID");
+	m_ActiveShader = ShaderID;
+	CCommandBuffer::SCommand_ShaderSet Cmd(m_apShaders[m_ActiveShader]->GetHandle());
+	m_pCommandBuffer->AddCommand(Cmd);
+}
+
+void CGraphics_Threaded::SetUniform1f(const char *pName, float value)
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->SetUniform1f without ShaderSet");
+	CCommandBuffer::SCommand_ShaderSetUniform1f Cmd(m_apShaders[m_ActiveShader]->GetHandle());
+	Cmd.m_pName = pName;
+	Cmd.value = value;
+	m_pCommandBuffer->AddCommand(Cmd);
+}
+
+void CGraphics_Threaded::SetUniform1i(const char *pName, int value)
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->SetUniform1i without ShaderSet");
+	CCommandBuffer::SCommand_ShaderSetUniform1i Cmd(m_apShaders[m_ActiveShader]->GetHandle());
+	Cmd.m_pName = pName;
+	Cmd.value = value;
+	m_pCommandBuffer->AddCommand(Cmd);
+}
+
+void CGraphics_Threaded::SetUniform2f(const char *pName, vec2 value)
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->SetUniform2f without ShaderSet");
+	CCommandBuffer::SCommand_ShaderSetUniform2f Cmd(m_apShaders[m_ActiveShader]->GetHandle());
+	Cmd.m_pName = pName;
+	Cmd.value = value;
+	m_pCommandBuffer->AddCommand(Cmd);
+}
+
+void CGraphics_Threaded::SetUniform3f(const char *pName, vec3 value)
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->SetUniform3f without ShaderSet");
+	CCommandBuffer::SCommand_ShaderSetUniform3f Cmd(m_apShaders[m_ActiveShader]->GetHandle());
+	Cmd.m_pName = pName;
+	Cmd.value = value;
+	m_pCommandBuffer->AddCommand(Cmd);
+}
+
+void CGraphics_Threaded::SetUniform4f(const char *pName, vec4 value)
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->SetUniform4f without ShaderSet");
+	CCommandBuffer::SCommand_ShaderSetUniform4f Cmd(m_apShaders[m_ActiveShader]->GetHandle());
+	Cmd.m_pName = pName;
+	Cmd.value = value;
+	m_pCommandBuffer->AddCommand(Cmd);
+}
+
+void CGraphics_Threaded::SetUniformMat4(const char *pName, mat4 value)
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->SetUniformMat4 without ShaderSet");
+	CCommandBuffer::SCommand_ShaderSetUniformMat4 Cmd(m_apShaders[m_ActiveShader]->GetHandle());
+	Cmd.m_pName = pName;
+	Cmd.value = value;
+	m_pCommandBuffer->AddCommand(Cmd);
+}
+
+/*void CGraphics_Threaded::GetUniformLocation(const char *pName)
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->GetUniformLocation without ShaderSet");
+
+}*/
+
+void CGraphics_Threaded::ShaderEnd()
+{
+	dbg_assert(m_ActiveShader > 0, "Called Graphics()->ShaderEnd without ShaderSet");
+	CCommandBuffer::SCommand_ShaderSet Cmd(0);
+	m_pCommandBuffer->AddCommand(Cmd);
+	KickCommandBuffer();
+}
+
 void CGraphics_Threaded::TextureSet(int TextureID)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
@@ -865,6 +942,10 @@ int CGraphics_Threaded::Init()
 	};
 
 	m_InvalidTexture = LoadTextureRaw(4,4,CImageInfo::FORMAT_RGBA,aNullTextureData,CImageInfo::FORMAT_RGBA,TEXLOAD_NORESAMPLE);
+
+	// load all the shaders TODO: needs to somehow go automatically
+	m_apShaders[SHADER_PASSTHROUGH] = new CShader("passthrough");
+
 	return 0;
 }
 

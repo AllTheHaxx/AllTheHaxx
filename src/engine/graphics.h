@@ -5,6 +5,9 @@
 
 #include "kernel.h"
 
+#include <base/vmath.h>
+#include <base/matmath.h>
+
 
 class CImageInfo
 {
@@ -95,6 +98,16 @@ public:
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual void TextureSet(int TextureID) = 0;
+
+	virtual void ShaderSet(int TextureID) = 0;
+	virtual void SetUniform1f(const char *pName, float value) = 0;
+	virtual void SetUniform1i(const char *pName, int value) = 0;
+	virtual void SetUniform2f(const char *pName, vec2 value) = 0;
+	virtual void SetUniform3f(const char *pName, vec3 value) = 0;
+	virtual void SetUniform4f(const char *pName, vec4 value) = 0;
+	virtual void SetUniformMat4(const char *pName, mat4 TextureID) = 0;
+	//virtual void GetUniformLocation(const char *pName) = 0;
+	virtual void ShaderEnd() = 0;
 
 	struct CLineItem
 	{

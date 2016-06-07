@@ -1,6 +1,8 @@
 #pragma once
 
+#include <base/matmath.h>
 #include <engine/graphics.h>
+#include "shader.h"
 
 class CCommandBuffer
 {
@@ -77,6 +79,16 @@ public:
 		// rendering
 		CMD_CLEAR,
 		CMD_RENDER,
+
+		// shader
+		CMD_SHADER_SET,
+		CMD_SHADER_SETUNIFORM1f,
+		CMD_SHADER_SETUNIFORM1i,
+		CMD_SHADER_SETUNIFORM2f,
+		CMD_SHADER_SETUNIFORM3f,
+		CMD_SHADER_SETUNIFORM4f,
+		CMD_SHADER_SETUNIFORMMAT4,
+		CMD_SHADER_GETUNIFORMLOCATION,
 
 		// swap
 		CMD_SWAP,
@@ -184,6 +196,61 @@ public:
 		unsigned m_PrimCount;
 		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
+
+	struct SCommandHelper_Shader // just a helper
+	{
+		const char *m_pName;
+		unsigned m_Shader; // internal(!) id of the shader
+	};
+
+	struct SCommand_ShaderSet : public SCommand
+	{
+		SCommand_ShaderSet(unsigned ShaderID) : SCommand(CMD_SHADER_SET) { m_Shader = ShaderID; }
+		unsigned m_Shader;
+	};
+
+	struct SCommand_ShaderSetUniform1f : public SCommandHelper_Shader, SCommand
+	{
+		SCommand_ShaderSetUniform1f(unsigned ShaderID) : SCommand(CMD_SHADER_SETUNIFORM1f) {}
+		float value;
+	};
+
+	struct SCommand_ShaderSetUniform1i : public SCommandHelper_Shader, SCommand
+	{
+		SCommand_ShaderSetUniform1i(unsigned ShaderID) : SCommand(CMD_SHADER_SETUNIFORM1i) {}
+		int value;
+	};
+
+	struct SCommand_ShaderSetUniform2f : public SCommandHelper_Shader, SCommand
+	{
+		SCommand_ShaderSetUniform2f(unsigned ShaderID) : SCommand(CMD_SHADER_SETUNIFORM2f) {}
+		vec2 value;
+	};
+
+	struct SCommand_ShaderSetUniform3f : public SCommandHelper_Shader, SCommand
+	{
+		SCommand_ShaderSetUniform3f(unsigned ShaderID) : SCommand(CMD_SHADER_SETUNIFORM3f) {}
+		vec3 value;
+	};
+
+	struct SCommand_ShaderSetUniform4f : public SCommandHelper_Shader, SCommand
+	{
+		SCommand_ShaderSetUniform4f(unsigned ShaderID) : SCommand(CMD_SHADER_SETUNIFORM4f) {}
+		vec4 value;
+};
+
+	struct SCommand_ShaderSetUniformMat4 : public SCommandHelper_Shader, SCommand
+	{
+		SCommand_ShaderSetUniformMat4(unsigned ShaderID) : SCommand(CMD_SHADER_SETUNIFORMMAT4) {}
+		mat4 value;
+	};
+
+	/*struct SCommand_ShaderGetUniformLocation : public SCommandHelper_Shader, SCommand
+	{
+		SCommand_ShaderGetUniformLocation(unsigned ShaderID) : SCommand(CMD_SHADER_GETUNIFORMLOCATION) {}
+		int result; // out
+	};*/
+
 
 	struct SCommand_Screenshot : public SCommand
 	{
@@ -361,6 +428,13 @@ class CGraphics_Threaded : public IEngineGraphics
 		DRAWING_LINES=2
 	};
 
+	// TODO: python scripts will be awesome!
+	enum
+	{
+		SHADER_PASSTHROUGH,
+		NUM_SHADERS
+	};
+
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
 
@@ -372,6 +446,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	class IStorageTW *m_pStorage;
 	class IConsole *m_pConsole;
 
+	CShader *m_apShaders[NUM_SHADERS]; // dynamic alloc...
+
 	CCommandBuffer::SVertex m_aVertices[MAX_VERTICES];
 	int m_NumVertices;
 
@@ -382,6 +458,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	float m_Rotation;
 	int m_Drawing;
+	int m_ActiveShader;
 	bool m_DoScreenshot;
 	char m_aScreenshotName[128];
 
@@ -430,6 +507,16 @@ public:
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
 
 	void ScreenshotDirect();
+
+	virtual void ShaderSet(int ShaderID);
+	virtual void SetUniform1f(const char *pName, float value);
+	virtual void SetUniform1i(const char *pName, int value);
+	virtual void SetUniform2f(const char *pName, vec2 value);
+	virtual void SetUniform3f(const char *pName, vec3 value);
+	virtual void SetUniform4f(const char *pName, vec4 value);
+	virtual void SetUniformMat4(const char *pName, mat4 TextureID);
+	//virtual void GetUniformLocation(const char *pName);
+	virtual void ShaderEnd();
 
 	virtual void TextureSet(int TextureID);
 

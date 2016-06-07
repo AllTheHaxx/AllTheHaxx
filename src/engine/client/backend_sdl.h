@@ -3,6 +3,7 @@
 
 #include "graphics_threaded.h"
 
+#include <map>
 
 
 # if defined(CONF_PLATFORM_MACOSX)
@@ -107,6 +108,14 @@ public:
 	};
 
 private:
+	struct ShaderUniformLocationCache
+	{
+		const GLchar *name;
+		GLint result;
+	};
+	std::map<GLuint, ShaderUniformLocationCache> m_ShaderUniformLocationCache; // program handle -> cache entry
+	GLint ShaderGetUniformLocation(unsigned Shader, const char *pName); // manages the cache
+
 	static int TexFormatToOpenGLFormat(int TexFormat);
 	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
 	static void *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
@@ -118,6 +127,14 @@ private:
 	void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand);
 	void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand);
 	void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand);
+	void Cmd_ShaderSet(const CCommandBuffer::SCommand_ShaderSet *pCommand);
+	void Cmd_ShaderSetUniform1f(const CCommandBuffer::SCommand_ShaderSetUniform1f *pCommand);
+	void Cmd_ShaderSetUniform1i(const CCommandBuffer::SCommand_ShaderSetUniform1i *pCommand);
+	void Cmd_ShaderSetUniform2f(const CCommandBuffer::SCommand_ShaderSetUniform2f *pCommand);
+	void Cmd_ShaderSetUniform3f(const CCommandBuffer::SCommand_ShaderSetUniform3f *pCommand);
+	void Cmd_ShaderSetUniform4f(const CCommandBuffer::SCommand_ShaderSetUniform4f *pCommand);
+	void Cmd_ShaderSetUniformMat4(const CCommandBuffer::SCommand_ShaderSetUniformMat4 *pCommand);
+	//void Cmd_ShaderGetUniformLocation(const CCommandBuffer::SCommand_ShaderGetUniformLocation *pCommand);
 	void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand);
 	void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand);
 
@@ -130,6 +147,8 @@ public:
 // takes care of sdl related commands
 class CCommandProcessorFragment_SDL
 {
+	GLuint m_VBO; // vertex array object XXX
+
 	// SDL stuff
 	SDL_Window *m_pWindow;
 	SDL_GLContext m_GLContext;
@@ -183,6 +202,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	ICommandProcessor *m_pProcessor;
 	volatile int m_TextureMemoryUsage;
 	int m_NumScreens;
+
 public:
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight);
 	virtual int Shutdown();

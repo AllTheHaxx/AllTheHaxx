@@ -39,10 +39,12 @@
 #include <engine/shared/config.h>
 #include <base/tl/threading.h>
 
+#include "shader.h"
 #include "graphics_threaded.h"
 #include "backend_sdl.h"
 
 // ------------ CGraphicsBackend_Threaded
+
 
 void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 {
@@ -338,9 +340,74 @@ void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void CCommandProcessorFragment_OpenGL::Cmd_ShaderSet(const CCommandBuffer::SCommand_ShaderSet *pCommand)
+{
+	glUseProgram(pCommand->m_Shader);
+}
+
+
+GLint CCommandProcessorFragment_OpenGL::ShaderGetUniformLocation(unsigned Shader, const char *pName)
+{
+	ShaderUniformLocationCache *pCacheEntry = 0x0;
+	try
+	{
+		pCacheEntry = &(m_ShaderUniformLocationCache.at(Shader));
+	} catch(...)
+	{
+		pCacheEntry = &(m_ShaderUniformLocationCache[Shader]);
+		pCacheEntry->name = pName;
+		pCacheEntry->result = glGetUniformLocation(Shader, pName);
+	}
+
+	return pCacheEntry->result;
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_ShaderSetUniform1f(const CCommandBuffer::SCommand_ShaderSetUniform1f *pCommand)
+{
+	glUniform1f(ShaderGetUniformLocation(pCommand->m_Shader, pCommand->m_pName), pCommand->value);
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_ShaderSetUniform1i(const CCommandBuffer::SCommand_ShaderSetUniform1i *pCommand)
+{
+	glUniform1i(ShaderGetUniformLocation(pCommand->m_Shader, pCommand->m_pName), pCommand->value);
+
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_ShaderSetUniform2f(const CCommandBuffer::SCommand_ShaderSetUniform2f *pCommand)
+{
+	glUniform2f(ShaderGetUniformLocation(pCommand->m_Shader, pCommand->m_pName), pCommand->value.x, pCommand->value.y);
+
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_ShaderSetUniform3f(const CCommandBuffer::SCommand_ShaderSetUniform3f *pCommand)
+{
+	glUniform3f(ShaderGetUniformLocation(pCommand->m_Shader, pCommand->m_pName), pCommand->value.x, pCommand->value.y, pCommand->value.z);
+
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_ShaderSetUniform4f(const CCommandBuffer::SCommand_ShaderSetUniform4f *pCommand)
+{
+	glUniform4f(ShaderGetUniformLocation(pCommand->m_Shader, pCommand->m_pName), pCommand->value.r, pCommand->value.g, pCommand->value.b, pCommand->value.a);
+
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_ShaderSetUniformMat4(const CCommandBuffer::SCommand_ShaderSetUniformMat4 *pCommand)
+{
+	glUniformMatrix4fv(ShaderGetUniformLocation(pCommand->m_Shader, pCommand->m_pName), 1, GL_FALSE, pCommand->value.data);
+
+}
+
+/*void CCommandProcessorFragment_OpenGL::Cmd_ShaderGetUniformLocation(const CCommandBuffer::SCommand_ShaderGetUniformLocation *pCommand)
+{
+	pCommand->result = ShaderGetUniformLocation(pCommand->m_Shader, pCommand->m_pName);
+}*/
+
 void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand)
 {
 	SetState(pCommand->m_State);
+
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices);
+	//glEnableVertexAttribArray(0);
 
 	glVertexPointer(3, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices + sizeof(float)*3);
@@ -421,6 +488,14 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 	case CCommandBuffer::CMD_TEXTURE_UPDATE: Cmd_Texture_Update(static_cast<const CCommandBuffer::SCommand_Texture_Update *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_CLEAR: Cmd_Clear(static_cast<const CCommandBuffer::SCommand_Clear *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER: Cmd_Render(static_cast<const CCommandBuffer::SCommand_Render *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SHADER_SET: Cmd_ShaderSet(static_cast<const CCommandBuffer::SCommand_ShaderSet *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SHADER_SETUNIFORM1f: Cmd_ShaderSetUniform1f(static_cast<const CCommandBuffer::SCommand_ShaderSetUniform1f *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SHADER_SETUNIFORM1i: Cmd_ShaderSetUniform1i(static_cast<const CCommandBuffer::SCommand_ShaderSetUniform1i *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SHADER_SETUNIFORM2f: Cmd_ShaderSetUniform2f(static_cast<const CCommandBuffer::SCommand_ShaderSetUniform2f *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SHADER_SETUNIFORM3f: Cmd_ShaderSetUniform3f(static_cast<const CCommandBuffer::SCommand_ShaderSetUniform3f *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SHADER_SETUNIFORM4f: Cmd_ShaderSetUniform4f(static_cast<const CCommandBuffer::SCommand_ShaderSetUniform4f *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SHADER_SETUNIFORMMAT4: Cmd_ShaderSetUniformMat4(static_cast<const CCommandBuffer::SCommand_ShaderSetUniformMat4 *>(pBaseCommand)); break;
+	//case CCommandBuffer::CMD_SHADER_GETUNIFORMLOCATION: Cmd_ShaderGetUniformLocation(static_cast<const CCommandBuffer::SCommand_ShaderGetUniformLocation *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_SCREENSHOT: Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_Screenshot *>(pBaseCommand)); break;
 	default: return false;
 	}
@@ -447,6 +522,10 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	glAlphaFunc(GL_GREATER, 0);
 	glEnable(GL_ALPHA_TEST);
 	glDepthMask(0);
+
+	glGenBuffers(1, &m_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+
 }
 
 void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
@@ -685,10 +764,10 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
-		dbg_msg("glew/ERROR", "%s", glewGetErrorString(err));
+		dbg_msg("gfx", "unable to init glew: %s", glewGetErrorString(err));
 		return -1;
 	}
-	dbg_msg("glew", "version: %s", glewGetString(GLEW_VERSION));
+	dbg_msg("gfx/version", "OpenGL %s", glewGetString(GLEW_VERSION), glGetString(GL_VERSION));
 
 	//SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
