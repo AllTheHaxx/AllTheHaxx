@@ -9,6 +9,7 @@
 	#define WINVER 0x0501
 #endif
 
+#include <GL/glew.h>
 #include <base/detect.h>
 #include <base/math.h>
 #include <stdlib.h>
@@ -680,6 +681,14 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		dbg_msg("gfx", "unable to create OpenGL context: %s", SDL_GetError());
 		return -1;
 	}
+
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+		dbg_msg("glew/ERROR", "%s", glewGetErrorString(err));
+		return -1;
+	}
+	dbg_msg("glew", "version: %s", glewGetString(GLEW_VERSION));
 
 	//SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);

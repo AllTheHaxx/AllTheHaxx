@@ -263,6 +263,7 @@ function build(settings)
 
 	settings.cc.includes:Add("src")
 	settings.cc.includes:Add("src/engine/external")
+	settings.cc.includes:Add("src/engine/external/glew/include")
 
 	-- set some platform specific settings
 	if family == "unix" then
@@ -303,6 +304,7 @@ function build(settings)
 	--settings.cc.includes:Add("src/engine/external/luabridge")
 
 	-- build the small libraries
+	glew = Compile(settings, Collect("src/engine/external/glew/*.c"))
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
 	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
@@ -412,7 +414,7 @@ function build(settings)
 
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
-		engine, client, game_editor, zlib, pnglite, wavpack,
+		engine, client, game_editor, zlib, pnglite, wavpack, glew,
 		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps)
 
 	server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
