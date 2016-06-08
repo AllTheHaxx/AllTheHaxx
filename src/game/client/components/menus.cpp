@@ -1214,8 +1214,10 @@ static const char *s_apSayings[] = {
 		"epppiiiiccc",
 		"Gimme dat muzic!",
 		"...it's evolving!",
-		"When will the Aliens find us?"
-		"Gotta get more sleep :("
+		"When will the Aliens find us?",
+		"Gotta get more sleep :(",
+		"We furfill every wish!",
+		"si el moreno te vasilah tu te calla y lo asimilah",
 };
 
 void CMenus::RenderLoading()
