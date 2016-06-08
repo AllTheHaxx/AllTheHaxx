@@ -137,7 +137,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
-	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, aCAFile);
+	//curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, aCAFile); // suppose this is only needed to access ddnet's server?
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pTask->m_aUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);
