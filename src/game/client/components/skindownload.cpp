@@ -59,7 +59,7 @@ void CSkinDownload::OnRender()
 		Screen.HSplitTop(13.5f, &Button, &Screen);
 		char aBuf[128];
 		if(it->second.url > 0)
-			str_format(aBuf, sizeof(aBuf), "%s from alternative '%s'", it->second.SkinName.c_str(), it->second.url);
+			str_format(aBuf, sizeof(aBuf), "%s from alternative %i", it->second.SkinName.c_str(), it->second.url);
 		else
 			str_format(aBuf, sizeof(aBuf), "%s", it->second.SkinName.c_str());
 
