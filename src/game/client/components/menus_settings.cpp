@@ -2252,7 +2252,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button, Localize("Use old mouse mode (warp mouse instead of raw input)")))
+	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Raw Mouse Input"), !g_Config.m_InpMouseOld, &Button, Localize("Use raw mouse input mode (the \"new one\")\nWARNING: MIGHT BE BUGGY/SLOW ON SOME SYSTEMS! In that case turn it off.")))
 	{
 		g_Config.m_InpMouseOld ^= 1;
 		CheckSettings = true;
