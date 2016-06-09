@@ -1601,7 +1601,7 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			if(Client()->m_ReconnectTime > 0)
 			{
-				str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((Client()->m_ReconnectTime - time_get()) / time_freq() + g_Config.m_ClReconnectFull));
+				str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), (Client()->m_ReconnectTime - time_get()) / time_freq());
 				pTitle = Client()->ErrorString();
 				pExtraText = aBuf;
 				pButtonText = Localize("Abort");
