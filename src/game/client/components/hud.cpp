@@ -673,7 +673,10 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 	Graphics()->QuadsBegin();
 
+	const bool ShowNinjaTimer = g_Config.m_ClShowhudHealthAmmoBars && IsVanilla(Client()->GetServerInfo(0)) && pCharacter->m_Weapon == WEAPON_NINJA;
+
 	// if weaponstage is active, put a "glow" around the stage ammo
+
 	RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[pCharacter->m_Weapon%NUM_WEAPONS].m_pSpriteProj);
 	IGraphics::CQuadItem Array[10];
 	int i;
@@ -681,11 +684,22 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		Array[i] = IGraphics::CQuadItem(x+i*12,y+24,10,10);
 	Graphics()->QuadsDrawTL(Array, i);
 	Graphics()->QuadsEnd();
+
+	static int64 NinjaStartTime = 0;
+	if(ShowNinjaTimer)
+	{
+		if(NinjaStartTime == 0)
+			NinjaStartTime = time_get();
+	}
+	else
+		NinjaStartTime = 0;
+
 	if(g_Config.m_ClShowhudHealthAmmoBars &&
-			(pCharacter->m_Weapon != WEAPON_HAMMER && pCharacter->m_Weapon != WEAPON_NINJA))
+			(pCharacter->m_Weapon != WEAPON_HAMMER && (pCharacter->m_Weapon != WEAPON_NINJA || (ShowNinjaTimer && NinjaStartTime > 0))))
 	{
 		m_MaxAmmo = max(m_MaxAmmo, pCharacter->m_AmmoCount);
 		CUIRect r;
+
 		// background
 		r.x = x + 12; r.y = y+24; r.h = 10; r.w = 12 * 10;
 		RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
@@ -695,18 +709,24 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		static int LastWeapon = -1;
 		if(pCharacter->m_Weapon != LastWeapon) // detect weapon switch
 		{
-			Width = ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo)*120.0f; // instantly set the value
+			if(!ShowNinjaTimer)
+				Width = ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo)*120.0f; // instantly set the value
+			else
+				Width = 120.0f;
 			LastWeapon = pCharacter->m_Weapon;
 		}
 
-		smooth_set(&Width, ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f);
+		float WantedWidth = !ShowNinjaTimer ? ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo) :
+				((float)round_to_int((((NinjaStartTime + ((int64)g_pData->m_Weapons.m_Ninja.m_Duration/1000LL+1LL) * time_freq())-time_get())&0x1F00000)>>5*4)/15.0f);
+		smooth_set(&Width, WantedWidth*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f);
+
 		if(Width > 5)
 		{
 			r.w = min(m_Width/3, Width);
-			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.7f, 0.7f, 0.8f), CUI::CORNER_R, 3.0f);
+			RenderTools()->DrawUIRect(&r, vec4(0.7f, (!ShowNinjaTimer)*0.7f, (!ShowNinjaTimer)*0.7f, 0.8f), CUI::CORNER_R, 3.0f);
 		}
 		char aBuf[16];
-		str_format(aBuf, sizeof(aBuf), "%i", pCharacter->m_AmmoCount);
+		str_format(aBuf, sizeof(aBuf), "%i", ShowNinjaTimer ? round_to_int((Width/120.0f)*15.0f) : pCharacter->m_AmmoCount);
 		TextRender()->Text(0, x+13, y+24, 6, aBuf, 100);
 	}
 

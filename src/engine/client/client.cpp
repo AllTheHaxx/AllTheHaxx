@@ -953,12 +953,16 @@ void CClient::DummyInfo()
 	SendMsgExY(&Packer, MSGFLAG_VITAL);
 }
 
-void CClient::GetServerInfo(CServerInfo *pServerInfo)
+CServerInfo *CClient::GetServerInfo(CServerInfo *pServerInfo)
 {
-	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
+	if(pServerInfo)
+	{
+		mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 
-	if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
-		str_copy(pServerInfo->m_aGameType, "DDraceNetwork", 14);
+		if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
+			str_copy(pServerInfo->m_aGameType, "DDraceNetwork", 14);
+	}
+	return &m_CurrentServerInfo;
 }
 
 void CClient::ServerInfoRequest()
