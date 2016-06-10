@@ -92,8 +92,8 @@ void CAStar::OnRender()
 	}
 
 
-	const CNetObj_Character * pPlayerChar = m_pClient->m_Snap.m_pLocalCharacter;
-	const CNetObj_Character * pPrevChar = m_pClient->m_Snap.m_pLocalPrevCharacter;
+	const CNetObj_Character *pPlayerChar = m_pClient->m_Snap.m_pLocalCharacter;
+	const CNetObj_Character *pPrevChar = m_pClient->m_Snap.m_pLocalPrevCharacter;
 
 	if (pPlayerChar && pPrevChar)
 		m_LastPos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
