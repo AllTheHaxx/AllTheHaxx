@@ -371,6 +371,7 @@ public:
 	class CItems *m_pItems;
 	class CMapLayers *m_pMapLayersBackGround;
 	class CMapLayers *m_pMapLayersForeGround;
+	class CNamePlates *m_pNamePlates;
 	class CBackground *m_pBackGround;
 
 	class CMapSounds *m_pMapSounds;

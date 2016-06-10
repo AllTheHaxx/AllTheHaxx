@@ -6,6 +6,8 @@
 
 class CNamePlates : public CComponent
 {
+	friend class CPlayers;
+
 	void RenderNameplate(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,

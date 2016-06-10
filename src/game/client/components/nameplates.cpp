@@ -30,30 +30,29 @@ void CNamePlates::RenderNameplate(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
-	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
-	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
-	// render name plate
+	const float FontSizeName = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
+	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+
+	// render nameplates
 	if(!pPlayerInfo->m_Local)
 	{
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
 			a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
 
-		char aName[MAX_NAME_LENGTH+3];
+		char aName[MAX_NAME_LENGTH+4];
 		if(g_Config.m_Debug)
 			str_format(aName, sizeof(aName), "%i: %s", pPlayerInfo->m_ClientID, m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName);
 		else
 			str_copy(aName, m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName, sizeof(aName));
 
-		//char aClan[MAX_CLAN_LENGTH];
-		//str_copy(aClan, m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan, sizeof(aClan));
 		const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
 
 		char aScore[8];
 		str_format(aScore, sizeof(aScore), "%i", pPlayerInfo->m_Score);
 
-		float tw = TextRender()->TextWidth(0, FontSize, aName, -1);
-		float tw2 = TextRender()->TextWidth(0, FontSize*0.6f+2, aScore, -1);
+		const float twName = TextRender()->TextWidth(0, FontSizeName, aName, -1);
+		const float twScore = TextRender()->TextWidth(0, FontSizeName*0.6f+2, aScore, -1);
 
 		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID))
@@ -79,53 +78,52 @@ void CNamePlates::RenderNameplate(
 
 		if (str_length(pClan) > 0 && g_Config.m_ClNameplatesClan) // name + clan
 		{
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f - FontSize, FontSize, aName, -1); // name
+			// name
+			TextRender()->Text(0, Position.x - twName / 2.0f, Position.y - FontSizeName - 38.0f - FontSizeClan - 3.0f, FontSizeName, aName, -1);
 
-			//FontSize = round_to_int(FontSize * 3 / 4);
-			tw = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
-
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSizeClan - 38.0f, FontSizeClan, pClan, -1); // clan
+			// clan
+			const float tw = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
+			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSizeClan - 38.0f, FontSizeClan, pClan, -1);
 		}
 		else
 		{
-			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSize - 38.0f, FontSize, aName, -1); // just name
+			// only name
+			TextRender()->Text(0, Position.x - twName / 2.0f, Position.y - FontSizeName - 38.0f, FontSizeName, aName, -1);
 		}
-		CServerInfo ServerInfo;
-		Client()->GetServerInfo(&ServerInfo);
-		if(g_Config.m_ClNamePlatesScore && !IsRace(&ServerInfo) && !IsDDNet(&ServerInfo))
+
+		// render score
+		if(g_Config.m_ClNamePlatesScore
+				&& !IsRace(Client()->GetServerInfo(0)) && !IsDDNet(Client()->GetServerInfo(0)))
 		{
 			CUIRect Bg;
-			Bg.x = Position.x - tw2 / 2.0f            -4.0f;
-			Bg.y = Position.y - FontSize*0.6f+2+28.0f +1.2f;
-			Bg.w = tw2                                +10.0f;
-			Bg.h = FontSize*0.6f+2                    +4.0f;
+			Bg.x = Position.x - twScore / 2.0f        -4.0f;
+			Bg.y = Position.y - FontSizeName*0.6f+2+28.0f +1.2f;
+			Bg.w = twScore                            +10.0f;
+			Bg.h = FontSizeName*0.6f+2                    +4.0f;
 			RenderTools()->DrawUIRect(&Bg, vec4(0.0f, 0.0f, 0.0f, a / 1.5f), CUI::CORNER_ALL, 10.0f);
 
 			TextRender()->TextColor(0.6f, 1.0f, 0.4f, a - 0.1f);
-			TextRender()->Text(0, Position.x - tw2 / 2.0f, Position.y - FontSize*0.6f+2 + 28.0f, FontSize*0.6f+2, aScore, -1);
+			TextRender()->Text(0, Position.x - twScore / 2.0f, Position.y - FontSizeName*0.6f+2 + 28.0f, FontSizeName*0.6f+2, aScore, -1);
 		}
-
-		/*if(g_Config.m_Debug) // render client id when in debug aswell
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
-			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
-			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
-		}*/
 
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 		
-		if((pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2) && g_Config.m_ClShowATHUser)
+		// render ATH sign
+		if(g_Config.m_ClNamePlatesATH &&
+				(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2))
 		{
+			const float Alpha = clamp((sinf((float)Client()->LocalTime()*3.141592f*((float)g_Config.m_ClNamePlatesATHBlinkTime/100.0f))+0.5f), 0.0f, 1.0f);
+			float PosY = Position.y - 65.0f;
+
+			PosY -= FontSizeName;  // take name into account
+			if(str_length(pClan) > 0 && g_Config.m_ClNameplatesClan)
+				PosY -= FontSizeClan-5.0f; // take clan into account
+
+			// do the actual thing
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
 			Graphics()->QuadsBegin();
-			float Alpha = sinf(Client()->GameTick()*0.025f);
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-			
-			float PosY = !(str_length(pClan) > 0 && g_Config.m_ClNameplatesClan) ? Position.y - 3.f*FontSize : Position.y - 3*FontSize -38.f;
-			
 			RenderTools()->DrawRoundRect(Position.x-30.f, PosY, 55.f, 25.f, 0.f);
 			Graphics()->QuadsEnd();
 		}

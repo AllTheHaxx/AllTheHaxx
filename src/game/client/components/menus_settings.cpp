@@ -154,8 +154,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		
 			Right.HSplitTop(5.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClShowATHUser, Localize("Show other ATH user"), g_Config.m_ClShowATHUser, &Button))
-				g_Config.m_ClShowATHUser ^= 1;
+			if(DoButton_CheckBox(&g_Config.m_ClNamePlatesATH, Localize("Show other ATH user"), g_Config.m_ClNamePlatesATH, &Button))
+				g_Config.m_ClNamePlatesATH ^= 1;
 	}
 
 	// client

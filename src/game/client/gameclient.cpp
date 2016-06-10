@@ -223,6 +223,7 @@ void CGameClient::OnConsoleInit()
 	m_pItems = &::gs_Items;
 	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
 	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
+	m_pNamePlates = &::gs_NamePlates;
 	m_pBackGround = &::gs_BackGround;
 	m_pEmoticon = &gs_Emoticon;
 
@@ -270,7 +271,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_LuaRender1); // lua
 	m_All.Add(&gs_MapLayersBackGround); // first to render
 	m_All.Add(&gs_LuaRender2); // lua
-	m_All.Add(m_pAStar); // <- this could be even more at the bottom
+	m_All.Add(m_pAStar);
 	m_All.Add(&gs_LuaRender3); // lua
 	m_All.Add(&m_pParticles->m_RenderTrail);
 	m_All.Add(&gs_LuaRender4); // lua
@@ -284,7 +285,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_LuaRender8); // lua
 	m_All.Add(&m_pParticles->m_RenderExplosions);
 	m_All.Add(&gs_LuaRender9); // lua
-	m_All.Add(&gs_NamePlates);
+	m_All.Add(m_pNamePlates);
 	m_All.Add(&gs_LuaRender10); // lua
 	m_All.Add(&m_pParticles->m_RenderGeneral);
 	m_All.Add(&gs_LuaRender11); // lua
