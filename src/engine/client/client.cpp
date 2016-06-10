@@ -1068,9 +1068,21 @@ void CClient::DebugRender()
 	if(!g_Config.m_ClShowhud || !g_Config.m_ClShowhudHealthAmmo)
 		YOFFSET = 0;
 
+	int TickSpeed = 0;
+	{
+		static int LastTick[2] = {0};
+		static int64 LastTime = 0;
+		if(time_get() > LastTime + time_freq())
+		{
+			TickSpeed = m_CurGameTick[g_Config.m_ClDummy] - LastTick[g_Config.m_ClDummy];
+			LastTick[g_Config.m_ClDummy] = m_CurGameTick[g_Config.m_ClDummy];
+			LastTime = time_get();
+		}
+	}
+
 	FrameTimeAvg = FrameTimeAvg*0.9f + m_RenderFrameTime*0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: curr=%2d pred_offset=%d  |  mem=%6d,%3dk in %d (%d)  |  gfxmem=%dk fps=%3d",
-		m_CurGameTick[g_Config.m_ClDummy], m_PredTick[g_Config.m_ClDummy] - m_CurGameTick[g_Config.m_ClDummy],
+	str_format(aBuffer, sizeof(aBuffer), "ticks: curr=%2d pred_offset=%d tps=%d  |  mem=%6d,%3dk in %d (%d)  |  gfxmem=%dk fps=%3d",
+		m_CurGameTick[g_Config.m_ClDummy], m_PredTick[g_Config.m_ClDummy] - m_CurGameTick[g_Config.m_ClDummy], TickSpeed,
 		mem_stats()->allocated/1024, mem_stats()->allocated%1024,
 		mem_stats()->active_allocations, mem_stats()->total_allocations,
 		Graphics()->MemoryUsage()/1024,
