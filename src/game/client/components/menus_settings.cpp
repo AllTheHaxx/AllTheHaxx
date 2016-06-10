@@ -2813,8 +2813,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		static int s_NumNodes = 0;
 		CUIRect ListBox = MainView;
-		UiDoListboxStart(&s_NumNodes, &ListBox, 50.0f, Localize("Lua files"), "", NumLuaFiles, 1, OldSelected, s_ScrollValue);
+		char aBuf[128];
+		static int NumListedFiles = 0, NumActiveScripts = 0;
+		str_format(aBuf, sizeof(aBuf), "%i files listed (%i total – %i filtered), %i scripts active", NumListedFiles, Client()->Lua()->GetLuaFiles().size(), Client()->Lua()->GetLuaFiles().size() - NumListedFiles, NumActiveScripts);
+		NumListedFiles = 0; NumActiveScripts = 0;
 
+		UiDoListboxStart(&s_NumNodes, &ListBox, 50.0f, Localize("Lua files"), aBuf, NumLuaFiles, 1, OldSelected, s_ScrollValue);
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
 			CLuaFile *L = Client()->Lua()->GetLuaFiles()[i];
@@ -2829,7 +2833,11 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			else if(ShowActiveOnly == 2 && L->State() == CLuaFile::LUAFILE_STATE_LOADED)
 				continue;
 
+			if(L->State() == CLuaFile::LUAFILE_STATE_LOADED)
+				NumActiveScripts++;
+
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
+			NumListedFiles++;
 
 			if(Item.m_Visible)
 			{
