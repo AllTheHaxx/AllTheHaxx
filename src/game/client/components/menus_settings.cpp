@@ -2816,9 +2816,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		char aBuf[128];
 		static int NumListedFiles = 0, NumActiveScripts = 0;
 		str_format(aBuf, sizeof(aBuf), "%i files listed (%i total – %i filtered), %i scripts active", NumListedFiles, Client()->Lua()->GetLuaFiles().size(), Client()->Lua()->GetLuaFiles().size() - NumListedFiles, NumActiveScripts);
+		UiDoListboxStart(&s_NumNodes, &ListBox, 50.0f, Localize("Lua files"), aBuf, NumListedFiles, 1, OldSelected, s_ScrollValue);
 		NumListedFiles = 0; NumActiveScripts = 0;
-
-		UiDoListboxStart(&s_NumNodes, &ListBox, 50.0f, Localize("Lua files"), aBuf, NumLuaFiles, 1, OldSelected, s_ScrollValue);
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
 			CLuaFile *L = Client()->Lua()->GetLuaFiles()[i];
