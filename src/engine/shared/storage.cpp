@@ -145,7 +145,20 @@ public:
 			dbg_msg("storage", "executable name is '%s'", m_aExecutableName);
 		}
 		else
-			dbg_msg("storage", "huh? couldn't get executable name! what went wrong??");
+		{
+			dbg_msg("storage/error", "couldn't get executable name! pArgv0='%s' Pos=%u", pArgv0, Pos);
+			dbg_msg("storage/error", "checking if argv[0] IS executable name...", pArgv0, Pos);
+			if(str_comp_nocase_num(&pArgv0[str_length(pArgv0)-4], ".exe", 4) == 0)
+			{
+				dbg_msg("storage", "yap, that worked!");
+				str_copy(m_aExecutableName, pArgv0, sizeof(m_aExecutableName));
+			}
+			else
+			{
+				dbg_msg("storage", "no, seems not like. Defaulting to 'AllTheHaxx.exe'");
+				str_copy(m_aExecutableName, "AllTheHaxx.exe", sizeof(m_aExecutableName));
+			}
+		}
 	}
 
 	void AddDefaultPaths()
