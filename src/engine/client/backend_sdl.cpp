@@ -849,9 +849,9 @@ void CGraphicsBackend_SDL_OpenGL::HideWindow()
 
 	
 	SDL_HideWindow(m_pWindow);
-#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
+/*#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 	XUnmapWindow(info.info.x11.display, info.info.x11.window);
-#endif
+#endif*/
 }
 
 void CGraphicsBackend_SDL_OpenGL::UnhideWindow()
@@ -867,9 +867,9 @@ void CGraphicsBackend_SDL_OpenGL::UnhideWindow()
 	}*/
 
 	SDL_ShowWindow(m_pWindow);
-#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
+/*#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 	XMapWindow(info.info.x11.display, info.info.x11.window);
-#endif
+#endif*/
 }
 
 
