@@ -68,6 +68,7 @@
 #include "fetcher.h"
 #include "updater.h"
 #include "client.h"
+#include "graphics_threaded.h"
 
 #include <zlib.h>
 
@@ -2832,13 +2833,16 @@ void CClient::Run()
 			CServerInfo Info;
 			GetServerInfo(&Info);
 			
+			//m_pGrahpics is IEngineGraphics, the base class of CGraphics_Threaded which we need here
+			CGraphics_Threaded * pGraph = dynamic_cast<CGraphics_Threaded*> (m_pGraphics);
+			
 			if(g_Config.m_ClConsoleMode) // hide
 			{
-				m_pGraphics->HideWindow();
+				pGraph->HideWindow();
 				
 				if(str_comp_num(Info.m_aGameType, "DD", 2) == 0)
 				{
-					//eye emote
+					//eye emote 
 					CNetMsg_Cl_Say Msg;
 					Msg.m_Team = 0;
 					Msg.m_pMessage = "/emote blink 999999";
@@ -2847,7 +2851,7 @@ void CClient::Run()
 			}
 			else // show
 			{
-				m_pGraphics->UnhideWindow();
+				pGraph->UnhideWindow();
 				
 				if(str_comp_num(Info.m_aGameType, "DD", 2) == 0)
 				{

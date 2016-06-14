@@ -155,8 +155,6 @@ public:
 
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
-	virtual void HideWindow() = 0;
-	virtual void UnhideWindow() = 0;
 };
 
 class IEngineGraphics : public IGraphics
@@ -171,6 +169,9 @@ public:
 
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
+	
+	virtual void HideWindow() = 0;
+	virtual void UnhideWindow() = 0;
 };
 
 extern IEngineGraphics *CreateEngineGraphics();
