@@ -1197,7 +1197,7 @@ static const char *s_apSayings[] = {
 		"Shaders would be awesome!",
 		"SDL2 <3",
 		"8th May 2016 – 100 issues closed! (27 to go)",
-		"Computers doesn't make mistakes; it's always the programmer's fault :\\",
+		"Computers don't byte!",// OH GOD HERNI WHAT THE DUCK U ENGLISH VERY BAD I IS NAISER U FGT WTF BRO I STRONKH BIZEPS "Computers doesn't make mistakes; it's always the programmer's fault :\\",
 		"git stash pop stash@{0}",
 		"Splashtexts for teh lulz ^^",
 		"Was he drunk...?",
