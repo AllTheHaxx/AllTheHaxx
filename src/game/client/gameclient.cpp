@@ -1643,7 +1643,7 @@ void CGameClient::OnPredict()
 		{
 			WarnedCrash = true;
 			for(int n = 0; n < 5; n++)
-				Console()->Print(0, "+++ WARNING +++", "!!! The server just tried to crash your client, I recommend fcking them hard !!!", true);
+				Console()->Print(0, "+++ WARNING +++", "!!! The server just tried to crash your client !!!", true);
 			Console()->Print(0, "+++ WARNING +++", "!!! --> Things are messed up from now on, please reconnect or turn off prediction <-- !!!", true);
 		}
 		return;
