@@ -46,23 +46,27 @@ function EventList(EventName)
 end
 
 function OnChat(ID, Team, Message)
+	ret = false
     if Events["OnChat"] ~= nil then
         for script, event in pairs(Events["OnChat"]) do
             if event ~= nil then
-                event(ID, Team, Message)
+                ret = ret or event(ID, Team, Message)
             end
         end
     end
+    return ret
 end
 
 function OnChatSend(Team, Msg)
+	ret = false
     if Events["OnChatSend"] ~= nil then
         for script, event in pairs(Events["OnChatSend"]) do
             if event ~= nil then
-                event(Team, Message)
+                ret = ret or event(Team, Message)
             end
         end
     end
+    return ret
 end
 
 function OnConfigOpen(x, y, w, h)
