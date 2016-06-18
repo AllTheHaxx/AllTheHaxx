@@ -16,10 +16,9 @@ Make sure you meet all requirements that are made by the DDNet Client (listed be
 
 __WINDOWS USERS:__ if you should encounter any compiling problems, please compile with MinGW!! ([»howto](https://www.teeworlds.com/forum/viewtopic.php?id=11811))
 
---------------------------
-AllTheHaxx requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). Instead you can install these libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default. You can install all required dependencies on Debian and Ubuntu like this:
+AllTheHaxx requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). Instead you can install these libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default. You can install all required dependencies and bam on Debian and Ubuntu like this:
 
-    apt-get install libsdl2-dev libfreetype6-dev libcurl4-openssl-dev libogg-dev libopus-dev libopusfile-dev
+    apt-get install libsdl2-dev libfreetype6-dev libcurl4-openssl-dev libogg-dev libopus-dev libopusfile-dev bam
 
 If you have the libraries installed, but still want to use the bundled ones instead, you can specify so by running `bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false`.
 
