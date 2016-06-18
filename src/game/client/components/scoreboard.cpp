@@ -35,7 +35,7 @@ void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->Client()->GetServerInfo(&Info);
 	pSelf->m_IsGameTypeRace = IsRace(&Info);
-	pSelf->m_Active = pResult->GetInteger(0) != 0;
+	pSelf->m_Active = pResult->GetInteger(0) != 0 && pSelf->Client()->State() == IClient::STATE_ONLINE;
 }
 
 void CScoreboard::OnReset()
