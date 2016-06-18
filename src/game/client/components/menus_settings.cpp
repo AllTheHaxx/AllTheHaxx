@@ -759,8 +759,8 @@ static CKeyInfo gs_aKeys[] =
 	{ "Dummy Copy", "toggle cl_dummy_copy_moves 0 1", 0 },
 	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
 	// ATH stuff
-	{ "Hidden Chat", "chat hidden", 0 },
-	{ "Crypted Chat", "chat crypt", 0 },
+	{ "Hidden Chat", "+show_chat; chat hidden", 0 },
+	{ "Crypted Chat", "+show_chat; chat crypt", 0 },
 	{ "Hookfly Dummy", "toggle cl_dummy_hook_fly 0 1", 0 },
 	{ "Toggle X-Ray", "toggle cl_overlay_entities 0 90", 0 },
 	{ "Zoom in", "zoom+", 0 },
