@@ -51,14 +51,13 @@ void CMenus::RenderIdents(CUIRect MainView)
 	Button.HMargin(5.0f, &Button);
 	Button.VSplitLeft(7.5f, 0, &Button);
 
-	int Offset = 2*30.0f + 80 * (NumIdentities - 4);
-	if(Offset > 0)
-		Button.x -= Offset * s_ScrollValue;
+	const int ListWidth = NumIdentities * (15.0f+80.0f) - 4 * (15.0f+80.0f);
+	Button.x -= ListWidth * s_ScrollValue;
 
 	for(int i = 0; i < NumIdentities; i++)
 	{
 		CIdentity::CIdentEntry *pIdent = m_pClient->m_pIdentity->GetIdent(i);
-		if(pIdent == NULL)
+		if(!pIdent)
 			continue;
 
 		const CSkins::CSkin *pSkin = NULL;
@@ -102,7 +101,7 @@ void CMenus::RenderIdents(CUIRect MainView)
 		// some h4XoRinG right here to get awesome R41NB0W!!
 		static float s_Hue = 1000.0f;
 		if(s_Hue > 1.0f) s_Hue = RgbToHsl(vec3(1.0f, 0.0f, 0.0f)).h;
-		s_Hue += 0.0007f;
+		s_Hue += Client()->RenderFrameTime()/255.0f;
 		vec3 rgb = HslToRgb(vec3(s_Hue, 1.0f, 0.5f));
 		RenderTools()->DrawUIRect(&Label, GameClient()->m_pIdentity->UsingIdent(i) ? vec4(rgb.r, rgb.g, rgb.b, 0.71f) :
 				vec4(pSkin->m_BloodColor.r * 0.3f, pSkin->m_BloodColor.g * 0.3f, pSkin->m_BloodColor.b * 0.3f, 0.95f), CUI::CORNER_T, 4.0f);
