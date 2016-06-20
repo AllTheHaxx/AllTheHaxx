@@ -3931,6 +3931,9 @@ void CClient::InputThread(void *pUser)
 	
 	while(1)
 	{
+		if(pSelf->m_State == IClient::STATE_QUITING)
+			break;
+
 		thread_sleep(100);
 		fgets(pInput, 200, stdin);
 		str_replace_char(aInput, sizeof(aInput), '\n', '\0');
