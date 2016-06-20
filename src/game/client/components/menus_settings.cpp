@@ -2472,10 +2472,37 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClConsoleModeEmotes, Localize("Console Mode Indicator"), g_Config.m_ClConsoleModeEmotes, &Button, Localize("Send Zzz emotes when in console mode")))
 		g_Config.m_ClConsoleModeEmotes ^= 1;
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClSkinFetcher, Localize("Skin Fetcher"), g_Config.m_ClSkinFetcher, &Button, Localize("Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server")))
-		g_Config.m_ClSkinFetcher ^= 1;
+	{
+		CUIRect ClearCacheButton;
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitRight(220.0f, &Button, &ClearCacheButton);
+		if(DoButton_CheckBox(&g_Config.m_ClSkinFetcher, Localize("Skin Fetcher"), g_Config.m_ClSkinFetcher, &Button, Localize("Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server")))
+			g_Config.m_ClSkinFetcher ^= 1;
+
+		static int s_ClearCacheButton = 0;
+		if(DoButton_Menu(&s_ClearCacheButton, Localize("Clear downloaded skins cache"), 0, &ClearCacheButton))
+		{
+			Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "downloadedskins", [](const char *name, int is_dir, int dir_type, void *user) -> int // TODO: put this into a method... Lambda cuz I'm lazy...
+			{
+				if(is_dir)
+				{
+					if(name[0] != '.')
+						dbg_msg("skincache", "warning: skincache seems to be polluted: Found a folder '%s', ignoring.", name);
+					return 0;
+				}
+				IStorageTW *pStorage = (IStorageTW *)user;
+				char aBuf[256], aFullPath[512];
+				str_format(aBuf, sizeof(aBuf), "downloadedskins/%s", name);
+				if(pStorage->RemoveFile(aBuf, IStorageTW::TYPE_SAVE))
+					dbg_msg("skincache", "deleted file '%s'", aBuf);
+				else
+					dbg_msg("skincache", "failed to delete file %s", aBuf);
+				return 0;
+			}, this->Storage());
+			dbg_msg("skincache", "cleared");
+		}
+	}
 
 	// extra binds!
 	{
