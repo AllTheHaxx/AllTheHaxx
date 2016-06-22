@@ -51,12 +51,12 @@ void CCamera::OnRender()
 		m_WantedZoom = 0.7f;
 		static vec2 Dir = vec2(1.0f, 0.0f);
 
-		if(distance(m_Center, m_RotationCenter) <= (float)g_Config.m_ClRotationRadius+0.5f)
+		if(g_Config.m_ClMenuBackground && g_Config.m_ClMenuBackgroundRotation && distance(m_Center, m_RotationCenter) <= (float)g_Config.m_ClMenuBackgroundRotationRadius+0.5f)
 		{
 			// do little rotation
-			float RotPerTick = 360.0f/(float)g_Config.m_ClRotationSpeed * Client()->RenderFrameTime();
+			float RotPerTick = 360.0f/(float)g_Config.m_ClMenuBackgroundRotationSpeed * Client()->RenderFrameTime();
 			Dir = rotate(Dir, RotPerTick);
-			m_WantedCenter = m_RotationCenter+Dir*(float)g_Config.m_ClRotationRadius/**(length(m_Center)/length(m_WantedCenter))*/;
+			m_WantedCenter = m_RotationCenter+Dir*(float)g_Config.m_ClMenuBackgroundRotationRadius/**(length(m_Center)/length(m_WantedCenter))*/;
 			//m_WantedCenter = vec2(0.0f, 0.0f);
 		}
 		else

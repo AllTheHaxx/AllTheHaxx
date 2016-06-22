@@ -1195,6 +1195,9 @@ bool CClient::MapLoaded()
 
 void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
 {
+	if(!g_Config.m_ClMenuBackground)
+		return;
+
 	if(!m_pMap->Load(pFilename))
 		return;
 

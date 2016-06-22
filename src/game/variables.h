@@ -204,8 +204,10 @@ MACRO_CONFIG_INT(ClFlagChatPause, cl_flag_chat_pause, 3, 1, 10, CFGFLAG_CLIENT|C
 //
 MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Scoreboard fading time")
 
-MACRO_CONFIG_INT(ClRotationRadius, cl_rotation_radius, 30, 1, 500, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Camera rotation radius")
-MACRO_CONFIG_INT(ClRotationSpeed, cl_rotation_speed, 40, 1, 120, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Camera rotations in seconds")
+MACRO_CONFIG_INT(ClMenuBackground, cl_menu_background, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Activate Menu Background")
+MACRO_CONFIG_INT(ClMenuBackgroundRotation, cl_menu_background_rotation, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Activate Menu Background Camera rotation")
+MACRO_CONFIG_INT(ClMenuBackgroundRotationRadius, cl_menu_background_rotation_radius, 30, 1, 500, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Menu Background Camera rotation radius")
+MACRO_CONFIG_INT(ClMenuBackgroundRotationSpeed, cl_menu_background_rotation_speed, 40, 1, 120, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Menu Background Camera rotation duration")
 
 MACRO_CONFIG_INT(ClChatAvatar, cl_chat_avatar, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render a small avatar in front of every chat message")
 
