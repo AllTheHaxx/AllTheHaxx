@@ -363,7 +363,6 @@ set(SOURCE_FILES
     src/base/color.h
     src/base/confusables.c
     src/base/confusables.h
-    src/base/debug.h
     src/base/detect.h
     src/base/math.h
     src/base/system.c
@@ -919,6 +918,6 @@ set(SOURCE_FILES
     src/twping/twping.cpp
     src/versionsrv/mapversions.h
     src/versionsrv/versionsrv.cpp
-    src/versionsrv/versionsrv.h)
+    src/versionsrv/versionsrv.h src/engine/client/debug.h src/engine/client/debug.cpp)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})

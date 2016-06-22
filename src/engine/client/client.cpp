@@ -13,7 +13,6 @@
 #include <base/math.h>
 #include <base/vmath.h>
 #include <base/system.h>
-#include <base/debug.h>
 
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
@@ -2712,6 +2711,8 @@ void CClient::InitInterfaces()
 
 void CClient::Run()
 {
+	CALLSTACK_ADD();
+
 	m_LocalStartTime = time_get();
 	m_SnapshotParts = 0;
 
@@ -3679,9 +3680,9 @@ int main(int argc, const char **argv) // ignore_convention
 		return -1;
 	}
 
-	//signal(SIGSEGV, debug_sighandler);
-
-	//CALLSTACK_ADD();
+	// initialize the debugger
+	CDebugger *debugger = new CDebugger();
+	CALLSTACK_ADD();
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
@@ -3741,6 +3742,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// init client's interfaces
 	pClient->InitInterfaces();
+
+	CDebugger::SetStaticData(pStorage);
 
 	// execute config file
 	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
@@ -3813,6 +3816,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
+	delete debugger;
 
 	if(pClient->m_Restarting)
 		shell_execute(argv[0]);
