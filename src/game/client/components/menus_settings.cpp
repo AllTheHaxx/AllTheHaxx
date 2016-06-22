@@ -2492,7 +2492,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 					return 0;
 				}
 				IStorageTW *pStorage = (IStorageTW *)user;
-				char aBuf[256], aFullPath[512];
+				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "downloadedskins/%s", name);
 				if(pStorage->RemoveFile(aBuf, IStorageTW::TYPE_SAVE))
 					dbg_msg("skincache", "deleted file '%s'", aBuf);
