@@ -422,7 +422,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addFunction("IntersectLine", &CCollision::IntersectLine)
 			.addFunction("MovePoint", &CCollision::MovePoint)
-			.addFunction("MoveBox", &CCollision::MovePoint)
+			.addFunction("MoveBox", &CCollision::MoveBox)
 			.addFunction("TestBox", &CCollision::TestBox)
 		.endClass()
 		
