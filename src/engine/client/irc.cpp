@@ -1,5 +1,5 @@
 /* (c) unsigned char*. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at https://github.com/CytraL/HClient */
+/* edited by The AllTheHaxx Team */
 #include <base/math.h>
 #include <base/system.h>
 #include <engine/graphics.h>
@@ -34,6 +34,8 @@ CIRC::CIRC()
 	m_StartTime = 0;
 	mem_zero(m_CmdToken, sizeof(m_CmdToken));
 	SetActiveCom(-1);
+	
+	m_Debug = false;
 }
 
 void CIRC::RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser) // pData, pUser
@@ -213,7 +215,9 @@ void CIRC::StartConnection() // call this from a thread only!
 	{
 		ReplyData reply;
 
-		//dbg_msg(".", "%s", aNetBuff);// XXX: here
+		if(m_Debug)
+			dbg_msg("irc/dbg", "%s", aNetBuff);
+			
 		for (int i=0; i < CurrentRecv; i++)
 		{
 			if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')
@@ -1228,8 +1232,8 @@ void CIRC::SendGetServer(const char *to)
 
 void CIRC::SendVersion(const char *to)
 {
-	SendRaw("NOTICE %s :VERSION AllTheHaxx %s; DDNet v%i; Teeworlds %s (%s); built on %s", to,
-			ALLTHEHAXX_VERSION, CLIENT_VERSIONNR, GAME_VERSION, GAME_NETVERSION, BUILD_DATE);
+	SendRaw("NOTICE %s :VERSION AllTheHaxx '%s' on %s; DDNet v%i; Teeworlds %s (%s); built on %s", to,
+			ALLTHEHAXX_VERSION, CONF_PLATFORM_STRING, CLIENT_VERSIONNR, GAME_VERSION, GAME_NETVERSION, BUILD_DATE);
 }
 
 void CIRC::ExecuteCommand(const char *cmd, char *params)
@@ -1373,6 +1377,11 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 			SendRaw(aBuf);
 			GetActiveCom()->AddMessage("* %s %s", m_Nick.c_str(), aMsg);
 		}
+	}
+	else if(str_comp_nocase(cmd, "/debug") == 0)
+	{
+		m_Debug ^= true;
+		GetActiveCom()->AddMessage("[[ SYSTEM ]] %sing debug mode", m_Debug ? "Enter" : "Leave");
 	}
 	else
 		SendRaw("%s %s", cmd, params);

@@ -19,6 +19,7 @@ class CIRC : public IIRC
 	};
 
 	int64 m_StartTime;
+	bool m_Debug;
 
 public:
     CIRC();
