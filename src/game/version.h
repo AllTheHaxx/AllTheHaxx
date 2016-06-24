@@ -5,7 +5,7 @@
 #include "generated/nethash.cpp"
 
 #define GAME_VERSION "0.6.3"
-#define ATH_VERSION "0.18"
+#define ATH_VERSION "0.19"
 #define BUILD_DATE __DATE__ ", " __TIME__
 
 #ifdef GIT_SHORTREV_HASH
@@ -18,7 +18,7 @@
 
 // for updater
 static const char GAME_ATH_VERSION[10] = ATH_VERSION;
-#define GAME_ATH_VERSION_NUMERIC 1800
+#define GAME_ATH_VERSION_NUMERIC 1900
 
 // do not modify these, they belong to ddnet
 static const char GAME_RELEASE_VERSION[8] = "10.1.1";
