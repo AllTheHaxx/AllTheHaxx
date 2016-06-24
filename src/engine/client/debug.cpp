@@ -27,8 +27,8 @@ void CDebugger::RegisterSignals()
 	/*signal(SIGINT, signalhandler);*/ // DON'T ever catch this!!
 	signal(SIGSEGV, signalhandler);
 	/*signal(SIGTERM, signalhandler);*/ // not sure, but I think this shall not be caught aswell
-	signal(SIGSTKFLT, signalhandler);
 #if defined(CONF_FAMILY_UNIX)
+	signal(SIGSTKFLT, signalhandler);
 	signal(SIGPIPE, signalhandler);
 	signal(SIGHUP, signalhandler);
 #endif
