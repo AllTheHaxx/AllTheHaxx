@@ -1288,10 +1288,16 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_SndGame, Localize("Enable game sounds"), g_Config.m_SndGame, &Button))
 		g_Config.m_SndGame ^= 1;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
-		g_Config.m_SndGun ^= 1;
+	if(g_Config.m_SndGame)
+	{
+		MainView.HSplitTop(3.0f, 0, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.x += 10.0f;
+		if(DoButton_CheckBox(&g_Config.m_SndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
+			g_Config.m_SndGun ^= 1;
+
+		// TODO: Add more game sounds here!
+	}
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
