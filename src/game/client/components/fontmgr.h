@@ -1,3 +1,5 @@
+#ifndef GAME_CLIENT_COMPONENTS_FONTMGR_H
+#define GAME_CLIENT_COMPONENTS_FONTMGR_H
 
 #include <string>
 
@@ -43,3 +45,6 @@ private:
 	static int LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser);
 
 };
+
+#endif
+

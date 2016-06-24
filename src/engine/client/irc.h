@@ -87,4 +87,6 @@ private:
 
     void SendServer(const char *to, const char *Token);
 };
+
 #endif
+

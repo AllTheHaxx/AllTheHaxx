@@ -1,5 +1,5 @@
-#ifndef STORAGE_H
-#define STORAGE_H
+#ifndef ENGINE_SHARED_STORAGE_H
+#define ENGINE_SHARED_STORAGE_H
 
 #include <base/system.h>
 #include <engine/storage.h>

@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_ASTAR_H
-#define GAME_CLIENT_ASTAR_H
+#ifndef GAME_CLIENT_COMPONENTS_ASTAR_H
+#define GAME_CLIENT_COMPONENTS_ASTAR_H
 
 #include <base/vmath.h>
 #include <base/tl/array.h>

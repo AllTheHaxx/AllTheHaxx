@@ -1,8 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.				*/
+/* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#ifndef ENGINE_CLIENT_SQLITE3_H
-#define ENGINE_CLIENT_SQLITE3_H
+#ifndef ENGINE_CLIENT_DB_SQLITE3_H
+#define ENGINE_CLIENT_DB_SQLITE3_H
+
 #include <base/system.h>
 #include <sqlite3.h>
 #include <vector>
