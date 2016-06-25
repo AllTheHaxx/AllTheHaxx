@@ -2406,6 +2406,7 @@ void CMenus::OnRender()
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
 		Graphics()->QuadsBegin();
+		Graphics()->QuadsSetRotation((float)g_Config.m_ClMouseRotation*((2.0f*3.1415926f)/360.0f));
 		Graphics()->SetColor(1,1,1,1);
 		IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);

@@ -141,7 +141,7 @@ MACRO_CONFIG_INT(BrAllowPureMod, br_allow_pure_mod, 0, 0, 1, CFGFLAG_CLIENT|CFGF
 MACRO_CONFIG_INT(BrLazySorting, br_lazy_sorting, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Only sort the serverlist once when reloading has finished")
 //
 MACRO_CONFIG_STR(ClSpoofSrvIP, cl_spoofsrv_ip, 32, "127.0.0.1", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IP of the spoofing server")
-MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 0, 0, 64000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Port of the spoofing server")
+MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 0, 0, 65535, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Port of the spoofing server")
 MACRO_CONFIG_INT(ClSpoofAutoconnect, cl_spoof_autoconnect, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to zervor on startup automatically")
 MACRO_CONFIG_INT(ClUsernameFetching, cl_fetch_names, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Get rich! #namefreestyle")
 MACRO_CONFIG_INT(ClChatShowIPs, cl_chat_show_ips, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether to show IPs in chat or just save them")
@@ -170,10 +170,10 @@ MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|C
 MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 16, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
 //MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
 MACRO_CONFIG_STR(ClIRCUser, cl_irc_user, 10, "allthehax", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC user")
-MACRO_CONFIG_STR(ClIRCPass, cl_irc_password, 16, "nopwset", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC password")
+MACRO_CONFIG_STR(ClIRCPass, cl_irc_password, 16, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC password")
 MACRO_CONFIG_STR(ClIRCQAuthName, cl_irc_q_auth_name, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q name")
 MACRO_CONFIG_STR(ClIRCQAuthPass, cl_irc_q_auth_pass, 11, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q password")
-MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+i-w+x", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC modes")
+MACRO_CONFIG_STR(ClIRCModes, cl_irc_modes, 16, "+ix-w", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC modes")
 MACRO_CONFIG_STR(ClIRCLeaveMsg, cl_irc_leavemsg, 32, "Leaving", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC leave message")
 MACRO_CONFIG_INT(ClIRCPrintChat, cl_irc_print_messages, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print messages from the IRC chat into console")
 MACRO_CONFIG_INT(ClIRCGetStartupMsgs, cl_irc_get_startup_msgs, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether to get some messages from the server when connecting")
@@ -183,26 +183,27 @@ MACRO_CONFIG_INT(ClIRCAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGF
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
 MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console")
 //
-MACRO_CONFIG_STR(GameTexture, game_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gameskin texture")
-MACRO_CONFIG_STR(GameParticles, particle_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Particle texture")
-MACRO_CONFIG_STR(GameEmoticons, emoticons_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Emoticons texture")
-MACRO_CONFIG_STR(GameCursor, cursor_texture, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Cursor texture")
+MACRO_CONFIG_STR(GameTexture, game_texture, 32, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gameskin texture")
+MACRO_CONFIG_STR(GameParticles, particle_texture, 32, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Particle texture")
+MACRO_CONFIG_STR(GameEmoticons, emoticons_texture, 32, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Emoticons texture")
+MACRO_CONFIG_STR(GameCursor, cursor_texture, 32, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Cursor texture")
 
 // translator stuff
 MACRO_CONFIG_INT(ClTransIn, cl_trans_in, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate incoming messages")
 MACRO_CONFIG_INT(ClTransOut, cl_trans_out, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate outgoing messages")
 MACRO_CONFIG_INT(ClTransChatCmds, cl_trans_chat_cmds, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable/disable client side traslation chat commands")
-MACRO_CONFIG_STR(ClTransInSrc, cl_trans_in_src, 32, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language are the incoming messages written in?")
-MACRO_CONFIG_STR(ClTransInDst, cl_trans_in_dest, 32, "en", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should incoming messages be translated?")
-MACRO_CONFIG_STR(ClTransOutSrc, cl_trans_out_src, 32, "en", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language are the outgoing messages written in?")
-MACRO_CONFIG_STR(ClTransOutDst, cl_trans_out_dest, 32, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should outgoing messages be translated?")
+MACRO_CONFIG_STR(ClTransInSrc, cl_trans_in_src, 4, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language are the incoming messages written in?")
+MACRO_CONFIG_STR(ClTransInDst, cl_trans_in_dest, 4, "en", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should incoming messages be translated?")
+MACRO_CONFIG_STR(ClTransOutSrc, cl_trans_out_src, 4, "en", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language are the outgoing messages written in?")
+MACRO_CONFIG_STR(ClTransOutDst, cl_trans_out_dest, 4, "ru", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Which language should outgoing messages be translated?")
 
 // chatcrypt
 MACRO_CONFIG_INT(ClFlagChat, cl_flag_chat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Receive flagchat (anti-logging-admin), players must be nearby")
-MACRO_CONFIG_INT(ClFlagChatPause, cl_flag_chat_pause, 3, 1, 10, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Speed of the flagchat; 1=high, 10= low; the faster the more errors will occur")
+MACRO_CONFIG_INT(ClFlagChatPause, cl_flag_chat_pause, 3, 1, 10, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Speed of the flagchat; 1=high, 10=low; the faster the more errors will occur")
 
 //
 MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Scoreboard fading time")
+MACRO_CONFIG_INT(ClMouseRotation, cl_mouse_rotation, 0, 0, 360, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Rotate the mouse cursor (degree)")
 
 MACRO_CONFIG_INT(ClMenuBackground, cl_menu_background, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Activate Menu Background")
 MACRO_CONFIG_INT(ClMenuBackgroundRotation, cl_menu_background_rotation, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Activate Menu Background Camera rotation")
