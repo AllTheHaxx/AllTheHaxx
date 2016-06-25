@@ -277,7 +277,6 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 }
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners)
-//void CMenus::ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra)
 {
 	if(Checked)
 		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), Corners, 5.0f);
@@ -293,7 +292,6 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 }
 
 int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip, bool Checked)
-//void CMenus::ui_draw_checkbox_common(const void *id, const char *text, const char *boxtext, const CUIRect *r, const void *extra)
 {
 	RenderTools()->DrawUIRect(pRect, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
 
