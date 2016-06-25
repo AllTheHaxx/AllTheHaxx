@@ -274,13 +274,34 @@ void CMenus::RenderIRC(CUIRect MainView)
 		{
 			CComChan *pChan = static_cast<CComChan*>(pCom);
 
-			CUIRect Chat, UserList;
+			CUIRect Chat, HorizScrollBar, UserList;
 			EntryBox.Margin(5.0f, &EntryBox);
 			EntryBox.VSplitRight(150.0f, &Chat, &UserList);
+			Chat.HSplitBottom(15.0f, &Chat, &HorizScrollBar);
+
+			static int s_HScrollbar = 0;
+			static float s_HScrollbarVal = 0.0f;
+			s_HScrollbarVal = DoScrollbarH(&s_HScrollbar, &HorizScrollBar, s_HScrollbarVal);
+			if(Input()->KeyIsPressed(KEY_LSHIFT))
+			{
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) // to the right
+					s_HScrollbarVal += 0.1f;
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) // to the left
+					s_HScrollbarVal -= 0.1f;
+				s_HScrollbarVal = clamp(s_HScrollbarVal, 0.0f, 1.0f);
+			}
 
 			static int Selected = 0;
 			static int s_UsersList = 0;
 			static float s_UsersScrollValue = 0;
+			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&UserList))
+			{
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) // to the right
+					s_UsersScrollValue -= 0.1f;
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) // to the left
+					s_UsersScrollValue += 0.1f;
+				s_UsersScrollValue = clamp(s_UsersScrollValue, 0.0f, 1.0f);
+			}*/
 			char aBuff[50];
 			str_format(aBuff, sizeof(aBuff), "Total: %d", pChan->m_Users.size());
 			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, "Users", aBuff, pChan->m_Users.size(), 1, Selected,
@@ -290,7 +311,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			std::list<std::string>::iterator it = pChan->m_Users.begin();
 			while(it != pChan->m_Users.end())
 			{
-				CListboxItem Item = UiDoListboxNextItem(&(*it));
+				CListboxItem Item = UiDoListboxNextItem(&(*it), false, UI()->MouseInside(&UserList));
 
 				if(Item.m_Visible)
 				{
@@ -329,37 +350,73 @@ void CMenus::RenderIRC(CUIRect MainView)
 
 			static int s_Chat = 0;
 			static float s_ChatScrollValue = 100.0f;
+			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat))
+			{
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) // to the right
+					s_ChatScrollValue -= 0.1f;
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) // to the left
+					s_ChatScrollValue += 0.1f;
+				s_ChatScrollValue = clamp(s_ChatScrollValue, 0.0f, 1.0f);
+			}*/
 			UiDoListboxStart(&s_Chat, &Chat, 12.0f,
 					pChan->m_Topic.c_str()[0] ? pChan->m_Topic.c_str() : "", "",
 					pChan->m_Buffer.size(), 1, -1, s_ChatScrollValue, CUI::CORNER_TL);
 			for(size_t i = 0; i < pChan->m_Buffer.size(); i++)
 			{
-				CListboxItem Item = UiDoListboxNextItem(&pChan->m_Buffer[i]);
+				CListboxItem Item = UiDoListboxNextItem(&pChan->m_Buffer[i], false, !Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&UserList));
 
 				if(Item.m_Visible)
+				{
+					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;
 					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 10.0f, -1);
+				}
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
 		}
 		else if(pCom->GetType() == CIRCCom::TYPE_QUERY)
 		{
 			CComQuery *pQuery = static_cast<CComQuery*>(pCom);
-			CUIRect Chat;
+			CUIRect Chat, HorizScrollBar;
 			EntryBox.Margin(5.0f, &Chat);
+			Chat.HSplitBottom(15.0f, &Chat, &HorizScrollBar);
+
+			static int s_HScrollbar = 0;
+			static float s_HScrollbarVal = 0.0f;
+			s_HScrollbarVal = DoScrollbarH(&s_HScrollbar, &HorizScrollBar, s_HScrollbarVal);
+			if(Input()->KeyIsPressed(KEY_LSHIFT))
+			{
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) // to the right
+					s_HScrollbarVal += 0.1f;
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) // to the left
+					s_HScrollbarVal -= 0.1f;
+				s_HScrollbarVal = clamp(s_HScrollbarVal, 0.0f, 1.0f);
+			}
 
 			static int s_Chat = 0;
 			static float s_ChatScrollValue = 100.0f;
+			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat))
+			{
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) // to the right
+					s_ChatScrollValue -= 0.1f;
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) // to the left
+					s_ChatScrollValue += 0.1f;
+				s_ChatScrollValue = clamp(s_ChatScrollValue, 0.0f, 1.0f);
+			}*/
 			UiDoListboxStart(&s_Chat, &Chat, 12.0f, pQuery->User(), "", pQuery->m_Buffer.size(), 1, -1,
 					s_ChatScrollValue);
 			for(size_t i = 0; i < pQuery->m_Buffer.size(); i++)
 			{
-				CListboxItem Item = UiDoListboxNextItem(&pQuery->m_Buffer[i]);
+				CListboxItem Item = UiDoListboxNextItem(&pQuery->m_Buffer[i], false, !Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat));
 
 				if(Item.m_Visible)
+				{
+					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;
 					UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 10.0f, -1);
+				}
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
 
+			// the join button
 			if(str_comp_nocase(pQuery->User(), "@status") != 0)
 			{
 				CUIRect ButtonQS;
