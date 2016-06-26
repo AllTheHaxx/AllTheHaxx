@@ -21,6 +21,7 @@
 #include <game/client/render.h>
 #include <game/client/ui.h>
 
+#include "binds.h"
 #include "identity.h"
 #include "menus.h"
 #include "motd.h"
@@ -250,7 +251,12 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
 	static int s_OpenChatButton = 0;
-	if(DoButton_Menu(&s_OpenChatButton, Localize("IRC Chat"), 0, &Button, "Open the IRC overlay"))
+	char aBuf[64];
+	if(str_comp(GameClient()->m_pBinds->GetKey("+irc"), ""))
+		str_format(aBuf, sizeof(aBuf), Localize("Open the IRC overlay (Key: %s)"), GameClient()->m_pBinds->GetKey("+irc"));
+	else
+		str_format(aBuf, sizeof(aBuf), Localize("Open the IRC overlay"));
+	if(DoButton_Menu(&s_OpenChatButton, Localize("IRC Chat"), 0, &Button, aBuf))
 		ToggleIRC();
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);

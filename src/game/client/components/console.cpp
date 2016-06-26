@@ -694,20 +694,23 @@ void CGameConsole::OnRender()
 		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
 		CUIRect Warning, Text;
-		float Fade = (sin(Client()->LocalTime())+1)/4+0.5f;
+		const float Fade = (sin(Client()->LocalTime())+1)/4+0.5f;
 		Screen.HSplitTop(200.0f, &Warning, 0);
-		Warning.Margin(Warning.w/3, &Warning);
-		Warning.HMargin(Warning.h/3, &Warning);
-		RenderTools()->DrawUIRect(&Warning, vec4(0,0,0,Fade), 0, 0.0f);
+		Warning.Margin(Warning.w/3.2f, &Warning);
+		Warning.HMargin(Warning.h/2.85f, &Warning);
+		Warning.h -= Warning.h*2.0f;
+		Warning.y -= Warning.h;
+		RenderTools()->DrawUIRect(&Warning, vec4(0,0,0,Fade), CUI::CORNER_ALL, 3.0f);
 		TextRender()->TextColor(1,1,1,Fade);
 
-		Warning.HMargin(-10.0f, &Text);
+		//Warning.HMargin(-10.0f, &Text);
+		Warning.HSplitTop(20.0f, 0, &Text);
 		//UI()->DoLabelScaled(&Text, Localize("MOUSE UNLOCKED"), 17.0f, 0, Warning.w-5.0f);
 		{
 			const float SIZE = 27.0f;
 			const char *pText = Localize("MOUSE UNLOCKED");
 			const float w = TextRender()->TextWidth(0, SIZE, pText, str_length(pText));
-			TextRender()->Text(0, Text.x+Text.w/2-w/2, Text.y+Text.h+SIZE/2, SIZE, pText, Text.w);
+			TextRender()->Text(0, Text.x+Text.w/2-w/2, Text.y, SIZE, pText, Text.w);
 		}
 
 		Warning.HSplitMid(&Text, &Warning);
@@ -720,7 +723,7 @@ void CGameConsole::OnRender()
 			if(pBoundKey && pBoundKey[0] != '\0')
 				str_format(aBuf, sizeof(aBuf), Localize("Press %s to switch back to ingame mouse"), pBoundKey);
 			else
-				str_format(aBuf, sizeof(aBuf), Localize("Use the command 'unlock_mouse'"), pBoundKey);
+				str_format(aBuf, sizeof(aBuf), Localize("Use the command 'unlock_mouse' in f1"), pBoundKey/*, m_pClient->m_pBinds->GetKey("toggle_local_console")*/);
 			//UI()->DoLabelScaled(&Text, aBuf, 17.0f, 0, Warning.w-5.0f);
 
 			const float w = TextRender()->TextWidth(0, SIZE, aBuf, str_length(aBuf));
@@ -732,7 +735,7 @@ void CGameConsole::OnRender()
 
 	if(s_OverlayAlpha > 0.0f)
 		RenderTools()->DrawUIRect(&Screen, vec4(0,0,0,s_OverlayAlpha), 0, 0);
-
+	TextRender()->TextColor(1,1,1,1);
 
 	float Progress = (TimeNow()-(m_StateChangeEnd-m_StateChangeDuration))/float(m_StateChangeDuration);
 
