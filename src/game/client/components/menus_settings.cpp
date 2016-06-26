@@ -2790,7 +2790,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			CUIRect CloseButton;
 			MainView.HSplitTop(20.0f, &CloseButton, &MainView);
 			static int s_CloseButton = 0;
-			if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B))
+			if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
 			{
 				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptSaveSettings")();
 				s_ActiveLuaSettings = -1;
@@ -2812,7 +2812,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	CUIRect RefreshButton;
 	Button.VSplitRight(100.0f, &Button, &RefreshButton);
 	static int s_RefreshButton = 0;
-	if (DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files"))
+	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files"))
 	{
 		Client()->Lua()->LoadFolder();
 	}
@@ -2824,6 +2824,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			Client()->Lua()->GetLuaFiles().delete_all();
 			Client()->Lua()->GetLuaFiles().clear();
 		}
+		//else
+		//	Client()->Lua()->LoadFolder();
 	}
 
 	if(!g_Config.m_ClLua)
