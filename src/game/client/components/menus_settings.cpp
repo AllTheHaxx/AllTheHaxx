@@ -2453,10 +2453,10 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClUsernameFetching, Localize("Gather Statistics"), g_Config.m_ClUsernameFetching, &Button))
 		g_Config.m_ClUsernameFetching ^= 1;
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClChatDennisProtection, ("Dennis Protection"), g_Config.m_ClChatDennisProtection, &Button))
-		g_Config.m_ClChatDennisProtection ^= 1;
+//	Left.HSplitTop(5.0f, 0, &Left);
+//	Left.HSplitTop(20.0f, &Button, &Left);
+//	if(DoButton_CheckBox(&g_Config.m_ClChatDennisProtection, ("Dennis Protection"), g_Config.m_ClChatDennisProtection, &Button))
+//		g_Config.m_ClChatDennisProtection ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
