@@ -1547,19 +1547,23 @@ void CMenus::RenderSettings(CUIRect MainView)
 		//Localize("All")
 	};
 
-	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
+	const int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
+	static float FadeVals[NumTabs] = {0.0f};
 
 	for(int i = 0; i < NumTabs; i++)
 	{
 		TabBar.HSplitTop(i == 7 || i == 11 ? 24 : 10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(UI()->MouseInside(&Button))
-			Button.w += 5.0f;
+			smooth_set(&FadeVals[i], 5.0f, 10.0f*(0.005f/Client()->RenderFrameTime()));
+		else
+			smooth_set(&FadeVals[i], 0.0f, 10.0f*(0.005f/Client()->RenderFrameTime()));
+		Button.w += FadeVals[i];
 		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R,
 				i == 8 && m_pfnAppearanceSubpage ? vec4(0.8f, 0.6f, 0.25f, ms_ColorTabbarActive.a) : ms_ColorTabbarActive
 				))
 		{
-			if(i == 8 && m_pfnAppearanceSubpage)
+			//if(i == 8 && m_pfnAppearanceSubpage)
 				m_pfnAppearanceSubpage = 0;
 			g_Config.m_UiSettingsPage = i;
 		}
