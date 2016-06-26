@@ -2795,7 +2795,7 @@ void CClient::Run()
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
 	// init lua
-	m_Lua.Init(this, Storage());
+	m_Lua.Init(this, Storage(), m_pConsole);
 	m_Lua.SetGameClient(GameClient());
 
 	if((m_pInputThread = thread_init(InputThread, this)))

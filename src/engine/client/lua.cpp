@@ -21,6 +21,7 @@ CLua::CLua()
 	CLuaBinding::m_pUiContainer = new(mem_alloc(sizeof(CLuaBinding::UiContainer), sizeof(void*))) CLuaBinding::UiContainer;
 	CConfigProperties::m_pConfig = &g_Config;
 	m_pStorage = 0;
+	m_pConsole = 0;
 }
 
 CLua::~CLua()
@@ -28,11 +29,12 @@ CLua::~CLua()
 	Shutdown();
 }
 
-void CLua::Init(IClient *pClient, IStorageTW *pStorage)
+void CLua::Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole)
 {
 	m_pClient = pClient;
 	m_pCClient = (CClient*)pClient;
 	m_pStorage = pStorage;
+	m_pConsole = pConsole;
 	m_aAutoloadFiles.clear();
 
 	//LoadFolder(); // we can't do it that early
@@ -180,7 +182,9 @@ int CLua::HandleException(std::exception &e, CLuaFile* culprit)
 	{
 		if(m_ErrorCounter[i].culprit == culprit)
 		{
-			dbg_msg("lua|EXCEPTION", "{%i/511} %s", m_ErrorCounter[i].count, e.what());
+			char aError[1024];
+			str_format(aError, sizeof(aError), "{%i/511} %s", m_ErrorCounter[i].count, e.what());
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lua|EXCEPTION", aError);
 			if(++m_ErrorCounter[i].count < 512)
 				return m_ErrorCounter[i].count;
 			m_ErrorCounter[i].count = 0;

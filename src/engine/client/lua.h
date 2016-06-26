@@ -34,6 +34,7 @@ class CLua
 	array<CLuaFile*> m_pLuaFiles;
 	array<std::string> m_aAutoloadFiles;
 	IStorageTW *m_pStorage;
+	class IConsole *m_pConsole;
 
 	struct LuaErrorCounter
 	{
@@ -47,7 +48,7 @@ public:
     CLua();
     ~CLua();
 	
-	void Init(IClient *pClient, IStorageTW *pStorage);
+	void Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole);
 	void Shutdown();
 	void SaveAutoloads();
 	void AddUserscript(const char *pFilename);
