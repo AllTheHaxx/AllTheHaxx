@@ -25,6 +25,8 @@
 
 void CMenus::RenderSettingsIdent(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	// render background
 	CUIRect Temp, TabBar, Button, Label, View;
 	static int Page = 0;

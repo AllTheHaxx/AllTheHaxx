@@ -7,6 +7,12 @@
 #include <csignal>
 #include <engine/storage.h>
 
+extern void *main_thread_handle;
+inline bool is_thread()
+{
+	return thread_get_current() != main_thread_handle;
+}
+
 class CCallstack
 {
 	friend class CDebugger;
@@ -45,6 +51,6 @@ private:
 
 };
 
-#define CALLSTACK_ADD() gDebugInfo.CallstackAdd(__FILE__, __LINE__, __FUNCTION__)
+#define CALLSTACK_ADD() if(!is_thread()) gDebugInfo.CallstackAdd(__FILE__, __LINE__, __FUNCTION__)
 
 #endif

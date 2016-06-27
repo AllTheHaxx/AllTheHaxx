@@ -31,6 +31,8 @@ CLua::~CLua()
 
 void CLua::Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole)
 {
+	CALLSTACK_ADD();
+
 	m_pClient = pClient;
 	m_pCClient = (CClient*)pClient;
 	m_pStorage = pStorage;
@@ -42,6 +44,8 @@ void CLua::Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole)
 
 void CLua::Shutdown()
 {
+	CALLSTACK_ADD();
+
 	SaveAutoloads();
 
 	m_pLuaFiles.delete_all();
@@ -51,6 +55,8 @@ void CLua::Shutdown()
 
 void CLua::SaveAutoloads()
 {
+	CALLSTACK_ADD();
+
 	char aFilePath[768];
 	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
 	str_append(aFilePath, "/luafiles.cfg", sizeof(aFilePath));
@@ -63,6 +69,8 @@ void CLua::SaveAutoloads()
 
 void CLua::SortLuaFiles()
 {
+	CALLSTACK_ADD();
+
 	const int NUM = m_pLuaFiles.size();
 	if(NUM < 2)
 		return;
@@ -89,12 +97,16 @@ void CLua::SortLuaFiles()
 
 void CLua::SetGameClient(IGameClient *pGameClient)
 {
+	CALLSTACK_ADD();
+
 	CLua::m_pGameClient = pGameClient;
 	CLua::m_pCGameClient = (CGameClient*)pGameClient;
 }
 
 void CLua::AddUserscript(const char *pFilename)
 {
+	CALLSTACK_ADD();
+
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
 		return;
 
@@ -119,11 +131,15 @@ void CLua::AddUserscript(const char *pFilename)
 
 void CLua::LoadFolder()
 {
+	CALLSTACK_ADD();
+
 	LoadFolder("lua");
 }
 
 void CLua::LoadFolder(const char *pFolder)
 {
+	CALLSTACK_ADD();
+
 	// get the files which should be auto-loaded from file
 	{
 		m_aAutoloadFiles.clear();
@@ -157,6 +173,8 @@ void CLua::LoadFolder(const char *pFolder)
 
 int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	CALLSTACK_ADD();
+
 	if(pName[0] == '.')
 		return 0;
 
@@ -204,12 +222,16 @@ int CLua::HandleException(std::exception &e, CLuaFile* culprit)
 
 int CLua::Panic(lua_State *L)
 {
+	CALLSTACK_ADD();
+
 	dbg_break();
 	return 0;
 }
 
 int CLua::ErrorFunc(lua_State *L)
 {
+	CALLSTACK_ADD();
+
 	dbg_msg("Lua", "Lua Script Error! :");
 	//lua_getglobal(L, "pLUA");
 	//CLua *pSelf = (CLua *)lua_touserdata(L, -1);

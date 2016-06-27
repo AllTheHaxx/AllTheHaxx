@@ -15,6 +15,8 @@ CFlow::CFlow()
 
 void CFlow::DbgRender()
 {
+	CALLSTACK_ADD();
+
 	if(!m_pCells)
 		return;
 
@@ -42,6 +44,8 @@ void CFlow::DbgRender()
 
 void CFlow::Init()
 {
+	CALLSTACK_ADD();
+
 	if(m_pCells)
 	{
 		mem_free(m_pCells);
@@ -61,6 +65,8 @@ void CFlow::Init()
 
 void CFlow::Update()
 {
+	CALLSTACK_ADD();
+
 	if(!m_pCells)
 		return;
 
@@ -84,6 +90,8 @@ vec2 CFlow::Get(vec2 Pos)
 
 void CFlow::Add(vec2 Pos, vec2 Vel, float Size)
 {
+	CALLSTACK_ADD();
+
 	if(!m_pCells)
 		return;
 

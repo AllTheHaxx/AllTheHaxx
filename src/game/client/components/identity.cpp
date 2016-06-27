@@ -6,6 +6,8 @@
 
 void CIdentity::OnInit()
 {
+	CALLSTACK_ADD();
+
 	m_aIdentities.clear();
 	Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "identities", FindIDFiles, this);
 	if(!m_aIdentities.size())
@@ -16,6 +18,8 @@ void CIdentity::OnInit()
 
 void CIdentity::SaveIdents()
 {
+	CALLSTACK_ADD();
+
 	for(int i = 0; i < NumIdents(); i++)
 	{
 		CIdentEntry *pEntry = GetIdent(i);
@@ -70,6 +74,8 @@ void CIdentity::SaveIdents()
 
 int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	CALLSTACK_ADD();
+
 	CIdentity *pSelf = (CIdentity*)pUser;
 	if(str_length(pName) < 4 || IsDir || str_comp(pName+str_length(pName)-3, ".id") != 0)
 		return 0;

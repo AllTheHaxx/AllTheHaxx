@@ -407,6 +407,13 @@ void thread_yield();
 */
 void thread_detach(void *thread);
 
+/*
+	Function: thread_get_current
+		Returns the handle of the thread from which this function is called
+*/
+void *thread_get_current();
+
+
 /* Group: Locks */
 typedef void* LOCK;
 

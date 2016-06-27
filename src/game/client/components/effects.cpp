@@ -29,6 +29,8 @@ CEffects::CEffects()
 
 void CEffects::AirJump(vec2 Pos)
 {
+	CALLSTACK_ADD();
+
 	CParticle p;
 	p.SetDefault();
 	p.m_Spr = SPRITE_PART_AIRJUMP;
@@ -53,16 +55,22 @@ void CEffects::AirJump(vec2 Pos)
 
 void CEffects::DamageIndicator(vec2 Pos, vec2 Dir)
 {
+	CALLSTACK_ADD();
+
 	m_pClient->m_pDamageind->Create(Pos, Dir);
 }
 
 void CEffects::ResetDamageIndicator()
 {
+	CALLSTACK_ADD();
+
 	m_pClient->m_pDamageind->Reset();
 }
 
 void CEffects::PowerupShine(vec2 Pos, vec2 size)
 {
+	CALLSTACK_ADD();
+
 	if(!m_Add50hz || g_Config.m_GfxLowGraphics)
 		return;
 
@@ -84,6 +92,8 @@ void CEffects::PowerupShine(vec2 Pos, vec2 size)
 
 void CEffects::SmokeTrail(vec2 Pos, vec2 Vel)
 {
+	CALLSTACK_ADD();
+
 	if(!m_Add50hz || g_Config.m_GfxLowGraphics)
 		return;
 
@@ -105,6 +115,8 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel)
 
 void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 {
+	CALLSTACK_ADD();
+
 	if(!m_Add100hz || g_Config.m_GfxLowGraphics)
 		return;
 
@@ -126,6 +138,8 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 
 void CEffects::BulletTrail(vec2 Pos)
 {
+	CALLSTACK_ADD();
+
 	if(!m_Add100hz || g_Config.m_GfxLowGraphics)
 		return;
 
@@ -142,6 +156,8 @@ void CEffects::BulletTrail(vec2 Pos)
 
 void CEffects::PlayerSpawn(vec2 Pos)
 {
+	CALLSTACK_ADD();
+
 	for(int i = 0; i < 32; i++)
 	{
 		if(g_Config.m_GfxLowGraphics)
@@ -171,6 +187,8 @@ void CEffects::PlayerSpawn(vec2 Pos)
 
 void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 {
+	CALLSTACK_ADD();
+
 	if(g_Config.m_GfxLowGraphics)
 		return;
 
@@ -220,6 +238,8 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 // stolen from H-Client :3
 void CEffects::Blood(vec2 Pos, vec2 Dir, int Type, int ClientID)
 {
+	CALLSTACK_ADD();
+
     vec3 BloodColor(1.0f, 0.0f, 0.0f);
     vec3 TeeColor(1.0f, 1.0f, 1.0f);
 
@@ -422,6 +442,8 @@ void CEffects::Blood(vec2 Pos, vec2 Dir, int Type, int ClientID)
 
 void CEffects::Explosion(vec2 Pos)
 {
+	CALLSTACK_ADD();
+
 	// add to flow
 	for(int y = -8; y <= 8; y++)
 		for(int x = -8; x <= 8; x++)
@@ -470,6 +492,8 @@ void CEffects::Explosion(vec2 Pos)
 
 void CEffects::HammerHit(vec2 Pos)
 {
+	CALLSTACK_ADD();
+
 	// add the explosion
 	CParticle p;
 	p.SetDefault();
@@ -487,6 +511,8 @@ void CEffects::HammerHit(vec2 Pos)
 // H-Client
 void CEffects::LaserTrail(vec2 Pos, vec2 Vel, vec4 color)
 {
+	CALLSTACK_ADD();
+
 	if(!m_Add50hz || g_Config.m_GfxLowGraphics)
 		return;
 
@@ -508,6 +534,8 @@ void CEffects::LaserTrail(vec2 Pos, vec2 Vel, vec4 color)
 
 void CEffects::OnRender()
 {
+	CALLSTACK_ADD();
+
 	static int64 LastUpdate100hz = 0;
 	static int64 LastUpdate50hz = 0;
 

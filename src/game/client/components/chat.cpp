@@ -74,11 +74,15 @@ void CChat::OnReset()
 
 void CChat::OnRelease()
 {
+	CALLSTACK_ADD();
+
 	m_Show = false;
 }
 
 void CChat::OnStateChange(int NewState, int OldState)
 {
+	CALLSTACK_ADD();
+
 	if(OldState <= IClient::STATE_CONNECTING)
 	{
 		m_Mode = MODE_NONE;
@@ -92,16 +96,22 @@ void CChat::OnStateChange(int NewState, int OldState)
 
 void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
+	CALLSTACK_ADD();
+
 	((CChat*)pUserData)->Say(0, pResult->GetString(0));
 }
 
 void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData)
 {
+	CALLSTACK_ADD();
+
 	((CChat*)pUserData)->Say(1, pResult->GetString(0));
 }
 
 void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 {
+	CALLSTACK_ADD();
+
 	const char *pMode = pResult->GetString(0);
 	if(str_comp(pMode, "all") == 0)
 		((CChat*)pUserData)->EnableMode(0);
@@ -120,11 +130,15 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 {
+	CALLSTACK_ADD();
+
 	((CChat *)pUserData)->m_Show = pResult->GetInteger(0) != 0;
 }
 
 void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 {
+	CALLSTACK_ADD();
+
 	if(pResult->GetInteger(1) % 2 == 0)
 	{
 		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "please use a odd number as exponent.");
@@ -135,16 +149,22 @@ void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConSaveKeys(IConsole::IResult *pResult, void *pUserData)
 {
+	CALLSTACK_ADD();
+
 	((CChat *)pUserData)->SaveKeys(((CChat *)pUserData)->m_pKeyPair, pResult->GetString(0));
 }
 
 void CChat::ConLoadKeys(IConsole::IResult *pResult, void *pUserData)
 {
+	CALLSTACK_ADD();
+
 	((CChat *)pUserData)->LoadKeys(pResult->GetString(0));
 }
 
 void CChat::OnConsoleInit()
 {
+	CALLSTACK_ADD();
+
 	Console()->Register("say", "r[message]", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
 	Console()->Register("say_team", "r[message]", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
 	Console()->Register("chat", "s['all'|'team'|'hidden'|'crypt'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
@@ -157,6 +177,8 @@ void CChat::OnConsoleInit()
 
 bool CChat::OnInput(IInput::CEvent Event)
 {
+	CALLSTACK_ADD();
+
 	if(m_Mode == MODE_NONE)
 		return false;
 
@@ -413,6 +435,8 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 void CChat::EnableMode(int Team)
 {
+	CALLSTACK_ADD();
+
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
@@ -435,6 +459,8 @@ void CChat::EnableMode(int Team)
 
 void CChat::OnMessage(int MsgType, void *pRawMsg)
 {
+	CALLSTACK_ADD();
+
 	static const char *apNotificationMsgs[] = {
 			"You are now in a solo part.",
 			"You are now out of the solo part.",
@@ -549,6 +575,8 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
+	CALLSTACK_ADD();
+
 	const char *pHL = str_find_nocase(pLine, pName);
 
 	if (pHL)
@@ -565,11 +593,18 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 
 void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 {
-	if(*pLine == 0 || (ClientID != -1 && ClientID != -1337 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
-		m_pClient->m_aClients[ClientID].m_ChatIgnore ||
-		(m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
-		(m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))))
+	CALLSTACK_ADD();
+
+	if(!pLine || pLine[0] == '\0' || ClientID >= MAX_CLIENTS)
 		return;
+
+	if(ClientID >= 0)
+	{
+		if(m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || m_pClient->m_aClients[ClientID].m_ChatIgnore ||
+		   (m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
+		   (m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))
+			return;
+	}
 
 	// trim right and set maximum length to 256 utf8-characters
 	int Length = 0;
@@ -656,6 +691,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 		else if(ClientID == -1337)
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "[*Translator*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
+			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
+		}
+		else if(ClientID <= -2)
+		{
+			str_copy(m_aLines[m_CurrentLine].m_aName, "[*Lua*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
 		}
 		else
@@ -747,6 +787,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 
 void CChat::OnRender()
 {
+	CALLSTACK_ADD();
+
 	if(m_pTranslator->GetTranslation())
 	{
 		char aBuf[512];
@@ -923,14 +965,18 @@ void CChat::OnRender()
 			TextRender()->TextColor(0,0.7f,0,Blend);
 		else if (m_aLines[r].m_ClientID == -1337) // translator in blue
 			TextRender()->TextColor(0.2f,0.2f,0.7f,Blend);
+		else if (m_aLines[r].m_ClientID < -1) // lua in ReD
+			TextRender()->TextColor(0.7f,0.2f,0.2f,Blend);
 		TextRender()->TextEx(&Cursor, aName, -1);
 
 		// render line
 		vec3 rgb;
-		if (m_aLines[r].m_ClientID == -1)
+		if (m_aLines[r].m_ClientID == -1) // system message
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
-		else if (m_aLines[r].m_ClientID == -1337)
-			rgb = vec3(0.45f, 0.45f, 1.0f); //TextRender()->TextColor(0.45f,0.45f,1.0f, Blend);
+		else if (m_aLines[r].m_ClientID == -1337) // translator
+			rgb = vec3(0.45f, 0.45f, 1.0f);
+		else if (m_aLines[r].m_ClientID < -1) // lua
+			rgb = vec3(1.0f, 0.45f, 0.45f);
 		else if (m_aLines[r].m_Highlighted)
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 		else if (m_aLines[r].m_Team)
@@ -990,6 +1036,8 @@ void CChat::OnRender()
 
 bool CChat::HandleTCommands(const char *pMsg)
 {
+	CALLSTACK_ADD();
+
 	if(g_Config.m_ClTransChatCmds && pMsg[0] == '$')
 	{
 		char aCmd[512][256] = {{0}};
@@ -1064,6 +1112,8 @@ bool CChat::HandleTCommands(const char *pMsg)
 
 void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
+	CALLSTACK_ADD();
+
 	m_LastChatSend = time_get();
 
 	char aMessage[1024];
@@ -1109,12 +1159,16 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 
 void CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like 512 bytes and Exp = 3
 {
+	CALLSTACK_ADD();
+
 	m_pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
 	m_GotKeys = true;
 }
 
 char *CChat::ReadPubKey(RSA *pKeyPair)
 {
+	CALLSTACK_ADD();
+
 	BIO *pBio = BIO_new(BIO_s_mem());
 	PEM_write_bio_RSAPublicKey(pBio, pKeyPair);
 
@@ -1127,6 +1181,8 @@ char *CChat::ReadPubKey(RSA *pKeyPair)
 
 char *CChat::ReadPrivKey(RSA *pKeyPair)
 {
+	CALLSTACK_ADD();
+
 	BIO *pBio = BIO_new(BIO_s_mem());
 	PEM_write_bio_RSAPrivateKey(pBio, pKeyPair, NULL, NULL, 0, NULL, NULL);
 
@@ -1139,6 +1195,8 @@ char *CChat::ReadPrivKey(RSA *pKeyPair)
 
 char *CChat::EncryptMsg(const char *pMsg)
 {
+	CALLSTACK_ADD();
+
 	if(!m_GotKeys)
 	{
 		m_pClient->m_pHud->PushNotification("Generate or load keys first!");
@@ -1167,6 +1225,8 @@ char *CChat::EncryptMsg(const char *pMsg)
 
 char *CChat::DecryptMsg(const char *pMsg)
 {
+	CALLSTACK_ADD();
+
 	if(!m_GotKeys)
 		return 0;
 
@@ -1200,6 +1260,8 @@ char *CChat::DecryptMsg(const char *pMsg)
 
 void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 {
+	CALLSTACK_ADD();
+
 	if(!m_GotKeys)
 	{
 		m_pClient->m_pHud->PushNotification("No keys to save!");
@@ -1245,6 +1307,8 @@ void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 
 void CChat::LoadKeys(const char *pKeyName)
 {
+	CALLSTACK_ADD();
+
 	m_pKeyPair = RSA_new();
 
 	char aPubKey[256];
@@ -1286,6 +1350,8 @@ void CChat::LoadKeys(const char *pKeyName)
 
 void CChat::SayChat(const char *pLine)
 {
+	CALLSTACK_ADD();
+
 	if(!pLine || str_length(pLine) < 1)
 		return;
 

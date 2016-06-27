@@ -1,6 +1,7 @@
 #include <base/system.h>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
+#include "debug.h"
 #include "fetcher.h"
 
 CFetchTask::CFetchTask(bool canTimeout)
@@ -21,6 +22,8 @@ CFetcher::CFetcher()
 
 bool CFetcher::Init()
 {
+	CALLSTACK_ADD();
+
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	if(!curl_global_init(CURL_GLOBAL_DEFAULT) && (m_pHandle = curl_easy_init()))
 		return true;
@@ -36,6 +39,8 @@ CFetcher::~CFetcher()
 
 void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
 {
+	CALLSTACK_ADD();
+
 	str_copy(pTask->m_aUrl, pUrl, sizeof(pTask->m_aUrl));
 	str_copy(pTask->m_aDest, pDest, sizeof(pTask->m_aDest));
 	pTask->m_StorageType = StorageType;
@@ -68,6 +73,8 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 
 void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
 {
+	CALLSTACK_ADD();
+
 	char *pEsc = curl_easy_escape(0, pStr, 0);
 	str_copy(pBuf, pEsc, size);
 	curl_free(pEsc);
@@ -75,6 +82,8 @@ void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
 
 void CFetcher::FetcherThread(void *pUser)
 {
+	CALLSTACK_ADD();
+
 	CFetcher *pFetcher = (CFetcher *)pUser;
 	dbg_msg("fetcher", "thread started...");
 	while(1)
@@ -98,6 +107,8 @@ void CFetcher::FetcherThread(void *pUser)
 
 void CFetcher::FetchFile(CFetchTask *pTask)
 {
+	CALLSTACK_ADD();
+
 	char aPath[512];
 	if(pTask->m_StorageType == -2)
 		m_pStorage->GetBinaryPath(pTask->m_aDest, aPath, sizeof(aPath));
@@ -164,11 +175,15 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 
 void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
 {
+	CALLSTACK_ADD();
+
 	io_write((IOHANDLE)pFile, pData, size*nmemb);
 }
 
 int CFetcher::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
+	CALLSTACK_ADD();
+
 	CFetchTask *pTask = (CFetchTask *)pUser;
 	pTask->m_Current = DlCurr;
 	pTask->m_Size = DlTotal;

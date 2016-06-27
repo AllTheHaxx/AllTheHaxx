@@ -37,6 +37,8 @@ void CParticles::OnReset()
 
 void CParticles::Add(int Group, CParticle *pPart)
 {
+	CALLSTACK_ADD();
+
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
@@ -74,6 +76,8 @@ void CParticles::Add(int Group, CParticle *pPart)
 
 void CParticles::Update(float TimePassed)
 {
+	CALLSTACK_ADD();
+
 	static float FrictionFraction = 0;
 	FrictionFraction += TimePassed;
 
@@ -135,6 +139,8 @@ void CParticles::Update(float TimePassed)
 
 void CParticles::OnRender()
 {
+	CALLSTACK_ADD();
+
 	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
@@ -159,6 +165,8 @@ void CParticles::OnRender()
 /*
 void CParticles::RenderGroup(int Group)
 {
+	CALLSTACK_ADD();
+
 	Graphics()->BlendNormal();
 	//gfx_blend_additive();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
@@ -190,6 +198,8 @@ void CParticles::RenderGroup(int Group)
 } */
 void CParticles::RenderGroup(int Group)
 {
+	CALLSTACK_ADD();
+
 	Graphics()->BlendNormal();
 	if (Group == GROUP_HCLIENT_BLOOD)
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BLOOD].m_Id);

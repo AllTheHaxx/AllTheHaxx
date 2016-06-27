@@ -35,6 +35,8 @@ CUpdater::CUpdater()
 
 void CUpdater::Init()
 {
+	CALLSTACK_ADD();
+
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
@@ -45,6 +47,8 @@ void CUpdater::Init()
 
 void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
 {
+	CALLSTACK_ADD();
+
 	CUpdater *pUpdate = (CUpdater *)pUser;
 	str_copy(pUpdate->m_Status, pTask->Dest(), sizeof(pUpdate->m_Status));
 	pUpdate->m_Percent = pTask->Progress();
@@ -52,6 +56,8 @@ void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
 
 void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 {
+	CALLSTACK_ADD();
+
 	CUpdater *pUpdate = (CUpdater *)pUser;
 	const char *b = 0;
 	for(const char *a = pTask->Dest(); *a; a++)
@@ -119,6 +125,8 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath)
 {
+	CALLSTACK_ADD();
+
 	char aBuf[256], aDestPath[512] = {0};
 	str_format(aBuf, sizeof(aBuf), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource, pFile);
 
@@ -138,6 +146,8 @@ void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDe
 
 void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
 {
+	CALLSTACK_ADD();
+
 	char aBuf[256], aDestPath[512] = {0};
 	str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/AllTheHaxx/releases/download/%s/%s", m_aLatestVersion, pFile);
 
@@ -157,6 +167,8 @@ void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
  
 void CUpdater::MoveFile(const char *pFile)
 {
+	CALLSTACK_ADD();
+
 	char aBuf[256];
 	size_t len = str_length(pFile);
 
@@ -177,6 +189,8 @@ void CUpdater::MoveFile(const char *pFile)
 
 void CUpdater::Update()
 {
+	CALLSTACK_ADD();
+
 	switch(m_State)
 	{
 		case GOT_MANIFEST:
@@ -192,11 +206,15 @@ void CUpdater::Update()
 
 void CUpdater::AddFileRemoveJob(const char *pFile, bool job)
 {
+	CALLSTACK_ADD();
+
 	m_FileRemoveJobs.push_back(string(pFile));
 }
 
 void CUpdater::ReplaceClient()
 {
+	CALLSTACK_ADD();
+
 	dbg_msg("updater", "replacing %s", CURR_FILE_NAME);
 
 	// replace running executable by renaming twice...
@@ -219,6 +237,8 @@ void CUpdater::ReplaceClient()
 
 void CUpdater::ParseUpdate()
 {
+	CALLSTACK_ADD();
+
 	char aPath[512];
 	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
@@ -306,6 +326,8 @@ void CUpdater::ParseUpdate()
 
 void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 {
+	CALLSTACK_ADD();
+
 	m_CheckOnly = CheckOnly;
 
 	// get the version info if we don't have any yet
@@ -322,6 +344,8 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 
 void CUpdater::PerformUpdate()
 {
+	CALLSTACK_ADD();
+
 	m_State = PARSING_UPDATE;
 	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
 	ParseUpdate();
@@ -376,6 +400,8 @@ void CUpdater::PerformUpdate()
 
 void CUpdater::CommitUpdate()
 {
+	CALLSTACK_ADD();
+
 	for(map<std::string, map<std::string, std::string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
 		for(map<std::string, std::string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
@@ -403,6 +429,8 @@ void CUpdater::CommitUpdate()
 
 void CUpdater::WinXpRestart()
 {
+	CALLSTACK_ADD();
+
 		char aBuf[512];
 		IOHANDLE bhFile = io_open(m_pStorage->GetBinaryPath("du.bat", aBuf, sizeof aBuf), IOFLAG_WRITE);
 		if(!bhFile)

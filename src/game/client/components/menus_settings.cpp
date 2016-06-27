@@ -60,6 +60,8 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
 	MainView.HSplitTop(180.0f, &Game, &Client);
 	Client.HSplitTop(160.0f, &Client, &AutoReconnect);
@@ -288,6 +290,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button, Label, Dummy;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
@@ -382,6 +386,8 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
 
 	static bool s_InitSkinlist = true;
@@ -784,6 +790,8 @@ const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
 
 void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View)
 {
+	CALLSTACK_ADD();
+
 	for (int i = Start; i < Stop; i++)
 	{
 		CKeyInfo &Key = gs_aKeys[i];
@@ -810,6 +818,8 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View)
 
 void CMenus::RenderSettingsControls(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	// this is kinda slow, but whatever
 	for(int i = 0; i < g_KeyCount; i++)
 		gs_aKeys[i].m_KeyId = 0;
@@ -991,6 +1001,8 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button;
 	char aBuf[128];
 	bool CheckSettings = false;
@@ -1242,6 +1254,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button;
 	MainView.VSplitMid(&MainView, 0);
 	static int s_SndEnable = g_Config.m_SndEnable;
@@ -1446,6 +1460,8 @@ void LoadLanguageIndexfile(IStorageTW *pStorage, IConsole *pConsole, sorted_arra
 
 void CMenus::RenderLanguageSelection(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	static int s_LanguageList = 0;
 	static int s_SelectedLanguage = 0;
 	static sorted_array<CLanguage> s_Languages;
@@ -1516,6 +1532,8 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 void CMenus::RenderSettings(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	//static int s_SettingsPage = 0;
 
 	// render background
@@ -1613,6 +1631,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 }
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser;
 
 	MainView.HSplitTop(150.0f, &HUD, &MainView);
@@ -2112,6 +2132,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 void CMenus::RenderSettingsDDNet(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
 
 	bool CheckSettings = false;
@@ -2444,6 +2466,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 void CMenus::RenderSettingsHaxx(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Left, Right, Button;
 	MainView.VSplitMid(&Left, &Right);
 	Left.Margin(5.0f, &Left);
@@ -2551,6 +2575,8 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 void CMenus::RenderSettingsAppearance(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	if(m_pfnAppearanceSubpage)
 	{
 		//if(RenderSettingsBackToAppearance(&MainView))
@@ -2583,18 +2609,24 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 void CMenus::RenderSettingsAppearanceHUD(CUIRect MainView) // here will be more tabs and stuff I think
 {
+	CALLSTACK_ADD();
+
 	//RenderTools()->DrawUIRect(&MainView, vec4(1,0,1,1), 0, 0); // debuggi ^^
 	RenderSettingsHUD(MainView);
 }
 
 void CMenus::RenderSettingsAppearanceTexture(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	//RenderTools()->DrawUIRect(&MainView, vec4(0,1,1,1), 0, 0);
 	RenderSettingsTexture(MainView);
 }
 
 void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	//RenderTools()->DrawUIRect(&MainView, vec4(1,1,0,1), 0, 0);
 	const int NUM_FONTS = m_pClient->m_pFontMgr->GetNumFonts();
 
@@ -2658,6 +2690,8 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 
 bool CMenus::RenderSettingsBackToAppearance(CUIRect *pMainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button;
 	pMainView->HSplitTop(20.0f, &Button, pMainView);
 	pMainView->HSplitTop(10.0f, 0, pMainView);
@@ -2669,6 +2703,8 @@ bool CMenus::RenderSettingsBackToAppearance(CUIRect *pMainView)
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button;
 	MainView.Margin(5.0f, &MainView);
 
@@ -2763,6 +2799,8 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 
 void CMenus::RenderLoadingLua()
 {
+	CALLSTACK_ADD();
+
 	Graphics()->Swap();
 
 	CUIRect Bar, Rect = *UI()->Screen();
@@ -2781,6 +2819,8 @@ void CMenus::RenderLoadingLua()
 
 void CMenus::RenderSettingsLua(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Button, BottomBar;
 	static int s_ActiveLuaSettings = -1;
 
@@ -3109,6 +3149,8 @@ struct ConfigString : public ConfigVar
 
 void CMenus::RenderSettingsAll(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	static array<ConfigInt> s_IntVars;
 	static array<ConfigString> s_StringVars;
 

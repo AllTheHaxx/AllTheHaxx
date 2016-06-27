@@ -25,6 +25,8 @@ void CItems::OnReset()
 
 void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 {
+	CALLSTACK_ADD();
+
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
@@ -131,6 +133,8 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent)
 {
+	CALLSTACK_ADD();
+
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 	Graphics()->QuadsBegin();
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick());
@@ -185,6 +189,8 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
 {
+	CALLSTACK_ADD();
+
 	float Angle = 0.0f;
 	float Size = 42.0f;
 
@@ -224,6 +230,8 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 
 void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent)
 {
+	CALLSTACK_ADD();
+
 	vec3 RGB;
 	vec2 Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
 	vec2 From = vec2(pCurrent->m_FromX, pCurrent->m_FromY);
@@ -309,6 +317,8 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent)
 
 void CItems::OnRender()
 {
+	CALLSTACK_ADD();
+
 	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
@@ -367,6 +377,8 @@ void CItems::OnRender()
 
 void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)
 {
+	CALLSTACK_ADD();
+
 	if(m_NumExtraProjectiles != MAX_EXTRA_PROJECTILES)
 	{
 		m_aExtraProjectiles[m_NumExtraProjectiles] = *pProj;

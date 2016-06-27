@@ -33,6 +33,8 @@
 
 void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset)
 {
+	CALLSTACK_ADD();
+
 	// for drawing hand
 	//const skin *s = skin_get(skin_id);
 
@@ -912,6 +914,8 @@ void CPlayers::RenderPlayer(
 
 void CPlayers::OnRender()
 {
+	CALLSTACK_ADD();
+
 	// update RenderInfo for ninja
 	bool IsTeamplay = false;
 	if(m_pClient->m_Snap.m_pGameInfoObj)

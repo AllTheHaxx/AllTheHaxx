@@ -24,6 +24,8 @@
 
 void CMenus::RenderServerbrowserServerList(CUIRect View)
 {
+	CALLSTACK_ADD();
+
 	CUIRect Headers;
 	CUIRect Status;
 
@@ -597,6 +599,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
+	CALLSTACK_ADD();
+
 	CUIRect ServerFilter = View, FilterHeader;
 	const float FontSize = 12.0f;
 	ServerFilter.HSplitBottom(0.0f, &ServerFilter, 0);
@@ -926,6 +930,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 {
+	CALLSTACK_ADD();
+
 	CUIRect ServerDetails = View;
 	CUIRect ServerScoreBoard, ServerHeader;
 
@@ -1114,6 +1120,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 void CMenus::FriendlistOnUpdate()
 {
+	CALLSTACK_ADD();
+
 	m_lFriends.clear();
 	for(int i = 0; i < m_pClient->Friends()->NumFriends(); ++i)
 	{
@@ -1127,6 +1135,8 @@ void CMenus::FriendlistOnUpdate()
 
 void CMenus::RenderServerbrowserFriends(CUIRect View)
 {
+	CALLSTACK_ADD();
+
 	static int s_Inited = 0;
 	if(!s_Inited)
 	{
@@ -1260,6 +1270,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 void CMenus::RenderServerbrowser(CUIRect MainView)
 {
+	CALLSTACK_ADD();
+
 	/*
 		+-----------------+	+-------+
 		|				  |	|		|
@@ -1536,6 +1548,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	CALLSTACK_ADD();
+
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() == 2 && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 	{
@@ -1546,12 +1560,16 @@ void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserDat
 
 void CMenus::ConchainDDraceNetworkFilterUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	CALLSTACK_ADD();
+
 	pfnCallback(pResult, pCallbackUserData);
 	((CMenus *)pUserData)->Client()->ServerBrowserUpdate();
 }
 
 void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	CALLSTACK_ADD();
+
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() && (g_Config.m_UiPage == PAGE_FAVORITES || g_Config.m_UiPage == PAGE_DDNET) && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);

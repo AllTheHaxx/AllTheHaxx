@@ -89,6 +89,8 @@ void CTranslator::TranslationWorker(void *pUser)
 
 void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In)
 {
+	CALLSTACK_ADD();
+
 	// prepare the entry
 	CTransEntry Entry;
 	str_copy(Entry.m_Text, pText, sizeof(Entry.m_Text));

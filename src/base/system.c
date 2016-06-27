@@ -691,6 +691,20 @@ void thread_detach(void *thread)
 #endif
 }
 
+void *thread_get_current()
+{
+#if defined(CONF_FAMILY_UNIX)
+	pthread_t ptid = pthread_self();
+	uint64_t threadId = 0;
+	memcpy(&threadId, &ptid, sizeof(ptid));
+	return (void*)threadId;
+#elif defined(CONF_FAMILY_WINDOWS)
+	return GetCurrentThread(void);
+#else
+	#error not implemented
+#endif
+}
+
 
 
 
