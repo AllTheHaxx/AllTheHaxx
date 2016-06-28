@@ -2,9 +2,7 @@
 #define GAME_CLIENT_COMPONENTS_SPOOFREMOTE_H
 
 #include <base/system.h>
-#if defined(CONF_FAMILY_UNIX)
-#include <netinet/in.h>
-#endif
+
 #include <game/client/component.h>
 
 class CSpoofRemote : public CComponent
@@ -20,19 +18,18 @@ public:
 		};
 
 private:
-#if defined(CONF_FAMILY_UNIX) // this ones are unix-only
 	// engine variables
 	void *m_pListenerThread;
 	void *m_pWorkerThread;
-	time_t m_LastAck;
-	int m_Socket;
-	struct sockaddr_in m_Info;
-#endif
+	int64 m_LastAck;
+	NETSOCKET m_Socket;
+	char m_aNetAddr[NETADDR_MAXSTRSIZE];
+
 	// control variables
 	int m_State; // current state, see above
 	int m_SpoofRemoteID; // our id at teh zervor
 	char m_aLastMessage[256]; // the last message from zervor
-	float m_LastMessageTime; // when teh l4st
+	int64 m_LastMessageTime; // when teh l4st
 	char m_aLastCommand[256]; // last message we've sent
 
 
@@ -52,10 +49,10 @@ public:
 	CSpoofRemote();
 	~CSpoofRemote();
 
-	inline bool IsConnected() const { return m_State&SPOOF_STATE_CONNECTED; }
+	inline bool IsConnected() const { return (m_State&SPOOF_STATE_CONNECTED) != 0; }
 	inline int IsState(int state) const { return m_State&state; }
 	inline const char *LastMessage() const { return m_aLastMessage; }
-	inline float LastMessageTime() const { return m_LastMessageTime; }
+	inline int64 LastMessageTime() const { return m_LastMessageTime; }
 	inline const char *LastCommand() const { return m_aLastCommand; }
 
 	inline void VotekickAll() { m_State |= SPOOF_STATE_VOTEKICKALL; }

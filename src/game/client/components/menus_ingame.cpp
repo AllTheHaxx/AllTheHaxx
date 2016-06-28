@@ -1502,9 +1502,9 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			CUIRect Left, Right;
 			const float HighlightTime = 2.0f; // highlight the box for 2 seconds
 			Extended.HSplitBottom(18.5f, &Extended, &Left);
-			float x = max(0-(pi/4), m_pClient->m_pSpoofRemote->LastMessageTime()+HighlightTime-Client()->LocalTime())/HighlightTime;
-			float y = sin(pi*(pi/4)*x+(pi/4));
-			vec4 Color(0.3 + clamp(y*0.7f, 0.0f, 0.7f), 0.3f, 0.3f, 0.45f);
+			float x = max(0-(pi/4), m_pClient->m_pSpoofRemote->LastMessageTime()+HighlightTime*time_freq()-time_get())/HighlightTime;
+			float y = (float)sin(pi * (pi / 4.0) * x + (pi / 4.0));
+			vec4 Color(0.3f + clamp(y*0.7f, 0.0f, 0.7f), 0.3f, 0.3f, 0.45f);
 			Left.VSplitMid(&Left, &Right);
 			// inbox
 			RenderTools()->DrawUIRect(&Left, Color, CUI::CORNER_ALL, 2.3f);

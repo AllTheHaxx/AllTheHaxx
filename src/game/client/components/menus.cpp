@@ -981,7 +981,7 @@ int CMenus::RenderMenubar(CUIRect r)
 #if defined(CONF_SPOOFING)
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
-		static int s_SpoofingButton=0;
+		static CButtonContainer s_SpoofingButton;
 		if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_SPOOFING;
 #endif

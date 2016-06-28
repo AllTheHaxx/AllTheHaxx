@@ -162,7 +162,7 @@ void CIRC::StartConnection() // call this from a thread only!
 
 	m_State = STATE_CONNECTING;
 	// lookup
-	int connectionType = NETTYPE_IPV6;
+	unsigned int connectionType = NETTYPE_IPV6;
 	//if(net_host_lookup("irc.ipv6.quakenet.org:6667", &m_HostAddress, connectionType) != 0)
 	{
 		connectionType = NETTYPE_IPV4;
