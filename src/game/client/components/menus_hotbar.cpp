@@ -40,8 +40,8 @@ void CMenus::RenderIdents(CUIRect MainView)
 		return;
 
 	CUIRect Button, Label, Temp;
-	static float s_Scrollbar = 0;
-	static float s_ScrollValue = 0;
+	static CButtonContainer s_Scrollbar;
+	static float s_ScrollValue = 0.0f;
 
 	RenderTools()->DrawUIRect(&MainView, vec4(0.65f, 0.68f, 0.9f, 0.64f), CUI::CORNER_T, 10.0f);
 
@@ -89,7 +89,7 @@ void CMenus::RenderIdents(CUIRect MainView)
 		}
 
 		Button.VSplitLeft(80.0f, &Label, &Button);
-		static int s_Button[512] = {0};
+		static CButtonContainer s_Button[512];
 		if(DoButton_Menu(&s_Button[i], "", 0, &Label, 0, CUI::CORNER_ALL, pIdent->m_UseCustomColor ? mix(SkinInfo.m_ColorBody, SkinInfo.m_ColorFeet, 0.4f)*0.7f :
 				vec4(pSkin->m_BloodColor.r, pSkin->m_BloodColor.g, pSkin->m_BloodColor.b, 0.7f)))
 		{
@@ -134,7 +134,8 @@ void CMenus::RenderTrans(CUIRect MainView)
 
 	// incoming messages
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClTransIn, Localize("Translate incoming messages"), g_Config.m_ClTransIn, &Button))
+	static CButtonContainer s_TransIn;
+	if(DoButton_CheckBox(&s_TransIn, Localize("Translate incoming messages"), g_Config.m_ClTransIn, &Button))
 		g_Config.m_ClTransIn ^= 1;
 
 	static float s_InGlideVal = 0.0f;
@@ -159,7 +160,8 @@ void CMenus::RenderTrans(CUIRect MainView)
 		Button.VSplitLeft(Button.w*0.55f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Source:"), 14.0, -1);
 		static float s_OffsetInSrc = 0.0f;
-		DoEditBox(&g_Config.m_ClTransInSrc, &Button, g_Config.m_ClTransInSrc, sizeof(g_Config.m_ClTransInSrc), 14.0f, &s_OffsetInSrc);
+		static CButtonContainer s_TransInSrc;
+		DoEditBox(&s_TransInSrc, &Button, g_Config.m_ClTransInSrc, sizeof(g_Config.m_ClTransInSrc), 14.0f, &s_OffsetInSrc);
 		UI()->ClipDisable();
 
 		// do the same for destination
@@ -168,14 +170,16 @@ void CMenus::RenderTrans(CUIRect MainView)
 		Button.VSplitLeft(Button.w*0.65f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Destination:"), 14.0, -1);
 		static float s_OffsetInDst = 0.0f;
-		DoEditBox(&g_Config.m_ClTransInDst, &Button, g_Config.m_ClTransInDst, sizeof(g_Config.m_ClTransInDst), 14.0f, &s_OffsetInDst);
+		static CButtonContainer s_TransInDst;
+		DoEditBox(&s_TransInDst, &Button, g_Config.m_ClTransInDst, sizeof(g_Config.m_ClTransInDst), 14.0f, &s_OffsetInDst);
 		UI()->ClipDisable();
 	}
 
 	// outgoing messages
 	MainView.HSplitTop(5.0f+10.0f*s_InGlideVal, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClTransOut, Localize("Translate outgoing messages"), g_Config.m_ClTransOut, &Button))
+	static CButtonContainer s_TransOut;
+	if(DoButton_CheckBox(&s_TransOut, Localize("Translate outgoing messages"), g_Config.m_ClTransOut, &Button))
 		g_Config.m_ClTransOut ^= 1;
 
 	static float s_OutGlideVal = 0.0f;
@@ -200,7 +204,8 @@ void CMenus::RenderTrans(CUIRect MainView)
 		Button.VSplitLeft(Button.w*0.55f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Source:"), 14.0, -1);
 		static float s_OffsetOutSrc = 0.0f;
-		DoEditBox(&g_Config.m_ClTransOutSrc, &Button, g_Config.m_ClTransOutSrc, sizeof(g_Config.m_ClTransOutSrc), 14.0f, &s_OffsetOutSrc);
+		static CButtonContainer s_TransOutSrc;
+		DoEditBox(&s_TransOutSrc, &Button, g_Config.m_ClTransOutSrc, sizeof(g_Config.m_ClTransOutSrc), 14.0f, &s_OffsetOutSrc);
 		UI()->ClipDisable();
 
 		// do the same for destination
@@ -209,7 +214,8 @@ void CMenus::RenderTrans(CUIRect MainView)
 		Button.VSplitLeft(Button.w*0.65f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Destination:"), 14.0, -1);
 		static float s_OffsetOutDst = 0.0f;
-		DoEditBox(&g_Config.m_ClTransOutDst, &Button, g_Config.m_ClTransOutDst, sizeof(g_Config.m_ClTransOutDst), 14.0f, &s_OffsetOutDst);
+		static CButtonContainer s_TransOutDst;
+		DoEditBox(&s_TransOutDst, &Button, g_Config.m_ClTransOutDst, sizeof(g_Config.m_ClTransOutDst), 14.0f, &s_OffsetOutDst);
 		UI()->ClipDisable();
 	}
 }
@@ -263,7 +269,8 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	MainView.Margin(5.0f, &MainView);
 
 	MainView.HSplitTop(15.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClFlagChat, Localize("Receive hidden chat"), g_Config.m_ClFlagChat, &Button))
+	static CButtonContainer s_FlagChat;
+	if(DoButton_CheckBox(&s_FlagChat, Localize("Receive hidden chat"), g_Config.m_ClFlagChat, &Button))
 		g_Config.m_ClFlagChat ^= 1;
 
 	MainView.HSplitTop(4.0f, 0, &MainView);
@@ -277,11 +284,12 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	static char aKeyName[64] = {0};
 	Button.VSplitRight(Button.h, &Button, &Label);
 	static int s_ListboxActive = false;
-	static int s_ListboxActiveButton = 0;
+	static CButtonContainer s_ListboxActiveButton;
 	if(DoButton_Menu(&s_ListboxActiveButton, ">", s_ListboxActive, &Label, 0, CUI::CORNER_R))
 		s_ListboxActive ^= 1;
 
-	DoEditBox(&aKeyName, &Button, aKeyName, 32, 14.0f, &s_OffsetKeyName, false, CUI::CORNER_ALL, Localize("RSA Key name"));
+	static CButtonContainer s_Editbox;
+	DoEditBox(&s_Editbox, &Button, aKeyName, 32, 14.0f, &s_OffsetKeyName, false, CUI::CORNER_ALL, Localize("RSA Key name"));
 	// do the key selector
 	if(s_ListboxActive)
 	{
@@ -293,12 +301,13 @@ void CMenus::RenderCrypt(CUIRect MainView)
 		RenderTools()->DrawUIRect(&KeyList, vec4(0.0f, 0.5f, 0.0f, 0.64f), CUI::CORNER_ALL, 6.0f);
 		KeyList.Margin(7.0f, &KeyList);
 
-		static int s_Listbox = 0;
+		static CButtonContainer s_Listbox;
 		static float s_ListboxScrollVal = 0.0f;
 		UiDoListboxStart(&s_Listbox, &KeyList, 15.0f, Localize("List of your RSA keys"), "", s_RSAKeyList.size(), 1, -1, s_ListboxScrollVal);
 		for(int i = 0; i < s_RSAKeyList.size(); i++)
 		{
-			CListboxItem Item = UiDoListboxNextItem(&s_RSAKeyList[i]);
+			CPointerContainer Container(&s_RSAKeyList[i]);
+			CListboxItem Item = UiDoListboxNextItem(&Container);
 			if(!Item.m_Visible)
 				continue;
 
@@ -321,7 +330,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	Button.VSplitLeft(330.0f, &Button, 0);
 	Label.x += 4.0f;
 	Button.x += 5.0f;
-	static int s_GenButton = 0;
+	static CButtonContainer s_GenButton;
 	if(DoButton_Menu(&s_GenButton, Localize("1. Generate RSA key"), 0, &Button, Localize("Generates a new (256 b) RSA key you can then save and share")))
 	{
 		m_pClient->m_pChat->GenerateKeyPair(256, 3);
@@ -331,7 +340,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(330.0f, &Button, 0);
 	Button.x += 5.0f;
-	static int s_SaveButton = 0;
+	static CButtonContainer s_SaveButton;
 	if(DoButton_Menu(&s_SaveButton, Localize("2. Save RSA key"), 0, &Button, Localize("Save key with the name you entered above")))
 	{
 		m_pClient->m_pChat->SaveKeys(m_pClient->m_pChat->m_pKeyPair, aKeyName);
@@ -342,7 +351,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(330.0f, &Button, 0);
 	Button.x += 5.0f;
-	static int s_LoadButton = 0;
+	static CButtonContainer s_LoadButton;
 	if(DoButton_Menu(&s_LoadButton, Localize("Load RSA key"), 0, &Button, Localize("Load key with the name you entered above")))
 	{
 		m_pClient->m_pChat->LoadKeys(aKeyName);

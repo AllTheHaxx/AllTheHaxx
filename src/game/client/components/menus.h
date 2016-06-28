@@ -38,6 +38,23 @@ public:
 
 class CMenus : public CComponent
 {
+public:
+		struct CButtonContainer
+		{
+			CButtonContainer() { m_FadeStartTime = 0.0f; }
+			float m_FadeStartTime;
+			virtual const void *GetID() const { return &m_FadeStartTime; }
+		};
+
+		struct CPointerContainer : public CButtonContainer
+		{
+			CPointerContainer(const void *pID) : m_pID(pID) { }
+			const void *GetID() const { return m_pID; }
+		private:
+			const void *m_pID;
+		};
+
+private:
 	typedef float (*FDropdownCallback)(CUIRect View, void *pUser, void *pArgs);
 
 	friend class CGameConsole; // need this for IRC GUI
@@ -52,21 +69,21 @@ class CMenus : public CComponent
 	static vec4 ms_ColorTabbarInactive;
 	static vec4 ms_ColorTabbarActive;
 
-	float *ButtonFade(const void *pID, float Seconds, int Checked=0);
+	float ButtonFade(CButtonContainer *pBC, float Seconds, int Checked=0);
 
-	vec4 ButtonColorMul(const void *pID);
+	vec4 ButtonColorMul(CButtonContainer *pBC);
 
 
-	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_DemoPlayer(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect);
 
-	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners, const char *pTooltip = 0);
-	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active, const char *pTooltip = 0);
-	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
-	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive = ms_ColorTabbarActive, vec4 ColorInactive = ms_ColorTabbarInactive, const char *pTooltip = 0);
+	int DoButton_Sprite(CButtonContainer *pBC, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners, const char *pTooltip = 0);
+	int DoButton_Toggle(CButtonContainer *pBC, int Checked, const CUIRect *pRect, bool Active, const char *pTooltip = 0);
+	int DoButton_Menu(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
+	int DoButton_MenuTab(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive = ms_ColorTabbarActive, vec4 ColorInactive = ms_ColorTabbarInactive, const char *pTooltip = 0);
 
-	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false);
-	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
-	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
+	int DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false);
+	int DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
+	int DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 
 	/*static void ui_draw_menu_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_keyselect_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -75,7 +92,7 @@ class CMenus : public CComponent
 	*/
 
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
-	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners = CUI::CORNER_T);
+	int DoButton_GridHeader(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, int Corners = CUI::CORNER_T);
 
 	//static void ui_draw_browse_icon(int what, const CUIRect *r);
 	//static void ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -84,15 +101,15 @@ class CMenus : public CComponent
 	static void ui_draw_checkbox(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_checkbox_number(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	*/
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", int Align = 0, const char *pTooltip = 0);
+	int DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", int Align = 0, const char *pTooltip = 0);
 	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
 
-	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0);
-	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0);
-	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
-	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, const char *pTooltip = 0);
+	float DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0);
+	float DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0);
+	void DoButton_KeySelect(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
+	int DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, const char *pTooltip = 0);
 
-	float DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, void *pArgs, const char *pTooltip = "");
+	float DoDropdownMenu(CButtonContainer *pBC, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, void *pArgs, const char *pTooltip = "");
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View);
@@ -105,9 +122,9 @@ class CMenus : public CComponent
 		CUIRect m_HitRect;
 	};
 
-	void UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
+	void UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
 						int ItemsPerRow, int SelectedIndex, float ScrollValue, int Corners = CUI::CORNER_T);
-	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false, bool KeyEvents = true);
+	CListboxItem UiDoListboxNextItem(CButtonContainer *pBC, bool Selected = false, bool KeyEvents = true);
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated);
 
@@ -433,7 +450,7 @@ public:
 	};
 
 	// DDRace
-	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_CheckBox_DontCare(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect);
 	sorted_array<CDemoItem> m_lDemos;
 	void DemolistPopulate();
 	bool m_Dummy;

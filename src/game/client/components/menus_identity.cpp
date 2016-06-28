@@ -37,9 +37,9 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	TabBar.VSplitRight(2.0f, &TabBar, &Button);
 	RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.8f, 0.6f, 0.5f), 0, 0);
 	
-	int s_aDeleteIDs[512] = {0};
-	int s_aUpIDs[512] = {0};
-	int s_aDownIDs[512] = {0};
+	static CButtonContainer s_aDeleteIDs[512];
+	static CButtonContainer s_aUpIDs[512];
+	static CButtonContainer s_aDownIDs[512];
 	for(int i = 0; i < numID; i++)
 	{
 		if(i >= 512)
@@ -47,7 +47,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(i);
 		TabBar.HSplitTop(24.0f, &Button, &TabBar);
-		if(DoButton_MenuTab(pEntry->m_aName, "", Page == i, &Button, 0))
+		static CButtonContainer s_Button;
+		if(DoButton_MenuTab(&s_Button, "", Page == i, &Button, 0))
 			Page = i;
 
 		Button.VSplitRight(Button.h, 0, &Temp);
@@ -115,7 +116,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	
-	static int s_ButtonAdd = 0;
+	static CButtonContainer s_ButtonAdd;
 
 	TabBar.HSplitTop(24.0f, &Button, &TabBar);
 	Button.VSplitRight(240.0f, 0, &Temp);
@@ -169,7 +170,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetName[512] = {0.0f};
-	if(DoEditBox(&s_OffsetName[Page], &Button, pEntry->m_aName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName[Page]))
+	CPointerContainer ContainerName(&s_OffsetName[Page]);
+	if(DoEditBox(&ContainerName, &Button, pEntry->m_aName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName[Page]))
 		m_NeedSendinfo = true;
 
 	// player clan
@@ -180,7 +182,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetClan[512] = {0.0f};
-	if(DoEditBox(&s_OffsetClan[Page], &Button, pEntry->m_aClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan[Page]))
+	CPointerContainer ContainerClan(&s_OffsetClan[Page]);
+	if(DoEditBox(&ContainerClan, &Button, pEntry->m_aClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan[Page]))
 		m_NeedSendinfo = true;
 
 	// apply identity
@@ -191,7 +194,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	static float s_ApplyButton[512] = {0.0f};
 	if(!GameClient()->m_pIdentity->UsingIdent(Page))
 	{
-		if(DoButton_Menu(&s_ApplyButton[Page], Localize("Use Identity"), 0, &Button, "", CUI::CORNER_ALL, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
+		CPointerContainer ContainerApply(&s_ApplyButton[Page]);
+		if(DoButton_Menu(&ContainerApply, Localize("Use Identity"), 0, &Button, "", CUI::CORNER_ALL, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
 			GameClient()->m_pIdentity->ApplyIdent(Page);
 	}
 
@@ -199,7 +203,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	View.HSplitTop(36.0f, 0, &View);
 	View.HSplitTop(20.0f, &Button, &View);
 	Button.VSplitLeft(230.0f, &Button, 0);
-	if(DoButton_CheckBox(&pEntry->m_UseCustomColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
+	static CButtonContainer s_CheckboxUseTeamColor;
+	if(DoButton_CheckBox(&s_CheckboxUseTeamColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
 	{
 		pEntry->m_UseCustomColor ^= 1;
 		m_NeedSendinfo = true;
@@ -255,7 +260,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 				Button.HMargin(2.0f, &Button);
 
 				float k = ((PrevColor>>((2-s)*8))&0xff) / 255.0f;
-				k = DoScrollbarH(&s_aColorSlider[i][s], &Button, k);
+				CPointerContainer Container(&s_aColorSlider[i][s]);
+				k = DoScrollbarH(&Container, &Button, k);
 				Color <<= 8;
 				Color += clamp((int)(k*255), 0, 255);
 				UI()->DoLabelScaled(&Label, paLabels[s], 14.0f, -1);
@@ -278,7 +284,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
 	Label.HSplitTop(15.0f, 0, &Label);
 	Label.VSplitLeft(70.0f, 0, &Label);
-	UI()->DoLabelScaled(&Label, pEntry->m_aSkin, 14.0f, -1, 150.0f);
+	UI()->DoLabelScaled(&Label, pEntry->m_aSkin, 14.0f, -1, 150);
 
 	MainView.HSplitTop(60.0f, 0, &MainView);
 	static bool s_InitSkinlist = false;
@@ -306,7 +312,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	MainView.h /= 1.5f;
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &MainView, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 8, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 8, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_paSkinList.size(); i++)
 	{
@@ -319,7 +326,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		if(str_comp(s->m_aName, pEntry->m_aSkin) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		CPointerContainer Container(&s_paSkinList[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info;

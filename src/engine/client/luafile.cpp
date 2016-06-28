@@ -237,15 +237,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
 		.endNamespace()
 
-		// ui namespace
-		.beginNamespace("_ui")
-			.addFunction("SetUiColor", &CLuaBinding::LuaSetUiColor)
-			.addFunction("DoButton_Menu", &CLuaBinding::LuaDoButton_Menu)
-		.endNamespace()
-
 		// graphics namespace
 		.beginNamespace("_graphics")
-			.addFunction("DrawLine", &CLuaBinding::LuaDrawLine)
 			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
 			.addFunction("RenderQuad", &CLuaBinding::LuaRenderQuadRaw)
 		.endNamespace()
@@ -336,6 +329,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass< IGraphics::CLineItem >("LineItem")
 			.addConstructor <void (*) ()> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
+		.endClass()
+
+		.beginClass< CMenus::CButtonContainer >("ButtonContainer")
+			.addConstructor <void (*) ()> ()
 		.endClass()
 
 		//OOP BEGINS HERE
@@ -437,7 +434,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("ActivePage", &CMenus::GetActivePage, &CMenus::SetActivePage)
 			.addProperty("MousePos", &CMenus::GetMousePos, &CMenus::SetMousePos)
 			.addFunction("ButtonColorMul", &CMenus::ButtonColorMul)
-			.addFunction("DoButton_Sprite", &CMenus::DoButton_Sprite)
+			.addFunction("ButtonColorMul", &CMenus::ButtonColorMul)
+			.addFunction("DoButton_Menu", &CMenus::DoButton_Menu)
 			.addFunction("DoButton_Toggle", &CMenus::DoButton_Toggle)
 			.addFunction("DoButton_Menu", &CMenus::DoButton_Menu)
 			.addFunction("DoButton_MenuTab", &CMenus::DoButton_MenuTab)

@@ -78,7 +78,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		// dynamic camera
 		Left.HSplitTop(20.0f, &Button, &Left);
-		static int s_DynamicCameraButton = 0;
+		static CButtonContainer s_DynamicCameraButton;
 		if(DoButton_CheckBox(&s_DynamicCameraButton, Localize("Dynamic Camera"), g_Config.m_ClMouseDeadzone != 0, &Button))
 		{
 			if(g_Config.m_ClMouseDeadzone)
@@ -98,31 +98,36 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		// weapon pickup
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeapons, Localize("Switch weapon on pickup"), g_Config.m_ClAutoswitchWeapons, &Button))
+		static CButtonContainer s_CheckboxAutoswitchWeapons;
+		if(DoButton_CheckBox(&s_CheckboxAutoswitchWeapons, Localize("Switch weapon on pickup"), g_Config.m_ClAutoswitchWeapons, &Button))
 			g_Config.m_ClAutoswitchWeapons ^= 1;
 
 		// weapon out of ammo autoswitch
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeaponsOutOfAmmo, Localize("Switch weapon when out of ammo"), g_Config.m_ClAutoswitchWeaponsOutOfAmmo, &Button))
+		static CButtonContainer s_CheckboxAutoswitchWeaponsOutOfAmmo;
+		if(DoButton_CheckBox(&s_CheckboxAutoswitchWeaponsOutOfAmmo, Localize("Switch weapon when out of ammo"), g_Config.m_ClAutoswitchWeaponsOutOfAmmo, &Button))
 			g_Config.m_ClAutoswitchWeaponsOutOfAmmo ^= 1;
 
 		// weapon reset on death
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
+		static CButtonContainer s_CheckboxResetWantedWeaponOnDeath;
+		if(DoButton_CheckBox(&s_CheckboxResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
 			g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
 
 		// chat messages
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClShowChatFriends, Localize("Show only chat messages from friends"), g_Config.m_ClShowChatFriends, &Button))
+		static CButtonContainer s_CheckboxShowChatFriends;
+		if(DoButton_CheckBox(&s_CheckboxShowChatFriends, Localize("Show only chat messages from friends"), g_Config.m_ClShowChatFriends, &Button))
 			g_Config.m_ClShowChatFriends ^= 1;
 
 		// name plates
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClNameplates, Localize("Show name plates"), g_Config.m_ClNameplates, &Button))
+		static CButtonContainer s_CheckboxNameplates;
+		if(DoButton_CheckBox(&s_CheckboxNameplates, Localize("Show name plates"), g_Config.m_ClNameplates, &Button))
 			g_Config.m_ClNameplates ^= 1;
 
 		if(g_Config.m_ClNameplates)
@@ -132,32 +137,37 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Button, &Right);
 			UI()->DoLabelScaled(&Label, Localize("Name plates size"), 13.0f, -1);
 			Button.HMargin(2.0f, &Button);
-			g_Config.m_ClNameplatesSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesSize, &Button, g_Config.m_ClNameplatesSize/100.0f, 0, g_Config.m_ClNameplatesSize)*100.0f+0.1f);
+			static CButtonContainer s_Scrollbar;
+			g_Config.m_ClNameplatesSize = (int)(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_ClNameplatesSize/100.0f, 0, g_Config.m_ClNameplatesSize)*100.0f+0.1f);
 
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
+			static CButtonContainer s_CheckboxNameplatesTeamcolors;
+			if(DoButton_CheckBox(&s_CheckboxNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
 				g_Config.m_ClNameplatesTeamcolors ^= 1;
 
 			Right.HSplitTop(5.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClNameplatesClan, Localize("Show clan above name plates"), g_Config.m_ClNameplatesClan, &Button))
+			static CButtonContainer s_CheckboxNameplatesClan;
+			if(DoButton_CheckBox(&s_CheckboxNameplatesClan, Localize("Show clan above name plates"), g_Config.m_ClNameplatesClan, &Button))
 				g_Config.m_ClNameplatesClan ^= 1;
-			}
+		}
 
-			if(g_Config.m_ClNameplatesClan)
-			{
-				Right.HSplitTop(2.5f, 0, &Right);
-				Right.HSplitTop(20.0f, &Label, &Right);
-				Right.HSplitTop(20.0f, &Button, &Right);
-				UI()->DoLabelScaled(&Label, Localize("Clan plates size"), 13.0f, -1);
-				Button.HMargin(2.0f, &Button);
-				g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize/100.0f, 0, g_Config.m_ClNameplatesClanSize)*100.0f+0.1f);
-			}
-		
-			Right.HSplitTop(5.0f, 0, &Right);
+		if(g_Config.m_ClNameplatesClan)
+		{
+			Right.HSplitTop(2.5f, 0, &Right);
+			Right.HSplitTop(20.0f, &Label, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClNamePlatesATH, Localize("Show other ATH user"), g_Config.m_ClNamePlatesATH, &Button))
-				g_Config.m_ClNamePlatesATH ^= 1;
+			UI()->DoLabelScaled(&Label, Localize("Clan plates size"), 13.0f, -1);
+			Button.HMargin(2.0f, &Button);
+			CButtonContainer s_Scrollbar;
+			g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_ClNameplatesClanSize/100.0f, 0, g_Config.m_ClNameplatesClanSize)*100.0f+0.1f);
+		}
+
+		Right.HSplitTop(5.0f, 0, &Right);
+		Right.HSplitTop(20.0f, &Button, &Right);
+		static CButtonContainer s_CheckboxNamePlatesATH;
+		if(DoButton_CheckBox(&s_CheckboxNamePlatesATH, Localize("Show other ATH user"), g_Config.m_ClNamePlatesATH, &Button))
+			g_Config.m_ClNamePlatesATH ^= 1;
 	}
 
 	// client
@@ -173,11 +183,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		// auto demo settings
 		{
 			Left.HSplitTop(20.0f, &Button, &Left);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
+			static CButtonContainer s_CheckboxAutoDemoRecord;
+			if(DoButton_CheckBox(&s_CheckboxAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
 				g_Config.m_ClAutoDemoRecord ^= 1;
 
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
+			static CButtonContainer s_CheckboxAutoScreenshot;
+			if(DoButton_CheckBox(&s_CheckboxAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
 				g_Config.m_ClAutoScreenshot ^= 1;
 
 			Left.HSplitTop(10.0f, 0, &Left);
@@ -191,7 +203,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 			Left.HSplitTop(20.0f, &Button, 0);
 			Button.HMargin(2.0f, &Button);
-			g_Config.m_ClAutoDemoMax = static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoDemoMax, &Button, g_Config.m_ClAutoDemoMax/1000.0f)*1000.0f+0.1f);
+			static CButtonContainer s_ScrollbarAutoDemoMax;
+			g_Config.m_ClAutoDemoMax = static_cast<int>(DoScrollbarH(&s_ScrollbarAutoDemoMax, &Button, g_Config.m_ClAutoDemoMax/1000.0f)*1000.0f+0.1f);
 
 			Right.HSplitTop(10.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Label, &Right);
@@ -203,7 +216,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 			Right.HSplitTop(20.0f, &Button, 0);
 			Button.HMargin(2.0f, &Button);
-			g_Config.m_ClAutoScreenshotMax = static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoScreenshotMax, &Button, g_Config.m_ClAutoScreenshotMax/1000.0f)*1000.0f+0.1f);
+			static CButtonContainer s_ScrollbarAutoScreenshotMax;
+			g_Config.m_ClAutoScreenshotMax = static_cast<int>(DoScrollbarH(&s_ScrollbarAutoScreenshotMax, &Button, g_Config.m_ClAutoScreenshotMax/1000.0f)*1000.0f+0.1f);
 		}
 
 		Left.HSplitTop(20.0f, 0, &Left);
@@ -217,11 +231,12 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
-		g_Config.m_ClCpuThrottle= round_to_int(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
+		static CButtonContainer s_ScrollbarCpuThrottle;
+		g_Config.m_ClCpuThrottle = round_to_int(DoScrollbarH(&s_ScrollbarCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 
 		{
 			CUIRect Checkbox;
-			static int s_CheckboxPID[2] = {0};
+			static CButtonContainer s_CheckboxPID[2];
 			Left.HSplitTop(20.0f, 0, &Left);
 			Left.HSplitTop(20.0f, &Label, &Left);
 			Button.VSplitRight(20.0f, &Button, 0);
@@ -233,8 +248,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			if(DoButton_CheckBox(&s_CheckboxPID[0], "", g_Config.m_ClReconnectFull, &Checkbox))
 				g_Config.m_ClReconnectFull = g_Config.m_ClReconnectFull ? 0 : 5;
 			Button.VSplitLeft(Button.h/2, 0, &Button);
+			static CButtonContainer s_ScrollbarReconnectFull;
 			if(g_Config.m_ClReconnectFull)
-				g_Config.m_ClReconnectFull = max(5, round_to_int(DoScrollbarH(&g_Config.m_ClReconnectFull, &Button, g_Config.m_ClReconnectFull/180.0f)*180.0f));
+				g_Config.m_ClReconnectFull = max(5, round_to_int(DoScrollbarH(&s_ScrollbarReconnectFull, &Button, g_Config.m_ClReconnectFull/180.0f)*180.0f));
 
 			Left.HSplitTop(20.0f, 0, &Left);
 			Left.HSplitTop(20.0f, &Label, &Left);
@@ -247,8 +263,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			if(DoButton_CheckBox(&s_CheckboxPID[1], "", g_Config.m_ClReconnectTimeout, &Checkbox))
 				g_Config.m_ClReconnectTimeout = g_Config.m_ClReconnectTimeout ? 0 : 10;
 			Button.VSplitLeft(Button.h/2, 0, &Button);
+			static CButtonContainer s_ScrollbarReconnectTimeout;
 			if(g_Config.m_ClReconnectTimeout)
-				g_Config.m_ClReconnectTimeout = max(5, round_to_int(DoScrollbarH(&g_Config.m_ClReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout/180.0f)*180.0f));
+				g_Config.m_ClReconnectTimeout = max(5, round_to_int(DoScrollbarH(&s_ScrollbarReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout/180.0f)*180.0f));
 		}
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -263,7 +280,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, 0, &Right); //
 			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoStatboardScreenshot,
+			static CButtonContainer s_CheckboxAutoStatboardScreenshot;
+			if(DoButton_CheckBox(&s_CheckboxAutoStatboardScreenshot,
 						Localize("Automatically take statboard screenshot"),
 						g_Config.m_ClAutoStatboardScreenshot, &Button))
 			{
@@ -280,8 +298,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 			Right.HSplitTop(20.0f, &Button, 0);
 			Button.HMargin(2.0f, &Button);
+			static CButtonContainer s_CheckboxAutoStatboardScreenshotMax;
 			g_Config.m_ClAutoStatboardScreenshotMax =
-				static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoStatboardScreenshotMax,
+				static_cast<int>(DoScrollbarH(&s_CheckboxAutoStatboardScreenshotMax,
 							&Button,
 							g_Config.m_ClAutoStatboardScreenshotMax/1000.0f)*1000.0f+0.1f);
 		}
@@ -315,7 +334,8 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetName = 0.0f;
-	if(DoEditBox(Name, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
+	static CButtonContainer s_EditboxName;
+	if(DoEditBox(&s_EditboxName, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
 	{
 		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
@@ -324,7 +344,8 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 
 	Dummy.w /= 2.3f;
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &Dummy))
+	static CButtonContainer s_CheckboxShowKillMessages;
+	if(DoButton_CheckBox(&s_CheckboxShowKillMessages, Localize("Dummy settings"), m_Dummy, &Dummy))
 	{
 		m_Dummy ^= 1;
 	}
@@ -337,7 +358,8 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetClan = 0.0f;
-	if(DoEditBox(Clan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
+	static CButtonContainer s_EditboxClan;
+	if(DoEditBox(&s_EditboxClan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 	{
 		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
@@ -349,15 +371,16 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	static float s_ScrollValue = 0.0f;
 	int OldSelected = -1;
-	UiDoListboxStart(&s_ScrollValue, &MainView, 50.0f, Localize("Country"), "", m_pClient->m_pCountryFlags->Num(), 6, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 50.0f, Localize("Country"), "", m_pClient->m_pCountryFlags->Num(), 6, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
 		if(pEntry->m_CountryCode == *Country)
 			OldSelected = i;
-
-		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i);
+		CPointerContainer Container(&pEntry->m_CountryCode);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CUIRect Label;
@@ -435,10 +458,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Dummy.VSplitLeft(Dummy.w/2.3f, &Dummy, &Right);
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
-	static int s_SkinFilter = 0;
+	static int s_SkinFilter;
+	static CButtonContainer s_ButtonSkinFilter;
 	char aFilterLabel[32];
 	str_format(aFilterLabel, sizeof(aFilterLabel), "Filter: %s", s_SkinFilter == 0 ? Localize("All Skins") : s_SkinFilter == 1 ? Localize("Vanilla Skins only") : s_SkinFilter == 2 ? Localize("Non-Vanilla Skins only") : "");
-	if(DoButton_CheckBox_Number(&s_SkinFilter, aFilterLabel, s_SkinFilter, &DummyLabel))
+	if(DoButton_CheckBox_Number(&s_ButtonSkinFilter, aFilterLabel, s_SkinFilter, &DummyLabel))
 	{
 		if(++s_SkinFilter > 2) s_SkinFilter = 0;
 		s_InitSkinlist = true;
@@ -446,7 +470,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Right.VSplitLeft(10.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Right, 0);
-	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Allow Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &Right))
+	static CButtonContainer s_VanillaSkinsOnly;
+	if(DoButton_CheckBox(&s_VanillaSkinsOnly, Localize("Allow Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &Right))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
 		GameClient()->m_pSkins->RefreshSkinList();
@@ -455,7 +480,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Dummy.HSplitTop(5.0f, 0, &Dummy);
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
-	static int s_DummySettings = 0;
+	static CButtonContainer s_DummySettings;
 	if(DoButton_CheckBox(&s_DummySettings, Localize("Dummy settings"), m_Dummy, &DummyLabel))
 	{
 		m_Dummy ^= 1;
@@ -466,8 +491,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_SkinSaveAsIdentClicked = 0;
 	if(s_SkinSaveAsIdentClicked == 0)
 	{
-		static int s_SkinSaveAsIdentButton = 0;
-		if(DoButton_Menu(&s_SkinSaveAsIdentButton, Localize("Save Skin as new Identity"), 0, &DummyLabel))
+		static CButtonContainer s_Button;
+		if(DoButton_Menu(&s_Button, Localize("Save Skin as new Identity"), 0, &DummyLabel))
 			s_SkinSaveAsIdentClicked = 1;
 	}
 	else if(s_SkinSaveAsIdentClicked == 1)
@@ -477,9 +502,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		static float s_NewIdentName = 0.0f;
 		static char aName[16];
-		DoEditBox(&s_NewIdentName, &DummyLabel, aName, sizeof(aName), 10, &s_NewIdentName, false, CUI::CORNER_L, g_Config.m_PlayerName);
+		static CButtonContainer s_NewIdentNameEditbox;
+		DoEditBox(&s_NewIdentNameEditbox, &DummyLabel, aName, sizeof(aName), 10, &s_NewIdentName, false, CUI::CORNER_L, g_Config.m_PlayerName);
 
-		static int s_OkButton = 0;
+		static CButtonContainer s_OkButton;
 		if(DoButton_Menu(&s_OkButton, Localize("Ok"), 0, &DummyLabelRight, 0, CUI::CORNER_R))
 		{
 			CIdentity::CIdentEntry Entry;
@@ -530,7 +556,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		CUIRect bt = Button;
 		bt.w /= 2.0f;
-		if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &bt))
+		static CButtonContainer s_ColorBody;
+		if(DoButton_CheckBox(&s_ColorBody, Localize("Custom colors"), *UseCustomColor, &bt))
 		{
 			*UseCustomColor = *UseCustomColor?0:1;
 			if(m_Dummy)
@@ -578,7 +605,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				Button.HMargin(2.0f, &Button);
 
 				float k = ((PrevColor>>((2-s)*8))&0xff) / 255.0f;
-				k = DoScrollbarH(&s_aColorSlider[i][s], &Button, k, 0, k*255.0f);
+				CPointerContainer Container(&s_aColorSlider[i][s]);
+				k = DoScrollbarH(&Container, &Button, k, 0, k*255.0f);
 				Color <<= 8;
 				Color += clamp((int)(k*255), 0, 255);
 				UI()->DoLabelScaled(&Label, paLabels[s], 14.0f, -1);
@@ -622,7 +650,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
 		const CSkins::CSkin *s = s_paSkinList[i];
@@ -632,7 +661,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(str_comp(s->m_aName, Skin) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		CPointerContainer Container(&s_paSkinList[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		char aBuf[128];
 		if(Item.m_Visible)
 		{
@@ -694,12 +724,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
 		static float Offset = 0.0f;
-		if(DoEditBox(&g_Config.m_ClSkinFilterString, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
+		static CButtonContainer s_SkinFilterString;
+		if(DoEditBox(&s_SkinFilterString, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
 			s_InitSkinlist = true;
 
 		// clear button
 		{
-			static int s_ClearButton = 0;
+			static CButtonContainer s_ClearButton;
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClSkinFilterString[0] = 0;
@@ -710,7 +741,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		Refresh.VSplitLeft(5.0f, 0, &Refresh);
 		Refresh.VSplitLeft(150.0f, &Refresh, 0);
-		static int s_RefreshButton = 0;
+		static CButtonContainer s_RefreshButton;
 		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Refresh))
 		{
 			GameClient()->m_pSkins->RefreshSkinList();
@@ -792,7 +823,7 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View)
 {
 	CALLSTACK_ADD();
 
-	for (int i = Start; i < Stop; i++)
+	for(int i = Start; i < Stop; i++)
 	{
 		CKeyInfo &Key = gs_aKeys[i];
 		CUIRect Button, Label;
@@ -804,7 +835,8 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View)
 
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 		int OldId = Key.m_KeyId;
-		int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId);
+		CPointerContainer Container((void *)&gs_aKeys[i].m_Name);
+		int NewId = DoKeyReader(&Container, &Button, OldId);
 		if(NewId != OldId)
 		{
 			if(OldId != 0 || NewId == 0)
@@ -867,9 +899,10 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			Button.VSplitLeft(9.0f, 0, &Button);
 			static char aInput[6] = {0}; static float s_Offset = 0.0f;
 			str_format(aInput, sizeof(aInput), "%i", g_Config.m_UiMousesens);
-			DoEditBox(&aInput, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
+			static CButtonContainer s_Input, s_Scrollbar;
+			DoEditBox(&s_Input, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
 			g_Config.m_UiMousesens = atoi(aInput);
-			g_Config.m_UiMousesens = round_to_int(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (g_Config.m_UiMousesens-5)/995.0f)*995.0f)+5;
+			g_Config.m_UiMousesens = round_to_int(DoScrollbarH(&s_Scrollbar, &Button, (g_Config.m_UiMousesens-5)/995.0f)*995.0f)+5;
 			MovementSettings.HSplitTop(5.0f, 0, &MovementSettings);
 			if(g_Config.m_UiMousesens < 5) g_Config.m_UiMousesens = 5;
 		}
@@ -884,9 +917,10 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			Button.VSplitLeft(9.0f, 0, &Button);
 			static char aInput[6] = {0}; static float s_Offset = 0.0f;
 			str_format(aInput, sizeof(aInput), "%i", g_Config.m_InpMousesens);
-			DoEditBox(&aInput, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
+			static CButtonContainer s_Input, s_Scrollbar;
+			DoEditBox(&s_Input, &InputBox, aInput, sizeof(aInput), 9.0f, &s_Offset, false);
 			g_Config.m_InpMousesens = atoi(aInput);
-			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/1995.0f)*1995.0f)+5;
+			g_Config.m_InpMousesens = round_to_int(DoScrollbarH(&s_Scrollbar, &Button, (g_Config.m_InpMousesens-5)/1995.0f)*1995.0f)+5;
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 			if(g_Config.m_InpMousesens < 5) g_Config.m_InpMousesens = 5;
 		}
@@ -925,16 +959,16 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		ResetButton.HMargin(10.0f, &ResetButton);
 		ResetButton.VMargin(30.0f, &ResetButton);
 		//ResetButton.HSplitTop(20.0f, &ResetButton, 0);
-		static int s_DefaultButton = 0;
+		static CButtonContainer s_DefaultButton;
 		static int64 s_Clicked = 0;
 		if(!s_Clicked)
 		{
-			if(DoButton_Menu((void*)&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
+			if(DoButton_Menu(&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
 				s_Clicked = time_get();
 		}
 		else
 		{
-			if(DoButton_Menu((void*)&s_DefaultButton, Localize("Are you sure?"), 0, &ResetButton, 0, CUI::CORNER_ALL, vec4(0.7f, 0.2f, 0.2f, 0.5f)))
+			if(DoButton_Menu(&s_DefaultButton, Localize("Are you sure?"), 0, &ResetButton, 0, CUI::CORNER_ALL, vec4(0.7f, 0.2f, 0.2f, 0.5f)))
 			{
 				m_pClient->m_pBinds->SetDefaults();
 				s_Clicked = 0;
@@ -1024,7 +1058,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	// draw allmodes switch
 	ModeList.HSplitTop(20, &Button, &ModeList);
-	if(DoButton_CheckBox(&g_Config.m_GfxDisplayAllModes, Localize("Show only supported"), g_Config.m_GfxDisplayAllModes^1, &Button))
+	static CButtonContainer s_CheckboxDisplayAllModes;
+	if(DoButton_CheckBox(&s_CheckboxDisplayAllModes, Localize("Show only supported"), g_Config.m_GfxDisplayAllModes^1, &Button))
 	{
 		g_Config.m_GfxDisplayAllModes ^= 1;
 		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
@@ -1035,7 +1070,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	int OldSelected = -1;
 	int G = gcd(s_GfxScreenWidth, s_GfxScreenHeight);
 	str_format(aBuf, sizeof(aBuf), "%s: %dx%d %d bit (%d:%d)", Localize("Current"), s_GfxScreenWidth, s_GfxScreenHeight, s_GfxColorDepth, s_GfxScreenWidth/G, s_GfxScreenHeight/G);
-	UiDoListboxStart(&s_NumNodes , &ModeList, 24.0f, Localize("Display Modes"), aBuf, s_NumNodes, 1, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox , &ModeList, 24.0f, Localize("Display Modes"), aBuf, s_NumNodes, 1, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_NumNodes; ++i)
 	{
@@ -1047,7 +1083,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			OldSelected = i;
 		}
 
-		CListboxItem Item = UiDoListboxNextItem(&s_aModes[i], OldSelected == i);
+		CPointerContainer Container(&s_aModes[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
 			int G = gcd(s_aModes[i].m_Width, s_aModes[i].m_Height);
@@ -1071,23 +1108,24 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	// switches
+	static CButtonContainer s_Checkbox1, s_Checkbox2, s_Checkbox3, s_Checkbox4, s_Checkbox5, s_Checkbox6, s_Checkbox7;
 	MainView.VSplitRight(30.0f, &MainView, 0);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxBorderless, Localize("Borderless window"), g_Config.m_GfxBorderless, &Button))
+	if(DoButton_CheckBox(&s_Checkbox1, Localize("Borderless window"), g_Config.m_GfxBorderless, &Button))
 	{
 		Client()->ToggleWindowBordered();
 	}
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxFullscreen, Localize("Fullscreen"), g_Config.m_GfxFullscreen, &Button))
+	if(DoButton_CheckBox(&s_Checkbox2, Localize("Fullscreen"), g_Config.m_GfxFullscreen, &Button))
 	{
 		Client()->ToggleFullscreen();
 	}
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxVsync, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if your game reacts too slow")))
+	if(DoButton_CheckBox(&s_Checkbox3, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if your game reacts too slow")))
 	{
 		Client()->ToggleWindowVSync();
 	}
@@ -1097,7 +1135,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		int NumScreens = Graphics()->GetNumScreens();
 		MainView.HSplitTop(3.0f, 0, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		int Screen_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxScreen, Localize("Screen"), g_Config.m_GfxScreen, &Button);
+		int Screen_MouseButton = DoButton_CheckBox_Number(&s_Checkbox4, Localize("Screen"), g_Config.m_GfxScreen, &Button);
 		if(Screen_MouseButton == 1) //inc
 		{
 			Client()->SwitchWindowScreen((g_Config.m_GfxScreen+1)%NumScreens);
@@ -1112,7 +1150,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxFsaaSamples, Localize("FSAA samples"), g_Config.m_GfxFsaaSamples, &Button, Localize("Smooths graphics at the expense of FPS"));
+	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&s_Checkbox5, Localize("FSAA samples"), g_Config.m_GfxFsaaSamples, &Button, Localize("Smooths graphics at the expense of FPS"));
 	if(GfxFsaaSamples_MouseButton == 1) //inc
 	{
 		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples+1)%17;
@@ -1126,7 +1164,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxTextureQuality, Localize("Quality Textures"), g_Config.m_GfxTextureQuality, &Button))
+	if(DoButton_CheckBox(&s_Checkbox6, Localize("Quality Textures"), g_Config.m_GfxTextureQuality, &Button))
 	{
 		g_Config.m_GfxTextureQuality ^= 1;
 		CheckSettings = true;
@@ -1134,7 +1172,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxTextureCompression, Localize("Texture Compression"), g_Config.m_GfxTextureCompression, &Button, Localize("Disable this if you get blurry textures")))
+	if(DoButton_CheckBox(&s_Checkbox7, Localize("Texture Compression"), g_Config.m_GfxTextureCompression, &Button, Localize("Disable this if you get blurry textures")))
 	{
 		g_Config.m_GfxTextureCompression ^= 1;
 		CheckSettings = true;
@@ -1142,37 +1180,44 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button, Localize("Show map decoration elements")))
+	static CButtonContainer s_CheckboxHighDetail;
+	if(DoButton_CheckBox(&s_CheckboxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button, Localize("Show map decoration elements")))
 		g_Config.m_GfxHighDetail ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button, Localize("Disable fancy effects to gain more fps")))
+	static CButtonContainer s_CheckboxLowGraphics;
+	if(DoButton_CheckBox(&s_CheckboxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button, Localize("Disable fancy effects to gain more fps")))
 		g_Config.m_GfxLowGraphics ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxBackgroundRender, Localize("Render when inactive"), g_Config.m_GfxBackgroundRender, &Button, Localize("Render graphics when window is in background")))
+	static CButtonContainer s_CheckboxBackgroundRender;
+	if(DoButton_CheckBox(&s_CheckboxBackgroundRender, Localize("Render when inactive"), g_Config.m_GfxBackgroundRender, &Button, Localize("Render graphics when window is in background")))
 		g_Config.m_GfxBackgroundRender ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button, Localize("May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.")))
+	static CButtonContainer s_CheckboxNoclip;
+	if(DoButton_CheckBox(&s_CheckboxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button, Localize("May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.")))
 		g_Config.m_GfxNoclip ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxQuadAsTriangle, Localize("Render quads as triangles"), g_Config.m_GfxQuadAsTriangle, &Button, Localize("Fixes quad coloring on some GPUs")))
+	static CButtonContainer s_CheckboxQuadAsTriangle;
+	if(DoButton_CheckBox(&s_CheckboxQuadAsTriangle, Localize("Render quads as triangles"), g_Config.m_GfxQuadAsTriangle, &Button, Localize("Fixes quad coloring on some GPUs")))
 		g_Config.m_GfxQuadAsTriangle ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxFinish, Localize("Wait for GL commands to finish"), g_Config.m_GfxFinish, &Button, Localize("Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.")))
+	static CButtonContainer s_CheckboxFinish;
+	if(DoButton_CheckBox(&s_CheckboxFinish, Localize("Wait for GL commands to finish"), g_Config.m_GfxFinish, &Button, Localize("Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.")))
 		g_Config.m_GfxFinish ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("High-DPI screen support"), g_Config.m_GfxHighdpi, &Button, Localize("Be careful: experimental")))
+	static CButtonContainer s_CheckboxHighdpi;
+	if(DoButton_CheckBox(&s_CheckboxHighdpi, Localize("High-DPI screen support"), g_Config.m_GfxHighdpi, &Button, Localize("Be careful: experimental")))
 	{
 		g_Config.m_GfxHighdpi ^= 1;
 		CheckSettings = true;
@@ -1225,7 +1270,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		Button.HSplitTop(4.0f, 0, &Button);
 
 		float k = (*pColorSlider[s]) / 255.0f;
-		k = DoScrollbarH(pColorSlider[s], &Button, k, 0, k*255.0f);
+		CPointerContainer Container(pColorSlider[s]);
+		k = DoScrollbarH(&Container, &Button, k, 0, k*255.0f);
 		*pColorSlider[s] = (int)(k*255.0f);
 		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
 	}
@@ -1243,7 +1289,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
 	MainView.HSplitTop(15.0f, &Text, &MainView);
-	static int s_Scrollbar = 0;
+	static CButtonContainer s_Scrollbar;
 	static int s_NewVal = g_Config.m_UiScale; // proxy it to not instantly change the ui size
 	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != (void*)&s_Scrollbar) // if it has been changed in f1
 		s_NewVal = g_Config.m_UiScale;
@@ -1262,7 +1308,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	static int s_SndRate = g_Config.m_SndRate;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndEnable, Localize("Use sounds"), g_Config.m_SndEnable, &Button))
+	static CButtonContainer s_CheckboxSndEnable;
+	if(DoButton_CheckBox(&s_CheckboxSndEnable, Localize("Use sounds"), g_Config.m_SndEnable, &Button))
 	{
 		g_Config.m_SndEnable ^= 1;
 		if(g_Config.m_SndEnable)
@@ -1280,7 +1327,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndMusic, Localize("Play background music"), g_Config.m_SndMusic, &Button))
+	static CButtonContainer s_CheckboxSndMusic;
+	if(DoButton_CheckBox(&s_CheckboxSndMusic, Localize("Play background music"), g_Config.m_SndMusic, &Button))
 	{
 		g_Config.m_SndMusic ^= 1;
 		if(Client()->State() == IClient::STATE_OFFLINE)
@@ -1294,12 +1342,14 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndNonactiveMute, Localize("Mute when not active"), g_Config.m_SndNonactiveMute, &Button))
+	static CButtonContainer s_CheckboxSndNonactiveMute;
+	if(DoButton_CheckBox(&s_CheckboxSndNonactiveMute, Localize("Mute when not active"), g_Config.m_SndNonactiveMute, &Button))
 		g_Config.m_SndNonactiveMute ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndGame, Localize("Enable game sounds"), g_Config.m_SndGame, &Button))
+	static CButtonContainer s_CheckboxSndGame;
+	if(DoButton_CheckBox(&s_CheckboxSndGame, Localize("Enable game sounds"), g_Config.m_SndGame, &Button))
 		g_Config.m_SndGame ^= 1;
 
 	if(g_Config.m_SndGame)
@@ -1307,7 +1357,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(3.0f, 0, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.x += 10.0f;
-		if(DoButton_CheckBox(&g_Config.m_SndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
+		static CButtonContainer s_CheckboxSndGun;
+		if(DoButton_CheckBox(&s_CheckboxSndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
 			g_Config.m_SndGun ^= 1;
 
 		// TODO: Add more game sounds here!
@@ -1315,32 +1366,38 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndSpawn, Localize("Enable spawn sound"), g_Config.m_SndSpawn, &Button))
+	static CButtonContainer s_CheckboxSndSpawn;
+	if(DoButton_CheckBox(&s_CheckboxSndSpawn, Localize("Enable spawn sound"), g_Config.m_SndSpawn, &Button))
 		g_Config.m_SndSpawn ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndServerMessage, Localize("Enable server message sound"), g_Config.m_SndServerMessage, &Button))
+	static CButtonContainer s_CheckboxSndServerMessage;
+	if(DoButton_CheckBox(&s_CheckboxSndServerMessage, Localize("Enable server message sound"), g_Config.m_SndServerMessage, &Button))
 		g_Config.m_SndServerMessage ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndChat, Localize("Enable regular chat sound"), g_Config.m_SndChat, &Button))
+	static CButtonContainer s_CheckboxSndChat;
+	if(DoButton_CheckBox(&s_CheckboxSndChat, Localize("Enable regular chat sound"), g_Config.m_SndChat, &Button))
 		g_Config.m_SndChat ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndTeamChat, Localize("Enable team chat sound"), g_Config.m_SndTeamChat, &Button))
+	static CButtonContainer s_CheckboxSndTeamChat;
+	if(DoButton_CheckBox(&s_CheckboxSndTeamChat, Localize("Enable team chat sound"), g_Config.m_SndTeamChat, &Button))
 		g_Config.m_SndTeamChat ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndHighlight, Localize("Enable highlighted chat sound"), g_Config.m_SndHighlight, &Button))
+	static CButtonContainer s_CheckboxSndHighlight;
+	if(DoButton_CheckBox(&s_CheckboxSndHighlight, Localize("Enable highlighted chat sound"), g_Config.m_SndHighlight, &Button))
 		g_Config.m_SndHighlight ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndIRC, Localize("Enable irc chat sound"), g_Config.m_SndIRC, &Button))
+	static CButtonContainer s_CheckboxSndIRC;
+	if(DoButton_CheckBox(&s_CheckboxSndIRC, Localize("Enable irc chat sound"), g_Config.m_SndIRC, &Button))
 		g_Config.m_SndIRC ^= 1;
 
 /*	MainView.HSplitTop(3.0f, 0, &MainView);
@@ -1357,7 +1414,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		UI()->DoLabelScaled(&Button, Localize("Sample rate"), 14.0f, -1);
 		Button.VSplitLeft(190.0f, 0, &Button);
 		static float Offset = 0.0f;
-		DoEditBox(&g_Config.m_SndRate, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
+		static CButtonContainer s_EditboxSndRate;
+		DoEditBox(&s_EditboxSndRate, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
 		g_Config.m_SndRate = max(1, str_toint(aBuf));
 		m_NeedRestartSound = !s_SndEnable || s_SndRate != g_Config.m_SndRate;
 	}
@@ -1370,7 +1428,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sound volume"), 14.0f, -1);
-		g_Config.m_SndVolume = round_to_int(DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume/100.0f, 0, g_Config.m_SndVolume)*100.0f);
+		static CButtonContainer s_Scrollbar;
+		g_Config.m_SndVolume = round_to_int(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_SndVolume/100.0f, 0, g_Config.m_SndVolume)*100.0f);
 	}
 
 	// volume slider map sounds
@@ -1381,7 +1440,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Map sound volume"), 14.0f, -1);
-		g_Config.m_SndMapSoundVolume = round_to_int(DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume/100.0f, 0, g_Config.m_SndMapSoundVolume)*100.0f);
+		static CButtonContainer s_Scrollbar;
+		g_Config.m_SndMapSoundVolume = round_to_int(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_SndMapSoundVolume/100.0f, 0, g_Config.m_SndMapSoundVolume)*100.0f);
 	}
 }
 
@@ -1462,7 +1522,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-	static int s_LanguageList = 0;
+	static CButtonContainer s_LanguageList;
 	static int s_SelectedLanguage = 0;
 	static sorted_array<CLanguage> s_Languages;
 	static float s_ScrollValue = 0;
@@ -1489,7 +1549,8 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	for(sorted_array<CLanguage>::range r = s_Languages.all(); !r.empty(); r.pop_front())
 	{
-		CListboxItem Item = UiDoListboxNextItem(&r.front());
+		CPointerContainer Container(&r.front());
+		CListboxItem Item = UiDoListboxNextItem(&Container);
 
 		if(Item.m_Visible)
 		{
@@ -1577,7 +1638,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		else
 			smooth_set(&FadeVals[i], 0.0f, 10.0f*(0.005f/Client()->RenderFrameTime()));
 		Button.w += FadeVals[i];
-		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R,
+		CPointerContainer Container(&aTabs[i]);
+		if(DoButton_MenuTab(&Container, aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R,
 				i == 8 && m_pfnAppearanceSubpage ? vec4(0.8f, 0.6f, 0.25f, ms_ColorTabbarActive.a) : ms_ColorTabbarActive
 				))
 		{
@@ -1624,7 +1686,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	}
 	else if(m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 	{
-		static int s_ButtonRestart = 0;
+		static CButtonContainer s_ButtonRestart;
 		if(DoButton_Menu(&s_ButtonRestart, Localize("You must restart the game for all settings to take effect."), 0, &RestartWarning, 0, CUI::CORNER_ALL, vec4(0.75f, 0.18f, 0.18f, 0.83f)))
 			Client()->Restart();
 	}
@@ -1646,13 +1708,15 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	// show hud
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), g_Config.m_ClShowhud, &Button))
+	static CButtonContainer s_CheckboxShowhud;
+	if(DoButton_CheckBox(&s_CheckboxShowhud, Localize("Show ingame HUD"), g_Config.m_ClShowhud, &Button))
 		g_Config.m_ClShowhud ^= 1;
 
 
 	Left.HSplitTop(3.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if (DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
+	static CButtonContainer s_CheckboxDDRaceScoreBoard;
+	if (DoButton_CheckBox(&s_CheckboxDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
 	{
 		g_Config.m_ClDDRaceScoreBoard ^= 1;
 	}
@@ -1664,12 +1728,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitMid(&Button, &Second);
 		Button.w -= 2.5f; Second.w -= 2.5f;
 		Second.x += 2.5f;
-		if (DoButton_CheckBox(&g_Config.m_ClShowIDsScoreboard, Localize("Show IDs in Scoreboard"), g_Config.m_ClShowIDsScoreboard, &Button))
+		static CButtonContainer s_CheckboxShowIDsScoreboard;
+		if (DoButton_CheckBox(&s_CheckboxShowIDsScoreboard, Localize("Show IDs in Scoreboard"), g_Config.m_ClShowIDsScoreboard, &Button))
 		{
 			g_Config.m_ClShowIDsScoreboard ^= 1;
 		}
 
-		if (DoButton_CheckBox(&g_Config.m_ClShowIDsChat, Localize("Show IDs in Chat"), g_Config.m_ClShowIDsChat, &Second))
+		static CButtonContainer s_CheckboxShowIDsChat;
+		if (DoButton_CheckBox(&s_CheckboxShowIDsChat, Localize("Show IDs in Chat"), g_Config.m_ClShowIDsChat, &Second))
 		{
 			g_Config.m_ClShowIDsChat ^= 1;
 		}
@@ -1677,49 +1743,56 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if (DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
+	static CButtonContainer s_CheckboxShowhudScore;
+	if (DoButton_CheckBox(&s_CheckboxShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
 	{
 		g_Config.m_ClShowhudScore ^= 1;
 	}
 
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if (DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
+	static CButtonContainer s_CheckboxShowhudHealthAmmo;
+	if (DoButton_CheckBox(&s_CheckboxShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
 	{
 		g_Config.m_ClShowhudHealthAmmo ^= 1;
 	}
 
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if (DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmoBars, Localize("Show health + ammo as bars"), g_Config.m_ClShowhudHealthAmmoBars, &Button))
+	static CButtonContainer s_CheckboxShowhudHealthAmmoBars;
+	if (DoButton_CheckBox(&s_CheckboxShowhudHealthAmmoBars, Localize("Show health + ammo as bars"), g_Config.m_ClShowhudHealthAmmoBars, &Button))
 	{
 		g_Config.m_ClShowhudHealthAmmoBars ^= 1;
 	}
 
 	Left.HSplitTop(3.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if (DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
+	static CButtonContainer s_CheckboxShowChat;
+	if (DoButton_CheckBox(&s_CheckboxShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
 	{
 		g_Config.m_ClShowChat ^= 1;
 	}
 
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if (DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
+	static CButtonContainer s_CheckboxChatTeamColors;
+	if (DoButton_CheckBox(&s_CheckboxChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
 	{
 		g_Config.m_ClChatTeamColors ^= 1;
 	}
 
 	Left.HSplitTop(3.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if (DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
+	static CButtonContainer s_CheckboxShowKillMessages;
+	if (DoButton_CheckBox(&s_CheckboxShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
 	{
 		g_Config.m_ClShowKillMessages ^= 1;
 	}
 
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if (DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
+	static CButtonContainer s_CheckboxShowVotesAfterVoting;
+	if (DoButton_CheckBox(&s_CheckboxShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
 	{
 		g_Config.m_ClShowVotesAfterVoting ^= 1;
 	}
@@ -1729,7 +1802,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	{
 		CUIRect Other;
 		Button.VSplitLeft(Button.w*0.4f, &Button, &Other);
-		if (DoButton_CheckBox(&g_Config.m_ClNotifications, Localize("Show notifications"), g_Config.m_ClNotifications, &Button))
+		static CButtonContainer s_CheckboxNotifications;
+		if (DoButton_CheckBox(&s_CheckboxNotifications, Localize("Show notifications"), g_Config.m_ClNotifications, &Button))
 		{
 			g_Config.m_ClNotifications ^= 1;
 		}
@@ -1737,7 +1811,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Other.w -= Button.w*0.1f;
 		Other.h *= 0.80f;
 		Other.y += 2.0f;
-		g_Config.m_ClShowhudChatbox = round_to_int(DoScrollbarH(&g_Config.m_ClShowhudChatbox, &Other, g_Config.m_ClShowhudChatbox/100.0f, Localize("Chatbox Alpha"), g_Config.m_ClShowhudChatbox)*100.0f);
+		static CButtonContainer s_Scrollbar;
+		g_Config.m_ClShowhudChatbox = round_to_int(DoScrollbarH(&s_Scrollbar, &Other, g_Config.m_ClShowhudChatbox/100.0f, Localize("Chatbox Alpha"), g_Config.m_ClShowhudChatbox)*100.0f);
 	}
 
 	MainView.HSplitTop(170.0f, &Messages, &MainView);
@@ -1754,34 +1829,35 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Label.VSplitRight(50.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
 		{
-			static int s_DefaultButton = 0;
+			static CButtonContainer s_DefaultButton;
 			vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
 			if(((int)HSL.h != g_Config.m_ClMessageSystemHue) || ((int)HSL.s != g_Config.m_ClMessageSystemSat) || ((int)HSL.l != g_Config.m_ClMessageSystemLht))
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					g_Config.m_ClMessageSystemHue = HSL.h;
-					g_Config.m_ClMessageSystemSat = HSL.s;
-					g_Config.m_ClMessageSystemLht = HSL.l;
+					g_Config.m_ClMessageSystemHue = (int)HSL.h;
+					g_Config.m_ClMessageSystemSat = (int)HSL.s;
+					g_Config.m_ClMessageSystemLht = (int)HSL.l;
 				}
 		}
+		static CButtonContainer s_Scrollbar1, s_Scrollbar2, s_Scrollbar3;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageSystemHue = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemHue, &Button, g_Config.m_ClMessageSystemHue / 255.0f, 0, g_Config.m_ClMessageSystemHue)*255.0f);
+		g_Config.m_ClMessageSystemHue = (int)(DoScrollbarH(&s_Scrollbar1, &Button, g_Config.m_ClMessageSystemHue / 255.0f, 0, g_Config.m_ClMessageSystemHue)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageSystemSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemSat, &Button, g_Config.m_ClMessageSystemSat / 255.0f, 0, g_Config.m_ClMessageSystemSat)*255.0f);
+		g_Config.m_ClMessageSystemSat = (int)(DoScrollbarH(&s_Scrollbar2, &Button, g_Config.m_ClMessageSystemSat / 255.0f, 0, g_Config.m_ClMessageSystemSat)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageSystemLht = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemLht, &Button, g_Config.m_ClMessageSystemLht / 255.0f, 0, g_Config.m_ClMessageSystemLht)*255.0f);
+		g_Config.m_ClMessageSystemLht = (int)(DoScrollbarH(&s_Scrollbar3, &Button, g_Config.m_ClMessageSystemLht / 255.0f, 0, g_Config.m_ClMessageSystemLht)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
 
@@ -1807,36 +1883,37 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Label.VSplitRight(50.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Highlighted message"), 16.0f, -1);
 		{
-			static int s_DefaultButton = 0;
+			static CButtonContainer s_DefaultButton;
 			vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
 			if(((int)HSL.h != g_Config.m_ClMessageHighlightHue) || ((int)HSL.s != g_Config.m_ClMessageHighlightSat) || ((int)HSL.l != g_Config.m_ClMessageHighlightLht))
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					g_Config.m_ClMessageHighlightHue = HSL.h;
-					g_Config.m_ClMessageHighlightSat = HSL.s;
-					g_Config.m_ClMessageHighlightLht = HSL.l;
+					g_Config.m_ClMessageHighlightHue = (int)HSL.h;
+					g_Config.m_ClMessageHighlightSat = (int)HSL.s;
+					g_Config.m_ClMessageHighlightLht = (int)HSL.l;
 				}
 		}
+		static CButtonContainer s_Scrollbar1, s_Scrollbar2, s_Scrollbar3;
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageHighlightHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightHue, &Button, g_Config.m_ClMessageHighlightHue / 255.0f, 0, g_Config.m_ClMessageHighlightHue)*255.0f);
+		g_Config.m_ClMessageHighlightHue = (int)(DoScrollbarH(&s_Scrollbar1, &Button, g_Config.m_ClMessageHighlightHue / 255.0f, 0, g_Config.m_ClMessageHighlightHue)*255.0f);
 
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageHighlightSat = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightSat, &Button, g_Config.m_ClMessageHighlightSat / 255.0f, 0, g_Config.m_ClMessageHighlightSat)*255.0f);
+		g_Config.m_ClMessageHighlightSat = (int)(DoScrollbarH(&s_Scrollbar2, &Button, g_Config.m_ClMessageHighlightSat / 255.0f, 0, g_Config.m_ClMessageHighlightSat)*255.0f);
 
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageHighlightLht = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightLht, &Button, g_Config.m_ClMessageHighlightLht / 255.0f, 0, g_Config.m_ClMessageHighlightLht)*255.0f);
+		g_Config.m_ClMessageHighlightLht = (int)(DoScrollbarH(&s_Scrollbar3, &Button, g_Config.m_ClMessageHighlightLht / 255.0f, 0, g_Config.m_ClMessageHighlightLht)*255.0f);
 
 		Right.HSplitTop(10.0f, &Label, &Right);
 
@@ -1867,33 +1944,34 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Team message"), 16.0f, -1);
 		{
 			vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
-			static int s_DefaultButton = 0;
+			static CButtonContainer s_DefaultButton;
 			if(((int)HSL.h != g_Config.m_ClMessageTeamHue) || ((int)HSL.s != g_Config.m_ClMessageTeamSat) || ((int)HSL.l != g_Config.m_ClMessageTeamLht))
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					g_Config.m_ClMessageTeamHue = HSL.h;
-					g_Config.m_ClMessageTeamSat = HSL.s;
-					g_Config.m_ClMessageTeamLht = HSL.l;
+					g_Config.m_ClMessageTeamHue = (int)HSL.h;
+					g_Config.m_ClMessageTeamSat = (int)HSL.s;
+					g_Config.m_ClMessageTeamLht = (int)HSL.l;
 				}
 		}
+		static CButtonContainer s_Scrollbar1, s_Scrollbar2, s_Scrollbar3;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageTeamHue = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamHue, &Button, g_Config.m_ClMessageTeamHue / 255.0f, 0, g_Config.m_ClMessageTeamHue)*255.0f);
+		g_Config.m_ClMessageTeamHue = (int)(DoScrollbarH(&s_Scrollbar1, &Button, g_Config.m_ClMessageTeamHue / 255.0f, 0, g_Config.m_ClMessageTeamHue)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageTeamSat = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamSat, &Button, g_Config.m_ClMessageTeamSat / 255.0f, 0, g_Config.m_ClMessageTeamSat)*255.0f);
+		g_Config.m_ClMessageTeamSat = (int)(DoScrollbarH(&s_Scrollbar2, &Button, g_Config.m_ClMessageTeamSat / 255.0f, 0, g_Config.m_ClMessageTeamSat)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageTeamLht = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamLht, &Button, g_Config.m_ClMessageTeamLht / 255.0f, 0, g_Config.m_ClMessageTeamLht)*255.0f);
+		g_Config.m_ClMessageTeamLht = (int)(DoScrollbarH(&s_Scrollbar3, &Button, g_Config.m_ClMessageTeamLht / 255.0f, 0, g_Config.m_ClMessageTeamLht)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
 
@@ -1916,14 +1994,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Label.VSplitRight(50.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Normal message"), 16.0f, -1);
 		{
-			static int s_DefaultButton = 0;
+			static CButtonContainer s_DefaultButton;
 			vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
 			if(((int)HSL.h != g_Config.m_ClMessageHue) || ((int)HSL.s != g_Config.m_ClMessageSat) || ((int)HSL.l != g_Config.m_ClMessageLht))
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					g_Config.m_ClMessageHue = HSL.h;
-					g_Config.m_ClMessageSat = HSL.s;
-					g_Config.m_ClMessageLht = HSL.l;
+					g_Config.m_ClMessageHue = (int)HSL.h;
+					g_Config.m_ClMessageSat = (int)HSL.s;
+					g_Config.m_ClMessageLht = (int)HSL.l;
 				}
 		}
 		Left.HSplitTop(20.0f, &Button, &Left);
@@ -1931,19 +2009,22 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
-		g_Config.m_ClMessageHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHue, &Button, g_Config.m_ClMessageHue / 255.0f, 0, g_Config.m_ClMessageHue)*255.0f);
+		static CButtonContainer s_ScrollbarMsgHue;
+		g_Config.m_ClMessageHue = (int)(DoScrollbarH(&s_ScrollbarMsgHue, &Button, g_Config.m_ClMessageHue / 255.0f, 0, g_Config.m_ClMessageHue)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
-		g_Config.m_ClMessageSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSat, &Button, g_Config.m_ClMessageSat / 255.0f, 0, g_Config.m_ClMessageSat)*255.0f);
+		static CButtonContainer s_ScrollbarMsgSat;
+		g_Config.m_ClMessageSat = (int)(DoScrollbarH(&s_ScrollbarMsgSat, &Button, g_Config.m_ClMessageSat / 255.0f, 0, g_Config.m_ClMessageSat)*255.0f);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
-		g_Config.m_ClMessageLht = (int)(DoScrollbarH(&g_Config.m_ClMessageLht, &Button, g_Config.m_ClMessageLht / 255.0f, 0, g_Config.m_ClMessageLht)*255.0f);
+		static CButtonContainer s_ScrollbarMsgLht;
+		g_Config.m_ClMessageLht = (int)(DoScrollbarH(&s_ScrollbarMsgLht, &Button, g_Config.m_ClMessageLht / 255.0f, 0, g_Config.m_ClMessageLht)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
 
@@ -1972,14 +2053,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Label.VSplitRight(50.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Inner color"), 16.0f, -1);
 		{
-			static int s_DefaultButton = 0;
+			static CButtonContainer s_DefaultButton;
 			vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
 			if(((int)HSL.h != g_Config.m_ClLaserInnerHue) || ((int)HSL.s != g_Config.m_ClLaserInnerSat) || ((int)HSL.l != g_Config.m_ClLaserInnerLht))
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					g_Config.m_ClLaserInnerHue = HSL.h;
-					g_Config.m_ClLaserInnerSat = HSL.s;
-					g_Config.m_ClLaserInnerLht = HSL.l;
+					g_Config.m_ClLaserInnerHue = (int)HSL.h;
+					g_Config.m_ClLaserInnerSat = (int)HSL.s;
+					g_Config.m_ClLaserInnerLht = (int)HSL.l;
 				}
 		}
 
@@ -1988,19 +2069,22 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
-		g_Config.m_ClLaserInnerHue = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerHue, &Button, g_Config.m_ClLaserInnerHue / 255.0f, 0, g_Config.m_ClLaserInnerHue)*255.0f);
+		static CButtonContainer s_ScrollbarLaserInnerHue;
+		g_Config.m_ClLaserInnerHue = (int)(DoScrollbarH(&s_ScrollbarLaserInnerHue, &Button, g_Config.m_ClLaserInnerHue / 255.0f, 0, g_Config.m_ClLaserInnerHue)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(20.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
-		g_Config.m_ClLaserInnerSat = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerSat, &Button, g_Config.m_ClLaserInnerSat / 255.0f, 0, g_Config.m_ClLaserInnerSat)*255.0f);
+		static CButtonContainer s_ScrollbarLaserInnerSat;
+		g_Config.m_ClLaserInnerSat = (int)(DoScrollbarH(&s_ScrollbarLaserInnerSat, &Button, g_Config.m_ClLaserInnerSat / 255.0f, 0, g_Config.m_ClLaserInnerSat)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(20.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
-		g_Config.m_ClLaserInnerLht = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerLht, &Button, g_Config.m_ClLaserInnerLht / 255.0f, 0, g_Config.m_ClLaserInnerLht)*255.0f);
+		static CButtonContainer s_ScrollbarLaserInnerLht;
+		g_Config.m_ClLaserInnerLht = (int)(DoScrollbarH(&s_ScrollbarLaserInnerLht, &Button, g_Config.m_ClLaserInnerLht / 255.0f, 0, g_Config.m_ClLaserInnerLht)*255.0f);
 
 		Laser.HSplitTop(10.0f, 0, &Laser);
 
@@ -2009,14 +2093,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Label.VSplitRight(50.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Outline color"), 16.0f, -1);
 		{
-			static int s_DefaultButton = 0;
+			static CButtonContainer s_DefaultButton;
 			vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
 			if(((int)HSL.h != g_Config.m_ClLaserOutlineHue) || ((int)HSL.s != g_Config.m_ClLaserOutlineSat) || ((int)HSL.l != g_Config.m_ClLaserOutlineLht))
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					g_Config.m_ClLaserOutlineHue = HSL.h;
-					g_Config.m_ClLaserOutlineSat = HSL.s;
-					g_Config.m_ClLaserOutlineLht = HSL.l;
+					g_Config.m_ClLaserOutlineHue = (int)HSL.h;
+					g_Config.m_ClLaserOutlineSat = (int)HSL.s;
+					g_Config.m_ClLaserOutlineLht = (int)HSL.l;
 				}
 		}
 
@@ -2025,19 +2109,22 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
-		g_Config.m_ClLaserOutlineHue = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineHue, &Button, g_Config.m_ClLaserOutlineHue / 255.0f, 0, g_Config.m_ClLaserOutlineHue)*255.0f);
+		static CButtonContainer s_ScrollbarLaserOutlineHue;
+		g_Config.m_ClLaserOutlineHue = (int)(DoScrollbarH(&s_ScrollbarLaserOutlineHue, &Button, g_Config.m_ClLaserOutlineHue / 255.0f, 0, g_Config.m_ClLaserOutlineHue)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
-		g_Config.m_ClLaserOutlineSat = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineSat, &Button, g_Config.m_ClLaserOutlineSat / 255.0f, 0, g_Config.m_ClLaserOutlineSat)*255.0f);
+		static CButtonContainer s_ScrollbarLaserOutlineSat;
+		g_Config.m_ClLaserOutlineSat = (int)(DoScrollbarH(&s_ScrollbarLaserOutlineSat, &Button, g_Config.m_ClLaserOutlineSat / 255.0f, 0, g_Config.m_ClLaserOutlineSat)*255.0f);
 		Laser.HSplitTop(20.0f, &Button, &Laser);
 		Button.VSplitLeft(15.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
-		g_Config.m_ClLaserOutlineLht = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineLht, &Button, g_Config.m_ClLaserOutlineLht / 255.0f, 0, g_Config.m_ClLaserOutlineLht)*255.0f);
+		static CButtonContainer s_ScrollbarLaserOutlineLht;
+		g_Config.m_ClLaserOutlineLht = (int)(DoScrollbarH(&s_ScrollbarLaserOutlineLht, &Button, g_Config.m_ClLaserOutlineLht / 255.0f, 0, g_Config.m_ClLaserOutlineLht)*255.0f);
 
 
 		//Laser.HSplitTop(8.0f, &Weapon, &Laser);
@@ -2149,13 +2236,15 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.VMargin(5.0f, &Right);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClAutoRaceRecord, Localize("Save the best demo of each race"), g_Config.m_ClAutoRaceRecord, &Button))
+	static CButtonContainer s_ButtonAutoRaceRecord;
+	if(DoButton_CheckBox(&s_ButtonAutoRaceRecord, Localize("Save the best demo of each race"), g_Config.m_ClAutoRaceRecord, &Button))
 	{
 		g_Config.m_ClAutoRaceRecord ^= 1;
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Ghost"), g_Config.m_ClRaceGhost, &Button))
+	static CButtonContainer s_ButtonRaceGhost;
+	if(DoButton_CheckBox(&s_ButtonRaceGhost, Localize("Ghost"), g_Config.m_ClRaceGhost, &Button))
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
@@ -2164,14 +2253,16 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
+		static CButtonContainer s_ButtonRaceShowGhost;
+		if(DoButton_CheckBox(&s_ButtonRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
 		{
 			g_Config.m_ClRaceShowGhost ^= 1;
 		}
 
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
+		static CButtonContainer s_ButtonRaceSaveGhost;
+		if(DoButton_CheckBox(&s_ButtonRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
 		{
 			g_Config.m_ClRaceSaveGhost ^= 1;
 		}
@@ -2192,7 +2283,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Button.VSplitLeft(120.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, -1);
-		g_Config.m_ClOverlayEntities = (int)(DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities/100.0f, 0, g_Config.m_ClOverlayEntities)*100.0f);
+		static CButtonContainer s_ButtonOverlayEntities;
+		g_Config.m_ClOverlayEntities = (int)(DoScrollbarH(&s_ButtonOverlayEntities, &Button, g_Config.m_ClOverlayEntities/100.0f, 0, g_Config.m_ClOverlayEntities)*100.0f);
 	}
 
 	{
@@ -2204,9 +2296,11 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Label.VSplitRight(5.0f, &Label, 0);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
-		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f, 0, g_Config.m_ClShowOthersAlpha)*100.0f);
+		static CButtonContainer s_ButtonShowOthersAlpha;
+		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&s_ButtonShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f, 0, g_Config.m_ClShowOthersAlpha)*100.0f);
 
-		if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers, &LeftLeft))
+		static CButtonContainer s_ButtonShowOthers;
+		if(DoButton_CheckBox(&s_ButtonShowOthers, Localize("Show others"), g_Config.m_ClShowOthers, &LeftLeft))
 		{
 			g_Config.m_ClShowOthers ^= 1;
 		}
@@ -2214,7 +2308,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads"), g_Config.m_ClShowQuads, &Button))
+	static CButtonContainer s_ButtonShowQuads;
+	if(DoButton_CheckBox(&s_ButtonShowQuads, Localize("Show quads"), g_Config.m_ClShowQuads, &Button))
 	{
 		g_Config.m_ClShowQuads ^= 1;
 	}
@@ -2226,7 +2321,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	//Right.HSplitTop(20.0f, &Button, 0);
 	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClDefaultZoom = static_cast<int>(DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom/20.0f, 0, g_Config.m_ClDefaultZoom)*20.0f+0.1f);
+	static CButtonContainer s_ButtonDefaultZoom;
+	g_Config.m_ClDefaultZoom = static_cast<int>(DoScrollbarH(&s_ButtonDefaultZoom, &Button, g_Config.m_ClDefaultZoom/20.0f, 0, g_Config.m_ClDefaultZoom)*20.0f+0.1f);
 
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(130.0f, &Label, &Button);
@@ -2234,10 +2330,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	//Right.HSplitTop(20.0f, &Button, 0);
 	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClAntiPingLimit = static_cast<int>(DoScrollbarH(&g_Config.m_ClAntiPingLimit, &Button, g_Config.m_ClAntiPingLimit/200.0f, 0, g_Config.m_ClAntiPingLimit)*200.0f+0.1f);
+	static CButtonContainer s_ButtonAntiPingLimit;
+	g_Config.m_ClAntiPingLimit = static_cast<int>(DoScrollbarH(&s_ButtonAntiPingLimit, &Button, g_Config.m_ClAntiPingLimit/200.0f, 0, g_Config.m_ClAntiPingLimit)*200.0f+0.1f);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
+	static CButtonContainer s_ButtonAntiPing;
+	if(DoButton_CheckBox(&s_ButtonAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
 	{
 		g_Config.m_ClAntiPing ^= 1;
 	}
@@ -2246,19 +2344,22 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClAntiPingPlayers, Localize("AntiPing: predict other players"), g_Config.m_ClAntiPingPlayers, &Button))
+		static CButtonContainer s_ButtonAntiPingPlayers;
+		if(DoButton_CheckBox(&s_ButtonAntiPingPlayers, Localize("AntiPing: predict other players"), g_Config.m_ClAntiPingPlayers, &Button))
 		{
 			g_Config.m_ClAntiPingPlayers ^= 1;
 		}
 
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClAntiPingWeapons, Localize("AntiPing: predict weapons"), g_Config.m_ClAntiPingWeapons, &Button))
+		static CButtonContainer s_ButtonAntiPingWeapons;
+		if(DoButton_CheckBox(&s_ButtonAntiPingWeapons, Localize("AntiPing: predict weapons"), g_Config.m_ClAntiPingWeapons, &Button))
 		{
 			g_Config.m_ClAntiPingWeapons ^= 1;
 		}
 
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClAntiPingGrenade, Localize("AntiPing: predict grenade paths"), g_Config.m_ClAntiPingGrenade, &Button))
+		static CButtonContainer s_ButtonAntiPingGrenade;
+		if(DoButton_CheckBox(&s_ButtonAntiPingGrenade, Localize("AntiPing: predict grenade paths"), g_Config.m_ClAntiPingGrenade, &Button))
 		{
 			g_Config.m_ClAntiPingGrenade ^= 1;
 		}
@@ -2270,21 +2371,24 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowOtherHookColl, Localize("Show other players' hook collision lines"), g_Config.m_ClShowOtherHookColl, &Button))
+	static CButtonContainer s_ButtonShowOtherHookColl;
+	if(DoButton_CheckBox(&s_ButtonShowOtherHookColl, Localize("Show other players' hook collision lines"), g_Config.m_ClShowOtherHookColl, &Button))
 	{
 		g_Config.m_ClShowOtherHookColl ^= 1;
 	}
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection, &Button))
+	static CButtonContainer s_ButtonShowDirection;
+	if(DoButton_CheckBox(&s_ButtonShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection, &Button))
 	{
 		g_Config.m_ClShowDirection ^= 1;
 	}
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Raw Mouse Input"), !g_Config.m_InpMouseOld, &Button, Localize("Use raw mouse input mode (the \"new one\")\nWARNING: MIGHT BE BUGGY/SLOW ON SOME SYSTEMS! In that case turn it off.")))
+	static CButtonContainer s_ButtonMouseOld;
+	if(DoButton_CheckBox(&s_ButtonMouseOld, Localize("Raw Mouse Input"), !g_Config.m_InpMouseOld, &Button, Localize("Use raw mouse input mode (the \"new one\")\nWARNING: MIGHT BE BUGGY/SLOW ON SOME SYSTEMS! In that case turn it off.")))
 	{
 		g_Config.m_InpMouseOld ^= 1;
 		CheckSettings = true;
@@ -2330,7 +2434,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 
 			float k = (*pColorSlider[i][s]) / 255.0f;
-			k = DoScrollbarH(pColorSlider[i][s], &Button, k, 0, k*255.0f);
+			static CPointerContainer s_Scrollbar(&pColorSlider[i][s]);
+			k = DoScrollbarH(&s_Scrollbar, &Button, k, 0, k*255.0f);
 			*pColorSlider[i][s] = (int)(k*255.0f);
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
@@ -2342,10 +2447,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Background.HSplitTop(20.0f, &Background, 0);
 		Background.VSplitLeft(100.0f, &Label, &Left);
 		UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
-		DoEditBox(g_Config.m_ClBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
+		static CButtonContainer s_ButtonBackgroundEntities;
+		DoEditBox(&s_ButtonBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
 
 		aRects[1].HSplitTop(20.0f, &Button, 0);
-		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
+		static CButtonContainer s_ButtonBackgroundShowTilesLayers;
+		if(DoButton_CheckBox(&s_ButtonBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
 		{
 			g_Config.m_ClBackgroundShowTilesLayers ^= 1;
 		}
@@ -2359,7 +2466,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.VMargin(5.0f, &Right);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
+	static CButtonContainer s_ButtonHttpMapDownload;
+	if(DoButton_CheckBox(&s_ButtonHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
 	{
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
@@ -2379,7 +2487,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), Localize("New Client Version '%s' is available!"), Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
-			static int s_ButtonUpdate = 0;
+			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
 				Updater()->InitiateUpdate();
 		}
@@ -2394,7 +2502,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), Localize("No updates available"));
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
-			static int s_ButtonUpdate = 0;
+			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
 				Client()->CheckVersionUpdate();
@@ -2406,7 +2514,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 #endif
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	static int s_Checkbox = 0;
+	static CButtonContainer s_Checkbox;
 	if(DoButton_CheckBox(&s_Checkbox, Localize("Enable Timeout Protection"), g_Config.m_ClTimeoutProtection, &Button))
 		g_Config.m_ClTimeoutProtection ^= 1;
 
@@ -2419,22 +2527,23 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.VSplitLeft(190.0f, &Label, &Button);
 			Button.VSplitRight(Button.h, &Button, &GenButton);
-			static int s_GenButton = 0;
+			static CButtonContainer s_GenButton;
 			if(DoButton_Menu(&s_GenButton, "¶", 0, &GenButton, Localize("Generate new Code"), CUI::CORNER_R))
 			{
 				for(unsigned int i = 0; i < 16; i++)
 				{
 					if (rand() % 2)
-						g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 97;
+						g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 97);
 					else
-						g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 65;
+						g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 65);
 				}
 			}
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Timeout code"));
 			UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 			static float s_OffsetCode = 0.0f;
-			DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode, false, CUI::CORNER_L);
+			static CButtonContainer s_TimeoutCodeButton;
+			DoEditBox(&s_TimeoutCodeButton, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode, false, CUI::CORNER_L);
 		}
 
 		Right.HSplitTop(5.0f, &Button, &Right);
@@ -2444,22 +2553,23 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.VSplitLeft(190.0f, &Label, &Button);
 			Button.VSplitRight(Button.h, &Button, &GenButton);
-			static int s_GenButton = 0;
+			static CButtonContainer s_GenButton;
 			if(DoButton_Menu(&s_GenButton, "¶", 0, &GenButton, Localize("Generate new Code"), CUI::CORNER_R))
 			{
 				for(unsigned int i = 0; i < 16; i++)
 				{
 					if (rand() % 2)
-						g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 97;
+						g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 97);
 					else
-						g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 65;
+						g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 65);
 				}
 			}
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Dummy Timeout code"));
 			UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 			static float s_OffsetCode = 0.0f;
-			DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode, false, CUI::CORNER_L);
+			static CButtonContainer s_DummyTimeoutCodeEditbox;
+			DoEditBox(&s_DummyTimeoutCodeEditbox, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode, false, CUI::CORNER_L);
 		}
 	}
 }
@@ -2478,7 +2588,8 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 	Left.HSplitTop(7.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClUsernameFetching, Localize("Gather Statistics"), g_Config.m_ClUsernameFetching, &Button))
+	static CButtonContainer s_ButtonUsernameFetching;
+	if(DoButton_CheckBox(&s_ButtonUsernameFetching, Localize("Gather Statistics"), g_Config.m_ClUsernameFetching, &Button))
 		g_Config.m_ClUsernameFetching ^= 1;
 
 //	Left.HSplitTop(5.0f, 0, &Left);
@@ -2488,22 +2599,26 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClColorfulClient, ("Colorful Client"), g_Config.m_ClColorfulClient, &Button, Localize("Makes everything look way more awesome!")))
+	static CButtonContainer s_ButtonColorfulClient;
+	if(DoButton_CheckBox(&s_ButtonColorfulClient, ("Colorful Client"), g_Config.m_ClColorfulClient, &Button, Localize("Makes everything look way more awesome!")))
 		g_Config.m_ClColorfulClient ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClPathFinding, Localize("A* Path Finding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
+	static CButtonContainer s_ButtonPathFinding;
+	if(DoButton_CheckBox(&s_ButtonPathFinding, Localize("A* Path Finding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
 		g_Config.m_ClPathFinding ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button, Localize("Highly recommended!")))
+	static CButtonContainer s_ButtonSmartZoom;
+	if(DoButton_CheckBox(&s_ButtonSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button, Localize("Highly recommended!")))
 		g_Config.m_ClSmartZoom ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClConsoleModeEmotes, Localize("Console Mode Indicator"), g_Config.m_ClConsoleModeEmotes, &Button, Localize("Send Zzz emotes when in console mode")))
+	static CButtonContainer s_ButtonConsoleModeEmotes;
+	if(DoButton_CheckBox(&s_ButtonConsoleModeEmotes, Localize("Console Mode Indicator"), g_Config.m_ClConsoleModeEmotes, &Button, Localize("Send Zzz emotes when in console mode")))
 		g_Config.m_ClConsoleModeEmotes ^= 1;
 
 	{
@@ -2511,10 +2626,11 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitRight(220.0f, &Button, &ClearCacheButton);
-		if(DoButton_CheckBox(&g_Config.m_ClSkinFetcher, Localize("Skin Fetcher"), g_Config.m_ClSkinFetcher, &Button, Localize("Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server")))
+		static CButtonContainer s_ButtonSkinFetcher;
+		if(DoButton_CheckBox(&s_ButtonSkinFetcher, Localize("Skin Fetcher"), g_Config.m_ClSkinFetcher, &Button, Localize("Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server")))
 			g_Config.m_ClSkinFetcher ^= 1;
 
-		static int s_ClearCacheButton = 0;
+		static CButtonContainer s_ClearCacheButton;
 		if(DoButton_Menu(&s_ClearCacheButton, Localize("Clear downloaded skins cache"), 0, &ClearCacheButton))
 		{
 			Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "downloadedskins", [](const char *name, int is_dir, int dir_type, void *user) -> int // TODO: put this into a method... Lambda cuz I'm lazy...
@@ -2597,8 +2713,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	Left.HSplitTop(10.0f, 0, &BASERECT); \
 	Left.HSplitTop(50.0f, &Button, &BASERECT); \
 	TextRender()->Text(0, Button.x+Button.w-TextRender()->TextWidth(0, Button.h, ">", 1)-10.0f, Button.y-Button.h/3.6f, Button.h, ">", 9999); \
-	if(DoButton_MenuTab(&s_Buttons[index++], TITLE, 0, &Button, CUI::CORNER_ALL)) \
-		m_pfnAppearanceSubpage = &CMenus::CALLBACK
+	{CPointerContainer Container(&s_Buttons[index++]); \
+	if(DoButton_MenuTab(&Container, TITLE, 0, &Button, CUI::CORNER_ALL)) \
+		m_pfnAppearanceSubpage = &CMenus::CALLBACK;}
 
 	DO_NEXT_BUTTON(Left, "HUD", RenderSettingsAppearanceHUD);
 	DO_NEXT_BUTTON(Left, Localize("Textures"), RenderSettingsAppearanceTexture);
@@ -2643,20 +2760,20 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 
 		OptionsBar.HSplitTop(10.0f, &Button, &OptionsBar);
 		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
-		static int s_ReloadButton = 0;
+		static CButtonContainer s_ReloadButton;
 		if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button))
 			m_pClient->m_pFontMgr->ReloadFontlist();
 
 		OptionsBar.HSplitTop(10.0f, &Button, &OptionsBar);
 		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
-		static int s_Checkbox = 0;
+		static CButtonContainer s_Checkbox;
 		if(DoButton_CheckBox(&s_Checkbox, Localize("Preload fonts on starup"), g_Config.m_FtPreloadFonts, &Button))
 			g_Config.m_FtPreloadFonts ^= 1;
 	}
 
 	const int SELECTED = m_pClient->m_pFontMgr->GetSelectedFontIndex();
 	static int pIDItem[128] = {0};
-	static int s_Listbox = 0;
+	static CButtonContainer s_Listbox;
 	static float s_ScrollValue = 0.0f;
 	UiDoListboxStart(&s_Listbox, &MainView, 30.0f, Localize("Font Selector"), 0, NUM_FONTS, 1, SELECTED, s_ScrollValue, CUI::CORNER_ALL);
 	for(int i = 0; i < NUM_FONTS; i++)
@@ -2664,7 +2781,8 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 		const char *FilePath = m_pClient->m_pFontMgr->GetFontPath(i);
 		if(!FilePath || FilePath[0] == '\0') continue;
 
-		CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
+		CPointerContainer Container(&pIDItem[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, 0);
 
 		if(Item.m_Visible)
 		{
@@ -2695,7 +2813,7 @@ bool CMenus::RenderSettingsBackToAppearance(CUIRect *pMainView)
 	CUIRect Button;
 	pMainView->HSplitTop(20.0f, &Button, pMainView);
 	pMainView->HSplitTop(10.0f, 0, pMainView);
-	static int s_Button = 0;
+	static CButtonContainer s_Button;
 	if(DoButton_MenuTab(&s_Button, Localize("< Back"), 0, &Button, CUI::CORNER_ALL, vec4(0.7f, 0.7f, 0.2f, 0.9f), vec4(0.7f, 0.7f, 0.2f, 0.6f)))
 		return false;
 	return true;
@@ -2713,22 +2831,26 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 
 	MainView.HSplitTop(7.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClIRCAutoconnect, Localize("Connect automatically"), g_Config.m_ClIRCAutoconnect, &Button, Localize("Connect to the Chat automatically on startup")))
+	static CButtonContainer s_ButtonIRCAutoconnect;
+	if(DoButton_CheckBox(&s_ButtonIRCAutoconnect, Localize("Connect automatically"), g_Config.m_ClIRCAutoconnect, &Button, Localize("Connect to the Chat automatically on startup ... yeah, be social!")))
 		g_Config.m_ClIRCAutoconnect ^= 1;
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClIRCPrintChat, Localize("Print to console"), g_Config.m_ClIRCPrintChat, &Button))
+	static CButtonContainer s_ButtonIRCPrintChat;
+	if(DoButton_CheckBox(&s_ButtonIRCPrintChat, Localize("Print to console"), g_Config.m_ClIRCPrintChat, &Button))
 		g_Config.m_ClIRCPrintChat ^= 1;
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndIRC, Localize("Play sound notification"), g_Config.m_SndIRC, &Button))
+	static CButtonContainer s_ButtonSndIRC;
+	if(DoButton_CheckBox(&s_ButtonSndIRC, Localize("Play sound notification"), g_Config.m_SndIRC, &Button))
 		g_Config.m_SndIRC ^= 1;
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClIRCAllowJoin, Localize("Allow others to join you"), g_Config.m_ClIRCAllowJoin, &Button))
+	static CButtonContainer s_ButtonIRCAllowJoin;
+	if(DoButton_CheckBox(&s_ButtonIRCAllowJoin, Localize("Allow others to join you"), g_Config.m_ClIRCAllowJoin, &Button))
 		g_Config.m_ClIRCAllowJoin ^= 1;
 
 	static const char *s_apLabels[] = {
@@ -2755,43 +2877,50 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetNick = 0.0f;
-	DoEditBox(&g_Config.m_ClIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &s_OffsetNick, false);
+	static CButtonContainer s_EditboxIRCNick;
+	DoEditBox(&s_EditboxIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &s_OffsetNick, false);
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetUser = 0.0f;
-	DoEditBox(&g_Config.m_ClIRCUser, &Button, g_Config.m_ClIRCUser, sizeof(g_Config.m_ClIRCUser), 12.0f, &s_OffsetUser, false);
+	static CButtonContainer s_EditboxIRCUser;
+	DoEditBox(&s_EditboxIRCUser, &Button, g_Config.m_ClIRCUser, sizeof(g_Config.m_ClIRCUser), 12.0f, &s_OffsetUser, false);
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetPass = 0.0f;
-	DoEditBox(&g_Config.m_ClIRCPass, &Button, g_Config.m_ClIRCPass, sizeof(g_Config.m_ClIRCPass), 12.0f, &s_OffsetPass, true);
+	static CButtonContainer s_EditboxIRCPass;
+	DoEditBox(&s_EditboxIRCPass, &Button, g_Config.m_ClIRCPass, sizeof(g_Config.m_ClIRCPass), 12.0f, &s_OffsetPass, true);
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetQAuthName = 0.0f;
-	DoEditBox(&g_Config.m_ClIRCQAuthName, &Button, g_Config.m_ClIRCQAuthName, sizeof(g_Config.m_ClIRCQAuthName), 12.0f, &s_OffsetQAuthName, false);
+	static CButtonContainer s_EditboxIRCQAuthName;
+	DoEditBox(&s_EditboxIRCQAuthName, &Button, g_Config.m_ClIRCQAuthName, sizeof(g_Config.m_ClIRCQAuthName), 12.0f, &s_OffsetQAuthName, false);
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetQAuthPass = 0.0f;
-	DoEditBox(&g_Config.m_ClIRCQAuthPass, &Button, g_Config.m_ClIRCQAuthPass, sizeof(g_Config.m_ClIRCQAuthPass), 12.0f, &s_OffsetQAuthPass, true);
+	static CButtonContainer s_EditboxIRCQAuthPass;
+	DoEditBox(&s_EditboxIRCQAuthPass, &Button, g_Config.m_ClIRCQAuthPass, sizeof(g_Config.m_ClIRCQAuthPass), 12.0f, &s_OffsetQAuthPass, true);
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetModes = 0.0f;
-	DoEditBox(&g_Config.m_ClIRCModes, &Button, g_Config.m_ClIRCModes, sizeof(g_Config.m_ClIRCModes), 12.0f, &s_OffsetModes, false);
+	static CButtonContainer s_EditboxIRCModes;
+	DoEditBox(&s_EditboxIRCModes, &Button, g_Config.m_ClIRCModes, sizeof(g_Config.m_ClIRCModes), 12.0f, &s_OffsetModes, false);
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetLeaveMsg = 0.0f;
-	DoEditBox(&g_Config.m_ClIRCLeaveMsg, &Button, g_Config.m_ClIRCLeaveMsg, sizeof(g_Config.m_ClIRCLeaveMsg), 12.0f, &s_OffsetLeaveMsg, false);
+	static CButtonContainer s_EditboxIRCLeaveMsg;
+	DoEditBox(&s_EditboxIRCLeaveMsg, &Button, g_Config.m_ClIRCLeaveMsg, sizeof(g_Config.m_ClIRCLeaveMsg), 12.0f, &s_OffsetLeaveMsg, false);
 
 #undef DO_NEXT_LABEL
 }
@@ -2833,7 +2962,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		{
 			CUIRect CloseButton;
 			MainView.HSplitTop(20.0f, &CloseButton, &MainView);
-			static int s_CloseButton = 0;
+			static CButtonContainer s_CloseButton;
 			if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
 			{
 				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptSaveSettings")();
@@ -2855,12 +2984,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 	CUIRect RefreshButton;
 	Button.VSplitRight(100.0f, &Button, &RefreshButton);
-	static int s_RefreshButton = 0;
+	static CButtonContainer s_RefreshButton, s_LuaButton;
 	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files"))
 	{
 		Client()->Lua()->LoadFolder();
 	}
-	if(DoButton_CheckBox(&g_Config.m_ClLua, Localize("Use lua"), g_Config.m_ClLua, &Button))
+	if(DoButton_CheckBox(&s_LuaButton, Localize("Use lua"), g_Config.m_ClLua, &Button))
 	{
 		if(!(g_Config.m_ClLua ^= 1))
 		{
@@ -2882,20 +3011,20 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		// display mode list
 		static float s_ScrollValue = 0;
-		static int pIDItem[128];
-		static int pIDCheckboxAutoload[128];
-		static int pIDButtonPermissions[128];
-		static int pIDButtonReload[128];
-		static int pIDButtonDeactivate[128];
-		static int pIDButtonSettings[128];
+		static CButtonContainer pIDItem[128];
+		static CButtonContainer pIDCheckboxAutoload[128];
+		static CButtonContainer pIDButtonPermissions[128];
+		static CButtonContainer pIDButtonReload[128];
+		static CButtonContainer pIDButtonDeactivate[128];
+		static CButtonContainer pIDButtonSettings[128];
 		int OldSelected = -1;
 
-		static int s_NumNodes = 0;
+		static CButtonContainer s_Listbox;
 		CUIRect ListBox = MainView;
 		char aBuf[128];
 		static int NumListedFiles = 0, NumActiveScripts = 0;
 		str_format(aBuf, sizeof(aBuf), "%i files listed (%i total – %i filtered), %i scripts active", NumListedFiles, Client()->Lua()->GetLuaFiles().size(), Client()->Lua()->GetLuaFiles().size() - NumListedFiles, NumActiveScripts);
-		UiDoListboxStart(&s_NumNodes, &ListBox, 50.0f, Localize("Lua files"), aBuf, NumListedFiles, 1, OldSelected, s_ScrollValue);
+		UiDoListboxStart(&s_Listbox, &ListBox, 50.0f, Localize("Lua files"), aBuf, NumListedFiles, 1, OldSelected, s_ScrollValue);
 		NumListedFiles = 0; NumActiveScripts = 0;
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
@@ -2941,7 +3070,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					Buttons.VMargin(5.0f, &Buttons);
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
 					Buttons.VSplitRight(Buttons.h, &Buttons, &Button);
-					if (DoButton_CheckBox(&pIDCheckboxAutoload[i], "", L->GetScriptIsAutoload(), &Button, Localize("Autoload")))
+					CPointerContainer Container(&pIDCheckboxAutoload[i]);
+					if(DoButton_CheckBox(&Container, "", L->GetScriptIsAutoload(), &Button, Localize("Autoload")))
 						L->SetScriptIsAutoload(!L->GetScriptIsAutoload());
 
 					Buttons.VSplitRight(5.0f, &Buttons, 0);
@@ -3046,11 +3176,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
 		static float Offset = 0.0f;
-		DoEditBox(&g_Config.m_ClLuaFilterString, &QuickSearch, g_Config.m_ClLuaFilterString, sizeof(g_Config.m_ClLuaFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search"));
+		static CButtonContainer s_LuaFilterStringEditbox;
+		DoEditBox(&s_LuaFilterStringEditbox, &QuickSearch, g_Config.m_ClLuaFilterString, sizeof(g_Config.m_ClLuaFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search"));
 
 		// clear button
 		{
-			static int s_ClearButton = 0;
+			static CButtonContainer s_ClearButton;
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClLuaFilterString[0] = 0;
@@ -3077,7 +3208,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		BottomBar.VSplitLeft(Width-5.0f, &Checkbox, &BottomBar);
 		Checkbox.HSplitTop(5.0f, 0, &Checkbox);
 
-		static int s_Checkbox = 0;
+		static CButtonContainer s_Checkbox;
 		int MouseButton = DoButton_CheckBox_Number(&s_Checkbox, s_apLabels[ShowActiveOnly], ShowActiveOnly, &Checkbox)-1;
 		if(MouseButton >= 0)
 		{
@@ -3195,12 +3326,12 @@ void CMenus::RenderSettingsAll(CUIRect MainView)
 	} // end of one-time-initialization thingy
 
 
-	static int s_Listbox = 0;
+	static CButtonContainer s_Listbox;
 	static float s_ScrollVal = 0.0f;
-	static int s_IDs[1024] = {0};
-	static int s_ScrollbarIDs[1024] = {0};
-	static int s_EditboxIDs[1024] = {0};
-	static float s_EditboxOffsets[1024] = {0};
+	static CButtonContainer s_IDs[1024];
+	static CButtonContainer s_ScrollbarIDs[1024];
+	static CButtonContainer s_EditboxIDs[1024];
+	static float s_EditboxOffsets[1024] = {0.0f};
 	CUIRect Test; MainView.Margin(20.0f, &Test);
 	UiDoListboxStart(&s_Listbox, &MainView, 40.0f, Localize("-- Collection of all config variables --"), Localize("(only for advanced players - be careful!)"), s_IntVars.size()+s_StringVars.size(), 1, -1, s_ScrollVal);
 	int i;
@@ -3255,7 +3386,7 @@ void CMenus::RenderSettingsAll(CUIRect MainView)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), Localize("Length: %i/%i"), str_length(var->pStr), var->MaxLength-1);
 		UI()->DoLabelScaled(&Text, aBuf, 12.0f, -1, Text.w-5.0f);
-		static int s_ResetButtons[1024] = {0};
+		static CButtonContainer s_ResetButtons[1024];
 		if(DoButton_Menu(&s_ResetButtons[j], Localize("Default"), 0, &Button, var->pDef))
 			str_copy(var->pStr, var->pDef, var->MaxLength);
 	}

@@ -106,12 +106,13 @@ void CMenus::RenderIRC(CUIRect MainView)
 			str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
 			str_irc_sanitize(g_Config.m_ClIRCNick);
 		} //TODO_ here?
-		DoEditBox(&g_Config.m_ClIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &OffsetNick,
+		static CButtonContainer s_EditboxIRCNick;
+		DoEditBox(&s_EditboxIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &OffsetNick,
 				false, CUI::CORNER_ALL);
 
 		EntryBox.HSplitTop(5.0f, 0x0, &EntryBox);
 		EntryBox.HSplitTop(20.0f, &Button, &EntryBox);
-		static float s_ButtonConnect = 0;
+		static CButtonContainer s_ButtonConnect;
 		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect"), 0, &Button))
 			m_pClient->m_pIRCBind->Connect();
 	}
@@ -133,7 +134,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		// channel list
 		MainIRC.HSplitTop(20.0f, &ButtonBox, &EntryBox);
 		ButtonBox.VSplitRight(80.0f, &ButtonBox, &Button);
-		static float s_ButtonDisc = 0;
+		static CButtonContainer s_ButtonDisc;
 		if(DoButton_Menu(&s_ButtonDisc, g_Config.m_ClIRCAutoconnect ? Localize("Reconnect") : Localize("Disconnect"), 0, &Button))
 			m_pClient->m_pIRCBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
 
@@ -147,7 +148,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		}
 
 		float LW = (ButtonBox.w - ButtonBox.x) / m_pClient->IRC()->GetNumComs();
-		static int s_ButsID[64];
+		static CButtonContainer s_ButsID[64];
 		for(int i = 0; i < m_pClient->IRC()->GetNumComs(); i++)
 		{
 			CIRCCom *pCom = m_pClient->IRC()->GetCom(i);
@@ -227,8 +228,8 @@ void CMenus::RenderIRC(CUIRect MainView)
 				Button.VSplitRight(ButtonBox.h, 0, &Button);
 				Button.Margin(3.0f, &Button);
 				Button.x -= 5.0f; Button.h = Button.w;
-				static int sCloseButton = 0;
-				if(DoButton_Menu(&sCloseButton, "×", 0, &Button, 0, CUI::CORNER_ALL, ms_ColorTabbarActive+vec4(0.3f,0.3f,0.3f,0)))
+				static CButtonContainer s_CloseButton;
+				if(DoButton_Menu(&s_CloseButton, "×", 0, &Button, 0, CUI::CORNER_ALL, ms_ColorTabbarActive+vec4(0.3f,0.3f,0.3f,0)))
 					m_pClient->IRC()->Part(g_Config.m_ClIRCLeaveMsg);
 			}
 		}
@@ -239,8 +240,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 		//Button.VSplitLeft(5.0f, 0x0, &Button);
 		static char aEntryText[500];
 		static float s_Offset;
-		DoEditBox(&m_IRCActive, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
-		static float s_ButtonSend = 0;
+		static CButtonContainer s_EditboxInput;
+		DoEditBox(&s_EditboxInput, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
+		static CButtonContainer s_ButtonSend;
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))
 				|| m_EnterPressed)
 		{
@@ -285,7 +287,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			EntryBox.VSplitRight(150.0f, &Chat, &UserList);
 			Chat.HSplitBottom(15.0f, &Chat, &HorizScrollBar);
 
-			static int s_HScrollbar = 0;
+			static CButtonContainer s_HScrollbar;
 			static float s_HScrollbarVal = 0.0f;
 			s_HScrollbarVal = DoScrollbarH(&s_HScrollbar, &HorizScrollBar, s_HScrollbarVal);
 			if(Input()->KeyIsPressed(KEY_LSHIFT))
@@ -298,7 +300,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}
 
 			static int Selected = 0;
-			static int s_UsersList = 0;
+			static CButtonContainer s_UsersList;
 			static float s_UsersScrollValue = 0;
 			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&UserList))
 			{
@@ -310,14 +312,15 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}*/
 			char aBuff[50];
 			str_format(aBuff, sizeof(aBuff), "Total: %d", pChan->m_Users.size());
-			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, "Users", aBuff, pChan->m_Users.size(), 1, Selected,
-					s_UsersScrollValue, CUI::CORNER_TR);
+			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, "Users", aBuff, (int)pChan->m_Users.size(), 1, Selected,
+							 s_UsersScrollValue, CUI::CORNER_TR);
 
 			int o = 0;
 			std::list<std::string>::iterator it = pChan->m_Users.begin();
 			while(it != pChan->m_Users.end())
 			{
-				CListboxItem Item = UiDoListboxNextItem(&(*it), false, UI()->MouseInside(&UserList));
+				CPointerContainer Container(&(*it));
+				CListboxItem Item = UiDoListboxNextItem(&Container, false, UI()->MouseInside(&UserList) != 0);
 
 				if(Item.m_Visible)
 				{
@@ -354,7 +357,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}
 			Selected = UiDoListboxEnd(&s_UsersScrollValue, 0);
 
-			static int s_Chat = 0;
+			static CButtonContainer s_Chat;
 			static float s_ChatScrollValue = 100.0f;
 			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat))
 			{
@@ -366,10 +369,11 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}*/
 			UiDoListboxStart(&s_Chat, &Chat, 12.0f,
 					pChan->m_Topic.c_str()[0] ? pChan->m_Topic.c_str() : "", "",
-					pChan->m_Buffer.size(), 1, -1, s_ChatScrollValue, CUI::CORNER_TL);
+					(int)pChan->m_Buffer.size(), 1, -1, s_ChatScrollValue, CUI::CORNER_TL);
 			for(size_t i = 0; i < pChan->m_Buffer.size(); i++)
 			{
-				CListboxItem Item = UiDoListboxNextItem(&pChan->m_Buffer[i], false, !Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&UserList));
+				CPointerContainer Container(&pChan->m_Buffer[i]);
+				CListboxItem Item = UiDoListboxNextItem(&Container, false, !Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&UserList));
 
 				if(Item.m_Visible)
 				{
@@ -386,7 +390,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			EntryBox.Margin(5.0f, &Chat);
 			Chat.HSplitBottom(15.0f, &Chat, &HorizScrollBar);
 
-			static int s_HScrollbar = 0;
+			static CButtonContainer s_HScrollbar;
 			static float s_HScrollbarVal = 0.0f;
 			s_HScrollbarVal = DoScrollbarH(&s_HScrollbar, &HorizScrollBar, s_HScrollbarVal);
 			if(Input()->KeyIsPressed(KEY_LSHIFT))
@@ -398,7 +402,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				s_HScrollbarVal = clamp(s_HScrollbarVal, 0.0f, 1.0f);
 			}
 
-			static int s_Chat = 0;
+			static CButtonContainer s_Chat;
 			static float s_ChatScrollValue = 100.0f;
 			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat))
 			{
@@ -408,11 +412,12 @@ void CMenus::RenderIRC(CUIRect MainView)
 					s_ChatScrollValue += 0.1f;
 				s_ChatScrollValue = clamp(s_ChatScrollValue, 0.0f, 1.0f);
 			}*/
-			UiDoListboxStart(&s_Chat, &Chat, 12.0f, pQuery->User(), "", pQuery->m_Buffer.size(), 1, -1,
-					s_ChatScrollValue);
+			UiDoListboxStart(&s_Chat, &Chat, 12.0f, pQuery->User(), "", (int)pQuery->m_Buffer.size(), 1, -1,
+							 s_ChatScrollValue);
 			for(size_t i = 0; i < pQuery->m_Buffer.size(); i++)
 			{
-				CListboxItem Item = UiDoListboxNextItem(&pQuery->m_Buffer[i], false, !Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat));
+				CPointerContainer Container(&pQuery->m_Buffer[i]);
+				CListboxItem Item = UiDoListboxNextItem(&Container, false, !Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat));
 
 				if(Item.m_Visible)
 				{

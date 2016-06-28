@@ -18,8 +18,6 @@ using namespace luabridge;
 
 CLua::CLua()
 {
-	CLuaBinding::m_pUiContainer = new(mem_alloc(sizeof(CLuaBinding::UiContainer), sizeof(void*))) CLuaBinding::UiContainer;
-	CConfigProperties::m_pConfig = &g_Config;
 	m_pStorage = 0;
 	m_pConsole = 0;
 }
@@ -50,7 +48,6 @@ void CLua::Shutdown()
 
 	m_pLuaFiles.delete_all();
 	m_pLuaFiles.clear();
-	mem_free(CLuaBinding::m_pUiContainer);
 }
 
 void CLua::SaveAutoloads()

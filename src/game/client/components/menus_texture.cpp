@@ -27,21 +27,21 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 	// tab bar
 	{
 		TabBar.VSplitLeft(TabBar.w/4, &Button, &TabBar);
-		static int s_Button0 = 0;
+		static CButtonContainer s_Button0;
 		if(DoButton_MenuTab(&s_Button0, Localize("Gameskin"), s_ControlPage == 0, &Button, CUI::CORNER_L))
 			s_ControlPage = 0;
 
 		TabBar.VSplitLeft(TabBar.w/3, &Button, &TabBar);
-		static int s_Button1 = 0;
+		static CButtonContainer s_Button1;
 		if(DoButton_MenuTab(&s_Button1, Localize("Particles"), s_ControlPage == 1, &Button, 0))
 			s_ControlPage = 1;
 
 		TabBar.VSplitMid(&Button, &TabBar);
-		static int s_Button2 = 0;
+		static CButtonContainer s_Button2;
 		if(DoButton_MenuTab(&s_Button2, Localize("Emoticons"), s_ControlPage == 2, &Button, 0))
 			s_ControlPage = 2;
 
-		static int s_Button3 = 0;
+		static CButtonContainer s_Button3;
 		if(DoButton_MenuTab(&s_Button3, Localize("Cursor"), s_ControlPage == 3, &TabBar, CUI::CORNER_R))
 			s_ControlPage = 3;
 	}
@@ -82,7 +82,8 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &MainView, 160.0f, Localize("Texture"), "", s_paSkinList.size(), 2, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Texture"), "", s_paSkinList.size(), 2, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
@@ -93,7 +94,8 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 		if(str_comp(s->m_aName, g_Config.m_GameTexture) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		CPointerContainer Container(&s_paSkinList[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CUIRect Label;
@@ -146,7 +148,8 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &MainView, 160.0f, Localize("Particles"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Particles"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
@@ -157,7 +160,8 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 		if(str_comp(s->m_aName, g_Config.m_GameParticles) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		CPointerContainer Container(&s_paSkinList[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CUIRect Label;
@@ -209,7 +213,8 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &MainView, 160.0f, Localize("Emoticons"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Emoticons"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
@@ -220,7 +225,8 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 		if(str_comp(s->m_aName, g_Config.m_GameEmoticons) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		CPointerContainer Container(&s_paSkinList[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CUIRect Label;
@@ -272,7 +278,8 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &MainView, 160.0f, Localize("Cursor"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Cursor"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
@@ -283,7 +290,8 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 		if(str_comp(s->m_aName, g_Config.m_GameCursor) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		CPointerContainer Container(&s_paSkinList[i]);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CUIRect Label;
