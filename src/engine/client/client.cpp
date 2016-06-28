@@ -2956,6 +2956,8 @@ void CClient::Run()
 
 	while (1)
 	{
+		set_new_tick();
+
 		if(g_Config.m_ClConsoleMode != LastConsoleMode)
 		{
 			CServerInfo Info;

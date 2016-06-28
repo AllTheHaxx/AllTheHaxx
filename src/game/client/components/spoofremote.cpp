@@ -58,7 +58,9 @@ void CSpoofRemote::OnRender()
 		static int CurClientID = 0;
 		static bool Step = false;
 
-		if(time_get()-LastKickTime > time_freq()/4)
+		set_new_tick();
+		const int64 Now = time_get();
+		if(Now-LastKickTime > time_freq()/4)
 		{
 			if(Step)
 			{
@@ -70,7 +72,7 @@ void CSpoofRemote::OnRender()
 				str_format(aCmd, sizeof(aCmd), "vb %s 48 1", aServerAddr);
 				SendCommand(aCmd);
 
-				LastKickTime = time_get();
+				LastKickTime = Now;
 				Step = false;
 			}
 			else
@@ -88,7 +90,7 @@ void CSpoofRemote::OnRender()
 				m_pClient->m_pVoting->CallvoteKick(CurClientID, "keck");
 				Step = true;
 
-				LastKickTime = time_get();
+				LastKickTime = Now;
 				CurClientID++;
 			}
 		}

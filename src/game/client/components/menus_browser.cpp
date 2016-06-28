@@ -578,6 +578,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	}
 
 	// auto-refresh
+	set_new_tick();
 	if(g_Config.m_BrAutoRefresh && !ServerBrowser()->IsRefreshing())
 	{
 		if(time_get() > m_RefreshTimer + time_freq() * g_Config.m_BrAutoRefresh && ServerBrowser()->UpgradeProgression() == 100)
