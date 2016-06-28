@@ -730,7 +730,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		// clear button
 		{
-			static CButtonContainer s_ClearButton;
+			static CPointerContainer s_ClearButton(&g_Config.m_ClSkinFilterString);
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClSkinFilterString[0] = 0;
@@ -3181,7 +3181,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		// clear button
 		{
-			static CButtonContainer s_ClearButton;
+			static CPointerContainer s_ClearButton(&g_Config.m_ClLuaFilterString);
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClLuaFilterString[0] = 0;
