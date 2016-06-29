@@ -1021,7 +1021,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				if(DoButton_Menu(&s_ClearButton, "×", 0, &Button2, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 				{
 					m_aFilterString[0] = 0;
-					UI()->SetActiveItem(&m_aFilterString);
+					UI()->SetActiveItem(s_FilterStringEditbox.GetID());
 					Client()->ServerBrowserUpdate();
 				}
 			}
@@ -1075,7 +1075,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &ClearButton, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 			{
 				m_aCallvoteReason[0] = 0;
-				UI()->SetActiveItem(&m_aCallvoteReason);
+				UI()->SetActiveItem(s_CallvoteReasonEditbox.GetID());
 			}
 		}
 
