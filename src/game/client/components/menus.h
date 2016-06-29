@@ -300,6 +300,7 @@ public:	int m_LoadTotal;
 	void RenderGameExtra(CUIRect ButtonBar);
 	void RenderServerConfigCreator(CUIRect MainView);
 	void RenderSnifferSettings(CUIRect MainView);
+	void RenderLuaQuickAccess(CUIRect MainView);
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerControl(CUIRect MainView);

@@ -76,6 +76,8 @@
 	#include "SDL_syswm.h"
 #else
 #include <fcntl.h>
+#include <engine/curlwrapper.h>
+
 #endif
 #ifdef main
 #undef main
@@ -292,6 +294,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_pConsole = 0;
 	m_pEngine = 0;
 	m_pFetcher = 0;
+	m_pCurlWrapper = 0;
 	m_pUpdater = 0;
 	m_pStorage = 0;
 	m_pMasterServer = 0;
@@ -2783,6 +2786,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
 	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher));
+	Kernel()->RegisterInterface(static_cast<ICurlWrapper*>(&m_CurlWrapper));
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	Kernel()->RegisterInterface(static_cast<IUpdater*>(&m_Updater));
 #endif
@@ -2805,6 +2809,7 @@ void CClient::InitInterfaces()
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+	m_pCurlWrapper = Kernel()->RequestInterface<ICurlWrapper>();
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -2816,6 +2821,7 @@ void CClient::InitInterfaces()
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
 	m_Fetcher.Init();
+	m_CurlWrapper.Init();
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();

@@ -210,7 +210,8 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	{
 		EXTRAS_NONE = 0,
 		EXTRAS_SERVERCONFIG_CREATOR,
-		EXTRAS_SNIFFER_SETTINGS
+		EXTRAS_SNIFFER_SETTINGS,
+		EXTRAS_LUA_QUICKACCESS,
 	};
 	static int s_ExtrasPage = EXTRAS_NONE;
 
@@ -225,6 +226,8 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		RenderServerConfigCreator(Button);
 	else if(s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS)
 		RenderSnifferSettings(Button);
+	else if(s_ExtrasPage == EXTRAS_LUA_QUICKACCESS)
+		RenderLuaQuickAccess(Button);
 
 	// button bar
 	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
@@ -270,10 +273,16 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR ? EXTRAS_NONE : EXTRAS_SERVERCONFIG_CREATOR;
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(140.0f, &Button, &ButtonBar);
 	static CButtonContainer s_SnifferSettingsButton;
 	if(DoButton_Menu(&s_SnifferSettingsButton, Localize("Network Sniffer"), s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS, &Button, "Packet sniffing settings"))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS ? EXTRAS_NONE : EXTRAS_SNIFFER_SETTINGS;
+
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(150.0f, &Button, &ButtonBar);
+	static CButtonContainer s_LuaQuickAccessButton;
+	if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "Scripts can create GUIs in here as they like"))
+		s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
 
 }
 
@@ -464,6 +473,46 @@ void CMenus::RenderSnifferSettings(CUIRect MainView)
 		if(DoButton_CheckBox(&s_Checkbox, Localize("Sniff incoming connless packets"), g_Config.m_ClSniffRecvConnless, &Button))
 			g_Config.m_ClSniffRecvConnless ^= 1;
 	}
+}
+
+void CMenus::RenderLuaQuickAccess(CUIRect MainView)
+{
+	CUIRect Button;
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+
+	char aBuf[128];
+	CButtonContainer pBCs[128];
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	const int NumLuaScripts = Client()->Lua()->GetLuaFiles().size();
+
+	CButtonContainer s_Listbox;
+	static float s_ScrollVal = 0.0f;
+	UiDoListboxStart(&s_Listbox, &MainView, 20.0f, "", "", NumLuaScripts, 1, -1, s_ScrollVal);
+	static int s_ActivatedIndex = -1;
+	for(int i = 0; i < NumLuaScripts; i++)
+	{
+		CLuaFile *L = Client()->Lua()->GetLuaFiles()[i];
+		if(!L || L->State() != CLuaFile::LUAFILE_STATE_LOADED)
+			continue;
+
+		CPointerContainer Container(L);
+		CListboxItem Item = UiDoListboxNextItem(&Container);
+		//MainView.HSplitTop(10.0f, &ButtonBar, &MainView);
+		RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0.8f, 0.2f+(i%2)*0.6f, 0.2f+(float)(1-i%2)*0.6f, 0.5f), 0, 0);
+
+		Item.m_Rect.VSplitRight(Item.m_Rect.h, &Item.m_Rect, &Button);
+		if(DoButton_Menu(&pBCs[i], "x", 0, &Button, Localize("Deactivate"), CUI::CORNER_R, vec4(1,0,0,0.5f)))
+			L->Unload(false);
+
+		//ButtonBar.VSplitRight(ButtonBar.h, &ButtonBar, &Button);
+		str_format(aBuf, sizeof(aBuf), "[%s] '%s' (%s)", L->GetFilename(), L->GetScriptTitle(), L->GetScriptInfo());
+		UI()->DoLabelScaled(&Item.m_Rect, aBuf, 10.0f, -1);
+		if(DoButton_Menu(&pBCs[i], "", 0, &Item.m_Rect, 0, 0/*i == 0 ? CUI::CORNER_T : i == NumLuaScripts-1 ? CUI::CORNER_B : 0*/))
+			s_ActivatedIndex = i;
+
+	}
+
+	UiDoListboxEnd(&s_ScrollVal, 0);
 }
 
 void CMenus::RenderPlayers(CUIRect MainView)

@@ -101,6 +101,7 @@ protected:
 	class IFriends *m_pFoes;
 	class IUpdater *m_pUpdater;
 	class IIRC *m_pIRC;
+	class ICurlWrapper *m_pCurlWrapper;
 
 	CLayers m_Layers;
 	class CCollision m_Collision;

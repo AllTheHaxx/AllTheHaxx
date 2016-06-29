@@ -196,6 +196,7 @@ void CGameClient::OnConsoleInit()
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 	m_pIRC = Kernel()->RequestInterface<IIRC>();
+	m_pCurlWrapper = Kernel()->RequestInterface<ICurlWrapper>();
 
 	// setup pointers
 	m_pBinds = &::gs_Binds;

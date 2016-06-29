@@ -4,6 +4,7 @@
 #define ENGINE_CLIENT_CLIENT_H
 
 #include "db_sqlite3.h"
+#include "curlwrapper.h"
 
 class CGraph
 {
@@ -68,6 +69,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IConsole *m_pConsole;
 	IStorageTW *m_pStorage;
 	IFetcher *m_pFetcher;
+	ICurlWrapper *m_pCurlWrapper;
 	IUpdater *m_pUpdater;
 	IEngineMasterServer *m_pMasterServer;
 	IIRC *m_pIRC;
@@ -84,6 +86,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CDemoEditor m_DemoEditor;
 	class CServerBrowser m_ServerBrowser;
 	class CFetcher m_Fetcher;
+	class CCurlWrapper m_CurlWrapper;
 	class CUpdater m_Updater;
 	class CFriends m_Friends;
 	class CFriends m_Foes;

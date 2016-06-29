@@ -18,6 +18,7 @@
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/serverbrowser.h>
+#include <engine/curlwrapper.h>
 //#include <engine/client/client.h>
 
 CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
@@ -553,6 +554,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
 		.endClass()
 
+		.beginClass<ICurlWrapper>("ICurlWrapper") /// Engine.Curl
+			.addFunction("httpSimplePost", &ICurlWrapper::PerformSimplePOST)
+		.endClass()
+
 		// serverinfo
 		.beginClass<CServerInfo>("CServerInfo") /// Game.ServerInfo
 			.addProperty("GameMode", &CServerInfo::LuaGetGameType)
@@ -673,6 +678,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginNamespace("Engine")
 			.addVariable("Graphics", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
 			.addVariable("Input", &CLua::m_pCGameClient->m_pInput) //dunno, this should be maybe an own subspace :O
+			.addVariable("Curl", &CLua::m_pCGameClient->m_pCurlWrapper)
 		.endNamespace()
 
 		// g_Config stuff... EVERYTHING AT ONCE!
