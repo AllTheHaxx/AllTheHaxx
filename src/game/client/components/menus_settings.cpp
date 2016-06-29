@@ -271,7 +271,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 #if defined(CONF_FAMILY_WINDOWS)
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClHideConsole, Localize("Hide console window"), g_Config.m_ClHideConsole, &Button))
+		CButtonContainer s_HideConsoleButton;
+		if(DoButton_CheckBox(&s_HideConsoleButton, Localize("Hide console window"), g_Config.m_ClHideConsole, &Button))
 			g_Config.m_ClHideConsole ^= 1;
 #endif
 

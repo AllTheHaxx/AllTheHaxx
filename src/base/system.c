@@ -699,7 +699,7 @@ void *thread_get_current()
 	memcpy(&threadId, &ptid, sizeof(ptid));
 	return (void*)threadId;
 #elif defined(CONF_FAMILY_WINDOWS)
-	return GetCurrentThread(void);
+	return GetCurrentThread();
 #else
 	#error not implemented
 #endif
