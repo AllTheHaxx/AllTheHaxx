@@ -240,7 +240,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		//Button.VSplitLeft(5.0f, 0x0, &Button);
 		static char aEntryText[500];
 		static float s_Offset;
-		static CButtonContainer s_EditboxInput;
+		static CPointerContainer s_EditboxInput(&m_IRCActive);
 		DoEditBox(&s_EditboxInput, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
 		static CButtonContainer s_ButtonSend;
 		if(DoButton_Menu(&s_ButtonSend, Localize("Send"), 0, &Button, 0, CUI::CORNER_R, vec4(1,1,1,0.6f))

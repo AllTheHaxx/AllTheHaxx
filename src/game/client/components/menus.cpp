@@ -1837,7 +1837,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Password"), 18.0f, -1);
 			static float Offset = 0.0f;
-			static CButtonContainer s_PasswordEditBox;
+			CPointerContainer s_PasswordEditBox(&g_Config.m_Password);
 			DoEditBox(&s_PasswordEditBox, &TextBox, g_Config.m_Password, sizeof(g_Config.m_Password), 12.0f, &Offset, true);
 		}
 		else if(m_Popup == POPUP_CONNECTING)
