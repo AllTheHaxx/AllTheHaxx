@@ -22,7 +22,7 @@ CDebugger::CDebugger()
 
 void CDebugger::RegisterSignals()
 {
-	signal(SIGABRT, signalhandler);
+	//signal(SIGABRT, signalhandler);
 	signal(SIGFPE, signalhandler);
 	signal(SIGILL, signalhandler);
 	/*signal(SIGINT, signalhandler);*/ // DON'T ever catch this!!
