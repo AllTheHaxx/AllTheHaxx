@@ -245,9 +245,9 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	}
 
 	// custom color selector
-	MainView.HSplitTop(36.0f, 0, &View);
+	MainView.HSplitTop(20.0f, 0, &View);
 	View.HSplitTop(20.0f, &Button, &View);
-	Button.VSplitLeft(230.0f, &Button, 0);
+	View.VSplitLeft(230.0f, &Button, &View);
 	static CButtonContainer s_CheckboxUseCustomColor;
 	if(DoButton_CheckBox(&s_CheckboxUseCustomColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
 	{
@@ -255,7 +255,15 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		m_NeedSendinfo = true;
 	}
 
-	/// XXX
+	View.VSplitLeft(10.0f, 0, &View);
+	View.VSplitLeft(230.0f, &Button, &View);
+	static CButtonContainer s_VanillaSkinsOnly;
+	if(DoButton_CheckBox(&s_VanillaSkinsOnly, Localize("Allow Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &Button))
+	{
+		g_Config.m_ClVanillaSkinsOnly ^= 1;
+		GameClient()->m_pSkins->RefreshSkinList();
+		m_InitSkinlist = true;
+	}
 
 	View.HSplitTop(5.0f, 0, &View);
 	if(pEntry->m_UseCustomColor)
@@ -322,11 +330,10 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	}
 
 	View.HSplitTop(100.0f, 0, &View); /// another hack because of all the haxx above D:
-	static bool s_InitSkinlist = true;
 	static sorted_array<const CSkins::CSkin *> s_paSkinList;
 	static float s_ScrollValue = {0.0f};
 
-	if(s_InitSkinlist)
+/*	if(m_InitSkinlist) // done in menus_settings.cpp
 	{
 		s_paSkinList.clear();
 		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
@@ -343,9 +350,9 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 
 			s_paSkinList.add(s);
 		}
-		s_InitSkinlist = false;
+		m_InitSkinlist = false;
 	}
-
+*/
 	int OldSelected = -1;
 	static int s_SkinFilter = 0;
 	static CButtonContainer s_Listbox;
@@ -429,7 +436,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		static float Offset = 0.0f;
 		static CButtonContainer s_SkinFilterString;
 		if(DoEditBox(&s_SkinFilterString, &Button, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
-			s_InitSkinlist = true;
+			m_InitSkinlist = true;
 
 		// clear button
 		{
@@ -439,7 +446,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 			{
 				g_Config.m_ClSkinFilterString[0] = 0;
 				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
-				s_InitSkinlist = true;
+				m_InitSkinlist = true;
 			}
 		}
 
@@ -449,7 +456,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Button))
 		{
 			GameClient()->m_pSkins->RefreshSkinList();
-			s_InitSkinlist = true;
+			m_InitSkinlist = true;
 		}
 	}
 
@@ -463,7 +470,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		if(DoButton_CheckBox_Number(&s_ButtonSkinFilter, aFilterLabel, s_SkinFilter, &Button))
 		{
 			if(++s_SkinFilter > 2) s_SkinFilter = 0;
-			s_InitSkinlist = true;
+			m_InitSkinlist = true;
 		}
 	}
 }

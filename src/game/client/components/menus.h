@@ -325,11 +325,11 @@ public:	int m_LoadTotal;
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// found in menus_settings.cpp
+	int m_InitSkinlist;
 	void (CMenus::*m_pfnAppearanceSubpage)(CUIRect MainView);
 	void RenderLanguageSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);
 	void RenderSettingsPlayer(CUIRect MainView);
-	void RenderSettingsDummyPlayer(CUIRect MainView);
 	void RenderSettingsTee(CUIRect MainView);
 	void RenderSettingsControls(CUIRect MainView);
 	void RenderSettingsGraphics(CUIRect MainView);
@@ -339,7 +339,6 @@ public:	int m_LoadTotal;
 	void RenderSettingsAppearanceHUD(CUIRect MainView);
 	void RenderSettingsAppearanceTexture(CUIRect MainView);
 	void RenderSettingsAppearanceFont(CUIRect MainView);
-	bool RenderSettingsBackToAppearance(CUIRect *pMainView);
 	void RenderSettingsIRC(CUIRect MainView);
 	void RenderSettingsLua(CUIRect MainView);
 	void RenderSettingsAll(CUIRect MainView);
@@ -361,7 +360,7 @@ public:	int m_LoadTotal;
 	void RenderCrypt(CUIRect MainView);
 	static void ConKeyShortcut(IConsole::IResult *pResult, void *pUserData);
 
-	// found in menus_IRC.cpp
+	// found in menus_irc.cpp
 	bool m_IRCActive;
 	void RenderIRC(CUIRect MainView);
 	bool ToggleIRC();

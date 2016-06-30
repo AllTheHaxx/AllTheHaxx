@@ -83,6 +83,7 @@ CMenus::CMenus()
 	m_HotbarWasActive = false;
 	m_UseMouseButtons = true;
 	m_MouseSlow = false;
+	m_InitSkinlist = true;
 
 	m_EscapePressed = false;
 	m_EnterPressed = false;

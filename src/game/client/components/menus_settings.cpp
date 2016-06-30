@@ -414,7 +414,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
 
-	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	char *Skin = g_Config.m_ClPlayerSkin;
@@ -466,7 +465,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox_Number(&s_ButtonSkinFilter, aFilterLabel, s_SkinFilter, &DummyLabel))
 	{
 		if(++s_SkinFilter > 2) s_SkinFilter = 0;
-		s_InitSkinlist = true;
+		m_InitSkinlist = true;
 	}
 
 	Right.VSplitLeft(10.0f, 0, &Right);
@@ -476,7 +475,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
 		GameClient()->m_pSkins->RefreshSkinList();
-		s_InitSkinlist = true;
+		m_InitSkinlist = true;
 	}
 
 	Dummy.HSplitTop(5.0f, 0, &Dummy);
@@ -548,7 +547,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
 	Label.HSplitTop(15.0f, 0, &Label);
 	Label.VSplitLeft(70.0f, 0, &Label);
-	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
+	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150);
 
 	// custom color selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
@@ -630,7 +629,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(230.0f, &SkinList, &MainView);
 	static sorted_array<const CSkins::CSkin *> s_paSkinList;
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist)
+	if(m_InitSkinlist)
 	{
 		s_paSkinList.clear();
 		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
@@ -647,7 +646,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			s_paSkinList.add(s);
 		}
-		s_InitSkinlist = false;
+		m_InitSkinlist = false;
 	}
 
 	int OldSelected = -1;
@@ -727,7 +726,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		static float Offset = 0.0f;
 		static CButtonContainer s_SkinFilterString;
 		if(DoEditBox(&s_SkinFilterString, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
-			s_InitSkinlist = true;
+			m_InitSkinlist = true;
 
 		// clear button
 		{
@@ -736,7 +735,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			{
 				g_Config.m_ClSkinFilterString[0] = 0;
 				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
-				s_InitSkinlist = true;
+				m_InitSkinlist = true;
 			}
 		}
 
@@ -746,7 +745,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Refresh))
 		{
 			GameClient()->m_pSkins->RefreshSkinList();
-			s_InitSkinlist = true;
+			m_InitSkinlist = true;
 		}
 	}
 }
@@ -2696,10 +2695,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 	if(m_pfnAppearanceSubpage)
 	{
-		//if(RenderSettingsBackToAppearance(&MainView))
-			(*this.*m_pfnAppearanceSubpage)(MainView);
-		//else
-		//	m_pfnAppearanceSubpage = 0;
+		(*this.*m_pfnAppearanceSubpage)(MainView);
 		return;
 	}
 
@@ -2805,19 +2801,6 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 	if(NewSelected != SELECTED)
 		m_pClient->m_pFontMgr->ActivateFont(NewSelected);
 
-}
-
-bool CMenus::RenderSettingsBackToAppearance(CUIRect *pMainView)
-{
-	CALLSTACK_ADD();
-
-	CUIRect Button;
-	pMainView->HSplitTop(20.0f, &Button, pMainView);
-	pMainView->HSplitTop(10.0f, 0, pMainView);
-	static CButtonContainer s_Button;
-	if(DoButton_MenuTab(&s_Button, Localize("< Back"), 0, &Button, CUI::CORNER_ALL, vec4(0.7f, 0.7f, 0.2f, 0.9f), vec4(0.7f, 0.7f, 0.2f, 0.6f)))
-		return false;
-	return true;
 }
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)
