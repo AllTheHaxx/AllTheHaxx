@@ -245,9 +245,9 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	}
 
 	// custom color selector
-	MainView.HSplitTop(20.0f, 0, &View);
+	MainView.HSplitTop(15.0f, 0, &View);
 	View.HSplitTop(20.0f, &Button, &View);
-	View.VSplitLeft(230.0f, &Button, &View);
+	Button.VSplitLeft(230.0f, &Button, 0);
 	static CButtonContainer s_CheckboxUseCustomColor;
 	if(DoButton_CheckBox(&s_CheckboxUseCustomColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
 	{
@@ -255,8 +255,9 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		m_NeedSendinfo = true;
 	}
 
-	View.VSplitLeft(10.0f, 0, &View);
-	View.VSplitLeft(230.0f, &Button, &View);
+	MainView.HSplitTop(40.0f, 0, &View);
+	View.HSplitTop(20.0f, &Button, &View);
+	Button.VSplitLeft(230.0f, &Button, 0);
 	static CButtonContainer s_VanillaSkinsOnly;
 	if(DoButton_CheckBox(&s_VanillaSkinsOnly, Localize("Allow Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &Button))
 	{
