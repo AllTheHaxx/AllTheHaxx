@@ -235,3 +235,11 @@ vec4 CSkins::GetColorV4(int v)
 	vec3 r = GetColorV3(v);
 	return vec4(r.r, r.g, r.b, 1.0f);
 }
+
+bool CSkins::IsVanilla(const char *pName)
+{
+	for(int i = 0; i < sizeof(vanillaSkins)/sizeof(vanillaSkins[0]); i++)
+		if(str_comp(pName, vanillaSkins[i]) == 0)
+			return true;
+	return false;
+}

@@ -25,6 +25,7 @@ public:
 
 	vec3 GetColorV3(int v);
 	vec4 GetColorV4(int v);
+	bool IsVanilla(const char *pName);
 	int Num();
 	const CSkin *Get(int Index);
 	int Find(const char *pName);

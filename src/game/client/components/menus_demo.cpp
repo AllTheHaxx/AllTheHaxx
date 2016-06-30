@@ -656,13 +656,13 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(CButtonContainer *pBC, bool Sel
 							int ScrollNum = (gs_ListBoxNumItems+gs_ListBoxItemsPerRow-1)/gs_ListBoxItemsPerRow-NumViewable+1;
 							if(Scroll < 0)
 							{
-								int Num = (gs_ListBoxOriginalView.y-Item.m_Rect.y-Offset+gs_ListBoxRowHeight-1.0f)/gs_ListBoxRowHeight;
+								int Num = (int)((gs_ListBoxOriginalView.y - Item.m_Rect.y - Offset + gs_ListBoxRowHeight - 1.0f) / gs_ListBoxRowHeight);
 								gs_ListBoxScrollValue -= (1.0f/ScrollNum)*Num;
 							}
 							else
 							{
-								int Num = (Item.m_Rect.y+Item.m_Rect.h+Offset-(gs_ListBoxOriginalView.y+gs_ListBoxOriginalView.h)+gs_ListBoxRowHeight-1.0f)/
-									gs_ListBoxRowHeight;
+								int Num = (int)((Item.m_Rect.y + Item.m_Rect.h + Offset - (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) + gs_ListBoxRowHeight - 1.0f) /
+												gs_ListBoxRowHeight);
 								gs_ListBoxScrollValue += (1.0f/ScrollNum)*Num;
 							}
 							if(gs_ListBoxScrollValue < 0.0f) gs_ListBoxScrollValue = 0.0f;

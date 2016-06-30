@@ -43,7 +43,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	static CButtonContainer s_aPageIDs[512];
 	static CButtonContainer s_LeftListbox;
 	static float s_LeftListboxScrollVal = 0.0f;
-	UiDoListboxStart(&s_LeftListbox, &TabBar, 24.0f, "", "", numID+1, 1, -1, s_LeftListboxScrollVal);
+	UiDoListboxStart(&s_LeftListbox, &TabBar, 24.0f, "", "", numID+1, 1, -1, s_LeftListboxScrollVal, 0);
 	for(int i = 0; i < numID+1; i++)
 	{
 		if(i >= 512)
@@ -56,13 +56,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		if(i == numID)
 		{
-			static CButtonContainer s_ButtonAdd;
-
-			//TabBar.HSplitTop(24.0f, &Button, &TabBar);
 			Button.HSplitBottom(4.0f, &Button, 0);
 			Button.VSplitRight(240.0f, 0, &Temp);
-			//Temp.Margin(4.0f, &Temp);
-			//if(DoButton_Menu(&s_ButtonAdd, Localize("Add Identity"), 0, &Temp))
 			if(DoButton_MenuTab(&s_aPageIDs[i], Localize("Add Identity"), false, &Button, CUI::CORNER_B, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a)))
 			{
 				CIdentity::CIdentEntry Entry;
@@ -81,21 +76,25 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		Button.VSplitRight(Button.h, 0, &Temp);
 		Temp.Margin(4.0f, &Temp);
-		if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (i < numID-1 ? 0 : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
+		if(i >= 2)
 		{
-			m_pClient->m_pIdentity->DeleteIdent(i);
-			if(i < Page)
-				Page--;
+			if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (i < numID - 1 ? 0 : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
+			{
+				m_pClient->m_pIdentity->DeleteIdent(i);
+				if(i < Page)
+					Page--;
+			}
 		}
 
-		if(i < numID-1)
+		if(i < numID-1 && i >= 2)
 		{
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
 			Temp.x -= 16.0f;
-			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i > 0 ? 0 : CUI::CORNER_L))
+			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i > 2 ? 0 : CUI::CORNER_L))
 			{
 				m_pClient->m_pIdentity->SwapIdent(i, 1);
+				m_MousePos.y += 36.0f;
 				if(Page == i)
 					Page++;
 				else if(i == Page-1)
@@ -103,13 +102,14 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			}
 		}
 
-		if(i > 0)
+		if(i >= 3)
 		{
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
 			Temp.x -= 32.0f;
 			if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, 0, i < numID-1 ? CUI::CORNER_L : CUI::CORNER_ALL))
 			{
+				m_MousePos.y -= 36.0f;
 				m_pClient->m_pIdentity->SwapIdent(i, -1);
 				if(i == Page)
 					Page--;
@@ -145,18 +145,39 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	}
 	UiDoListboxEnd(&s_LeftListboxScrollVal, 0);
 
+
+	//MainView.Margin(10.0f, &MainView);
+	MainView.HSplitTop(20.0f, &Temp, &View);
+	Temp.VMargin(5.0f, &Temp);
+	Temp.VSplitMid(&Button, &Temp);
 	MainView.Margin(10.0f, &MainView);
 
-	MainView.Margin(10.0f, &MainView);
-	MainView.HSplitTop(10.0f, 0, &View);
+	static int s_ControlPage = 0;
+	CButtonContainer s_ButtonPlayer;
+	if(DoButton_MenuTab(&s_ButtonPlayer, Localize("Player"), s_ControlPage == 0, &Button, CUI::CORNER_L))
+		s_ControlPage = 0;
+	CButtonContainer s_ButtonTee;
+	if(DoButton_MenuTab(&s_ButtonTee, Localize("Tee"), s_ControlPage == 1, &Temp, CUI::CORNER_R))
+		s_ControlPage = 1;
 
-	View.HSplitTop(20.0f, 0, &View);
-	View.HSplitTop(20.0f, &Button, &View);
-	Button.VSplitLeft(230.0f, &Button, 0);
+	if(s_ControlPage == 0)
+		RenderSettingsIdentPlayer(View, Page);
+	if(s_ControlPage == 1)
+		RenderSettingsIdentTee(View, Page);
+}
 
+void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
+{
+
+}
+
+void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
+{
 	CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(Page);
 	if(!m_pClient->m_pIdentity->NumIdents() || !pEntry)
 		return;
+
+	CUIRect Button, Label, View;
 
 	// skin info
 	const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(pEntry->m_aSkin));
@@ -176,9 +197,20 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	OwnSkinInfo.m_Size = 50.0f*UI()->Scale();
 
 	char aBuf[128];
+	MainView.Margin(10.0f, &MainView);
+	MainView.HSplitTop(50.0f, &Label, &MainView);
+	Label.VSplitMid(&View, &Label);
+
+	// skin view
+	//Label.VSplitLeft(230.0f, &Label, 0);
+	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
+	Label.HSplitTop(15.0f, 0, &Label);
+	Label.VSplitLeft(70.0f, 0, &Label);
+	UI()->DoLabelScaled(&Label, pEntry->m_aSkin, 14.0f, -1, 150);
 
 	// player name
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	View.HSplitTop(20.0f, &Button, &View);
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
@@ -189,8 +221,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		m_NeedSendinfo = true;
 
 	// player clan
-	MainView.HSplitTop(5.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	View.HSplitTop(5.0f, 0, &View);
+	View.HSplitTop(20.0f, &Button, &View);
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
@@ -201,31 +233,31 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		m_NeedSendinfo = true;
 
 	// apply identity
-	MainView.HSplitTop(5.0f, 0, &MainView);
+	//MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
-	static float s_ApplyButton[512] = {0.0f};
+	static CButtonContainer s_ApplyButton[512];
 	if(!GameClient()->m_pIdentity->UsingIdent(Page))
 	{
-		CPointerContainer ContainerApply(&s_ApplyButton[Page]);
-		if(DoButton_Menu(&ContainerApply, Localize("Use Identity"), 0, &Button, "", CUI::CORNER_ALL, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
+		if(DoButton_Menu(&s_ApplyButton[Page], Localize("Use Identity"), 0, &Button, "", CUI::CORNER_ALL, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
 			GameClient()->m_pIdentity->ApplyIdent(Page);
 	}
 
 	// custom color selector
-	View.HSplitTop(36.0f, 0, &View);
+	MainView.HSplitTop(36.0f, 0, &View);
 	View.HSplitTop(20.0f, &Button, &View);
 	Button.VSplitLeft(230.0f, &Button, 0);
-	static CButtonContainer s_CheckboxUseTeamColor;
-	if(DoButton_CheckBox(&s_CheckboxUseTeamColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
+	static CButtonContainer s_CheckboxUseCustomColor;
+	if(DoButton_CheckBox(&s_CheckboxUseCustomColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
 	{
 		pEntry->m_UseCustomColor ^= 1;
 		m_NeedSendinfo = true;
 	}
 
+	/// XXX
+
 	View.HSplitTop(5.0f, 0, &View);
-	//View.HSplitTop(82.5f, &Label, &View);
 	if(pEntry->m_UseCustomColor)
 	{
 		CUIRect aRects[2];
@@ -236,17 +268,18 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 		aRects[1].VSplitRight(10.0f, &aRects[1], 0);
 
-		int *paColors[2];
-		paColors[0] = &pEntry->m_ColorBody;
-		paColors[1] = &pEntry->m_ColorFeet;
+		int *paColors[2] = {
+				&pEntry->m_ColorBody,
+				&pEntry->m_ColorFeet
+		};
 
 		const char *paParts[] = {
-			Localize("Body"),
-			Localize("Feet")};
+				Localize("Body"),
+				Localize("Feet")};
 		const char *paLabels[] = {
-			Localize("Hue"),
-			Localize("Sat."),
-			Localize("Lht.")};
+				Localize("Hue"),
+				Localize("Sat."),
+				Localize("Lht.")};
 		static int s_aColorSlider[2][3] = { { 0 } };
 
 		for(int i = 0; i < 2; i++)
@@ -275,7 +308,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 				float k = ((PrevColor>>((2-s)*8))&0xff) / 255.0f;
 				CPointerContainer Container(&s_aColorSlider[i][s]);
-				k = DoScrollbarH(&Container, &Button, k);
+				k = DoScrollbarH(&Container, &Button, k, 0, (int)(k * 100.0f));
 				Color <<= 8;
 				Color += clamp((int)(k*255), 0, 255);
 				UI()->DoLabelScaled(&Label, paLabels[s], 14.0f, -1);
@@ -288,54 +321,47 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		}
 	}
 
-	// skin selector
-	MainView.VSplitMid(0, &MainView);
-
-	MainView.y -= 48.0f;
-	MainView.HSplitTop(50.0f, &Label, &View);
-	Label.VSplitLeft(230.0f, &Label, 0);
-	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
-	Label.HSplitTop(15.0f, 0, &Label);
-	Label.VSplitLeft(70.0f, 0, &Label);
-	UI()->DoLabelScaled(&Label, pEntry->m_aSkin, 14.0f, -1, 150);
-
-	MainView.HSplitTop(60.0f, 0, &MainView);
-	static bool s_InitSkinlist = false;
+	View.HSplitTop(100.0f, 0, &View); /// another hack because of all the haxx above D:
+	static bool s_InitSkinlist = true;
 	static sorted_array<const CSkins::CSkin *> s_paSkinList;
 	static float s_ScrollValue = {0.0f};
 
-	if(!s_InitSkinlist)
+	if(s_InitSkinlist)
 	{
 		s_paSkinList.clear();
 		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
-			// no special skins
-			if(s->m_aName[0] == 'x' && s->m_aName[1] == '_')
+
+			// filter quick search
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
 				continue;
+
+			// no special skins
+			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_'))
+				continue;
+
 			s_paSkinList.add(s);
 		}
-		s_InitSkinlist = true;
+		s_InitSkinlist = false;
 	}
 
-	// shit's so hacky.
-	MainView.x -= 300.0f;
-	MainView.y += 150.0f;
-	MainView.w *= 2.0f;
-	MainView.h /= 1.5f;
-
 	int OldSelected = -1;
+	static int s_SkinFilter = 0;
 	static CButtonContainer s_Listbox;
-	UiDoListboxStart(&s_Listbox, &MainView, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 8, OldSelected, s_ScrollValue);
+	View.HSplitBottom(25.0f, &Button, &View);
+	UiDoListboxStart(&s_Listbox, &Button, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 8, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_paSkinList.size(); i++)
 	{
-		
 		const CSkins::CSkin *s = s_paSkinList[i];
-
-		if(s == 0)
+		if(!s)
 			continue;
+
+		if((s_SkinFilter == 1 && !m_pClient->m_pSkins->IsVanilla(s->m_aName)) ||
+				(s_SkinFilter == 2 && m_pClient->m_pSkins->IsVanilla(s->m_aName)))
+			continue;
+
 
 		if(str_comp(s->m_aName, pEntry->m_aSkin) == 0)
 			OldSelected = i;
@@ -344,6 +370,13 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
+			if(UI()->MouseInside(&Item.m_HitRect))
+			{
+				m_pClient->m_pTooltip->SetTooltip(s->m_aName);
+				if(i != OldSelected)
+					RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1,1,1,0.2f), CUI::CORNER_ALL, 3.5f);
+			}
+
 			CTeeRenderInfo Info;
 			if(pEntry->m_UseCustomColor)
 			{
@@ -381,4 +414,57 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		str_format(pEntry->m_aSkin, sizeof(s_paSkinList[NewSelected]->m_aName), s_paSkinList[NewSelected]->m_aName);
 		m_NeedSendinfo = true;
 	}
+
+	//View.HSplitTop(5.0f, 0, &View);
+	// render quick search and refresh (bottom bar)
+	View.HSplitTop(5.0f, 0, &View);
+	View.HSplitTop(ms_ButtonHeight, &View, 0);
+	{
+		View.VSplitLeft(240.0f, &Button, &View);
+		//QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
+		UI()->DoLabelScaled(&Button, "⚲", 14.0f, -1);
+		float wSearch = TextRender()->TextWidth(0, 14.0f, "⚲", -1);
+		Button.VSplitLeft(wSearch, 0, &Button);
+		Button.VSplitLeft(5.0f, 0, &Button);
+		static float Offset = 0.0f;
+		static CButtonContainer s_SkinFilterString;
+		if(DoEditBox(&s_SkinFilterString, &Button, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
+			s_InitSkinlist = true;
+
+		// clear button
+		{
+			static CPointerContainer s_ClearButton(&g_Config.m_ClSkinFilterString);
+			View.VSplitLeft(15.0f, &Button, &View);
+			if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
+			{
+				g_Config.m_ClSkinFilterString[0] = 0;
+				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
+				s_InitSkinlist = true;
+			}
+		}
+
+		View.VSplitLeft(5.0f, 0, &View);
+		View.VSplitLeft(150.0f, &Button, &View);
+		static CButtonContainer s_RefreshButton;
+		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Button))
+		{
+			GameClient()->m_pSkins->RefreshSkinList();
+			s_InitSkinlist = true;
+		}
+	}
+
+	// render skin filters (also bottom bar)
+	{
+		View.VSplitLeft(5.0f, 0, &View);
+		View.VSplitLeft(180.0f, &Button, &View);
+		char aFilterLabel[32];
+		str_format(aFilterLabel, sizeof(aFilterLabel), "Filter: %s", s_SkinFilter == 0 ? Localize("All Skins") : s_SkinFilter == 1 ? Localize("Vanilla Skins only") : s_SkinFilter == 2 ? Localize("Non-Vanilla Skins only") : "");
+		static CButtonContainer s_ButtonSkinFilter;
+		if(DoButton_CheckBox_Number(&s_ButtonSkinFilter, aFilterLabel, s_SkinFilter, &Button))
+		{
+			if(++s_SkinFilter > 2) s_SkinFilter = 0;
+			s_InitSkinlist = true;
+		}
+	}
 }
+

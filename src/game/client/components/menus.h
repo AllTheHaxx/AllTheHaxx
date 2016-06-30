@@ -349,6 +349,8 @@ public:	int m_LoadTotal;
 
 	// found in menus_identity.cpp
 	void RenderSettingsIdent(CUIRect MainView);
+	void RenderSettingsIdentTee(CUIRect MainView, int Page);
+	void RenderSettingsIdentPlayer(CUIRect MainView, int Page);
 
 	// found in menus_hotbar.cpp
 	bool m_HotbarActive;
