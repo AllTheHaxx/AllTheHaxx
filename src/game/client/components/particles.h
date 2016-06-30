@@ -12,18 +12,14 @@ struct CParticle
 	{
 		m_Vel = vec2(0,0);
 		m_LifeSpan = 0;
-		m_StartSize = vec2(32.0f,32.0f);
-		m_EndSize = vec2(32.0f,32.0f);
+		m_StartSize = 32;
+		m_EndSize = 32;
 		m_Rot = 0;
 		m_Rotspeed = 0;
 		m_Gravity = 0;
 		m_Friction = 0;
 		m_FlowAffected = 1.0f;
 		m_Color = vec4(1,1,1,1);
-		m_Collide = false;
-		m_ToBlack = false;
-		m_Type = 0;
-		m_pData = 0x0;
 	}
 
 	vec2 m_Pos;
@@ -35,8 +31,8 @@ struct CParticle
 
 	float m_LifeSpan;
 
-	vec2 m_StartSize;
-	vec2 m_EndSize;
+	float m_StartSize;
+	float m_EndSize;
 
 	float m_Rot;
 	float m_Rotspeed;
@@ -45,14 +41,6 @@ struct CParticle
 	float m_Friction;
 
 	vec4 m_Color;
-
-	// H-Client
-	float m_ToBlack;
-	int m_Type;
-	int m_Collide;
-	vec2 m_LastPos;
-	void *m_pData;
-	//
 
 	// set by the particle system
 	float m_Life;
@@ -69,21 +57,8 @@ public:
 		GROUP_PROJECTILE_TRAIL=0,
 		GROUP_EXPLOSIONS,
 		GROUP_GENERAL,
-		GROUP_HCLIENT_BLOOD,
-		GROUP_HCLIENT_BLOOD_BODY,
 		NUM_GROUPS
 	};
-
-	// for the gore
-	enum
-	{
-		PARTICLE_NONE=0,
-		PARTICLE_BLOOD,
-		PARTICLE_BLOOD_L,
-		PARTICLE_BLOOD_BODY,
-		PARTICLE_WEAPON
-	};
-	//
 
 	CParticles();
 
@@ -117,9 +92,5 @@ private:
 	CRenderGroup<GROUP_PROJECTILE_TRAIL> m_RenderTrail;
 	CRenderGroup<GROUP_EXPLOSIONS> m_RenderExplosions;
 	CRenderGroup<GROUP_GENERAL> m_RenderGeneral;
-
-	// H-Client
-	CRenderGroup<GROUP_HCLIENT_BLOOD> m_RenderHClientBlood;
-	CRenderGroup<GROUP_HCLIENT_BLOOD_BODY> m_RenderHClientBloodBody;
 };
 #endif

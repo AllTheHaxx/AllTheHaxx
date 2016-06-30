@@ -24,7 +24,6 @@
 #include <game/client/components/sounds.h>
 #include <game/client/components/controls.h>
 
-#include <engine/serverbrowser.h>
 #include <engine/textrender.h>
 
 #include "nameplates.h"
@@ -501,7 +500,7 @@ void CPlayers::RenderPlayer(
 	bool WantOtherDir = (Player.m_Direction == -1 && Vel.x > 0) || (Player.m_Direction == 1 && Vel.x < 0);
 
 	// evaluate animation
-	float WalkTime = fmod(absolute(Position.x), 100.0f)/100.0f;
+	float WalkTime = (float)(fmod(absolute(Position.x), 100.0f) / 100.0f);
 	CAnimState State;
 	State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0);
 
@@ -677,7 +676,7 @@ void CPlayers::RenderPlayer(
 				}
 				else
 				{
-					if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
+					if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED)
 						IteX = s_LastIteX;
 					else
 						s_LastIteX = IteX;
@@ -741,7 +740,7 @@ void CPlayers::RenderPlayer(
 				}
 				else
 				{
-					if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
+					if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED)
 						IteX = s_LastIteX;
 					else
 						s_LastIteX = IteX;
@@ -787,17 +786,7 @@ void CPlayers::RenderPlayer(
 		RenderTools()->RenderTee(&State, &Ghost, Player.m_Emote, Direction, GhostPosition, true); // render ghost
 	}
 
-	RenderInfo.m_Size = 64.0f;       // force some settings
-	RenderInfo.m_ColorBody.a = 1.0f;
-	RenderInfo.m_ColorFeet.a = 1.0f;
-
-	// gore
-	{
-		CServerInfo ServerInfo;
-		Client()->GetServerInfo(&ServerInfo);
-		if (g_Config.m_ClGoreStyle && !IsRace(&ServerInfo) && !IsDDNet(&ServerInfo) && Prev.m_Emote == EMOTE_NORMAL && Player.m_Emote == EMOTE_PAIN)
-			m_pClient->m_pEffects->Blood(Position, Direction, 0, pInfo.m_ClientID);
-		}
+	RenderInfo.m_Size = 64.0f; // force some settings
 
 	if (OtherTeam)
 	{
@@ -877,15 +866,15 @@ void CPlayers::RenderPlayer(
 		float a = 1;
 
 		if (FromEnd < Client()->GameTickSpeed() / 5)
-			a = FromEnd / (Client()->GameTickSpeed() / 5.0);
+			a = FromEnd / (Client()->GameTickSpeed() / 5.0f);
 
 		float h = 1;
 		if (SinceStart < Client()->GameTickSpeed() / 10)
-			h = SinceStart / (Client()->GameTickSpeed() / 10.0);
+			h = SinceStart / (Client()->GameTickSpeed() / 10.0f);
 
 		float Wiggle = 0;
 		if (SinceStart < Client()->GameTickSpeed() / 5)
-			Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0);
+			Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0f);
 
 		float WiggleAngle = sinf(5*Wiggle);
 

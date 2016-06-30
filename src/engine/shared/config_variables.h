@@ -137,6 +137,7 @@ MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 0, CFGFLAG_SAVE|
 MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
 #endif
 MACRO_CONFIG_INT(GfxHighdpi, gfx_highdpi, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Try to use high-dpi screen features")
+MACRO_CONFIG_INT(GfxLaserTrail, gfx_lasertrail, 1, 0, 3, CFGFLAG_SAVE|CFGFLAG_CLIENT, "0: off | 1: vanilla only | 2: not on race servers | 3: everywhere")
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 130, 5, 100000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Mouse sensitivity")
 MACRO_CONFIG_INT(InpMouseOld, inp_mouseold, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use old mouse mode (warp mouse instead of raw input) -- MIGHT BE BUGGY ON SOME SYSTEMS!!")
