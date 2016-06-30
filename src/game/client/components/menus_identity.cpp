@@ -40,15 +40,43 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	static CButtonContainer s_aDeleteIDs[512];
 	static CButtonContainer s_aUpIDs[512];
 	static CButtonContainer s_aDownIDs[512];
-	for(int i = 0; i < numID; i++)
+	static CButtonContainer s_aPageIDs[512];
+	static CButtonContainer s_LeftListbox;
+	static float s_LeftListboxScrollVal = 0.0f;
+	UiDoListboxStart(&s_LeftListbox, &TabBar, 24.0f, "", "", numID+1, 1, -1, s_LeftListboxScrollVal);
+	for(int i = 0; i < numID+1; i++)
 	{
 		if(i >= 512)
 			break;
 
 		CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(i);
-		TabBar.HSplitTop(24.0f, &Button, &TabBar);
-		static CButtonContainer s_Button;
-		if(DoButton_MenuTab(&s_Button, "", Page == i, &Button, 0))
+		CPointerContainer Container(pEntry);
+		CListboxItem Item = UiDoListboxNextItem(&Container, false/*Page == i*/);
+		Button = Item.m_Rect;
+
+		if(i == numID)
+		{
+			static CButtonContainer s_ButtonAdd;
+
+			//TabBar.HSplitTop(24.0f, &Button, &TabBar);
+			Button.HSplitBottom(4.0f, &Button, 0);
+			Button.VSplitRight(240.0f, 0, &Temp);
+			//Temp.Margin(4.0f, &Temp);
+			//if(DoButton_Menu(&s_ButtonAdd, Localize("Add Identity"), 0, &Temp))
+			if(DoButton_MenuTab(&s_aPageIDs[i], Localize("Add Identity"), false, &Button, CUI::CORNER_B, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a)))
+			{
+				CIdentity::CIdentEntry Entry;
+				mem_zero(&Entry, sizeof(Entry));
+				str_format(Entry.m_aName, sizeof(Entry.m_aName), "melon tee");
+				str_format(Entry.m_aClan, sizeof(Entry.m_aClan), "Team Green");
+				str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), "toptri");
+				m_pClient->m_pIdentity->AddIdent(Entry);
+			}
+			break;
+		}
+
+		//TabBar.HSplitTop(24.0f, &Button, &TabBar);
+		if(DoButton_MenuTab(&s_aPageIDs[i], "", Page == i, &Button, i == 0 ? CUI::CORNER_T : 0, vec4(0.2f, 0.6f, 0.2f, ms_ColorTabbarActive.a), vec4(0.2f, 0.6f, 0.2f, ms_ColorTabbarInactive.a)))
 			Page = i;
 
 		Button.VSplitRight(Button.h, 0, &Temp);
@@ -115,21 +143,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		UI()->DoLabelScaled(&Button, pEntry->m_aName, 14.0f, 0);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	
-	static CButtonContainer s_ButtonAdd;
-
-	TabBar.HSplitTop(24.0f, &Button, &TabBar);
-	Button.VSplitRight(240.0f, 0, &Temp);
-	Temp.Margin(4.0f, &Temp);
-	if(DoButton_Menu(&s_ButtonAdd, Localize("Add Identity"), 0, &Temp))
-	{
-		CIdentity::CIdentEntry Entry;
-		mem_zero(&Entry, sizeof(Entry));
-		str_format(Entry.m_aName, sizeof(Entry.m_aName), "melon tee");
-		str_format(Entry.m_aClan, sizeof(Entry.m_aClan), "Team Green");
-		str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), "toptri");
-		m_pClient->m_pIdentity->AddIdent(Entry);
-	}
+	UiDoListboxEnd(&s_LeftListboxScrollVal, 0);
 
 	MainView.Margin(10.0f, &MainView);
 
