@@ -2382,6 +2382,30 @@ void CMenus::OnRender()
 		m_Popup = POPUP_PURE;
 	}
 
+	if(m_InitSkinlist)
+	{
+		m_apSkinList.clear();
+		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
+		{
+			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
+
+			// filter quick search
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
+				continue;
+
+			// filter vanilla
+			if((g_Config.m_ClSkinFilterAdvanced == 1 && !s->m_IsVanilla) || (g_Config.m_ClSkinFilterAdvanced == 2 && s->m_IsVanilla))
+				continue;
+
+			// no special skins
+			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_'))
+				continue;
+
+			m_apSkinList.add(s);
+		}
+		m_InitSkinlist = false;
+	}
+
 	if(!IsActive())
 	{
 		m_EscapePressed = false;

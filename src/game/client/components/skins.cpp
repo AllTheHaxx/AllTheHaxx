@@ -20,27 +20,26 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CALLSTACK_ADD();
 
-	if(g_Config.m_ClVanillaSkinsOnly)
-	{
-		bool found = false;
-		for(unsigned int i = 0; i < sizeof(vanillaSkins) / sizeof(vanillaSkins[0]); i++)
-		{
-			if(str_comp(pName, vanillaSkins[i]) == 0)
-			{
-				found = true;
-				break;
-			}
-		}
-		if(!found)
-			return 0;
-	}
-
-	IStorageTW::CLoadHelper<CSkins> *pLoadHelper = (IStorageTW::CLoadHelper<CSkins> *)pUser;
-	CSkins *pSelf = pLoadHelper->pSelf;
-
 	int l = str_length(pName);
 	if(l < 4 || IsDir || str_comp(pName+l-4, ".png") != 0)
 		return 0;
+
+	CSkin Skin;
+	Skin.m_IsVanilla = false;
+	for(unsigned int i = 0; i < sizeof(vanillaSkins) / sizeof(vanillaSkins[0]); i++)
+	{
+		if(str_comp(pName, vanillaSkins[i]) == 0)
+		{
+			Skin.m_IsVanilla = true;
+			break;
+		}
+	}
+
+	if(g_Config.m_ClVanillaSkinsOnly && !Skin.m_IsVanilla)
+		return 0;
+
+	IStorageTW::CLoadHelper<CSkins> *pLoadHelper = (IStorageTW::CLoadHelper<CSkins> *)pUser;
+	CSkins *pSelf = pLoadHelper->pSelf;
 
 	// Don't add duplicate skins (one from user's config directory, other from
 	// client itself)
@@ -60,7 +59,6 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 		return 0;
 	}
 
-	CSkin Skin;
 	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 	int BodySize = 96; // body size
@@ -234,12 +232,4 @@ vec4 CSkins::GetColorV4(int v)
 {
 	vec3 r = GetColorV3(v);
 	return vec4(r.r, r.g, r.b, 1.0f);
-}
-
-bool CSkins::IsVanilla(const char *pName)
-{
-	for(int i = 0; i < sizeof(vanillaSkins)/sizeof(vanillaSkins[0]); i++)
-		if(str_comp(pName, vanillaSkins[i]) == 0)
-			return true;
-	return false;
 }

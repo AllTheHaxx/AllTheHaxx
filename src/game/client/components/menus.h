@@ -13,6 +13,8 @@
 #include <game/client/component.h>
 #include <game/client/ui.h>
 
+#include "skins.h"
+
 
 // compnent to fetch keypresses, override all other input
 class CMenusKeyBinder : public CComponent
@@ -326,6 +328,7 @@ public:	int m_LoadTotal;
 
 	// found in menus_settings.cpp
 	int m_InitSkinlist;
+	sorted_array<const CSkins::CSkin *> m_apSkinList;
 	void (CMenus::*m_pfnAppearanceSubpage)(CUIRect MainView);
 	void RenderLanguageSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);

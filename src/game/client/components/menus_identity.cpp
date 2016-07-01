@@ -168,11 +168,6 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 {
-
-}
-
-void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
-{
 	CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(Page);
 	if(!m_pClient->m_pIdentity->NumIdents() || !pEntry)
 		return;
@@ -199,6 +194,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	char aBuf[128];
 	MainView.Margin(10.0f, &MainView);
 	MainView.HSplitTop(50.0f, &Label, &MainView);
+	UI()->DoLabelScaled(&Label, Localize(""))
 	Label.VSplitMid(&View, &Label);
 
 	// skin view
@@ -233,7 +229,6 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		m_NeedSendinfo = true;
 
 	// apply identity
-	//MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
@@ -243,19 +238,45 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		if(DoButton_Menu(&s_ApplyButton[Page], Localize("Use Identity"), 0, &Button, "", CUI::CORNER_ALL, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
 			GameClient()->m_pIdentity->ApplyIdent(Page);
 	}
+}
 
-	// custom color selector
-	MainView.HSplitTop(15.0f, 0, &View);
-	View.HSplitTop(20.0f, &Button, &View);
-	Button.VSplitLeft(230.0f, &Button, 0);
-	static CButtonContainer s_CheckboxUseCustomColor;
-	if(DoButton_CheckBox(&s_CheckboxUseCustomColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
+void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
+{
+	CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(Page);
+	if(!m_pClient->m_pIdentity->NumIdents() || !pEntry)
+		return;
+
+	CUIRect Button, Label, View;
+
+	// skin info
+	const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(pEntry->m_aSkin));
+	CTeeRenderInfo OwnSkinInfo;
+	if(pEntry->m_UseCustomColor)
 	{
-		pEntry->m_UseCustomColor ^= 1;
-		m_NeedSendinfo = true;
+		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
+		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorBody);
+		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorFeet);
 	}
+	else
+	{
+		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
+		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	OwnSkinInfo.m_Size = 50.0f*UI()->Scale();
 
-	MainView.HSplitTop(40.0f, 0, &View);
+	MainView.Margin(10.0f, &MainView);
+	MainView.HSplitTop(50.0f, &Label, &MainView);
+	Label.VSplitMid(&View, &Label);
+
+	// skin view
+	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
+	Label.HSplitTop(15.0f, 0, &Label);
+	Label.VSplitLeft(70.0f, 0, &Label);
+	UI()->DoLabelScaled(&Label, pEntry->m_aSkin, 14.0f, -1, 150);
+
+	// player name
 	View.HSplitTop(20.0f, &Button, &View);
 	Button.VSplitLeft(230.0f, &Button, 0);
 	static CButtonContainer s_VanillaSkinsOnly;
@@ -266,13 +287,26 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		m_InitSkinlist = true;
 	}
 
+	// player clan
 	View.HSplitTop(5.0f, 0, &View);
+	View.HSplitTop(20.0f, &Button, &View);
+	Button.VSplitLeft(230.0f, &Button, 0);
+	static CButtonContainer s_CheckboxUseCustomColor;
+	if(DoButton_CheckBox(&s_CheckboxUseCustomColor, Localize("Custom colors"), pEntry->m_UseCustomColor, &Button))
+	{
+		pEntry->m_UseCustomColor ^= 1;
+		m_NeedSendinfo = true;
+	}
+
+	// apply identity
+	MainView.HSplitTop(5.0f, 0, &MainView);
+
+	// vanilla skins only
+	MainView.HSplitTop(10.0f, 0, &View);
 	if(pEntry->m_UseCustomColor)
 	{
 		CUIRect aRects[2];
-		Label.VSplitMid(&aRects[0], &aRects[1]);
-		View.VSplitMid(&aRects[0], 0);
-		aRects[0].HSplitMid(&aRects[0], &aRects[1]);
+		MainView.VSplitMid(&aRects[0], &aRects[1]);
 
 		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 		aRects[1].VSplitRight(10.0f, &aRects[1], 0);
@@ -293,15 +327,6 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 
 		for(int i = 0; i < 2; i++)
 		{
-			// things are getting even more hacky... i hope noone will ever read this
-			if(i)
-			{
-				aRects[i].x += 305.0f;
-				aRects[i].y -= 158.0f;
-				Label.x += 305.0f;
-				Label.y -= 158.0f;
-			}
-
 			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
 			UI()->DoLabelScaled(&Label, paParts[i], 14.0f, -1);
 			aRects[i].VSplitLeft(20.0f, 0, &aRects[i]);
@@ -330,51 +355,25 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		}
 	}
 
+	View = MainView;
 	View.HSplitTop(100.0f, 0, &View); /// another hack because of all the haxx above D:
-	static sorted_array<const CSkins::CSkin *> s_paSkinList;
 	static float s_ScrollValue = {0.0f};
-
-/*	if(m_InitSkinlist) // done in menus_settings.cpp
-	{
-		s_paSkinList.clear();
-		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
-		{
-			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
-
-			// filter quick search
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
-				continue;
-
-			// no special skins
-			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_'))
-				continue;
-
-			s_paSkinList.add(s);
-		}
-		m_InitSkinlist = false;
-	}
-*/
 	int OldSelected = -1;
-	static int s_SkinFilter = 0;
 	static CButtonContainer s_Listbox;
 	View.HSplitBottom(25.0f, &Button, &View);
-	UiDoListboxStart(&s_Listbox, &Button, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 8, OldSelected, s_ScrollValue);
 
-	for(int i = 0; i < s_paSkinList.size(); i++)
+	// do skinlist
+	UiDoListboxStart(&s_Listbox, &Button, 50.0f, Localize("Skins"), "", m_apSkinList.size(), 8, OldSelected, s_ScrollValue);
+	for(int i = 0; i < m_apSkinList.size(); i++)
 	{
-		const CSkins::CSkin *s = s_paSkinList[i];
+		const CSkins::CSkin *s = m_apSkinList[i];
 		if(!s)
 			continue;
-
-		if((s_SkinFilter == 1 && !m_pClient->m_pSkins->IsVanilla(s->m_aName)) ||
-				(s_SkinFilter == 2 && m_pClient->m_pSkins->IsVanilla(s->m_aName)))
-			continue;
-
 
 		if(str_comp(s->m_aName, pEntry->m_aSkin) == 0)
 			OldSelected = i;
 
-		CPointerContainer Container(&s_paSkinList[i]);
+		CPointerContainer Container(&m_apSkinList[i]);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
@@ -419,7 +418,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		str_format(pEntry->m_aSkin, sizeof(s_paSkinList[NewSelected]->m_aName), s_paSkinList[NewSelected]->m_aName);
+		str_format(pEntry->m_aSkin, sizeof(pEntry->m_aSkin), m_apSkinList[NewSelected]->m_aName);
 		m_NeedSendinfo = true;
 	}
 
@@ -466,13 +465,15 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		View.VSplitLeft(5.0f, 0, &View);
 		View.VSplitLeft(180.0f, &Button, &View);
 		char aFilterLabel[32];
-		str_format(aFilterLabel, sizeof(aFilterLabel), "Filter: %s", s_SkinFilter == 0 ? Localize("All Skins") : s_SkinFilter == 1 ? Localize("Vanilla Skins only") : s_SkinFilter == 2 ? Localize("Non-Vanilla Skins only") : "");
+		str_format(aFilterLabel, sizeof(aFilterLabel), "%s", g_Config.m_ClSkinFilterAdvanced == 0 ? Localize("All Skins") : g_Config.m_ClSkinFilterAdvanced == 1 ? Localize("Vanilla Skins only") : g_Config.m_ClSkinFilterAdvanced == 2 ? Localize("Non-Vanilla Skins only") : "");
 		static CButtonContainer s_ButtonSkinFilter;
-		if(DoButton_CheckBox_Number(&s_ButtonSkinFilter, aFilterLabel, s_SkinFilter, &Button))
-		{
-			if(++s_SkinFilter > 2) s_SkinFilter = 0;
+		int PrevFilter = g_Config.m_ClSkinFilterAdvanced;
+		if(DoButton_CheckBox_Number(&s_ButtonSkinFilter, aFilterLabel, g_Config.m_ClSkinFilterAdvanced, &Button) == 1)
+			if(++g_Config.m_ClSkinFilterAdvanced > 2) g_Config.m_ClSkinFilterAdvanced = 0;
+		if(DoButton_CheckBox_Number(&s_ButtonSkinFilter, aFilterLabel, g_Config.m_ClSkinFilterAdvanced, &Button) == 2)
+			if(--g_Config.m_ClSkinFilterAdvanced < 0) g_Config.m_ClSkinFilterAdvanced = 2;
+		if(g_Config.m_ClSkinFilterAdvanced != PrevFilter)
 			m_InitSkinlist = true;
-		}
 	}
 }
 

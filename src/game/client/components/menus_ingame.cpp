@@ -663,9 +663,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Width-5.0f, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
-		static CButtonContainer s_IDButton;
+		static CButtonContainer s_IDButton[MAX_CLIENTS];
 		if(GameClient()->m_pIdentity->GetIdent(GameClient()->m_pIdentity->GetIdentID(m_pClient->m_aClients[Index].m_aName)))
-		if(DoButton_Menu(&s_IDButton, "ID", 0, &Button, "Add as new identity"))
+		if(DoButton_Menu(&s_IDButton[Index], "ID", 0, &Button, "Add as new identity"))
 		{
 			CIdentity::CIdentEntry Entry;
 			mem_zero(&Entry, sizeof(Entry));

@@ -16,6 +16,7 @@ public:
 		int m_ColorTexture;
 		char m_aName[24];
 		vec3 m_BloodColor;
+		bool m_IsVanilla;
 
 		bool operator<(const CSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
 	};
@@ -25,7 +26,6 @@ public:
 
 	vec3 GetColorV3(int v);
 	vec4 GetColorV4(int v);
-	bool IsVanilla(const char *pName);
 	int Num();
 	const CSkin *Get(int Index);
 	int Find(const char *pName);
