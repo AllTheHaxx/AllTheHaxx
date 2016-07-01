@@ -46,7 +46,7 @@ public:
 
 	// getter and setter functions
 	inline int NumIdents() { return m_aIdentities.size(); }
-	inline void AddIdent(CIdentEntry Entry) { m_aIdentities.add_unsorted(Entry); }
+	inline void AddIdent(CIdentEntry& Entry) { m_aIdentities.add_unsorted(Entry); }
 	inline void DeleteIdent(int Ident)
 	{
 		char aFile[64];
@@ -104,6 +104,20 @@ public:
 			return true;
 		return false;
 	};
+
+	void AddIdent() // adds a new ident with current settings
+	{
+		CIdentity::CIdentEntry Entry;
+		mem_zero(&Entry, sizeof(CIdentity::CIdentEntry));
+		str_copy(Entry.m_aName, g_Config.m_PlayerName, sizeof(Entry.m_aName));
+		str_copy(Entry.m_aClan, g_Config.m_PlayerClan, sizeof(Entry.m_aClan));
+		str_copy(Entry.m_aSkin, g_Config.m_ClPlayerSkin, sizeof(Entry.m_aSkin));
+		Entry.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+		Entry.m_ColorBody = g_Config.m_ClPlayerColorBody;
+		Entry.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+		Entry.m_Country = g_Config.m_PlayerCountry;
+		AddIdent(Entry);
+	}
 
 	void ApplyIdent(int i)
 	{

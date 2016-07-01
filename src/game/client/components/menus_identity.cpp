@@ -33,6 +33,10 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		
 	int numID = m_pClient->m_pIdentity->NumIdents();
 
+	// add a new identity from current settings as we need at least one
+	if(numID == 0)
+		m_pClient->m_pIdentity->AddIdent();
+
 	MainView.VSplitLeft(240.0f, &TabBar, &MainView);
 	TabBar.VSplitRight(2.0f, &TabBar, &Button);
 	RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.8f, 0.6f, 0.5f), 0, 0);
@@ -59,14 +63,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			Button.HSplitBottom(4.0f, &Button, 0);
 			Button.VSplitRight(240.0f, 0, &Temp);
 			if(DoButton_MenuTab(&s_aPageIDs[i], Localize("Add Identity"), false, &Button, CUI::CORNER_B, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a)))
-			{
-				CIdentity::CIdentEntry Entry;
-				mem_zero(&Entry, sizeof(Entry));
-				str_format(Entry.m_aName, sizeof(Entry.m_aName), "melon tee");
-				str_format(Entry.m_aClan, sizeof(Entry.m_aClan), "Team Green");
-				str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), "toptri");
-				m_pClient->m_pIdentity->AddIdent(Entry);
-			}
+				m_pClient->m_pIdentity->AddIdent();
 			break;
 		}
 
@@ -228,7 +225,7 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetTitle[512] = {0.0f};
 	CPointerContainer ContainerTitle(&s_OffsetTitle[Page]);
-	if(DoEditBox(&ContainerTitle, &Button, pEntry->m_aTitle, sizeof(pEntry->m_aTitle), 14.0f, &s_OffsetTitle[Page]))
+	if(DoEditBox(&ContainerTitle, &Button, pEntry->m_aTitle, sizeof(pEntry->m_aTitle), 14.0f, &s_OffsetTitle[Page], false, CUI::CORNER_ALL, "", 0, Localize("a custom title to display this identity")))
 		m_NeedSendinfo = true;
 
 	// player name

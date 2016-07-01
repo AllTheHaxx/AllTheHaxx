@@ -1592,14 +1592,12 @@ void CMenus::RenderSettings(CUIRect MainView)
 	const char *aTabs[] = {
 		Localize("Language"),
 		Localize("General"),
-		Localize("Player"),
-		("Tee"),
+		Localize("Identities"),
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
 		("Haxx"),
 		m_pfnAppearanceSubpage == NULL ? Localize("Appearance") : Localize("< back"),
-		Localize("Identities"),
 		Localize("Misc."),
 		Localize("Lua"),
 		//Localize("All")
@@ -1610,7 +1608,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	for(int i = 0; i < NumTabs; i++)
 	{
-		TabBar.HSplitTop(i == 7 || i == 11 ? 24 : 10, &Button, &TabBar);
+		TabBar.HSplitTop(i == 6 || i == 9 ? 24 : 10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(UI()->MouseInside(&Button))
 			smooth_set(&FadeVals[i], 5.0f, 10.0f*(0.005f/Client()->RenderFrameTime()));
@@ -1619,42 +1617,37 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Button.w += FadeVals[i];
 		CPointerContainer Container(&aTabs[i]);
 		if(DoButton_MenuTab(&Container, aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R,
-				i == 8 && m_pfnAppearanceSubpage ? vec4(0.8f, 0.6f, 0.25f, ms_ColorTabbarActive.a) : ms_ColorTabbarActive
+				i == PAGE_SETTINGS_APPEARANCE && m_pfnAppearanceSubpage ? vec4(0.8f, 0.6f, 0.25f, ms_ColorTabbarActive.a) : ms_ColorTabbarActive
 				))
 		{
-			//if(i == 8 && m_pfnAppearanceSubpage)
-				m_pfnAppearanceSubpage = 0;
+			m_pfnAppearanceSubpage = 0;
 			g_Config.m_UiSettingsPage = i;
 		}
 	}
 
 	MainView.Margin(10.0f, &MainView);
 
-	if(g_Config.m_UiSettingsPage == 0)
+	if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_LANGUAGE)
 		RenderLanguageSelection(MainView);
-	else if(g_Config.m_UiSettingsPage == 1)
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_GENERAL)
 		RenderSettingsGeneral(MainView);
-	else if(g_Config.m_UiSettingsPage == 2)
-		RenderSettingsPlayer(MainView);
-	else if(g_Config.m_UiSettingsPage == 3)
-		RenderSettingsTee(MainView);
-	else if(g_Config.m_UiSettingsPage == 4)
-		RenderSettingsControls(MainView);
-	else if(g_Config.m_UiSettingsPage == 5)
-		RenderSettingsGraphics(MainView);
-	else if(g_Config.m_UiSettingsPage == 6)
-		RenderSettingsSound(MainView);
-	else if(g_Config.m_UiSettingsPage == 7)
-		RenderSettingsHaxx(MainView);
-	else if(g_Config.m_UiSettingsPage == 8)
-		RenderSettingsAppearance(MainView);
-	else if(g_Config.m_UiSettingsPage == 9)
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_IDENTITIES)
 		RenderSettingsIdent(MainView);
-	else if(g_Config.m_UiSettingsPage == 10)
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_CONTROLS)
+		RenderSettingsControls(MainView);
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_GRAPHICS)
+		RenderSettingsGraphics(MainView);
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_SOUND)
+		RenderSettingsSound(MainView);
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_HAXX)
+		RenderSettingsHaxx(MainView);
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_APPEARANCE)
+		RenderSettingsAppearance(MainView);
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_MISC)
 		RenderSettingsDDNet(MainView);
-	else if	(g_Config.m_UiSettingsPage == 11)
+	else if	(g_Config.m_UiSettingsPage == PAGE_SETTINGS_LUA)
 		RenderSettingsLua(MainView);
-	//else if	(g_Config.m_UiSettingsPage == 12)
+	//else if	(g_Config.m_UiSettingsPage == PAGE_SETTINGS_ALL)
 	//	RenderSettingsAll(MainView);
 
 	if(m_NeedRestartUpdate)
