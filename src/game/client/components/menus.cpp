@@ -112,6 +112,8 @@ CMenus::CMenus()
 
 float CMenus::ButtonFade(CButtonContainer *pBC, float Seconds, int Checked)
 {
+	if(pBC->m_FadeStartTime > Client()->LocalTime())
+		pBC->m_FadeStartTime = 0.0f;
 	if (UI()->HotItem() == pBC->GetID() || Checked)
 	{
 		pBC->m_FadeStartTime = Client()->LocalTime();
@@ -505,7 +507,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 
 	if(Hidden)
 	{
-		unsigned s = str_length(pDisplayStr);
+		unsigned s = (unsigned int)str_length(pDisplayStr);
 		if(s >= sizeof(aStars))
 			s = sizeof(aStars)-1;
 		for(unsigned int i = 0; i < s; ++i)
@@ -1550,8 +1552,8 @@ int CMenus::Render()
 		TabBar.VMargin(20.0f, &TabBar);
 		RenderMenubar(TabBar);
 
-		// make sure the ui page didn't go wild
-		if(g_Config.m_UiPage < PAGE_NEWS_ATH || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
+		// make sure the ui page doesn't go wild
+		if(g_Config.m_UiPage < PAGE_NEWS_ATH || g_Config.m_UiPage >= NUM_PAGES || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
 			if(m_pClient->ServerBrowser()->CacheExists())
 				m_pClient->ServerBrowser()->LoadCache();
@@ -1576,8 +1578,6 @@ int CMenus::Render()
 				RenderServerControl(MainView);
 			else if(m_GamePage == PAGE_SPOOFING)
 				RenderSpoofing(MainView);
-		//	else if(m_GamePage == PAGE_IRC)
-		//		RenderIrc(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
 			else if(m_GamePage == PAGE_GHOST)
@@ -1603,8 +1603,6 @@ int CMenus::Render()
 	//		RenderIrc(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);
-
-
 	}
 	else
 	{
@@ -2549,7 +2547,7 @@ void CMenus::RenderBackground()
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 		float Size = 15.0f;
-		float OffsetTime = fmod(Client()->LocalTime()*0.15f, 2.0f);
+		float OffsetTime = (float)fmod(Client()->LocalTime() * 0.15f, 2.0f);
 		for(int y = -2; y < (int)(sw/Size); y++)
 			for(int x = -2; x < (int)(sh/Size); x++)
 			{

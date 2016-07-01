@@ -2,25 +2,17 @@
 
 #include <engine/engine.h>
 #include <engine/graphics.h>
-#include <engine/storage.h>
 #include <engine/textrender.h>
 #include <engine/shared/config.h>
-#include <engine/shared/linereader.h>
 
-#include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
 
 #include <game/client/components/sounds.h>
-#include <game/client/ui.h>
-#include <game/client/render.h>
-#include <game/client/gameclient.h>
 #include <game/client/animstate.h>
 #include <game/localization.h>
 
-#include "binds.h"
 #include "countryflags.h"
 #include "menus.h"
-#include "skins.h"
 #include "identity.h"
 
 void CMenus::RenderSettingsIdent(CUIRect MainView)
@@ -67,7 +59,6 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			break;
 		}
 
-		//TabBar.HSplitTop(24.0f, &Button, &TabBar);
 		if(DoButton_MenuTab(&s_aPageIDs[i], "", Page == i, &Button, i == 0 ? CUI::CORNER_T : 0, vec4(0.2f, 0.6f, 0.2f, ms_ColorTabbarActive.a), vec4(0.2f, 0.6f, 0.2f, ms_ColorTabbarInactive.a)))
 			Page = i;
 
@@ -282,23 +273,23 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 
 	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
-		if(pEntry->m_CountryCode == *Country)
+		const CCountryFlags::CCountryFlag *pFlag = m_pClient->m_pCountryFlags->GetByIndex(i);
+		if(pFlag->m_CountryCode == *Country)
 			OldSelected = i;
-		CPointerContainer Container(&pEntry->m_CountryCode);
+		CPointerContainer Container(&pFlag->m_CountryCode);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
-			CUIRect Label;
+			CUIRect FlagLabel;
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
-			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
+			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &FlagLabel);
 			float OldWidth = Item.m_Rect.w;
 			Item.m_Rect.w = Item.m_Rect.h*2;
 			Item.m_Rect.x += (OldWidth-Item.m_Rect.w)/ 2.0f;
 			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_pCountryFlags->Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
-			if(pEntry->m_Texture != -1)
-				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
+			m_pClient->m_pCountryFlags->Render(pFlag->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
+			if(pFlag->m_Texture != -1)
+				UI()->DoLabel(&FlagLabel, pFlag->m_aCountryCodeString, 10.0f, 0);
 		}
 	}
 

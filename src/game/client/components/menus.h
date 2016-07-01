@@ -50,7 +50,7 @@ public:
 
 		struct CPointerContainer : public CButtonContainer
 		{
-			CPointerContainer(const void *pID) : m_pID(pID) { }
+			CPointerContainer(const void *pID) : m_pID(pID) { m_FadeStartTime = 0.0f; }
 			const void *GetID() const { return m_pID; }
 		private:
 			const void *m_pID;
@@ -433,6 +433,7 @@ public:
 		PAGE_BROWSER,
 		PAGE_GHOST,
 		PAGE_SYSTEM,
+		NUM_PAGES,
 
 		PAGE_SETTINGS_LANGUAGE=0,
 		PAGE_SETTINGS_GENERAL,
