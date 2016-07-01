@@ -139,14 +139,16 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		Button.HSplitBottom(16.0f, 0, &Button);
 		if(GameClient()->m_pIdentity->UsingIdent(i))
-			TextRender()->TextColor(0.2f, 0.2f, 0.7f, 1.0f);
-		UI()->DoLabelScaled(&Button, pEntry->m_aName, 14.0f, 0);
+			TextRender()->TextColor(0.7f, 0.7f, 0.2f, 1.0f);
+		if(str_length(pEntry->m_aTitle) > 0)
+			UI()->DoLabelScaled(&Button, pEntry->m_aTitle, 14.0f, 0);
+		else
+			UI()->DoLabelScaled(&Button, pEntry->m_aName, 14.0f, 0);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	UiDoListboxEnd(&s_LeftListboxScrollVal, 0);
 
 
-	//MainView.Margin(10.0f, &MainView);
 	MainView.HSplitTop(20.0f, &Temp, &View);
 	Temp.VMargin(5.0f, &Temp);
 	Temp.VSplitMid(&Button, &Temp);
@@ -172,7 +174,7 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	if(!m_pClient->m_pIdentity->NumIdents() || !pEntry)
 		return;
 
-	CUIRect Button, Label, View;
+	CUIRect Button, Label;
 
 	// skin info
 	const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(pEntry->m_aSkin));
@@ -194,19 +196,40 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	char aBuf[128];
 	MainView.Margin(10.0f, &MainView);
 	MainView.HSplitTop(50.0f, &Label, &MainView);
-	UI()->DoLabelScaled(&Label, Localize(""))
-	Label.VSplitMid(&View, &Label);
+	RenderTools()->DrawUIRect(&Label, vec4(1,1,1,0.2f), CUI::CORNER_ALL, 25.0f);
+	Label.VSplitLeft(15.0f, 0, &Label);
+	Label.HSplitTop(3.0f, 0, &Label);
+	str_format(aBuf, sizeof(aBuf), "%s", Page == 0 ? Localize("Main Identity: ") : Page == 1 ? Localize("Dummy Identity: ") : "");
+	if(str_length(pEntry->m_aTitle) > 0)
+		str_append(aBuf, pEntry->m_aTitle, sizeof(aBuf));
+	else
+		str_append(aBuf, pEntry->m_aName, sizeof(aBuf));
+	UI()->DoLabelScaled(&Label, aBuf, 35.0f, -1, (int)Label.w);
+	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin view
-	//Label.VSplitLeft(230.0f, &Label, 0);
+	MainView.HSplitTop(50.0f, &Label, 0);
+	Label.VSplitMid(0, &Label);
 	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
 	Label.HSplitTop(15.0f, 0, &Label);
 	Label.VSplitLeft(70.0f, 0, &Label);
 	UI()->DoLabelScaled(&Label, pEntry->m_aSkin, 14.0f, -1, 150);
 
+	// ident title
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(80.0f, &Label, &Button);
+	Button.VSplitLeft(150.0f, &Button, 0);
+	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Title"));
+	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+	static float s_OffsetTitle[512] = {0.0f};
+	CPointerContainer ContainerTitle(&s_OffsetTitle[Page]);
+	if(DoEditBox(&ContainerTitle, &Button, pEntry->m_aTitle, sizeof(pEntry->m_aTitle), 14.0f, &s_OffsetTitle[Page]))
+		m_NeedSendinfo = true;
+
 	// player name
-	View.HSplitTop(20.0f, &Button, &View);
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
@@ -217,8 +240,8 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 		m_NeedSendinfo = true;
 
 	// player clan
-	View.HSplitTop(5.0f, 0, &View);
-	View.HSplitTop(20.0f, &Button, &View);
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
@@ -229,14 +252,25 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 		m_NeedSendinfo = true;
 
 	// apply identity
+	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
-	static CButtonContainer s_ApplyButton[512];
-	if(!GameClient()->m_pIdentity->UsingIdent(Page))
+	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Apply as"));
+	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+	Button.VSplitMid(&Button, &Label);
+	static CButtonContainer s_ApplyButtonMain[512], s_ApplyButtonDummy[512];
+	const int IsMain = GameClient()->m_pIdentity->UsingIdent(Page);
+	const int IsDummy = GameClient()->m_pIdentity->UsingIdentDummy(Page);
+	if(!IsMain)
 	{
-		if(DoButton_Menu(&s_ApplyButton[Page], Localize("Use Identity"), 0, &Button, "", CUI::CORNER_ALL, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
+		if(DoButton_Menu(&s_ApplyButtonMain[Page], Localize("Main"), 0, &Button, "", CUI::CORNER_L|CUI::CORNER_R*IsDummy, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
 			GameClient()->m_pIdentity->ApplyIdent(Page);
+	}
+	if(!IsDummy)
+	{
+		if(DoButton_Menu(&s_ApplyButtonDummy[Page], Localize("Dummy"), 0, &Label, "", CUI::CORNER_R|CUI::CORNER_L*IsMain, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
+			GameClient()->m_pIdentity->ApplyIdentDummy(Page);
 	}
 }
 

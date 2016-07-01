@@ -20,6 +20,7 @@ void CIdentity::SaveIdents()
 {
 	CALLSTACK_ADD();
 
+	int Successful = 0;
 	for(int i = 0; i < NumIdents(); i++)
 	{
 		CIdentEntry *pEntry = GetIdent(i);
@@ -34,7 +35,7 @@ void CIdentity::SaveIdents()
 			if(tmp)
 			{
 				io_close(tmp);
-				bool ret = fs_remove(aPath);
+				int ret = fs_remove(aPath);
 				dbg_msg("ident/cleanup", "removing '%s' %s", aPath, ret ? "failed" : "succeeded");
 			}
 			else
@@ -49,10 +50,12 @@ void CIdentity::SaveIdents()
 			continue;
 		}
 
-		dbg_msg("ident", "saving %s:%s", aBuf, pEntry->m_aName);
+		if(g_Config.m_Debug)
+			dbg_msg("ident", "saving %s:%s", aBuf, pEntry->m_aName);
 
 		char aTeeEntry[NUM_ENTRIES][64];
 
+		str_format(aTeeEntry[TITLE], 64, pEntry->m_aTitle);
 		str_format(aTeeEntry[NAME], 64, pEntry->m_aName);
 		str_format(aTeeEntry[CLAN], 64, pEntry->m_aClan);
 
@@ -65,11 +68,13 @@ void CIdentity::SaveIdents()
 		
 		for(int j = 0; j < NUM_ENTRIES; j++)
 		{
-			io_write(File, aTeeEntry[j], str_length(aTeeEntry[j]));
+			io_write(File, aTeeEntry[j], (unsigned int)str_length(aTeeEntry[j]));
 			io_write_newline(File);
 		}
 		io_close(File);
-	}	
+		Successful++;
+	}
+	dbg_msg("ident", "successfully saved %i/%i identities", Successful, NumIdents());
 }
 
 int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser)
@@ -100,13 +105,17 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 		{
 			if(!(pLine = lr.Get()))
 			{
+				if(i == TITLE) // for backwards compatibility
+				{
+					str_copy(aEntryItems[i], "", sizeof(aEntryItems[i]));
+					continue;
+				}
 				str_format(aBuf, sizeof(aBuf), "error while loading identity file");
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", aBuf);
-				//io_close(File);
 				mem_zero(aEntryItems[i], sizeof(aEntryItems[i]));
 				break;
 			}
-			str_format(aEntryItems[i], sizeof(aEntryItems[i]), pLine);
+			str_copy(aEntryItems[i], pLine, sizeof(aEntryItems[i]));
 		}
 
 		io_close(File);
@@ -119,10 +128,11 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 	}
 
 	CIdentEntry Entry;
-	str_format(Entry.m_aFilename, sizeof(Entry.m_aFilename), aFileName);
+	str_copy(Entry.m_aFilename, aFileName, sizeof(Entry.m_aFilename));
 
-	str_format(Entry.m_aName, sizeof(Entry.m_aName), aEntryItems[NAME]);
-	str_format(Entry.m_aClan, sizeof(Entry.m_aClan), aEntryItems[CLAN]);
+	str_copy(Entry.m_aTitle, aEntryItems[TITLE], sizeof(Entry.m_aTitle));
+	str_copy(Entry.m_aName, aEntryItems[NAME], sizeof(Entry.m_aName));
+	str_copy(Entry.m_aClan, aEntryItems[CLAN], sizeof(Entry.m_aClan));
 
 	Entry.m_Country = str_toint(aEntryItems[COUNTRY]);
 
