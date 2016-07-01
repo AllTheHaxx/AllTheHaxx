@@ -76,7 +76,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		Button.VSplitRight(Button.h, 0, &Temp);
 		Temp.Margin(4.0f, &Temp);
-		if(i >= 2)
+		if(m_pClient->m_pIdentity->NumIdents() > 1)
 		{
 			if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (i < numID - 1 ? 0 : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
 			{
@@ -86,12 +86,12 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			}
 		}
 
-		if(i < numID-1 && i >= 2)
+		if(i < numID-1)
 		{
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
 			Temp.x -= 16.0f;
-			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i > 2 ? 0 : CUI::CORNER_L))
+			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i >= 1 ? 0 : CUI::CORNER_L))
 			{
 				m_pClient->m_pIdentity->SwapIdent(i, 1);
 				m_MousePos.y += 36.0f;
@@ -102,7 +102,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			}
 		}
 
-		if(i >= 3)
+		if(i >= 1)
 		{
 			Button.VSplitRight(Button.h, 0, &Temp);
 			Temp.Margin(4.0f, &Temp);
@@ -138,8 +138,10 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x + OwnSkinInfo.m_Size, Button.y + Button.h *0.6f));
 		Button.HMargin(2.0f, &Button);
 		Button.HSplitBottom(16.0f, 0, &Button);
-		if(GameClient()->m_pIdentity->UsingIdent(i))
-			TextRender()->TextColor(0.7f, 0.7f, 0.2f, 1.0f);
+		const bool IsMain = m_pClient->m_pIdentity->UsingIdent(i);
+		const bool IsDummy = m_pClient->m_pIdentity->UsingIdentDummy(i);
+		vec3 rgb = IsMain && !IsDummy ? vec3(0.7f, 0.7f, 0.2f) : !IsMain && IsDummy ? vec3(0.2f, 0.7f, 0.7f) : IsMain && IsDummy ? vec3(0.2f, 0.7f, 0.2f) : vec3(1,1,1);
+		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 		if(str_length(pEntry->m_aTitle) > 0)
 			UI()->DoLabelScaled(&Button, pEntry->m_aTitle, 14.0f, 0);
 		else
@@ -199,7 +201,9 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	RenderTools()->DrawUIRect(&Label, vec4(1,1,1,0.2f), CUI::CORNER_ALL, 25.0f);
 	Label.VSplitLeft(15.0f, 0, &Label);
 	Label.HSplitTop(3.0f, 0, &Label);
-	str_format(aBuf, sizeof(aBuf), "%s", Page == 0 ? Localize("Main Identity: ") : Page == 1 ? Localize("Dummy Identity: ") : "");
+	const bool IsMain = m_pClient->m_pIdentity->UsingIdent(Page);
+	const bool IsDummy = m_pClient->m_pIdentity->UsingIdentDummy(Page);
+	str_format(aBuf, sizeof(aBuf), "%s", IsMain && !IsDummy ? Localize("Main Identity: ") : !IsMain && IsDummy ? Localize("Dummy's Identity: ") : IsMain && IsDummy ? Localize("Both's Identity: ") : "");
 	if(str_length(pEntry->m_aTitle) > 0)
 		str_append(aBuf, pEntry->m_aTitle, sizeof(aBuf));
 	else
@@ -260,8 +264,6 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	Button.VSplitMid(&Button, &Label);
 	static CButtonContainer s_ApplyButtonMain[512], s_ApplyButtonDummy[512];
-	const int IsMain = GameClient()->m_pIdentity->UsingIdent(Page);
-	const int IsDummy = GameClient()->m_pIdentity->UsingIdentDummy(Page);
 	if(!IsMain)
 	{
 		if(DoButton_Menu(&s_ApplyButtonMain[Page], Localize("Main"), 0, &Button, "", CUI::CORNER_L|CUI::CORNER_R*IsDummy, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
@@ -271,6 +273,46 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	{
 		if(DoButton_Menu(&s_ApplyButtonDummy[Page], Localize("Dummy"), 0, &Label, "", CUI::CORNER_R|CUI::CORNER_L*IsMain, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
 			GameClient()->m_pIdentity->ApplyIdentDummy(Page);
+	}
+
+	// country flag selector
+	int *Country = &pEntry->m_Country;
+	MainView.HSplitTop(20.0f, 0, &MainView);
+	static float s_ScrollValue = 0.0f;
+	int OldSelected = -1;
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 50.0f, Localize("Country"), "", m_pClient->m_pCountryFlags->Num(), 6, OldSelected, s_ScrollValue);
+
+	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
+	{
+		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
+		if(pEntry->m_CountryCode == *Country)
+			OldSelected = i;
+		CPointerContainer Container(&pEntry->m_CountryCode);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
+		if(Item.m_Visible)
+		{
+			CUIRect Label;
+			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
+			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
+			float OldWidth = Item.m_Rect.w;
+			Item.m_Rect.w = Item.m_Rect.h*2;
+			Item.m_Rect.x += (OldWidth-Item.m_Rect.w)/ 2.0f;
+			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+			m_pClient->m_pCountryFlags->Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
+			if(pEntry->m_Texture != -1)
+				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
+		}
+	}
+
+	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+	if(OldSelected != NewSelected)
+	{
+		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
+		if(m_Dummy)
+			m_NeedSendDummyinfo = true;
+		else
+			m_NeedSendinfo = true;
 	}
 }
 
