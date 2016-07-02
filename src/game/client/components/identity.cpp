@@ -88,7 +88,7 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 	char aBuf[256];
 	char aFileName[64];
 	char aFilePath[512];
-	char aEntryItems[NUM_ENTRIES][64];
+	char aEntryItems[NUM_ENTRIES][64] = { { 0 } };
 	str_format(aFilePath, sizeof(aFilePath), "identities/%s", pName);
 	str_format(aFileName, sizeof(aFileName), pName);
 
@@ -134,12 +134,12 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 	str_copy(Entry.m_aName, aEntryItems[NAME], sizeof(Entry.m_aName));
 	str_copy(Entry.m_aClan, aEntryItems[CLAN], sizeof(Entry.m_aClan));
 
-	Entry.m_Country = str_toint(aEntryItems[COUNTRY]);
+	Entry.m_Country = max(0, str_toint(aEntryItems[COUNTRY]));
 
 	str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), aEntryItems[SKIN]);
-	Entry.m_UseCustomColor = str_toint(aEntryItems[USE_CUSTOM_COLOR]);
-	Entry.m_ColorBody = str_toint(aEntryItems[COLOR_BODY]);
-	Entry.m_ColorFeet = str_toint(aEntryItems[COLOR_FEET]);
+	Entry.m_UseCustomColor = max(0, str_toint(aEntryItems[USE_CUSTOM_COLOR]));
+	Entry.m_ColorBody = max(0, str_toint(aEntryItems[COLOR_BODY]));
+	Entry.m_ColorFeet = max(0, str_toint(aEntryItems[COLOR_FEET]));
 
 	// add the entry to our array
 	pSelf->m_aIdentities.add(Entry);
