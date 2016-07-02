@@ -1688,7 +1688,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_QUIT)
 		{
 			pTitle = Localize("Quit");
-			pExtraText = Localize("Are you sure that you want to quit?");
+			pExtraText = Localize("Are you handsome?");
 			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
@@ -1765,11 +1765,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("Yes"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("No"), 0, &Yes) || m_EnterPressed)
 				Client()->Quit();
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
