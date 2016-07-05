@@ -771,7 +771,7 @@ void CClient::SetState(int s)
 		{
 			if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
 				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
-			else if(g_Config.m_ClReconnectTimeout > 0 && str_find_nocase(ErrorString(), "Timeout"))
+			else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
 				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
 		}
 	}
@@ -3015,6 +3015,8 @@ void CClient::Run()
 			LastTick = time_get();
 			LUA_FIRE_EVENT("OnTick");
 		}
+
+		//
 		
 		VersionUpdate();
 
@@ -3118,6 +3120,7 @@ void CClient::Run()
 			{
 				if(!m_EditorActive)
 				{
+					Input()->MouseModeRelative();
 					GameClient()->OnActivateEditor();
 					m_EditorActive = true;
 				}
