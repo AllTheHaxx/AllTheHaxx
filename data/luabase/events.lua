@@ -89,6 +89,16 @@ function OnConfigClose()
     end
 end
 
+function OnConsoleCommand(Command)
+    if Events["OnConsoleCommand"] ~= nil then
+        for script, event in pairs(Events["OnConsoleCommand"]) do
+            if event ~= nil then
+                event(Command)
+            end
+        end
+    end
+end
+
 function OnEnterGame()
     if Events["OnEnterGame"] ~= nil then
         for script, event in pairs(Events["OnEnterGame"]) do

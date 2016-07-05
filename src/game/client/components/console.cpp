@@ -114,7 +114,24 @@ void CGameConsole::CInstance::ClearHistory()
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
+	{
+		{
+			bool DiscardCommand = false;
+			for(int ijdfg = 0; ijdfg < m_pGameConsole->Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+			{
+				if(m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+					continue;
+				LuaRef lfunc = m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnConsoleCommand");
+				if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+			}
+			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
+			if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+
+			if(DiscardCommand)
+				return;
+		}
 		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
+	}
 	else if(m_Type == CGameConsole::CONSOLETYPE_REMOTE)
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
