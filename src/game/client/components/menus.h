@@ -350,6 +350,7 @@ public:	int m_LoadTotal;
 	void RenderLoadingLua();
 
 	// found in menus_identity.cpp
+	int RenderSettingsIdentLegacy(CUIRect MainView);
 	void RenderSettingsIdent(CUIRect MainView);
 	void RenderSettingsIdentTee(CUIRect MainView, int Page);
 	void RenderSettingsIdentPlayer(CUIRect MainView, int Page);

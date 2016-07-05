@@ -15,9 +15,52 @@
 #include "menus.h"
 #include "identity.h"
 
+int CMenus::RenderSettingsIdentLegacy(CUIRect MainView)
+{
+	CUIRect Button, Bar;
+
+	enum
+	{
+		PAGE_PLAYER = 0,
+		PAGE_TEE = 1
+	};
+	static int s_Page = PAGE_PLAYER;
+
+	MainView.HSplitTop(20.0f, &Bar, &MainView);
+	Bar.VSplitLeft(MainView.w/5.0f, &Button, &Bar);
+	static CButtonContainer s_BackButton;
+	if(DoButton_MenuTab(&s_BackButton, Localize("< back"), 0, &Button, CUI::CORNER_L))
+		return 0;
+
+	Bar.VSplitMid(&Button, &Bar);
+	static CButtonContainer s_ButtonPlayer;
+	if(DoButton_MenuTab(&s_ButtonPlayer, Localize("Player"), 0, &Button, 0))
+		s_Page = PAGE_PLAYER;
+
+	static CButtonContainer s_ButtonTee;
+	if(DoButton_MenuTab(&s_ButtonTee, Localize("Tee"), 0, &Bar, CUI::CORNER_R))
+		s_Page = PAGE_TEE;
+
+	if(s_Page == PAGE_PLAYER)
+		RenderSettingsPlayer(MainView);
+	else if(s_Page == PAGE_TEE)
+		RenderSettingsTee(MainView);
+	else
+		s_Page = PAGE_PLAYER;
+
+	return 1;
+}
+
 void CMenus::RenderSettingsIdent(CUIRect MainView)
 {
 	CALLSTACK_ADD();
+
+	static int s_LegacyIsOpen = 0;
+	if(s_LegacyIsOpen)
+	{
+		s_LegacyIsOpen = RenderSettingsIdentLegacy(MainView);
+		return;
+	}
 
 	// render background
 	CUIRect Temp, TabBar, Button, Label, View;
@@ -32,6 +75,11 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	MainView.VSplitLeft(240.0f, &TabBar, &MainView);
 	TabBar.VSplitRight(2.0f, &TabBar, &Button);
 	RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.8f, 0.6f, 0.5f), 0, 0);
+
+	TabBar.HSplitTop(20.0f, &Button, &TabBar);
+	static CButtonContainer s_ButtonOpenLegacy;
+	if(DoButton_Menu(&s_ButtonOpenLegacy, Localize("Open legacy view"), 0, &Button, 0, CUI::CORNER_T))
+		s_LegacyIsOpen = 1;
 	
 	static CButtonContainer s_aDeleteIDs[512];
 	static CButtonContainer s_aUpIDs[512];
