@@ -30,10 +30,7 @@ void CCamera::OnRender()
 {
 	CALLSTACK_ADD();
 
-	CServerInfo Info;
-	Client()->GetServerInfo(&Info);
-
-	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(Client()->GetServerInfo(0)) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		m_ZoomSet = false;
 		m_Zoom = 1.0;
@@ -183,21 +180,15 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CCamera *pSelf = (CCamera *)pUserData;
-	CServerInfo Info;
-	pSelf->Client()->GetServerInfo(&Info);
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(pSelf->Client()->GetServerInfo(0)) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*ZoomStep;
-	}
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
 	CALLSTACK_ADD();
 
 	CCamera *pSelf = (CCamera *)pUserData;
-	CServerInfo Info;
-	pSelf->Client()->GetServerInfo(&Info);
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(pSelf->Client()->GetServerInfo(0)) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*(1/ZoomStep);
 }
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
