@@ -910,7 +910,7 @@ void CChat::OnRender()
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine-i)+MAX_LINES)%MAX_LINES;
-		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_Show)
+		if(Now > m_aLines[r].m_Time+g_Config.m_ClShowhudChatMsgTime*time_freq() && !m_Show)
 			break;
 
 		char aName[64] = "";

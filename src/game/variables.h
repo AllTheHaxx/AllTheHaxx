@@ -151,6 +151,7 @@ MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLA
 MACRO_CONFIG_INT(ClPathFinding, cl_path_finding, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")
 MACRO_CONFIG_INT(ClShowhudHealthAmmoBars, cl_showhud_healthammo_bars, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use bars for health and ammo")
 MACRO_CONFIG_INT(ClShowhudChatbox, cl_showhud_chatbox, 34, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Nice background for the chat (alpha, 0-100)")
+MACRO_CONFIG_INT(ClShowhudChatMsgTime, cl_chatmsg_time, 16, 1, 30, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show long chat messages should stay on the screen")
 MACRO_CONFIG_INT(ClUiShowExtraBar, cl_ui_extra_bar, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show the extra bar")
 MACRO_CONFIG_INT(ClSmartZoom, cl_smart_zoom, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom in/out in a smart way, only on race gametypes")
 MACRO_CONFIG_INT(ClCinematicCamera, cl_cinematic_camera, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth spectator cam movement")
