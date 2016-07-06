@@ -233,15 +233,24 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		RenderTools()->DrawUIRect(&FilledBar, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 5.0f);
 
 		// draw markers
-		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
+		if(pInfo->m_NumTimelineMarkers < TotalTicks / 20)
 		{
-			float Ratio = (pInfo->m_aTimelineMarkers[i]-pInfo->m_FirstTick) / (float)TotalTicks;
-			Graphics()->TextureSet(-1);
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			IGraphics::CQuadItem QuadItem(SeekBar.x + (SeekBar.w-10.0f)*Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
-			Graphics()->QuadsDrawTL(&QuadItem, 1);
-			Graphics()->QuadsEnd();
+			for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
+			{
+				float Ratio = (pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / (float)TotalTicks;
+				Graphics()->TextureSet(-1);
+				Graphics()->QuadsBegin();
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+				IGraphics::CQuadItem QuadItem(SeekBar.x + (SeekBar.w - 10.0f) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				Graphics()->QuadsEnd();
+			}
+		}
+		else
+		{
+			TextRender()->TextColor(1,0,0,1);
+			UI()->DoLabelScaled(&SeekBar, Localize("removed markers due to broken demo"), 9.0f, -1);
+			TextRender()->TextColor(1,1,1,1);
 		}
 
 		// draw slice markers
