@@ -20,12 +20,12 @@ enum
 };
 
 
-static int aFontSizes[] = {8,9,10,11,12,13,14,15,16,17,18,19,20,36,64};
+static unsigned int aFontSizes[] = {8,9,10,11,12,13,14,15,16,17,18,19,20,36,64};
 #define NUM_FONT_SIZES (sizeof(aFontSizes)/sizeof(int))
 
 struct CFontChar
 {
-	int m_ID;
+	FT_ULong m_ID;
 
 	// these values are scaled to the pFont size
 	// width * font_size == real_size
@@ -41,18 +41,17 @@ struct CFontChar
 
 struct CFontSizeData
 {
-	int m_FontSize;
-	FT_Face *m_pFace;
+	unsigned int m_FontSize;
 
 	int m_aTextures[2];
 	int m_TextureWidth;
 	int m_TextureHeight;
 
-	int m_NumXChars;
-	int m_NumYChars;
+	unsigned int m_NumXChars;
+	unsigned int m_NumYChars;
 
-	int m_CharMaxWidth;
-	int m_CharMaxHeight;
+	unsigned int m_CharMaxWidth;
+	unsigned int m_CharMaxHeight;
 
 	CFontChar m_aCharacters[MAX_CHARACTERS*MAX_CHARACTERS];
 
@@ -103,7 +102,7 @@ class CTextRender : public IEngineTextRender
 
 	FT_Library m_FTLibrary;
 
-	int GetFontSizeIndex(int Pixelsize)
+	int GetFontSizeIndex(unsigned int Pixelsize)
 	{
 		for(unsigned i = 0; i < NUM_FONT_SIZES; i++)
 		{
@@ -121,7 +120,7 @@ class CTextRender : public IEngineTextRender
 		for(int y = 0; y < h; y++)
 			for(int x = 0; x < w; x++)
 			{
-				int c = pIn[y*w+x];
+				unsigned char c = pIn[y*w+x];
 
 				for(int sy = -1; sy <= 1; sy++)
 					for(int sx = -1; sx <= 1; sx++)
@@ -140,11 +139,11 @@ class CTextRender : public IEngineTextRender
 			}
 	}
 
-	void InitTexture(CFontSizeData *pSizeData, int CharWidth, int CharHeight, int Xchars, int Ychars)
+	void InitTexture(CFontSizeData *pSizeData, unsigned int CharWidth, unsigned int CharHeight, unsigned int Xchars, unsigned int Ychars)
 	{
 		static int FontMemoryUsage = 0;
-		int Width = CharWidth*Xchars;
-		int Height = CharHeight*Ychars;
+		unsigned int Width = CharWidth*Xchars;
+		unsigned int Height = CharHeight*Ychars;
 		void *pMem = mem_alloc(Width*Height, 1);
 		mem_zero(pMem, Width*Height);
 
@@ -167,12 +166,12 @@ class CTextRender : public IEngineTextRender
 		pSizeData->m_TextureHeight = Height;
 		pSizeData->m_CurrentCharacter = 0;
 
-		dbg_msg("text", "pFont memory usage: %d", FontMemoryUsage);
+		dbg_msg("text", "font data memory usage: %d byte (%.2f KiB)", FontMemoryUsage, (float)FontMemoryUsage/1024.0f);
 
 		mem_free(pMem);
 	}
 
-	int AdjustOutlineThicknessToFontSize(int OutlineThickness, int FontSize)
+	int AdjustOutlineThicknessToFontSize(int OutlineThickness, unsigned int FontSize)
 	{
 		if(FontSize > 36)
 			OutlineThickness *= 4;
@@ -203,10 +202,10 @@ class CTextRender : public IEngineTextRender
 
 		{
 			unsigned GlyphIndex;
-			int MaxH = 0;
-			int MaxW = 0;
+			FT_Pos MaxH = 0;
+			FT_Pos MaxW = 0;
 
-			int Charcode = FT_Get_First_Char(pFont->m_FtFace, &GlyphIndex);
+			FT_ULong Charcode = FT_Get_First_Char(pFont->m_FtFace, &GlyphIndex);
 			while(GlyphIndex != 0)
 			{
 				// do stuff
@@ -229,7 +228,7 @@ class CTextRender : public IEngineTextRender
 		InitTexture(pSizeData, pSizeData->m_CharMaxWidth, pSizeData->m_CharMaxHeight, 8, 8);
 	}
 
-	CFontSizeData *GetSize(CFont *pFont, int Pixelsize)
+	CFontSizeData *GetSize(CFont *pFont, unsigned int Pixelsize)
 	{
 		int Index = GetFontSizeIndex(Pixelsize);
 		if(pFont->m_aSizes[Index].m_FontSize != aFontSizes[Index])
@@ -238,7 +237,7 @@ class CTextRender : public IEngineTextRender
 	}
 
 
-	void UploadGlyph(CFontSizeData *pSizeData, int Texnum, int SlotID, int Chr, const void *pData)
+	void UploadGlyph(CFontSizeData *pSizeData, int Texnum, int SlotID, FT_ULong Chr, const void *pData)
 	{
 		int x = (SlotID%pSizeData->m_NumXChars) * (pSizeData->m_TextureWidth/pSizeData->m_NumXChars);
 		int y = (SlotID/pSizeData->m_NumXChars) * (pSizeData->m_TextureHeight/pSizeData->m_NumYChars);
@@ -290,13 +289,13 @@ class CTextRender : public IEngineTextRender
 		}
 	}
 
-	int RenderGlyph(CFont *pFont, CFontSizeData *pSizeData, int Chr)
+	int RenderGlyph(CFont *pFont, CFontSizeData *pSizeData, FT_ULong Chr)
 	{
 		FT_Bitmap *pBitmap;
 		int SlotID = 0;
-		int SlotW = pSizeData->m_TextureWidth / pSizeData->m_NumXChars;
-		int SlotH = pSizeData->m_TextureHeight / pSizeData->m_NumYChars;
-		int SlotSize = SlotW*SlotH;
+		unsigned int SlotW = pSizeData->m_TextureWidth / pSizeData->m_NumXChars;
+		unsigned int SlotH = pSizeData->m_TextureHeight / pSizeData->m_NumYChars;
+		unsigned int SlotSize = SlotW*SlotH;
 		int x = 1;
 		int y = 1;
 		unsigned int px, py;
@@ -340,9 +339,9 @@ class CTextRender : public IEngineTextRender
 				}
 		}
 
-		if(0) for(py = 0; (int)py < SlotW; py++)
-			for(px = 0; (int)px < SlotH; px++)
-				ms_aGlyphData[py*SlotW+px] = 255;
+//		for(py = 0; (int)py < SlotW; py++)
+//			for(px = 0; (int)px < SlotH; px++)
+//				ms_aGlyphData[py*SlotW+px] = 255;
 
 		// upload the glyph
 		UploadGlyph(pSizeData, 0, SlotID, Chr, ms_aGlyphData);
@@ -387,7 +386,7 @@ class CTextRender : public IEngineTextRender
 		return SlotID;
 	}
 
-	CFontChar *GetChar(CFont *pFont, CFontSizeData *pSizeData, int Chr)
+	CFontChar *GetChar(CFont *pFont, CFontSizeData *pSizeData, FT_ULong Chr)
 	{
 		CFontChar *pFontchr = NULL;
 
@@ -420,12 +419,12 @@ class CTextRender : public IEngineTextRender
 	}
 
 	// must only be called from the rendering function as the pFont must be set to the correct size
-	void RenderSetup(CFont *pFont, int size)
+	void RenderSetup(CFont *pFont, FT_UInt size)
 	{
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, size);
 	}
 
-	float Kerning(CFont *pFont, int Left, int Right)
+	float Kerning(CFont *pFont, FT_UInt Left, FT_UInt Right)
 	{
 		FT_Vector Kerning = {0,0};
 		FT_Get_Kerning(pFont->m_FtFace, Left, Right, FT_KERNING_DEFAULT, &Kerning);
@@ -475,7 +474,7 @@ public:
 		}
 
 		for(unsigned i = 0; i < NUM_FONT_SIZES; i++)
-			pFont->m_aSizes[i].m_FontSize = -1;
+			pFont->m_aSizes[i].m_FontSize = 0;
 
 		dbg_msg("textrender", "loaded pFont from '%s'", pFilename);
 		return pFont;
@@ -560,7 +559,7 @@ public:
 		float FakeToScreenX, FakeToScreenY;
 		int ActualX, ActualY;
 
-		int ActualSize;
+		FT_UInt ActualSize;
 		int i;
 		int GotNewLine = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
@@ -581,7 +580,7 @@ public:
 		CursorY = ActualY / FakeToScreenY;
 
 		// same with size
-		ActualSize = (int)(Size * FakeToScreenY);
+		ActualSize = (unsigned int)round_to_int(Size * FakeToScreenY);
 		Size = ActualSize / FakeToScreenY;
 
 		// fetch pFont data
@@ -652,7 +651,7 @@ public:
 						Cutter.m_Flags &= ~TEXTFLAG_RENDER;
 						Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
 
-						TextEx(&Cutter, (const char *)pCurrent, Wlen);
+						TextEx(&Cutter, pCurrent, Wlen);
 						Wlen = Cutter.m_CharCount;
 						NewLine = 1;
 
@@ -669,12 +668,12 @@ public:
 				}
 
 				const char *pTmp = pCurrent;
-				int NextCharacter = str_utf8_decode(&pTmp);
+				FT_UInt NextCharacter = (FT_UInt)str_utf8_decode(&pTmp);
 				while(pCurrent < pBatchEnd)
 				{
-					int Character = NextCharacter;
+					FT_UInt Character = NextCharacter;
 					pCurrent = pTmp;
-					NextCharacter = str_utf8_decode(&pTmp);
+					NextCharacter = (FT_UInt)str_utf8_decode(&pTmp);
 
 					if(Character == '\n')
 					{
