@@ -368,13 +368,29 @@ void CHud::RenderTeambalanceWarning()
 	CALLSTACK_ADD();
 
 	// render prompt about team-balance
-	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
+	if(!m_pClient->m_Snap.m_pGameInfoObj)
+	{
+		float FlashVal = (float)(0.3f * (sin(Client()->LocalTime() * 2.35f) / 2.0f + 0.4f));
+		TextRender()->TextColor(0.7f+FlashVal,0.1f+FlashVal,0.0f+FlashVal,1.0f);
+		TextRender()->Text(0x0, 5, 50, 6, "Error: m_pClient->m_Snap.m_pGameInfoObj is null ", -1);
+		TextRender()->TextColor(1,1,1,1);
+	}
+	else if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 	{
 		int TeamDiff = m_pClient->m_Snap.m_aTeamSize[TEAM_RED]-m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE];
-		if (g_Config.m_ClWarningTeambalance && (TeamDiff >= 2 || TeamDiff <= -2))
+		if (g_Config.m_ClWarningTeambalance && abs(TeamDiff) >= 2)
 		{
 			const char *pText = Localize("Please balance teams!");
-			float FlashVal = 0.3*(sin(Client()->LocalTime()*2.35f)/2+0.4f);
+			static const float w = TextRender()->TextWidth(0, 6, pText, -1);
+			float FlashVal = (float)(0.3f * (sin(Client()->LocalTime() * 2.35f) / 2.0f + 0.4f));
+			if(g_Config.m_ClColorfulClient)
+			{
+				vec3 color = vec3(0.7f, 0.2f, 0.2f); // red
+				if(TeamDiff < 0)
+					color = vec3(0.2f, 0.2f, 0.7f); // blue
+				const CUIRect Rect(0.0f, 47.0f, w + 10.0f, 15.0f);
+				RenderTools()->DrawUIRect(&Rect, vec4(color, 0.3f + FlashVal), CUI::CORNER_R, 3.5f);
+			}
 			TextRender()->TextColor(0.7f+FlashVal,0.7f+FlashVal,0.2f+FlashVal,1.0f);
 			TextRender()->Text(0x0, 5, 50, 6, pText, -1);
 			TextRender()->TextColor(1,1,1,1);
