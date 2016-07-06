@@ -627,7 +627,9 @@ public:
 					Graphics()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
 			}
 
-			while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
+			set_new_tick();
+			int64 InitTime = time_get();
+			while(time_get() < InitTime + time_freq()/50 && pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
 			{
 				int NewLine = 0;
 				const char *pBatchEnd = pEnd;
