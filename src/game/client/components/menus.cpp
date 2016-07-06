@@ -386,25 +386,32 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 
 		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
 		{
-			const char *Text = Input()->GetClipboardText();
-			if(Text)
+			const char *pText = Input()->GetClipboardText();
+			if(pText)
 			{
-				int Offset = str_length(pStr);
-				int CharsLeft = StrSize - Offset - 1;
-				for(int i = 0; i < str_length(Text) && i < CharsLeft; i++)
-				{
-					if(Text[i] == '\n')
-						pStr[i + Offset] = ' ';
-					else
-						pStr[i + Offset] = Text[i];
-				}
-				s_AtIndex = str_length(pStr);
+				char aLine[StrSize];
+				str_copy(aLine, pText, sizeof(aLine));
+				str_replace_char(aLine, sizeof(aLine), '\n', ' ');
+
+				char aRightPart[256];
+				str_copy(aRightPart, pStr + s_AtIndex, sizeof(aRightPart));
+				str_copy(aLine, pStr, min(s_AtIndex+1, (int)sizeof(aLine)));
+				str_append(aLine, pText, sizeof(aLine));
+				str_append(aLine, aRightPart, sizeof(aLine));
+				str_copy(pStr, aLine, StrSize);
+				s_AtIndex = str_length(pStr)-str_length(aRightPart);
 			}
 		}
 
 		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
 		{
 			Input()->SetClipboardText(pStr);
+		}
+
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_X))
+		{
+			Input()->SetClipboardText(pStr);
+			pStr[0] = '\0';
 		}
 
 		if(Inside && UI()->MouseButton(0))

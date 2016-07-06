@@ -182,36 +182,47 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V)) // copy
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V)) // paste
 	{
-		const char *Text = Input()->GetClipboardText();
-		if(Text)
+		const char *pText = Input()->GetClipboardText();
+		if(pText)
 		{
 			// if the text has more than one line, we send all lines except the last one
 			// the last one is set as in the text field
-			char Line[256];
+			char aLine[256];
 			int i, Begin = 0;
-			for(i = 0; i < str_length(Text); i++)
+			for(i = 0; i < str_length(pText); i++)
 			{
-				if(Text[i] == '\n')
+				if(pText[i] == '\n')
 				{
-					int max = min(i - Begin + 1, (int)sizeof(Line));
-					str_copy(Line, Text + Begin, max);
+					int max = min(i - Begin + 1, (int)sizeof(aLine));
+					str_copy(aLine, pText + Begin, max);
 					Begin = i+1;
-					SayChat(Line);
-					while(Text[i] == '\n') i++;
+					SayChat(aLine);
+					while(pText[i] == '\n') i++;
 				}
 			}
-			int max = min(i - Begin + 1, (int)sizeof(Line));
-			str_copy(Line, Text + Begin, max);
-			Begin = i+1;
-			m_Input.Add(Line);
+			pText += Begin;
+
+			char aRightPart[256];
+			str_copy(aRightPart, m_Input.GetString() + m_Input.GetCursorOffset(), sizeof(aRightPart));
+			str_copy(aLine, m_Input.GetString(), min(m_Input.GetCursorOffset()+1, (int)sizeof(aLine)));
+			str_append(aLine, pText, sizeof(aLine));
+			str_append(aLine, aRightPart, sizeof(aLine));
+			m_Input.Set(aLine);
+			m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
 		}
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C)) // paste
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C)) // copy
 	{
 		Input()->SetClipboardText(m_Input.GetString());
+	}
+
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_X)) // cut
+	{
+		Input()->SetClipboardText(m_Input.GetString());
+		m_Input.Clear();
 	}
 
 	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
