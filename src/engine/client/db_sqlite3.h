@@ -5,7 +5,7 @@
 #define ENGINE_CLIENT_DB_SQLITE3_H
 
 #include <base/system.h>
-#include <sqlite3.h>
+#include <engine/external/sqlite3/sqlite3.h>
 #include <vector>
 #include <queue>
 #include <string>
@@ -30,7 +30,7 @@ public:
 
 	int GetID(const char *pName);
 	int GetInt(int i) { return sqlite3_column_int(m_pStatement, i); }
-	float GetFloat(int i) { return sqlite3_column_double(m_pStatement, i); }
+	float GetFloat(int i) { return (float)sqlite3_column_double(m_pStatement, i); }
 	const char *GetText(int i) { return (const char *)sqlite3_column_text(m_pStatement, i); }
 	const void *GetBlob(int i) { return sqlite3_column_blob(m_pStatement, i); }
 	int GetSize(int i) { return sqlite3_column_bytes(m_pStatement, i); }

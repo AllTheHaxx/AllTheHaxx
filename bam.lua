@@ -314,7 +314,6 @@ function build(settings)
 	if config.websockets.value then
 		libwebsockets = Compile(settings, Collect("src/engine/external/libwebsockets/*.c"))
 	end
-	settings.cc.includes:Add("src/engine/external/sqlite3")
 	sqlite3 = Compile(settings, Collect("src/engine/external/sqlite3/*.c"))
 	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
 	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
