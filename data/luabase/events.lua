@@ -268,6 +268,11 @@ function ResumeThreads()
     end
 end
 
+function RemoveThread(Name)
+	Func = getfenv()[Name]
+	Threads[Func] = nil
+end
+
 function thread_sleep_ticks(num)
     Threads[debug.getinfo(2).func].ResTick = Game.Client.Tick + num    
     coroutine.yield()
