@@ -19,6 +19,7 @@
 #include <engine/input.h>
 #include <engine/serverbrowser.h>
 #include <engine/curlwrapper.h>
+#include <engine/textrender.h>
 //#include <engine/client/client.h>
 
 CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
@@ -629,6 +630,14 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
 		.endClass()
 
+		.beginClass<ITextRender>("ITextRender")
+			.addFunction("Text", &ITextRender::Text)
+			.addFunction("TextWidth", &ITextRender::TextWidth)
+			.addFunction("TextLineCount", &ITextRender::TextLineCount)
+			.addFunction("TextColor", &ITextRender::TextColor)
+			.addFunction("TextOutlineColor", &ITextRender::TextOutlineColor)
+		.endClass()
+
 		.beginClass<CGameClient>("CGameClient")   //this class is kinda outdated due to "Game"
 		/*	.addData("Chat", &CGameClient::m_pChat)
 			.addData("ServerInfo", &CGameClient::m_CurrentServerInfo, false)
@@ -676,6 +685,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginNamespace("Engine")
 			.addVariable("Graphics", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
+			.addVariable("TextRender", &CLua::m_pCGameClient->m_pTextRender)
 			.addVariable("Input", &CLua::m_pCGameClient->m_pInput) //dunno, this should be maybe an own subspace :O
 			.addVariable("Curl", &CLua::m_pCGameClient->m_pCurlWrapper)
 		.endNamespace()
