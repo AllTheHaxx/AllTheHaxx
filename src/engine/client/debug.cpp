@@ -14,10 +14,13 @@ CCallstack gDebugInfo;
 
 CDebugger::CDebugger()
 {
+#if defined(CONF_FAMILY_UNIX) and defined(FEATURE_DEBUGGER) and not defined(CONF_DEBUG)
 	for(int i = 0; i < CALLSTACK_SIZE; i++)
 		gDebugInfo.m_CallStack.push_front("..");
 
 	RegisterSignals();
+	dbg_msg("debugger", ">> DEBUG SYSTEM STARTED");
+#endif
 }
 
 void CDebugger::RegisterSignals()
