@@ -389,7 +389,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 			const char *pText = Input()->GetClipboardText();
 			if(pText)
 			{
-				char aLine[StrSize];
+				char *aLine = (char*)mem_alloc(StrSize, 0);
 				str_copy(aLine, pText, sizeof(aLine));
 				str_replace_char(aLine, sizeof(aLine), '\n', ' ');
 
@@ -399,6 +399,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 				str_append(aLine, pText, sizeof(aLine));
 				str_append(aLine, aRightPart, sizeof(aLine));
 				str_copy(pStr, aLine, StrSize);
+				mem_free(aLine);
 				s_AtIndex = str_length(pStr)-str_length(aRightPart);
 			}
 		}
