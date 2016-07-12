@@ -1151,13 +1151,15 @@ void CClient::DebugRender()
 	if(!g_Config.m_ClShowhud || !g_Config.m_ClShowhudHealthAmmo)
 		YOFFSET = 0;
 
-	int TickSpeed = 0;
+	static int TickSpeed = 50;
 	{
 		static int LastTick[2] = {0};
 		static int64 LastTime = 0;
-		if(time_get() > LastTime + time_freq())
+		set_new_tick();
+		if(time_get() > LastTime + time_freq()/2)
 		{
-			TickSpeed = m_CurGameTick[g_Config.m_ClDummy] - LastTick[g_Config.m_ClDummy];
+			TickSpeed += 2*(m_CurGameTick[g_Config.m_ClDummy] - LastTick[g_Config.m_ClDummy]);
+			TickSpeed /= 2;
 			LastTick[g_Config.m_ClDummy] = m_CurGameTick[g_Config.m_ClDummy];
 			LastTime = time_get();
 		}
