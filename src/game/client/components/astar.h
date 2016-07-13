@@ -15,9 +15,6 @@ class CAStar : public CComponent
 	bool m_ThreadShouldExit;
 
 protected:
-	class CCollision *Collision() const { return m_pClient->Collision(); }
-	class IClient *Client() const { return m_pClient->Client(); }
-
 	int GetTileAreaCenter(int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
 	int GetStart() {return GetTileAreaCenter(TILE_BEGIN); }
 	int GetFinish() { return GetTileAreaCenter(TILE_END); }

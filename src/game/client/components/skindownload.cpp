@@ -129,6 +129,12 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 {
 	int DefaultSkin = GameClient()->m_pSkins->Find("default");
 
+	if(!g_Config.m_ClSkinFetcher)
+	{
+		*pDestID = DefaultSkin;
+		return;
+	}
+
 	int SkinID = GameClient()->m_pSkins->Find(pName);
 	if(SkinID >= 0)
 	{
@@ -137,12 +143,6 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	}
 	else
 		*pDestID = DefaultSkin;
-
-	if(!g_Config.m_ClSkinFetcher)
-	{
-		*pDestID = DefaultSkin;
-		return;
-	}
 
 	for(int i = 0; i < m_FailedTasks.size(); i++)
 		if(m_FailedTasks[i] == std::string(pName))
@@ -181,7 +181,7 @@ void CSkinDownload::FetchSkin(const char *pName, int *pDestID, int url)
 		return;
 	}
 
-	CFetchTask *pTask = new CFetchTask(false);
+	CFetchTask *pTask = new () CFetchTask(false);
 	SkinFetchTask Task;
 	Task.SkinName = std::string(pName);
 	Task.url = url;

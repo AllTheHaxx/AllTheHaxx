@@ -20,6 +20,7 @@ MACRO_CONFIG_INT(ClCpuThrottle, cl_cpu_throttle, 0, 0, 100, CFGFLAG_SAVE|CFGFLAG
 MACRO_CONFIG_INT(ClCpuThrottleInactive, cl_cpu_throttle_inactive, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(ClEditorUndo, cl_editorundo, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Undo function in editor")
+MACRO_CONFIG_INT(ClEditorLazyInit, cl_editor_lazy_init, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Delay the editor init after client startup to speed up loading")
 MACRO_CONFIG_INT(ClLoadCountryFlags, cl_load_country_flags, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Load and show country flags")
 MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Skin filtering string")
 MACRO_CONFIG_INT(ClSkinFilterAdvanced, cl_skin_filter_advanced, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "0: Show all | 1: Show Vanilla only | 3: Show non-vanilla only")

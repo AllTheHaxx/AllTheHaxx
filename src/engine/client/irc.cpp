@@ -494,7 +494,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						del = aMsgFServer.find_first_of("!");
 						std::string aMsgFrom = aMsgFServer.substr(0, del);
 
-						if(MsgType == MSG_TYPE_TWSERVER) // somebody wants to know our server
+						if(MsgType == MSG_TYPE_TWSERVER) // somebody sends us his server
 						{
 							if(aMsgChan == m_Nick)
 							{

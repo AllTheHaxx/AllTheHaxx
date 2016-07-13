@@ -32,6 +32,9 @@ class CFetchTask
 public:
 	CFetchTask(bool canTimeout);
 
+	void* operator new (size_t size) { return mem_alloc(sizeof(CFetchTask), 1); }
+	void operator delete (void *block) { mem_free(block); }
+
 	enum
 	{
 		STATE_ERROR = -1,

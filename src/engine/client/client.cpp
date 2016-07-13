@@ -2913,8 +2913,8 @@ void CClient::Run()
 	// start refreshing addresses while we load
 	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
 
-	// init the editor
-	m_pEditor->Init();
+	// init the editor ... XXX this is done again in GameClient()->OnInit() ??
+	//m_pEditor->Init();
 
 	// load data
 	if(!LoadData())
@@ -2978,7 +2978,7 @@ void CClient::Run()
 			{
 				pGraph->HideWindow();
 				
-				if(str_comp_num(Info.m_aGameType, "DD", 2) == 0)
+				if(IsDDNet(&Info) || IsDDRace(&Info))
 				{
 					//eye emote 
 					CNetMsg_Cl_Say Msg;
@@ -3120,6 +3120,12 @@ void CClient::Run()
 		{
 			if(g_Config.m_ClEditor)
 			{
+				static bool EditorInited = !g_Config.m_ClEditorLazyInit;
+				if(!EditorInited)
+				{
+					m_pEditor->Init();
+					EditorInited = true;
+				}
 				if(!m_EditorActive)
 				{
 					Input()->MouseModeRelative();
@@ -3880,7 +3886,7 @@ static CClient *CreateClient()
 		Upstream latency
 */
 
-void *main_thread_handle;
+void *main_thread_handle = 0;
 
 #if defined(CONF_PLATFORM_MACOSX) || defined(__ANDROID__)
 extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
@@ -3912,8 +3918,10 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	// initialize the debugger
-	CDebugger *debugger = new CDebugger();
+	CDebugger *pDebugger = new (mem_alloc(sizeof(CDebugger), 1)) CDebugger();
+#if defined(CONF_FAMILY_UNIX) and defined(FEATURE_DEBUGGER) and not defined(CONF_DEBUG)
 	main_thread_handle = thread_get_current();
+#endif
 	CALLSTACK_ADD();
 
 	CClient *pClient = CreateClient();
@@ -4021,7 +4029,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention
 	{
-		if(argv[1][0] == 't' && argv[1][1] == 'w' && argv[1][2] == ':' && argv[1][3] == '/' && argv[1][4] == '/' && argv[1][5])
+		if(str_comp_nocase_num(argv[1], "tw://", 5) == 0 && str_length(argv[1]) >= 5+7)
 		{
 			char aBuf[NETADDR_MAXSTRSIZE+8];
 			str_copy(aBuf, &argv[1][5], sizeof(aBuf));
@@ -4048,10 +4056,23 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
-	delete debugger;
+
+	// cleanup
+	delete pEngine;
+	delete pConsole;
+	delete pStorage;
+	delete pConfig;
+	delete pEngineSound;
+	delete pEngineInput;
+	delete pEngineTextRender;
+	delete pEngineMap;
+	delete pEngineMasterServer;
+
+	mem_free(pDebugger);
 
 	if(pClient->m_Restarting)
-		shell_execute(argv[0]);
+		system(argv[0]);
+		//shell_execute(argv[0]);
 
 
 	bool WantReport = false;

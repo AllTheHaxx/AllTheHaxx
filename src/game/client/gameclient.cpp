@@ -109,7 +109,7 @@ static CLuaRender gs_LuaRender25(25);
 static CLuaRender gs_LuaRender26(26);
 static CLuaRender gs_LuaRender27(27);
 
-// instanciate all systems
+// instantiate all systems
 static CKillMessages gs_KillMessages;
 static CCamera gs_Camera;
 static CChat gs_Chat;
@@ -412,24 +412,8 @@ void CGameClient::OnInit()
 
 	// load default font
 	m_pFontMgr->Init();
-/*	static CFont *pDefaultFont = 0;
-	char aFilename[512];
-	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
-	if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
-		str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
-		pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
-	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorageTW::TYPE_ALL, aFilename, sizeof(aFilename));
-	if(File)
-	{
-		io_close(File);
-		pDefaultFont = TextRender()->LoadFont(aFilename);
-		TextRender()->SetDefaultFont(pDefaultFont);
-	}
-	if(!pDefaultFont)
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
-*/
-	// init all components
 
+	// init all components
 	char aBuf[256];
 
 	// setup load amount & load textures and stuff
@@ -442,11 +426,7 @@ void CGameClient::OnInit()
 		// init the components
 		if(i < m_All.m_Num)  // 0 <= i <= m_All.m_Num-1
 		{
-
-			if(i != 61)
-				SET_LOAD_LABEL_V("Initializing Components (%i/%i)", i+1, m_All.m_Num);
-			else
-				SET_LOAD_LABEL_V("Initializing Components (%i/%i) --> Loading sounds", i+1, m_All.m_Num);
+			SET_LOAD_LABEL_V("Initializing Components (%i/%i)", i+1, m_All.m_Num);
 			m_All.m_paComponents[m_All.m_Num-i-1]->OnInit();
 		}
 
@@ -499,7 +479,8 @@ void CGameClient::OnInit()
 		{
 			SET_LOAD_LABEL("Initializing Editor");
 
-			m_pEditor->Init();
+			if(!g_Config.m_ClEditorLazyInit)
+				m_pEditor->Init();
 		}
 
 		// last iteration

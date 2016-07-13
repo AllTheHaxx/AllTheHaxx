@@ -636,7 +636,6 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 	{
 		unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO)+1];
 		CNetChunk Packet;
-		int i;
 
 		mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
 		Buffer[sizeof(SERVERBROWSE_GETINFO)] = m_CurrentToken;
@@ -650,7 +649,7 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 		Packet.m_pData = Buffer;
 		m_BroadcastTime = time_get();
 
-		for(i = 8303; i <= 8310; i++)
+		for(unsigned short i = 8303; i <= 8310; i++)
 		{
 			Packet.m_Address.port = i;
 			m_pNetClient->Send(&Packet);
@@ -792,7 +791,7 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 	io_read(File, &NumServers, sizeof(NumServers));
 	//dbg_msg("browser", "serverlist cache entries: %i", NumServers);
 
-	mem_zero(pSelf->m_ppServerlist, pSelf->m_NumServerCapacity);
+	mem_zero(pSelf->m_ppServerlist, (unsigned int)pSelf->m_NumServerCapacity);
 
 	// get length of array
 	io_read(File, &pSelf->m_NumServerCapacity, sizeof(pSelf->m_NumServerCapacity));
@@ -1089,7 +1088,7 @@ void CServerBrowser::Upgrade()
 	if(CurrPart < NumParts)
 	{
 		//dbg_msg("browser", "upgrading part %i/%i", CurrPart+1, NumParts);
-		m_UpgradeProgression = (float)(CurrPart+1.0f)/(float)NumParts;
+		m_UpgradeProgression = (CurrPart+1.0f)/(float)NumParts;
 		for(int i = CurrPart*PartLen; i < (CurrPart+1)*PartLen; i++)
 		{
 			if(!m_ppServerlist[i]) continue;
@@ -1304,9 +1303,9 @@ int CServerBrowser::LoadingProgression() const
 	if(m_NumServers == 0)
 		return 0;
 
-	int Servers = m_NumServers;
-	int Loaded = m_NumServers-m_NumRequests;
-	return 100.0f * Loaded/Servers;
+	float Servers = m_NumServers;
+	float Loaded = m_NumServers-m_NumRequests;
+	return round_to_int(100.0f * Loaded/Servers);
 }
 
 int CServerBrowser::UpgradeProgression() const
