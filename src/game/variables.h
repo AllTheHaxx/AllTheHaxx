@@ -76,7 +76,7 @@ MACRO_CONFIG_INT(ClMotdTime, cl_motd_time, 10, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SA
 
 MACRO_CONFIG_STR(ClDDNetVersionServer, cl_ddnet_version_server, 100, "version.ddnet.tw", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Server to use to check for ddnet version (needed for DDNet-Serverlist)")
 MACRO_CONFIG_STR(ClDDNetUpdate2Server, cl_ddnet_update2_server, 100, "update2.ddnet.tw", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Server to use to update new ddnet versions")
-MACRO_CONFIG_STR(ClDDNetMapServer, cl_ddnet_maps_server, 100, "maps.ddnet.tw", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Server to use to download maps")
+MACRO_CONFIG_STR(ClMapDbFile, cl_mapdb_file, 128, "data/maps/urls.cfg", CFGFLAG_CLIENT|CFGFLAG_SAVE, "File to load the mapserver addresses from")
 
 MACRO_CONFIG_STR(ClLanguagefile, cl_languagefile, 255, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "What language file to use")
 MACRO_CONFIG_INT(ClVanillaSkinsOnly, cl_vanilla_skins_only, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Only show skins available in Vanilla Teeworlds")

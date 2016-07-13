@@ -135,7 +135,17 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdConnect[256];
 
 	// map download
+	void LoadMapDatabaseUrls();
+	struct MapDbUrl
+	{
+		int prior;
+		std::string url;
+		bool operator<(const MapDbUrl& other) { return this->prior < other.prior; }
+	};
+	sorted_array<MapDbUrl> m_MapDbUrls;
 	CFetchTask *m_pMapdownloadTask;
+	int m_NextMapServer;
+
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadName[256];
 	IOHANDLE m_MapdownloadFile;

@@ -4,10 +4,10 @@
 #include "debug.h"
 #include "fetcher.h"
 
-CFetchTask::CFetchTask(bool canTimeout)
+CFetchTask::CFetchTask(bool CanTimeout)
 {
 	m_pNext = NULL;
-	m_CanTimeout = canTimeout;
+	m_CanTimeout = CanTimeout;
 }
 
 CFetcher::CFetcher()

@@ -77,6 +77,7 @@
 #else
 #include <fcntl.h>
 #include <engine/curlwrapper.h>
+#include <fstream>
 
 #endif
 #ifdef main
@@ -395,6 +396,44 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	CQueryNames *pQuery = new CQueryNames();
 	pQuery->Query(m_pDatabase, pQueryBuf);
 	sqlite3_free(pQueryBuf);
+}
+
+void CClient::LoadMapDatabaseUrls()
+{
+	m_NextMapServer = 0;
+	m_MapDbUrls.clear();
+
+	int prior = 0;
+	std::string line;
+	std::ifstream file(g_Config.m_ClMapDbFile);
+	if(file.is_open())
+	{
+		while(std::getline(file, line))
+		{
+			if(line == "" || line.c_str()[0] == '#')
+				continue;
+
+			//line = line.replace(line.begin(), line.end(), "\n", "\0");
+			MapDbUrl e;
+			e.prior = prior++;
+			e.url = line;
+			m_MapDbUrls.add_unsorted(e);
+		}
+		file.close();
+
+		m_MapDbUrls.sort_range();
+		dbg_msg("mapfetcher", "loaded %i url%s from file '%s'", prior, prior > 1 ? "s" : "", g_Config.m_ClMapDbFile);
+	}
+	else
+		dbg_msg("mapfetcher/error", "failed to open url file '%s', using ddnet's database only", g_Config.m_ClMapDbFile);
+
+	if(m_MapDbUrls.size() == 0)
+	{
+		MapDbUrl e;
+		e.prior = 0;
+		e.url = std::string("http://maps.ddnet.tw");
+		m_MapDbUrls.add(e);
+	}
 }
 
 // ----- send functions -----
@@ -1795,12 +1834,15 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 					if(g_Config.m_ClHttpMapDownload)
 					{
+						if(m_MapDbUrls.size() == 0) // init if not already happened
+							LoadMapDatabaseUrls();
+						m_NextMapServer = 0;
 						char aUrl[256];
 						char aFilename[64];
 						char aEscaped[128];
 						str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
 						Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
-						str_format(aUrl, sizeof(aUrl), "http://%s/%s", g_Config.m_ClDDNetMapServer, aEscaped);
+						str_format(aUrl, sizeof(aUrl), "%s/%s", m_MapDbUrls[m_NextMapServer++].url.c_str(), aEscaped);
 						m_pMapdownloadTask = new CFetchTask(true);
 						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
 					}
@@ -2370,6 +2412,7 @@ void CClient::ResetMapDownload()
 
 	if(m_pMapdownloadTask)
 		delete m_pMapdownloadTask;
+	m_NextMapServer = 0;
 	m_pMapdownloadTask = 0;
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
@@ -2711,9 +2754,27 @@ void CClient::Update()
 			FinishMapDownload();
 		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
 		{
-			dbg_msg("webdl", "http failed, falling back to gameserver");
-			ResetMapDownload();
-			SendMapRequest();
+			if(m_NextMapServer < m_MapDbUrls.size())
+			{
+				dbg_msg("webdl", "%s failed, trying %s (%i/%i)", m_MapDbUrls[m_NextMapServer-1].url.c_str(), m_MapDbUrls[m_NextMapServer].url.c_str(), m_NextMapServer+1, m_MapDbUrls.size());
+				char aUrl[256];
+				char aFilename[64];
+				char aEscaped[128];
+				str_format(aFilename, sizeof(aFilename), "%s_%08x.map", m_aMapdownloadName, m_MapdownloadCrc);
+				Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
+				str_format(aUrl, sizeof(aUrl), "%s/%s", m_MapDbUrls[m_NextMapServer++], aEscaped);
+				if(m_pMapdownloadTask)
+					delete m_pMapdownloadTask;
+				m_pMapdownloadTask = new CFetchTask(true);
+				Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
+				m_NextMapServer++;
+			}
+			else
+			{
+				dbg_msg("webdl", "http failed, falling back to gameserver");
+				ResetMapDownload();
+				SendMapRequest();
+			}
 		}
 		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
 		{
