@@ -183,7 +183,9 @@ void CSkinDownload::FetchSkin(const char *pName, int *pDestID, int url)
 
 	CFetchTask *pTask = new () CFetchTask(false);
 	SkinFetchTask Task;
-	Task.SkinName = std::string(pName);
+	char aEscapedName[128] = {0};
+	m_pFetcher->Escape(aEscapedName, sizeof(aEscapedName), pName);
+	Task.SkinName = std::string(aEscapedName);
 	Task.url = url;
 	Task.Progress = 0;
 	Task.FinishTime = -1;
@@ -206,8 +208,8 @@ void CSkinDownload::LoadUrls()
 			if(line == "" || line.c_str()[0] == '#')
 				continue;
 
-			SkinDbUrl e;
 			//line = line.replace(line.begin(), line.end(), "\n", "\0");
+			SkinDbUrl e;
 			e.prior = prior++;
 			e.url = line;
 			m_SkinDbUrls.add_unsorted(e);

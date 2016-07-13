@@ -2762,7 +2762,7 @@ void CClient::Update()
 				char aEscaped[128];
 				str_format(aFilename, sizeof(aFilename), "%s_%08x.map", m_aMapdownloadName, m_MapdownloadCrc);
 				Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
-				str_format(aUrl, sizeof(aUrl), "%s/%s", m_MapDbUrls[m_NextMapServer++], aEscaped);
+				str_format(aUrl, sizeof(aUrl), "%s/%s", m_MapDbUrls[m_NextMapServer++].url.c_str(), aEscaped);
 				if(m_pMapdownloadTask)
 					delete m_pMapdownloadTask;
 				m_pMapdownloadTask = new CFetchTask(true);
