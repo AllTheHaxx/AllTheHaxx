@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <climits>
+#include <fstream>
 //#include <csignal>
 #include <locale.h> //setlocale
 
