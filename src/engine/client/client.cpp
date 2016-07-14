@@ -393,7 +393,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 		"id INTEGER PRIMARY KEY AUTOINCREMENT, " \
 		"name TEXT NOT NULL UNIQUE, " \
 		"clan TEXT NOT NULL, " \
-        "last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
+		"last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
 	CQueryNames *pQuery = new CQueryNames();
 	pQuery->Query(m_pDatabase, pQueryBuf);
 	sqlite3_free(pQueryBuf);

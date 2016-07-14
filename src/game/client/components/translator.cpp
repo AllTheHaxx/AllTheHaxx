@@ -53,7 +53,7 @@ void CTranslator::TranslationWorker(void *pUser)
 
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_URL, "http://api.mymemory.translated.net/get");
 			str_format(aPost, sizeof(aPost), "q=%s&langpair=%s|%s&de=associatingblog@gmail.com", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang);
-		    curl_easy_setopt(pTrans->m_pHandle, CURLOPT_POSTFIELDS, aPost);
+			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_POSTFIELDS, aPost);
 		 	
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEFUNCTION, &CTranslator::write_to_string);
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEDATA, &response);

@@ -152,14 +152,14 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		char ErrorMsg[512];
 		bool ScopeIncreased = false;
 		
-		if(!m_LuaHandler.m_Inited)  //this is yet quite retarded!
+		if(!m_LuaHandler.m_Inited)  // this is yet quite retarded!
 		{
 			CLuaFile::RegisterLuaCallbacks(m_LuaHandler.m_pLuaState);
 			m_LuaHandler.m_Inited = true;
 		}
 		
-		//SCOPING DETECT!
-		std::string ActLine(pLine);                             //cuz after an elseif is no extra end!
+		// SCOPING DETECT!
+		std::string ActLine(pLine); // cuz after an elseif is no extra end!
 		if(ActLine.find("while") == 0 || ActLine.find("function") == 0 || (ActLine.find("if") == 0 && ActLine.find("elseif") == std::string::npos) || ActLine.find("for") == 0)
 		{
 			m_LuaHandler.m_ScopeCount++;
@@ -167,8 +167,8 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		}
 		if(ActLine.find("end") != std::string::npos)  //NO ELSE IF HERE
 		{
-			//this is a bit tricky D: because e.g. Game.Emote:Send will also trigger the search for 'end' :D
-			//so we remove all whitespaces and check again
+			// this is a bit tricky D: because e.g. Game.Emote:Send will also trigger the search for 'end' :D
+			// so we remove all whitespaces and check again
 			bool RealEnd = false;
 			std::string testbuf = ActLine;
 			
@@ -596,19 +596,19 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 	}
 		
 	int Status = luaL_loadfile(m_LuaHandler.m_pLuaState, pFile);
-    if (Status)
-    {
-        // does this work? -- I don't think so, Henritees.
-        PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
-        return false;
-    }
+	if (Status)
+	{
+		// does this work? -- I don't think so, Henritees.
+		PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
+		return false;
+	}
 
-    Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
-    if (Status)
-    {
-    	PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
-        return false;
-    }
+	Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
+	if (Status)
+	{
+		PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
+		return false;
+	}
 	
 	return true;
 }

@@ -1185,10 +1185,6 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-#if !defined(CONF_FAMILY_UNIX)
-	return;
-#endif
-
 	CUIRect Button, Box;
 
 	char aServerAddr[NETADDR_MAXSTRSIZE];
@@ -1218,7 +1214,6 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.VMargin(10.0f, &Box);
 	Box.HSplitTop(25.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
-#if defined(CONF_FAMILY_UNIX)
 
 	if(!m_pClient->m_pSpoofRemote->IsConnected())
 	{
@@ -1230,7 +1225,6 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		}
 		return;
 	}
-#endif
 
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);

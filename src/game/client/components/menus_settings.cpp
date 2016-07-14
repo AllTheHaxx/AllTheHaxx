@@ -173,7 +173,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	// client
 	{
 		// headline
-		Client.HSplitTop(65.0f, &Label, &Client);    //changed due to Show other ATH user
+		Client.HSplitTop(65.0f, &Label, &Client);	//changed due to Show other ATH user
 		UI()->DoLabelScaled(&Label, Localize("Client"), 20.0f, -1);
 		Client.Margin(5.0f, &Client);
 		Client.VSplitMid(&Left, &Right);

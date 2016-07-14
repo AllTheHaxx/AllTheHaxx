@@ -417,7 +417,7 @@ void CGameClient::OnInit()
 	char aBuf[256];
 
 	// setup load amount & load textures and stuff
-	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1    +3;
+	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1   +3;
 	g_GameClient.m_pMenus->m_LoadTotal = TotalLoadAmount + g_pData->m_NumSounds;
 #define SET_LOAD_LABEL(TEXT) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT)
 #define SET_LOAD_LABEL_V(TEXT, ...) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT, __VA_ARGS__)

@@ -46,8 +46,8 @@ class CLua
 	array<LuaErrorCounter> m_ErrorCounter;
 
 public:
-    CLua();
-    ~CLua();
+	CLua();
+	~CLua();
 	
 	void Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole);
 	void Shutdown();
@@ -59,8 +59,8 @@ public:
 
 
 	static int ErrorFunc(lua_State *L);
-    static int Panic(lua_State *L);
-    int HandleException(std::exception &e, CLuaFile*);
+	static int Panic(lua_State *L);
+	int HandleException(std::exception &e, CLuaFile*);
 
 	static CClient * m_pCClient;
 	static IClient *m_pClient;

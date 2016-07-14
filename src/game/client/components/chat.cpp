@@ -997,15 +997,15 @@ void CChat::OnRender()
 		else
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 
-        if(g_Config.m_ClChatAvatar && m_aLines[r].m_ClientID >= 0)
-        {
-            CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_aLines[r].m_ClientID];
-            CTeeRenderInfo RenderInfo = pClientData->m_RenderInfo;
-            RenderInfo.m_Size = 8.0f;
-            RenderInfo.m_ColorBody.a = RenderInfo.m_ColorFeet.a = Blend;
+		if(g_Config.m_ClChatAvatar && m_aLines[r].m_ClientID >= 0)
+		{
+			CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_aLines[r].m_ClientID];
+			CTeeRenderInfo RenderInfo = pClientData->m_RenderInfo;
+			RenderInfo.m_Size = 8.0f;
+			RenderInfo.m_ColorBody.a = RenderInfo.m_ColorFeet.a = Blend;
 
-            RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfo, 0, vec2(-1.0f, 0.0f), vec2(Begin, y+FontSize-1.5f));
-        }
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfo, 0, vec2(-1.0f, 0.0f), vec2(Begin, y+FontSize-1.5f));
+		}
 
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);

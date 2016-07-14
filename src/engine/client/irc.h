@@ -22,70 +22,70 @@ class CIRC : public IIRC
 	bool m_Debug;
 
 public:
-    CIRC();
+	CIRC();
 
-    void Init();
+	void Init();
 
-    virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser); // pData, pUser, this
+	virtual void RegisterCallback(const char* pMsgID, int (*func)(ReplyData*, void*, void*), void *pUser); // pData, pUser, this
 
-    int GetState() { return m_State; }
-    void NextRoom();
-    void PrevRoom();
+	int GetState() { return m_State; }
+	void NextRoom();
+	void PrevRoom();
 
-    void SetActiveCom(int index);
+	void SetActiveCom(int index);
 	void SetActiveCom(CIRCCom *pCom);
-    CIRCCom* GetActiveCom();
-    CIRCCom* GetCom(size_t index);
-    CIRCCom* GetCom(std::string name);
-    int GetNumComs() { return m_IRCComs.size(); }
-    bool CanCloseCom(CIRCCom *pCom);
+	CIRCCom* GetActiveCom();
+	CIRCCom* GetCom(size_t index);
+	CIRCCom* GetCom(std::string name);
+	int GetNumComs() { return m_IRCComs.size(); }
+	bool CanCloseCom(CIRCCom *pCom);
 
-    template<class TCOM>
-    TCOM* OpenCom(const char *pName, bool SwitchTo = true, int UnreadMessages = 0);
-    void OpenQuery(const char *to);
-    void JoinTo(const char *to, const char *pass = "");
-    void SetTopic(const char *topic);
-    void Part(const char *pReason = 0, CIRCCom *pCom = 0);
+	template<class TCOM>
+	TCOM* OpenCom(const char *pName, bool SwitchTo = true, int UnreadMessages = 0);
+	void OpenQuery(const char *to);
+	void JoinTo(const char *to, const char *pass = "");
+	void SetTopic(const char *topic);
+	void Part(const char *pReason = 0, CIRCCom *pCom = 0);
 
-    void SetMode(const char *mode, const char *to);
-    void SetNick(const char *nick);
-    const char* GetNick() { return m_Nick.c_str(); }
-    int NumUnreadMessages(int *pArray = 0);
-    int GetMsgType(const char *msg);
+	void SetMode(const char *mode, const char *to);
+	void SetNick(const char *nick);
+	const char* GetNick() { return m_Nick.c_str(); }
+	int NumUnreadMessages(int *pArray = 0);
+	int GetMsgType(const char *msg);
 
-    void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
-    void SendRaw(const char *fmt, ...);
-    void SendGetServer(const char *to);
-    void SendVersion(const char *to);
+	void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
+	void SendRaw(const char *fmt, ...);
+	void SendGetServer(const char *to);
+	void SendVersion(const char *to);
 
-    void StartConnection();
-    void Disconnect(const char *pReason = 0);
+	void StartConnection();
+	void Disconnect(const char *pReason = 0);
 
-    void SetAway(bool state, const char *msg = 0x0);
+	void SetAway(bool state, const char *msg = 0x0);
 
-    void ExecuteCommand(const char *cmd, char *params);
+	void ExecuteCommand(const char *cmd, char *params);
 
-    std::string m_Nick;
+	std::string m_Nick;
 
 protected:
-    class IGraphics *m_pGraphics;
-    class IGameClient *m_pGameClient;
-    class IClient *m_pClient;
+	class IGraphics *m_pGraphics;
+	class IGameClient *m_pGameClient;
+	class IClient *m_pClient;
 
-    int m_State;
-    int m_ActiveCom;
-    NETSOCKET m_Socket;
-    NETADDR m_HostAddress;
+	int m_State;
+	int m_ActiveCom;
+	NETSOCKET m_Socket;
+	NETADDR m_HostAddress;
 
-    char m_CmdToken[12];
+	char m_CmdToken[12];
 
-    std::list<CIRCCom*> m_IRCComs;
-    array<IRCHook> m_Hooks;
+	std::list<CIRCCom*> m_IRCComs;
+	array<IRCHook> m_Hooks;
 
 private:
-    void CallHooks(const char* pMsgID, ReplyData* pReplyData);
+	void CallHooks(const char* pMsgID, ReplyData* pReplyData);
 
-    void SendServer(const char *to, const char *Token);
+	void SendServer(const char *to, const char *Token);
 };
 
 #endif

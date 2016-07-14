@@ -122,7 +122,7 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 	}
 }
 	
-        
+
 void CMenus::RenderSettingsParticles(CUIRect MainView)
 {
 	CALLSTACK_ADD();

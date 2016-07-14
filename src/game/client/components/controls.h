@@ -66,9 +66,9 @@ public:
 	int GetMouseY() const { return m_MousePos[g_Config.m_ClDummy].y; }
 	void SetTargetY(int n) { m_InputData[g_Config.m_ClDummy].m_TargetY = n; }
 	void SetDirRight(int n) { m_InputDirectionRight[g_Config.m_ClDummy] = n; }
-    void SetDirLeft(int n) { m_InputDirectionLeft[g_Config.m_ClDummy] = n; }
-    int GetDirRight() const { return m_InputDirectionRight[g_Config.m_ClDummy]; }
-    int GetDirLeft() const { return m_InputDirectionLeft[g_Config.m_ClDummy]; }
+	void SetDirLeft(int n) { m_InputDirectionLeft[g_Config.m_ClDummy] = n; }
+	int GetDirRight() const { return m_InputDirectionRight[g_Config.m_ClDummy]; }
+	int GetDirLeft() const { return m_InputDirectionLeft[g_Config.m_ClDummy]; }
 	
 	int m_NextHiddenCharCounter;
 	int m_HiddenCharSerialCount;

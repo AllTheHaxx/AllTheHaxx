@@ -51,7 +51,7 @@ int IRChook_privmsg(IIRC::ReplyData* hostd, void* user, void* engine)
 	if(g_Config.m_ClIRCPrintChat)
 	{
 		char aBuf[256], aTime[32];
-    	time_t rawtime;
+		time_t rawtime;
 		struct tm *timeinfo;
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
@@ -114,7 +114,7 @@ void CIRCBind::Connect() // XXX this is depreciated and only for compatibility
 	if(IsConnected())
 		return;
 
-    m_pClient->IRC()->SetNick(g_Config.m_ClIRCNick);
+	m_pClient->IRC()->SetNick(g_Config.m_ClIRCNick);
 	thread_init(ListenIRCThread, this);
 }
 
