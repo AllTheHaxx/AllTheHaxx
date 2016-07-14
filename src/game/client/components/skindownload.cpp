@@ -144,10 +144,12 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	else
 		*pDestID = DefaultSkin;
 
+	// don't rerun failed tasks
 	for(int i = 0; i < m_FailedTasks.size(); i++)
 		if(m_FailedTasks[i] == std::string(pName))
 			return;
 
+	// don't queue tasks multiple times
 	for(std::map<CFetchTask*, SkinFetchTask>::iterator it = m_FetchTasks.begin(); it != m_FetchTasks.end(); it++)
 		if(it->second.SkinName == std::string(pName))
 			return;
@@ -160,7 +162,12 @@ void CSkinDownload::FetchSkin(const char *pName, int *pDestID, int url)
 	if(url >= m_SkinDbUrls.size())
 		return;
 
-	char aBuf[256], aDestPath[256] = {0}, aFullPath[512] = {0};
+	if(m_FetchTasks.size() > MAX_FETCHTASKS)
+		return;
+
+	char aBuf[256];
+	char aDestPath[256] = {0};
+	char aFullPath[512] = {0};
 
 	str_copy(aDestPath, m_SkinDbUrls[url].url.c_str(), sizeof(aDestPath));
 	if(aDestPath[str_length(aDestPath)-1] != '/')

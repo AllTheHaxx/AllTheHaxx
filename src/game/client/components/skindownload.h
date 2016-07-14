@@ -14,6 +14,8 @@ class CSkinDownload : public CComponent
 	class IFetcher *m_pFetcher;
 	class IStorageTW *m_pStorage;
 
+	enum { MAX_FETCHTASKS=3 };
+
 	struct SkinDbUrl
 	{
 		int prior;
