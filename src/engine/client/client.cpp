@@ -3980,7 +3980,7 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	// initialize the debugger
-	CDebugger *pDebugger = new (mem_alloc(sizeof(CDebugger), 1)) CDebugger();
+	CDebugger *pDebugger = new CDebugger();
 #if defined(CONF_FAMILY_UNIX) and defined(FEATURE_DEBUGGER) and not defined(CONF_DEBUG)
 	main_thread_handle = thread_get_current();
 #endif
@@ -4120,7 +4120,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfig->Save();
 
 	// cleanup
-	delete pEngine;
+/*	delete pEngine;
 	delete pConsole;
 	delete pStorage;
 	delete pConfig;
@@ -4129,7 +4129,7 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pEngineTextRender;
 	delete pEngineMap;
 	delete pEngineMasterServer;
-
+*/
 	mem_free(pDebugger);
 
 	if(pClient->m_Restarting)

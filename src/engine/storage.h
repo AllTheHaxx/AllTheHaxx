@@ -21,6 +21,8 @@ public:
 
 	template<class T> struct CLoadHelper // this is really useful to list dirs recursively
 	{
+		MACRO_ALLOC_HEAP()
+	public:
 		T *pSelf;
 		const char *pFullDir;
 

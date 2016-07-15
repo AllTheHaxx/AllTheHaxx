@@ -30,6 +30,7 @@ extern CCallstack gDebugInfo;
 
 class CDebugger
 {
+	MACRO_ALLOC_HEAP()
 	//void (*signal(int sig, void (*func)(int)))(int);
 	//static void signalhandler(int sig);
 

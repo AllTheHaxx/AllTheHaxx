@@ -11,6 +11,7 @@ typedef void (*COMPFUNC)(CFetchTask *pDest, void *pUser);
 
 class CFetchTask
 {
+	MACRO_ALLOC_HEAP()
 	friend class CFetcher;
 
 	CFetchTask *m_pNext;
@@ -31,9 +32,6 @@ class CFetchTask
 
 public:
 	CFetchTask(bool canTimeout);
-
-	void* operator new (size_t size) { return mem_alloc(sizeof(CFetchTask), 1); }
-	void operator delete (void *block) { mem_free(block); }
 
 	enum
 	{

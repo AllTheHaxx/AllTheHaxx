@@ -7,6 +7,7 @@
 
 class CSound : public IEngineSound
 {
+	MACRO_ALLOC_HEAP()
 	int m_SoundEnabled;
 
 public:

@@ -76,6 +76,8 @@ public:
 
 	struct LuaLoadHelper
 	{
+		MACRO_ALLOC_HEAP()
+	public:
 		CLua * pLua;
 		const char * pString;
 	};

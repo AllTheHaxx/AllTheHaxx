@@ -172,8 +172,12 @@ void CSkinDownload::FetchSkin(const char *pName, int *pDestID, int url)
 	str_copy(aDestPath, m_SkinDbUrls[url].url.c_str(), sizeof(aDestPath));
 	if(aDestPath[str_length(aDestPath)-1] != '/')
 		str_append(aDestPath, "/", sizeof(aDestPath));
-	str_format(aBuf, sizeof(aBuf), "%s%s.png", aDestPath, pName);
-	dbg_msg("skinfetcher/debug", "fetching file from '%s'", aBuf);
+	char aEscapedName[128] = {0};
+	m_pFetcher->Escape(aEscapedName, sizeof(aEscapedName), pName);
+	str_format(aBuf, sizeof(aBuf), "%s%s.png", aDestPath, aEscapedName);
+
+	if(g_Config.m_Debug)
+		dbg_msg("skinfetcher/debug", "fetching file from '%s'", aBuf);
 
 	str_format(aDestPath, sizeof(aDestPath), "downloadedskins/%s.png", pName);
 	IOHANDLE f = Storage()->OpenFile(aDestPath, IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aFullPath, sizeof(aFullPath));
@@ -188,11 +192,9 @@ void CSkinDownload::FetchSkin(const char *pName, int *pDestID, int url)
 		return;
 	}
 
-	CFetchTask *pTask = new () CFetchTask(false);
+	CFetchTask *pTask = new CFetchTask(false);
 	SkinFetchTask Task;
-	char aEscapedName[128] = {0};
-	m_pFetcher->Escape(aEscapedName, sizeof(aEscapedName), pName);
-	Task.SkinName = std::string(aEscapedName);
+	Task.SkinName = std::string(pName);
 	Task.url = url;
 	Task.Progress = 0;
 	Task.FinishTime = -1;

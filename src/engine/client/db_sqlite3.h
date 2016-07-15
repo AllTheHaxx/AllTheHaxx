@@ -13,6 +13,7 @@
 
 class CQuery
 {
+	MACRO_ALLOC_HEAP()
 	friend class CSql;
 
 private:
@@ -41,6 +42,7 @@ public:
 
 class CSql
 {
+	MACRO_ALLOC_HEAP()
 private:
 	void WorkerThread();
 	static void InitWorker(void *pSelf);
@@ -53,7 +55,7 @@ private:
 	sqlite3 *m_pDB;
 
 public:
-	CSql(const char *pFilename = "ath_data");
+	CSql(const char *pFilename = "ath_data.db");
 	~CSql();
 	CQuery *Query(CQuery *pQuery, std::string QueryString);
 
