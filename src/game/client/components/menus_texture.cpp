@@ -4,15 +4,12 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <game/generated/client_data.h>
-#include <game/client/animstate.h>
 #include <game/localization.h>
 
 #include "menus.h"
-#include "skins.h"
-#include "gskins.h"
-#include "pskins.h"
-#include "eskins.h"
-#include "cskins.h"
+#include "gametexture.h"
+
+// TODO: make all that duplicate code better!
 
 void CMenus::RenderSettingsTexture(CUIRect MainView)
 {
@@ -55,6 +52,8 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 		RenderSettingsEmoticons(MainView);
 	else if(s_ControlPage == 3)
 		RenderSettingsCursor(MainView);
+	else
+		s_ControlPage = 0;
 }
 
 void CMenus::RenderSettingsGameskin(CUIRect MainView)
@@ -64,37 +63,23 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
-	static bool s_InitSkinlist = true;
-	static sorted_array<const CgSkins::CgSkin *> s_paSkinList;
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist)
-	{
-		s_paSkinList.clear();
-		for(int i = 0; i < m_pClient->m_pgSkins->Num(); ++i)
-		{
-			const CgSkins::CgSkin *s = m_pClient->m_pgSkins->Get(i);
-			// no special skins
-			if(s->m_aName[0] == 'x' && s->m_aName[1] == '_')
-				continue;
-			s_paSkinList.add(s);
-		}
-		s_InitSkinlist = false;
-	}
+	static const sorted_array<CGameTextureManager::CGameSkin>& s_aSkinList = m_pClient->m_pGameTextureManager->GetGroup(CGameTextureManager::TEXTURE_GROUP_GAME);
 
 	int OldSelected = -1;
 	static CButtonContainer s_Listbox;
-	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Texture"), "", s_paSkinList.size(), 2, OldSelected, s_ScrollValue);
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Texture"), "", s_aSkinList.size(), 2, OldSelected, s_ScrollValue);
 
-	for(int i = 0; i < s_paSkinList.size(); ++i)
+	for(int i = 0; i < s_aSkinList.size(); ++i)
 	{
-		const CgSkins::CgSkin *s = s_paSkinList[i];
+		const CGameTextureManager::CGameSkin *s = &s_aSkinList[i];
 		if(s == 0)
 			continue;
 
-		if(str_comp(s->m_aName, g_Config.m_GameTexture) == 0)
+		if(str_comp(s->m_aName, g_Config.m_TexGame) == 0)
 			OldSelected = i;
 
-		CPointerContainer Container(&s_paSkinList[i]);
+		CPointerContainer Container(s);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
@@ -102,9 +87,10 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->m_Texture;
+			int gTexture = s->Texture();
+			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_GAME, s->m_aName)) <= 0) continue;
 			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);;
+			str_format(gName, sizeof(gName), "%s", s->m_aName);
 			Graphics()->TextureSet(gTexture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 120.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 240.0f, 120.0f);
@@ -117,8 +103,8 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_GameTexture, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_GameTexture));
-		g_pData->m_aImages[IMAGE_GAME].m_Id = s_paSkinList[NewSelected]->m_Texture;
+		mem_copy(g_Config.m_TexGame, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexGame));
+		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_GAME, g_Config.m_TexGame);
 	}
 }
 	
@@ -130,37 +116,24 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
-	static bool s_InitSkinlist = true;
-	static sorted_array<const CpSkins::CpSkin *> s_paSkinList;
+	static const sorted_array<CGameTextureManager::CGameSkin>& s_aSkinList = m_pClient->m_pGameTextureManager->GetGroup(CGameTextureManager::TEXTURE_GROUP_PARTICLES);
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist)
-	{
-		s_paSkinList.clear();
-		for(int i = 0; i < m_pClient->m_ppSkins->Num(); ++i)
-		{
-			const CpSkins::CpSkin *s = m_pClient->m_ppSkins->Get(i);
-			// no special skins
-			if(s->m_aName[0] == 'x' && s->m_aName[1] == '_')
-				continue;
-			s_paSkinList.add(s);
-		}
-		s_InitSkinlist = false;
-	}
+
 
 	int OldSelected = -1;
 	static CButtonContainer s_Listbox;
-	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Particles"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Particles"), "", s_aSkinList.size(), 3, OldSelected, s_ScrollValue);
 
-	for(int i = 0; i < s_paSkinList.size(); ++i)
+	for(int i = 0; i < s_aSkinList.size(); ++i)
 	{
-		const CpSkins::CpSkin *s = s_paSkinList[i];
+		const CGameTextureManager::CGameSkin *s = &s_aSkinList[i];
 		if(s == 0)
 			continue;
 
-		if(str_comp(s->m_aName, g_Config.m_GameParticles) == 0)
+		if(str_comp(s->m_aName, g_Config.m_TexParticles) == 0)
 			OldSelected = i;
 
-		CPointerContainer Container(&s_paSkinList[i]);
+		CPointerContainer Container(s);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
@@ -168,9 +141,10 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->m_Texture;
+			int gTexture = s->Texture();
+			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_PARTICLES, s->m_aName)) <= 0) continue;
 			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);;
+			str_format(gName, sizeof(gName), "%s", s->m_aName);
 			Graphics()->TextureSet(gTexture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
@@ -183,8 +157,8 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_GameParticles, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_GameParticles));
-		g_pData->m_aImages[IMAGE_PARTICLES].m_Id = s_paSkinList[NewSelected]->m_Texture;
+		mem_copy(g_Config.m_TexParticles, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexParticles));
+		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_PARTICLES, g_Config.m_TexParticles);
 	}
 }
 
@@ -195,37 +169,23 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
-	static bool s_InitSkinlist = true;
-	static sorted_array<const CeSkins::CeSkin *> s_paSkinList;
+	static const sorted_array<CGameTextureManager::CGameSkin>& s_aSkinList = m_pClient->m_pGameTextureManager->GetGroup(CGameTextureManager::TEXTURE_GROUP_EMOTE);
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist)
-	{
-		s_paSkinList.clear();
-		for(int i = 0; i < m_pClient->m_peSkins->Num(); ++i)
-		{
-			const CeSkins::CeSkin *s = m_pClient->m_peSkins->Get(i);
-			// no special skins
-			if(s->m_aName[0] == 'x' && s->m_aName[1] == '_')
-				continue;
-			s_paSkinList.add(s);
-		}
-		s_InitSkinlist = false;
-	}
 
 	int OldSelected = -1;
 	static CButtonContainer s_Listbox;
-	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Emoticons"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Emoticons"), "", s_aSkinList.size(), 3, OldSelected, s_ScrollValue);
 
-	for(int i = 0; i < s_paSkinList.size(); ++i)
+	for(int i = 0; i < s_aSkinList.size(); ++i)
 	{
-		const CeSkins::CeSkin *s = s_paSkinList[i];
+		const CGameTextureManager::CGameSkin *s = &s_aSkinList[i];
 		if(s == 0)
 			continue;
 
-		if(str_comp(s->m_aName, g_Config.m_GameEmoticons) == 0)
+		if(str_comp(s->m_aName, g_Config.m_TexEmoticons) == 0)
 			OldSelected = i;
 
-		CPointerContainer Container(&s_paSkinList[i]);
+		CPointerContainer Container(s);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
@@ -233,9 +193,10 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->m_Texture;
+			int gTexture = s->Texture();
+			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_EMOTE, s->m_aName)) <= 0) continue;
 			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);;
+			str_format(gName, sizeof(gName), "%s", s->m_aName);
 			Graphics()->TextureSet(gTexture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
@@ -248,8 +209,8 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_GameEmoticons, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_GameEmoticons));
-		g_pData->m_aImages[IMAGE_EMOTICONS].m_Id = s_paSkinList[NewSelected]->m_Texture;
+		mem_copy(g_Config.m_TexEmoticons, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexEmoticons));
+		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_EMOTICONS, g_Config.m_TexEmoticons);
 	}
 }
 
@@ -260,37 +221,23 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
-	static bool s_InitSkinlist = true;
-	static sorted_array<const CcSkins::CcSkin *> s_paSkinList;
+	static const sorted_array<CGameTextureManager::CGameSkin>& s_aSkinList = m_pClient->m_pGameTextureManager->GetGroup(CGameTextureManager::TEXTURE_GROUP_CURSOR);
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist)
-	{
-		s_paSkinList.clear();
-		for(int i = 0; i < m_pClient->m_pcSkins->Num(); ++i)
-		{
-			const CcSkins::CcSkin *s = m_pClient->m_pcSkins->Get(i);
-			// no special skins
-			if(s->m_aName[0] == 'x' && s->m_aName[1] == '_')
-				continue;
-			s_paSkinList.add(s);
-		}
-		s_InitSkinlist = false;
-	}
 
 	int OldSelected = -1;
 	static CButtonContainer s_Listbox;
-	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Cursor"), "", s_paSkinList.size(), 3, OldSelected, s_ScrollValue);
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Cursor"), "", s_aSkinList.size(), 3, OldSelected, s_ScrollValue);
 
-	for(int i = 0; i < s_paSkinList.size(); ++i)
+	for(int i = 0; i < s_aSkinList.size(); ++i)
 	{
-		const CcSkins::CcSkin *s = s_paSkinList[i];
+		const CGameTextureManager::CGameSkin *s = &s_aSkinList[i];
 		if(s == 0)
 			continue;
 
-		if(str_comp(s->m_aName, g_Config.m_GameCursor) == 0)
+		if(str_comp(s->m_aName, g_Config.m_TexCursor) == 0)
 			OldSelected = i;
 
-		CPointerContainer Container(&s_paSkinList[i]);
+		CPointerContainer Container(s);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
@@ -298,9 +245,10 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->m_Texture;
+			int gTexture = s->Texture();
+			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_CURSOR, s->m_aName)) <= 0) continue;
 			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);;
+			str_format(gName, sizeof(gName), "%s", s->m_aName);
 			Graphics()->TextureSet(gTexture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
@@ -313,7 +261,7 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_GameCursor, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_GameCursor));
-		g_pData->m_aImages[IMAGE_CURSOR].m_Id = s_paSkinList[NewSelected]->m_Texture;
+		mem_copy(g_Config.m_TexCursor, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexCursor));
+		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_CURSOR, g_Config.m_TexCursor);
 	}
 }

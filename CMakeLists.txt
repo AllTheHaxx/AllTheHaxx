@@ -725,8 +725,6 @@ set(SOURCE_FILES
     src/game/client/components/controls.h
     src/game/client/components/countryflags.cpp
     src/game/client/components/countryflags.h
-    src/game/client/components/cskins.cpp
-    src/game/client/components/cskins.h
     src/game/client/components/damageind.cpp
     src/game/client/components/damageind.h
     src/game/client/components/debughud.cpp
@@ -737,16 +735,14 @@ set(SOURCE_FILES
     src/game/client/components/effects.h
     src/game/client/components/emoticon.cpp
     src/game/client/components/emoticon.h
-    src/game/client/components/eskins.cpp
-    src/game/client/components/eskins.h
     src/game/client/components/flow.cpp
     src/game/client/components/flow.h
     src/game/client/components/fontmgr.cpp
     src/game/client/components/fontmgr.h
     src/game/client/components/ghost.cpp
     src/game/client/components/ghost.h
-    src/game/client/components/gskins.cpp
-    src/game/client/components/gskins.h
+        src/game/client/components/gametexture.cpp
+        src/game/client/components/gametexture.h
     src/game/client/components/hud.cpp
     src/game/client/components/hud.h
     src/game/client/components/identity.cpp
@@ -783,8 +779,6 @@ set(SOURCE_FILES
     src/game/client/components/particles.h
     src/game/client/components/players.cpp
     src/game/client/components/players.h
-    src/game/client/components/pskins.cpp
-    src/game/client/components/pskins.h
     src/game/client/components/race_demo.cpp
     src/game/client/components/race_demo.h
     src/game/client/components/scoreboard.cpp

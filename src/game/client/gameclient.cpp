@@ -63,10 +63,7 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/voting.h"
-#include "components/gskins.h"
-#include "components/pskins.h"
-#include "components/eskins.h"
-#include "components/cskins.h"
+#include "game/client/components/gametexture.h"
 #include "components/drawing.h"
 #include "components/fontmgr.h"
 #include "components/skindownload.h"
@@ -136,10 +133,7 @@ static CVoting gs_Voting;
 static CSpectator gs_Spectator;
 static CSpoofRemote gs_SpoofRemote;
 static CIdentity gs_Identity;
-static CgSkins gs_gSkins;
-static CpSkins gs_pSkins;
-static CeSkins gs_eSkins;
-static CcSkins gs_cSkins;
+static CGameTextureManager gs_GameTextureManager;
 static CDrawing gs_Drawing;
 static CFontMgr gs_FontMgr;
 static CSkinDownload gs_SkinDownload;
@@ -233,10 +227,7 @@ void CGameClient::OnConsoleInit()
 	m_pAStar = &::gs_AStar;
 	m_pIRCBind = &::gs_IRC;
 	m_pIdentity = &::gs_Identity;
-	m_pgSkins = &::gs_gSkins;
-	m_ppSkins = &::gs_pSkins;
-	m_peSkins = &::gs_eSkins;
-	m_pcSkins = &::gs_cSkins;
+	m_pGameTextureManager = &::gs_GameTextureManager;
 	m_pFontMgr = &::gs_FontMgr;
 
 	m_pRaceDemo = &::gs_RaceDemo;
@@ -262,10 +253,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pAStar);
 	m_All.Add(m_pIRCBind);
 	m_All.Add(m_pIdentity);
-	m_All.Add(m_pgSkins);
-	m_All.Add(m_ppSkins);
-	m_All.Add(m_peSkins);
-	m_All.Add(m_pcSkins);
+	m_All.Add(m_pGameTextureManager);
 
 	m_All.Add(&gs_LuaRender0); // lua
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
@@ -431,7 +419,9 @@ void CGameClient::OnInit()
 		}
 
 		// load the textures
-		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages)
+		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages &&
+				i-m_All.m_Num != IMAGE_GAME && i-m_All.m_Num != IMAGE_CURSOR &&
+				i-m_All.m_Num != IMAGE_PARTICLES && i-m_All.m_Num != IMAGE_EMOTICONS)
 		{
 			SET_LOAD_LABEL_V("Loading Textures (%i/%i): \"%s\"", i-m_All.m_Num+1, g_pData->m_NumImages, g_pData->m_aImages[i-m_All.m_Num].m_pFilename);
 			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
