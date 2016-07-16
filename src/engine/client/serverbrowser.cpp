@@ -120,7 +120,7 @@ CServerBrowser::CServerBrowser()
 
 	// read the entries from it
 	{
-		char *pQueryBuf = sqlite3_mprintf("SELECT * FROM recent` ORDER BY `last_joined` DESC;");
+		char *pQueryBuf = sqlite3_mprintf("SELECT * FROM 'recent' ORDER BY 'last_joined' DESC;");
 		CQueryRecent *pQuery = new CQueryRecent(&m_aRecentServers);
 		pQuery->Query(m_pRecentDB, pQueryBuf);
 		sqlite3_free(pQueryBuf);
