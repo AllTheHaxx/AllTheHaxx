@@ -112,15 +112,17 @@ void CSpoofRemote::Connect(const char *pAddr, int Port)
 
 	// Info
 	NETADDR BindAddr;
-	BindAddr.type = NETTYPE_IPV4;
+	BindAddr.type = NETTYPE_ALL;
+	BindAddr.port = (unsigned short)(secure_rand() % 40000 + 16000);
 	m_Socket = net_tcp_create(BindAddr);
 
 	// Socket
-	Console()->Print(0, "spfrmt", "opening socket...", false);
+	if(g_Config.m_Debug)
+		Console()->Printf(0, "spfrmt", "opening socket on port %i", BindAddr.port);
 	if (m_Socket.type == NETTYPE_INVALID)
 	{
-		dbg_msg("spfrmt", "failed to create socket");
-		Console()->Print(0, "spfrmt", "error while creating socket", false);
+		//dbg_msg("spfrmt", "failed to create socket");
+		Console()->Print(0, "spfrmt", "error while creating socket", true);
 		return;
 	}
 
@@ -153,8 +155,7 @@ void CSpoofRemote::CreateThreads(void *pUserData)
 	net_addr_from_str(&Addr, pSelf->m_aNetAddr);
 	if (net_tcp_connect(pSelf->m_Socket, &Addr) != 0)
 	{
-		dbg_msg("spfrmt", "failed to connect to '%s'", pSelf->m_aNetAddr);
-		pSelf->Console()->Print(0, "spfrmt", "error while connecting", false);
+		pSelf->Console()->Printf(0, "spfrmt", "failed to connect to '%s'", pSelf->m_aNetAddr);
 		return;
 	}
 
