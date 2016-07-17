@@ -24,7 +24,7 @@ void CCurlWrapper::PerformPOST_ex(void *pUser)
 
 	curl_easy_setopt(pHandle, CURLOPT_URL, pTask->m_aUrl);
 	curl_easy_setopt(pHandle, CURLOPT_POSTFIELDS, pTask->m_aFields);
-	dbg_msg("curlwrapper/POST", "performing '%s?%s'", pTask->m_aUrl, pTask->m_aFields);
+	dbg_msg("curlwrapper/POST", "performing '%s' with fields '%s'", pTask->m_aUrl, pTask->m_aFields);
 
 	CURLcode res = curl_easy_perform(pHandle);
 	if(res != CURLE_OK)
