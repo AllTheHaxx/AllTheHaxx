@@ -100,7 +100,7 @@ int CGameTextureManager::SetTexture(int Image, const char *pName)
 
 	dbg_assert(Group >= 0 && Group < NUM_TEXTURE_GROUPS, "CGameTextureManager::SetTexture invalid group");
 
-	g_pData->m_aImages[Image].m_Id = FindTexture(Group, pName);
+	return g_pData->m_aImages[Image].m_Id = FindTexture(Group, pName);
 }
 
 int CGameTextureManager::FindTexture(int Group, const char *pName)
