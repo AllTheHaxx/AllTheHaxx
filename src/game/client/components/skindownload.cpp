@@ -20,6 +20,8 @@ void CSkinDownload::OnInit()
 
 	m_Lock = lock_create();
 	lock_unlock(m_Lock);
+	m_FetchTasks.clear();
+	m_FetchTasks.hint_size(5);
 
 	LoadUrls();
 }
@@ -55,36 +57,38 @@ void CSkinDownload::OnRender()
 	Screen.HSplitTop(15.0f, &Button, &Screen);
 	UI()->DoLabelScaled(&Button, Localize("Skin Downloads"), 14.0f, -1);
 
-	for(std::map<CFetchTask*, SkinFetchTask>::iterator it = m_FetchTasks.begin(); it != m_FetchTasks.end(); it++)
+	for(int i = 0; i < m_FetchTasks.size(); i++)
+	//for(std::map<CFetchTask*, SkinFetchTask>::iterator it = m_FetchTasks.begin(); it != m_FetchTasks.end(); it++)
 	{
-		if(it->second.State == CFetchTask::STATE_ERROR)
+		SkinFetchTask *e = &m_FetchTasks[i];
+		if(e->State == CFetchTask::STATE_ERROR)
 			TextRender()->TextColor(1,0,0,1);
-		if(it->second.State == CFetchTask::STATE_DONE)
+		if(e->State == CFetchTask::STATE_DONE)
 			TextRender()->TextColor(0,1,0,1);
-		if(it->second.State == CFetchTask::STATE_QUEUED)
+		if(e->State == CFetchTask::STATE_QUEUED)
 			TextRender()->TextColor(1,1,0,1);
 
 		Screen.HSplitTop(5.0f, 0, &Screen);
 		Screen.HSplitTop(13.5f, &Button, &Screen);
 		char aBuf[128];
-		if(it->second.url > 0)
-			str_format(aBuf, sizeof(aBuf), "%s (try %i/%i)", it->second.SkinName.c_str(), it->second.url+1, m_SkinDbUrls.size());
+		if(e->url > 0)
+			str_format(aBuf, sizeof(aBuf), "%s (try %i/%i)", e->SkinName.c_str(), e->url+1, m_SkinDbUrls.size());
 		else
-			str_format(aBuf, sizeof(aBuf), "%s", it->second.SkinName.c_str());
+			str_format(aBuf, sizeof(aBuf), "%s", e->SkinName.c_str());
 
 		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
-		if(it->second.State == CFetchTask::STATE_RUNNING)
+		if(e->State == CFetchTask::STATE_RUNNING)
 		{
 			Screen.HSplitTop(3.0f, 0, &Screen);
 			Screen.HSplitTop(2.0f, &Button, &Screen);
 			RenderTools()->DrawUIRect(&Button, vec4(0.2f, 0.2f, 0.8f, 0.9f), 0, 0);
-			Button.w *= (float)it->second.Progress/100.0f;
+			Button.w *= (float)e->Progress/100.0f;
 			RenderTools()->DrawUIRect(&Button, vec4(0.4f, 0.4f, 0.9f, 1.0f), 0, 0);
 		}
 
-		if(it->second.FinishTime > 0 && time_get() > it->second.FinishTime + 4 * time_freq())
-			m_FetchTasks.erase(it->first);
+		if(e->FinishTime > 0 && time_get() > e->FinishTime + 2 * time_freq())
+			m_FetchTasks.remove_index_fast(i);
 	}
 
 	TextRender()->TextColor(1,1,1,1);
@@ -97,8 +101,8 @@ void CSkinDownload::ProgressCallback(CFetchTask *pTask, void *pUser)
 	CSkinDownload *pSelf = (CSkinDownload *)pUser;
 	//lock_wait(pSelf->m_Lock); // we don't really need a lock here, do we?
 
-	pSelf->m_FetchTasks[pTask].State = pTask->State();
-	pSelf->m_FetchTasks[pTask].Progress = pTask->Progress();
+	pSelf->FindTask(pTask)->State = pTask->State();
+	pSelf->FindTask(pTask)->Progress = pTask->Progress();
 
 	//lock_unlock(pSelf->m_Lock);
 }
@@ -109,7 +113,7 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 	lock_wait(pSelf->m_Lock);
 
 	const char *dest = pTask->Dest();
-	SkinFetchTask *pTaskHandler = &pSelf->m_FetchTasks[pTask];
+	SkinFetchTask *pTaskHandler = pSelf->FindTask(pTask);
 	pTaskHandler->State = pTask->State();
 
 	if(pTask->State() == CFetchTask::STATE_ERROR)
@@ -177,8 +181,8 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		}
 
 	// don't queue tasks multiple times
-	for(std::map<CFetchTask*, SkinFetchTask>::iterator it = m_FetchTasks.begin(); it != m_FetchTasks.end(); it++)
-		if(it->second.SkinName == std::string(pName))
+	for(int i = 0; i < m_FetchTasks.size(); i++)
+		if(str_comp(m_FetchTasks[i].SkinName.c_str(), pName) == 0)
 		{
 			lock_unlock(m_Lock);
 			return;
@@ -230,8 +234,9 @@ void CSkinDownload::FetchSkin(const char *pName, int *pDestID, int url)
 	Task.Progress = 0;
 	Task.FinishTime = -1;
 	Task.pDestID = pDestID;
+	Task.pCurlTask = pTask;
 	lock_wait(m_Lock);
-	m_FetchTasks[pTask] = Task;
+	m_FetchTasks.add(Task);
 	lock_unlock(m_Lock);
 	m_pFetcher->QueueAdd(pTask, aBuf, aFullPath, -2, this, &CSkinDownload::CompletionCallback, &CSkinDownload::ProgressCallback);
 }

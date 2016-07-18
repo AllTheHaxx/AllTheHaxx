@@ -1,7 +1,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_SKINDOWNLOAD_H
 #define GAME_CLIENT_COMPONENTS_SKINDOWNLOAD_H
 
-#include <map>
 #include <string>
 
 #include <engine/fetcher.h>
@@ -27,6 +26,7 @@ class CSkinDownload : public CComponent
 
 	struct SkinFetchTask
 	{
+		CFetchTask* pCurlTask;
 		std::string SkinName;
 		int url;
 		int Progress;
@@ -34,8 +34,17 @@ class CSkinDownload : public CComponent
 		int State;
 		int *pDestID;
 	};
-	std::map<CFetchTask*, SkinFetchTask> m_FetchTasks;
+
+	array<SkinFetchTask> m_FetchTasks;
 	array<std::string> m_FailedTasks;
+
+	SkinFetchTask *FindTask(CFetchTask* pTask)
+	{
+		for(int i = 0; i < m_FetchTasks.size(); i++)
+			if(m_FetchTasks[i].pCurlTask == pTask)
+				return &m_FetchTasks[i];
+		return 0;
+	}
 
 public:
 	void OnConsoleInit();
