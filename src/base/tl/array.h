@@ -5,6 +5,7 @@
 
 #include "base/tl/range.h"
 #include "base/tl/allocator.h"
+#include "base/system.h"
 
 
 /*
@@ -176,6 +177,7 @@ public:
 	{
 		incsize();
 		set_size(size()+1);
+		//mem_copy(&list[num_elements-1], &item, sizeof(T));
 		list[num_elements-1] = item;
 		return num_elements-1;
 	}
