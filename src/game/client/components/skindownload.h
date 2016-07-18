@@ -13,6 +13,7 @@ class CSkinDownload : public CComponent
 {
 	class IFetcher *m_pFetcher;
 	class IStorageTW *m_pStorage;
+	LOCK m_Lock;
 
 	enum { MAX_FETCHTASKS=3 };
 
