@@ -241,7 +241,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	if(s_WantedScrollValue < 0) s_WantedScrollValue = 0;
 	if(s_WantedScrollValue > 1) s_WantedScrollValue = 1;
-	smooth_set(&s_ScrollValue, s_WantedScrollValue, (0.005f/Client()->RenderFrameTime())*27.0f);
+	smooth_set(&s_ScrollValue, s_WantedScrollValue, 27.0f, Client()->RenderFrameTime());
 
 	// set clipping
 	UI()->ClipEnable(&View);

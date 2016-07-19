@@ -33,7 +33,7 @@ void CSkinDownload::OnRender()
 
 	const float MAX_HEIGHT = m_apFetchTasks.empty() ? 0.001f : 5.0f+25.0f+5.0f+20.0f*(float)m_apFetchTasks.size();
 	static float s_SmoothPos = 0.0f;
-	smooth_set(&s_SmoothPos, MAX_HEIGHT, (0.005f/Client()->RenderFrameTime())*23.0f);
+	smooth_set(&s_SmoothPos, MAX_HEIGHT, 23.0f, Client()->RenderFrameTime());
 
 	if(s_SmoothPos <= 0.01f)
 	{

@@ -1363,9 +1363,6 @@ void CMenus::RenderNews(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-	// TODO: Like the settings with big fonts
-	// Make it work WITHOUT version updates
-	// Show news once after each version or news update
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
 	// tabbar
@@ -1382,9 +1379,53 @@ void CMenus::RenderNews(CUIRect MainView)
 			g_Config.m_UiPage = PAGE_NEWS_DDNET;
 	}
 
-	MainView.HSplitTop( 15.0f, 0, &MainView);
+	MainView.HSplitTop(15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
 
+	// calculate how much height we need - TODO: make this better
+	const int CURRENT_NEWS_PAGE = g_Config.m_UiPage == PAGE_NEWS_ATH ? 0 : 1;
+	static float s_TotalHeight[2] = {-1.0f};
+	if(s_TotalHeight[CURRENT_NEWS_PAGE] < 0.0f)
+	{
+		std::istringstream f;
+		if(g_Config.m_UiPage == PAGE_NEWS_ATH)
+			f.str(Client()->News());
+		else if(g_Config.m_UiPage == PAGE_NEWS_DDNET)
+			f.str(Client()->m_aNewsDDNet);
+
+		std::string line;
+		while (std::getline(f, line))
+		{
+			if(line.size() > 0 && line.at(0) == '|' && line.at(line.size()-1) == '|')
+				s_TotalHeight[CURRENT_NEWS_PAGE] += 30.0f;
+			else
+				s_TotalHeight[CURRENT_NEWS_PAGE] += 20.0f;
+		}
+	}
+
+	// scrollbar if necessary
+	static float s_ScrollOffset[2] = {0.0f};
+	if(s_TotalHeight[CURRENT_NEWS_PAGE] > MainView.h-5.0f)
+	{
+		static float s_WantedScrollOffset[2] = {0.0f};
+		CUIRect Scrollbar;
+		MainView.VSplitRight(15.0f, &MainView, &Scrollbar);
+		Scrollbar.HMargin(5.0f, &Scrollbar);
+		static CButtonContainer s_Scrollbar;
+		s_WantedScrollOffset[CURRENT_NEWS_PAGE] = DoScrollbarV(&s_Scrollbar, &Scrollbar, s_WantedScrollOffset[CURRENT_NEWS_PAGE]);
+
+		// scroll with the mousewheel
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+			s_WantedScrollOffset[CURRENT_NEWS_PAGE] += 0.1f;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			s_WantedScrollOffset[CURRENT_NEWS_PAGE] -= 0.1f;
+		s_WantedScrollOffset[CURRENT_NEWS_PAGE] = clamp(s_WantedScrollOffset[CURRENT_NEWS_PAGE], 0.0f, 1.0f);
+
+		// smooth for the win
+		smooth_set(&s_ScrollOffset[CURRENT_NEWS_PAGE], s_WantedScrollOffset[CURRENT_NEWS_PAGE], 27.0f, Client()->RenderFrameTime());
+	}
+
+	Graphics()->ClipEnable((int)MainView.x, (int)MainView.y+15, (int)MainView.w, round_to_int(MainView.h*1.5f));
 	CUIRect Label;
 
 	std::istringstream f;
@@ -1399,14 +1440,18 @@ void CMenus::RenderNews(CUIRect MainView)
 		if(line.size() > 0 && line.at(0) == '|' && line.at(line.size()-1) == '|')
 		{
 			MainView.HSplitTop(30.0f, &Label, &MainView);
+			Label.y -= s_TotalHeight[CURRENT_NEWS_PAGE] * s_ScrollOffset[CURRENT_NEWS_PAGE];
 			UI()->DoLabelScaled(&Label, Localize(line.substr(1, line.size()-2).c_str()), 20.0f, -1);
 		}
 		else
 		{
 			MainView.HSplitTop(20.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, line.c_str(), 15.f, -1, MainView.w-30.0f);
+			Label.y -= s_TotalHeight[CURRENT_NEWS_PAGE] * s_ScrollOffset[CURRENT_NEWS_PAGE];
+			UI()->DoLabelScaled(&Label, line.c_str(), 15.f, -1, (int)(MainView.w - 30.0f));
 		}
 	}
+
+	Graphics()->ClipDisable();
 }
 
 void CMenus::OnInit()

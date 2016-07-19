@@ -510,7 +510,7 @@ void CHud::RenderIRCNotifications(CUIRect Rect)
 	static float Offset = -Rect.w-1;
 	if(m_pClient->IRC()->NumUnreadMessages())
 	{
-		smooth_set(&Offset, 0.0f, (0.005f/Client()->RenderFrameTime())*40.0f);
+		smooth_set(&Offset, 0.0f, 40.0f, Client()->RenderFrameTime());
 		Rect.x += Offset;
 
 		char aBuf[19];
@@ -576,7 +576,7 @@ void CHud::RenderVoting()
 	if(ShouldRender)
 		smooth_set(&Offset, 0.0f, (0.01f/Client()->RenderFrameTime())*10.0f, 0.03f); // visible
 	else if(!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice() && m_pClient->m_pVoting->IsVoting())
-		smooth_set(&Offset, Rect.w*0.75f, (0.01f/Client()->RenderFrameTime())*10.0f); // only a bit visible
+		smooth_set(&Offset, Rect.w*0.75f, 20.0f, Client()->RenderFrameTime()); // only a bit visible
 	else
 		smooth_set(&Offset, Rect.w, (0.01f/Client()->RenderFrameTime())*10.0f, 0.02f); // invisible
 
@@ -769,7 +769,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		float WantedWidth = !ShowNinjaTimer ? ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo) :
 				((float)round_to_int((((NinjaStartTime + ((int64)g_pData->m_Weapons.m_Ninja.m_Duration/1000LL+1LL) * time_freq())-time_get())&0x1F00000)>>5*4)/15.0f);
-		smooth_set(&Width, WantedWidth*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f);
+		smooth_set(&Width, WantedWidth*120.0f, 20.0f, Client()->RenderFrameTime());
 
 		if(Width > 5)
 		{
@@ -801,7 +801,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(smooth_set(&Width, ((float)pCharacter->m_Health/(float)m_MaxHealth)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
+		if(smooth_set(&Width, ((float)pCharacter->m_Health/(float)m_MaxHealth)*120.0f, 20.0f, Client()->RenderFrameTime()) > 5)
 		{
 			r.w = min(m_Width/3, Width);
 			RenderTools()->DrawUIRect(&r, vec4(g_Config.m_ClColorfulClient?1.0f-Width/120.0f:0.7f, g_Config.m_ClColorfulClient?Width/120.0f:0.0f, 0, 0.8f), CUI::CORNER_R, 3.0f);
@@ -841,7 +841,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 		// bar
 		static float Width = 0.0f;
-		if(smooth_set(&Width, ((float)pCharacter->m_Armor/(float)m_MaxArmor)*120.0f, (0.01f/Client()->RenderFrameTime())*10.0f) > 5)
+		if(smooth_set(&Width, ((float)pCharacter->m_Armor/(float)m_MaxArmor)*120.0f, 20.0f, Client()->RenderFrameTime()) > 5)
 		{
 			r.w = min(m_Width/3, Width);
 			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.8f, 0, 0.8f), CUI::CORNER_R, 3.0f);

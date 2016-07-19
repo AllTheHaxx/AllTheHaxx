@@ -105,6 +105,11 @@ class CSkinDownload : public CComponent
 	void FetchSkin(CSkinFetchTask *pTaskHandler);
 
 public:
+	~CSkinDownload()
+	{
+		m_apFetchTasks.delete_all();
+	}
+
 	void OnConsoleInit();
 	void OnInit();
 	void OnRender();

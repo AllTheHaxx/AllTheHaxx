@@ -140,9 +140,9 @@ void CMenus::RenderTrans(CUIRect MainView)
 
 	static float s_InGlideVal = 0.0f;
 	if(g_Config.m_ClTransIn)
-		smooth_set(&s_InGlideVal, 1.0f, 27.0f*(0.005f/Client()->RenderFrameTime()));
+		smooth_set(&s_InGlideVal, 1.0f, 27.0f, Client()->RenderFrameTime());
 	else
-		smooth_set(&s_InGlideVal, 0.0f, 27.0f*(0.005f/Client()->RenderFrameTime()));
+		smooth_set(&s_InGlideVal, 0.0f, 27.0f, Client()->RenderFrameTime());
 
 	if(s_InGlideVal > 0.01f)
 	{
@@ -184,9 +184,9 @@ void CMenus::RenderTrans(CUIRect MainView)
 
 	static float s_OutGlideVal = 0.0f;
 	if(g_Config.m_ClTransOut)
-		smooth_set(&s_OutGlideVal, 1.0f, 27.0f*(0.005f/Client()->RenderFrameTime()));
+		smooth_set(&s_OutGlideVal, 1.0f, 27.0f, Client()->RenderFrameTime());
 	else
-		smooth_set(&s_OutGlideVal, 0.0f, 27.0f*(0.005f/Client()->RenderFrameTime()));
+		smooth_set(&s_OutGlideVal, 0.0f, 27.0f, Client()->RenderFrameTime());
 
 	if(s_OutGlideVal > 0.01f)
 	{

@@ -714,11 +714,11 @@ void CGameConsole::OnRender()
 	static float s_OverlayAlpha = 0.0f;
 	if(m_pClient->m_pMenus->MouseUnlocked())
 	{
-		smooth_set(&s_OverlayAlpha, 0.15f, 40.0f*(0.005f/Client()->RenderFrameTime()));
+		smooth_set(&s_OverlayAlpha, 0.15f, 40.0f, Client()->RenderFrameTime());
 		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
 		CUIRect Warning, Text;
-		const float Fade = (sin(Client()->LocalTime())+1)/4+0.5f;
+		const float Fade = (const float)((sin(Client()->LocalTime()) + 1.0) / 4.0 + 0.5);
 		Screen.HSplitTop(200.0f, &Warning, 0);
 		Warning.Margin(Warning.w/3.2f, &Warning);
 		Warning.HMargin(Warning.h/2.85f, &Warning);
@@ -755,7 +755,7 @@ void CGameConsole::OnRender()
 		}
 	}
 	else
-		smooth_set(&s_OverlayAlpha, 0.0f, 40.0f*(0.005f/Client()->RenderFrameTime()));
+		smooth_set(&s_OverlayAlpha, 0.0f, 40.0f, Client()->RenderFrameTime());
 
 	if(s_OverlayAlpha > 0.0f)
 		RenderTools()->DrawUIRect(&Screen, vec4(0,0,0,s_OverlayAlpha), 0, 0);

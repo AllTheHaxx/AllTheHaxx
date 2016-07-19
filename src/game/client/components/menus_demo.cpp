@@ -560,7 +560,7 @@ void CMenus::UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float
 				s_NewVal = gs_ListBoxScrollValue;
 				gs_ListBoxScrollValue = old;
 			}
-			smooth_set(&gs_ListBoxScrollValue, s_NewVal, (0.005f/Client()->RenderFrameTime())*23.0f);
+			smooth_set(&gs_ListBoxScrollValue, s_NewVal, 23.0f, Client()->RenderFrameTime());
 			s_NewVals[pBC->GetID()].second = gs_ListBoxScrollValue;
 		}
 	}

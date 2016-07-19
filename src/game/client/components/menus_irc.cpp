@@ -57,7 +57,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		return;
 	}
 
-	smooth_set(&YOffset, 50.0f, (0.005f/Client()->RenderFrameTime())*35.0f, 0);
+	smooth_set(&YOffset, 50.0f, 35.0f, Client()->RenderFrameTime());
 	
 	// small0r
 	MainView.x = 50;
@@ -173,9 +173,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 				static bool Add[64] = { true };
 
 				if(Add[i])
-					smooth_set(&FadeVal[i], 1.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
+					smooth_set(&FadeVal[i], 1.0f, 120.0f, Client()->RenderFrameTime());
 				else
-					smooth_set(&FadeVal[i], 0.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
+					smooth_set(&FadeVal[i], 0.0f, 120.0f, Client()->RenderFrameTime());
 				if(FadeVal[i] >= 0.8f) Add[i] = false;
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 
@@ -201,9 +201,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 				static bool Add[64] = { true };
 
 				if(Add[i])
-					smooth_set(&FadeVal[i], 1.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
+					smooth_set(&FadeVal[i], 1.0f, 120.0f, Client()->RenderFrameTime());
 				else
-					smooth_set(&FadeVal[i], 0.0f, (0.01f/Client()->RenderFrameTime())*60.0f, 0);
+					smooth_set(&FadeVal[i], 0.0f, 120.0f, Client()->RenderFrameTime());
 				if(FadeVal[i] >= 0.8f) Add[i] = false;
 				if(FadeVal[i] <= 0.2f) Add[i] = true;
 

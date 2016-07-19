@@ -37,10 +37,11 @@ inline float frandom() { return rand()/(float)(RAND_MAX); }
 
 /* smoothly sets the value to target, must be called every tick to do so;
  * val is a pointer to a static float
- * returns the newly calculated value
- * !! remember to multply 'delay' by (0.005f/Client()->RenderFrameTime()) !! */
-inline float smooth_set(float* val, float target, float delay, float snaprange = 0.00f)
+ * returns the newly calculated value */
+inline float smooth_set(float* val, float target, float delay, float multiplier, float snaprange = 0.00f)
 {
+	delay *= (0.005f/multiplier);
+
 	if(delay < 1.0f || *val == target)
 		return *val;
 

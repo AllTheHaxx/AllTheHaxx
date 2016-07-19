@@ -98,7 +98,7 @@ void CEmoticon::OnRender()
 				 EyeEmote(m_SelectedEyeEmote);
 			m_WasActive = false;
 		}
-		smooth_set(&s_Val, 0.0f, (0.005f/Client()->RenderFrameTime())*25.0f);
+		smooth_set(&s_Val, 0.0f, 25.0f, Client()->RenderFrameTime());
 		if(s_Val < 0.001f)
 		{
 			s_Val = 0.0f;
@@ -107,7 +107,7 @@ void CEmoticon::OnRender()
 	}
 	else
 	{
-		smooth_set(&s_Val, 1.0f, (0.005f/Client()->RenderFrameTime())*25.0f);
+		smooth_set(&s_Val, 1.0f, 25.0f, Client()->RenderFrameTime());
 		if(s_Val > 0.995f)
 			s_Val = 1.0f;
 	}
@@ -157,9 +157,9 @@ void CEmoticon::OnRender()
 	// draw the emoticons in a circle
 	static float s_PopVal = 0.0f;
 	if(s_Val > 0.5f)
-		smooth_set(&s_PopVal, 1.0f, (0.005f/Client()->RenderFrameTime())*35.0f);
+		smooth_set(&s_PopVal, 1.0f, 35.0f, Client()->RenderFrameTime());
 	else
-		smooth_set(&s_PopVal, 0.0f, (0.005f/Client()->RenderFrameTime())*35.0f);
+		smooth_set(&s_PopVal, 0.0f, 35.0f, Client()->RenderFrameTime());
 	if(s_PopVal < 0.01f)
 		s_PopVal = 0.0f;
 

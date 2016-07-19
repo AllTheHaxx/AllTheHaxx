@@ -858,9 +858,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		MovementSettings.HSplitTop(MainView.h/3+75.0f, &MovementSettings, &WeaponSettings);
 		static float s_AlphaAddition = 0.0f;
 		if(UI()->MouseInside(&MovementSettings))
-			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.10f, 60.0f*30.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.0f, 60.0f*30.0f, Client()->RenderFrameTime());
 		RenderTools()->DrawUIRect(&MovementSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
@@ -914,9 +914,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		WeaponSettings.HSplitTop(MainView.h/3+35.0f, &WeaponSettings, &ResetButton);
 		static float s_AlphaAddition = 0.0f;
 		if(UI()->MouseInside(&WeaponSettings))
-			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.10f, 60.0f*30.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.0f, 60.0f*30.0f, Client()->RenderFrameTime());
 		RenderTools()->DrawUIRect(&WeaponSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		WeaponSettings.VMargin(10.0f, &WeaponSettings);
 
@@ -931,9 +931,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		ResetButton.HSplitTop(10.0f, 0, &ResetButton);
 		static float s_AlphaAddition = 0.0f;
 		if(UI()->MouseInside(&ResetButton))
-			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.10f, 60.0f*30.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.0f, 60.0f*30.0f, Client()->RenderFrameTime());
 		RenderTools()->DrawUIRect(&ResetButton, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 10.0f);
 		ResetButton.HMargin(10.0f, &ResetButton);
 		ResetButton.VMargin(30.0f, &ResetButton);
@@ -963,9 +963,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		VotingSettings.HSplitTop(MainView.h/3-106.0f, &VotingSettings, &ChatSettings);
 		static float s_AlphaAddition = 0.0f;
 		if(UI()->MouseInside(&VotingSettings))
-			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.10f, 60.0f*30.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.0f, 60.0f*30.0f, Client()->RenderFrameTime());
 		RenderTools()->DrawUIRect(&VotingSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		VotingSettings.VMargin(10.0f, &VotingSettings);
 
@@ -981,9 +981,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		ChatSettings.HSplitTop(MainView.h/3-56.0f, &ChatSettings, &MiscSettings);
 		static float s_AlphaAddition = 0.0f;
 		if(UI()->MouseInside(&ChatSettings))
-			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.10f, 60.0f*30.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.0f, 60.0f*30.0f, Client()->RenderFrameTime());
 		RenderTools()->DrawUIRect(&ChatSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
@@ -998,9 +998,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		MiscSettings.HSplitTop(10.0f, 0, &MiscSettings);
 		static float s_AlphaAddition = 0.0f;
 		if(UI()->MouseInside(&MiscSettings))
-			smooth_set(&s_AlphaAddition, 0.10f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.10f, 60.0f*30.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&s_AlphaAddition, 0.0f, (60.0f*Client()->RenderFrameTime())*30.0f);
+			smooth_set(&s_AlphaAddition, 0.0f, 60.0f*30.0f, Client()->RenderFrameTime());
 		RenderTools()->DrawUIRect(&MiscSettings, vec4(1,1,1,0.25f+s_AlphaAddition), CUI::CORNER_ALL, 6.0f);
 		MiscSettings.VMargin(10.0f, &MiscSettings);
 
@@ -1611,9 +1611,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 		TabBar.HSplitTop(i == 6 || i == 9 ? 24 : 10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(UI()->MouseInside(&Button))
-			smooth_set(&FadeVals[i], 5.0f, 10.0f*(0.005f/Client()->RenderFrameTime()));
+			smooth_set(&FadeVals[i], 5.0f, 10.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&FadeVals[i], 0.0f, 10.0f*(0.005f/Client()->RenderFrameTime()));
+			smooth_set(&FadeVals[i], 0.0f, 10.0f, Client()->RenderFrameTime());
 		Button.w += FadeVals[i];
 		CPointerContainer Container(&aTabs[i]);
 		if(DoButton_MenuTab(&Container, aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R,
