@@ -17,7 +17,7 @@ void CCurlWrapper::PerformPOST_ex(void *pUser)
 
 	if(!pHandle)
 	{
-		dbg_msg("curlwrapper", "failed to perform POST '%s?%s': invalid curl_easy handle", pTask->m_aUrl, pTask->m_aFields);
+		dbg_msg("curlwrapper", "failed to perform POST '%s' with fields '%s': invalid curl_easy handle", pTask->m_aUrl, pTask->m_aFields);
 		delete pTask;
 		return;
 	}
@@ -28,7 +28,7 @@ void CCurlWrapper::PerformPOST_ex(void *pUser)
 
 	CURLcode res = curl_easy_perform(pHandle);
 	if(res != CURLE_OK)
-		dbg_msg("curlwrapper/POST", "'%s?%s' failed: %s", pTask->m_aUrl, pTask->m_aFields, curl_easy_strerror(res));
+		dbg_msg("curlwrapper/POST", "'%s' with fields '%s' failed: %s", pTask->m_aUrl, pTask->m_aFields, curl_easy_strerror(res));
 
 	curl_easy_cleanup(pHandle);
 	delete pTask;
