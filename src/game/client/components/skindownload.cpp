@@ -120,13 +120,19 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 	lock_wait(pSelf->m_Lock);
 	CSkinFetchTask *pTaskHandler = pSelf->FindTask(pTask);
 	lock_unlock(pSelf->m_Lock);
+	if(!pTaskHandler)
+	{
+		dbg_msg("SKINFETCHER/ERROR", "Something really bad happened. I have no clue how that comes. I'm sorry.");
+		delete pTask;
+		return;
+	}
 
 	CSkinDownload::CSkinFetchTask::ProgressCallback(pTask, pTaskHandler);
-	pTaskHandler->Finish();
 
 	if(pTask->State() == CFetchTask::STATE_ERROR)
 	{
-		pSelf->m_pStorage->RemoveBinaryFile(pDest); // delete the empty file dummy
+		if(g_Config.m_Debug)
+			pSelf->m_pStorage->RemoveBinaryFile(pDest); // delete the empty file dummy
 		dbg_msg("skinfetcher/debug", "download failed: '%s'", pDest);
 		pSelf->FetchNext(pTaskHandler);
 	}
@@ -136,6 +142,7 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(g_Config.m_Debug)
 			dbg_msg("skinfetcher/debug", "download finished: '%s'", pDest);
 		pSelf->GameClient()->m_pSkins->RefreshSkinList(false);
+		pTaskHandler->Finish();
 	}
 }
 
