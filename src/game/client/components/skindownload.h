@@ -10,27 +10,10 @@
 
 class CSkinDownload : public CComponent
 {
-	class IFetcher *m_pFetcher;
-	class IStorageTW *m_pStorage;
-	LOCK m_Lock;
-
-	enum
-	{
-		MAX_FETCHTASKS = 4,
-		MAX_URL_LEN = 512,
-	};
-
-	struct SkinDbUrl
-	{
-		int prior;
-		char aUrl[MAX_URL_LEN];
-		bool operator<(const SkinDbUrl& other) { return this->prior < other.prior; }
-	};
-	sorted_array<SkinDbUrl> m_SkinDbUrls;
-
+public:
 	class CSkinFetchTask
 	{
-		MACRO_ALLOC_HEAP();
+	MACRO_ALLOC_HEAP();
 
 		CFetchTask* m_pCurlTask;
 		std::string m_SkinName;
@@ -88,6 +71,25 @@ class CSkinDownload : public CComponent
 		static void ProgressCallback(CFetchTask *pTask, void *pUser);
 
 	};
+
+private:
+	class IFetcher *m_pFetcher;
+	class IStorageTW *m_pStorage;
+	LOCK m_Lock;
+
+	enum
+	{
+		MAX_FETCHTASKS = 4,
+		MAX_URL_LEN = 512,
+	};
+
+	struct SkinDbUrl
+	{
+		int prior;
+		char aUrl[MAX_URL_LEN];
+		bool operator<(const SkinDbUrl& other) { return this->prior < other.prior; }
+	};
+	sorted_array<SkinDbUrl> m_SkinDbUrls;
 
 	array<CSkinFetchTask *> m_apFetchTasks;
 	array<std::string> m_FailedTasks;

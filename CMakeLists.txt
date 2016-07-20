@@ -828,8 +828,8 @@ set(SOURCE_FILES
     src/game/generated/nethash.cpp
     src/game/generated/protocol.cpp
     src/game/generated/protocol.h
-    src/game/generated/server_data.cpp
-    src/game/generated/server_data.h
+    #src/game/generated/server_data.cpp
+    #src/game/generated/server_data.h
     src/game/server/entities/character.cpp
     src/game/server/entities/character.h
     src/game/server/entities/door.cpp
