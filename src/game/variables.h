@@ -167,7 +167,6 @@ MACRO_CONFIG_INT(FtPreloadFonts, ft_preload_fonts, 1, 0, 1, CFGFLAG_CLIENT|CFGFL
 MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to IRC on startup automatically")
 MACRO_CONFIG_STR(ClIRCNick, cl_irc_nick, 16, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC nick")
 //MACRO_CONFIG_STR(ClIRCRealname, cl_irc_realname, 32, "AllTheHaxx-User", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC realname")
-MACRO_CONFIG_STR(ClIRCUser, cl_irc_user, 10, "allthehax", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC user")
 MACRO_CONFIG_STR(ClIRCPass, cl_irc_password, 16, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC password")
 MACRO_CONFIG_STR(ClIRCQAuthName, cl_irc_q_auth_name, 32, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q name")
 MACRO_CONFIG_STR(ClIRCQAuthPass, cl_irc_q_auth_pass, 11, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IRC Quakenet Q password")

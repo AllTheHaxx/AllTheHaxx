@@ -2860,14 +2860,14 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 	static float s_OffsetNick = 0.0f;
 	static CButtonContainer s_EditboxIRCNick;
 	DoEditBox(&s_EditboxIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &s_OffsetNick, false);
-
+/*
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL
 	static float s_OffsetUser = 0.0f;
 	static CButtonContainer s_EditboxIRCUser;
 	DoEditBox(&s_EditboxIRCUser, &Button, g_Config.m_ClIRCUser, sizeof(g_Config.m_ClIRCUser), 12.0f, &s_OffsetUser, false);
-
+*/
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	DO_NEXT_LABEL

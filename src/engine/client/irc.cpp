@@ -125,13 +125,13 @@ CIRCCom* CIRC::GetCom(std::string name)
 		if ((*it)->GetType() == CIRCCom::TYPE_CHANNEL)
 		{
 			CComChan *pChan = static_cast<CComChan*>((*it));
-			if (str_comp_nocase(name.c_str(), pChan->m_Name) == 0)
+			if (str_comp_nocase(name.c_str(), pChan->m_aName) == 0)
 				return (*it);
 		}
 		else if ((*it)->GetType() == CIRCCom::TYPE_QUERY)
 		{
 			CComQuery *pQuery = static_cast<CComQuery*>((*it));
-			if (str_comp_nocase(name.c_str(), pQuery->m_Name) == 0)
+			if (str_comp_nocase(name.c_str(), pQuery->m_aName) == 0)
 				return (*it);
 		}
 
@@ -146,8 +146,8 @@ bool CIRC::CanCloseCom(CIRCCom *pCom)
 	if(!pCom)
 		return false;
 
-	if(GetNumComs() <= 2 || str_comp_nocase(((CComChan*)pCom)->m_Name, "#AllTheHaxx") == 0 ||
-			str_comp_nocase(((CComQuery*)pCom)->m_Name, "@status") == 0)
+	if(GetNumComs() <= 2 || str_comp_nocase(((CComChan*)pCom)->m_aName, "#AllTheHaxx") == 0 ||
+			str_comp_nocase(((CComQuery*)pCom)->m_aName, "@status") == 0)
 		return false;
 
 	return true;
@@ -197,7 +197,7 @@ void CIRC::StartConnection() // call this from a thread only!
 	// send request
 	SendRaw("CAP LS");
 	SendRaw("NICK %s", m_Nick.c_str());
-	SendRaw("USER %s 0 * :%s", g_Config.m_ClIRCUser, g_Config.m_PlayerName);
+	SendRaw("USER %s 0 * :%s", "allthehax", g_Config.m_PlayerName);
 
 	// status tab
 	OpenCom<CComQuery>("@Status");
@@ -672,12 +672,49 @@ void CIRC::StartConnection() // call this from a thread only!
 							reply.from = aMsgFrom;
 							reply.params = aMsgText;
 
-							if(aMsgChan == m_Nick) // TODO refractor: sending ourselves a NOTICE??
+							if(aMsgChan == m_Nick)
 							{
 								CIRCCom *pCom = GetCom(aMsgFrom);
 								std::replace(aMsgText.begin(), aMsgText.end(), '\1', ' ');
 								if(!pCom)
-									pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false);
+								{
+									// search through all users
+									static std::list<const char *> s_AvailableQueries;
+									static int64 LastUpdateTime = 0;
+									if(time_get() > LastUpdateTime + 3 * time_freq())
+									{
+										set_new_tick();
+										LastUpdateTime = time_get();
+										s_AvailableQueries.clear();
+										for(unsigned c = 0; c < (unsigned)GetNumComs(); c++)
+										{
+											if(GetCom(c)->GetType() == CIRCCom::TYPE_CHANNEL)
+											{
+												CComChan *pChanCom = ((CComChan *)GetCom(c));
+												for(std::list<std::string>::iterator it = pChanCom->m_Users.begin(); it != pChanCom->m_Users.end(); it++)
+												{
+													s_AvailableQueries.push_back(it->c_str());
+												}
+											}
+											else if(str_comp_nocase(((CComQuery *)GetCom(c))->m_aName, "@status") != 0)
+												s_AvailableQueries.push_back(((CComQuery *)GetCom(c))->m_aName);
+
+										}
+									}
+
+									for(std::list<const char *>::iterator it = s_AvailableQueries.begin(); it != s_AvailableQueries.end(); it++)
+									{
+										int offset = (*it)[0] == '@' || (*it)[0] == '+' ? 1 : 0;
+										if(str_comp(*it+offset, aMsgFrom.c_str()) == 0)
+										{
+											pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false); // only open a com for seeable users
+											break;
+										}
+									}
+
+									if(!pCom)
+										pCom = dynamic_cast<CIRCCom *>(GetCom(0)); // otherwise print it to the Status com
+								}
 
 								if(pCom)
 								{
@@ -734,9 +771,9 @@ void CIRC::StartConnection() // call this from a thread only!
 							if ((*it)->GetType() == CIRCCom::TYPE_QUERY)
 							{
 								CComQuery *pQuery = static_cast<CComQuery*>((*it));
-								if (str_comp_nocase(pQuery->m_Name, aMsgOldNick.c_str()) == 0)
+								if (str_comp_nocase(pQuery->m_aName, aMsgOldNick.c_str()) == 0)
 								{
-									str_copy(pQuery->m_Name, aMsgNewNick.c_str(), sizeof(pQuery->m_Name));
+									str_copy(pQuery->m_aName, aMsgNewNick.c_str(), sizeof(pQuery->m_aName));
 									pQuery->AddMessage( "*** '%s' changed their nick to '%s'", aMsgOldNick.c_str(), aMsgNewNick.c_str());
 								}
 							}
@@ -973,15 +1010,16 @@ template<class TCOM> // returns a new CComChan or CComQuery
 TCOM* CIRC::OpenCom(const char *pName, bool SwitchTo, int UnreadMessages)
 {
 	// XXX: hack to suppress opening of the useless tabs at startup
-	if(!g_Config.m_ClIRCGetStartupMsgs &&
-			time_get() < m_StartTime+time_freq()*2 && // give it a couple of seconds; should be enough
-			str_comp_nocase(pName, "#AllTheHaxx") != 0 &&
-			str_comp_nocase(pName, "@Status") != 0)
-		return 0;
+//	if(!g_Config.m_ClIRCGetStartupMsgs &&
+//			time_get() < m_StartTime+time_freq()*4 && // give it a couple of seconds; should be enough
+//			str_comp_nocase(pName, "#AllTheHaxx") != 0 &&
+//			str_comp_nocase(pName, "@Status") != 0)
+//		return 0;
 
 	TCOM *pNewCom = new(mem_alloc(sizeof(TCOM), 0)) TCOM();
 	pNewCom->m_NumUnreadMsg = UnreadMessages;
-	str_copy(pNewCom->m_Name, pName, sizeof(pNewCom->m_Name));
+	pNewCom->m_NumUnreadMsg = UnreadMessages;
+	str_copy(pNewCom->m_aName, pName, sizeof(pNewCom->m_aName));
 	m_IRCComs.push_back(pNewCom);
 
 	if(SwitchTo)
@@ -1032,9 +1070,9 @@ void CIRC::SetMode(const char *mode, const char *to)
 		return;
 
 	if (!to || to[0] == 0)
-		SendRaw("MODE %s %s %s", pChan->m_Name, mode, m_Nick.c_str());
+		SendRaw("MODE %s %s %s", pChan->m_aName, mode, m_Nick.c_str());
 	else
-		SendRaw("MODE %s %s %s", pChan->m_Name, mode, to);
+		SendRaw("MODE %s %s %s", pChan->m_aName, mode, to);
 }
 
 void CIRC::SetTopic(const char *topic)
@@ -1044,7 +1082,7 @@ void CIRC::SetTopic(const char *topic)
 		return;
 
 	CComChan *pChan = static_cast<CComChan*>(pCom);
-	SendRaw("TOPIC %s :%s", pChan->m_Name, topic);
+	SendRaw("TOPIC %s :%s", pChan->m_aName, topic);
 }
 
 void CIRC::Part(const char *pReason, CIRCCom *pCom)
@@ -1059,9 +1097,9 @@ void CIRC::Part(const char *pReason, CIRCCom *pCom)
 	{
 		CComChan *pChan = static_cast<CComChan*>(pCom);
 		if(pReason && pReason[0])
-			SendRaw("PART %s :%s", pChan->m_Name, pReason);
+			SendRaw("PART %s :%s", pChan->m_aName, pReason);
 		else
-			SendRaw("PART %s %", pChan->m_Name);
+			SendRaw("PART %s %", pChan->m_aName);
 
 		m_IRCComs.remove(pCom);
 		mem_free(pCom);
@@ -1071,7 +1109,7 @@ void CIRC::Part(const char *pReason, CIRCCom *pCom)
 	else if (pCom->GetType() == CIRCCom::TYPE_QUERY)
 	{
 		CComQuery *pQuery = static_cast<CComQuery*>(pCom);
-		if (str_comp_nocase(pQuery->m_Name, "@Status") == 0)
+		if (str_comp_nocase(pQuery->m_aName, "@Status") == 0)
 			return;
 
 		m_IRCComs.remove(pCom);
@@ -1121,18 +1159,18 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 		if ((*it)->GetType() == CIRCCom::TYPE_CHANNEL)
 		{
 			CComChan *pChan = static_cast<CComChan*>((*it));
-			str_copy(aDest, pChan->m_Name, sizeof(aDest));
+			str_copy(aDest, pChan->m_aName, sizeof(aDest));
 		}
 		else if ((*it)->GetType() == CIRCCom::TYPE_QUERY)
 		{
 			CComQuery *pQuery = static_cast<CComQuery*>((*it));
-			if (str_comp_nocase(pQuery->m_Name, "@Status") == 0)
+			if (str_comp_nocase(pQuery->m_aName, "@Status") == 0)
 			{
 				pQuery->AddMessage("*** You can't send messages to '@Status'!", GetNick(), msg);
 				return;
 			}
 
-			str_copy(aDest, pQuery->m_Name, sizeof(aDest));
+			str_copy(aDest, pQuery->m_aName, sizeof(aDest));
 		}
 		else
 			return;
@@ -1369,7 +1407,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 
 			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION %s",
 					GetActiveCom()->GetType() == CIRCCom::TYPE_QUERY ?
-							((CComQuery*)GetActiveCom())->m_Name : ((CComChan*)GetActiveCom())->m_Name,
+							((CComQuery*)GetActiveCom())->m_aName : ((CComChan*)GetActiveCom())->m_aName,
 					aMsg); // message text
 
 

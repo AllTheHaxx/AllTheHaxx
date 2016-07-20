@@ -25,7 +25,7 @@ public:
 
 	std::vector<std::string> m_Buffer;
 	int m_NumUnreadMsg;
-	char m_Name[25]; // channel/user
+	char m_aName[25]; // channel/user
 
 	unsigned int GetType() const { return m_Type; }
 
@@ -43,7 +43,7 @@ public:
 
 	std::list<std::string> m_Users;
 	std::string m_Topic;
-	const char *Channel() const { return m_Name; }
+	const char *Channel() const { return m_aName; }
 };
 
 
@@ -51,7 +51,7 @@ class CComQuery : public CIRCCom
 {
 public:
 	CComQuery() : CIRCCom(CIRCCom::TYPE_QUERY) { }
-	const char *User() const { return m_Name; }
+	const char *User() const { return m_aName; }
 };
 
 
