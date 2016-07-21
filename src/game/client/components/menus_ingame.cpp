@@ -186,13 +186,39 @@ void CMenus::RenderGame(CUIRect MainView)
 	static CButtonContainer s_DummyButton;
 	if(DummyConnecting)
 		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
-	else if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy")), 0, &Button))
+	else if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy")), 0, &Button, 0, CUI::CORNER_L))
 	{
 		if(!Client()->DummyConnected())
 			Client()->DummyConnect();
 		else
 			Client()->DummyDisconnect(0);
 	}
+
+	ButtonBar.VSplitLeft(30.0f, &Button, &ButtonBar);
+
+	const CSkins::CSkin *pDummySkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(g_Config.m_ClDummySkin));
+	CTeeRenderInfo OwnSkinInfo;
+	if(g_Config.m_ClDummyUseCustomColor)
+	{
+		OwnSkinInfo.m_Texture = pDummySkin->m_ColorTexture;
+		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClDummyColorBody);
+		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClDummyColorFeet);
+	}
+	else
+	{
+		OwnSkinInfo.m_Texture = pDummySkin->m_OrgTexture;
+		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	OwnSkinInfo.m_Size = 28.0f*UI()->Scale();
+
+	// skin view (fake the button)
+	float Seconds = 0.6f; //  0.6 seconds for fade
+	float Fade = ButtonFade(&s_DummyButton, Seconds, 0);
+	float FadeVal = Fade/Seconds;
+	vec4 FinalColor = mix(vec4(0.0f, 0.0f, 0.0f, 0.25f), vec4(1,1,1,0.5f), FadeVal);
+	RenderTools()->DrawUIRect(&Button, FinalColor, CUI::CORNER_R, 10.0f);
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x+Button.w/2, Button.y+Button.h/2+2.0f));
 }
 
 void CMenus::RenderGameExtra(CUIRect ButtonBar)
