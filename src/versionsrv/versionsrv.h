@@ -3,7 +3,7 @@
 #ifndef VERSIONSRV_VERSIONSRV_H
 #define VERSIONSRV_VERSIONSRV_H
 static const int VERSIONSRV_PORT = 8302;
-static const int NEWS_SIZE = 1380;
+static const int NEWS_SIZE = 4096;
 static const int DDNETLIST_SIZE = 1380;
 
 struct CMapVersion

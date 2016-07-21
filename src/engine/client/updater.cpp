@@ -59,23 +59,30 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	CALLSTACK_ADD();
 
 	CUpdater *pUpdate = (CUpdater *)pUser;
+	const bool ERROR = pTask->State() == CFetchTask::STATE_ERROR;
 	const char *b = 0;
 	for(const char *a = pTask->Dest(); *a; a++)
 		if(*a == '/')
 			b = a + 1;
 	b = b ? b : pTask->Dest();
 
-	if(pTask->State() == CFetchTask::STATE_ERROR)
+	const char * const pFailedNewsMsg = Localize(
+			"|<<< Failed to download news >>>|\n"
+			"News will automatically be refreshed on next client start if available\n"
+			"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+	if(ERROR)
 	{
-		if(str_comp(b, "ath-news.txt") != 0) // news are allowed to fail...
-			pUpdate->m_State = FAIL;
+		if(str_comp(b, "ath-news.txt") == 0) // news are allowed to fail...
+			str_copy(pUpdate->m_aNews, pFailedNewsMsg, sizeof(pUpdate->m_aNews));
 		else
-			str_copy(pUpdate->m_aNews, Localize("|<<< Failed to download news >>>|\nNews will automatically be loaded\non next client startif available"), sizeof(pUpdate->m_aNews));
-		str_format(pUpdate->m_aError, sizeof(pUpdate->m_aError), "'%s'", b);
-		pUpdate->m_pStorage->RemoveBinaryFile(b); // delete the empty file dummy
+		{
+			pUpdate->m_State = FAIL;
+			str_format(pUpdate->m_aError, sizeof(pUpdate->m_aError), "'%s'", b);
+		}
+		fs_remove(pTask->Dest()); // delete the empty file dummy
 	}
 
-	if(!str_comp(b, "ath-news.txt"))
+	if(str_comp(b, "ath-news.txt") == 0)
 	{
 		// dig out whether ATH news have been updated
 
@@ -83,34 +90,42 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		char aNewsBackupPath[512];
 
 		// read the old news
-		IOHANDLE newsFile = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
-		if(newsFile)
+		IOHANDLE f = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+		if(f)
 		{
-			io_read(newsFile, aOldNews, NEWS_SIZE);
-			io_close(newsFile);
-			newsFile = NULL;
+			io_read(f, aOldNews, NEWS_SIZE);
+			io_close(f);
 		}
 
 		// read the new news
-		newsFile = io_open("update/ath-news.txt", IOFLAG_READ);
-		if(newsFile)
+		if(!ERROR)
 		{
-			io_read(newsFile, pUpdate->m_aNews, NEWS_SIZE);
-			io_close(newsFile);
-			newsFile = NULL;
+			f = io_open("update/ath-news.txt", IOFLAG_READ);
+			if(f)
+			{
+				io_read(f, pUpdate->m_aNews, NEWS_SIZE);
+				io_close(f);
+			}
 		}
+		else
+			str_append(pUpdate->m_aNews, aOldNews, NEWS_SIZE);
 
 		// dig out whether news have been updated
-		if(str_comp(aOldNews, pUpdate->m_aNews))
+		if(str_comp(aOldNews, pUpdate->m_aNews + (ERROR ? str_length(pFailedNewsMsg) : 0)) != 0)
 		{
 			g_Config.m_UiPage = CMenus::PAGE_NEWS_ATH;
 
-			// backup the new news file
-			newsFile = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
-			io_write(newsFile, pUpdate->m_aNews, sizeof(pUpdate->m_aNews));
-			io_flush(newsFile);
-			io_close(newsFile);
-			newsFile = NULL;
+			// backup the new news file if we got one
+			if(!ERROR)
+			{
+				f = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+				if(f)
+				{
+					io_write(f, pUpdate->m_aNews, (unsigned int)str_length(pUpdate->m_aNews));
+					io_flush(f);
+					io_close(f);
+				}
+			}
 		}
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
