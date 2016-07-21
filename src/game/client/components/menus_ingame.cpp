@@ -664,19 +664,36 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Width-5.0f, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
-		static CButtonContainer s_IDButton[MAX_CLIENTS];
-		if(GameClient()->m_pIdentity->GetIdent(GameClient()->m_pIdentity->GetIdentID(m_pClient->m_aClients[Index].m_aName)))
-		if(DoButton_Menu(&s_IDButton[Index], "ID", 0, &Button, "Add as new identity"))
+		static CIdentity::CIdentEntry s_CmpIdents[MAX_CLIENTS];
+		CIdentity::CIdentEntry * const pIdent = &s_CmpIdents[Index];
+		if(str_comp(pIdent->m_aName, m_pClient->m_aClients[Index].m_aName) != 0) // update the cache entry if necessary
 		{
-			CIdentity::CIdentEntry Entry;
-			mem_zero(&Entry, sizeof(Entry));
-			str_format(Entry.m_aName, sizeof(Entry.m_aName), m_pClient->m_aClients[Index].m_aName);
-			str_format(Entry.m_aClan, sizeof(Entry.m_aClan), m_pClient->m_aClients[Index].m_aClan);
-			str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), m_pClient->m_aClients[Index].m_aSkinName);
-			Entry.m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
-			Entry.m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
-			Entry.m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
-			m_pClient->m_pIdentity->AddIdent(Entry);
+			str_copy(pIdent->m_aName, m_pClient->m_aClients[Index].m_aName, sizeof(CIdentity::CIdentEntry::m_aName));
+			str_copy(pIdent->m_aClan, m_pClient->m_aClients[Index].m_aClan, sizeof(CIdentity::CIdentEntry::m_aClan));
+			str_copy(pIdent->m_aSkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(CIdentity::CIdentEntry::m_aSkin));
+			pIdent->m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
+			pIdent->m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
+			pIdent->m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
+			pIdent->m_Country = m_pClient->m_aClients[Index].m_Country;
+		}
+
+		// only render the ID button if we don't have him already
+		if(GameClient()->m_pIdentity->GetIdentID(s_CmpIdents[Index]) == -1) // this costs so much D:
+		{
+			static CButtonContainer s_IDButton[MAX_CLIENTS];
+			if(DoButton_Menu(&s_IDButton[Index], "ID", 0, &Button, "Add as new identity"))
+			{
+				CIdentity::CIdentEntry Entry;
+				mem_zero(&Entry, sizeof(Entry));
+				str_format(Entry.m_aName, sizeof(Entry.m_aName), m_pClient->m_aClients[Index].m_aName);
+				str_format(Entry.m_aClan, sizeof(Entry.m_aClan), m_pClient->m_aClients[Index].m_aClan);
+				str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), m_pClient->m_aClients[Index].m_aSkinName);
+				Entry.m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
+				Entry.m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
+				Entry.m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
+				Entry.m_Country = m_pClient->m_aClients[Index].m_Country;
+				m_pClient->m_pIdentity->AddIdent(Entry);
+			}
 		}
 	}
 

@@ -93,14 +93,7 @@ void CMenus::RenderIdents(CUIRect MainView)
 		if(DoButton_Menu(&s_Button[i], "", 0, &Label, 0, CUI::CORNER_ALL, pIdent->m_UseCustomColor ? mix(SkinInfo.m_ColorBody, SkinInfo.m_ColorFeet, 0.4f)*0.7f :
 				vec4(pSkin->m_BloodColor.r, pSkin->m_BloodColor.g, pSkin->m_BloodColor.b, 0.7f)))
 		{
-			CIdentity::CIdentEntry *pIdent = m_pClient->m_pIdentity->GetIdent(i);
-			str_format(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), pIdent->m_aName);
-			str_format(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan), pIdent->m_aClan);
-			str_format(g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClPlayerSkin), pIdent->m_aSkin);
-			g_Config.m_ClPlayerUseCustomColor = pIdent->m_UseCustomColor;
-			g_Config.m_ClPlayerColorBody = pIdent->m_ColorBody;
-			g_Config.m_ClPlayerColorFeet = pIdent->m_ColorFeet;
-			m_pClient->SendInfo(false);
+			GameClient()->m_pIdentity->ApplyIdent(i, (bool)g_Config.m_ClDummy);
 		}
 
 		SkinInfo.m_Size = 50.0f*UI()->Scale();
@@ -108,12 +101,10 @@ void CMenus::RenderIdents(CUIRect MainView)
 
 		Label.HSplitBottom(15.0f, 0, &Label);
 		Label.y = Button.y;
-		// some h4XoRinG right here to get awesome R41NB0W!!
-		static float s_Hue = 1000.0f;
-		if(s_Hue > 1.0f) s_Hue = RgbToHsl(vec3(1.0f, 0.0f, 0.0f)).h;
-		s_Hue += Client()->RenderFrameTime()/255.0f;
-		vec3 rgb = HslToRgb(vec3(s_Hue, 1.0f, 0.5f));
-		RenderTools()->DrawUIRect(&Label, GameClient()->m_pIdentity->UsingIdent(i) ? vec4(rgb.r, rgb.g, rgb.b, 0.71f) :
+		// awesome rainbow
+		const float Hue = (sinf(Client()->LocalTime()/3.1415f)/2.0f)+0.5f;
+		vec3 rgb = HslToRgb(vec3(Hue, 1.0f, 0.5f));
+		RenderTools()->DrawUIRect(&Label, GameClient()->m_pIdentity->UsingIdent(i, (bool)g_Config.m_ClDummy) ? vec4(rgb.r, rgb.g, rgb.b, 0.71f) :
 				vec4(pSkin->m_BloodColor.r * 0.3f, pSkin->m_BloodColor.g * 0.3f, pSkin->m_BloodColor.b * 0.3f, 0.95f), CUI::CORNER_T, 4.0f);
 		UI()->DoLabelScaled(&Label, pIdent->m_aName, 10.0f, 0);
 		Button.VSplitLeft(15.0f, 0, &Button);

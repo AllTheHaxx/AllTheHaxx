@@ -174,8 +174,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x + OwnSkinInfo.m_Size, Button.y + Button.h *0.6f));
 		Button.HMargin(2.0f, &Button);
 		Button.HSplitBottom(16.0f, 0, &Button);
-		const bool IsMain = m_pClient->m_pIdentity->UsingIdent(i);
-		const bool IsDummy = m_pClient->m_pIdentity->UsingIdentDummy(i);
+		const bool IsMain = m_pClient->m_pIdentity->UsingIdent(i, false);
+		const bool IsDummy = m_pClient->m_pIdentity->UsingIdent(i, true);
 		vec3 rgb = IsMain && !IsDummy ? vec3(0.7f, 0.7f, 0.2f) : !IsMain && IsDummy ? vec3(0.2f, 0.7f, 0.7f) : IsMain && IsDummy ? vec3(0.2f, 0.7f, 0.2f) : vec3(1,1,1);
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 		if(str_length(pEntry->m_aTitle) > 0)
@@ -237,8 +237,8 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	RenderTools()->DrawUIRect(&Label, vec4(1,1,1,0.2f), CUI::CORNER_ALL, 25.0f);
 	Label.VSplitLeft(15.0f, 0, &Label);
 	Label.HSplitTop(3.0f, 0, &Label);
-	const bool IsMain = m_pClient->m_pIdentity->UsingIdent(Page);
-	const bool IsDummy = m_pClient->m_pIdentity->UsingIdentDummy(Page);
+	const bool IsMain = m_pClient->m_pIdentity->UsingIdent(Page, false);
+	const bool IsDummy = m_pClient->m_pIdentity->UsingIdent(Page, true);
 	str_format(aBuf, sizeof(aBuf), "%s", IsMain && !IsDummy ? Localize("Main Identity: ") : !IsMain && IsDummy ? Localize("Dummy's Identity: ") : IsMain && IsDummy ? Localize("Both's Identity: ") : "");
 	if(str_length(pEntry->m_aTitle) > 0)
 		str_append(aBuf, pEntry->m_aTitle, sizeof(aBuf));
@@ -302,13 +302,13 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	static CButtonContainer s_ApplyButtonMain[512], s_ApplyButtonDummy[512];
 	if(!IsMain)
 	{
-		if(DoButton_Menu(&s_ApplyButtonMain[Page], Localize("Main"), 0, &Button, "", CUI::CORNER_L|CUI::CORNER_R*IsDummy, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
-			GameClient()->m_pIdentity->ApplyIdent(Page);
+		if(DoButton_Menu(&s_ApplyButtonMain[Page], Localize("Main"), 0, &Button, "", CUI::CORNER_L|CUI::CORNER_R*IsDummy, vec4(0.7f, 0.7f, 0.2f, 1.0f)))
+			GameClient()->m_pIdentity->ApplyIdent(Page, false);
 	}
 	if(!IsDummy)
 	{
-		if(DoButton_Menu(&s_ApplyButtonDummy[Page], Localize("Dummy"), 0, &Label, "", CUI::CORNER_R|CUI::CORNER_L*IsMain, vec4(0.0f, 0.55f, 0.0f, 1.0f)))
-			GameClient()->m_pIdentity->ApplyIdentDummy(Page);
+		if(DoButton_Menu(&s_ApplyButtonDummy[Page], Localize("Dummy"), 0, &Label, "", CUI::CORNER_R|CUI::CORNER_L*IsMain, vec4(0.2f, 0.7f, 0.7f, 1.0f)))
+			GameClient()->m_pIdentity->ApplyIdent(Page, true);
 	}
 
 	// country flag selector
