@@ -19,4 +19,4 @@ dependencies:
 test:
   override:
     - |
-        ../bam/bam -j 4 client_release
+        ~/bam/bam client_release
