@@ -21,7 +21,7 @@ static const char GAME_ATH_VERSION[10] = ATH_VERSION;
 #define GAME_ATH_VERSION_NUMERIC 2211
 
 // do not modify these, they belong to ddnet
-static const char GAME_RELEASE_VERSION[8] = "10.2";
+static const char GAME_RELEASE_VERSION[8] = "10.2.1";
 #define CLIENT_VERSIONNR 1002
 
 #endif
