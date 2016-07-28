@@ -12,6 +12,8 @@ dependencies:
         fi
 
   cache_directories:
+    - "./objs/"
+    - "./.bam/"
     - "~/bam/"
     - "./other/luajit/LuaJIT-2.0.2/"
 
