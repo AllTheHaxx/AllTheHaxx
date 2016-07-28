@@ -150,7 +150,11 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 {
 	int DefaultSkin = GameClient()->m_pSkins->Find("default");
 
-	if(!g_Config.m_ClSkinFetcher)
+	bool Windoof = false; // XXX: HACK! BETTER GO FIX IT!
+#if defined(CONF_FAMILY_WINDOWS)
+	Windoof = true;
+#endif
+	if(!g_Config.m_ClSkinFetcher || Windoof)
 	{
 		*pDestID = DefaultSkin;
 		return;
