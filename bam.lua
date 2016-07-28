@@ -1,4 +1,4 @@
-CheckVersion("0.4")
+CheckVersion("0.5")
 
 target_family = os.getenv("TARGET_FAMILY")
 if target_family then
@@ -226,11 +226,11 @@ function build(settings)
 	if config.websockets.value then
 		settings.cc.defines:Add("WEBSOCKETS")
 	end
-	
+
 	if config.spoofing.value then
 		settings.cc.defines:Add("CONF_SPOOFING")
 	end
-	
+
 	if config.debugger.value then
 		settings.cc.defines:Add("FEATURE_DEBUGGER")
 	end
@@ -238,9 +238,9 @@ function build(settings)
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
-		
+
 		--vs 2015
-		settings.cc.flags:Add("/D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS") 
+		settings.cc.flags:Add("/D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS")
 	else
 		settings.cc.flags:Add("-Wall")
 		settings.cc.flags:Add("-Wno-deprecated")
@@ -307,7 +307,7 @@ function build(settings)
 		zlib = Compile(settings, Collect("src/engine/external/zlib/*.c"))
 		settings.cc.includes:Add("src/engine/external/zlib")
 	end
-	
+
 	-- luabridge
 	--settings.cc.includes:Add("src/engine/external/luabridge")
 
@@ -322,7 +322,7 @@ function build(settings)
 	sqlite3 = Compile(settings, Collect("src/engine/external/sqlite3/*.c"))
 	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
 	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
-	
+
 	-- apply luajit settings
 	config.luajit:Apply(settings)
 
@@ -359,13 +359,13 @@ function build(settings)
 		client_settings.link.libs:Add("winmm")
 		client_settings.link.libs:Add("libopusfile-0")
 		client_settings.link.libs:Add("curl")
-		
+
 		if config.compiler.driver == "cl" then
 			client_settings.link.libs:Add("libeay32")
 		else
 			client_settings.link.libs:Add("eay32")
 		end
-		
+
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")
