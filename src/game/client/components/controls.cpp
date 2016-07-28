@@ -227,7 +227,7 @@ int CControls::SnapInput(int *pData)
 	bool Send = false;
 
 	// update player state
-	if(m_pClient->m_pChat->IsActive())
+	if(g_Config.m_ClChatbubble && m_pClient->m_pChat->IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
 	else if(m_pClient->m_pMenus->IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;

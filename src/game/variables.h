@@ -161,6 +161,7 @@ MACRO_CONFIG_INT(ClResetServerCfgOnDc, cl_reset_server_cfg_on_disconnect, 1, 0, 
 MACRO_CONFIG_INT(ClSendHookline, cl_send_hookline, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send the hookline (forced-off on stitch-* gamemodes)")
 MACRO_CONFIG_STR(ClSkinDbFile, cl_skin_db_file, 128, "data/skins/urls.cfg", CFGFLAG_CLIENT|CFGFLAG_SAVE, "File which holds the skin database urls")
 MACRO_CONFIG_INT(ClSkinFetcher, cl_skin_fetcher, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Fetch skins from the public skin databases (automatically as they are needed)  → see cl_skin_db_file")
+MACRO_CONFIG_INT(ClChatbubble, cl_chatbubble, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Notifiy others that you are typing")
 MACRO_CONFIG_INT(FtPreloadFonts, ft_preload_fonts, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Load all fonts in 'data/fonts/' into memory on client start (enables font-preview!)")
 
 // irc

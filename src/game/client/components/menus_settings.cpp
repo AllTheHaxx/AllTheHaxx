@@ -2609,7 +2609,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
 	static CButtonContainer s_ButtonSmartZoom;
-	if(DoButton_CheckBox(&s_ButtonSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button, Localize("Highly recommended!")))
+	if(DoButton_CheckBox(&s_ButtonSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button, Localize("Smart zoom on race gametypes")))
 		g_Config.m_ClSmartZoom ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
@@ -2617,6 +2617,12 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	static CButtonContainer s_ButtonConsoleModeEmotes;
 	if(DoButton_CheckBox(&s_ButtonConsoleModeEmotes, Localize("Console Mode Indicator"), g_Config.m_ClConsoleModeEmotes, &Button, Localize("Send Zzz emotes when in console mode")))
 		g_Config.m_ClConsoleModeEmotes ^= 1;
+
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_ButtonChatbubble;
+	if(DoButton_CheckBox(&s_ButtonChatbubble, Localize("Chatbubble"), g_Config.m_ClChatbubble, &Button, Localize("Send the chatbubble when you are typing")))
+		g_Config.m_ClChatbubble ^= 1;
 
 	{
 		CUIRect ClearCacheButton;
@@ -2628,6 +2634,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 			g_Config.m_ClSkinFetcher ^= 1;
 
 		static CButtonContainer s_ClearCacheButton;
+		ClearCacheButton.VSplitLeft(5.0f, 0, &ClearCacheButton);
 		if(DoButton_Menu(&s_ClearCacheButton, Localize("Clear downloaded skins cache"), 0, &ClearCacheButton))
 		{
 			Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "downloadedskins", [](const char *name, int is_dir, int dir_type, void *user) -> int // TODO: put this into a method... Lambda cuz I'm lazy...
