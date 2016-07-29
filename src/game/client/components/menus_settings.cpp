@@ -2772,24 +2772,24 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 			g_Config.m_FtPreloadFonts ^= 1;
 	}
 
-	const int SELECTED = m_pClient->m_pFontMgr->GetSelectedFontIndex();
+	const int OldSelected = m_pClient->m_pFontMgr->GetSelectedFontIndex();
 	static int pIDItem[128] = {0};
 	static CButtonContainer s_Listbox;
 	static float s_ScrollValue = 0.0f;
-	UiDoListboxStart(&s_Listbox, &MainView, 30.0f, Localize("Font Selector"), 0, NUM_FONTS, 1, SELECTED, s_ScrollValue, CUI::CORNER_ALL);
+	UiDoListboxStart(&s_Listbox, &MainView, 30.0f, Localize("Font Selector"), 0, NUM_FONTS, 1, OldSelected, s_ScrollValue, CUI::CORNER_ALL);
 	for(int i = 0; i < NUM_FONTS; i++)
 	{
-		const char *FilePath = m_pClient->m_pFontMgr->GetFontPath(i);
-		if(!FilePath || FilePath[0] == '\0') continue;
+		const char *pFilePath = m_pClient->m_pFontMgr->GetFontPath(i);
+		if(!pFilePath || pFilePath[0] == '\0') continue;
 
 		CPointerContainer Container(&pIDItem[i]);
 		CListboxItem Item = UiDoListboxNextItem(&Container, 0);
 
 		if(Item.m_Visible)
 		{
-			if((i%2) && i != SELECTED)
+			if((i%2) && i != OldSelected)
 				RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0,0,0,0.35f), CUI::CORNER_ALL, 4.0f);
-			//UI()->DoLabelScaled(&Item.m_Rect, FilePath, Item.m_Rect.h-10.0f, -1, -1, 0, m_pClient->m_pFontMgr->GetFont(i));
+			//UI()->DoLabelScaled(&Item.m_Rect, pFilePath, Item.m_Rect.h-10.0f, -1, -1, 0, m_pClient->m_pFontMgr->GetFont(i));
 			CTextCursor Cursor;
 			TextRender()->SetCursor(&Cursor, Item.m_Rect.x, Item.m_Rect.y, 17.0f, TEXTFLAG_RENDER);
 			Cursor.m_pFont = m_pClient->m_pFontMgr->GetFont(i);
@@ -2797,13 +2797,16 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 				TextRender()->TextColor(1,1,0.85f, 1);
 			else
 				TextRender()->TextColor(1,1,1,1);
-			TextRender()->TextEx(&Cursor, FilePath, -1);
+			TextRender()->TextEx(&Cursor, pFilePath, -1);
 		}
 	}
 
 	int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
-	if(NewSelected != SELECTED)
+	if(NewSelected != OldSelected)
+	{
 		m_pClient->m_pFontMgr->ActivateFont(NewSelected);
+		str_copy(g_Config.m_FtFont, m_pClient->m_pFontMgr->GetFontPath(NewSelected), sizeof(g_Config.m_FtFont));
+	}
 
 }
 
