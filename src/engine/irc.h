@@ -30,6 +30,7 @@ public:
 	unsigned int GetType() const { return m_Type; }
 
 	void AddMessage(const char *fmt, ...);
+	void AddMessage_nofmt(const char *msg);
 
 protected:
 	unsigned int m_Type;
