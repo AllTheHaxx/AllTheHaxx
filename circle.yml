@@ -10,10 +10,14 @@ dependencies:
           git clone https://github.com/matricks/bam ~/bam/
           cd ~/bam; ./make_unix.sh
         fi
+        
+        cd ./other/luajit/LuaJIT-2.0.2
+        make -j$(nproc)
+        cp -l src/libluajit.a ../unix/libluajit.a
 
   cache_directories:
     - "~/bam/"
-    - "./other/luajit/LuaJIT-2.0.2/"
+    - "./other/luajit/"
 
 ## Customize test commands
 test:
