@@ -572,12 +572,8 @@ void CIRC::StartConnection() // call this from a thread only!
 								SendVersion(aMsgFrom.c_str());
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "time") == 0)
 							{
-								char aTime[32];
-								time_t rawtime;
-								struct tm *timeinfo;
-								time(&rawtime);
-								timeinfo = localtime(&rawtime);
-								str_format(aTime, sizeof(aTime), "%02d:%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+								char aTime[64];
+								str_timestamp(aTime, sizeof(aTime));
 								SendRaw("NOTICE %s :TIME %s", aMsgFrom.c_str(), aTime);
 							}
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "playerinfo") == 0)
@@ -587,6 +583,8 @@ void CIRC::StartConnection() // call this from a thread only!
 								while(CmdListParams.size())
 								{
 									str_append(aBuf, " '", sizeof(aBuf));
+									str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
+									str_append(aBuf, "=", sizeof(aBuf));
 									if(str_comp_nocase("name", CmdListParams[0].c_str()) == 0)
 										str_append(aBuf, g_Config.m_PlayerName, sizeof(aBuf));
 									else if(str_comp_nocase("clan", CmdListParams[0].c_str()) == 0)
@@ -601,7 +599,7 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									CmdListParams.remove_index(0);
 								}
-								SendRaw(aBuf);
+								SendRaw_nonfmt(aBuf);
 							}
 						}
 						else // normal message
@@ -631,16 +629,19 @@ void CIRC::StartConnection() // call this from a thread only!
 									if(pCom != GetActiveCom())
 										pCom->m_NumUnreadMsg++;
 
-									if(MsgType == MSG_TYPE_ACTION)
+									if(MsgType == MSG_TYPE_ACTION) // the "/me" thingy
 									{
-										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str(),
-												aMsgText.substr(8, -1).c_str());
+										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str());
+										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
 										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
 									}
 									else
-										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str(),
-												aMsgText.c_str());
-									pCom->AddMessage(aBuff);
+									{
+										str_format(aBuff, sizeof(aBuff), "<%s> ", aMsgFrom.c_str());
+										str_append(aBuff, aMsgText.c_str(), sizeof(aBuff));
+									}
+
+									pCom->AddMessage_nofmt(aBuff);
 								}
 
 								if(pCom == GetActiveCom())
@@ -724,7 +725,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									if(MsgType == MSG_TYPE_ACTION)
 										pCom->AddMessage(aMsgText.substr(8, -1).c_str());
 									else
-										pCom->AddMessage(aMsgText.c_str());
+										pCom->AddMessage_nofmt(aMsgText.c_str());
 								}
 							}
 							else
@@ -736,10 +737,16 @@ void CIRC::StartConnection() // call this from a thread only!
 										pCom->m_NumUnreadMsg++;
 
 									if(MsgType == MSG_TYPE_ACTION)
-										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str(), aMsgText.substr(8, -1).c_str());
+									{
+										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str());
+										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
+									}
 									else
-										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str(), aMsgText.c_str());
-									pCom->AddMessage(aBuff);
+									{
+										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str());
+										str_append(aBuff, aMsgText.c_str(), sizeof(aBuff));
+									}
+									pCom->AddMessage_nofmt(aBuff);
 								}
 
 								if(pCom == GetActiveCom())
@@ -1028,6 +1035,11 @@ TCOM* CIRC::OpenCom(const char *pName, bool SwitchTo, int UnreadMessages)
 	return pNewCom;
 }
 
+void CIRCCom::AddMessage_nofmt(const char *msg)
+{
+	AddMessage("%s", msg);
+}
+
 void CIRCCom::AddMessage(const char *fmt, ...)
 {
 	if(!fmt || fmt[0] == 0)
@@ -1193,8 +1205,13 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 			str_format(aBuff, sizeof(aBuff),"* %s %s", GetNick(), msg); // XXX: This seems to be useless...? (broken)
 		else
 			str_format(aBuff, sizeof(aBuff),"<%s> %s", GetNick(), msg);
-		pCom->AddMessage(aBuff);
+		pCom->AddMessage_nofmt(aBuff);
 	}
+}
+
+void CIRC::SendRaw_nonfmt(const char *msg)
+{
+	SendRaw("%s", msg);
 }
 
 void CIRC::SendRaw(const char *fmt, ...)
@@ -1230,7 +1247,7 @@ void CIRC::SetAway(bool state, const char *msg)
 	if (state)
 		SendRaw("AWAY :%s", msg);
 	else
-		SendRaw("AWAY");
+		SendRaw_nonfmt("AWAY");
 }
 
 int CIRC::GetMsgType(const char *msg)
@@ -1368,7 +1385,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
 				CmdListParams.remove_index(0);
 			}
-			SendRaw(aBuf);
+			SendRaw_nonfmt(aBuf);
 		}
 	}
 	else if (str_comp_nocase(cmd, "ctcp") == 0)
@@ -1376,8 +1393,9 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 		char aBuf[1024] = {0};
 		if (CmdListParams.size() >= 2)
 		{
-			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1%s",
-					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1",
+					CmdListParams[0].c_str()); // to...
+			str_append(aBuf, CmdListParams[1].c_str(), sizeof(aBuf)); // ...what
 			CmdListParams.remove_index(0); // pop twice
 			CmdListParams.remove_index(0); //   -> the first two arguments
 			while(CmdListParams.size() > 0) // add all other arguments
@@ -1387,7 +1405,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				CmdListParams.remove_index(0);
 			}
 			aBuf[str_length(aBuf)] = '\1';
-			SendRaw(aBuf);
+			SendRaw_nonfmt(aBuf);
 		}
 	}
 	else if(str_comp_nocase(cmd, "me") == 0)
@@ -1405,14 +1423,14 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				CmdListParams.remove_index(0);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION %s",
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION ",
 					GetActiveCom()->GetType() == CIRCCom::TYPE_QUERY ?
-							((CComQuery*)GetActiveCom())->m_aName : ((CComChan*)GetActiveCom())->m_aName,
-					aMsg); // message text
-
+							((CComQuery*)GetActiveCom())->m_aName : ((CComChan*)GetActiveCom())->m_aName
+					); // message text ...
+			str_append(aBuf, aMsg, sizeof(aBuf));
 
 			aBuf[str_length(aBuf)] = '\1';
-			SendRaw(aBuf);
+			SendRaw_nonfmt(aBuf);
 			GetActiveCom()->AddMessage("* %s %s", m_Nick.c_str(), aMsg);
 		}
 	}

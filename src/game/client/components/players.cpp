@@ -544,7 +544,7 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if((g_Config.m_Debug && g_Config.m_DbgDirections) || ((pPlayerInfo->m_Local && (GameClient()->m_pControls->m_InputData[g_Config.m_ClDummy].m_PlayerFlags&PLAYERFLAG_AIM)) || (Player.m_PlayerFlags&PLAYERFLAG_AIM)) && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))
+		if((g_Config.m_Debug && g_Config.m_DbgDirections) || ((pPlayerInfo->m_Local && (GameClient()->m_pControls->m_InputData[g_Config.m_ClDummy].m_PlayerFlags&PLAYERFLAG_AIM)) || ((Player.m_PlayerFlags&PLAYERFLAG_AIM) && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))))
 		{
 			float Alpha = 1.0f;
 			if (OtherTeam)

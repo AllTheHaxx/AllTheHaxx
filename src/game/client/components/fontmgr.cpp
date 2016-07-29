@@ -16,14 +16,17 @@ void CFontMgr::Init()
 			InitFont(&m_FontFiles[i]);
 
 	// load default font
-	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
-	if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
-		str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
-		pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
+	char aFontFile[256];
+	str_format(aFontFile, sizeof(aFontFile), "%s", g_Config.m_FtFont);
+	if(str_comp(g_Config.m_FtFont, "fonts/DejaVuSansCJKName.ttf") == 0)
+		if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+			str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
+				str_format(aFontFile, sizeof(aFontFile), "fonts/DejavuWenQuanYiMicroHei.ttf");
+
 
 	for(int i = 0; i < m_FontFiles.size(); i++)
 	{
-		if(str_comp_nocase(m_FontFiles[i].m_Path.c_str(), pFontFile) == 0)
+		if(str_comp(m_FontFiles[i].m_Path.c_str(), aFontFile) == 0)
 			ActivateFont(i);
 	}
 }

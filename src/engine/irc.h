@@ -30,6 +30,7 @@ public:
 	unsigned int GetType() const { return m_Type; }
 
 	void AddMessage(const char *fmt, ...);
+	void AddMessage_nofmt(const char *msg);
 
 protected:
 	unsigned int m_Type;
@@ -113,6 +114,7 @@ public:
 
     virtual void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL) = 0;
     virtual void SendRaw(const char *fmt, ...) = 0;
+    virtual void SendRaw_nonfmt(const char *msg) = 0;
     virtual void SendGetServer(const char *to) = 0;
     virtual void SendVersion(const char *to) = 0;
 
