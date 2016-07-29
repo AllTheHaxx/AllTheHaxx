@@ -599,7 +599,7 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									CmdListParams.remove_index(0);
 								}
-								SendRaw(aBuf);
+								SendRaw_nonfmt(aBuf);
 							}
 						}
 						else // normal message
@@ -1209,6 +1209,11 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 	}
 }
 
+void CIRC::SendRaw_nonfmt(const char *msg)
+{
+	SendRaw("%s", msg);
+}
+
 void CIRC::SendRaw(const char *fmt, ...)
 {
 	if (!fmt || fmt[0] == 0)
@@ -1242,7 +1247,7 @@ void CIRC::SetAway(bool state, const char *msg)
 	if (state)
 		SendRaw("AWAY :%s", msg);
 	else
-		SendRaw("AWAY");
+		SendRaw_nonfmt("AWAY");
 }
 
 int CIRC::GetMsgType(const char *msg)
@@ -1380,7 +1385,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
 				CmdListParams.remove_index(0);
 			}
-			SendRaw(aBuf);
+			SendRaw_nonfmt(aBuf);
 		}
 	}
 	else if (str_comp_nocase(cmd, "ctcp") == 0)
@@ -1388,8 +1393,9 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 		char aBuf[1024] = {0};
 		if (CmdListParams.size() >= 2)
 		{
-			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1%s",
-					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1",
+					CmdListParams[0].c_str()); // to...
+			str_append(aBuf, CmdListParams[1].c_str(), sizeof(aBuf)); // ...what
 			CmdListParams.remove_index(0); // pop twice
 			CmdListParams.remove_index(0); //   -> the first two arguments
 			while(CmdListParams.size() > 0) // add all other arguments
@@ -1399,7 +1405,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				CmdListParams.remove_index(0);
 			}
 			aBuf[str_length(aBuf)] = '\1';
-			SendRaw(aBuf);
+			SendRaw_nonfmt(aBuf);
 		}
 	}
 	else if(str_comp_nocase(cmd, "me") == 0)
@@ -1417,14 +1423,14 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				CmdListParams.remove_index(0);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION %s",
+			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION ",
 					GetActiveCom()->GetType() == CIRCCom::TYPE_QUERY ?
-							((CComQuery*)GetActiveCom())->m_aName : ((CComChan*)GetActiveCom())->m_aName,
-					aMsg); // message text
-
+							((CComQuery*)GetActiveCom())->m_aName : ((CComChan*)GetActiveCom())->m_aName
+					); // message text ...
+			str_append(aBuf, aMsg, sizeof(aBuf));
 
 			aBuf[str_length(aBuf)] = '\1';
-			SendRaw(aBuf);
+			SendRaw_nonfmt(aBuf);
 			GetActiveCom()->AddMessage("* %s %s", m_Nick.c_str(), aMsg);
 		}
 	}

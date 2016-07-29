@@ -55,6 +55,7 @@ public:
 
 	void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
 	void SendRaw(const char *fmt, ...);
+	void SendRaw_nonfmt(const char *msg);
 	void SendGetServer(const char *to);
 	void SendVersion(const char *to);
 

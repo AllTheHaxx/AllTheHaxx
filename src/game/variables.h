@@ -139,6 +139,7 @@ MACRO_CONFIG_INT(BrAutoCache, br_auto_cache, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAV
 MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show DDNet tab in serverbrowser")
 MACRO_CONFIG_INT(BrAllowPureMod, br_allow_pure_mod, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow joining modded pure server")
 MACRO_CONFIG_INT(BrLazySorting, br_lazy_sorting, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Only sort the serverlist once when reloading has finished")
+MACRO_CONFIG_STR(ClLeaveMsg, cl_leave_msg, 25, "> AllTheHaxx < ", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Game leave message")
 //
 MACRO_CONFIG_STR(ClSpoofSrvIP, cl_spoofsrv_ip, 32, "127.0.0.1", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IP of the spoofing server")
 MACRO_CONFIG_INT(ClSpoofSrvPort, cl_spoofsrv_port, 0, 0, 65535, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Port of the spoofing server")
