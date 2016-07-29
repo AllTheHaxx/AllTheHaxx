@@ -114,6 +114,7 @@ public:
 
     virtual void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL) = 0;
     virtual void SendRaw(const char *fmt, ...) = 0;
+    virtual void SendRaw_nonfmt(const char *msg) = 0;
     virtual void SendGetServer(const char *to) = 0;
     virtual void SendVersion(const char *to) = 0;
 
