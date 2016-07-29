@@ -1,7 +1,6 @@
 #AllTheHaxx ~ [0x539]
 CI Status: [![Circle CI](https://circleci.com/gh/AllTheHaxx/AllTheHaxx.svg?style=svg)](https://circleci.com/gh/AllTheHaxx/AllTheHaxx)
 ###AllTheHaxx. Guaranteed to be 420% verkeckt!
-[![ATH](https://ga-beacon.appspot.com/UA-81641724-2/master?pixel&autoReferer)](https://allthehaxx.github.com)
 ================================
 Our own flavor of the popular [DDNet](https://github.com/ddnet/ddnet) client modification for the 2d shooter [teeworlds](http://teeworlds.com). Take a look at our [homepage](https://AllTheHaxx.github.io/) for more information.
 
@@ -30,3 +29,4 @@ Note that the bundled MySQL libraries might not work properly on your system. If
 
 --------------------------
 
+[![ATH](https://ga-beacon.appspot.com/UA-81641724-2/AllTheHaxx/repo?pixel&autoReferer)](https://allthehaxx.github.com)
