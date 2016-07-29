@@ -29,3 +29,4 @@ Note that the bundled MySQL libraries might not work properly on your system. If
 
 --------------------------
 
+[![ATH](https://ga-beacon.appspot.com/UA-81641724-2/AllTheHaxx/repo?pixel&autoReferer)](https://allthehaxx.github.com)
