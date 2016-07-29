@@ -8,6 +8,8 @@ rsa
 src/game/generated
 update/
 
+/other/icons/teeworlds_gcc.coff
+
 crapnet*
 config_store*
 config_retrieve*
