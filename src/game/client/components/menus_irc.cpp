@@ -3,6 +3,7 @@
 #include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
+#include <engine/textrender.h>
 
 #include "irc.h"
 #include "menus.h"
@@ -378,7 +379,13 @@ void CMenus::RenderIRC(CUIRect MainView)
 				if(Item.m_Visible)
 				{
 					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;
+					if(str_find_nocase(pChan->m_Buffer[i].c_str(), m_pClient->IRC()->GetNick()))
+					{
+						vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue, g_Config.m_ClMessageHighlightSat, g_Config.m_ClMessageHighlightLht));
+						TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					}
 					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 10.0f, -1);
+					TextRender()->TextColor(1,1,1,1);
 				}
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
