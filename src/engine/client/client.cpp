@@ -3442,6 +3442,7 @@ void CClient::Con_SaveConfig(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	((CClient *)pUserData)->Kernel()->RequestInterface<IConfig>()->Save();
+	((CClient *)pUserData)->Lua()->SaveAutoloads();
 }
 
 void CClient::AutoScreenshot_Start()
