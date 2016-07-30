@@ -3324,14 +3324,14 @@ void CClient::Run()
 		thread_destroy(m_pInputThread);
 #endif
 	}
-
+	
 	if(m_Updater.GetCurrentState() == IUpdater::CLEAN)
 	{
 		// do cleanups - much hack.
 #if defined(CONF_FAMILY_UNIX)
 		system("rm -rf update");
 #elif defined(CONF_FAMILY_WINDOWS)
-		system("rd update /S /Q");
+		system("if exist update rd update /S /Q");
 #endif
 	}
 }
