@@ -32,8 +32,9 @@
 	#include <arpa/inet.h>
 
 	#include <dirent.h>
+#include <engine/external/openssl/sha.h>
 
-	#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOSX)
 		// some lock and pthread functions are already defined in headers
 		// included from Carbon.h
 		// this prevents having duplicate definitions of those
@@ -2805,6 +2806,21 @@ int secure_rand()
 	unsigned int i;
 	secure_random_fill(&i, sizeof(i));
 	return (int)(i%RAND_MAX);
+}
+
+int simpleSHA256(void* input, unsigned long length, unsigned char* md)
+{
+	SHA256_CTX context;
+	if(!SHA256_Init(&context))
+		return 1;
+
+	if(!SHA256_Update(&context, (unsigned char*)input, length))
+		return 2;
+
+	if(!SHA256_Final(md, &context))
+		return 3;
+
+	return 0;
 }
 
 void open_default_browser(const char *url)

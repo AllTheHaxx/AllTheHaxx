@@ -24,7 +24,7 @@
 
 
 /* mark for precompiled code (`<esc>Lua') */
-#define	LUA_SIGNATURE	"\033Lua"
+#define	LUA_SIGNATURE	"\033LJ"
 
 /* option for multiple returns in `lua_pcall' and `lua_call' */
 #define LUA_MULTRET	(-1)

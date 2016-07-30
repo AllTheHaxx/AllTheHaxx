@@ -5,6 +5,7 @@
 #include <base/tl/array.h>
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
+#include <engine/external/openssl/sha.h>
 #include "luafile.h"
 
 #define LUA_FIRE_EVENT(EVENTNAME, ...) \
@@ -30,6 +31,13 @@ class CLuaFile;
 
 using namespace luabridge;
 
+struct LuaBinaryCert
+{
+	char aIssuer[64];
+	char aDate[64];
+	unsigned char aHashMD[SHA256_DIGEST_LENGTH];
+};
+
 class CLua
 {
 	array<CLuaFile*> m_pLuaFiles;
@@ -42,7 +50,6 @@ class CLua
 		CLuaFile* culprit;
 		int count;
 	};
-
 	array<LuaErrorCounter> m_ErrorCounter;
 
 public:

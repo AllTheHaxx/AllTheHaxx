@@ -139,6 +139,7 @@ void CLuaFile::OpenLua()
 
 	lua_atpanic(m_pLuaState, CLua::Panic);
 	lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
+	//lua_register(m_pLuaState, "print", CLuaFile::LuaPrintOverride);
 
 	//luaL_openlibs(m_pLuaState);  // we don't need certain libs -> open them all manually
 
@@ -741,13 +742,48 @@ bool CLuaFile::LoadFile(const char *pFilename)
 {
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") &&
+			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") &&
 			str_comp_nocase(&pFilename[str_length(pFilename)]-7, ".config")) || !m_pLuaState)
 		return false;
 
-	int Status = luaL_loadfile(m_pLuaState, pFilename);
-	if (Status)
+	// some security steps right here...
+	if(!CheckCertificate(pFilename))
+		return false;
+
+	// make sure that source code scripts are what they're supposed to be
+	bool Compiled = str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") == 0;
+	IOHANDLE f = io_open(pFilename, IOFLAG_READ);
+	if(!f)
 	{
-		// does this work? -- I don't think so, Henritees.
+		dbg_msg("Failed to open script '%s' for integrity check", pFilename);
+		return false;
+	}
+
+	char aData[sizeof(LUA_SIGNATURE)] = {0};
+	io_read(f, aData, sizeof(aData));
+	io_close(f);
+	char aHeader[2][7];
+	str_format(aHeader[0], sizeof(aHeader[0]), "\\x%02x%s", aData[0], aData+1);
+	str_format(aHeader[1], sizeof(aHeader[1]), "\\x%02x%s", LUA_SIGNATURE[0], LUA_SIGNATURE+1);
+
+	if(str_comp(aHeader[0], aHeader[1]) == 0 && !Compiled)
+	{
+		dbg_msg("lua", "!! WARNING: PREVENTED LOADING A PRECOMPILED SCRIPT PRETENDING TO BE A SOURCE CODE SCRIPT !!");
+		dbg_msg("lua", "!! :  %s", pFilename);
+		return false;
+	}
+	else if(str_comp(aHeader[0], aHeader[1]) != 0 && Compiled)
+	{
+		dbg_msg("lua", "!! WARNING: PREVENTED LOADING AN INVALID PRECOMPILED SCRIPT (%s != %s) !!", aHeader[0], aHeader[1]);
+		dbg_msg("lua", "!! :  %s", pFilename);
+		return false;
+	}
+
+
+	int Status = luaL_loadfile(m_pLuaState, pFilename);
+	if (Status != 0)
+	{
+		// does this work?
 		CLua::ErrorFunc(m_pLuaState);
 		return false;
 	}

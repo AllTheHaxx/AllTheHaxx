@@ -1457,6 +1457,19 @@ void secure_random_fill(void *bytes, size_t length);
 */
 int secure_rand();
 
+/*
+  Usage:
+
+	unsigned char md[SHA256_DIGEST_LENGTH]; // 32 bytes
+	if(simpleSHA256(<data buffer>, <data length>, md) < 0)
+	{
+		// handle error
+	}
+	Afterwards, md will contain the binary SHA-256 message digest.
+ */
+int simpleSHA256(void* input, unsigned long length, unsigned char* md);
+
+
 void open_default_browser(const char *url);
 
 #ifdef __cplusplus

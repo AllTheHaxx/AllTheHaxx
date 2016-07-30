@@ -3,7 +3,7 @@ config.lua
 datasrc/__pycache__
 datasrc/*.pyc
 objs
-lua
+lua/
 rsa
 src/game/generated
 update/
@@ -21,11 +21,12 @@ serverlaunch_*
 tileset_border*
 twping*
 versionsrv*
+dummy_map*
+luacert
+luacert.exe
 
 *.txt
 *.bat
-.cproject
-.project
 *.dtb
 *.log
 *.exe
@@ -54,7 +55,6 @@ versionsrv*
 *.db-journal
 *.pdf
 *.key
-*.lua
 
 autoexec.cfg
 
@@ -71,3 +71,4 @@ other/luajit/LuaJIT-2.0.2/src/lj_folddef.h
 other/luajit/LuaJIT-2.0.2/src/lj_libdef.h
 other/luajit/LuaJIT-2.0.2/src/lj_recdef.h
 other/luajit/LuaJIT-2.0.2/src/luajit
+src/tools/luacert.cpp

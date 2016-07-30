@@ -431,65 +431,6 @@ set(SOURCE_FILES
     src/engine/external/libwebsockets/server.c
     src/engine/external/libwebsockets/service.c
     src/engine/external/libwebsockets/sha-1.c
-    src/engine/external/lua/lapi.c
-    src/engine/external/lua/lapi.h
-    src/engine/external/lua/lauxlib.c
-    src/engine/external/lua/lauxlib.h
-    src/engine/external/lua/lbaselib.c
-    src/engine/external/lua/lbitlib.c
-    src/engine/external/lua/lcode.c
-    src/engine/external/lua/lcode.h
-    src/engine/external/lua/lcorolib.c
-    src/engine/external/lua/lctype.c
-    src/engine/external/lua/lctype.h
-    src/engine/external/lua/ldblib.c
-    src/engine/external/lua/ldebug.c
-    src/engine/external/lua/ldebug.h
-    src/engine/external/lua/ldo.c
-    src/engine/external/lua/ldo.h
-    src/engine/external/lua/ldump.c
-    src/engine/external/lua/lfunc.c
-    src/engine/external/lua/lfunc.h
-    src/engine/external/lua/lgc.c
-    src/engine/external/lua/lgc.h
-    src/engine/external/lua/linit.c
-    src/engine/external/lua/liolib.c
-    src/engine/external/lua/llex.c
-    src/engine/external/lua/llex.h
-    src/engine/external/lua/llimits.h
-    src/engine/external/lua/lmathlib.c
-    src/engine/external/lua/lmem.c
-    src/engine/external/lua/lmem.h
-    src/engine/external/lua/loadlib.c
-    src/engine/external/lua/lobject.c
-    src/engine/external/lua/lobject.h
-    src/engine/external/lua/lopcodes.c
-    src/engine/external/lua/lopcodes.h
-    src/engine/external/lua/loslib.c
-    src/engine/external/lua/lparser.c
-    src/engine/external/lua/lparser.h
-    src/engine/external/lua/lprefix.h
-    src/engine/external/lua/lstate.c
-    src/engine/external/lua/lstate.h
-    src/engine/external/lua/lstring.c
-    src/engine/external/lua/lstring.h
-    src/engine/external/lua/lstrlib.c
-    src/engine/external/lua/ltable.c
-    src/engine/external/lua/ltable.h
-    src/engine/external/lua/ltablib.c
-    src/engine/external/lua/ltm.c
-    src/engine/external/lua/ltm.h
-    src/engine/external/lua/lua.h
-    src/engine/external/lua/lua.hpp
-    src/engine/external/lua/luaconf.h
-    src/engine/external/lua/lualib.h
-    src/engine/external/lua/lundump.c
-    src/engine/external/lua/lundump.h
-    src/engine/external/lua/lutf8lib.c
-    src/engine/external/lua/lvm.c
-    src/engine/external/lua/lvm.h
-    src/engine/external/lua/lzio.c
-    src/engine/external/lua/lzio.h
     src/engine/external/luabridge/detail/CFunctions.h
     src/engine/external/luabridge/detail/ClassInfo.h
     src/engine/external/luabridge/detail/Constructor.h
@@ -743,8 +684,8 @@ set(SOURCE_FILES
     src/game/client/components/fontmgr.h
     src/game/client/components/ghost.cpp
     src/game/client/components/ghost.h
-        src/game/client/components/gametexture.cpp
-        src/game/client/components/gametexture.h
+    src/game/client/components/gametexture.cpp
+    src/game/client/components/gametexture.h
     src/game/client/components/hud.cpp
     src/game/client/components/hud.h
     src/game/client/components/identity.cpp
@@ -911,9 +852,11 @@ set(SOURCE_FILES
     src/tools/tileset_borderfix.cpp
     src/tools/tileset_borderrem.cpp
     src/tools/tileset_borderset.cpp
+    src/tools/dummy_map.cpp
+    src/tools/luacert.cpp
     src/twping/twping.cpp
     src/versionsrv/mapversions.h
     src/versionsrv/versionsrv.cpp
-    src/versionsrv/versionsrv.h src/engine/client/debug.h src/engine/client/debug.cpp src/engine/client/curlwrapper.cpp src/engine/client/curlwrapper.h src/engine/curlwrapper.h)
+    src/versionsrv/versionsrv.h src/engine/client/debug.h src/engine/client/debug.cpp src/engine/client/curlwrapper.cpp src/engine/client/curlwrapper.h src/engine/curlwrapper.h src/tools/luacert.cpp)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})
