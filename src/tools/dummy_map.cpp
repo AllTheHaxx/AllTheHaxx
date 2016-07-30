@@ -4,7 +4,7 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-void CreateEmptyMap(IStorage *pStorage)
+void CreateEmptyMap(IStorageTW *pStorage)
 {
 	CDataFileWriter Writer;
 	if(!Writer.Open(pStorage, "maps/dummy3.map"))
@@ -74,7 +74,7 @@ void CreateEmptyMap(IStorage *pStorage)
 int main(int argc, const char **argv)
 {
 	dbg_logger_stdout();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv);
+	IStorageTW *pStorage = CreateStorage("Teeworlds", IStorageTW::STORAGETYPE_SERVER, argc, argv);
 	CreateEmptyMap(pStorage);
 	return 0;
 }
