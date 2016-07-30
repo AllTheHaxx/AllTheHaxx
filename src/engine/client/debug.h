@@ -52,7 +52,7 @@ private:
 
 };
 
-#if defined(CONF_FAMILY_UNIX) and defined(FEATURE_DEBUGGER) and not defined(CONF_DEBUG)
+#if defined(CONF_FAMILY_UNIX) && defined(FEATURE_DEBUGGER) && !defined(CONF_DEBUG)
 #define CALLSTACK_ADD() if(!is_thread()) gDebugInfo.CallstackAdd(__FILE__, __LINE__, __FUNCTION__)
 #else
 #define CALLSTACK_ADD() ;;

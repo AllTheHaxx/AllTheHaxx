@@ -20,6 +20,8 @@ class CLua;
 
 class CLuaFile
 {
+	MACRO_ALLOC_HEAP()
+
 	friend class CLuaBinding;
 public:
 	enum
@@ -56,8 +58,6 @@ private:
 	bool m_ScriptAutoload;
 
 public:
-	void operator delete(void *p) { mem_free(p); }
-
 	CLuaFile(CLua *pLua, std::string Filename, bool Autoload);
 	~CLuaFile();
 	void Init();

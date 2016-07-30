@@ -13,6 +13,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <engine/external/openssl/sha.h>
+
 #if defined(WEBSOCKETS)
 	#include "engine/shared/websockets.h"
 #endif
@@ -32,7 +34,6 @@
 	#include <arpa/inet.h>
 
 	#include <dirent.h>
-#include <engine/external/openssl/sha.h>
 
 #if defined(CONF_PLATFORM_MACOSX)
 		// some lock and pthread functions are already defined in headers

@@ -348,6 +348,7 @@ public:	int m_LoadTotal;
 	void RenderSettings(CUIRect MainView);
 
 	void RenderLoadingLua();
+	static int SkinCacheListdirCallback(const char *name, int is_dir, int dir_type, void *user);
 
 	// found in menus_identity.cpp
 	int RenderSettingsIdentLegacy(CUIRect MainView);

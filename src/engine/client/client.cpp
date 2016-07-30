@@ -3982,7 +3982,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// initialize the debugger
 	CDebugger *pDebugger = new CDebugger();
-#if defined(CONF_FAMILY_UNIX) and defined(FEATURE_DEBUGGER) and not defined(CONF_DEBUG)
+#if defined(CONF_FAMILY_UNIX) && defined(FEATURE_DEBUGGER) && !defined(CONF_DEBUG)
 	main_thread_handle = thread_get_current();
 #endif
 	CALLSTACK_ADD();

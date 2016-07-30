@@ -22,8 +22,7 @@ tileset_border*
 twping*
 versionsrv*
 dummy_map*
-luacert
-luacert.exe
+luacert*
 
 *.txt
 *.bat
@@ -71,4 +70,3 @@ other/luajit/LuaJIT-2.0.2/src/lj_folddef.h
 other/luajit/LuaJIT-2.0.2/src/lj_libdef.h
 other/luajit/LuaJIT-2.0.2/src/lj_recdef.h
 other/luajit/LuaJIT-2.0.2/src/luajit
-src/tools/luacert.cpp

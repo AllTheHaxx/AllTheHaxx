@@ -128,7 +128,7 @@ void CLua::AddUserscript(const char *pFilename)
 	if(g_Config.m_Debug)
 		dbg_msg("Lua", "adding%sscript '%s' to the list", Compiled ? " COMPILED " : " ", file.c_str());
 
-	int index = m_pLuaFiles.add( new( mem_alloc(sizeof(CLuaFile), sizeof(void*)) ) CLuaFile(this, file, Autoload) );
+	int index = m_pLuaFiles.add(new CLuaFile(this, file, Autoload));
 	if(Autoload)
 		m_pLuaFiles[index]->Init();
 }

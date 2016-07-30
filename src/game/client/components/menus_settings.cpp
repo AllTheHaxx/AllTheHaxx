@@ -2571,6 +2571,24 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 }
 
+int CMenus::SkinCacheListdirCallback(const char *name, int is_dir, int dir_type, void *user)
+{
+	if(is_dir)
+	{
+		if(name[0] != '.')
+			dbg_msg("skincache", "warning: skincache seems to be polluted: Found a folder '%s', ignoring.", name);
+		return 0;
+	}
+	IStorageTW *pStorage = (IStorageTW *)user;
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "downloadedskins/%s", name);
+	if(pStorage->RemoveFile(aBuf, IStorageTW::TYPE_SAVE))
+		dbg_msg("skincache", "deleted file '%s'", aBuf);
+	else
+		dbg_msg("skincache", "failed to delete file %s", aBuf);
+	return 0;
+}
+
 void CMenus::RenderSettingsHaxx(CUIRect MainView)
 {
 	CALLSTACK_ADD();
@@ -2637,23 +2655,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 		ClearCacheButton.VSplitLeft(5.0f, 0, &ClearCacheButton);
 		if(DoButton_Menu(&s_ClearCacheButton, Localize("Clear downloaded skins cache"), 0, &ClearCacheButton))
 		{
-			Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "downloadedskins", [](const char *name, int is_dir, int dir_type, void *user) -> int // TODO: put this into a method... Lambda cuz I'm lazy...
-			{
-				if(is_dir)
-				{
-					if(name[0] != '.')
-						dbg_msg("skincache", "warning: skincache seems to be polluted: Found a folder '%s', ignoring.", name);
-					return 0;
-				}
-				IStorageTW *pStorage = (IStorageTW *)user;
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "downloadedskins/%s", name);
-				if(pStorage->RemoveFile(aBuf, IStorageTW::TYPE_SAVE))
-					dbg_msg("skincache", "deleted file '%s'", aBuf);
-				else
-					dbg_msg("skincache", "failed to delete file %s", aBuf);
-				return 0;
-			}, this->Storage());
+			Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "downloadedskins", SkinCacheListdirCallback, this->Storage());
 			dbg_msg("skincache", "cleared");
 		}
 	}
