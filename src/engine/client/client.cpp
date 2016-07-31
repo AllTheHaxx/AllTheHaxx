@@ -51,6 +51,7 @@
 
 #include <game/version.h>
 #include <game/client/components/console.h>
+#include <game/client/components/identity.h>
 
 #include <mastersrv/mastersrv.h>
 #include <versionsrv/versionsrv.h>
@@ -3431,6 +3432,7 @@ void CClient::Con_SaveConfig(IConsole::IResult *pResult, void *pUserData)
 
 	((CClient *)pUserData)->Kernel()->RequestInterface<IConfig>()->Save();
 	((CClient *)pUserData)->Lua()->SaveAutoloads();
+	((CGameClient *)((CClient *)pUserData)->m_pGameClient)->m_pIdentity->SaveIdents();
 }
 
 void CClient::AutoScreenshot_Start()
