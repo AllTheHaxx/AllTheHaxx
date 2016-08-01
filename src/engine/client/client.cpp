@@ -332,6 +332,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	// pinging
 	m_PingStartTime = 0;
 	m_LocalStartTime = 0;
+	m_TimerStartTime = 0;
 
 	//
 	m_aCurrentMap[0] = 0;
@@ -2909,6 +2910,7 @@ void CClient::Run()
 	CALLSTACK_ADD();
 
 	m_LocalStartTime = time_get();
+	m_TimerStartTime = time_get();
 	m_SnapshotParts = 0;
 
 	srand(time(NULL));
@@ -3292,6 +3294,7 @@ void CClient::Run()
 
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
+		m_SteadyTimer = (time_get()-m_TimerStartTime)/(float)time_freq();
 
 		static bool LuaFinalInitDone = false;
 		if(!LuaFinalInitDone)
@@ -3299,6 +3302,15 @@ void CClient::Run()
 			LuaFinalInitDone = true;
 			m_Lua.LoadFolder();
 		}
+
+#if defined(CONF_DEBUG)
+		static float LastCheck = m_SteadyTimer;
+		if(g_Config.m_ClMemcheckInterval && m_SteadyTimer - LastCheck > g_Config.m_ClMemcheckInterval)
+		{
+			mem_check();
+			LastCheck = m_SteadyTimer;
+		}
+#endif
 	}
 
 #if defined(CONF_FAMILY_UNIX)

@@ -97,6 +97,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	unsigned m_SnapshotParts;
 	int64 m_LocalStartTime;
+	int64 m_TimerStartTime;
 
 	int m_DebugFont;
 

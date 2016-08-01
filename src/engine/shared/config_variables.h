@@ -145,6 +145,10 @@ MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 130, 5, 100000, CFGFLAG_SAVE|CFGFL
 MACRO_CONFIG_INT(InpMouseOld, inp_mouseold, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use old mouse mode (warp mouse instead of raw input) -- MIGHT BE BUGGY ON SOME SYSTEMS!!")
 MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
 
+#if defined(CONF_DEBUG)
+MACRO_CONFIG_INT(ClMemcheckInterval, cl_memcheck_interval, 60, 0, 6000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Interval for validating the heap")
+#endif
+
 MACRO_CONFIG_STR(SvName, sv_name, 128, "unnamed server", CFGFLAG_SERVER, "Server name")
 MACRO_CONFIG_STR(Bindaddr, bindaddr, 128, "", CFGFLAG_CLIENT|CFGFLAG_SERVER|CFGFLAG_MASTER, "Address to bind the client/server to")
 MACRO_CONFIG_INT(SvPort, sv_port, 8303, 0, 0, CFGFLAG_SERVER, "Port to use for the server (Only ports 8303-8310 work in LAN server browser)")
