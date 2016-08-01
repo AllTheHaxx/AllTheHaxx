@@ -379,9 +379,12 @@ void CMenus::RenderIRC(CUIRect MainView)
 				if(Item.m_Visible)
 				{
 					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;
-					if(str_find_nocase(pChan->m_Buffer[i].c_str(), m_pClient->IRC()->GetNick()))
+					const char *pSearchFrom = str_find(pChan->m_Buffer[i].c_str(), ">");
+					if(!pSearchFrom)
+						pSearchFrom = pChan->m_Buffer[i].c_str();
+					if(str_find_nocase(pSearchFrom, m_pClient->IRC()->GetNick()))
 					{
-						vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue, g_Config.m_ClMessageHighlightSat, g_Config.m_ClMessageHighlightLht));
+						vec3 rgb = HslToRgb(vec3((float)g_Config.m_ClMessageHighlightHue/255.0f, (float)g_Config.m_ClMessageHighlightSat/255.0f, (float)g_Config.m_ClMessageHighlightLht/255.0f));
 						TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 					}
 					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 10.0f, -1);
