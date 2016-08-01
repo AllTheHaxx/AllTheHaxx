@@ -20,9 +20,9 @@ void CSkinDownload::OnInit()
 
 	m_Lock = lock_create();
 	lock_unlock(m_Lock);
-	m_apFetchTasks.clear();
-	m_apFetchTasks.hint_size(5);
+	mem_zero(m_apFetchTasks, sizeof(m_apFetchTasks));
 
+	m_DefaultSkin = -1;
 	LoadUrls();
 }
 
@@ -31,7 +31,9 @@ void CSkinDownload::OnRender()
 	if(lock_trylock(m_Lock) != 0) // just don't render if it's locked, but don't block!
 		return;
 
-	const float MAX_HEIGHT = m_apFetchTasks.empty() ? 0.001f : 5.0f+25.0f+5.0f+20.0f*(float)m_apFetchTasks.size();
+	const int NUM_TASKS = NumTasks();
+	const float MAX_HEIGHT = NUM_TASKS == 0 ? 0.001f : 5.0f + 25.0f + 5.0f + 20.0f * (float)NUM_TASKS;
+
 	static float s_SmoothPos = 0.0f;
 	smooth_set(&s_SmoothPos, MAX_HEIGHT, 23.0f, Client()->RenderFrameTime());
 
@@ -45,11 +47,11 @@ void CSkinDownload::OnRender()
 	Graphics()->MapScreen(0, 0, Screen.w, Screen.h);
 	Screen.HSplitBottom(s_SmoothPos, 0, &Screen);
 	//float dings = clamp(s_SmoothPos/(5.0f+25.0f+5.0f+20.0f*(float)m_FetchTasks.size()), 0.75f, 1.0f);
-	Screen.VMargin(Screen.w/3.0f/**ding*/, &Screen);
+	Screen.VMargin(Screen.w / 3.0f, &Screen);
 	//Screen.x = UI()->Screen()->w/2-Screen.w/2;
 
 	Screen.y += 5.0f;
-	RenderTools()->DrawUIRect(&Screen, vec4(0,0,0,0.3f), CUI::CORNER_T, 5.0f);
+	RenderTools()->DrawUIRect(&Screen, vec4(0, 0, 0, 0.3f), CUI::CORNER_T, 5.0f);
 
 	Screen.VMargin(10.0f, &Screen);
 	TextRender()->TextColor(0.8f, 0.8f, 0.8f, 0.8f);
@@ -57,10 +59,13 @@ void CSkinDownload::OnRender()
 	Screen.HSplitTop(15.0f, &Button, &Screen);
 	UI()->DoLabelScaled(&Button, Localize("Skin Downloads"), 14.0f, -1);
 
-	for(int i = 0; i < m_apFetchTasks.size(); i++)
+	for(int i = 0; i < MAX_FETCHTASKS; i++)
 	//for(std::map<CFetchTask*, SkinFetchTask>::iterator it = m_FetchTasks.begin(); it != m_FetchTasks.end(); it++)
 	{
 		CSkinFetchTask *e = m_apFetchTasks[i];
+		if(!e)
+			continue;
+
 		if(e->State() == CFetchTask::STATE_ERROR)
 			TextRender()->TextColor(1,0,0,1);
 		if(e->State() == CFetchTask::STATE_DONE)
@@ -75,7 +80,7 @@ void CSkinDownload::OnRender()
 		Screen.HSplitTop(5.0f, 0, &Screen);
 		Screen.HSplitTop(13.5f, &Button, &Screen);
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s (try %i/%i)", e->SkinName(), e->Url()+1, m_SkinDbUrls.size());
+		str_format(aBuf, sizeof(aBuf), "%s (try %i/%i)", e->SkinName(), e->Url()+1, m_NumUrls);
 
 		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
@@ -91,7 +96,7 @@ void CSkinDownload::OnRender()
 		if(e->FinishTime() > 0 && time_get() > e->FinishTime() + 2 * time_freq())
 		{
 			delete m_apFetchTasks[i];
-			m_apFetchTasks.remove_index_fast(i);
+			m_apFetchTasks[i] = NULL;
 		}
 	}
 
@@ -133,8 +138,9 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 	{
 		if(g_Config.m_Debug)
 			dbg_msg("skinfetcher/debug", "download failed: '%s'", pDest);
-		pSelf->m_pStorage->RemoveBinaryFile(pDest); // delete the empty file dummy
-		pSelf->FetchNext(pTaskHandler);
+
+		if(!pSelf->FetchNext(pTaskHandler))
+			pSelf->m_pStorage->RemoveBinaryFile(pDest); // delete the empty file dummy
 	}
 
 	if(pTask->State() == CFetchTask::STATE_DONE)
@@ -148,18 +154,10 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 {
-	int DefaultSkin = GameClient()->m_pSkins->Find("default");
+	if(m_DefaultSkin < 0)
+		m_DefaultSkin = GameClient()->m_pSkins->Find("default");
 
-	bool Windoof = false; // XXX: HACK! BETTER GO FIX IT!
-#if defined(CONF_FAMILY_WINDOWS)
-	Windoof = true;
-#endif
-	if(!g_Config.m_ClSkinFetcher || Windoof)
-	{
-		*pDestID = DefaultSkin;
-		return;
-	}
-
+	// search for the wanted skin
 	int SkinID = GameClient()->m_pSkins->Find(pName);
 	if(SkinID >= 0)
 	{
@@ -167,13 +165,23 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		return;
 	}
 	else
-		*pDestID = DefaultSkin;
+		*pDestID = m_DefaultSkin; // set the default skin for now and try to fetch the actual one
 
-	if(m_apFetchTasks.size() >= MAX_FETCHTASKS)
-		return;
 
-	if(lock_trylock(m_Lock) != 0) // try again when lock is available
+	// XXX: FIX THE SKINFETCHER ON WINDOWS!
+#if defined(CONF_FAMILY_WINDOWS) && !defined(CONF_DEBUG)
+	return;
+#endif
+
+	// don't fetch anything if it's disabled or the tasklist is full
+	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS)
+	{
 		return;
+	}
+
+	// get the lock
+	if(lock_trylock(m_Lock) != 0)
+		return; // try again when lock is available
 
 	// don't rerun failed tasks
 	for(int i = 0; i < m_FailedTasks.size(); i++)
@@ -184,47 +192,57 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		}
 
 	// don't queue tasks multiple times
-	for(int i = 0; i < m_apFetchTasks.size(); i++)
-		if(str_comp_nocase(m_apFetchTasks[i]->SkinName(), pName) == 0)
-		{
-			lock_unlock(m_Lock);
-			return;
-		}
+	for(int i = 0; i < MAX_FETCHTASKS; i++)
+		if(m_apFetchTasks[i])
+			if(str_comp_nocase(m_apFetchTasks[i]->SkinName(), pName) == 0)
+			{
+				lock_unlock(m_Lock);
+				return;
+			}
 
-	int i = m_apFetchTasks.add(new CSkinFetchTask(pName));
-	lock_unlock(m_Lock);
-	FetchSkin(m_apFetchTasks[i]);
-}
-
-void CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler) // doesn't lock!
-{
-	dbg_assert(pTaskHandler != NULL, "CSkinDownload::FetchNext called with pTaskHandler == NULL");
-
-	if(pTaskHandler->Url()+1 >= m_SkinDbUrls.size())
+	CSkinFetchTask *pTask = new CSkinFetchTask(pName);
+	CSkinFetchTask **ppSlot = FindFreeSlot();
+	if(!ppSlot) // this check shouldn't be necessary... but safe is safe :/
 	{
-		pTaskHandler->Finish();
-		Fail(pTaskHandler->SkinName());
+		lock_unlock(m_Lock);
 		return;
 	}
 
-	dbg_msg("skinfetcher/debug", "trying next url (%i/%i): '%s'", pTaskHandler->Url()+2, m_SkinDbUrls.size(), m_SkinDbUrls[pTaskHandler->Url()+1].aUrl);
+	*ppSlot = pTask;
+	FetchSkin(pTask);
+}
+
+bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler) // doesn't lock!
+{
+	dbg_assert(pTaskHandler != NULL, "CSkinDownload::FetchNext called with pTaskHandler == NULL");
+
+	if(pTaskHandler->Url()+1 >= m_NumUrls)
+	{
+		pTaskHandler->Finish();
+		Fail(pTaskHandler->SkinName());
+		return false;
+	}
 
 	pTaskHandler->Next();
+	dbg_msg("skinfetcher/debug", "trying next url (%i/%i): '%s'", pTaskHandler->Url()+1, m_NumUrls, m_aaSkinDbUrls[pTaskHandler->Url()]);
+
 	FetchSkin(pTaskHandler);
+
+	return true;
 }
 
 void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler) // doesn't lock!
 {
 	dbg_assert(pTaskHandler != NULL, "CSkinDownload::FetchSkin called with pTaskHandler == NULL");
 
-	if(pTaskHandler->Url() >= m_SkinDbUrls.size())
+	if(pTaskHandler->Url() >= m_NumUrls)
 		return;
 
 	char aBuf[256];
 	char aDestPath[256] = {0};
 	char aFullPath[512] = {0};
 
-	str_copy(aDestPath, m_SkinDbUrls[pTaskHandler->Url()].aUrl, sizeof(aDestPath));
+	str_copy(aDestPath, m_aaSkinDbUrls[pTaskHandler->Url()], sizeof(aDestPath));
 	if(aDestPath[str_length(aDestPath)-1] != '/')
 		str_append(aDestPath, "/", sizeof(aDestPath));
 	char aEscapedName[128] = {0};
@@ -252,9 +270,9 @@ void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler) // doesn't lock!
 
 void CSkinDownload::LoadUrls()
 {
-	m_SkinDbUrls.clear();
+	m_NumUrls = 0;
+	mem_zero(m_aaSkinDbUrls, sizeof(m_aaSkinDbUrls));
 
-	int prior = 0;
 	std::string line;
 	std::ifstream file(g_Config.m_ClSkinDbFile);
 	if(file.is_open())
@@ -264,25 +282,18 @@ void CSkinDownload::LoadUrls()
 			if(line == "" || line.c_str()[0] == '#' || str_length(line.c_str()) > MAX_URL_LEN)
 				continue;
 
-			SkinDbUrl e;
-			e.prior = prior++;
-			str_copy(e.aUrl, line.c_str(), sizeof(e.aUrl));
-			m_SkinDbUrls.add_unsorted(e);
+			str_copy(m_aaSkinDbUrls[m_NumUrls++], line.c_str(), MAX_URL_LEN);
 		}
 		file.close();
 
-		m_SkinDbUrls.sort_range();
-		dbg_msg("skinfetcher", "loaded %i url%s from file '%s'", prior, prior > 1 ? "s" : "", g_Config.m_ClSkinDbFile);
+		dbg_msg("skinfetcher", "loaded %i url%s from file '%s'", m_NumUrls, m_NumUrls > 1 ? "s" : "", g_Config.m_ClSkinDbFile);
 	}
 	else
 		dbg_msg("skinfetcher/error", "failed to open url file '%s', using ddnet's database only", g_Config.m_ClSkinDbFile);
 
-	if(m_SkinDbUrls.size() == 0)
+	if(m_NumUrls == 0)
 	{
-		SkinDbUrl e;
-		e.prior = 0;
-		str_copy(e.aUrl, "https://ddnet.tw/skins/skin/", sizeof(e.aUrl));
-		m_SkinDbUrls.add(e);
+		str_copy(m_aaSkinDbUrls[m_NumUrls++], "https://ddnet.tw/skins/skin/", MAX_URL_LEN);
 	}
 }
 
@@ -293,9 +304,8 @@ void CSkinDownload::ConFetchSkin(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "skinfetcher", "You must turn on cl_skin_fetcher to use this command");
 	else
 	{
-		lock_wait(pSelf->m_Lock);
-		int i = pSelf->m_apFetchTasks.add(new CSkinFetchTask(pResult->GetString(0)));
-		lock_unlock(pSelf->m_Lock);
-		pSelf->FetchSkin(pSelf->m_apFetchTasks[i]);
+		int SkinID;
+		pSelf->RequestSkin(&SkinID, pResult->GetString(0));
+		// TODO: add some kind of f1 output message here if the task couldn't be created
 	}
 }

@@ -77,48 +77,81 @@ private:
 	class IStorageTW *m_pStorage;
 	LOCK m_Lock;
 
+	int m_DefaultSkin;
+
 	enum
 	{
 		MAX_FETCHTASKS = 4,
+
+		MAX_URLS = 64,
 		MAX_URL_LEN = 512,
 	};
 
-	struct SkinDbUrl
-	{
-		int prior;
-		char aUrl[MAX_URL_LEN];
-		bool operator<(const SkinDbUrl& other) { return this->prior < other.prior; }
-	};
-	sorted_array<SkinDbUrl> m_SkinDbUrls;
+	char m_aaSkinDbUrls[MAX_URLS][MAX_URL_LEN];
+	int m_NumUrls;
 
-	array<CSkinFetchTask *> m_apFetchTasks;
+	CSkinFetchTask *m_apFetchTasks[MAX_FETCHTASKS];
 	array<std::string> m_FailedTasks;
+
+
+	/**
+	 * @Warning DON'T use this to iterate over the array! ALWAYS use <code>MAX_FETCHTASKS</code>!
+	 * @threadsafety DOESN'T lock, but accesses the critical array
+	 * @return The number of tasks
+	 */
+	int NumTasks()
+	{
+		int ret = 0;
+		for(int i = 0; i < MAX_FETCHTASKS; i++)
+			if(m_apFetchTasks[i] != NULL)
+				ret++;
+		return ret;
+	}
 
 	CSkinFetchTask *FindTask(CFetchTask* pTask)
 	{
-		for(int i = 0; i < m_apFetchTasks.size(); i++)
-			if(m_apFetchTasks[i]->Task() == pTask)
-				return m_apFetchTasks[i];
+		for(int i = 0; i < MAX_FETCHTASKS; i++)
+			if(m_apFetchTasks[i] != NULL)
+				if(m_apFetchTasks[i]->Task() == pTask)
+					return m_apFetchTasks[i];
 		return 0;
 	}
 
+	CSkinFetchTask **FindFreeSlot()
+	{
+		for(int i = 0; i < MAX_FETCHTASKS; i++)
+			if(m_apFetchTasks[i] == NULL)
+				return &(m_apFetchTasks[i]);
+		return NULL;
+	}
+
+	void LoadUrls();
+
 	void Fail(const char *pSkinName) { m_FailedTasks.add(std::string(pSkinName)); }
-	void FetchNext(CSkinFetchTask *pTaskHandler);
+	bool FetchNext(CSkinFetchTask *pTaskHandler);
 	void FetchSkin(CSkinFetchTask *pTaskHandler);
 
 public:
 	~CSkinDownload()
 	{
-		m_apFetchTasks.delete_all();
+		for(int i = 0; i < MAX_FETCHTASKS; i++)
+			if(m_apFetchTasks[i])
+				delete m_apFetchTasks[i];
 	}
 
 	void OnConsoleInit();
 	void OnInit();
 	void OnRender();
 
+	/**
+	 * Gets the ID of the requested skin.<br>
+	 * If the skin doesn't exist, automatically try to download it.
+	 * @param pDestID - Pointer to an integer to store the skin ID in
+	 * @param pName - Name of the wanted skin
+	 * @remark	Returns the ID of the default skin if the requested skin couldn't be
+	 * 			downloaded or if it is currently being downloaded
+	 */
 	void RequestSkin(int *pDestID, const char *pName);
-
-	void LoadUrls();
 
 	//static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
