@@ -1312,7 +1312,7 @@ void CGameClient::OnNewSnapshot()
 				}
 				else if(g_Config.m_ClFlagChat)
 				{
-					if(m_HiddenMessages[Item.m_ID][0])
+					if(m_HiddenMessages[Item.m_ID].size())
 					{
 						//dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
 						m_pChat->AddLine(Item.m_ID, 0, m_HiddenMessages[Item.m_ID].c_str(), true);
