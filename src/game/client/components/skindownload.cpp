@@ -210,6 +210,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 
 	*ppSlot = pTask;
 	FetchSkin(pTask);
+	lock_unlock(m_Lock);
 }
 
 bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler) // doesn't lock!
