@@ -692,11 +692,11 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Button.VSplitLeft(Button.h, &Button, 0);
 		static CIdentity::CIdentEntry s_CmpIdents[MAX_CLIENTS];
 		CIdentity::CIdentEntry * const pIdent = &s_CmpIdents[Index];
-		if(str_comp(pIdent->m_aName, m_pClient->m_aClients[Index].m_aName) != 0) // update the cache entry if necessary
+		if(std::string(pIdent->m_aName) != std::string(m_pClient->m_aClients[Index].m_aName)) // update the cache entry if necessary | std::string hack because str_comp can only handle A-Z
 		{
-			str_copy(pIdent->m_aName, m_pClient->m_aClients[Index].m_aName, sizeof(CIdentity::CIdentEntry::m_aName));
-			str_copy(pIdent->m_aClan, m_pClient->m_aClients[Index].m_aClan, sizeof(CIdentity::CIdentEntry::m_aClan));
-			str_copy(pIdent->m_aSkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(CIdentity::CIdentEntry::m_aSkin));
+			str_copy(pIdent->m_aName, m_pClient->m_aClients[Index].m_aName, sizeof(m_pClient->m_aClients[Index].m_aName));
+			str_copy(pIdent->m_aClan, m_pClient->m_aClients[Index].m_aClan, sizeof(m_pClient->m_aClients[Index].m_aClan));
+			str_copy(pIdent->m_aSkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(m_pClient->m_aClients[Index].m_aSkinName));
 			pIdent->m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
 			pIdent->m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
 			pIdent->m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
@@ -711,9 +711,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			{
 				CIdentity::CIdentEntry Entry;
 				mem_zero(&Entry, sizeof(Entry));
-				str_format(Entry.m_aName, sizeof(Entry.m_aName), m_pClient->m_aClients[Index].m_aName);
-				str_format(Entry.m_aClan, sizeof(Entry.m_aClan), m_pClient->m_aClients[Index].m_aClan);
-				str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), m_pClient->m_aClients[Index].m_aSkinName);
+				str_copy(Entry.m_aName, m_pClient->m_aClients[Index].m_aName, sizeof(Entry.m_aName));
+				str_copy(Entry.m_aClan, m_pClient->m_aClients[Index].m_aClan, sizeof(Entry.m_aClan));
+				str_copy(Entry.m_aSkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(Entry.m_aSkin));
 				Entry.m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
 				Entry.m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
 				Entry.m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
