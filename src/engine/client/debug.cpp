@@ -14,7 +14,7 @@ CCallstack gDebugInfo;
 
 CDebugger::CDebugger()
 {
-#if defined(CONF_FAMILY_UNIX) and defined(FEATURE_DEBUGGER) and not defined(CONF_DEBUG)
+#if defined(CONF_FAMILY_UNIX) && defined(FEATURE_DEBUGGER) && !defined(CONF_DEBUG)
 	for(int i = 0; i < CALLSTACK_SIZE; i++)
 		gDebugInfo.m_CallStack.push_front("..");
 
