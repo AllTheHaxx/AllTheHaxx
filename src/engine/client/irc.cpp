@@ -631,7 +631,7 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									if(MsgType == MSG_TYPE_ACTION) // the "/me" thingy
 									{
-										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str());
+										str_format(aBuff, sizeof(aBuff), "* %s ", aMsgFrom.c_str());
 										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
 										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
 									}
@@ -738,12 +738,12 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									if(MsgType == MSG_TYPE_ACTION)
 									{
-										str_format(aBuff, sizeof(aBuff), "* %s %s", aMsgFrom.c_str());
+										str_format(aBuff, sizeof(aBuff), "* %s ", aMsgFrom.c_str());
 										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
 									}
 									else
 									{
-										str_format(aBuff, sizeof(aBuff), "<%s> %s", aMsgFrom.c_str());
+										str_format(aBuff, sizeof(aBuff), "<%s> ", aMsgFrom.c_str());
 										str_append(aBuff, aMsgText.c_str(), sizeof(aBuff));
 									}
 									pCom->AddMessage_nofmt(aBuff);
