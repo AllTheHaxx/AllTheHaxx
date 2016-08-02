@@ -545,17 +545,15 @@ void CIRC::StartConnection() // call this from a thread only!
 								}
 							}
 						}
-						else if(MsgType == MSG_TYPE_GET_TWSERVER) // somebody wants our server
+						else if(MsgType == MSG_TYPE_GET_TWSERVER) // somebody sent us his server
 						{
 							if(aMsgChan == m_Nick)
 							{
-								char aCleanMsg[512] = {0};
-								str_copy(aCleanMsg, aMsgText.c_str(), sizeof(aCleanMsg));
+								std::string CleanMsg = aMsgText.substr(13);
+								CleanMsg = CleanMsg.substr(0, CleanMsg.length() - 1);
 
-								char *pCleanMsg = aCleanMsg + 1;
-								str_replace_char(pCleanMsg, sizeof(aCleanMsg), '\1', '\0');
-								
-								SendServer(aMsgFrom.c_str(), pCleanMsg);
+								if(!CleanMsg.empty())
+									SendServer(aMsgFrom.c_str(), CleanMsg.c_str());
 							}
 						}
 						else if(MsgType == MSG_TYPE_CTCP) // custom ctcp message
@@ -609,49 +607,52 @@ void CIRC::StartConnection() // call this from a thread only!
 							reply.channel = aMsgChan;
 							reply.from = aMsgFrom;
 							reply.params = aMsgText;
-							
-							CIRCCom *pCom;
-							if(aMsgChan == m_Nick) // this is the case for private chats ("Query"s)
-							{
-								pCom = GetCom(aMsgFrom);
-								if(!pCom)
-									pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false);
-							}
-							else
-							{
-								pCom = GetCom(aMsgChan);
-								if(!pCom)
-									pCom = OpenCom<CComChan>(aMsgChan.c_str(), false);
-							}
 
-							if(pCom)
-							{
-								if(pCom != GetActiveCom())
-									pCom->m_NumUnreadMsg++;
 
-								if(MsgType == MSG_TYPE_ACTION) // the "/me" thingy
+							{
+								CIRCCom *pCom;
+								if(aMsgChan == m_Nick) // this is the case for private chats ("Query"s)
 								{
-									str_format(aBuff, sizeof(aBuff), "* %s ", aMsgFrom.c_str());
-									str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
-									str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
+									pCom = GetCom(aMsgFrom);
+									if(!pCom)
+										pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false);
 								}
 								else
 								{
-									str_format(aBuff, sizeof(aBuff), "<%s> ", aMsgFrom.c_str());
-									str_append(aBuff, aMsgText.c_str(), sizeof(aBuff));
+									pCom = GetCom(aMsgChan);
+									if(!pCom)
+										pCom = OpenCom<CComChan>(aMsgChan.c_str(), false);
 								}
 
-								pCom->AddMessage_nofmt(aBuff);
-							}
+								if(pCom)
+								{
+									if(pCom != GetActiveCom())
+										pCom->m_NumUnreadMsg++;
 
-							if(pCom == GetActiveCom())
-							{
-								aMsgChan.insert(0, "[");
-								aMsgChan.append("] ");
-								aMsgFrom.insert(0, "<");
-								aMsgFrom.append("> ");
-								//aMsgFrom.insert(0, aTime);
-								m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
+									if(MsgType == MSG_TYPE_ACTION) // the "/me" thingy
+									{
+										str_format(aBuff, sizeof(aBuff), "* %s ", aMsgFrom.c_str());
+										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
+										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
+									}
+									else
+									{
+										str_format(aBuff, sizeof(aBuff), "<%s> ", aMsgFrom.c_str());
+										str_append(aBuff, aMsgText.c_str(), sizeof(aBuff));
+									}
+
+									pCom->AddMessage_nofmt(aBuff);
+								}
+
+								if(pCom == GetActiveCom())
+								{
+									aMsgChan.insert(0, "[");
+									aMsgChan.append("] ");
+									aMsgFrom.insert(0, "<");
+									aMsgFrom.append("> ");
+									//aMsgFrom.insert(0, aTime);
+									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
+								}
 							}
 						}
 					}
@@ -1019,6 +1020,7 @@ TCOM* CIRC::OpenCom(const char *pName, bool SwitchTo, int UnreadMessages)
 //		return 0;
 
 	TCOM *pNewCom = new(mem_alloc(sizeof(TCOM), 0)) TCOM();
+	pNewCom->m_NumUnreadMsg = UnreadMessages;
 	pNewCom->m_NumUnreadMsg = UnreadMessages;
 	str_copy(pNewCom->m_aName, pName, sizeof(pNewCom->m_aName));
 	m_IRCComs.push_back(pNewCom);
