@@ -167,17 +167,10 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	else
 		*pDestID = m_DefaultSkin; // set the default skin for now and try to fetch the actual one
 
-
-	// XXX: FIX THE SKINFETCHER ON WINDOWS!
-#if defined(CONF_FAMILY_WINDOWS) && !defined(CONF_DEBUG)
-	return;
-#endif
-
+	
 	// don't fetch anything if it's disabled or the tasklist is full
 	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS)
-	{
 		return;
-	}
 
 	// get the lock
 	if(lock_trylock(m_Lock) != 0)
