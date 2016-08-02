@@ -21,7 +21,7 @@ public:
 	void OnNickChange(const char *pNewNick);
 
 	const char *CurrentNick() { return m_pClient->IRC()->GetNick(); } // XXX this is depreciated and only for compatibility
-	bool IsConnected() { return (m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTED || m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTING); }
+	bool IsConnected() { return (m_pClient->IRC()->GetState() != IIRC::STATE_DISCONNECTED); }
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();

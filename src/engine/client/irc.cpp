@@ -971,10 +971,6 @@ void CIRC::StartConnection() // call this from a thread only!
 		}
 	}
 
-	// finish
-	net_tcp_close(m_Socket);
-	m_State = STATE_DISCONNECTED;
-
 	Disconnect();
 }
 
@@ -1133,14 +1129,22 @@ void CIRC::Part(const char *pReason, CIRCCom *pCom)
 
 void CIRC::Disconnect(const char *pReason)
 {
-	if (m_State != STATE_DISCONNECTED)
+	if (m_State == STATE_DISCONNECTED)
+	{
+		dbg_msg("IRC", "WARNING: tried to disconnect while already disconnected!");
+		return;
+	}
+
+	if (m_State == STATE_CONNECTED)
 	{
 		if(pReason && pReason[0])
 			SendRaw("QUIT :%s", pReason);
 		else
 			SendRaw("QUIT");
-		m_State = STATE_DISCONNECTED;
 	}
+
+	net_tcp_close(m_Socket);
+	m_State = STATE_DISCONNECTED;
 
 	std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
 	while (it != m_IRCComs.end())

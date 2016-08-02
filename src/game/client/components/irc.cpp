@@ -93,8 +93,15 @@ CIRCBind::CIRCBind()
 
 void CIRCBind::OnRender()
 {
-	if(g_Config.m_ClIRCAutoconnect && !IsConnected())
+	static bool First = true;
+	if (g_Config.m_ClIRCAutoconnect && !IsConnected())
+	{
+		if (!First && (round_to_int(Client()->LocalTime()) % 10) != 0)
+			return;
+		First = false;
+
 		Connect();
+	}
 }
 
 void CIRCBind::ListenIRCThread(void *pUser)
