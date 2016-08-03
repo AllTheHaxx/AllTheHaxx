@@ -96,6 +96,10 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(i);
 		CPointerContainer Container(pEntry);
 		CListboxItem Item = UiDoListboxNextItem(&Container, false/*Page == i*/);
+
+		if(!Item.m_Visible)
+			continue;
+
 		Button = Item.m_Rect;
 
 		if(i == numID)
