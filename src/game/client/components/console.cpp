@@ -290,29 +290,6 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(const char *pStr,
 	pInstance->m_CompletionEnumerationCount++;
 }
 
-bool CGameConsole::OnMouseMove(float x, float y)
-{
-	//m_LastInput = time_get();
-
-	if((m_ConsoleState != CONSOLE_OPEN && m_ConsoleState != CONSOLE_OPENING))
-		return false;
-
-#if defined(__ANDROID__) // No relative mouse on Android
-	m_MousePos.x = x;
-	m_MousePos.y = y;
-#else
-	UI()->ConvertMouseMove(&x, &y);
-	m_MousePos.x += x;
-	m_MousePos.y += y;
-#endif
-	if(m_MousePos.x < 0) m_MousePos.x = 0;
-	if(m_MousePos.y < 0) m_MousePos.y = 0;
-	if(m_MousePos.x > Graphics()->ScreenWidth()) m_MousePos.x = Graphics()->ScreenWidth();
-	if(m_MousePos.y > Graphics()->ScreenHeight()) m_MousePos.y = Graphics()->ScreenHeight();
-
-	return true;
-}
-
 void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
@@ -844,26 +821,6 @@ void CGameConsole::OnRender()
 	}
 
 	CInstance *pConsole = CurrentConsole();
-
-	// update the ui
-	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*Screen.w;
-	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*Screen.h;
-	{
-		int Buttons = 0;
-		if(Input()->KeyPress(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyPress(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyPress(KEY_MOUSE_3)) Buttons |= 4;
-
-#if defined(__ANDROID__)
-		static int ButtonsOneFrameDelay = 0; // For Android touch input
-
-		UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
-		ButtonsOneFrameDelay = Buttons;
-#else
-		UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
-#endif
-	}
-
 	{
 		float FontSize = 10.0f;
 		float RowHeight = FontSize*1.25f;
@@ -1157,7 +1114,7 @@ void CGameConsole::OnRender()
 		// render page
 		char aBuf[128];
 		TextRender()->TextColor(1,1,1,1);
-		str_format(aBuf, sizeof(aBuf), Localize("-Page %d, Offset %d-"), pConsole->m_BacklogActPage+1, pConsole->m_BacklogLineOffset);
+		str_format(aBuf, sizeof(aBuf), Localize("-Page %d, Line %d-"), pConsole->m_BacklogActPage+1, pConsole->m_BacklogLineOffset);
 		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
 
 		// render version
@@ -1168,15 +1125,6 @@ void CGameConsole::OnRender()
 		Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->Text(0, Screen.w-Width-10.0f, 10.0f, FontSize, aBuf, -1);
 	}
-
-	// render cursor
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->QuadsSetRotation((float)g_Config.m_ClMouseRotation*((2.0f*3.1415926f)/360.0f));
-	Graphics()->SetColor(1,1,1,1);
-	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
 }
 
 void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
@@ -1219,7 +1167,7 @@ void CGameConsole::Toggle(int Type)
 
 		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
-			//Input()->MouseModeAbsolute();
+			Input()->MouseModeAbsolute();
 			m_pClient->m_pMenus->UseMouseButtons(false);
 			m_ConsoleState = CONSOLE_OPENING;
 			/*// reset controls - no don't do it because we want swag!
@@ -1227,7 +1175,7 @@ void CGameConsole::Toggle(int Type)
 		}
 		else
 		{
-			;//Input()->MouseModeRelative();
+			Input()->MouseModeRelative();
 			m_pClient->m_pMenus->UseMouseButtons(true);
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
@@ -1322,7 +1270,7 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 	}
 }
 
-// TODO: This may be moved to elsewhere
+// TODO: This should be moved to elsewhere
 void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -1372,7 +1320,7 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This may be moved to elsewhere
+	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This should be moved to elsewhere
 
 }
 
