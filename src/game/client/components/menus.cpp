@@ -386,21 +386,19 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 
 		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
 		{
-			const char *pText = Input()->GetClipboardText();
-			if(pText)
+			const char *Text = Input()->GetClipboardText();
+			if(Text)
 			{
-				char *aLine = (char*)mem_alloc(StrSize, 0);
-				str_copy(aLine, pText, sizeof(aLine));
-				str_replace_char(aLine, sizeof(aLine), '\n', ' ');
-
-				char aRightPart[256];
-				str_copy(aRightPart, pStr + s_AtIndex, sizeof(aRightPart));
-				str_copy(aLine, pStr, min(s_AtIndex+1, (int)sizeof(aLine)));
-				str_append(aLine, pText, sizeof(aLine));
-				str_append(aLine, aRightPart, sizeof(aLine));
-				str_copy(pStr, aLine, StrSize);
-				mem_free(aLine);
-				s_AtIndex = str_length(pStr)-str_length(aRightPart);
+				int PasteOffset = str_length(pStr);
+				int CharsLeft = StrSize - PasteOffset - 1;
+				for(int i = 0; i < str_length(Text) && i < CharsLeft; i++)
+				{
+					if(Text[i] == '\n')
+						pStr[i + PasteOffset] = ' ';
+					else
+						pStr[i + PasteOffset] = Text[i];
+				}
+				s_AtIndex = str_length(pStr);
 			}
 		}
 
