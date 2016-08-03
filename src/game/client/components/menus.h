@@ -355,6 +355,7 @@ public:	int m_LoadTotal;
 	void RenderSettingsIdent(CUIRect MainView);
 	void RenderSettingsIdentTee(CUIRect MainView, int Page);
 	void RenderSettingsIdentPlayer(CUIRect MainView, int Page);
+	array<std::string> m_aIRCBacklog;
 
 	// found in menus_hotbar.cpp
 	bool m_HotbarActive;

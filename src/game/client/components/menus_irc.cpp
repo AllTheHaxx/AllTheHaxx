@@ -235,11 +235,37 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}
 		}
 
+		static char aEntryText[512];
+		static int s_CurrBacklogIndex = -1;
+		bool Update = false;
+		if(Input()->KeyPress(KEY_UP))
+		{
+			s_CurrBacklogIndex++;
+			Update = true;
+		}
+		if(Input()->KeyPress(KEY_DOWN))
+		{
+			s_CurrBacklogIndex--;
+			Update = true;
+		}
+		s_CurrBacklogIndex = clamp(s_CurrBacklogIndex, -1, m_aIRCBacklog.size()-1);
+
+		if(Update)
+		{
+			if(s_CurrBacklogIndex < 0)
+				mem_zero(aEntryText, sizeof(aEntryText));
+			else if(m_aIRCBacklog.size() > 0)
+			{
+				int ActualEntry = m_aIRCBacklog.size()-1-s_CurrBacklogIndex;
+				if(str_length(m_aIRCBacklog[ActualEntry].c_str()) > 0)
+					str_copy(aEntryText, m_aIRCBacklog[ActualEntry].c_str(), sizeof(aEntryText));
+			}
+		}
+
 		// Input Box
 		EntryBox.HSplitBottom(20.0f, &EntryBox, &InputBox);
 		InputBox.VSplitRight(50.0f, &InputBox, &Button);
 		//Button.VSplitLeft(5.0f, 0x0, &Button);
-		static char aEntryText[500];
 		static float s_Offset;
 		static CPointerContainer s_EditboxInput(&m_IRCActive);
 		DoEditBox(&s_EditboxInput, &InputBox, aEntryText, sizeof(aEntryText), 12.0f, &s_Offset, false, CUI::CORNER_L, "", -1);
@@ -271,6 +297,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 			else
 				m_pClient->IRC()->SendMsg(0x0, aEntryText);
 
+			if(str_length(aEntryText) > 0)
+				m_aIRCBacklog.add(std::string(aEntryText));
+			s_CurrBacklogIndex = -1;
 			aEntryText[0] = 0;
 		}
 
