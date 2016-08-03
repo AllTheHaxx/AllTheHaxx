@@ -1149,7 +1149,10 @@ void CIRC::Disconnect(const char *pReason)
 	std::list<CIRCCom*>::iterator it = m_IRCComs.begin();
 	while (it != m_IRCComs.end())
 	{
-		mem_free((*it));
+		if(*it)
+			mem_free((*it));
+		//else
+		//	dbg_msg("IRC", "randomshit happened! IRCCOM=%x", it - m_IRCComs.begin());
 		it = m_IRCComs.erase(it);
 	}
 
