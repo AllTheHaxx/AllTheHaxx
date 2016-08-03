@@ -192,7 +192,7 @@ void CIRC::StartConnection() // call this from a thread only!
 	if(str_length(g_Config.m_ClIRCNick) == 0 || str_comp(g_Config.m_ClIRCNick, "haxxless tee") == 0)
 		str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
 
-	m_Nick = g_Config.m_ClIRCNick;
+	SetNick(g_Config.m_ClIRCNick);
 
 	// send request
 	SendRaw("CAP LS");
@@ -1235,8 +1235,15 @@ void CIRC::SendRaw(const char *fmt, ...)
 
 void CIRC::SetNick(const char *nick)
 {
+	char aBuf[64] = {0};
+	str_copy(aBuf, nick, sizeof(aBuf));
+	str_irc_sanitize(aBuf);
+	nick = aBuf;
+
 	if (m_State == STATE_CONNECTED)
+	{
 		SendRaw("NICK %s", nick);
+	}
 
 	m_Nick = nick;
 }

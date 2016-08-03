@@ -432,7 +432,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 				if(Item.m_Visible)
 				{
 					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;
-					UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 10.0f, -1);
+					if(pQuery->m_Buffer[i].c_str())
+						if(str_length(pQuery->m_Buffer[i].c_str()))
+							UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 10.0f, -1);
 				}
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);

@@ -93,14 +93,15 @@ CIRCBind::CIRCBind()
 
 void CIRCBind::OnRender()
 {
-	static bool First = true;
+	static int64 LastConnTry = 0;
 	if (g_Config.m_ClIRCAutoconnect && !IsConnected())
 	{
-		if (!First && (round_to_int(Client()->LocalTime()) % 10) != 0)
-			return;
-		First = false;
-
-		Connect();
+		if(time_get() > LastConnTry + 10*time_freq())
+		{
+			set_new_tick();
+			LastConnTry = time_get();
+			Connect();
+		}
 	}
 }
 
@@ -116,7 +117,7 @@ void CIRCBind::SendCommand(const char* pCmd)
 	m_pClient->IRC()->SendRaw(++pCmd);
 }
 
-void CIRCBind::Connect() // XXX this is depreciated and only for compatibility
+void CIRCBind::Connect() // XXX this is deprecated and only for compatibility
 {
 	if(IsConnected())
 		return;
@@ -125,7 +126,7 @@ void CIRCBind::Connect() // XXX this is depreciated and only for compatibility
 	thread_init(ListenIRCThread, this);
 }
 
-void CIRCBind::Disconnect(char *pReason) // XXX this is depreciated and only for compatibility
+void CIRCBind::Disconnect(char *pReason) // XXX this is deprecated and only for compatibility
 {
 	if(!IsConnected())
 		return;
@@ -133,7 +134,7 @@ void CIRCBind::Disconnect(char *pReason) // XXX this is depreciated and only for
 	m_pClient->IRC()->Disconnect(pReason);
 }
 
-void CIRCBind::OnNickChange(const char *pNewNick) // XXX this is depreciated and only for compatibility
+void CIRCBind::OnNickChange(const char *pNewNick) // XXX this is deprecated and only for compatibility
 {
 	m_pClient->IRC()->SetNick(pNewNick);
 }
