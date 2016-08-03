@@ -475,6 +475,8 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	static const char *apNotificationMsgs[] = {
 			"You are now in a solo part.",
 			"You are now out of the solo part.",
+			"You are now in a solo part",
+			"You are now out of the solo part",
 			"Rescue is not enabled on this server",
 			"You aren't freezed!",
 			"You are not freezed!",
