@@ -2848,7 +2848,7 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 
 	static const char *s_apLabels[] = {
 			Localize("Nickname"),
-			Localize("Username"),
+		//	Localize("Username"),
 			Localize("Password"),
 			Localize("Q Auth Name"),
 			Localize("Q Auth Pass"),
