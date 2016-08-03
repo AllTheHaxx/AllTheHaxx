@@ -86,6 +86,8 @@ public:
 	//
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
+	virtual void NativeMousePos(int *x, int *y) = 0;
+	virtual bool NativeMousePressed(int index) = 0;
 	virtual int MouseDoubleClick() = 0;
 
 	virtual const char* GetClipboardText() = 0;

@@ -58,6 +58,16 @@ int CUI::MouseInside(const CUIRect *r)
 	return 0;
 }
 
+int CUI::MouseInsideAbsolute(float mx, float my, const CUIRect *s, const CUIRect *r)
+{
+	mx = (mx/(float)Graphics()->ScreenWidth())*(s->w);
+	my = (my/(float)Graphics()->ScreenHeight())*(s->h);
+
+	if(mx >= r->x && mx <= r->x+r->w && my >= r->y && my <= r->y+r->h)
+		return 1;
+	return 0;
+}
+
 void CUI::ConvertMouseMove(float *x, float *y)
 {
 #if defined(__ANDROID__)

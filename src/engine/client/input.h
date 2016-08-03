@@ -40,6 +40,8 @@ public:
 	virtual void MouseRelative(float *x, float *y);
 	virtual void MouseModeAbsolute();
 	virtual void MouseModeRelative();
+	virtual void NativeMousePos(int *x, int *y);
+	virtual bool NativeMousePressed(int index);
 	virtual int MouseDoubleClick();
 	virtual const char* GetClipboardText();
 	virtual void SetClipboardText(const char *Text);

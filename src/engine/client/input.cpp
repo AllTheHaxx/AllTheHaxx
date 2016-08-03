@@ -104,6 +104,22 @@ void CInput::MouseModeRelative()
 	Graphics()->SetWindowGrab(true);
 }
 
+void CInput::NativeMousePos(int *x, int *y)
+{
+    int nx = 0, ny = 0;
+    SDL_GetMouseState(&nx,&ny);
+
+    *x = nx;
+    *y = ny;
+}
+
+bool CInput::NativeMousePressed(int index)
+{
+    int i = SDL_GetMouseState(NULL, NULL);
+    return (i&SDL_BUTTON(index)) != 0;
+}
+
+
 int CInput::MouseDoubleClick()
 {
 	CALLSTACK_ADD();
