@@ -28,6 +28,9 @@ void CSkinDownload::OnInit()
 
 void CSkinDownload::OnRender()
 {
+	if(Client()->State() != IClient::STATE_ONLINE)
+		return;
+
 	if(lock_trylock(m_Lock) != 0) // just don't render if it's locked, but don't block!
 		return;
 

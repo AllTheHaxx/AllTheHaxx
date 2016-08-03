@@ -37,6 +37,9 @@ void CMotd::OnRender()
 {
 	CALLSTACK_ADD();
 
+	if(Client()->State() != IClient::STATE_ONLINE)
+		return;
+
 	if(!IsActive())
 		return;
 
