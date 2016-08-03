@@ -2385,11 +2385,6 @@ void str_timestamp(char *buffer, int buffer_size)
 	str_timestamp_ex(time_data, buffer, buffer_size, "%Y-%m-%d_%H-%M-%S");
 }
 
-int mem_comp(const void *a, const void *b, int size)
-{
-	return memcmp(a,b,size);
-}
-
 const char *str_next_word(char *str, char delim, char *buf, int *cursor)
 {
 	int i;
@@ -2406,6 +2401,12 @@ const char *str_next_word(char *str, char delim, char *buf, int *cursor)
 			return buf;
 		}
 	}
+}
+
+
+int mem_comp(const void *a, const void *b, int size)
+{
+	return memcmp(a,b,size);
 }
 
 const MEMSTATS *mem_stats()
