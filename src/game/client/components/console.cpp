@@ -100,8 +100,8 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 void CGameConsole::CInstance::ClearBacklog()
 {
-	m_Backlog.delete_all();
-	m_Backlog.hint_size(CONSOLE_MAX_LINES*12);
+	m_Backlog.Init();
+	m_BacklogActPage = 0;
 	m_BacklogLineOffset = 0;
 }
 
@@ -416,19 +416,43 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		}
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
-			m_BacklogLineOffset = min(m_BacklogLineOffset+CONSOLE_MAX_LINES, m_Backlog.size()-CONSOLE_MAX_LINES);
+			if(m_BacklogLineOffset+=26 > 27-1) // 27 lines fit onto one page
+			{
+				m_BacklogLineOffset = m_BacklogLineOffset%27;
+				m_BacklogActPage++;
+			}
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
-			m_BacklogLineOffset = max(m_BacklogLineOffset-CONSOLE_MAX_LINES, 0);
+			if(m_BacklogLineOffset-=27 < 0)
+			{
+				m_BacklogLineOffset = m_BacklogLineOffset%27;
+				if(--m_BacklogActPage < 0)
+				{
+					m_BacklogActPage = 0;
+					m_BacklogLineOffset = 0;
+				}
+			}
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
 		{
-			m_BacklogLineOffset = min(m_BacklogLineOffset+1, m_Backlog.size()-CONSOLE_MAX_LINES);
+			if(++m_BacklogLineOffset > 27-1) // 27 lines fit onto one page
+			{
+				m_BacklogLineOffset = 0;
+				m_BacklogActPage++;
+			}
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
 		{
-			m_BacklogLineOffset = max(m_BacklogLineOffset-1, 0);
+			if(--m_BacklogLineOffset < 0)
+			{
+				m_BacklogLineOffset = 27-1;
+				if(--m_BacklogActPage < 0)
+				{
+					m_BacklogActPage = 0;
+					m_BacklogLineOffset = 0;
+				}
+			}
 		}
 		else if(Event.m_Key == KEY_F)
 		{
@@ -523,7 +547,16 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 {
-	m_Backlog.add(new CBacklogEntry(pLine, Highlighted));
+	int Len = str_length(pLine);
+
+	if (Len > 255)
+		Len = 255;
+
+	CBacklogEntry *pEntry = m_Backlog.Allocate(sizeof(CBacklogEntry)+Len);
+	pEntry->m_YOffset = -1.0f;
+	pEntry->m_Highlighted = Highlighted;
+	mem_copy(pEntry->m_aText, pLine, Len);
+	pEntry->m_aText[Len] = 0;
 }
 
 bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is for LuaConsole
@@ -903,237 +936,281 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		const vec3 HighlightRGB = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
+		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 
-		// XXX: RENDER THE LINES
-		for(int CurrLine = 0; CurrLine < + CONSOLE_MAX_LINES; CurrLine++) // CONSOLE_MAX_LINES lines to render on one page
+		//	render log (actual page, wrap lines)
+		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
+		float OffsetY = 0.0f;
+		float LineOffset = 1.0f;
+
+		for(int Page = 0; Page <= pConsole->m_BacklogActPage; ++Page, OffsetY = 0.0f)
 		{
-			int LineToRender = pConsole->m_Backlog.size()-1-pConsole->m_BacklogLineOffset-CurrLine;
-			if(LineToRender < 0)
-				break;
-
-			CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog[LineToRender];
-			const char * const pEntryText = pEntry->Text();
-
-			if(m_pSearchString && !str_find_nocase(pEntryText, m_pSearchString))
-				continue;
-
-			if(pEntry->Highlighted())
-				TextRender()->TextColor(HighlightRGB.r, HighlightRGB.g, HighlightRGB.b, 1);
-			else
-				TextRender()->TextColor(1,1,1,1);
-
-			// y offset
-			//	render log (actual page, wrap lines)
-			const float LineOffset = 11.0f;
-			float OffsetY = (CurrLine*Cursor.m_FontSize+LineOffset+((float)CONSOLE_MAX_LINES)-25);
-
-			// clipboard selection
-			int mx, my;
-			Input()->NativeMousePos(&mx, &my);
-			Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
-			mx = (mx / (float)Graphics()->ScreenWidth()) * Screen.w;
-			my = (my / (float)Graphics()->ScreenHeight()) * Screen.h;
-
-			float strWidth = TextRender()->TextWidth(Cursor.m_pFont, FontSize, sText.c_str(), (int)sText.length());
-			CUIRect seltextRect(0, y - OffsetY, strWidth, FontSize + 3.0f);
-
-			if(my > seltextRect.y && my < seltextRect.y + seltextRect.h)
+			for(int asdf = 0; asdf < pConsole->m_BacklogLineOffset; asdf++)
 			{
-				if(selectedLine == -1)
-					sText = pEntry->Text();
-
-				float offacumx = 0;
-				float charwi = 0;
-				for(int i = 0; i < sText.length(); i++)
-				{
-					char toAn[2] = {sText.at(i), '\0'};
-					charwi = TextRender()->TextWidth(0, FontSize, toAn, 1);
-					if(mx >= offacumx && mx <= offacumx + charwi)
-						break;
-
-					offacumx += charwi;
-				}
-
-				if(mousePress && copyStart == -1)
-				{
-					textRect.y = seltextRect.y;
-					textRect.h = seltextRect.h;
-					copyStart = offacumx;
-					copyEnd = offacumx + charwi;
-					copyIndexStart = CurrLine;
-					copyIndexEnd = CurrLine + 1;
-					selectedLine = CurrLine;
-				}
-				if(mousePress && copyStart != -1)
-				{
-					copyEnd = offacumx;
-					if(copyEnd < copyStart)
-					{
-						copyEnd = copyStart;
-						copyIndexEnd = copyIndexStart;
-					}
-					else
-						copyIndexEnd = CurrLine;
-				}
-
-				if(Input()->NativeMousePressed(1))
-				{
-					mousePress = true;
-				}
+				if(pEntry && pConsole->m_Backlog.Prev(pEntry))
+					pEntry = pConsole->m_Backlog.Prev(pEntry);
+				else break;
 			}
 
-			if(!Input()->NativeMousePressed(1) && mousePress)
+			int lineNum = 0;
+			while(pEntry)
 			{
-				if(copyIndexStart != -1 && !sText.empty() && copyIndexEnd <= sText.length())
+				if(m_pSearchString && !str_find_nocase(pEntry->m_aText, m_pSearchString))
 				{
-					Input()->SetClipboardTextSTD(sText.substr(copyIndexStart, copyIndexEnd - copyIndexStart));
-					//dbg_msg("Clipboard", "Copied '%s' to clipboard...", sText.substr(copyIndexStart, copyIndexEnd-copyIndexStart).c_str());
+					pEntry = pConsole->m_Backlog.Prev(pEntry); // skip entries not mathing our search
+					continue;
 				}
 
-				copyStart = -1.0f;
-				copyEnd = -1.0f;
-				copyIndexStart = -1;
-				copyIndexEnd = -1;
-				selectedLine = -1;
-				sText.clear();
-				mousePress = false;
-			}
-			// -------------------- end clipboard selection code -------------------
+				if(pEntry->m_Highlighted)
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
+				else
+					TextRender()->TextColor(1,1,1,1);
 
+				// get y offset (calculate it if we haven't yet)
+				if(pEntry->m_YOffset < 0.0f)
+				{
+					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0);
+					Cursor.m_LineWidth = Screen.w-10;
+					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					pEntry->m_YOffset = Cursor.m_Y+Cursor.m_FontSize+LineOffset;
+				}
+				OffsetY += pEntry->m_YOffset;
 
-			TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER); // XXX: renders the line
-			Cursor.m_LineWidth = Screen.w-10.0f;
-
-			const char *pCursor = pEntry->Text();
-			const char *pUrlBeginning = pCursor;
-			const char *pUrlEnding;
-
-			char aUrl[64];
-			int UrlSize;
-
-			CUIRect TextRect;
-
-			bool Found = false;
-			bool One = true;
-
-			while(true)
-			{
-				if(!pUrlBeginning)
+				//	next page when lines reach the top
+				if(y-OffsetY <= RowHeight)
 					break;
 
-				mem_zero(aUrl, sizeof(aUrl));
-				UrlSize = 0;
-
-				pUrlBeginning = str_find(pCursor, "http://");
-				if(!pUrlBeginning)
-					pUrlBeginning = str_find(pCursor, "https://");
-
-				if(pUrlBeginning) // found the link
+				//	just render output from actual backlog page (render bottom up)
+				if(Page == pConsole->m_BacklogActPage)
 				{
-					Found = true;
+					// clipboard selection
+					int mx, my;
+					Input()->NativeMousePos(&mx, &my);
+					Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+					mx = (mx / (float)Graphics()->ScreenWidth()) * Screen.w;
+					my = (my / (float)Graphics()->ScreenHeight()) * Screen.h;
 
-					pUrlEnding = str_find(pUrlBeginning, " ");
-					if(!pUrlEnding) // the link is till the end
-						pUrlEnding = pUrlBeginning + str_length(pUrlBeginning);
-					else
+					int strWidth = TextRender()->TextWidth(Cursor.m_pFont, FontSize, sText.c_str(), sText.length());
+					CUIRect seltextRect(0, y - OffsetY, strWidth, FontSize + 3.0f);
+
+					if(my > seltextRect.y && my < seltextRect.y + seltextRect.h)
 					{
-						One = false;
-						pUrlEnding++;
-					}
+						if(selectedLine == -1)
+							sText = pEntry->m_aText;
 
-					UrlSize = pUrlEnding - pUrlBeginning;
-					str_copy(aUrl, pUrlBeginning, UrlSize + 1);
-
-					// url rect
-					TextRect.x = TextRender()->TextWidth(0, FontSize, pEntryText, pUrlBeginning -  pEntryText);
-					TextRect.y = y - OffsetY;
-					TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, UrlSize);
-					TextRect.h = FontSize;
-
-					// render the first part
-					if(pUrlBeginning - pCursor > 0)
-					{
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pCursor, pUrlBeginning - pCursor);
-					}
-
-					// set the color and check if pressed
-					if(UI()->MouseInside(&TextRect))
-					{
-						TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
-						static float LastClicked = 0;
-						if(UI()->MouseButtonClicked(0) && Client()->LocalTime() > LastClicked + 1)
+						float offacumx = 0;
+						float charwi = 0;
+						int i = 0;
+						for(i = 0; i < sText.length(); i++)
 						{
-							LastClicked = Client()->LocalTime();
-							Input()->MouseModeAbsolute();
-							//((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->Minimize();
-							open_default_browser(aUrl);
+							char toAn[2] = {sText.at(i), '\0'};
+							charwi = TextRender()->TextWidth(0, FontSize, toAn, 1);
+							if(mx >= offacumx && mx <= offacumx + charwi)
+								break;
+
+							offacumx += charwi;
+						}
+
+						if(mousePress && copyStart == -1)
+						{
+							textRect.y = seltextRect.y;
+							textRect.h = seltextRect.h;
+							copyStart = offacumx;
+							copyEnd = offacumx + charwi;
+							copyIndexStart = i;
+							copyIndexEnd = i + 1;
+							selectedLine = lineNum;
+						}
+						if(mousePress && copyStart != -1)
+						{
+							copyEnd = offacumx;
+							if(copyEnd < copyStart)
+							{
+								copyEnd = copyStart;
+								copyIndexEnd = copyIndexStart;
+							}
+							else
+								copyIndexEnd = i;
+						}
+
+						if(Input()->NativeMousePressed(1))
+						{
+							mousePress = true;
 						}
 					}
-					else
-						TextRender()->TextColor(1.0f, 0.39f, 0.0f, 1.0f);
 
-					// render the link
-					TextRender()->TextEx(&Cursor, pUrlBeginning, UrlSize);
+					if(!Input()->NativeMousePressed(1) && mousePress)
+					{
+						if(copyIndexStart != -1 && !sText.empty() && copyIndexEnd <= sText.length())
+						{
+							Input()->SetClipboardTextSTD(sText.substr(copyIndexStart, copyIndexEnd - copyIndexStart));
+							//dbg_msg("Clipboard", "Copied '%s' to clipboard...", sText.substr(copyIndexStart, copyIndexEnd-copyIndexStart).c_str());
+						}
 
-					// render the rest
-					if(One)
+						copyStart = -1.0f;
+						copyEnd = -1.0f;
+						copyIndexStart = -1;
+						copyIndexEnd = -1;
+						selectedLine = -1;
+						sText.clear();
+						mousePress = false;
+					}
+					// -------------------- end clipboard selection code -------------------
+
+								
+					TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER);
+					Cursor.m_LineWidth = Screen.w-10.0f;
+					
+					const char *pCursor = pEntry->m_aText;
+					const char *pUrlBeginning = pEntry->m_aText;
+					const char *pUrlEnding;
+
+					char aUrl[64];
+					int UrlSize;
+
+					CUIRect TextRect;
+
+					bool Found = false;
+					bool One = true;
+
+					while(true)
+					{
+						if(!pUrlBeginning)
+							break;
+
+						mem_zero(aUrl, sizeof(aUrl));
+						UrlSize = 0;
+
+						pUrlBeginning = str_find(pCursor, "http://");
+						if(!pUrlBeginning)
+							pUrlBeginning = str_find(pCursor, "https://");
+
+						if(pUrlBeginning) // found the link
+						{
+							Found = true;
+
+							pUrlEnding = str_find(pUrlBeginning, " ");
+							if(!pUrlEnding) // the link is till the end
+								pUrlEnding = pUrlBeginning + str_length(pUrlBeginning);
+							else
+							{
+								One = false;
+								pUrlEnding++;
+							}
+
+							UrlSize = pUrlEnding - pUrlBeginning;
+							str_copy(aUrl, pUrlBeginning, UrlSize + 1);
+
+							// url rect
+							TextRect.x = TextRender()->TextWidth(0, FontSize, pEntry->m_aText, pUrlBeginning - pEntry->m_aText);
+							TextRect.y = y - OffsetY;
+							TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, UrlSize);
+							TextRect.h = FontSize;
+
+							// render the first part
+							if(pUrlBeginning - pCursor > 0)
+							{
+								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+								TextRender()->TextEx(&Cursor, pCursor, pUrlBeginning - pCursor);
+							}
+
+							// set the color and check if pressed
+							if(UI()->MouseInside(&TextRect))
+							{
+								TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
+								static float LastClicked = 0;
+								if(UI()->MouseButtonClicked(0) && Client()->LocalTime() > LastClicked + 1)
+								{
+									LastClicked = Client()->LocalTime();
+									Input()->MouseModeAbsolute();
+									//((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->Minimize();
+									open_default_browser(aUrl);
+								}
+							}
+							else
+								TextRender()->TextColor(1.0f, 0.39f, 0.0f, 1.0f);
+
+							// render the link
+							TextRender()->TextEx(&Cursor, pUrlBeginning, UrlSize);
+
+							// render the rest
+							if(One)
+							{
+								TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+								TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
+							}
+							
+							pCursor = pUrlEnding;
+						}
+					}
+
+					if(!One)
 					{
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 						TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
 					}
 
-					pCursor = pUrlEnding;
-				}
-			}
-
-			if(!One)
-			{
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-				TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
-			}
-
-			if(!Found)
-			{
-				// highlight the parts that matches
-				if(m_pSearchString && m_pSearchString[0] != '\0')
-				{
-					const char *pText = pEntryText;
-					while(pText)
+					if(!Found)
 					{
-						const char *pFoundStr = str_find_nocase(pText, m_pSearchString);
-						if(pFoundStr)
+						// highlight the parts that matches
+						if(m_pSearchString && m_pSearchString[0] != '\0')
 						{
-							TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr-pText));
-							TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
-							TextRender()->TextEx(&Cursor, pFoundStr, str_length(m_pSearchString));
-							TextRender()->TextColor(1,1,1,1);
-							//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
-							pText = pFoundStr+str_length(m_pSearchString);
+							const char *pText = pEntry->m_aText;
+							while(pText)
+							{
+								const char *pFoundStr = str_find_nocase(pText, m_pSearchString);
+								if(pFoundStr)
+								{
+									TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr-pText));
+									TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
+									TextRender()->TextEx(&Cursor, pFoundStr, str_length(m_pSearchString));
+									TextRender()->TextColor(1,1,1,1);
+									//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
+									pText = pFoundStr+str_length(m_pSearchString);
+								}
+								else
+								{
+									TextRender()->TextEx(&Cursor, pText, -1);
+									break;
+								}
+
+								if(pText > pEntry->m_aText + str_length(pEntry->m_aText)-1 || pText < pEntry->m_aText)
+									pText = 0;
+							}
 						}
 						else
-						{
-							TextRender()->TextEx(&Cursor, pText, -1);
-							break;
-						}
-
-						if(pText > pEntryText + str_length(pEntryText)-1 || pText < pEntryText)
-							pText = 0;
+							TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 					}
 				}
-				else
-					TextRender()->TextEx(&Cursor, pEntryText, -1);
+				pEntry = pConsole->m_Backlog.Prev(pEntry);
+				lineNum++;
+
+				// reset color
+				TextRender()->TextColor(1,1,1,1);
 			}
 
-			// reset color
-			TextRender()->TextColor(1,1,1,1);
+			//	actual backlog page number is too high, render last available page (current checked one, render top down)
+			if(!pEntry && Page < pConsole->m_BacklogActPage)
+			{
+				pConsole->m_BacklogActPage = Page;
+				pConsole->m_BacklogLineOffset = 26; // <-ANZAHL DER ZEILEN AUF SEITE "Page" TODO XXX nicht 27
+				pEntry = pConsole->m_Backlog.First();
+				while(OffsetY > 0.0f && pEntry)
+				{
+					TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER);
+					Cursor.m_LineWidth = Screen.w-10.0f;
+					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					OffsetY -= pEntry->m_YOffset;
+					pEntry = pConsole->m_Backlog.Next(pEntry);
+				}
+				break;
+			}
 		}
 
 		// render page
 		char aBuf[128];
 		TextRender()->TextColor(1,1,1,1);
-		str_format(aBuf, sizeof(aBuf), Localize("Page %d, Line %d"), pConsole->m_BacklogLineOffset/CONSOLE_MAX_LINES+1, pConsole->m_BacklogLineOffset%CONSOLE_MAX_LINES);
+		str_format(aBuf, sizeof(aBuf), Localize("-Page %d, Line %d-"), pConsole->m_BacklogActPage+1, pConsole->m_BacklogLineOffset);
 		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
 
 		// render version
@@ -1219,16 +1296,14 @@ void CGameConsole::Dump(int Type)
 	IOHANDLE io = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(io)
 	{
-		for(int i = 0; i < pConsole->m_Backlog.size(); i++)
+		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry;
+				pEntry = pConsole->m_Backlog.Next(pEntry))
 		{
-			io_write(io, pConsole->m_Backlog[i]->Text(), (unsigned int)str_length(pConsole->m_Backlog[i]->Text()));
+			io_write(io, pEntry->m_aText, str_length(pEntry->m_aText));
 			io_write_newline(io);
 		}
 		io_close(io);
-		GameClient()->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "console_dump", "Saved %i lines to '%s'", pConsole->m_Backlog.size(), aFilename);
 	}
-	else
-		GameClient()->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "console_dump", "Failed to open file '%s' for writing", aFilename);
 }
 
 void CGameConsole::ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData)
