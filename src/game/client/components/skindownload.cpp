@@ -180,7 +180,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS)
 		return;
 
-	// protect against malicious skin names
+/*	// protect against malicious skin names --- doesn't really seem to be necessary, huh
 #if defined(CONF_FAMILY_WINDOWS)
 	bool fail = false;
 	for(int i = 0; i <= 9; i++)
@@ -205,7 +205,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		Fail(pName);
 		return;
 	}
-#endif
+#endif*/
 
 	// get the lock
 	if(lock_trylock(m_Lock) != 0)
