@@ -18,8 +18,6 @@ void CSkinDownload::OnInit()
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 
-	m_Lock = lock_create();
-	lock_unlock(m_Lock);
 	mem_zero(m_apFetchTasks, sizeof(m_apFetchTasks));
 
 	m_DefaultSkin = -1;
@@ -31,9 +29,6 @@ void CSkinDownload::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE)
 		return;
 
-	if(lock_trylock(m_Lock) != 0) // just don't render if it's locked, but don't block!
-		return;
-
 	const int NUM_TASKS = NumTasks();
 	const float MAX_HEIGHT = NUM_TASKS == 0 ? 0.001f : 5.0f + 25.0f + 5.0f + 20.0f * (float)NUM_TASKS;
 
@@ -42,7 +37,6 @@ void CSkinDownload::OnRender()
 
 	if(s_SmoothPos <= 0.01f)
 	{
-		lock_unlock(m_Lock);
 		return;
 	}
 
@@ -110,18 +104,15 @@ void CSkinDownload::OnRender()
 
 	TextRender()->TextColor(1,1,1,1);
 
-	lock_unlock(m_Lock);
 }
 
 void CSkinDownload::CSkinFetchTask::ProgressCallback(CFetchTask *pTask, void *pUser)
 {
 	CSkinFetchTask *pSelf = (CSkinFetchTask *)pUser;
-	//lock_wait(pSelf->m_Lock); // we don't really need a lock here, do we?
 
 	pSelf->m_State = pTask->State();
 	pSelf->m_Progress = pTask->Progress();
 
-	//lock_unlock(pSelf->m_Lock);
 }
 
 void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
@@ -130,9 +121,7 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 	const char *pDest = pTask->Dest();
 
-	lock_wait(pSelf->m_Lock);
 	CSkinFetchTask *pTaskHandler = pSelf->FindTask(pTask);
-	lock_unlock(pSelf->m_Lock);
 	if(!pTaskHandler)
 	{
 		dbg_msg("SKINFETCHER/ERROR", "Something really bad happened. I have no clue how that comes. I'm sorry.");
@@ -207,15 +196,10 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	}
 #endif*/
 
-	// get the lock
-	if(lock_trylock(m_Lock) != 0)
-		return; // try again when lock is available
-
 	// don't rerun failed tasks
 	for(int i = 0; i < m_FailedTasks.size(); i++)
 		if(str_comp_nocase(m_FailedTasks[i].c_str(), pName) == 0)
 		{
-			lock_unlock(m_Lock);
 			return;
 		}
 
@@ -224,7 +208,6 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		if(m_apFetchTasks[i])
 			if(str_comp_nocase(m_apFetchTasks[i]->SkinName(), pName) == 0)
 			{
-				lock_unlock(m_Lock);
 				return;
 			}
 
@@ -232,16 +215,14 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	CSkinFetchTask **ppSlot = FindFreeSlot();
 	if(!ppSlot) // this check shouldn't be necessary... but safe is safe :/
 	{
-		lock_unlock(m_Lock);
 		return;
 	}
 
 	*ppSlot = pTask;
 	FetchSkin(pTask);
-	lock_unlock(m_Lock);
 }
 
-bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler) // doesn't lock!
+bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler)
 {
 	dbg_assert(pTaskHandler != NULL, "CSkinDownload::FetchNext called with pTaskHandler == NULL");
 
@@ -260,7 +241,7 @@ bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler) // doesn't lock!
 	return true;
 }
 
-void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler) // doesn't lock!
+void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler)
 {
 	dbg_assert(pTaskHandler != NULL, "CSkinDownload::FetchSkin called with pTaskHandler == NULL");
 

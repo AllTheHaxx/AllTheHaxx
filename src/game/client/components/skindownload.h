@@ -75,7 +75,6 @@ public:
 private:
 	class IFetcher *m_pFetcher;
 	class IStorageTW *m_pStorage;
-	LOCK m_Lock;
 
 	int m_DefaultSkin;
 

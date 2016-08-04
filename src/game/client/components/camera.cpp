@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/tl/string.h>
+
 #include <engine/shared/config.h>
 
 #include <base/math.h>
@@ -10,6 +12,8 @@
 
 #include "camera.h"
 #include "controls.h"
+
+#include <engine/serverbrowser.h>
 
 CCamera::CCamera()
 {
@@ -37,7 +41,7 @@ void CCamera::OnRender()
 		OnReset();
 	}
 
-	smooth_set(&m_Zoom, m_WantedZoom, 105.0f, Client()->RenderFrameTime(), 0);
+	smooth_set(&m_Zoom, m_WantedZoom, 105.0f, Client()->RenderFrameTime());
 
 	// update camera center
 	if(Client()->State() == IClient::STATE_OFFLINE)
@@ -73,7 +77,7 @@ void CCamera::OnRender()
 			m_CamType = CAMTYPE_SPEC;
 		}
 
-	/*	if(m_GodlikeSpec) // TODO: this needs some more work.
+	/*	if(m_GodlikeSpec && false) // TODO: this needs some more work.
 		{
 			vec2 Middlwerd(0.0f, 0.0f);
 			int Num = 0;
@@ -98,9 +102,9 @@ void CCamera::OnRender()
 			else
 				m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
 		}
-		else
+		else*/
 			m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
-		//dbg_msg("center", "(%.1f %.1f) wanted (%.1f %.1f)", m_Center.x, m_Center.y, m_WantedCenter.x, m_WantedCenter.y);*/
+		//dbg_msg("center", "(%.1f %.1f) wanted (%.1f %.1f)", m_Center.x, m_Center.y, m_WantedCenter.x, m_WantedCenter.y);
 	}
 	else
 	{
