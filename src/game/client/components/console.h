@@ -14,25 +14,45 @@ enum
 	CONSOLE_CLOSING,
 };
 
+#define CONSOLE_MAX_LINES 30
+
 class CGameConsole : public CComponent
 {
 	class CInstance
 	{
 	public:
-		struct CBacklogEntry
+		class CBacklogEntry
 		{
-			float m_YOffset;
 			bool m_Highlighted;
-			char m_aText[1];
+			char *m_pText;
+
+		public:
+			CBacklogEntry(const char *pText, bool Highlighted) : m_Highlighted(Highlighted)
+			{
+				int Len = /*min(255, */str_length(pText)/*)*/;
+				m_pText = (char *)mem_alloc(Len + 1U, 0);
+				mem_zero(m_pText, Len + 1U);
+				mem_copy(m_pText, pText, (unsigned)Len);
+				m_pText[Len] = '\0';
+			}
+
+			~CBacklogEntry()
+			{
+				mem_free(m_pText);
+			}
+
+			const char *Text() const { return m_pText; }
+			bool Highlighted() const { return m_Highlighted; }
 		};
-		TStaticRingBuffer<CBacklogEntry, 64*1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
+
+		array<CBacklogEntry*> m_Backlog;
+
 		TStaticRingBuffer<char, 64*1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
 		CLineInput m_Input;
 		int m_Type;
 		int m_CompletionEnumerationCount;
-		int m_BacklogActPage;
 		int m_BacklogLineOffset;
 
 	public:
