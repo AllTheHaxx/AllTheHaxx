@@ -223,14 +223,18 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #if defined(CONF_FAMILY_WINDOWS)
 		//see http://www.cplusplus.com/articles/2ywTURfi/
 		
-		if(str_comp(sys, "chat") == 0)
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
-		else if(str_comp(sys, "teamchat") == 0)
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2);
-		else if(str_comp(sys, "serv") == 0)
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
+		if(str_comp_nocase(sys, "chat") == 0)
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); // gamechat: white
+		else if(str_comp_nocase(sys, "teamchat") == 0)
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2); // teamchat: green
+		else if(str_comp_nocase(sys, "serv") == 0)
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6); // serverchat: yellow
+		else if(str_find_nocase(sys, "error"))
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4); // errors: red
+		else if(str_comp_nocase(sys, "irc") && str_find_nocase(msg, "chat]"))
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 3); // irc-chat: blue
 		else
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 8);
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 8); // everything else: gray
 		
 		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #else
