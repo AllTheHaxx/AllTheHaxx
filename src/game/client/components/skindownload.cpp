@@ -169,7 +169,14 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS || g_Config.m_ClVanillaSkinsOnly)
 		return;
 
-/*	// protect against malicious skin names --- doesn't really seem to be necessary, huh
+	// don't rerun failed tasks
+	for(int i = 0; i < m_FailedTasks.size(); i++)
+		if(str_comp_nocase(m_FailedTasks[i].c_str(), pName) == 0)
+		{
+			return;
+		}
+
+	// protect against malicious skin names --- doesn't really seem to be necessary, huh
 #if defined(CONF_FAMILY_WINDOWS)
 	bool fail = false;
 	for(int i = 0; i <= 9; i++)
@@ -194,14 +201,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		Fail(pName);
 		return;
 	}
-#endif*/
-
-	// don't rerun failed tasks
-	for(int i = 0; i < m_FailedTasks.size(); i++)
-		if(str_comp_nocase(m_FailedTasks[i].c_str(), pName) == 0)
-		{
-			return;
-		}
+#endif
 
 	// don't queue tasks multiple times
 	for(int i = 0; i < MAX_FETCHTASKS; i++)
