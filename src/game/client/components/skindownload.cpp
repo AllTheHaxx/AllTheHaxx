@@ -177,7 +177,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 
 	
 	// don't fetch anything if it's disabled or the tasklist is full
-	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS)
+	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS || g_Config.m_ClVanillaSkinsOnly)
 		return;
 
 /*	// protect against malicious skin names --- doesn't really seem to be necessary, huh

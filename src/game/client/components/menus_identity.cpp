@@ -160,7 +160,15 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		Button.HSplitTop(Button.h*0.25f, 0, &Label);
 
-		const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(pEntry->m_aSkin));
+		static int DefaultSkin = -1;
+		if(DefaultSkin < 0)
+			 DefaultSkin = m_pClient->m_pSkins->Find("default");
+
+		int SkinID = m_pClient->m_pSkins->Find(pEntry->m_aSkin);
+		if(SkinID < 0)
+			SkinID = DefaultSkin;
+
+		const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(SkinID);
 		CTeeRenderInfo OwnSkinInfo;
 		if(pEntry->m_UseCustomColor)
 		{
