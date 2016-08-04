@@ -69,16 +69,21 @@ void CSkinDownload::OnRender()
 		if(!e)
 			continue;
 
-		if(e->State() == CFetchTask::STATE_ERROR)
+		int S = e->State();
+		if(S == CFetchTask::STATE_ERROR)
 			TextRender()->TextColor(1,0,0,1);
-		if(e->State() == CFetchTask::STATE_DONE)
+		else if(S == CFetchTask::STATE_DONE)
 			TextRender()->TextColor(0,1,0,1);
-		if(e->State() == CFetchTask::STATE_QUEUED)
+		else if(S == CFetchTask::STATE_QUEUED)
 			TextRender()->TextColor(1,1,0,1);
-		if(e->State() == CFetchTask::STATE_RUNNING)
+		else if(S == CFetchTask::STATE_RUNNING)
 			TextRender()->TextColor(0.3f, 0.3f, 0.6f, 1);
-		if(e->State() == CFetchTask::STATE_ABORTED)
+		else if(S == CFetchTask::STATE_ABORTED)
 			TextRender()->TextColor(0.7f, 0.2f, 0.7f, 1);
+
+		// make sure that tasks don't stay in the list for ever
+		if(S != CFetchTask::STATE_QUEUED && S != CFetchTask::STATE_RUNNING && e->FinishTime() < 0)
+			e->Finish();
 
 		Screen.HSplitTop(5.0f, 0, &Screen);
 		Screen.HSplitTop(13.5f, &Button, &Screen);
@@ -174,6 +179,33 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	// don't fetch anything if it's disabled or the tasklist is full
 	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS)
 		return;
+
+	// protect against malicious skin names
+#if defined(CONF_FAMILY_WINDOWS)
+	bool fail = false;
+	for(int i = 0; i <= 9; i++)
+	{
+		char aBuf[16];
+		str_format(aBuf, sizeof(aBuf), "lpt%i", i);
+		if(str_comp_nocase(pName, aBuf) == 0)
+		{
+			fail = true;
+			break;
+		}
+	}
+
+	if(!fail)
+		fail = str_comp_nocase(pName, "con") == 0 ||
+				str_find(pName, "/") || str_find(pName, "*") || str_find(pName, "\"") || str_find(pName, "?") ||
+				str_find(pName, "\\") || str_find(pName, ":") || str_find(pName, ">") || str_find(pName, "<") || str_find(pName, "|");
+
+	if(fail)
+	{
+		dbg_msg("skinfetcher", "couldn't fetch skin '%s': invalid name", pName);
+		Fail(pName);
+		return;
+	}
+#endif
 
 	// get the lock
 	if(lock_trylock(m_Lock) != 0)
