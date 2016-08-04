@@ -153,6 +153,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 {
 	if(m_DefaultSkin < 0)
 		m_DefaultSkin = GameClient()->m_pSkins->Find("default");
+	*pDestID = m_DefaultSkin;
 
 	// search for the wanted skin
 	int SkinID = GameClient()->m_pSkins->Find(pName);
@@ -161,9 +162,6 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		*pDestID = SkinID;
 		return;
 	}
-	else
-		*pDestID = m_DefaultSkin; // set the default skin for now and try to fetch the actual one
-
 	
 	// don't fetch anything if it's disabled or the tasklist is full
 	if(!g_Config.m_ClSkinFetcher || NumTasks(false) >= MAX_FETCHTASKS || NumTasks(true) >= MAX_ACTIVE_TASKS || g_Config.m_ClVanillaSkinsOnly)
