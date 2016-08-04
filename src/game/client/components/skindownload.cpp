@@ -166,36 +166,18 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 
 	
 	// don't fetch anything if it's disabled or the tasklist is full
-	if(!g_Config.m_ClSkinFetcher || NumTasks() >= MAX_FETCHTASKS || g_Config.m_ClVanillaSkinsOnly)
+	if(!g_Config.m_ClSkinFetcher || NumTasks(false) >= MAX_FETCHTASKS || NumTasks(true) >= MAX_ACTIVE_TASKS || g_Config.m_ClVanillaSkinsOnly)
 		return;
 
 	// don't rerun failed tasks
 	for(int i = 0; i < m_FailedTasks.size(); i++)
 		if(str_comp_nocase(m_FailedTasks[i].c_str(), pName) == 0)
-		{
 			return;
-		}
 
-	// protect against malicious skin names --- doesn't really seem to be necessary, huh
+	// protect against malicious skin names
 #if defined(CONF_FAMILY_WINDOWS)
-	bool fail = false;
-	for(int i = 0; i <= 9; i++)
-	{
-		char aBuf[16];
-		str_format(aBuf, sizeof(aBuf), "lpt%i", i);
-		if(str_comp_nocase(pName, aBuf) == 0)
-		{
-			fail = true;
-			break;
-		}
-	}
-
-	if(!fail)
-		fail = str_comp_nocase(pName, "con") == 0 ||
-				str_find(pName, "/") || str_find(pName, "*") || str_find(pName, "\"") || str_find(pName, "?") ||
-				str_find(pName, "\\") || str_find(pName, ":") || str_find(pName, ">") || str_find(pName, "<") || str_find(pName, "|");
-
-	if(fail)
+	if(	str_find(pName, "/") || str_find(pName, "*") || str_find(pName, "\"") || str_find(pName, "?") ||
+		str_find(pName, "\\") || str_find(pName, ":") || str_find(pName, ">") || str_find(pName, "<") || str_find(pName, "|"))
 	{
 		dbg_msg("skinfetcher", "couldn't fetch skin '%s': invalid name", pName);
 		Fail(pName);
@@ -207,16 +189,12 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	for(int i = 0; i < MAX_FETCHTASKS; i++)
 		if(m_apFetchTasks[i])
 			if(str_comp_nocase(m_apFetchTasks[i]->SkinName(), pName) == 0)
-			{
 				return;
-			}
 
 	CSkinFetchTask *pTask = new CSkinFetchTask(pName);
 	CSkinFetchTask **ppSlot = FindFreeSlot();
 	if(!ppSlot) // this check shouldn't be necessary... but safe is safe :/
-	{
 		return;
-	}
 
 	*ppSlot = pTask;
 	FetchSkin(pTask);
@@ -267,11 +245,12 @@ void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler)
 	if(f)
 	{
 		io_close(f);
-		//Storage()->RemoveBinaryFile(aFullPath);
 	}
 	else
 	{
 		dbg_msg("skinfetcher/error", "cannot write to '%s'", aFullPath);
+		pTaskHandler->Invalidate();
+		Fail(pTaskHandler->SkinName());
 		return;
 	}
 

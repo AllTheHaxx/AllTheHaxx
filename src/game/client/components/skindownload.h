@@ -56,6 +56,13 @@ public:
 			m_FinishTime = -1;
 		}
 
+		void Invalidate()
+		{
+			m_State = CFetchTask::STATE_ERROR;
+			m_FinishTime = time_get();
+			m_Progress = 100;
+		}
+
 		// getters
 		CFetchTask *Task() const { return m_pCurlTask; }
 		const char *SkinName() const { return m_SkinName.c_str(); }
@@ -80,7 +87,8 @@ private:
 
 	enum
 	{
-		MAX_FETCHTASKS = 4,
+		MAX_ACTIVE_TASKS = 4,
+		MAX_FETCHTASKS = 8,
 
 		MAX_URLS = 64,
 		MAX_URL_LEN = 512,
@@ -98,12 +106,13 @@ private:
 	 * @threadsafety DOESN'T lock, but accesses the critical array
 	 * @return The number of tasks
 	 */
-	int NumTasks()
+	int NumTasks(bool ActiveOnly=false)
 	{
 		int ret = 0;
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
 			if(m_apFetchTasks[i] != NULL)
-				ret++;
+				if(!ActiveOnly || m_apFetchTasks[i]->FinishTime() < 0)
+					ret++;
 		return ret;
 	}
 
@@ -113,7 +122,7 @@ private:
 			if(m_apFetchTasks[i] != NULL)
 				if(m_apFetchTasks[i]->Task() == pTask)
 					return m_apFetchTasks[i];
-		return 0;
+		return NULL;
 	}
 
 	CSkinFetchTask **FindFreeSlot()
