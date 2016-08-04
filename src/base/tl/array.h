@@ -111,7 +111,10 @@ public:
 	*/
 	void remove_index_fast(int index)
 	{
-		list[index] = list[num_elements-1];
+		if(index < 0)
+			index += num_elements;
+		if(index != num_elements-1)
+			list[index] = list[num_elements-1];
 		set_size(size()-1);
 	}
 
@@ -139,6 +142,8 @@ public:
 	*/
 	void remove_index(int index)
 	{
+		if(index < 0)
+			index += num_elements;
 		for(int i = index+1; i < num_elements; i++)
 			list[i-1] = list[i];
 
@@ -216,6 +221,8 @@ public:
 	*/
 	T& operator[] (int index)
 	{
+		if(index < 0)
+			index += num_elements;
 		return list[index];
 	}
 
@@ -224,6 +231,8 @@ public:
 	*/
 	const T& operator[] (int index) const
 	{
+		if(index < 0)
+			index += num_elements;
 		return list[index];
 	}
 
