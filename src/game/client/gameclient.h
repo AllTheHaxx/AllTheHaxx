@@ -260,6 +260,7 @@ public:
 		bool m_ChatIgnore;
 		bool m_Friend;
 		bool m_Foe;
+		bool m_ATH;
 
 		void UpdateRenderInfo();
 		void Reset();
