@@ -403,7 +403,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				m_Input.Clear();
 			Handled = true;
 		}
-		else if(Event.m_Key == KEY_TAB)
+		else if(Event.m_Key == KEY_TAB && !m_pSearchString)
 		{
 			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
@@ -412,7 +412,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				else
 					m_CompletionChosen++;
 				m_CompletionEnumerationCount = 0;
-				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL &&
+				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_REMOTE &&
 					m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
 
 				// handle wrapping
@@ -420,7 +420,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				{
 					m_CompletionChosen= (m_CompletionChosen + m_CompletionEnumerationCount) %  m_CompletionEnumerationCount;
 					m_CompletionEnumerationCount = 0;
-					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL &&
+					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_REMOTE &&
 						m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
 				}
 			}
@@ -518,6 +518,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 
 		// find the current command
+		if(!m_pSearchString)
 		{
 			char aBuf[64] = {0};
 			const char *pSrc = GetString();
@@ -642,6 +643,9 @@ struct CRenderInfo
 
 void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
 {
+	if(m_pSearchString)
+		return;
+
 	CRenderInfo *pInfo = static_cast<CRenderInfo *>(pUser);
 
 	if(pInfo->m_EnumCount == pInfo->m_WantedCompletion)
@@ -924,7 +928,7 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(), -1);
 
 		// render possible commands
-		if(m_ConsoleType == CONSOLETYPE_LOCAL || Client()->RconAuthed())
+		if(!m_pSearchString && (m_ConsoleType == CONSOLETYPE_LOCAL || m_ConsoleType == CONSOLETYPE_REMOTE && Client()->RconAuthed()))
 		{
 			if(pConsole->m_Input.GetString()[0] != 0)
 			{
@@ -949,13 +953,13 @@ void CGameConsole::OnRender()
 
 		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 
-		//new console rendering
+		// new console rendering
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
 
-		//scrolling
+		// scrolling
 		if(pConsole->m_SearchFound)
 		{
-			pConsole->m_BacklogActLineOld = 0;//reset var
+			pConsole->m_BacklogActLineOld = 0; // reset var
 			for(int i = 0; i < pConsole->m_BacklogActLine; i++)
 			{
 				if(!pEntry || (pEntry == pConsole->m_Backlog.First()) && str_length(pEntry->m_aText) >= 3)
@@ -1021,10 +1025,9 @@ void CGameConsole::OnRender()
 
 		float OffsetY = 0.0f;
 		float LineOffset = 1.0f;
+		int lineNum = 0;
 		for(int iter = 0; iter < 32; iter++)
 		{
-			int lineNum = 0;
-
 			if(pEntry)
 			{
 				if(pEntry->m_YOffset < 0.0f)
@@ -1217,19 +1220,19 @@ void CGameConsole::OnRender()
 					{
 						const char *pText = pEntry->m_aText;
 
-						for(int i = 0; i < 2048; i++)
+						for(int i = 0; i < 2048; i++) // makes sure we doesn't get stuck in an infinite loop
 						{
 							if(pText)
 							{
 								const char *pFoundStr = str_find_nocase(pText, m_pSearchString);
 								if(pFoundStr)
 								{
-									TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr-pText));
+									TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr - pText));
 									TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
 									TextRender()->TextEx(&Cursor, pFoundStr, str_length(m_pSearchString));
-									TextRender()->TextColor(1,1,1,1);
+									TextRender()->TextColor(1, 1, 1, 1);
 									//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
-									pText = pFoundStr+str_length(m_pSearchString);
+									pText = pFoundStr + str_length(m_pSearchString);
 								}
 								else
 								{
@@ -1237,9 +1240,11 @@ void CGameConsole::OnRender()
 									break;
 								}
 
-								if(pText > pEntry->m_aText + str_length(pEntry->m_aText)-1 || pText < pEntry->m_aText)
+								if(pText > pEntry->m_aText + str_length(pEntry->m_aText) - 1 || pText < pEntry->m_aText)
 									pText = 0;
 							}
+							else
+								break;
 						}
 					}
 					else
@@ -1257,13 +1262,13 @@ void CGameConsole::OnRender()
 			// reset color
 			TextRender()->TextColor(1,1,1,1);
 
-			thread_sleep(1);//ne nice to our cpu!
+			thread_sleep(1); //be nice to our cpu!
 		}
 
 		// render page
 		char aBuf[128];
 		TextRender()->TextColor(1,1,1,1);
-		str_format(aBuf, sizeof(aBuf), Localize("-Line %d-"), pConsole->m_BacklogActLine+1);
+		str_format(aBuf, sizeof(aBuf), Localize("Page %i, Line %d"), pConsole->m_BacklogActLine/27+1, pConsole->m_BacklogActLine%27+1);
 		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
 
 		// render version
