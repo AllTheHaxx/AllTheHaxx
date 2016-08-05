@@ -536,20 +536,21 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			}
 		}
 
-		if(g_Config.m_ClChatDennisProtection && m_LastDennisTrigger + time_freq() * 30 < time_get() &&
-			(str_find_nocase(pMsg->m_pMessage, "'Dennis' entered and joined the game") ||
-			str_find_nocase(pMsg->m_pMessage, "'deen' entered and joined the game") ||
-			str_find_nocase(pMsg->m_pMessage, "'Dune' entered and joined the game")))
-		{
-			Say(0, "DENNIS!");
-			m_LastDennisTrigger = time_get();
-		}
+		if(pMsg->m_ClientID == -1)
+			if(g_Config.m_ClChatDennisProtection && m_LastDennisTrigger + time_freq() * 3 < time_get() &&
+				(str_comp_nocase(pMsg->m_pMessage, "'Dennis' entered and joined the game") == 0 ||
+				str_comp_nocase(pMsg->m_pMessage, "'deen' entered and joined the game") == 0 ||
+				str_comp_nocase(pMsg->m_pMessage, "'Dune' entered and joined the game") == 0))
+			{
+				Say(0, "DENNIS!");
+				m_LastDennisTrigger = time_get();
+			}
 
 		NETADDR Addr;
 		if(net_addr_from_str(&Addr, pMsg->m_pMessage) == 0)
 		{
 			// such dennis
-			if(g_Config.m_ClChatDennisProtection && m_LastDennisTrigger + time_freq() * 30 < time_get() && 
+			if(g_Config.m_ClChatDennisProtection && m_LastDennisTrigger + time_freq() * 10 < time_get() &&
 				Addr.port != 1337)
 			{
 				Say(0, "DENNIS!");
