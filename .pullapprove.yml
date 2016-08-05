@@ -1,10 +1,10 @@
 approve_by_comment: true
-approve_regex: ^Approved
-reject_regex: ^Rejected
-reset_on_push: false
+approve_regex: '^([A|a]pproved|:\+1:|([L|l]ooks good[ to me]?))'
+reject_regex: '^([R|r]ejected|:\-1:)'
+reset_on_push: true
 reviewers:
-  members:
-  - xushWT
-  - Henningstone
-  name: pullapprove
+  name: approvers
   required: 2
+  members:
+      - xushWT
+      - Henningstone
