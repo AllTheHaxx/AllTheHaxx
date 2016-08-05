@@ -29,6 +29,7 @@
 #include <game/generated/client_data.h>
 #include <game/client/components/camera.h>
 #include <game/client/components/sounds.h>
+#include <game/client/components/console.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
 #include <game/localization.h>
@@ -413,7 +414,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 			pStr[0] = '\0';
 		}
 
-		if(Inside && UI()->MouseButton(0))
+		if(Inside && UI()->MouseButton(0) && m_pClient->m_pGameConsole->IsClosed())
 		{
 			s_DoScroll = true;
 			s_ScrollStart = UI()->MouseX();
@@ -437,7 +438,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 					s_AtIndex = Len;
 			}
 		}
-		else if(!UI()->MouseButton(0))
+		else if(!UI()->MouseButton(0) || m_pClient->m_pGameConsole->IsClosed())
 			s_DoScroll = false;
 		else if(s_DoScroll)
 		{
@@ -657,10 +658,13 @@ float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 
 	if(UI()->MouseInside(&Rail) || Inside)
 	{
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
-		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		if(m_pClient->m_pGameConsole->IsClosed())
+		{
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		}
 	}
 
 	return clamp(ReturnValue, 0.0f, 1.0f);
@@ -756,10 +760,13 @@ float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 
 	if(UI()->MouseInside(&Rail) || Inside)
 	{
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
-		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		if(m_pClient->m_pGameConsole->IsClosed())
+		{
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		}
 	}
 
 	return clamp(ReturnValue, 0.0f, 1.0f);
@@ -1413,10 +1420,13 @@ void CMenus::RenderNews(CUIRect MainView)
 		s_WantedScrollOffset[CURRENT_NEWS_PAGE] = DoScrollbarV(&s_Scrollbar, &Scrollbar, s_WantedScrollOffset[CURRENT_NEWS_PAGE]);
 
 		// scroll with the mousewheel
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			s_WantedScrollOffset[CURRENT_NEWS_PAGE] += 0.1f;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			s_WantedScrollOffset[CURRENT_NEWS_PAGE] -= 0.1f;
+		if(m_pClient->m_pGameConsole->IsClosed())
+		{
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				s_WantedScrollOffset[CURRENT_NEWS_PAGE] += 0.1f;
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				s_WantedScrollOffset[CURRENT_NEWS_PAGE] -= 0.1f;
+		}
 		s_WantedScrollOffset[CURRENT_NEWS_PAGE] = clamp(s_WantedScrollOffset[CURRENT_NEWS_PAGE], 0.0f, 1.0f);
 
 		// smooth for the win

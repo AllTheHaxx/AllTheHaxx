@@ -58,6 +58,13 @@ int CUI::MouseInside(const CUIRect *r)
 	return 0;
 }
 
+int CUI::MouseInsideNative(float mx, float my, const CUIRect *r)
+{
+	if(mx >= r->x && mx <= r->x+r->w && my >= r->y && my <= r->y+r->h)
+		return 1;
+	return 0;
+}
+
 int CUI::MouseInsideAbsolute(float mx, float my, const CUIRect *s, const CUIRect *r)
 {
 	mx = (mx/(float)Graphics()->ScreenWidth())*(s->w);

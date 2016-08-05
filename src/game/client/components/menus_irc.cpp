@@ -7,6 +7,7 @@
 
 #include "irc.h"
 #include "menus.h"
+#include <game/client/components/console.h>
 
 void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 {
@@ -140,7 +141,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			m_pClient->m_pIRCBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
 
 		// scroll through the tabs
-		if(UI()->MouseInside(&ButtonBox))
+		if(UI()->MouseInside(&ButtonBox) && m_pClient->m_pGameConsole->IsClosed())
 		{
 			if(m_pClient->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 				m_pClient->IRC()->NextRoom();
@@ -320,7 +321,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			static CButtonContainer s_HScrollbar;
 			static float s_HScrollbarVal = 0.0f;
 			s_HScrollbarVal = DoScrollbarH(&s_HScrollbar, &HorizScrollBar, s_HScrollbarVal);
-			if(Input()->KeyIsPressed(KEY_LSHIFT))
+			if(Input()->KeyIsPressed(KEY_LSHIFT) && m_pClient->m_pGameConsole->IsClosed())
 			{
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) // to the right
 					s_HScrollbarVal += 0.1f;
@@ -432,7 +433,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			static CButtonContainer s_HScrollbar;
 			static float s_HScrollbarVal = 0.0f;
 			s_HScrollbarVal = DoScrollbarH(&s_HScrollbar, &HorizScrollBar, s_HScrollbarVal);
-			if(Input()->KeyIsPressed(KEY_LSHIFT))
+			if(Input()->KeyIsPressed(KEY_LSHIFT) && m_pClient->m_pGameConsole->IsClosed())
 			{
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) // to the right
 					s_HScrollbarVal += 0.1f;

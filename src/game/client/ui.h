@@ -84,6 +84,7 @@ public:
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	int MouseInside(const CUIRect *pRect);
+	int MouseInsideNative(float mx, float my, const CUIRect *pRect);
 	int MouseInsideAbsolute(float mx, float my, const CUIRect *s, const CUIRect *r);
 	void ConvertMouseMove(float *x, float *y);
 

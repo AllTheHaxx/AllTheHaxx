@@ -33,6 +33,7 @@
 #include <engine/graphics.h>
 #include <engine/storage.h>
 #include "ghost.h"
+#include <game/client/components/console.h>
 
 void CMenus::RenderGame(CUIRect MainView)
 {
@@ -2072,7 +2073,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
 	int ScrollNum = NumGhosts-Num+1;
-	if(ScrollNum > 0)
+	if(ScrollNum > 0 && m_pClient->m_pGameConsole->IsClosed())
 	{
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 			s_ScrollValue -= 1.0f/ScrollNum;

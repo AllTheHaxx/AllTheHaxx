@@ -182,10 +182,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			s_WantedScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = -1;
 		}
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
-			s_WantedScrollValue -= Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f/ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f/ScrollNum : 3.0f/ScrollNum;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
-			s_WantedScrollValue += Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f/ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f/ScrollNum : 3.0f/ScrollNum;
+		if(UI()->MouseInside(&View) && m_pClient->m_pGameConsole->IsClosed())
+		{
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				s_WantedScrollValue -= Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f / ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f / ScrollNum : 3.0f / ScrollNum;
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				s_WantedScrollValue += Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f / ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f / ScrollNum : 3.0f / ScrollNum;
+		}
 	}
 	else
 		ScrollNum = 0;

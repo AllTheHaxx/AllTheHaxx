@@ -23,6 +23,7 @@
 
 #include "maplayers.h"
 #include "menus.h"
+#include <game/client/components/console.h>
 
 int CMenus::DoButton_DemoPlayer(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect)
 {
@@ -159,7 +160,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle mousewheel independent of active menu
-	if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+	if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && m_pClient->m_pGameConsole->IsClosed())
 	{
 		if(pInfo->m_Speed < 0.1f) DemoPlayer()->SetSpeed(0.1f);
 		else if(pInfo->m_Speed < 0.25f) DemoPlayer()->SetSpeed(0.25f);
@@ -171,7 +172,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		else DemoPlayer()->SetSpeed(8.0f);
 		LastSpeedChange = time_get();
 	}
-	else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+	else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && m_pClient->m_pGameConsole->IsClosed())
 	{
 		if(pInfo->m_Speed > 4.0f) DemoPlayer()->SetSpeed(4.0f);
 		else if(pInfo->m_Speed > 2.0f) DemoPlayer()->SetSpeed(2.0f);
@@ -547,9 +548,9 @@ void CMenus::UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float
 			s_NewVal = gs_ListBoxScrollValue;
 		else
 		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View) && m_pClient->m_pGameConsole->IsClosed())
 				s_NewVal -= 3.0f/Num;
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View) && m_pClient->m_pGameConsole->IsClosed())
 				s_NewVal += 3.0f/Num;
 
 			if(s_NewVal < 0.0f) s_NewVal = 0.0f;
@@ -1015,9 +1016,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = 0;
 		}
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&ListBox))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&ListBox) && m_pClient->m_pGameConsole->IsClosed())
 			s_ScrollValue -= 3.0f/ScrollNum;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&ListBox))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&ListBox) && m_pClient->m_pGameConsole->IsClosed())
 			s_ScrollValue += 3.0f/ScrollNum;
 	}
 	else
