@@ -412,7 +412,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				else
 					m_CompletionChosen++;
 				m_CompletionEnumerationCount = 0;
-				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_REMOTE &&
+				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_LUA &&
 					m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
 
 				// handle wrapping
@@ -420,7 +420,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				{
 					m_CompletionChosen= (m_CompletionChosen + m_CompletionEnumerationCount) %  m_CompletionEnumerationCount;
 					m_CompletionEnumerationCount = 0;
-					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_REMOTE &&
+					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_LUA &&
 						m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
 				}
 			}
@@ -928,7 +928,7 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(), -1);
 
 		// render possible commands
-		if(!m_pSearchString && (m_ConsoleType == CONSOLETYPE_LOCAL || m_ConsoleType == CONSOLETYPE_REMOTE && Client()->RconAuthed()))
+		if(!m_pSearchString && m_ConsoleType != CONSOLETYPE_LUA && (m_ConsoleType == CONSOLETYPE_LOCAL || m_ConsoleType == CONSOLETYPE_REMOTE && Client()->RconAuthed()))
 		{
 			if(pConsole->m_Input.GetString()[0] != 0)
 			{
