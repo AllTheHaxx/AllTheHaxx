@@ -500,13 +500,13 @@ void CHud::RenderIRCNotifications(CUIRect Rect)
 
 	Rect.HMargin(Rect.h/3.0f, &Rect);
 
-	// hack
+/*	// hack - why?
 	{
 		static bool True = false;
-		if(!True) m_pClient->IRC()->SetActiveCom(-1);
+		if(!True) m_pClient->IRC()->SetActiveCom(0);
 		True = true;
 	}
-
+*/
 	static float Offset = -Rect.w-1;
 	if(m_pClient->IRC()->NumUnreadMessages())
 	{

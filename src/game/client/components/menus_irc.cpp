@@ -8,6 +8,7 @@
 #include "irc.h"
 #include "menus.h"
 #include <game/client/components/console.h>
+#include <game/generated/client_data.h>
 
 void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
 {
@@ -27,16 +28,17 @@ bool CMenus::ToggleIRC()
 {
 	CALLSTACK_ADD();
 
-	static CIRCCom *s_pActiveCom = m_pClient->IRC()->GetActiveCom();
-	if(!(m_IRCActive ^= 1))
+	m_IRCActive ^= 1;
+	if(m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTED)
 	{
-		// set active com to @status in order to receive unread message notification
-		s_pActiveCom = m_pClient->IRC()->GetActiveCom();
-		m_pClient->IRC()->SetActiveCom(0);
-	}
-	else
-	{
-		if(m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTED)
+		static CIRCCom *s_pActiveCom = m_pClient->IRC()->GetActiveCom();
+		if(!m_IRCActive)
+		{
+			// hack: set active com to @status in order to receive the unread-message-notification
+			s_pActiveCom = m_pClient->IRC()->GetActiveCom();
+			m_pClient->IRC()->SetActiveCom(0U);
+		}
+		else
 		{
 			m_pClient->IRC()->SetActiveCom(s_pActiveCom);
 			UI()->SetActiveItem(&m_IRCActive);
@@ -151,7 +153,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 
 		float LW = (ButtonBox.w - ButtonBox.x) / m_pClient->IRC()->GetNumComs();
 		static CButtonContainer s_ButsID[64];
-		for(int i = 0; i < m_pClient->IRC()->GetNumComs(); i++)
+		for(unsigned i = 0; i < m_pClient->IRC()->GetNumComs(); i++)
 		{
 			CIRCCom *pCom = m_pClient->IRC()->GetCom(i);
 
@@ -343,48 +345,52 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}*/
 			char aBuff[50];
 			str_format(aBuff, sizeof(aBuff), "Total: %d", pChan->m_Users.size());
-			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, "Users", aBuff, (int)pChan->m_Users.size(), 1, Selected,
+			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, "Users", aBuff, pChan->m_Users.size(), 1, Selected,
 							 s_UsersScrollValue, CUI::CORNER_TR);
 
-			int o = 0;
-			std::list<std::string>::iterator it = pChan->m_Users.begin();
-			while(it != pChan->m_Users.end())
+			for(int u = 0; u < pChan->m_Users.size(); u++)
 			{
-				CPointerContainer Container(&(*it));
+				std::string& Name = pChan->m_Users[u].m_Nick;
+				CPointerContainer Container(&Name);
 				CListboxItem Item = UiDoListboxNextItem(&Container, false, UI()->MouseInside(&UserList) != 0);
 
-				if(Item.m_Visible)
+				if(!Item.m_Visible)
+					continue;
+
+				// quick join button
+				CUIRect Label, ButtonQS;
+				Item.m_Rect.VSplitRight(Item.m_Rect.h, &Label, &ButtonQS);
+
+				if(Selected == u)
 				{
-					if(Selected == o)
+					if(UI()->DoButtonLogic(&Item.m_Selected, "", Selected, &Label))
 					{
-						CUIRect Label, ButtonQS;
-						Item.m_Rect.VSplitRight(Item.m_Rect.h, &Label, &ButtonQS);
-						UI()->DoLabelScaled(&Label, (*it).c_str(), 12.0f, -1);
-						if(UI()->DoButtonLogic(&Item.m_Selected, "", Selected, &Label))
-						{
-							std::list<std::string>::iterator it = pChan->m_Users.begin();
-							std::advance(it, o);
-
-							if(str_comp_nocase(it->c_str()+1, m_pClient->IRC()->GetNick()) != 0)
-								m_pClient->IRC()->OpenQuery(it->c_str());
-						}
-
-						//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CONNECT, &ButtonQS,
-						//		vec4(0.47f, 0.58f, 0.72f, 1.0f));
-						if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
-						{
-							std::list<std::string>::iterator it = pChan->m_Users.begin();
-							std::advance(it, o);
-
-							m_pClient->IRC()->SendGetServer(it->c_str());
-						}
+						if(str_comp_nocase(Name.c_str()+1, m_pClient->IRC()->GetNick()) != 0)
+							m_pClient->IRC()->OpenQuery(Name.c_str());
 					}
-					else
-						UI()->DoLabelScaled(&Item.m_Rect, it->c_str(), 12.0f, -1);
 				}
 
-				o++;
-				it++;
+				CComChan::CUser *pUser = &(pChan->m_Users[u]);
+				dbg_assert(pUser != NULL, "in render: pChan->m_Users contains invalid pointer");
+
+				//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_JOIN, &ButtonQS/*, vec4(0.47f, 0.58f, 0.72f, 1.0f)*/);
+				CPointerContainer s_JoinButton(pUser);
+				ButtonQS.Margin(2.0f, &ButtonQS);
+				if(!pUser->IsVoice() && str_comp(pUser->m_Nick.c_str(), m_pClient->IRC()->GetNick()) != 0)
+					if(DoButton_Menu(&s_JoinButton, "→", 0, &ButtonQS, Localize("Join"), CUI::CORNER_ALL, vec4(0, 0, 1, 0.7f)))
+					//if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
+					{
+						m_pClient->IRC()->SendGetServer(Name.c_str());
+					}
+
+				// colors for admin and voice
+				if(pUser->IsAdmin())
+					TextRender()->TextColor(0.2f, 0.7f, 0.2f, 1);
+				else if(pUser->IsVoice())
+					TextRender()->TextColor(0.2f, 0.2f, 0.7f, 1);
+
+				UI()->DoLabelScaled(&Item.m_Rect, Name.c_str(), 12.0f, -1);
+				TextRender()->TextColor(1,1,1,1);
 			}
 			Selected = UiDoListboxEnd(&s_UsersScrollValue, 0);
 
@@ -470,7 +476,10 @@ void CMenus::RenderIRC(CUIRect MainView)
 			UiDoListboxEnd(&s_ChatScrollValue, 0);
 
 			// the join button
-			if(str_comp_nocase(pQuery->User(), "@status") != 0)
+			if(str_comp_nocase(pQuery->User(), "@status") != 0 && str_comp(pQuery->User(), m_pClient->IRC()->GetNick()) != 0 &&
+					((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User())) && // this is kinda inefficient but whatever...
+					!((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsVoice()
+					)
 			{
 				CUIRect ButtonQS;
 				Chat.VSplitRight(32.0f, 0x0, &ButtonQS);

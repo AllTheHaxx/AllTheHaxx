@@ -7,9 +7,13 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <base/tl/sorted_array.h>
 
 class CIRCCom
 {
+	MACRO_ALLOC_HEAP();
+
+	unsigned int m_Type;
 public:
 	enum
 	{
@@ -31,20 +35,73 @@ public:
 
 	void AddMessage(const char *fmt, ...);
 	void AddMessage_nofmt(const char *msg);
-
-protected:
-	unsigned int m_Type;
 };
 
 
 class CComChan : public CIRCCom
 {
 public:
+	struct CUser
+	{
+		enum
+		{
+			LEVEL_USER=0,
+			LEVEL_VOICE=1 << 0,
+			LEVEL_ADMIN=2 << 1,
+		};
+
+		int m_Level;
+		std::string m_Nick;
+
+		CUser(){}
+
+		CUser(const std::string& Nick) : m_Nick(Nick)
+		{
+			m_Level = 0;
+		}
+
+	/*	CUser(const CUser& other)
+		{
+			m_Level = other.m_Level;
+			m_Nick = other.m_Nick;
+		}*/
+
+		bool IsAdmin() const { return (m_Level&LEVEL_ADMIN) != 0; }
+		bool IsVoice() const { return (m_Level&LEVEL_VOICE) != 0; }
+
+		const char *c_str() const { return m_Nick.c_str(); }
+
+		bool operator<(const CUser& other)
+		{
+			if(m_Level != other.m_Level)
+				return m_Level > other.m_Level;
+			return m_Nick < other.m_Nick;
+		}
+	};
+
 	CComChan() : CIRCCom(CIRCCom::TYPE_CHANNEL) { }
 
-	std::list<std::string> m_Users;
+	sorted_array<CUser> m_Users;
 	std::string m_Topic;
 	const char *Channel() const { return m_aName; }
+
+	void RemoveUserFromList(const char *pName)
+	{
+		for(int u = 0; u < m_Users.size(); u++)
+			if(str_comp(m_Users[u].c_str(), pName) == 0)
+			{
+				m_Users.remove_index(u);
+				break;
+			}
+	}
+
+	CUser* GetUser(const std::string& Nick)
+	{
+		for(int u = 0; u < m_Users.size(); u++)
+			if(m_Users[u].m_Nick == Nick)
+				return &(m_Users[u]);
+		return 0;
+	}
 };
 
 
@@ -93,12 +150,14 @@ public:
     virtual void NextRoom() = 0;
     virtual void PrevRoom() = 0;
 
-    virtual void SetActiveCom(int index) = 0;
+    virtual void SetActiveCom(unsigned index) = 0;
 	virtual void SetActiveCom(CIRCCom *pCom) = 0;
     virtual CIRCCom* GetActiveCom() = 0;
-    virtual CIRCCom* GetCom(size_t index) = 0;
+    virtual CIRCCom* GetCom(unsigned index) = 0;
     virtual CIRCCom* GetCom(std::string name) = 0;
-    virtual int GetNumComs() = 0;
+	virtual void CloseCom(unsigned index) = 0;
+	virtual void CloseCom(CIRCCom *pCom) = 0;
+    virtual unsigned GetNumComs() = 0;
     virtual bool CanCloseCom(CIRCCom *pCom) = 0;
 
     virtual void OpenQuery(const char *to) = 0;

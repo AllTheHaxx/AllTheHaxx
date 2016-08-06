@@ -5,6 +5,7 @@
 
 #include <base/system.h>
 #include <base/tl/array.h>
+#include <base/tl/sorted_array.h>
 #include <engine/irc.h>
 #include <list>
 #include <string>
@@ -32,12 +33,14 @@ public:
 	void NextRoom();
 	void PrevRoom();
 
-	void SetActiveCom(int index);
+	void SetActiveCom(unsigned index);
 	void SetActiveCom(CIRCCom *pCom);
 	CIRCCom* GetActiveCom();
-	CIRCCom* GetCom(size_t index);
+	CIRCCom* GetCom(unsigned index);
 	CIRCCom* GetCom(std::string name);
-	int GetNumComs() { return m_IRCComs.size(); }
+	void CloseCom(unsigned index);
+	void CloseCom(CIRCCom *pCom);
+	unsigned GetNumComs() { return (unsigned)m_apIRCComs.size(); }
 	bool CanCloseCom(CIRCCom *pCom);
 
 	template<class TCOM>
@@ -73,13 +76,13 @@ protected:
 	class IClient *m_pClient;
 
 	int m_State;
-	int m_ActiveCom;
+	unsigned m_ActiveCom;
 	NETSOCKET m_Socket;
 	NETADDR m_HostAddress;
 
 	char m_CmdToken[12];
 
-	std::list<CIRCCom*> m_IRCComs;
+	array<CIRCCom*> m_apIRCComs;
 	array<IRCHook> m_Hooks;
 
 private:

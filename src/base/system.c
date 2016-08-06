@@ -109,15 +109,9 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	}
 }
 
-void dbg_break()
-{
-	//*((volatile unsigned*)0) = 0x0;
-	abort();
-}
-
 #if !defined(CONF_PLATFORM_MACOSX)
 #define QUEUE_SIZE 16
-
+static int dbg_msg_threaded = 0;
 typedef struct
 {
 	char q[QUEUE_SIZE][1024*4];
@@ -127,10 +121,21 @@ typedef struct
 	SEMAPHORE notempty;
 	SEMAPHORE notfull;
 } Queue;
-
-static int dbg_msg_threaded = 0;
 static Queue log_queue;
+int queue_empty(Queue *q);
+#endif
 
+void dbg_break()
+{
+	//*((volatile unsigned*)0) = 0x0;
+
+	if(dbg_msg_threaded) // wait for all debug output to be flushed
+		while(!queue_empty(&log_queue))
+			thread_sleep(20);
+	abort();
+}
+
+#if !defined(CONF_PLATFORM_MACOSX)
 int queue_empty(Queue *q)
 {
 	return q->begin == q->end;
@@ -2132,14 +2137,19 @@ char *str_trim_words(char *str, int words)
 }
 
 /* replaces a single character within a string */
-void str_replace_char(char *str_in, size_t size, char find, char replace)
+int str_replace_char(char *str_in, size_t size, char find, char replace)
 {
+	int counter = 0;
 	size_t i;
 	for(i = 0; i < size; i++)
 	{
 		if(str_in[i] == find)
+		{
 			str_in[i] = replace;
+			counter++;
+		}
 	}
+	return counter;
 }
 
 /* makes sure that the string only contains the characters between 48-57, 65-95 & 97-122 */
