@@ -30,6 +30,7 @@ void CCamera::OnRender()
 {
 	CALLSTACK_ADD();
 
+	// ------------------ zooming ------------------
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(Client()->GetServerInfo(0)) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		m_ZoomSet = false;
@@ -41,7 +42,27 @@ void CCamera::OnRender()
 		OnReset();
 	}
 
-	smooth_set(&m_Zoom, m_WantedZoom, 105.0f, Client()->RenderFrameTime());
+	// smart zoom
+	float TotalZoom = m_WantedZoom;
+	vec2 Vel(0);
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+		Vel = mix(m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_PrevPredicted.m_Vel, m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_Predicted.m_Vel, Client()->IntraGameTick()); // TODO: fix this!
+	else if(m_pClient->m_Snap.m_pLocalCharacter)
+		Vel = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX, m_pClient->m_Snap.m_pLocalCharacter->m_VelY);
+
+	if(Client()->State() == IClient::STATE_ONLINE && Vel != vec2(0))
+	{
+		if((g_Config.m_ClSmartZoom == 1 && (IsRace(Client()->GetServerInfo(0)) || IsDDNet(Client()->GetServerInfo(0)))) ||
+				(g_Config.m_ClSmartZoom == 2 && !IsVanilla(Client()->GetServerInfo(0))))
+		{
+			float ExtraZoom = (length(Vel) / 24000.0f) * ((float)g_Config.m_ClSmartZoomVal/100.0f);
+			TotalZoom += ExtraZoom;
+		}
+	}
+
+	smooth_set(&m_Zoom, TotalZoom, 105.0f, Client()->RenderFrameTime());
+	// ------------------ end zooming ------------------
+
 
 	// update camera center
 	if(Client()->State() == IClient::STATE_OFFLINE)
