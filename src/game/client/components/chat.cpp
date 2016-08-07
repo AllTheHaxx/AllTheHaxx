@@ -510,6 +510,22 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		bool HideChat = false;
 
+		if(g_Config.m_ClNotifications)
+		{
+			for(int i = 0; i < int(sizeof(apNotificationMsgs)/sizeof(apNotificationMsgs[0])); i++)
+			{
+				if(str_comp_nocase(pMsg->m_pMessage, apNotificationMsgs[i]) == 0)
+				{
+					m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
+					HideChat = true;
+				}
+			}
+		}
+
+		// return down here in order to always receive the race notifications
+		if(g_Config.m_ClChat == 0 || (g_Config.m_ClChat == 1 && pMsg->m_ClientID >= 0))
+			return;
+
 		// EVENT CALL
 		{
 			for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
@@ -523,24 +539,14 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			if(confunc) try { confunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
 		}
 
-
-		if(g_Config.m_ClNotifications)
-		{
-			for(int i = 0; i < 28; i++) // don't forget to increment 28 if you add more messages!
-			{
-				if(str_comp_nocase(pMsg->m_pMessage, apNotificationMsgs[i]) == 0)
-				{
-					m_pClient->m_pHud->PushNotification(pMsg->m_pMessage);
-					HideChat = true;
-				}
-			}
-		}
-
+		// some dennis (you can never have enough)
 		if(pMsg->m_ClientID == -1)
 			if(g_Config.m_ClChatDennisProtection && m_LastDennisTrigger + time_freq() * 3 < time_get() &&
-				(str_comp_nocase(pMsg->m_pMessage, "'Dennis' entered and joined the game") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "'deen' entered and joined the game") == 0 ||
-				str_comp_nocase(pMsg->m_pMessage, "'Dune' entered and joined the game") == 0))
+					str_find_nocase(pMsg->m_pMessage, "entered and joined the") && (
+			   		str_find_nocase(pMsg->m_pMessage, "Dennis") ||
+					str_find_nocase(pMsg->m_pMessage, "deen") ||
+					str_find_nocase(pMsg->m_pMessage, "Dune"))
+				)
 			{
 				Say(0, "DENNIS!");
 				m_LastDennisTrigger = time_get();
@@ -1143,8 +1149,8 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	}
 
 	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
+	bool DiscardChat = false;
 	{
-		bool DiscardChat = false;
 		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 		{
 			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
@@ -1154,11 +1160,14 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		}
 		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
 		if(confunc) try { if(confunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
-
-		if(DiscardChat)
-			return;
 	}
 
+	if(!g_Config.m_ClChat || DiscardChat)
+	{
+		if(!DiscardChat)
+			m_pClient->m_pHud->PushNotification(Localize("Chat is disabled. Set 'cl_chat' to 1 or 2 to send messages!"));
+		return;
+	}
 
 	// send chat message
 	CNetMsg_Cl_Say Msg;
