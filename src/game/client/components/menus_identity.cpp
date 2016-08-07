@@ -564,7 +564,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 
 		// clear button
 		{
-			static CPointerContainer s_ClearButton(&g_Config.m_ClSkinFilterString);
+			CPointerContainer s_ClearButton(&g_Config.m_ClSkinFilterString);
 			View.VSplitLeft(15.0f, &Button, &View);
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{

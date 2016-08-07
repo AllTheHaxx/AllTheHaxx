@@ -709,7 +709,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		// clear button
 		{
-			static CPointerContainer s_ClearButton(&g_Config.m_ClSkinFilterString);
+			CPointerContainer s_ClearButton(&g_Config.m_ClSkinFilterString);
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClSkinFilterString[0] = 0;
@@ -1272,7 +1272,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_NewVal = g_Config.m_UiScale; // proxy it to not instantly change the ui size
 	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != (void*)&s_Scrollbar) // if it has been changed in f1
 		s_NewVal = g_Config.m_UiScale;
-	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_Scrollbar, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("If you happen to mess it up so that this slider\nis not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
+	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_Scrollbar, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider\nis not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
 	if(UI()->ActiveItem() != (void*)&s_Scrollbar)
 		g_Config.m_UiScale = s_NewVal;
 }
@@ -1335,7 +1335,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	{
 		MainView.HSplitTop(3.0f, 0, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.x += 10.0f;
+		Button.VSplitLeft(10.0f, 0, &Button);
 		static CButtonContainer s_CheckboxSndGun;
 		if(DoButton_CheckBox(&s_CheckboxSndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
 			g_Config.m_SndGun ^= 1;
@@ -1391,7 +1391,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_SndRate);
 		UI()->DoLabelScaled(&Button, Localize("Sample rate"), 14.0f, -1);
-		Button.VSplitLeft(190.0f, 0, &Button);
+		Button.VSplitLeft(200.0f, 0, &Button);
 		static float Offset = 0.0f;
 		static CButtonContainer s_EditboxSndRate;
 		DoEditBox(&s_EditboxSndRate, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
@@ -1404,7 +1404,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(190.0f, &Label, &Button);
+		Button.VSplitLeft(200.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Sound volume"), 14.0f, -1);
 		static CButtonContainer s_Scrollbar;
@@ -1416,7 +1416,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(190.0f, &Label, &Button);
+		Button.VSplitLeft(200.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Map sound volume"), 14.0f, -1);
 		static CButtonContainer s_Scrollbar;
@@ -2399,11 +2399,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			m_NeedRestartDDNet = true;
 	}
 
-	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
 	Right.HSplitTop(5.0f, &Button, &Right);
-	aRects[0] = Left;
-	aRects[1] = Right;
+	CUIRect aRects[2] = { Left, Right };
 	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 	aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
@@ -2431,7 +2429,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 
 			float k = (*pColorSlider[i][s]) / 255.0f;
-			static CPointerContainer s_Scrollbar(&pColorSlider[i][s]);
+			CPointerContainer s_Scrollbar(&pColorSlider[i][s]);
 			k = DoScrollbarH(&s_Scrollbar, &Button, k, 0, k*255.0f);
 			*pColorSlider[i][s] = (int)(k*255.0f);
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
@@ -3174,7 +3172,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		// clear button
 		{
-			static CPointerContainer s_ClearButton(&g_Config.m_ClLuaFilterString);
+			CPointerContainer s_ClearButton(&g_Config.m_ClLuaFilterString);
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClLuaFilterString[0] = 0;
