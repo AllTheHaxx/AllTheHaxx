@@ -2384,6 +2384,8 @@ void CMenus::OnStateChange(int NewState, int OldState)
 
 	// reset active item
 	UI()->SetActiveItem(0);
+	if(m_IRCActive)
+		ToggleIRC();
 
 	if(NewState == IClient::STATE_OFFLINE)
 	{
@@ -2392,7 +2394,7 @@ void CMenus::OnStateChange(int NewState, int OldState)
 		m_Popup = POPUP_NONE;
 		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)
 		{
-			if(str_find(Client()->ErrorString(), "password"))
+			if(str_find_nocase(Client()->ErrorString(), "password"))
 			{
 				m_Popup = POPUP_PASSWORD;
 				UI()->SetHotItem(&g_Config.m_Password);
