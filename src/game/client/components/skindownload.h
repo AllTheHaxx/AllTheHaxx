@@ -92,15 +92,15 @@ private:
 		MAX_FETCHTASKS = 4,
 	};
 
-	array<std::string> m_aSkinDbUrls;
-	const char *GetURL(int i) const
+	static array<std::string> m_aSkinDbUrls;
+	static const char *GetURL(int i)
 	{
 		dbg_assert(i >= 0 && i < m_aSkinDbUrls.size(), "GetURL called with index out of range");
 		return m_aSkinDbUrls[i].c_str();
 	}
-	int NumURLs() const { return m_aSkinDbUrls.size(); }
-	CSkinFetchTask *m_apFetchTasks[MAX_FETCHTASKS];
-	array<std::string> m_FailedTasks;
+	static int NumURLs() { return m_aSkinDbUrls.size(); }
+	static CSkinFetchTask *m_apFetchTasks[MAX_FETCHTASKS];
+	static array<std::string> m_FailedTasks;
 
 
 	/**

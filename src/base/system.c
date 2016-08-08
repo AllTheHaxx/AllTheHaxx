@@ -476,8 +476,7 @@ void mem_free(void *p)
 		MEMTAIL *tail = (MEMTAIL *)(((char*)(header+1))+header->size);
 
 		if(tail->guard != MEM_GUARD_VAL)
-			dbg_msg("mem", "!! %p", p);
-		/* dbg_msg("mem", "-- %p", p); */
+			dbg_msg("mem", "!! dealloc @@ %p[%i] from '%s' INVALID GUARD: 0x%08x{@%p} != 0x%08x", p, header->size, header->filename, tail->guard, tail, MEM_GUARD_VAL);
 		memory_stats.allocated -= header->size;
 		memory_stats.active_allocations--;
 

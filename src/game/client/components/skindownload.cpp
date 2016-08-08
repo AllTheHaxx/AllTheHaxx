@@ -4,9 +4,15 @@
 
 #include <engine/graphics.h>
 #include <engine/textrender.h>
+#include <curl/curl.h>
 
 #include "skins.h"
 #include "skindownload.h"
+
+CSkinDownload::CSkinFetchTask * CSkinDownload::m_apFetchTasks[MAX_FETCHTASKS] = {0};
+array<std::string> CSkinDownload::m_aSkinDbUrls = array<std::string>();
+array<std::string> CSkinDownload::m_FailedTasks = array<std::string>();
+
 
 void CSkinDownload::OnConsoleInit()
 {
@@ -129,7 +135,7 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 	{
 		dbg_msg("SKINFETCHER/ERROR", "Something really bad happened. I have no clue how that comes. I'm sorry.");
 		dbg_msg("SKINFETCHER/ERROR", "INFO: pTask@%p={ dest='%s' curr=%.2f, size=%.2f }", pTask, pTask->Dest(), pTask->Current(), pTask->Size());
-		delete pTask;
+		delete pTask; // <-- this crashes it in any circumstance... but a single leak for a crash seems to be a pretty good trade xD
 		return;
 	}
 

@@ -11,7 +11,7 @@ typedef void (*COMPFUNC)(CFetchTask *pDest, void *pUser);
 
 class CFetchTask
 {
-	//MACRO_ALLOC_HEAP()
+	MACRO_ALLOC_HEAP()
 	friend class CFetcher;
 
 	CFetchTask *m_pNext;

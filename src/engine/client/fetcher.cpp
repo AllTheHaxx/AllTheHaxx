@@ -163,7 +163,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	io_close(File);
 	if(ret != CURLE_OK)
 	{
-		dbg_msg("fetcher", "task failed. (URL='%s') libcurl error: %s", pTask->m_aUrl, aErr);
+		dbg_msg("fetcher", "task failed. ('%s' -> '%s') libcurl error: %s", pTask->m_aUrl, pTask->m_aDest, aErr);
 		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? CFetchTask::STATE_ABORTED : CFetchTask::STATE_ERROR;
 	}
 	else
