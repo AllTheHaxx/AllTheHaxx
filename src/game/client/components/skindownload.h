@@ -90,25 +90,20 @@ private:
 	enum
 	{
 		MAX_FETCHTASKS = 4,
-
-		MAX_URLS = 64,
-		MAX_URL_LEN = 512,
 	};
 
-	std::string m_aSkinDbUrls[MAX_URLS];
+	array<std::string> m_aSkinDbUrls;
 	const char *GetURL(int i) const
 	{
-		dbg_assert(i >= 0 && i < m_NumUrls, "GetURL called with index out of range");
+		dbg_assert(i >= 0 && i < m_aSkinDbUrls.size(), "GetURL called with index out of range");
 		return m_aSkinDbUrls[i].c_str();
 	}
-	int m_NumUrls;
-	int NumURLs() const { return m_NumUrls; }
+	int NumURLs() const { return m_aSkinDbUrls.size(); }
 	CSkinFetchTask *m_apFetchTasks[MAX_FETCHTASKS];
 	array<std::string> m_FailedTasks;
 
 
 	/**
-	 * @Warning DON'T use this to iterate over the array! ALWAYS use <code>MAX_FETCHTASKS</code>!
 	 * @threadsafety DOESN'T lock, but accesses the critical array
 	 * @return The number of tasks
 	 */

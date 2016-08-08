@@ -273,8 +273,7 @@ void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler)
 
 void CSkinDownload::LoadUrls()
 {
-	m_NumUrls = 0;
-	//mem_zero(m_aaSkinDbUrls, sizeof(m_aaSkinDbUrls));
+	m_aSkinDbUrls.clear();
 
 	std::string line;
 	std::ifstream file(g_Config.m_ClSkinDbFile);
@@ -284,11 +283,10 @@ void CSkinDownload::LoadUrls()
 		{
 			const char *pLine = str_skip_whitespaces_const(line.c_str());
 
-			if(str_length(pLine) <= 0 || pLine[0] == '#' || str_length(pLine) > MAX_URL_LEN)
+			if(str_length(pLine) <= 0 || pLine[0] == '#')
 				continue;
 
-			//str_copy(m_aaSkinDbUrls[m_NumUrls++], pLine, MAX_URL_LEN);
-			m_aSkinDbUrls[m_NumUrls++] = std::string(pLine);
+			m_aSkinDbUrls.add(std::string(pLine));
 		}
 		file.close();
 
@@ -303,8 +301,7 @@ void CSkinDownload::LoadUrls()
 
 	if(NumURLs() == 0)
 	{
-		//str_copy(m_aaSkinDbUrls[m_NumUrls++], "https://ddnet.tw/skins/skin/", MAX_URL_LEN);
-		m_aSkinDbUrls[m_NumUrls++] = "https://ddnet.tw/skins/skin/";
+		m_aSkinDbUrls.add(std::string("https://ddnet.tw/skins/skin/"));
 	}
 }
 
