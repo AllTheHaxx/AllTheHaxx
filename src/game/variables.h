@@ -181,7 +181,11 @@ MACRO_CONFIG_INT(ClIRCGetStartupMsgs, cl_irc_get_startup_msgs, 0, 0, 1, CFGFLAG_
 MACRO_CONFIG_INT(SndIRC, snd_irc, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Play a sound when an irc chat message arrives")
 MACRO_CONFIG_INT(ClIRCAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow others to request the server you're playing on")
 //
+#if defined(FEATURE_LUA)
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
+#else
+MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "THIS VERSION OF ALLTHEHAXX WAS COMPILED WITHOUT LUA SUPPORT !!")
+#endif
 MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console") // TODO: DO!
 //
 MACRO_CONFIG_INT(TexLazyLoading, tex_lazy_loading, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Wait with loading the actual textures until they're needed")

@@ -326,6 +326,7 @@ int CInput::Update()
 					if(!HoldKeys[Key])
 					{
 						//LastKey = Key;
+#if defined(FEATURE_LUA)
 						for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 						{
 							if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
@@ -334,7 +335,7 @@ int CInput::Update()
 							if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }
 						}
 						//CLua::LUA_FIRE_EVENT_V("OnKeyPress", IInput::KeyName(Key));
-
+#endif
 						HoldKeys[Key] = true;
 					}
 				}
@@ -342,6 +343,7 @@ int CInput::Update()
 				if(Action&IInput::FLAG_RELEASE)
 				{
 					// EVENT CALL
+#if defined(FEATURE_LUA)
 					for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 					{
 						if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
@@ -350,7 +352,7 @@ int CInput::Update()
 						if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }
 					}
 					//CLua::LUA_FIRE_EVENT_V("OnKeyRelease", IInput::KeyName(Key));
-
+#endif
 					HoldKeys[Key] = false;
 				}
 

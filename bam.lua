@@ -29,14 +29,16 @@ config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-ve
 config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
-config:Add(luajit.OptFind("luajit", true))
+config:Add(luajit.OptFind("luajit", false))
 config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
 config:Add(Opus.OptFind("opus", true))
 config:Add(Ogg.OptFind("ogg", true))
 config:Add(Mysql.OptFind("mysql", false))
+-- some config vars for customization:
 config:Add(OptString("websockets", false))
+config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
 config:Finalize("config.lua")
@@ -232,7 +234,12 @@ function build(settings)
 	if config.debugger.value then
 		settings.cc.defines:Add("FEATURE_DEBUGGER")
 	end
-
+	
+	if config.lua.value and config.luajit.value then
+		settings.cc.defines:Add("FEATURE_LUA")
+		--settings.cc.includes:Add("src/engine/external/luabridge")
+	end
+	
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
@@ -306,9 +313,6 @@ function build(settings)
 		settings.cc.includes:Add("src/engine/external/zlib")
 	end
 
-	-- luabridge
-	--settings.cc.includes:Add("src/engine/external/luabridge")
-
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
@@ -322,7 +326,9 @@ function build(settings)
 	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
 
 	-- apply luajit settings
-	config.luajit:Apply(settings)
+	if config.lua.value and config.luajit.value then
+		config.luajit:Apply(settings)
+	end
 
 	-- build game components
 	engine_settings = settings:Copy()

@@ -1599,7 +1599,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 		("Haxx"),
 		m_pfnAppearanceSubpage == NULL ? Localize("Appearance") : Localize("< back"),
 		Localize("Misc."),
+#if defined(FEATURE_LUA)
 		Localize("Lua"),
+#endif
 		//Localize("All")
 	};
 
@@ -1608,7 +1610,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	for(int i = 0; i < NumTabs; i++)
 	{
-		TabBar.HSplitTop(i == 6 || i == 9 ? 24 : 10, &Button, &TabBar);
+		TabBar.HSplitTop(i == PAGE_SETTINGS_HAXX || i == PAGE_SETTINGS_LUA ? 24 : 10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(UI()->MouseInside(&Button))
 			smooth_set(&FadeVals[i], 5.0f, 10.0f, Client()->RenderFrameTime());
@@ -2937,6 +2939,7 @@ void CMenus::RenderLoadingLua()
 	Graphics()->Swap();
 }
 
+#if defined(FEATURE_LUA)
 void CMenus::RenderSettingsLua(CUIRect MainView)
 {
 	CALLSTACK_ADD();
@@ -3217,6 +3220,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 	}
 }
+#endif
 
 
 // sort arrays
@@ -3348,7 +3352,7 @@ void CMenus::RenderSettingsAll(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Item.m_Rect.w/3, &Text, &Button);
 		UI()->DoLabelScaled(&Text, var->pName, 13.0f, -1, Text.w-5.0f);
 		Button.Margin(12.0f, &Button);
-		///**(var->pValue) = */round_to_int((var->Max-var->Min)*DoScrollbarH(&s_IDs[i], &Button, (*(var->pValue))/(var->Max-var->Min), var->pTooltip, *(var->pValue)));
+		//**(var->pValue) = */round_to_int((var->Max-var->Min)*DoScrollbarH(&s_IDs[i], &Button, (*(var->pValue))/(var->Max-var->Min), var->pTooltip, *(var->pValue)));
 		*pVal = max(var->Min, round_to_int((var->Max)*DoScrollbarH(&s_ScrollbarIDs[i], &Button, (float)*pVal/(float)var->Max, var->pTooltip, *pVal)));
 	}
 	for(int j = 0; j < s_StringVars.size(); j++) // STRING VARS VIA EDITBOX

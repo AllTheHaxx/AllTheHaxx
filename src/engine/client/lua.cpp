@@ -16,7 +16,9 @@ CClient * CLua::m_pCClient = 0;
 IGameClient * CLua::m_pGameClient = 0;
 CGameClient * CLua::m_pCGameClient = 0;
 
+#if defined(FEATURE_LUA)
 using namespace luabridge;
+#endif
 
 CLua::CLua()
 {
@@ -55,7 +57,7 @@ void CLua::Shutdown()
 void CLua::SaveAutoloads()
 {
 	CALLSTACK_ADD();
-
+#if defined(FEATURE_LUA)
 	char aFilePath[768];
 	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
 	str_append(aFilePath, "/luafiles.cfg", sizeof(aFilePath));
@@ -64,6 +66,7 @@ void CLua::SaveAutoloads()
 		if(m_pLuaFiles[i]->GetScriptIsAutoload())
 			f << m_pLuaFiles[i]->GetFilename() << std::endl;
 	f.close();
+#endif
 }
 
 void CLua::SortLuaFiles()
@@ -106,6 +109,7 @@ void CLua::AddUserscript(const char *pFilename)
 {
 	CALLSTACK_ADD();
 
+#if defined(FEATURE_LUA)
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua")
 																		&& str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc")) // "compiled lua chunk"
 		return;
@@ -131,6 +135,7 @@ void CLua::AddUserscript(const char *pFilename)
 	int index = m_pLuaFiles.add(new CLuaFile(this, file, Autoload));
 	if(Autoload)
 		m_pLuaFiles[index]->Init();
+#endif
 }
 
 void CLua::LoadFolder()
@@ -144,6 +149,7 @@ void CLua::LoadFolder(const char *pFolder)
 {
 	CALLSTACK_ADD();
 
+#if defined(FEATURE_LUA)
 	// get the files which should be auto-loaded from file
 	{
 		m_aAutoloadFiles.clear();
@@ -173,6 +179,7 @@ void CLua::LoadFolder(const char *pFolder)
 	delete pParams;
 
 	SortLuaFiles();
+#endif
 }
 
 int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)
@@ -228,8 +235,10 @@ int CLua::Panic(lua_State *L)
 {
 	CALLSTACK_ADD();
 
+#if defined(FEATURE_LUA)
 	dbg_msg("LUA/FATAL", "panic [%p] %s", L, lua_tostring(L, -1));
 	dbg_break();
+#endif
 	return 0;
 }
 
@@ -237,6 +246,7 @@ int CLua::ErrorFunc(lua_State *L)
 {
 	CALLSTACK_ADD();
 
+#if defined(FEATURE_LUA)
 	dbg_msg("Lua", "Lua Script Error! :");
 	//lua_getglobal(L, "pLUA");
 	//CLua *pSelf = (CLua *)lua_touserdata(L, -1);
@@ -269,6 +279,7 @@ int CLua::ErrorFunc(lua_State *L)
 	}*/
 	lua_pop(L, 1); // remove error message
 	lua_gc(L, LUA_GCCOLLECT, 0);
+#endif
 	return 0;
 }
 
@@ -276,6 +287,7 @@ int CLua::ErrorFunc(lua_State *L)
 
 bool CLuaFile::CheckCertificate(const char *pFilename)
 {
+#if defined(FEATURE_LUA)
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") == 0)
 	{
 		char aCertFile[128];
@@ -374,4 +386,7 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }

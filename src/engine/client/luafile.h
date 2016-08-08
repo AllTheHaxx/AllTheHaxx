@@ -1,18 +1,26 @@
 #ifndef ENGINE_CLIENT_LUAFILE_H
 #define ENGINE_CLIENT_LUAFILE_H
 
+#if defined(FEATURE_LUA)
 #include <lua.hpp>
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
+#else
+#define lua_State int
+#endif
 
 #include "base/system.h"
 
+#if defined(FEATURE_LUA)
 #define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) { try { \
 	LuaRef func = getGlobal(LUA_STATE, FUNC_NAME); \
 	if(func) \
 		RETURN = func(__VA_ARGS__).cast<TYPE>(); }\
 	catch (std::exception& e) \
 	{ printf("LUA EXCEPTION: %s\n", e.what()); } }
+#else
+#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) ;;
+#endif
 
 class IClient;
 class IStorageTW;
@@ -64,7 +72,9 @@ public:
 	void Reset(bool error = false);
 	void LoadPermissionFlags();
 	void Unload(bool error = false);
+#if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName);
+#endif
 	template<class T> T CallFunc(const char *pFuncName);
 
 	int State() const { return m_State; }

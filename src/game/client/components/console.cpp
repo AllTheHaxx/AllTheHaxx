@@ -64,7 +64,8 @@ CGameConsole::CInstance::CInstance(int Type)
 void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 {
 	m_pGameConsole = pGameConsole;
-	
+
+#if defined(FEATURE_LUA)
 	if(m_Type == CONSOLETYPE_LUA)
 	{
 		m_LuaHandler.m_pLuaState = luaL_newstate();
@@ -96,6 +97,7 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 		
 		CGameConsole::m_pStatLuaConsole = this;
 	}
+#endif
 };
 
 void CGameConsole::CInstance::ClearBacklog()
@@ -115,6 +117,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
 	{
+#if defined(FEATURE_LUA)
 		{
 			bool DiscardCommand = false;
 			for(int ijdfg = 0; ijdfg < m_pGameConsole->Client()->Lua()->GetLuaFiles().size(); ijdfg++)
@@ -130,6 +133,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			if(DiscardCommand)
 				return;
 		}
+#endif
 		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
 	}
 	else if(m_Type == CGameConsole::CONSOLETYPE_REMOTE)
@@ -141,6 +145,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	}
 	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
+#if defined(FEATURE_LUA)
 		if(str_comp(pLine, "reset") == 0)
 		{
 			m_LuaHandler.m_ScopeCount = 0;
@@ -279,6 +284,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			str_append(aBuf, pLine, sizeof(aBuf));
 			PrintLine(aBuf);
 		}
+#endif // defined(FEATURE_LUA)
 	}
 }
 
@@ -566,6 +572,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 
 bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is for LuaConsole
 {
+#if defined(FEATURE_LUA)
 	if(m_Type != CONSOLETYPE_LUA)
 		return false;
 	
@@ -593,6 +600,9 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 	}
 	
 	return true;
+#else
+	return false;
+#endif
 }
 
 CGameConsole::CGameConsole()
@@ -1466,12 +1476,15 @@ void CGameConsole::OnConsoleInit()
 
 	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
 	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
-	Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
 	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
 	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console");
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
+
+#if defined(FEATURE_LUA)
+	Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
 	Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
+#endif
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This should be moved to elsewhere

@@ -1,13 +1,15 @@
 #ifndef ENGINE_CLIENT_LUA_H
 #define ENGINE_CLIENT_LUA_H
 
+#include <string>
+#if defined(FEATURE_LUA)
 #include <lua.hpp>
+#endif
 #include <base/tl/array.h>
-#include <engine/external/luabridge/LuaBridge.h>
-#include <engine/external/luabridge/RefCountedPtr.h>
 #include <engine/external/openssl/sha.h>
 #include "luafile.h"
 
+#if defined(FEATURE_LUA)
 #define LUA_FIRE_EVENT(EVENTNAME, ...) \
 	{ \
 		if(g_Config.m_ClLua) \
@@ -21,6 +23,9 @@
 			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, EVENTNAME); \
 			if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } \
 	}
+#else
+#define LUA_FIRE_EVENT(EVENTNAME, ...) ;
+#endif
 
 class IClient;
 class CClient;
@@ -29,7 +34,9 @@ class IGameClient;
 class CGameClient;
 class CLuaFile;
 
+#if defined(FEATURE_LUA)
 using namespace luabridge;
+#endif
 
 struct LuaBinaryCert
 {

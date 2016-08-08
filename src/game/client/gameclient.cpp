@@ -77,6 +77,7 @@
 CGameClient g_GameClient;
 
 // instantiate the lua render levels
+#if defined(FEATURE_LUA)
 static CLuaRender gs_LuaRender0(0);
 static CLuaRender gs_LuaRender1(1);
 static CLuaRender gs_LuaRender2(2);
@@ -105,6 +106,7 @@ static CLuaRender gs_LuaRender24(24);
 static CLuaRender gs_LuaRender25(25);
 static CLuaRender gs_LuaRender26(26);
 static CLuaRender gs_LuaRender27(27);
+#endif
 
 // instantiate all systems
 static CKillMessages gs_KillMessages;
@@ -255,62 +257,69 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pIdentity);
 	m_All.Add(m_pGameTextureManager);
 
-	m_All.Add(&gs_LuaRender0); // lua
+#if defined(FEATURE_LUA)
+#define ADD_LUARENDER(I) m_All.Add(&gs_LuaRender##I) // lua
+#else
+#define ADD_LUARENDER(I) ;
+#endif
+
+	ADD_LUARENDER(0);
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
-	m_All.Add(&gs_LuaRender1); // lua
+	ADD_LUARENDER(1);
 	m_All.Add(&gs_MapLayersBackGround); // first to render
-	m_All.Add(&gs_LuaRender2); // lua
+	ADD_LUARENDER(2);
 	m_All.Add(m_pAStar);
-	m_All.Add(&gs_LuaRender3); // lua
+	ADD_LUARENDER(3);
 	m_All.Add(&m_pParticles->m_RenderTrail);
-	m_All.Add(&gs_LuaRender4); // lua
+	ADD_LUARENDER(4);
 	m_All.Add(m_pItems);
-	m_All.Add(&gs_LuaRender5); // lua
+	ADD_LUARENDER(5);
 	m_All.Add(&gs_Players);
-	m_All.Add(&gs_LuaRender6); // lua
+	ADD_LUARENDER(6);
 	m_All.Add(m_pGhost);
-	m_All.Add(&gs_LuaRender7); // lua
+	ADD_LUARENDER(7);
 	m_All.Add(&gs_MapLayersForeGround);
-	m_All.Add(&gs_LuaRender8); // lua
+	ADD_LUARENDER(8);
 	m_All.Add(&m_pParticles->m_RenderExplosions);
-	m_All.Add(&gs_LuaRender9); // lua
+	ADD_LUARENDER(9);
 	m_All.Add(m_pNamePlates);
-	m_All.Add(&gs_LuaRender10); // lua
+	ADD_LUARENDER(10);
 	m_All.Add(&m_pParticles->m_RenderGeneral);
-	m_All.Add(&gs_LuaRender11); // lua
+	ADD_LUARENDER(11);
 	m_All.Add(m_pDamageind);
-	m_All.Add(&gs_Drawing);
-	m_All.Add(&gs_LuaRender12); // lua
+	ADD_LUARENDER(12);
+//	m_All.Add(&gs_Drawing);
+//	ADD_LUARENDER(13);
 	m_All.Add(m_pHud);
 	m_All.Add(m_pSkinDownload);
-	m_All.Add(&gs_LuaRender13); // lua
+	ADD_LUARENDER(14);
 	m_All.Add(&gs_Spectator);
-	m_All.Add(&gs_LuaRender14); // lua
+	ADD_LUARENDER(15);
 	m_All.Add(&gs_Emoticon);
-	m_All.Add(&gs_LuaRender15); // lua
+	ADD_LUARENDER(16);
 	m_All.Add(&gs_KillMessages);
-	m_All.Add(&gs_LuaRender16); // lua
-	m_All.Add(&gs_SpoofRemote);
-	m_All.Add(&gs_LuaRender17); // lua
+	ADD_LUARENDER(17);
 	m_All.Add(m_pChat);
-	m_All.Add(&gs_LuaRender18); // lua
+	ADD_LUARENDER(18);
 	m_All.Add(&gs_Broadcast);
-	m_All.Add(&gs_LuaRender19); // lua
+	ADD_LUARENDER(19);
 	m_All.Add(&gs_DebugHud);
-	m_All.Add(&gs_LuaRender20); // lua
+	ADD_LUARENDER(20);
 	m_All.Add(&gs_Scoreboard);
-	m_All.Add(&gs_LuaRender21); // lua
 	m_All.Add(&gs_Statboard);
-	m_All.Add(&gs_LuaRender22); // lua
+	ADD_LUARENDER(21);
 	m_All.Add(m_pMotd);
-	m_All.Add(&gs_LuaRender23); // lua
+	ADD_LUARENDER(22);
 	m_All.Add(m_pMenus);
-	m_All.Add(&gs_LuaRender24); // lua
 	m_All.Add(m_pTooltip);
-	m_All.Add(&gs_LuaRender25); // lua
+	ADD_LUARENDER(23);
 	m_All.Add(m_pGameConsole);
-	m_All.Add(&gs_LuaRender26); // lua
+	ADD_LUARENDER(24);
+	// stuff that doesn't render anything:
+	m_All.Add(&gs_SpoofRemote);
 	m_All.Add(m_pFontMgr);
+
+#undef ADD_LUARENDER
 
 	// build the input stack
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key
@@ -327,8 +336,9 @@ void CGameClient::OnConsoleInit()
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
+#if defined(FEATURE_LUA)
 	Console()->Register("luafile", "s[activate|deactivate|toggle] s[filepath]", CFGFLAG_CLIENT, ConLuafile, this, "Toggle Luafiles (use their path)");
-
+#endif
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, 0, 0, "Reset tuning");
@@ -403,6 +413,10 @@ void CGameClient::OnInit()
 
 	// init all components
 	char aBuf[256];
+
+	// disable vsync temporarily for not to waste time with rendering
+	if(g_Config.m_GfxVsync)
+		Graphics()->SetVSync(false);
 
 	// setup load amount & load textures and stuff
 	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1   +3;
@@ -494,6 +508,10 @@ void CGameClient::OnInit()
 	}
 #undef SET_LOAD_LABEL
 #undef SET_LOAD_LABEL_V
+
+	// re-enable vsync if wanted
+	if(g_Config.m_GfxVsync)
+		Graphics()->SetVSync(true);
 
 #if defined(__ANDROID__)
 	m_pMapimages->OnMapLoad(); // Reload map textures on Android    ...could be broken by background map stuff

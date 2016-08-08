@@ -55,6 +55,7 @@ void CLuaFile::Reset(bool error)
 
 void CLuaFile::LoadPermissionFlags()
 {
+#if defined(FEATURE_LUA)
 	std::ifstream f(m_Filename.c_str());
 	std::string line; bool searching = true;
 	while(std::getline(f, line))
@@ -96,10 +97,12 @@ void CLuaFile::LoadPermissionFlags()
 	
 	//m_PermissionFlags |= LUAFILE_PERMISSION_OS;
 	//m_PermissionFlags |= LUAFILE_PERMISSION_DEBUG;
+#endif
 }
 
 void CLuaFile::Unload(bool error)
 {
+#if defined(FEATURE_LUA)
 //	if(m_pLuaState)			 // -- do not close it in order to prevent crashes
 //		lua_close(m_pLuaState);
 
@@ -128,10 +131,12 @@ void CLuaFile::Unload(bool error)
 
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
 	Reset(error);
+#endif
 }
 
 void CLuaFile::OpenLua()
 {
+#if defined(FEATURE_LUA)
 	if(m_pLuaState)
 		lua_close(m_pLuaState);
 
@@ -160,11 +165,12 @@ void CLuaFile::OpenLua()
 		luaopen_os(m_pLuaState);	// evil
 	if(m_PermissionFlags&LUAFILE_PERMISSION_PACKAGE)
 		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
-
+#endif
 }
 
 void CLuaFile::Init()
 {
+#if defined(FEATURE_LUA)
 	if(m_State == LUAFILE_STATE_LOADED)
 		Unload();
 
@@ -224,10 +230,12 @@ void CLuaFile::Init()
 		Unload(true);
 		return;
 	}
+#endif
 }
 
 void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
-{		
+{
+#if defined(FEATURE_LUA)
 	getGlobalNamespace(L)
 
 		.addFunction("Import", &CLuaBinding::LuaImport)
@@ -516,7 +524,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("Value", &CTuneParam::Get)
 		.endClass()
 
-
 #define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) \
 	.addData(#Name, &CTuningParams::m_##Name) \
 	.addData(#ScriptName, &CTuningParams::m_##Name)
@@ -526,7 +533,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 #undef MACRO_TUNING_PARAM
-
 
 		.beginClass<CControls>("CControls") /// Game.Input
 			.addProperty("Direction", &CControls::GetDirection, &CControls::SetDirection)
@@ -710,7 +716,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 #undef MACRO_CONFIG_STR
 #undef MACRO_CONFIG_INT
 
-
 		// OOP ENDS HERE
 	;
 
@@ -719,8 +724,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	
 	if(g_Config.m_Debug)
 		dbg_msg("lua", "registering lua bindings complete (L=%p)", L);
+
+#endif
 }
 
+#if defined(FEATURE_LUA)
 luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 {
 	LuaRef func = getGlobal(m_pLuaState, pFuncName);
@@ -729,12 +737,13 @@ luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 
 	return func;  // return 0 if the function is not found!
 }
+#endif
 
 template<class T>
 T CLuaFile::CallFunc(const char *pFuncName) // just for quick access
 {
 	if(!m_pLuaState)
-		return;
+		return (T)0;
 
 	T ret;
 	LUA_CALL_FUNC(m_pLuaState, pFuncName, T, ret);
@@ -743,6 +752,7 @@ T CLuaFile::CallFunc(const char *pFuncName) // just for quick access
 
 bool CLuaFile::LoadFile(const char *pFilename)
 {
+#if defined(FEATURE_LUA)
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") &&
 			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") &&
@@ -801,13 +811,18 @@ bool CLuaFile::LoadFile(const char *pFilename)
 	//}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 bool CLuaFile::ScriptHasSettings()
 {
+#if defined(FEATURE_LUA)
 	LuaRef func1 = GetFunc("OnScriptRenderSettings");
 	LuaRef func2 = GetFunc("OnScriptSaveSettings");
 	if(func1.cast<bool>() && func2.cast<bool>())
 		return true;
+#endif
 	return false;
 }

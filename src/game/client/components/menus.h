@@ -343,7 +343,11 @@ public:	int m_LoadTotal;
 	void RenderSettingsAppearanceTexture(CUIRect MainView);
 	void RenderSettingsAppearanceFont(CUIRect MainView);
 	void RenderSettingsIRC(CUIRect MainView);
+#if defined(FEATURE_LUA)
 	void RenderSettingsLua(CUIRect MainView);
+#else
+	void RenderSettingsLua(CUIRect MainView){};
+#endif
 	void RenderSettingsAll(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 

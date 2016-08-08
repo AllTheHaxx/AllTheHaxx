@@ -527,6 +527,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			return;
 
 		// EVENT CALL
+#if defined(FEATURE_LUA)
 		{
 			for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 			{
@@ -538,6 +539,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChat");
 			if(confunc) try { confunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
 		}
+#endif
 
 		// some dennis (you can never have enough)
 		if(pMsg->m_ClientID == -1)
@@ -1148,8 +1150,9 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		return;
 	}
 
-	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
 	bool DiscardChat = false;
+#if defined(FEATURE_LUA)
+	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
 	{
 		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 		{
@@ -1161,6 +1164,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
 		if(confunc) try { if(confunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
 	}
+#endif
 
 	if(!g_Config.m_ClChat || DiscardChat)
 	{
