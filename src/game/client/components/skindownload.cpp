@@ -189,11 +189,11 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 			if(str_comp_nocase(m_apFetchTasks[i]->SkinName(), pName) == 0)
 				return;
 
-	CSkinFetchTask *pTask = new CSkinFetchTask(pName);
 	CSkinFetchTask **ppSlot = FindFreeSlot();
 	if(!ppSlot) // this check shouldn't be necessary... but safe is safe :/
 		return;
 
+	CSkinFetchTask *pTask = new CSkinFetchTask(pName);
 	*ppSlot = pTask;
 	FetchSkin(pTask);
 }
