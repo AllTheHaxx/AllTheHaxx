@@ -10,7 +10,10 @@
 
 void CSkinDownload::OnConsoleInit()
 {
-	Console()->Register("fetch_skin", "s[skinname]", CFGFLAG_CLIENT, ConFetchSkin, this, "Fetch a skin by name from the available databases");
+	Console()->Register("skinfetcher_request", "s[skinname]", CFGFLAG_CLIENT, ConFetchSkin, this, "Fetch a skin by name from the available databases");
+#if defined(CONF_DEBUG)
+	Console()->Register("skinfetcher_spam", "i[num]", CFGFLAG_CLIENT, ConDbgSpam, this, "Spam random skin download request for debugging purposes");
+#endif
 }
 
 void CSkinDownload::OnInit()
@@ -82,7 +85,7 @@ void CSkinDownload::OnRender()
 		Screen.HSplitTop(5.0f, 0, &Screen);
 		Screen.HSplitTop(13.5f, &Button, &Screen);
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s (try %i/%i)", e->SkinName(), e->Url()+1, m_NumUrls);
+		str_format(aBuf, sizeof(aBuf), "%s (try %i/%i)", e->SkinName(), e->Url()+1, NumURLs());
 
 		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
@@ -125,6 +128,7 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 	if(!pTaskHandler)
 	{
 		dbg_msg("SKINFETCHER/ERROR", "Something really bad happened. I have no clue how that comes. I'm sorry.");
+		dbg_msg("SKINFETCHER/ERROR", "INFO: pTask@%p={ dest='%s' curr=%.2f, size=%.2f }", pTask, pTask->Dest(), pTask->Current(), pTask->Size());
 		delete pTask;
 		return;
 	}
@@ -164,7 +168,10 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 	}
 	
 	// don't fetch anything if it's disabled or the tasklist is full
-	if(!g_Config.m_ClSkinFetcher || NumTasks(false) >= MAX_FETCHTASKS || NumTasks(true) >= MAX_ACTIVE_TASKS || g_Config.m_ClVanillaSkinsOnly)
+	if(!g_Config.m_ClSkinFetcher || g_Config.m_ClVanillaSkinsOnly)
+		return;
+
+	if(NumTasks(false) >= MAX_FETCHTASKS/* || NumTasks(true) >= MAX_ACTIVE_TASKS*/)
 		return;
 
 	// don't rerun failed tasks
@@ -191,7 +198,10 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 
 	CSkinFetchTask **ppSlot = FindFreeSlot();
 	if(!ppSlot) // this check shouldn't be necessary... but safe is safe :/
+	{
+		dbg_msg("skinfetcher/debug", "!! WARNING !! > Couldn't find a free slot for new task '%s' (got %i/%i tasks)", pName, NumTasks(), MAX_FETCHTASKS);
 		return;
+	}
 
 	CSkinFetchTask *pTask = new CSkinFetchTask(pName);
 	*ppSlot = pTask;
@@ -202,7 +212,7 @@ bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler)
 {
 	dbg_assert(pTaskHandler != NULL, "CSkinDownload::FetchNext called with pTaskHandler == NULL");
 
-	if(pTaskHandler->Url()+1 >= m_NumUrls)
+	if(pTaskHandler->Url()+1 >= NumURLs())
 	{
 		pTaskHandler->Finish();
 		Fail(pTaskHandler->SkinName());
@@ -210,7 +220,7 @@ bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler)
 	}
 
 	pTaskHandler->Next();
-	dbg_msg("skinfetcher/debug", "trying next url (%i/%i): '%s'", pTaskHandler->Url()+1, m_NumUrls, m_aaSkinDbUrls[pTaskHandler->Url()]);
+	dbg_msg("skinfetcher/debug", "trying next url (%i/%i): '%s' for '%s.png'", pTaskHandler->Url()+1, NumURLs(), GetURL(pTaskHandler->Url()), pTaskHandler->SkinName());
 
 	FetchSkin(pTaskHandler);
 
@@ -221,22 +231,28 @@ void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler)
 {
 	dbg_assert(pTaskHandler != NULL, "CSkinDownload::FetchSkin called with pTaskHandler == NULL");
 
-	if(pTaskHandler->Url() >= m_NumUrls)
+	if(pTaskHandler->Url() >= NumURLs())
 		return;
 
-	char aBuf[256];
+	char aBuf[256] = {0};
 	char aDestPath[256] = {0};
 	char aFullPath[512] = {0};
 
-	str_copy(aDestPath, m_aaSkinDbUrls[pTaskHandler->Url()], sizeof(aDestPath));
+	const char * const pURL = GetURL(pTaskHandler->Url());
+	str_copy(aDestPath, pURL, sizeof(aDestPath));
+	//if(str_length(aDestPath) <= 0)
+	//	return;
+
 	if(aDestPath[str_length(aDestPath)-1] != '/')
 		str_append(aDestPath, "/", sizeof(aDestPath));
 	char aEscapedName[128] = {0};
 	m_pFetcher->Escape(aEscapedName, sizeof(aEscapedName), pTaskHandler->SkinName());
 	str_format(aBuf, sizeof(aBuf), "%s%s.png", aDestPath, aEscapedName);
 
+#if !defined(CONF_DEBUG)
 	if(g_Config.m_Debug)
-		dbg_msg("skinfetcher/debug", "fetching file from '%s'", aBuf);
+#endif
+		dbg_msg("skinfetcher/debug", "fetching file from '%s' (url=%i '%s')", aBuf, pTaskHandler->Url(), pURL);
 
 	str_format(aDestPath, sizeof(aDestPath), "downloadedskins/%s.png", pTaskHandler->SkinName());
 	IOHANDLE f = Storage()->OpenFile(aDestPath, IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aFullPath, sizeof(aFullPath));
@@ -258,7 +274,7 @@ void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler)
 void CSkinDownload::LoadUrls()
 {
 	m_NumUrls = 0;
-	mem_zero(m_aaSkinDbUrls, sizeof(m_aaSkinDbUrls));
+	//mem_zero(m_aaSkinDbUrls, sizeof(m_aaSkinDbUrls));
 
 	std::string line;
 	std::ifstream file(g_Config.m_ClSkinDbFile);
@@ -266,21 +282,29 @@ void CSkinDownload::LoadUrls()
 	{
 		while(std::getline(file, line))
 		{
-			if(line == "" || line.c_str()[0] == '#' || str_length(line.c_str()) > MAX_URL_LEN)
+			const char *pLine = str_skip_whitespaces_const(line.c_str());
+
+			if(str_length(pLine) <= 0 || pLine[0] == '#' || str_length(pLine) > MAX_URL_LEN)
 				continue;
 
-			str_copy(m_aaSkinDbUrls[m_NumUrls++], line.c_str(), MAX_URL_LEN);
+			//str_copy(m_aaSkinDbUrls[m_NumUrls++], pLine, MAX_URL_LEN);
+			m_aSkinDbUrls[m_NumUrls++] = std::string(pLine);
 		}
 		file.close();
 
-		dbg_msg("skinfetcher", "loaded %i url%s from file '%s'", m_NumUrls, m_NumUrls > 1 ? "s" : "", g_Config.m_ClSkinDbFile);
+		dbg_msg("skinfetcher", "loaded %i url%s from file '%s'", NumURLs(), NumURLs() > 1 ? "s" : "", g_Config.m_ClSkinDbFile);
+#if defined(CONF_DEBUG)
+		for(int i = 0; i < NumURLs(); i++)
+			dbg_msg("skinfecher/debug", "  > %i:'%s'", i, GetURL(i));
+#endif
 	}
 	else
 		dbg_msg("skinfetcher/error", "failed to open url file '%s', using ddnet's database only", g_Config.m_ClSkinDbFile);
 
-	if(m_NumUrls == 0)
+	if(NumURLs() == 0)
 	{
-		str_copy(m_aaSkinDbUrls[m_NumUrls++], "https://ddnet.tw/skins/skin/", MAX_URL_LEN);
+		//str_copy(m_aaSkinDbUrls[m_NumUrls++], "https://ddnet.tw/skins/skin/", MAX_URL_LEN);
+		m_aSkinDbUrls[m_NumUrls++] = "https://ddnet.tw/skins/skin/";
 	}
 }
 
@@ -294,5 +318,24 @@ void CSkinDownload::ConFetchSkin(IConsole::IResult *pResult, void *pUserData)
 		int SkinID;
 		pSelf->RequestSkin(&SkinID, pResult->GetString(0));
 		// TODO: add some kind of f1 output message here if the task couldn't be created
+	}
+}
+
+void CSkinDownload::ConDbgSpam(IConsole::IResult *pResult, void *pUserData)
+{
+	CSkinDownload *pSelf = (CSkinDownload *)pUserData;
+	if(!g_Config.m_ClSkinFetcher)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "skinfetcher", "You must turn on cl_skin_fetcher to use this command");
+		return;
+	}
+
+	pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "skinfetcher", "Creating %i skin fetching requests... (not all may get registered)", pResult->GetInteger(0));
+	for(int i = 0; i < pResult->GetInteger(0); i++)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "%i%02x%f-%i", i, i, (float)i/123.0f, rand());
+		int Dest;
+		pSelf->RequestSkin(&Dest, aBuf);
 	}
 }

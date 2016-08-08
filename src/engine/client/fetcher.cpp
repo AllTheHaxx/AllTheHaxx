@@ -95,7 +95,7 @@ void CFetcher::FetcherThread(void *pUser)
 		lock_unlock(pFetcher->m_Lock);
 		if(pTask)
 		{
-			dbg_msg("fetcher", "task got %s:%s", pTask->m_aUrl, pTask->m_aDest);
+			dbg_msg("fetcher", "task got '%s' -> '%s'", pTask->m_aUrl, pTask->m_aDest);
 			pFetcher->FetchFile(pTask);
 			if(pTask->m_pfnCompCallback)
 				pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
@@ -116,12 +116,12 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 		m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_aDest, aPath, sizeof(aPath));
 
 	if(fs_makedir_rec_for(aPath) < 0)
-		dbg_msg("fetcher", "i/o error, cannot create folder for: %s", aPath);
+		dbg_msg("fetcher", "i/o error, cannot create folder for: '%s'", aPath);
 
 	IOHANDLE File = io_open(aPath, IOFLAG_WRITE);
 
 	if(!File){
-		dbg_msg("fetcher", "i/o error, cannot open file: %s", pTask->m_aDest);
+		dbg_msg("fetcher", "i/o error, cannot open file: '%s'", pTask->m_aDest);
 		pTask->m_State = CFetchTask::STATE_ERROR;
 		return;
 	}

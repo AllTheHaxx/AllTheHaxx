@@ -45,6 +45,8 @@ public:
 			//dbg_assert(m_pCurlTask != NULL, "SkinFetchTask::pCurlTask has been modified externally");
 			if(m_pCurlTask)
 				delete m_pCurlTask;
+			else
+				dbg_msg("skinfetcher/debug", "!! WARNING !! > Taskhandler for '%s' had no more curltask at destruction!", m_SkinName.c_str());
 		}
 
 		void Next()
@@ -87,16 +89,20 @@ private:
 
 	enum
 	{
-		MAX_ACTIVE_TASKS = 4,
-		MAX_FETCHTASKS = 8,
+		MAX_FETCHTASKS = 4,
 
 		MAX_URLS = 64,
 		MAX_URL_LEN = 512,
 	};
 
-	char m_aaSkinDbUrls[MAX_URLS][MAX_URL_LEN];
+	std::string m_aSkinDbUrls[MAX_URLS];
+	const char *GetURL(int i) const
+	{
+		dbg_assert(i >= 0 && i < m_NumUrls, "GetURL called with index out of range");
+		return m_aSkinDbUrls[i].c_str();
+	}
 	int m_NumUrls;
-
+	int NumURLs() const { return m_NumUrls; }
 	CSkinFetchTask *m_apFetchTasks[MAX_FETCHTASKS];
 	array<std::string> m_FailedTasks;
 
@@ -165,6 +171,7 @@ public:
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
 	static void ConFetchSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConDbgSpam(IConsole::IResult *pResult, void *pUserData);
 };
 
 

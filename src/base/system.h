@@ -911,6 +911,7 @@ char *str_skip_to_whitespace(char *str);
 		- The strings are treated as zero-termineted strings.
 */
 char *str_skip_whitespaces(char *str);
+const char *str_skip_whitespaces_const(const char *str);
 
 char *str_split(char *dst, const char *str, int split, char dilem);
 

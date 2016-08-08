@@ -3,6 +3,7 @@ project(AllTheHaxx)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions("-DCONF_FAMILY_UNIX")
+add_definitions("-DCONF_DEBUG")
 add_definitions("-DCONF_SPOOFING")
 add_definitions("-DFEATURE_LUA")
 

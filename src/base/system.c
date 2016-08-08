@@ -2226,6 +2226,13 @@ char *str_skip_whitespaces(char *str)
 	return str;
 }
 
+const char *str_skip_whitespaces_const(const char *str)
+{
+	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
+		str++;
+	return str;
+}
+
 char *str_split(char *dst, const char *str, int split, char dilem)
 {
 	char splits[512][256] = { { 0 } };
