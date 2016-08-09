@@ -414,7 +414,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							char aChanName[128];
 							str_copy(aChanName, aMsgChannel.c_str(), sizeof(aChanName));
 							const char *pReason = str_find(aChanName, ":")+1;
-							if(str_replace_char(aChanName, sizeof(aChanName), ':', '\0'))
+							if(str_replace_char(aChanName, ':', '\0'))
 								aChanName[str_length(aChanName)-1] = '\0';
 							CComChan *pChan = static_cast<CComChan*>(GetCom(std::string(aChanName)));
 							if(pChan)
@@ -564,7 +564,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							char aBuf[512]; char *Ptr;
 							str_copy(aBuf, aMsgText.c_str(), sizeof(aBuf));
 							Ptr = aBuf+1;
-							str_replace_char(Ptr, sizeof(aBuf)-1, '\1', '\0');
+							str_replace_char_rev_num(Ptr, 1, '\1', '\0');
 							dbg_msg("IRC", "got a CTCP '%s' from '%s'", Ptr, aMsgFrom.c_str());
 
 							for (char *p = strtok(Ptr, " "); p != NULL; p = strtok(NULL, " "))
@@ -635,7 +635,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									{
 										str_format(aBuff, sizeof(aBuff), "* %s ", aMsgFrom.c_str());
 										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
-										str_replace_char(aBuff, sizeof(aBuff), '\1', '\0');
+										str_replace_char_rev_num(aBuff, 1, '\1', '\0');
 									}
 									else
 									{

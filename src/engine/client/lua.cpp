@@ -290,11 +290,14 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 #if defined(FEATURE_LUA)
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") == 0)
 	{
-		char aCertFile[128];
-		str_format(aCertFile, sizeof(aCertFile), "data/luacerts/%s", pFilename);
-		aCertFile[str_length(aCertFile)-4] = '\0';
-		str_append(aCertFile, ".cert", sizeof(aCertFile));
-		IOHANDLE f = Lua()->Storage()->OpenFile(aCertFile, IOFLAG_READ, IStorageTW::TYPE_ALL);
+		char aCertFile[256];
+		str_copy(aCertFile, pFilename, sizeof(aCertFile)); // get the path of the file
+		str_replace_char_rev_num(aCertFile, 1, '/', '\0'); // cut off the filename
+		str_append(aCertFile, "/.cert/", sizeof(aCertFile)); // append the certs folder name
+		str_append(aCertFile, str_find_rev(pFilename, "/"), sizeof(aCertFile)); // re-append the name of the luafile
+		str_replace_char_rev_num(aCertFile, 1, '.', '\0');  // cut off the file ending
+		str_append(aCertFile, ".cert", sizeof(aCertFile));  // append the file ending of certs
+		IOHANDLE f = Lua()->Storage()->OpenFile(aCertFile, IOFLAG_READ, IStorageTW::TYPE_ALL); // hope that it works.
 		if(!f)
 		{
 			dbg_msg("lua", "failed to open certificate file '%s'", aCertFile);

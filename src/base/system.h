@@ -822,7 +822,9 @@ int str_length(const char *str);
 */
 int str_format(char *buffer, int buffer_size, const char *format, ...);
 
-int str_replace_char(char *str_in, size_t size, char find, char replace);
+int str_replace_char(char *str_in, char find, char replace);
+int str_replace_char_num(char *str_in, int max_replace, char find, char replace);
+int str_replace_char_rev_num(char *str_in, int max_replace, char find, char replace);
 
 void str_irc_sanitize(char *str_in); // H-Client
 /*

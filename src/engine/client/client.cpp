@@ -4287,7 +4287,7 @@ void CClient::InputThread(void *pUser)
 
 		thread_sleep(100);
 		fgets(pInput, 200, stdin);
-		str_replace_char(aInput, sizeof(aInput), '\n', '\0');
+		aInput[str_length(aInput)-1] = '\0';
 
 		#if defined(CONF_FAMILY_WINDOWS)
 			if(!str_utf8_check(pInput))

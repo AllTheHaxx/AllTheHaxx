@@ -358,7 +358,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 		IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
-		str_replace_char(aBuf, sizeof(aBuf), ':', '_');
+		str_replace_char(aBuf, ':', '_');
 
 		IOHANDLE f = pStorage->OpenFile(aBuf, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 		if(!f)
@@ -388,7 +388,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 		// load server specific config
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
-		str_replace_char(aBuf, sizeof(aBuf), ':', '_');
+		str_replace_char(aBuf, ':', '_');
 
 		Items.clear();
 		mem_zero(aEditBoxBuffer, sizeof(aEditBoxBuffer));

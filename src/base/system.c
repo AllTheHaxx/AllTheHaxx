@@ -2136,11 +2136,10 @@ char *str_trim_words(char *str, int words)
 }
 
 /* replaces a single character within a string */
-int str_replace_char(char *str_in, size_t size, char find, char replace)
+int str_replace_char(char *str_in, char find, char replace)
 {
-	int counter = 0;
-	size_t i;
-	for(i = 0; i < size; i++)
+	int i, counter = 0;
+	for(i = 0; i < str_length(str_in); i++)
 	{
 		if(str_in[i] == find)
 		{
@@ -2150,6 +2149,37 @@ int str_replace_char(char *str_in, size_t size, char find, char replace)
 	}
 	return counter;
 }
+
+int str_replace_char_num(char *str_in, int max_replace, char find, char replace)
+{
+	int i, counter = 0;
+	for(i = 0; i < str_length(str_in); i++)
+	{
+		if(str_in[i] == find)
+		{
+			str_in[i] = replace;
+			if(++counter >= max_replace)
+				break;
+		}
+	}
+	return counter;
+}
+
+int str_replace_char_rev_num(char *str_in, int max_replace, char find, char replace)
+{
+	int i, counter = 0;
+	for(i = str_length(str_in)-1; i >= 0; i--)
+	{
+		if(str_in[i] == find)
+		{
+			str_in[i] = replace;
+			if(++counter >= max_replace)
+				break;
+		}
+	}
+	return counter;
+}
+
 
 /* makes sure that the string only contains the characters between 48-57, 65-95 & 97-122 */
 void str_irc_sanitize(char *str_in)
