@@ -8,11 +8,15 @@
 class CLuaBinding
 {
 public:
-	static CLuaFile *GetLuaFile(int UID);
+	static CLuaFile *GetLuaFile(lua_State *l);
 
 	// global namespace
-	static bool LuaImport(int UID, const char *pFilename);
-	static bool LuaKillScript(int UID);
+
+	// low level lua callbacks
+	/** @PseudoArguments const char *pFilename */
+	static int LuaImport(lua_State *L);
+	/** @PseudoArguments none */
+	static int LuaKillScript(lua_State *L);
 
 	// external info
 	static int LuaGetPlayerScore(int ClientID);

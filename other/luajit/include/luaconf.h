@@ -76,16 +76,8 @@
 #define LUA_MAXCAPTURES	32	/* Max. pattern captures. */
 
 /* Compatibility with older library function names. */
-#define LUA_COMPAT_MOD		/* OLD: math.mod, NEW: math.fmod */
-#define LUA_COMPAT_GFIND	/* OLD: string.gfind, NEW: string.gmatch */
-
-/* Configuration for the frontend (the luajit executable). */
-#if defined(luajit_c)
-#define LUA_PROGNAME	"luajit"  /* Fallback frontend name. */
-#define LUA_PROMPT	"> "	/* Interactive prompt. */
-#define LUA_PROMPT2	">> "	/* Continuation prompt. */
-#define LUA_MAXINPUT	512	/* Max. input line length. */
-#endif
+//#define LUA_COMPAT_MOD		/* OLD: math.mod, NEW: math.fmod */
+//#define LUA_COMPAT_GFIND	/* OLD: string.gfind, NEW: string.gmatch */
 
 /* Note: changing the following defines breaks the Lua 5.1 ABI. */
 #define LUA_INTEGER	ptrdiff_t

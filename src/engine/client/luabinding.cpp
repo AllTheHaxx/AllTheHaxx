@@ -4,12 +4,12 @@
 
 #include "luabinding.h"
 
-CLuaFile* CLuaBinding::GetLuaFile(int UID)
+CLuaFile* CLuaBinding::GetLuaFile(lua_State *l)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	for(int i = 0; i < pGameClient->Client()->Lua()->GetLuaFiles().size(); i++)
 	{
-		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->GetUID() == UID)
+		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->L() == l)
 		{
 			return pGameClient->Client()->Lua()->GetLuaFiles()[i];
 		}
@@ -18,25 +18,34 @@ CLuaFile* CLuaBinding::GetLuaFile(int UID)
 }
 
 // global namespace
-bool CLuaBinding::LuaImport(int UID, const char *pFilename)
+int CLuaBinding::LuaImport(lua_State *L)
 {
-	CLuaFile *L = GetLuaFile(UID);
-	if(!L)
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
 		return false;
+
+
+	int n = lua_gettop(L);
+	if(n != 1)
+		return luaL_argerror(L, 1, "expected a string value, got nil");
+
+	const char *pFilename = luaL_checklstring(L, 1, 0);
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename); // force path to prevent kids from importing events.lua
-	return L->LoadFile(aBuf);
+	str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename); // force path to make stuff more intuitive
+
+	bool ret = pLF->LoadFile(aBuf);
+	lua_pushboolean(L, (int)ret);
+	return 1;
 }
 
-bool CLuaBinding::LuaKillScript(int UID)
+int CLuaBinding::LuaKillScript(lua_State *L)
 {
-	CLuaFile *L = GetLuaFile(UID);
-	if(!L)
-		return false;
+	CLuaFile *pLF = GetLuaFile(L);
+	if(pLF)
+		pLF->Unload();
 
-	L->Unload();
-	return true;
+	return 0;
 }
 
 void CLuaFile::LuaPrintOverride(std::string str)

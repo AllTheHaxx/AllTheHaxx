@@ -236,11 +236,15 @@ void CLuaFile::Init()
 void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 {
 #if defined(FEATURE_LUA)
+
+	lua_register(L, "Import", CLuaBinding::LuaImport);
+	lua_register(L, "KillScript", CLuaBinding::LuaKillScript);
+
 	getGlobalNamespace(L)
 
-		.addFunction("Import", &CLuaBinding::LuaImport)
-		.addFunction("KillScript", &CLuaBinding::LuaKillScript)
-		//.addFunction("print", &CLuaFile::LuaPrintOverride)
+		//.addFunction("Import", &CLuaBinding::LuaImport)
+		//.addFunction("KillScript", &CLuaBinding::LuaKillScript)
+		//.addFunction("print", &CLuaFile::LuaPrintOverride)       // TODO: do this with a low level implementation :D
 
 		// client namespace
 		.beginNamespace("_client")

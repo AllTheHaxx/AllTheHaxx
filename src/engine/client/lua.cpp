@@ -110,8 +110,8 @@ void CLua::AddUserscript(const char *pFilename)
 	CALLSTACK_ADD();
 
 #if defined(FEATURE_LUA)
-	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua")
-																		&& str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc")) // "compiled lua chunk"
+	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || (str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua")
+																		&& str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc"))) // "compiled lua chunk/code/cackwurst"
 		return;
 
 	// don't add duplicates
@@ -317,7 +317,7 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 
 		// the (compressed) certificate data
 		char aData[sizeof(LuaBinaryCert)] = {0};
-		if(io_read(f, aData, (unsigned int)DataSize) != DataSize)
+		if((int)io_read(f, aData, (unsigned int)DataSize) != DataSize)
 		{
 			dbg_msg("lua", "corrupted certificate '%s'", aCertFile);
 			io_close(f);

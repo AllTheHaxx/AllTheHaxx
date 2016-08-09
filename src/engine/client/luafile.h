@@ -78,7 +78,6 @@ public:
 	template<class T> T CallFunc(const char *pFuncName);
 
 	int State() const { return m_State; }
-	int GetUID() const { return m_UID; }
 	int GetPermissionFlags() const { return m_PermissionFlags; }
 	const char* GetFilename() const { return m_Filename.c_str(); }
 	const char* GetScriptTitle() const { return m_aScriptTitle; }
@@ -86,6 +85,7 @@ public:
 	bool GetScriptHasSettings() const { return m_ScriptHasSettings; }
 	bool GetScriptIsAutoload() const { return m_ScriptAutoload; }
 	bool SetScriptIsAutoload(bool NewVal) { bool ret = m_ScriptAutoload; m_ScriptAutoload = NewVal; return ret; }
+	lua_State *L() const { return m_pLuaState; }
 
 	CLua *Lua() const { return m_pLua; }
 	
