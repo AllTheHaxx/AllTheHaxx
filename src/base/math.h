@@ -38,20 +38,23 @@ inline float frandom() { return rand()/(float)(RAND_MAX); }
 /* smoothly sets the value to target, must be called every tick to do so;
  * val is a pointer to a static float
  * returns the newly calculated value */
-inline float smooth_set(float* val, float target, float delay, float multiplier, float snaprange = 0.00f)
+inline float smooth_set(float* val, float target, float delay, float multiplier)
 {
+	if(delay <= 0.0f)
+		delay = 0.00001f;
+
 	delay *= (0.005f/multiplier);
 
 	if(delay < 1.0f || *val == target)
 		return *val;
 
-	if(snaprange)
+/*	if(snaprange)
 	{
 		if(*val > target * (1.0f - snaprange))
 			*val = target;
 		if(*val < target + snaprange)
 			*val = target;
-	}
+	}*/
 
 	if(*val < target)
 		*val += (target-*val)/delay;

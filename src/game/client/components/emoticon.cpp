@@ -98,17 +98,19 @@ void CEmoticon::OnRender()
 				 EyeEmote(m_SelectedEyeEmote);
 			m_WasActive = false;
 		}
-		smooth_set(&s_Val, 0.0f, 25.0f, Client()->RenderFrameTime());
-		if(s_Val < 0.001f)
+		if(g_Config.m_ClSmoothEmoteWheel)
+			smooth_set(&s_Val, 0.0f, (float)g_Config.m_ClSmoothEmoteWheelDelay, Client()->RenderFrameTime());
+		if(s_Val < 0.005f || !g_Config.m_ClSmoothEmoteWheel)
 		{
-			s_Val = 0.0f;
+			//s_Val = 0.0f;
 			return;
 		}
 	}
 	else
 	{
-		smooth_set(&s_Val, 1.0f, 25.0f, Client()->RenderFrameTime());
-		if(s_Val > 0.995f)
+		if(g_Config.m_ClSmoothEmoteWheel)
+			smooth_set(&s_Val, 1.0f, (float)g_Config.m_ClSmoothEmoteWheelDelay, Client()->RenderFrameTime());
+		else
 			s_Val = 1.0f;
 	}
 
@@ -157,10 +159,20 @@ void CEmoticon::OnRender()
 	// draw the emoticons in a circle
 	static float s_PopVal = 0.0f;
 	if(s_Val > 0.5f)
-		smooth_set(&s_PopVal, 1.0f, 35.0f, Client()->RenderFrameTime());
+	{
+		if(g_Config.m_ClSmoothEmoteWheel)
+			smooth_set(&s_PopVal, 1.0f, (float)g_Config.m_ClSmoothEmoteWheelDelay+10.0f, Client()->RenderFrameTime());
+		else
+			s_PopVal = 1.0f;
+	}
 	else
-		smooth_set(&s_PopVal, 0.0f, 35.0f, Client()->RenderFrameTime());
-	if(s_PopVal < 0.01f)
+	{
+		if(g_Config.m_ClSmoothEmoteWheel)
+			smooth_set(&s_PopVal, 0.0f, (float)g_Config.m_ClSmoothEmoteWheelDelay+10.0f, Client()->RenderFrameTime());
+		else
+			s_PopVal = 0.0f;
+	}
+	if(s_PopVal < 0.001f)
 		s_PopVal = 0.0f;
 
 	for(int i = 0; i < NUM_EMOTICONS; i++)
@@ -259,28 +271,19 @@ void CEmoticon::Emote(int Emoticon)
 void CEmoticon::EyeEmote(int Emote)
 {
 	CALLSTACK_ADD();
+	if(Emote >= NUM_EMOTES)
+		return;
+
+	static const char *s_apEmoteMapping[NUM_EMOTES] = {
+			"normal",
+			"pain",
+			"happy",
+			"surprise",
+			"angry",
+			"blink"
+	};
 
 	char aBuf[32];
-	switch(Emote)
-	{
-	case EMOTE_NORMAL:
-		str_format(aBuf, sizeof(aBuf), "/emote normal %d", g_Config.m_ClEyeDuration);
-		break;
-	case EMOTE_PAIN:
-		str_format(aBuf, sizeof(aBuf), "/emote pain %d", g_Config.m_ClEyeDuration);
-		break;
-	case EMOTE_HAPPY:
-		str_format(aBuf, sizeof(aBuf), "/emote happy %d", g_Config.m_ClEyeDuration);
-		break;
-	case EMOTE_SURPRISE:
-		str_format(aBuf, sizeof(aBuf), "/emote surprise %d", g_Config.m_ClEyeDuration);
-		break;
-	case EMOTE_ANGRY:
-		str_format(aBuf, sizeof(aBuf), "/emote angry %d", g_Config.m_ClEyeDuration);
-		break;
-	case EMOTE_BLINK:
-		str_format(aBuf, sizeof(aBuf), "/emote blink %d", g_Config.m_ClEyeDuration);
-		break;
-	}
+	str_format(aBuf, sizeof(aBuf), "/emote %s %d", s_apEmoteMapping[Emote], g_Config.m_ClEyeDuration);
 	GameClient()->m_pChat->Say(0, aBuf);
 }
