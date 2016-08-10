@@ -165,7 +165,9 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libogg-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopusfile-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/luajit/win32/lua51.dll"))
+		if config.lua.value and config.luajit.value then
+			table.insert(client_depends, CopyToDirectory(".", "other/luajit/windows/lib32/lua51.dll"))
+		end
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib64/freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL2.dll"))
