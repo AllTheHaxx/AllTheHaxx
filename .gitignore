@@ -8,20 +8,21 @@ rsa
 src/game/generated
 update/
 
-crapnet*
-config_store*
-config_retrieve*
-dilate*
-fake_server*
-map_resave*
-map_version*
-mastersrv*
-packetgen*
-serverlaunch_*
-tileset_border*
-twping*
-versionsrv*
-dummy_map*
+/crapnet*
+/config_store*
+/config_retrieve*
+/dilate*
+/fake_server*
+/map_resave*
+/map_version*
+/mastersrv*
+/packetgen*
+/serverlaunch*
+/tileset_border*
+/twping*
+/versionsrv*
+/dummy_map*
+/slc_unpack
 luacert*
 
 *.txt
@@ -58,7 +59,7 @@ luacert*
 autoexec.cfg
 
 DDNet*
-AllTheHaxx*
+/AllTheHaxx*
 
 other/luajit/LuaJIT-2.0.2/src/host/buildvm
 other/luajit/LuaJIT-2.0.2/src/host/buildvm_arch.h

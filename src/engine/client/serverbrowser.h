@@ -6,6 +6,19 @@
 #include <base/tl/sorted_array.h>
 #include <engine/serverbrowser.h>
 #include <engine/client/db_sqlite3.h>
+#include <mastersrv/mastersrv.h>
+#include <engine/masterserver.h>
+#include <engine/shared/memheap.h>
+#include <engine/config.h>
+
+/**
+ * FORMAT OF THE SERVERLIST CACHE FILE (version identifier '1')
+ *
+ * char - file version<br>
+ * int  - number of helt servers [NumServers]<br>
+ * int  - array capacity<br>
+ * sizeof(CServerInfo)*NumServers - all the entries<br>
+ */
 
 class CServerBrowser : public IServerBrowser
 {

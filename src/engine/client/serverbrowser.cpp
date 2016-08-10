@@ -768,7 +768,7 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 	pSelf->m_ServerlistType = IServerBrowser::TYPE_INTERNET;
 
 	// open file
-	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorageTW::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if(!File)
 	{
 		dbg_msg("browser", "opening cache file failed.");
