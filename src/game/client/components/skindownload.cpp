@@ -4,7 +4,6 @@
 
 #include <engine/graphics.h>
 #include <engine/textrender.h>
-#include <curl/curl.h>
 
 #include "skins.h"
 #include "skindownload.h"
