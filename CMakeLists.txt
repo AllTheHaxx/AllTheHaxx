@@ -859,6 +859,6 @@ set(SOURCE_FILES
     src/twping/twping.cpp
     src/versionsrv/mapversions.h
     src/versionsrv/versionsrv.cpp
-    src/versionsrv/versionsrv.h src/engine/client/debug.h src/engine/client/debug.cpp src/engine/client/curlwrapper.cpp src/engine/client/curlwrapper.h src/engine/curlwrapper.h src/tools/slc_unpack.cpp)
+    src/versionsrv/versionsrv.h src/engine/client/debug.h src/engine/client/debug.cpp src/engine/client/curlwrapper.cpp src/engine/client/curlwrapper.h src/engine/curlwrapper.h src/tools/slc_unpack.cpp src/engine/client/lua_apidef.cpp)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})
