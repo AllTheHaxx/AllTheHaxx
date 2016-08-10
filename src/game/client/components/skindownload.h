@@ -107,7 +107,7 @@ private:
 	 * @threadsafety DOESN'T lock, but accesses the critical array
 	 * @return The number of tasks
 	 */
-	int NumTasks(bool ActiveOnly=false)
+	static int NumTasks(bool ActiveOnly=false)
 	{
 		int ret = 0;
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
@@ -117,7 +117,7 @@ private:
 		return ret;
 	}
 
-	CSkinFetchTask *FindTask(CFetchTask* pTask)
+	static CSkinFetchTask *FindTask(CFetchTask* pTask)
 	{
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
 			if(m_apFetchTasks[i] != NULL)
@@ -126,7 +126,7 @@ private:
 		return NULL;
 	}
 
-	CSkinFetchTask **FindFreeSlot()
+	static CSkinFetchTask **FindFreeSlot()
 	{
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
 			if(m_apFetchTasks[i] == NULL)

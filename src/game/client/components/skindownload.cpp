@@ -116,11 +116,15 @@ void CSkinDownload::OnRender()
 
 void CSkinDownload::CSkinFetchTask::ProgressCallback(CFetchTask *pTask, void *pUser)
 {
-	CSkinFetchTask *pSelf = (CSkinFetchTask *)pUser;
+	CSkinFetchTask *pTaskHandler = FindTask(pTask);
+	if(!pTaskHandler)
+	{
+		dbg_msg("skinfetcher/error", "FATAL: NO HANDLER FOR TASK %p", pTask);
+		return;
+	}
 
-	pSelf->m_State = pTask->State();
-	pSelf->m_Progress = pTask->Progress();
-
+	pTaskHandler->m_State = pTask->State();
+	pTaskHandler->m_Progress = pTask->Progress();
 }
 
 void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
@@ -134,13 +138,13 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 	{
 		dbg_msg("SKINFETCHER/ERROR", "Something really bad happened. I have no clue how that comes. I'm sorry.");
 		dbg_msg("SKINFETCHER/ERROR", "INFO: pTask@%p={ dest='%s' curr=%.2f, size=%.2f }", pTask, pTask->Dest(), pTask->Current(), pTask->Size());
-		//delete pTask; // <-- this crashes it in any circumstance... but a single leak for a crash seems to be a pretty good trade xD
+		delete pTask;
 		return;
 	}
 
 	CSkinDownload::CSkinFetchTask::ProgressCallback(pTask, pTaskHandler);
 
-	if(pTask->State() == CFetchTask::STATE_ERROR)
+	if(pTask->State() == CFetchTask::STATE_ERROR || pTask->State() == CFetchTask::STATE_ABORTED)
 	{
 		if(g_Config.m_Debug)
 			dbg_msg("skinfetcher/debug", "download failed: '%s'", pDest);

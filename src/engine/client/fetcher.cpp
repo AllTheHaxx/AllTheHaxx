@@ -187,7 +187,7 @@ int CFetcher::ProgressCallback(void *pUser, double DlTotal, double DlCurr, doubl
 	CFetchTask *pTask = (CFetchTask *)pUser;
 	pTask->m_Current = DlCurr;
 	pTask->m_Size = DlTotal;
-	pTask->m_Progress = (100 * DlCurr) / (DlTotal ? DlTotal : 1);
+	pTask->m_Progress = (int)((100 * DlCurr) / (DlTotal ? DlTotal : 1));
 	if(pTask->m_pfnProgressCallback)
 		pTask->m_pfnProgressCallback(pTask, pTask->m_pUser);
 	return pTask->m_Abort ? -1 : 0;
