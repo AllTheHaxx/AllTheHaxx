@@ -855,7 +855,7 @@ set(SOURCE_FILES
     src/tools/tileset_borderrem.cpp
     src/tools/tileset_borderset.cpp
     src/tools/dummy_map.cpp
-#   src/tools/luacert.cpp
+    src/tools/luacert.cpp
     src/twping/twping.cpp
     src/versionsrv/mapversions.h
     src/versionsrv/versionsrv.cpp

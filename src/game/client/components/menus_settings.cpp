@@ -3029,12 +3029,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			if(g_Config.m_ClLuaFilterString[0] != '\0' && (!str_find_nocase(L->GetFilename(), g_Config.m_ClLuaFilterString) && !str_find_nocase(L->GetScriptTitle(), g_Config.m_ClLuaFilterString)))
 				continue;
 
-			if(ShowActiveOnly == 1 && L->State() != CLuaFile::LUAFILE_STATE_LOADED)
+			if(ShowActiveOnly == 1 && L->State() != CLuaFile::STATE_LOADED)
 				continue;
-			else if(ShowActiveOnly == 2 && L->State() == CLuaFile::LUAFILE_STATE_LOADED)
+			else if(ShowActiveOnly == 2 && L->State() == CLuaFile::STATE_LOADED)
 				continue;
 
-			if(L->State() == CLuaFile::LUAFILE_STATE_LOADED)
+			if(L->State() == CLuaFile::STATE_LOADED)
 				NumActiveScripts++;
 
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
@@ -3046,8 +3046,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				CUIRect LabelInfo;
 				CUIRect Buttons, Button;
 
-				vec4 Color = L->State() == CLuaFile::LUAFILE_STATE_ERROR ? vec4(0.7f,0,0,0.3f) :
-						L->State() == CLuaFile::LUAFILE_STATE_LOADED ? vec4(0,0.7f,0,0.3f) : vec4(0,0,0,0.3f);
+				vec4 Color = L->State() == CLuaFile::STATE_ERROR ? vec4(0.7f,0,0,0.3f) :
+						L->State() == CLuaFile::STATE_LOADED ? vec4(0,0.7f,0,0.3f) : vec4(0,0,0,0.3f);
 
 				if(i%2)
 					Color.a += 0.2f;
@@ -3079,22 +3079,22 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					{
 						str_format(aTooltip, sizeof(aTooltip), "This script has the following additional permission:");
 
-						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_IO)
+						if(PermissionFlags&CLuaFile::PERMISSION_IO)
 							str_append(aTooltip, "\n\n- IO (Write and read files)", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_DEBUG)
+						if(PermissionFlags&CLuaFile::PERMISSION_DEBUG)
 							str_append(aTooltip, "\n\n- DEBUG (Dunno what this is used for o.O)", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_FFI)
+						if(PermissionFlags&CLuaFile::PERMISSION_FFI)
 							str_append(aTooltip, "\n\n- FFI (Execution of native code)", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_OS)
+						if(PermissionFlags&CLuaFile::PERMISSION_OS)
 							str_append(aTooltip, "\n\n- OS (Access to various operation system functionalities, BE CAREFUL!", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::LUAFILE_PERMISSION_PACKAGE)
+						if(PermissionFlags&CLuaFile::PERMISSION_PACKAGE)
 							str_append(aTooltip, "\n\n- PACKAGE (Modules)", sizeof(aTooltip));
 					}
 					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Button, aTooltip, CUI::CORNER_ALL, vec4(PermissionFlags > 0 ? .7f : .2f, PermissionFlags > 0 ? .2f : .7f, .2f, .8f)))
 						dbg_msg("lua/permissions", "'%s' | %i (%i)", L->GetFilename(), PermissionFlags, L->GetPermissionFlags());
 
 
-					if(L->State() == CLuaFile::LUAFILE_STATE_LOADED)
+					if(L->State() == CLuaFile::STATE_LOADED)
 					{
 						Buttons.VSplitRight(5.0f, &Buttons, 0);
 						Buttons.VSplitRight(100.0f, &Buttons, &Button);
@@ -3123,7 +3123,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						}
 					}
 
-					if(L->State() == CLuaFile::LUAFILE_STATE_ERROR)
+					if(L->State() == CLuaFile::STATE_ERROR)
 					{
 						Buttons.VSplitRight(5.0f, &Buttons, 0);
 						Buttons.VSplitRight(200.0f, &Buttons, &Button);

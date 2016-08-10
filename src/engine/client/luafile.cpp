@@ -11,7 +11,7 @@
 CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
 {
 	m_pLuaState = 0;
-	m_State = LUAFILE_STATE_IDLE;
+	m_State = STATE_IDLE;
 	m_pErrorStr = 0;
 	Reset();
 }
@@ -25,7 +25,7 @@ void CLuaFile::Reset(bool error)
 {
 	m_UID = rand()%0xFFFF;
 	m_PermissionFlags = 0x0;
-	m_State = error ? LUAFILE_STATE_ERROR: LUAFILE_STATE_IDLE;
+	m_State = error ? STATE_ERROR: STATE_IDLE;
 
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
@@ -42,20 +42,21 @@ void CLuaFile::Reset(bool error)
 void CLuaFile::LoadPermissionFlags()
 {
 #if defined(FEATURE_LUA)
+	// FIRST COMES THE OLD INTERFACE (only here for compatibility reasons)
 	std::ifstream f(m_Filename.c_str());
 	std::string line; bool searching = true;
 	while(std::getline(f, line))
 	{
-		if(line.find("]]") != std::string::npos)
-			break;
-
 		if(searching && line != "--[[#!")
 			continue;
+
 		if(searching)
 		{
 			searching = false;
 			continue;
 		}
+		else if(line.find("]]") != std::string::npos)
+			break;
 
 		// make sure we only get what we want
 		char aBuf[32]; char *p;
@@ -70,19 +71,63 @@ void CLuaFile::LoadPermissionFlags()
 			continue;
 
 		if(str_comp_nocase("io", p) == 0)
-			m_PermissionFlags |= LUAFILE_PERMISSION_IO;
+			m_PermissionFlags |= PERMISSION_IO;
 		if(str_comp_nocase("debug", p) == 0)
-			m_PermissionFlags |= LUAFILE_PERMISSION_DEBUG;
+			m_PermissionFlags |= PERMISSION_DEBUG;
 		if(str_comp_nocase("ffi", p) == 0)
-			m_PermissionFlags |= LUAFILE_PERMISSION_FFI;
+			m_PermissionFlags |= PERMISSION_FFI;
 		if(str_comp_nocase("os", p) == 0)
-			m_PermissionFlags |= LUAFILE_PERMISSION_OS;
+			m_PermissionFlags |= PERMISSION_OS;
 		if(str_comp_nocase("package", p) == 0)
-			m_PermissionFlags |= LUAFILE_PERMISSION_PACKAGE;
+			m_PermissionFlags |= PERMISSION_PACKAGE;
 	}
-	
-	//m_PermissionFlags |= LUAFILE_PERMISSION_OS;
-	//m_PermissionFlags |= LUAFILE_PERMISSION_DEBUG;
+	// ----------------- END OLD INTERFACE -----------------
+
+
+	// ---------------- BEGIN NEW INTERFACE ----------------
+
+/*	int PrevStackSize = lua_gettop(m_pLuaState);
+	lua_getfield(m_pLuaState, LUA_GLOBALSINDEX, "RequestPerms");
+	if(lua_isfunction(m_pLuaState, -1))
+	{
+		int ret = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
+		if(ret != 0)
+		{
+			dbg_msg("lua", "error while retrieving permission flags from script '%s' (code %i)", m_Filename.c_str(), ret);
+			if(lua_isstring(m_pLuaState, -1))
+			{
+				dbg_msg("lua", "  : lua error : %s", lua_tostring(m_pLuaState, -1));
+				lua_pop(m_pLuaState, 1);
+			}
+			else
+				dbg_msg("lua", "  : unknown error, code %i", ret);
+		}
+		else
+		{
+			int nargs = lua_gettop(m_pLuaState) - PrevStackSize;
+			for(int i = 0; i < nargs; i++)
+			{
+				if(!lua_isstring(m_pLuaState, -1))
+				{
+					lua_pop(m_pLuaState, 1);
+					continue;
+				}
+				const char *p = lua_tostring(m_pLuaState, -1);
+				if(str_comp_nocase("io", p) == 0)
+					m_PermissionFlags |= PERMISSION_IO;
+				if(str_comp_nocase("debug", p) == 0)
+					m_PermissionFlags |= PERMISSION_DEBUG;
+				if(str_comp_nocase("ffi", p) == 0)
+					m_PermissionFlags |= PERMISSION_FFI;
+				if(str_comp_nocase("os", p) == 0)
+					m_PermissionFlags |= PERMISSION_OS;
+				if(str_comp_nocase("package", p) == 0)
+					m_PermissionFlags |= PERMISSION_PACKAGE;
+				lua_pop(m_pLuaState, 1);
+			}
+		}
+	}*/
+
 #endif
 }
 
@@ -93,7 +138,7 @@ void CLuaFile::Unload(bool error)
 //		lua_close(m_pLuaState);
 
 	// script is not loaded -> don't unload it
-	if(m_State != LUAFILE_STATE_LOADED)
+	if(m_State != STATE_LOADED)
 	{
 		Reset(error);
 		return;
@@ -141,15 +186,15 @@ void CLuaFile::OpenLua()
 	luaopen_bit(m_pLuaState);	// bit operations
 	//luaopen_jit(m_pLuaState);	// control the jit-compiler [don't needed]
 
-	if(m_PermissionFlags&LUAFILE_PERMISSION_IO)
+	if(m_PermissionFlags&PERMISSION_IO)
 		luaopen_io(m_pLuaState);	// input/output of files
-	//if(m_PermissionFlags&LUAFILE_PERMISSION_DEBUG) XXX
+	//if(m_PermissionFlags&PERMISSION_DEBUG) XXX
 		luaopen_debug(m_pLuaState);	// debug stuff for whatever... can be removed in further patches
-	if(m_PermissionFlags&LUAFILE_PERMISSION_FFI)
+	if(m_PermissionFlags&PERMISSION_FFI)
 		luaopen_ffi(m_pLuaState);	// register and write own C-Functions and call them in lua (whoever may need that...)
-	//if(m_PermissionFlags&LUAFILE_PERMISSION_OS) XXX
+	//if(m_PermissionFlags&PERMISSION_OS) XXX
 		luaopen_os(m_pLuaState);	// evil
-	if(m_PermissionFlags&LUAFILE_PERMISSION_PACKAGE)
+	if(m_PermissionFlags&PERMISSION_PACKAGE)
 		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
 #endif
 }
@@ -157,10 +202,10 @@ void CLuaFile::OpenLua()
 void CLuaFile::Init()
 {
 #if defined(FEATURE_LUA)
-	if(m_State == LUAFILE_STATE_LOADED)
+	if(m_State == STATE_LOADED)
 		Unload();
 
-	m_State = LUAFILE_STATE_IDLE;
+	m_State = STATE_IDLE;
 
 	LoadPermissionFlags();
 	OpenLua();
@@ -168,23 +213,23 @@ void CLuaFile::Init()
 	if(!LoadFile("data/luabase/events.lua")) // try the usual script file first
 	{
 		//if(!LoadFile("data/lua/events.luac")) // try for the compiled file if script not found
-			m_State = LUAFILE_STATE_ERROR;
+			m_State = STATE_ERROR;
 		//else
 		//	RegisterLuaCallbacks(m_pLuaState);
 	}
 	else
 		RegisterLuaCallbacks(m_pLuaState);
 
-	if(m_State != LUAFILE_STATE_ERROR)
+	if(m_State != STATE_ERROR)
 	{
 		if(LoadFile(m_Filename.c_str()))
-			m_State = LUAFILE_STATE_LOADED;
+			m_State = STATE_LOADED;
 		else
-			m_State = LUAFILE_STATE_ERROR;
+			m_State = STATE_ERROR;
 	}
 
 	// if we errored so far, don't go any further
-	if(m_State == LUAFILE_STATE_ERROR)
+	if(m_State == STATE_ERROR)
 	{
 		Reset(true);
 		return;
@@ -223,11 +268,7 @@ void CLuaFile::Init()
 #if defined(FEATURE_LUA)
 luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 {
-	LuaRef func = getGlobal(m_pLuaState, pFuncName);
-	if(func == 0)
-		dbg_msg("lua", "error: function '%s' not found in file '%s'", pFuncName, m_Filename.c_str());
-
-	return func;  // return 0 if the function is not found!
+	return getGlobal(m_pLuaState, pFuncName);
 }
 #endif
 
@@ -288,7 +329,6 @@ bool CLuaFile::LoadFile(const char *pFilename)
 	int Status = luaL_loadfile(m_pLuaState, pFilename);
 	if (Status != 0)
 	{
-		// does this work?
 		CLua::ErrorFunc(m_pLuaState);
 		return false;
 	}

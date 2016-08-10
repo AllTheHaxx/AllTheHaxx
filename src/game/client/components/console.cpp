@@ -122,7 +122,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			bool DiscardCommand = false;
 			for(int ijdfg = 0; ijdfg < m_pGameConsole->Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 			{
-				if(m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				if(m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
 					continue;
 				LuaRef lfunc = m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnConsoleCommand");
 				if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }

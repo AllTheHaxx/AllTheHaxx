@@ -2246,27 +2246,27 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 
 		if(str_comp_nocase(pResult->GetString(0), "activate") == 0)
 		{
-			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::STATE_LOADED)
 				pSelf->Client()->Lua()->GetLuaFiles()[id]->Init();
 		}
 		else if(str_comp_nocase(pResult->GetString(0), "deactivate") == 0)
 		{
-			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED)
 				pSelf->Client()->Lua()->GetLuaFiles()[id]->Unload();
 		}
 		else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
 		{
-			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::STATE_LOADED)
 				pSelf->Client()->Lua()->GetLuaFiles()[id]->Init();
-			else if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED)
+			else if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED)
 				pSelf->Client()->Lua()->GetLuaFiles()[id]->Unload();
 
 			char aBuf[64];
-			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_ERROR)
+			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_ERROR)
 				str_format(aBuf, sizeof(aBuf), "Script '%s' failed to load", pResult->GetString(1));
 			else
 				str_format(aBuf, sizeof(aBuf), "Toggled script '%s' %s", pResult->GetString(1),
-						pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::LUAFILE_STATE_LOADED ? "on" : "off");
+						pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED ? "on" : "off");
 				pSelf->m_pHud->PushNotification(aBuf);
 		}
 		else

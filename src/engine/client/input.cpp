@@ -329,7 +329,7 @@ int CInput::Update()
 #if defined(FEATURE_LUA)
 						for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 						{
-							if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+							if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
 								continue;
 							LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyPress");
 							if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }
@@ -346,7 +346,7 @@ int CInput::Update()
 #if defined(FEATURE_LUA)
 					for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 					{
-						if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+						if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
 							continue;
 						LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyRelease");
 						if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }

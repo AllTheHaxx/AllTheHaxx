@@ -531,7 +531,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		{
 			for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 			{
-				if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+				if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
 					continue;
 				LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChat");
 				if(lfunc) try { HideChat |= lfunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)).cast<bool>(); } catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[ijdfg]); }
@@ -1156,7 +1156,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	{
 		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 		{
-			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::LUAFILE_STATE_LOADED)
+			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
 				continue;
 			LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChatSend");
 			if(lfunc) try { if(lfunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }

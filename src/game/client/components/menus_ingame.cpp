@@ -520,7 +520,7 @@ void CMenus::RenderLuaQuickAccess(CUIRect MainView)
 	for(int i = 0; i < NumLuaScripts; i++)
 	{
 		CLuaFile *L = Client()->Lua()->GetLuaFiles()[i];
-		if(!L || L->State() != CLuaFile::LUAFILE_STATE_LOADED)
+		if(!L || L->State() != CLuaFile::STATE_LOADED)
 			continue;
 
 		CPointerContainer Container(L);

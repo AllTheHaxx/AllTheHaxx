@@ -284,6 +284,7 @@ int CLua::ErrorFunc(lua_State *L)
 }
 
 
+// --------------------- stuff from CLuaFile
 
 bool CLuaFile::CheckCertificate(const char *pFilename)
 {
@@ -310,14 +311,18 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 		bool CurrBigEndian = true;
 #endif
 		// some (uncompressed) meta data
-		int DataSize;
-		bool FileBigEndian;
-		io_read(f, &FileBigEndian, sizeof(bool));
-		io_read(f, &DataSize, sizeof(int));
+		LuaCertHeader Header;
+		io_read(f, &Header, sizeof(LuaCertHeader));
+
+		if(Header.Version != LuaBinaryCert::LUA_CERT_VERSION)
+		{
+			dbg_msg("lua", "certificate '%s' uses an incompatible protocol version (%i != %i)", Header.Version, LuaBinaryCert::LUA_CERT_VERSION);
+			return false;
+		}
 
 		// the (compressed) certificate data
 		char aData[sizeof(LuaBinaryCert)] = {0};
-		if((int)io_read(f, aData, (unsigned int)DataSize) != DataSize)
+		if((int)io_read(f, aData, (unsigned int)Header.DataSize) != Header.DataSize)
 		{
 			dbg_msg("lua", "corrupted certificate '%s'", aCertFile);
 			io_close(f);
@@ -326,25 +331,25 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 		io_close(f);
 
 		// correct the endianess if neccesary
-		if(CurrBigEndian != FileBigEndian)
-			swap_endian(aData, 1, (unsigned int)DataSize);
+		if(CurrBigEndian != Header.FileBigEndian)
+			swap_endian(aData, 1, (unsigned int)Header.DataSize);
 
 		LuaBinaryCert cert;
 		mem_zero(&cert, sizeof(cert));
 
-		if(DataSize == sizeof(LuaBinaryCert)) // saved data is not compressed
-			mem_copy(&cert, aData, (unsigned int)DataSize); // -> copy it as is
+		if(Header.DataSize == sizeof(LuaBinaryCert)) // saved data is not compressed
+			mem_copy(&cert, aData, (unsigned int)Header.DataSize); // -> copy it as is
 		else
 		{
-			int DecompressedSize = CNetBase::Decompress(aData, DataSize, &cert, sizeof(LuaBinaryCert));
+			int DecompressedSize = CNetBase::Decompress(aData, Header.DataSize, &cert, sizeof(LuaBinaryCert));
 			if(DecompressedSize <= 0)
 			{
-				dbg_msg("lua", "failed to decompress cert '%s' (%i => %i)", aCertFile, DataSize, sizeof(LuaBinaryCert));
+				dbg_msg("lua", "failed to decompress cert '%s' (%i => %i)", aCertFile, Header.DataSize, sizeof(LuaBinaryCert));
 				return false;
 			}
 
 			if(g_Config.m_Debug)
-				dbg_msg("lua", "decompressed cert '%s' (%i => %i)", aCertFile, DataSize, DecompressedSize);
+				dbg_msg("lua", "decompressed cert '%s' (%i => %i)", aCertFile, Header.DataSize, DecompressedSize);
 
 			// check the certificate
 			f = Lua()->Storage()->OpenFile(pFilename, IOFLAG_READ, IStorageTW::TYPE_ALL);
@@ -383,6 +388,8 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 				dbg_msg("lua", " :  (%s != %s)", aStrHash[0], aStrHash[1]);
 				return false;
 			}
+
+			m_PermissionFlags = cert.PermissionFlags;
 
 			dbg_msg("lua", "success: certificate check for '%s' [[ ISSUER='%s' DATE='%s' ]]", pFilename, cert.aIssuer, cert.aDate);
 		}
