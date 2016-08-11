@@ -9,14 +9,31 @@ class CLuaBinding
 {
 public:
 	static CLuaFile *GetLuaFile(lua_State *l);
+	static int LuaListdirCallback(const char *name, int is_dir, int dir_type, void *user);
+	struct LuaListdirCallbackParams
+	{
+		lua_State *L;
+		char aCallbackFunc[128];
 
+		LuaListdirCallbackParams(lua_State *l, const char *pCB) : L(l)
+		{
+			str_copy(aCallbackFunc, pCB, sizeof(aCallbackFunc));
+		}
+	};
 	// global namespace
 
 	// low level lua callbacks
-	/** @PseudoArguments const char *pFilename */
+	/** @LuaFunc @code bool Import(const char *pFilename) */
 	static int LuaImport(lua_State *L);
-	/** @PseudoArguments none */
+	/** @LuaFunc none */
 	static int LuaKillScript(lua_State *L);
+	/** @LuaFunc @code int Listdir(const char *pDir, LUA_FS_LISTDIR_CALLBACK *pFCallback)@endcode
+	 * @typedef @code int (*LUA_FS_LISTDIR_CALLBACK)(const char *name, int is_dir);@endcode
+	 */
+	static int LuaListdir(lua_State *L);
+
+	// some getters
+	static int LuaScriptPath(lua_State *L);
 
 	// external info
 	static int LuaGetPlayerScore(int ClientID);

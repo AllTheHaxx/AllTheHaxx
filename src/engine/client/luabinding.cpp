@@ -4,6 +4,22 @@
 
 #include "luabinding.h"
 
+int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, void *user)
+{
+	LuaListdirCallbackParams *params = (LuaListdirCallbackParams*)user;
+	lua_State *L = params->L;
+
+	lua_getglobal(L, params->aCallbackFunc);
+	lua_pushstring(L, name);
+	lua_pushboolean(L, is_dir);
+	lua_pcall(L, 2, 1, 0);
+	int ret = 0;
+	if(lua_isnumber(L, -1))
+		ret = round_to_int((float)round(lua_tonumber(L, -1)));
+	lua_pop(L, 1); // pop return
+	return ret;
+}
+
 CLuaFile* CLuaBinding::GetLuaFile(lua_State *l)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
@@ -22,8 +38,7 @@ int CLuaBinding::LuaImport(lua_State *L)
 {
 	CLuaFile *pLF = GetLuaFile(L);
 	if(!pLF)
-		return false;
-
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
 
 	int n = lua_gettop(L);
 	if(n != 1)
@@ -39,13 +54,52 @@ int CLuaBinding::LuaImport(lua_State *L)
 	return 1;
 }
 
+int CLuaBinding::LuaListdir(lua_State *L)
+{
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	int nargs = lua_gettop(L);
+	if(nargs != 2)
+		return luaL_error(L, "Listdir expects 2 arguments");
+
+#define argcheck(cond, narg, msg) if(!(cond)) {dbg_msg("LUAERRROR", "narg=%i msg='%s'", narg, msg); return luaL_argerror(L, (narg), (msg));}
+
+	argcheck(lua_isstring(L, 1), 1, ""); // path
+	argcheck(lua_isstring(L, 2), 2, "must be the name of the callback function (as a string)"); // function callback
+
+	lua_getglobal(L, lua_tostring(L, 2)); // check if the given callback function actually exists
+	luaL_argcheck(L, lua_isfunction(L, -1), 2, "must be the name of the callback function (as a string)");
+	lua_pop(L, 1); // pop temporary lua function
+
+	const char *pDir = luaL_optstring(L, 1, 0);
+	LuaListdirCallbackParams params(L, lua_tostring(L, 2));
+	lua_pop(L, 1); // pop arg2
+	lua_Number ret = (lua_Number)fs_listdir(pDir, LuaListdirCallback, IStorageTW::TYPE_ALL, &params);
+	lua_pop(L, 1); // pop arg1
+	lua_pushnumber(L, ret);
+	return 1;
+}
+
 int CLuaBinding::LuaKillScript(lua_State *L)
 {
 	CLuaFile *pLF = GetLuaFile(L);
-	if(pLF)
-		pLF->Unload();
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
 
+	pLF->Unload();
 	return 0;
+}
+
+int CLuaBinding::LuaScriptPath(lua_State *L)
+{
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	lua_pushstring(L, pLF->GetFilename());
+	return 1;
 }
 
 void CLuaFile::LuaPrintOverride(std::string str)
