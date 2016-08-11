@@ -314,9 +314,9 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 		LuaCertHeader Header;
 		io_read(f, &Header, sizeof(LuaCertHeader));
 
-		if(Header.Version != LuaBinaryCert::LUA_CERT_VERSION)
+		if(Header.Version != LuaCertHeader::LUA_CERT_VERSION)
 		{
-			dbg_msg("lua", "certificate '%s' uses an incompatible protocol version (%i != %i)", Header.Version, LuaBinaryCert::LUA_CERT_VERSION);
+			dbg_msg("lua", "certificate '%s' uses an incompatible protocol version (%i != %i)", Header.Version, LuaCertHeader::LUA_CERT_VERSION);
 			return false;
 		}
 
