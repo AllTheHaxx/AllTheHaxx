@@ -13,6 +13,7 @@ CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLu
 	m_pLuaState = 0;
 	m_State = STATE_IDLE;
 	m_pErrorStr = 0;
+	CheckCertificate(Filename.c_str()); // just to load the permission flags
 	Reset();
 }
 
@@ -23,32 +24,23 @@ CLuaFile::~CLuaFile()
 
 void CLuaFile::Reset(bool error)
 {
-	m_UID = rand()%0xFFFF;
-	m_PermissionFlags = 0x0;
-	m_State = error ? STATE_ERROR: STATE_IDLE;
-
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 
+	LoadPermissionFlags(m_Filename.c_str());
+
 	m_ScriptHasSettings = false;
 
-	LoadPermissionFlags();
-
-	//if(m_pLuaState)
-	//	lua_close(m_pLuaState);
-	//m_pLuaState = luaL_newstate();
+	m_State = error ? STATE_ERROR: STATE_IDLE;
 }
 
-void CLuaFile::LoadPermissionFlags()
+void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interface for non-compiled scripts
 {
 #if defined(FEATURE_LUA)
-	if(m_PermissionFlags != 0)
-	{
-		dbg_msg("lua/debug", "aborted loading permission flags for script '%s': already got %i", m_Filename.c_str(), m_PermissionFlags);
+	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0)
 		return;
-	}
 
-	// FIRST COMES THE OLD INTERFACE (only here for compatibility reasons)
+	m_PermissionFlags = 0;
 	std::ifstream f(m_Filename.c_str());
 	std::string line; bool searching = true;
 	while(std::getline(f, line))
@@ -88,51 +80,6 @@ void CLuaFile::LoadPermissionFlags()
 			m_PermissionFlags |= PERMISSION_PACKAGE;
 	}
 	// ----------------- END OLD INTERFACE -----------------
-
-
-	// ---------------- BEGIN NEW INTERFACE ----------------
-
-/*	int PrevStackSize = lua_gettop(m_pLuaState);
-	lua_getfield(m_pLuaState, LUA_GLOBALSINDEX, "RequestPerms");
-	if(lua_isfunction(m_pLuaState, -1))
-	{
-		int ret = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
-		if(ret != 0)
-		{
-			dbg_msg("lua", "error while retrieving permission flags from script '%s' (code %i)", m_Filename.c_str(), ret);
-			if(lua_isstring(m_pLuaState, -1))
-			{
-				dbg_msg("lua", "  : lua error : %s", lua_tostring(m_pLuaState, -1));
-				lua_pop(m_pLuaState, 1);
-			}
-			else
-				dbg_msg("lua", "  : unknown error, code %i", ret);
-		}
-		else
-		{
-			int nargs = lua_gettop(m_pLuaState) - PrevStackSize;
-			for(int i = 0; i < nargs; i++)
-			{
-				if(!lua_isstring(m_pLuaState, -1))
-				{
-					lua_pop(m_pLuaState, 1);
-					continue;
-				}
-				const char *p = lua_tostring(m_pLuaState, -1);
-				if(str_comp_nocase("io", p) == 0)
-					m_PermissionFlags |= PERMISSION_IO;
-				if(str_comp_nocase("debug", p) == 0)
-					m_PermissionFlags |= PERMISSION_DEBUG;
-				if(str_comp_nocase("ffi", p) == 0)
-					m_PermissionFlags |= PERMISSION_FFI;
-				if(str_comp_nocase("os", p) == 0)
-					m_PermissionFlags |= PERMISSION_OS;
-				if(str_comp_nocase("package", p) == 0)
-					m_PermissionFlags |= PERMISSION_PACKAGE;
-				lua_pop(m_pLuaState, 1);
-			}
-		}
-	}*/
 
 #endif
 }
@@ -213,15 +160,14 @@ void CLuaFile::Init()
 
 	m_State = STATE_IDLE;
 
-	LoadPermissionFlags();
 	OpenLua();
 
 	if(!LoadFile("data/luabase/events.lua")) // try the usual script file first
 	{
-		//if(!LoadFile("data/lua/events.luac")) // try for the compiled file if script not found
+//		if(!LoadFile("data/lua/events.clc")) // try for the compiled file if script not found
 			m_State = STATE_ERROR;
-		//else
-		//	RegisterLuaCallbacks(m_pLuaState);
+//		else
+//			RegisterLuaCallbacks(m_pLuaState);
 	}
 	else
 		RegisterLuaCallbacks(m_pLuaState);
@@ -255,8 +201,8 @@ void CLuaFile::Init()
 	m_ScriptHasSettings = ScriptHasSettings();
 
 	// pass the uid to the script
-	lua_pushinteger(m_pLuaState, m_UID);
-	lua_setglobal(m_pLuaState, "g_ScriptUID");
+//	lua_pushinteger(m_pLuaState, m_UID);
+//	lua_setglobal(m_pLuaState, "g_ScriptUID");
 
 	// call the OnScriptInit function if we have one
 	bool success = true;
@@ -264,6 +210,7 @@ void CLuaFile::Init()
 	if(!success)
 	{
 		dbg_msg("lua", "script '%s' rejected being loaded, did 'OnScriptInit()' return true...?", m_Filename.c_str());
+		m_pErrorStr = "OnScriptInit didn't return true";
 		Unload(true);
 		return;
 	}
@@ -299,8 +246,15 @@ bool CLuaFile::LoadFile(const char *pFilename)
 		return false;
 
 	// some security steps right here...
-	if(!CheckCertificate(pFilename))
+	LoadPermissionFlags(m_Filename.c_str());
+	if(!CheckCertificate(m_Filename.c_str()))
+	{
+		m_pErrorStr = "certificate check failed";
+		Reset(true);
 		return false;
+	}
+
+	dbg_msg("lua/debug", "loading '%s' with flags %i", pFilename, m_PermissionFlags);
 
 	// make sure that source code scripts are what they're supposed to be
 	bool Compiled = str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") == 0;

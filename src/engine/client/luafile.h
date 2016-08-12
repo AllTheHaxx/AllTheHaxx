@@ -55,9 +55,8 @@ private:
 	CLua *m_pLua;
 	lua_State *m_pLuaState;
 	int m_State;
-	std::string m_Filename;
+	const std::string m_Filename;
 
-	int m_UID; // the script can use this to identify itself
 	int m_PermissionFlags;
 
 	char m_aScriptTitle[64];
@@ -70,7 +69,7 @@ public:
 	~CLuaFile();
 	void Init();
 	void Reset(bool error = false);
-	void LoadPermissionFlags();
+	void LoadPermissionFlags(const char *pFilename);
 	void Unload(bool error = false);
 #if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName);

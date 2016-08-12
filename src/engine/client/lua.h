@@ -44,12 +44,12 @@ struct LuaBinaryCert
 	char aIssuer[64];
 	char aDate[64];
 	unsigned char aHashMD[SHA256_DIGEST_LENGTH];
-	unsigned short PermissionFlags;
+	int PermissionFlags;
 };
 
 struct LuaCertHeader
 {
-	enum { LUA_CERT_VERSION = 1 };
+	enum { LUA_CERT_VERSION = 3 };
 	short Version;
 	bool FileBigEndian;
 	int DataSize;
