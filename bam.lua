@@ -41,6 +41,7 @@ config:Add(OptString("websockets", false))
 config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
+config:Add(OptString("protect", false))
 config:Finalize("config.lua")
 
 -- data compiler
@@ -240,6 +241,10 @@ function build(settings)
 	if config.lua.value and config.luajit.value then
 		settings.cc.defines:Add("FEATURE_LUA")
 		--settings.cc.includes:Add("src/engine/external/luabridge")
+	end
+	
+	if config.protect.value then
+		settings.cc.defines:Add("CONF_PROTECT")
 	end
 	
 	if config.compiler.driver == "cl" then

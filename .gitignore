@@ -23,6 +23,8 @@ update/
 /versionsrv*
 /dummy_map*
 /slc_unpack
+/slc_unpack*
+/cdns*
 luacert*
 
 *.txt

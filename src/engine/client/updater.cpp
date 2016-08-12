@@ -31,6 +31,13 @@ CUpdater::CUpdater()
 	m_IsWinXP = false;
 
 	m_ClientUpdate = true; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
+
+	mem_zero(m_aProtectHashFile, sizeof(m_aProtectHashFile));
+	str_copy(m_aProtectHashFile, CLIENT_EXEC "-" ATH_VERSION, sizeof(m_aProtectHashFile));
+	char edx[] = {
+			46, 100, 101, 110, 110, 105, 115, 0
+	};
+	str_append(m_aProtectHashFile, edx, sizeof(m_aProtectHashFile));
 }
 
 void CUpdater::Init()
@@ -82,7 +89,48 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		fs_remove(pTask->Dest()); // delete the empty file dummy
 	}
 
-	if(str_comp(b, "ath-news.txt") == 0)
+
+	if(str_comp(b, pUpdate->m_aProtectHashFile) == 0)
+	{
+		#if defined(CONF_PROTECT)
+		// 0
+		unsigned char asdf[SHA256_DIGEST_LENGTH] = {0};
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "update/%s", pUpdate->m_aProtectHashFile);
+		IOHANDLE f = io_open(aBuf, IOFLAG_READ);
+		io_read(f, asdf, sizeof(asdf));
+		io_close(f);
+		// 1
+		f = io_open(pUpdate->m_pStorage->GetExecutableName(), IOFLAG_READ);
+		unsigned int len = (unsigned int)io_length(f);
+		char *aFile = new char[len];
+		io_read(f, aFile, len);
+		unsigned char md[SHA256_DIGEST_LENGTH] = {0};
+		int ret = simpleSHA256(aFile, len, md);
+		if(ret != 0)
+		{
+			mem_free(aFile);
+		};
+		// 2
+		char ast[2][128] = {{0}};
+		for(int k = 0; k < 2; k++)
+		{
+			for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+			{
+				char h[3];
+				str_format(h, sizeof(h), "%02x", k == 0 ? md[i] : asdf[i]);
+				str_append(ast[k], h, sizeof(ast[k]));
+			}
+		}
+
+		if(str_comp(ast[0], ast[1]) != 0)
+		{
+			mem_free(aFile);
+		}
+		delete[] aFile;
+		#endif
+	}
+	else if(str_comp(b, "ath-news.txt") == 0)
 	{
 		// dig out whether ATH news have been updated
 
@@ -352,6 +400,9 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 		dbg_msg("updater", "refreshing version info");
 		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		FetchFile("stuffility/master", "ath-news.txt");
+		#if defined(CONF_PROTECT)
+		FetchFile("stuffility/master", m_aProtectHashFile);
+		#endif
 	}
 	else
 		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step

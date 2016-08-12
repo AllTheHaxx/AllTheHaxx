@@ -1243,7 +1243,7 @@ static const char *s_apSayings[] = {
 		"Shaders would be awesome!",
 		"SDL2 <3",
 		"8th May 2016 – 100 issues closed! (27 to go)",
-		"Computers don't byte!",// OH GOD HERNI WHAT THE DUCK U ENGLISH VERY BAD I IS NAISER U FGT WTF BRO I STRONKH BIZEPS "Computers doesn't make mistakes; it's always the programmer's fault :\\",
+		"Computers don't byte!",
 		"git stash pop stash@{0}",
 		"Splashtexts for teh lulz ^^",
 		"Was he drunk...?",
@@ -1263,7 +1263,7 @@ static const char *s_apSayings[] = {
 		"When will the Aliens find us?",
 		"Gotta get more sleep :(",
 		"We furfill every wish!",
-		"si el moreno te vasilah tu te calla y lo asimilah",
+		"I hate fucking script kiddies",
 };
 
 void CMenus::RenderLoading()
@@ -1295,7 +1295,11 @@ void CMenus::RenderLoading()
 	Graphics()->QuadsEnd();
 
 
-	const char *pCaption = Localize("Loading AllTheHaxx");
+	const char pCaption[] = {
+			76, 111, 97, 100, 105, 110, 103, 32,
+			65, 108, 108, 84, 104, 101, 72, 97, 120, 120,
+			0
+	};
 
 	CUIRect r;
 	r.x = x;
