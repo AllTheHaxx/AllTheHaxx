@@ -15,7 +15,7 @@ int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, 
 	lua_pcall(L, 2, 1, 0);
 	int ret = 0;
 	if(lua_isnumber(L, -1))
-		ret = round_to_int((float)round(lua_tonumber(L, -1)));
+		ret = round_to_int((float)lua_tonumber(L, -1));
 	lua_pop(L, 1); // pop return
 	return ret;
 }

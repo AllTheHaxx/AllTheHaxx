@@ -42,6 +42,12 @@ void CLuaFile::Reset(bool error)
 void CLuaFile::LoadPermissionFlags()
 {
 #if defined(FEATURE_LUA)
+	if(m_PermissionFlags != 0)
+	{
+		dbg_msg("lua/debug", "aborted loading permission flags for script '%s': already got %i", m_Filename.c_str(), m_PermissionFlags);
+		return;
+	}
+
 	// FIRST COMES THE OLD INTERFACE (only here for compatibility reasons)
 	std::ifstream f(m_Filename.c_str());
 	std::string line; bool searching = true;
