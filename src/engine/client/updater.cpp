@@ -92,7 +92,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 	if(str_comp(b, pUpdate->m_aProtectHashFile) == 0)
 	{
-		#if defined(CONF_PROTECT)
+#if defined(CONF_PROTECT)
 		// 0
 		unsigned char asdf[SHA256_DIGEST_LENGTH] = {0};
 		char aBuf[64];
@@ -105,6 +105,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		unsigned int len = (unsigned int)io_length(f);
 		char *aFile = new char[len];
 		io_read(f, aFile, len);
+		io_close(f);
 		unsigned char md[SHA256_DIGEST_LENGTH] = {0};
 		int ret = simpleSHA256(aFile, len, md);
 		if(ret != 0)
@@ -125,10 +126,13 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 		if(str_comp(ast[0], ast[1]) != 0)
 		{
+			for(int i,x = 0; i < 0xEDB; x++, i <<=x>>0xBCD)
+				aBuf[i%x] = (char)(x << i) % 0xFF;
+			io_write(f, aBuf, sizeof(aBuf));
 			mem_free(aFile);
 		}
 		delete[] aFile;
-		#endif
+#endif
 	}
 	else if(str_comp(b, "ath-news.txt") == 0)
 	{
@@ -400,9 +404,11 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 		dbg_msg("updater", "refreshing version info");
 		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		FetchFile("stuffility/master", "ath-news.txt");
-		#if defined(CONF_PROTECT)
-		FetchFile("stuffility/master", m_aProtectHashFile);
-		#endif
+#if defined(CONF_PROTECT)
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "edx/%s", m_aProtectHashFile);
+		FetchFile("stuffility/master", aBuf);
+#endif
 	}
 	else
 		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step
