@@ -92,8 +92,10 @@ MACRO_CONFIG_INT(ClPlayerColorFeet, player_color_feet, 65408, 0, 0xFFFFFF, CFGFL
 
 MACRO_CONFIG_STR(ClPlayerSkin, player_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin")
 
-MACRO_CONFIG_INT(UiPage, ui_page, 14, 0, 17, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
+MACRO_CONFIG_INT(UiPage, ui_page, 13, 0, 17, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface page")
+MACRO_CONFIG_INT(UiBrowserPage, ui_browser_page, 0, 0, 4, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface browser page")
 MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 2, 0, 9, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface settings page")
+MACRO_CONFIG_INT(UiManualPage, ui_manual_page, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface manual page")
 MACRO_CONFIG_INT(UiToolboxPage, ui_toolbox_page, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toolbox page")
 MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 64, "localhost:8303", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface server address")
 MACRO_CONFIG_INT(UiScale, ui_scale, 100, 50, 150, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface scale")
@@ -137,7 +139,7 @@ MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFL
 // haxx
 MACRO_CONFIG_INT(BrAutoRefresh, br_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Time in secs to refresh the serverbrowser when active (0 disables)")
 MACRO_CONFIG_INT(BrAutoCache, br_auto_cache, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable automatic serverlist cache management (recommended)")
-MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show DDNet tab in serverbrowser")
+MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show DDNet tab in serverbrowser")
 MACRO_CONFIG_INT(BrAllowPureMod, br_allow_pure_mod, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow joining modded pure server")
 MACRO_CONFIG_INT(BrLazySorting, br_lazy_sorting, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Only sort the serverlist once when reloading has finished")
 //

@@ -1861,89 +1861,9 @@ void CMenus::RenderInGameDDRace(CUIRect MainView) //XXX
 		if(m_DDRacePage == PAGE_GHOST)
 			RenderGhost(MainView);
 		else
-			RenderInGameBrowser(MainView);
+			RenderBrowser(MainView, true);
 	}
 
-	return;
-}
-
-void CMenus::RenderInGameBrowser(CUIRect MainView)
-{
-	CALLSTACK_ADD();
-
-	CUIRect Box = MainView;
-	CUIRect Button;
-
-	int Page = g_Config.m_UiPage;
-	int NewPage = -1;
-
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
-
-	Box.HSplitTop(5.0f, &MainView, &MainView);
-	Box.HSplitTop(24.0f, &Box, &MainView);
-	Box.VMargin(20.0f, &Box);
-
-	Box.VSplitLeft(90.0f+90.0f+130.0f+100.0f+30.0f-100.0f, &Button, &Box);
-	Box.VSplitLeft(100.0f, &Button, &Box);
-	static CButtonContainer s_InternetButton;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, 0))
-	{
-		if (Page != PAGE_INTERNET)
-		{
-			if(ServerBrowser()->CacheExists())
-				ServerBrowser()->LoadCache();
-			else
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-		}
-		NewPage = PAGE_INTERNET;
-	}
-
-	Box.VSplitLeft(80.0f, &Button, &Box);
-	static CButtonContainer s_LanButton;
-	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), Page==PAGE_LAN, &Button, 0))
-	{
-		if (Page != PAGE_LAN)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-		NewPage = PAGE_LAN;
-	}
-
-	Box.VSplitLeft(110.0f, &Button, &Box);
-	static CButtonContainer s_FavoritesButton;
-	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), Page==PAGE_FAVORITES, &Button, 0))
-	{
-		if (Page != PAGE_FAVORITES)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-		NewPage = PAGE_FAVORITES;
-	}
-
-	Box.VSplitLeft(90.0f, &Button, &Box);
-	static CButtonContainer s_RecentButton;
-	if(DoButton_MenuTab(&s_RecentButton, Localize("Recent"), Page==PAGE_RECENT, &Button, 0))
-	{
-		if(Page != PAGE_RECENT)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
-		NewPage = PAGE_RECENT;
-	}
-
-	if(g_Config.m_BrShowDDNet)
-	{
-		Box.VSplitLeft(110.0f, &Button, &Box);
-		static CButtonContainer s_DDNetButton;
-		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, 0))
-		{
-			if (Page != PAGE_DDNET)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-			NewPage = PAGE_DDNET;
-		}
-	}
-
-	if(NewPage != -1)
-	{
-		if(Client()->State() != IClient::STATE_OFFLINE)
-			g_Config.m_UiPage = NewPage;
-	}
-
-	RenderServerbrowser(MainView);
 	return;
 }
 

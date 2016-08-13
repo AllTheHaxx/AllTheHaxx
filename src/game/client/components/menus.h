@@ -350,7 +350,6 @@ public:	int m_LoadTotal;
 #endif
 	void RenderSettingsAll(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
-
 	void RenderLoadingLua();
 	static int SkinCacheListdirCallback(const char *name, int is_dir, int dir_type, void *user);
 
@@ -382,6 +381,12 @@ public:	int m_LoadTotal;
 	void RenderSettingsParticles(CUIRect MainView);
 	void RenderSettingsEmoticons(CUIRect MainView);
 	void RenderSettingsCursor(CUIRect MainView);
+
+	// found in menus_manual.cpp
+	void RenderManual(CUIRect MainView);
+	void RenderAbout(CUIRect MainView);
+	void RenderCredits(CUIRect MainView);
+	void RenderManual_General(CUIRect MainView);
 
 	void SetActive(bool Active);
 	bool LockInput(IInput::CEvent Event);
@@ -429,18 +434,20 @@ public:
 		PAGE_SERVER_INFO,
 		PAGE_CALLVOTE,
 		PAGE_SPOOFING,
-		PAGE_INTERNET,
-		PAGE_LAN,
-		PAGE_FAVORITES,
-		PAGE_RECENT,
-		PAGE_DDNET,
+		PAGE_BROWSER,
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
 		PAGE_DDRace,
-		PAGE_BROWSER,
 		PAGE_GHOST,
+		PAGE_MANUAL,
 		PAGE_SYSTEM,
 		NUM_PAGES,
+
+		PAGE_BROWSER_INTERNET=0,
+		PAGE_BROWSER_LAN,
+		PAGE_BROWSER_FAVORITES,
+		PAGE_BROWSER_RECENT,
+		PAGE_BROWSER_DDNET,
 
 		PAGE_SETTINGS_LANGUAGE=0,
 		PAGE_SETTINGS_GENERAL,
@@ -453,7 +460,10 @@ public:
 		PAGE_SETTINGS_MISC,
 		PAGE_SETTINGS_LUA,
 		PAGE_SETTINGS_ALL, // TODO: fix the page with all vars on it
-		PAGE_SETTINGS_INFO, // TODO: implement info page, should contain tabs "about" and "help"
+
+		PAGE_MANUAL_ABOUT=0,
+		PAGE_MANUAL_CREDITS,
+		PAGE_MANUAL_GENERAL,
 	};
 
 	// DDRace
@@ -518,7 +528,7 @@ private:
 	// found in menus_ingame.cpp
 	void RenderInGameDDRace(CUIRect MainView);
 	void RenderGhost(CUIRect MainView);
-	void RenderInGameBrowser(CUIRect MainView);
+	void RenderBrowser(CUIRect MainView, bool Ingame);
 
 	// found in menus_settings.cpp
 	void RenderSettingsDDNet(CUIRect MainView);

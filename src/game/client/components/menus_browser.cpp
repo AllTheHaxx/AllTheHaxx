@@ -156,7 +156,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CUIRect MsgBox = View;
 		MsgBox.y += View.h/3;
 
-		if(m_ActivePage == PAGE_INTERNET && ServerBrowser()->IsRefreshingMasters())
+		if(m_ActivePage == PAGE_BROWSER && g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET && ServerBrowser()->IsRefreshingMasters())
 			UI()->DoLabelScaled(&MsgBox, Localize("Refreshing master servers"), 16.0f, 0);
 		else if(!ServerBrowser()->NumServers())
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, 0);
@@ -233,7 +233,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 
 				const CServerInfo *pItem;
-				if(g_Config.m_UiPage == PAGE_RECENT)
+				if(g_Config.m_UiBrowserPage == PAGE_BROWSER_RECENT)
 					pItem = ServerBrowser()->Get(m_SelectedIndex);
 				else
 					pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
@@ -568,7 +568,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static bool HasCached = false;
 		if(g_Config.m_BrAutoCache)
 		{
-			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !HasCached && !ServerBrowser()->IsRefreshing() && m_ActivePage == PAGE_INTERNET)
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !HasCached && !ServerBrowser()->IsRefreshing() && m_ActivePage == PAGE_BROWSER && g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 			{
 				ServerBrowser()->SaveCache();
 				HasCached = true;
@@ -751,7 +751,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	}
 
 	// additional settings
-	if(g_Config.m_UiPage != PAGE_DDNET)
+	if(g_Config.m_UiBrowserPage != PAGE_BROWSER_DDNET)
 	{
 		ServerFilter.HSplitTop(20.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(15.0f, &Button, &ServerFilter);
@@ -771,7 +771,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	ServerFilter.HSplitBottom(ms_ButtonHeight-2.0f, &ServerFilter, &ResetButton);
 
 	// ddnet country filters
-	if(g_Config.m_UiPage == PAGE_DDNET)
+	if(g_Config.m_UiBrowserPage == PAGE_BROWSER_DDNET)
 	{
 		// add more space
 		ServerFilter.HSplitTop(10.0f, 0, &ServerFilter);
@@ -1487,15 +1487,15 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		static CButtonContainer s_RefreshButton;
 		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely"), ServerBrowser()->IsRefreshing() ? CUI::CORNER_L : CUI::CORNER_ALL) || Input()->KeyPress(KEY_F5) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
 		{
-			if(g_Config.m_UiPage == PAGE_INTERNET)
+			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			else if(g_Config.m_UiPage == PAGE_LAN)
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_LAN)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-			else if(g_Config.m_UiPage == PAGE_FAVORITES)
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-			else if(g_Config.m_UiPage == PAGE_RECENT)
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_RECENT)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
-			else if(g_Config.m_UiPage == PAGE_DDNET)
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_DDNET)
 			{
 				// start a new serverlist request
 				Client()->RequestDDNetSrvList();
@@ -1526,20 +1526,20 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
-		if(m_ActivePage == PAGE_INTERNET)
+		if(m_ActivePage == PAGE_BROWSER)
 		{
 			CUIRect Right;
 			Button.VSplitMid(&Button, &Right);
 			static CButtonContainer s_SaveButton;
 			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, Localize("Save the serverlist"), CUI::CORNER_L))
 			{
-				if(m_ActivePage != PAGE_RECENT)
+				if(g_Config.m_UiBrowserPage != PAGE_BROWSER_RECENT)
 					ServerBrowser()->SaveCache();
 			}
 			static CButtonContainer s_LoadButton;
 			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, Localize("Load the saved serverlist"), CUI::CORNER_R))
 			{
-				if(m_ActivePage != PAGE_RECENT)
+				if(g_Config.m_UiBrowserPage != PAGE_BROWSER_RECENT)
 					/*if(!*/ServerBrowser()->LoadCache()/*)
 						Console()->Print(0, "browser", "failed to load cache file", false)*/;
 			}
@@ -1573,6 +1573,111 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	}
 }
 
+void CMenus::RenderBrowser(CUIRect MainView, bool Ingame)
+{
+	CALLSTACK_ADD();
+
+	CUIRect Box = MainView;
+	CUIRect Button;
+
+	int Page = g_Config.m_UiBrowserPage;
+	int NewPage = -1;
+
+	if(Ingame)
+		RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+
+	Box.HSplitTop(5.0f, &MainView, &MainView);
+	Box.HSplitTop(24.0f, &Box, &MainView);
+	Box.VMargin(20.0f, &Box);
+
+	if(Ingame)
+		Box.VSplitLeft(90.0f+90.0f+130.0f+100.0f+30.0f-100.0f, &Button, &Box);
+
+#define PREPARE_BUTTON(LABEL) \
+		const char *pLabelText = LABEL; \
+		Box.VSplitLeft(max(90.0f, TextRender()->TextWidth(0, Box.h, pLabelText, str_length(LABEL))), &Button, &Box);
+
+	// internet
+	{
+		PREPARE_BUTTON(Localize("Internet"))
+		static CButtonContainer s_InternetButton;
+		if(DoButton_MenuTab(&s_InternetButton, pLabelText, Page == PAGE_BROWSER_INTERNET, &Button, 0))
+		{
+			if(Page != PAGE_BROWSER_INTERNET)
+			{
+				if(ServerBrowser()->CacheExists())
+					ServerBrowser()->LoadCache();
+				else
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			}
+			NewPage = PAGE_BROWSER_INTERNET;
+		}
+	}
+
+	// lan
+	{
+		PREPARE_BUTTON(Localize("LAN"))
+		static CButtonContainer s_LanButton;
+		if(DoButton_MenuTab(&s_LanButton, pLabelText, Page == PAGE_BROWSER_LAN, &Button, 0))
+		{
+			if(Page != PAGE_BROWSER_LAN)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			NewPage = PAGE_BROWSER_LAN;
+		}
+	}
+
+	// favorites
+	{
+		PREPARE_BUTTON(Localize("Favorites"))
+		static CButtonContainer s_FavoritesButton;
+		if(DoButton_MenuTab(&s_FavoritesButton, pLabelText, Page == PAGE_BROWSER_FAVORITES, &Button, 0))
+		{
+			if(Page != PAGE_BROWSER_FAVORITES)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			NewPage = PAGE_BROWSER_FAVORITES;
+		}
+	}
+
+	// recent
+	{
+		PREPARE_BUTTON(Localize("Recent"))
+		static CButtonContainer s_RecentButton;
+		if(DoButton_MenuTab(&s_RecentButton, pLabelText, Page == PAGE_BROWSER_RECENT, &Button, 0))
+		{
+			if(Page != PAGE_BROWSER_RECENT)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
+			NewPage = PAGE_BROWSER_RECENT;
+		}
+	}
+
+	// ddnet, if wanted
+	if(g_Config.m_BrShowDDNet)
+	{
+		PREPARE_BUTTON(Localize("DDNet"))
+		static CButtonContainer s_DDNetButton;
+		if(DoButton_MenuTab(&s_DDNetButton, pLabelText, Page==PAGE_BROWSER_DDNET, &Button, 0))
+		{
+			if (Page != PAGE_BROWSER_DDNET)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			NewPage = PAGE_BROWSER_DDNET;
+		}
+	}
+
+#undef PREPARE_BUTTON
+
+	if(!Ingame)
+		RenderTools()->DrawUIRect(&Box, ms_ColorTabbarInactive, 0, 0);
+
+	if(NewPage != -1)
+	{
+		//if(Client()->State() != IClient::STATE_OFFLINE)
+			g_Config.m_UiBrowserPage = NewPage;
+	}
+
+	RenderServerbrowser(MainView);
+	return;
+}
+
 void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CALLSTACK_ADD();
@@ -1598,8 +1703,8 @@ void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUser
 	CALLSTACK_ADD();
 
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() && (g_Config.m_UiPage == PAGE_FAVORITES || g_Config.m_UiPage == PAGE_DDNET) && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
+	if(pResult->NumArguments() && (g_Config.m_UiBrowserPage == PAGE_BROWSER_FAVORITES || g_Config.m_UiBrowserPage == PAGE_BROWSER_DDNET) && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-	if(pResult->NumArguments() && g_Config.m_UiPage == PAGE_RECENT && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
+	if(pResult->NumArguments() && g_Config.m_UiBrowserPage == PAGE_BROWSER_RECENT && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
 }

@@ -1527,7 +1527,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 							io_write(File, aBuf, PlainLength);
 							io_close(File);
 						}
-						if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
+						if(g_Config.m_UiPage == CMenus::PAGE_BROWSER && g_Config.m_UiBrowserPage == CMenus::PAGE_BROWSER_DDNET)
 							m_ServerBrowser.Refresh(IServerBrowser::TYPE_DDNET);
 					}
 				}

@@ -70,7 +70,7 @@ int CMenus::m_NumInputEvents;
 CMenus::CMenus()
 {
 	m_Popup = POPUP_NONE;
-	m_ActivePage = PAGE_INTERNET;
+	m_ActivePage = PAGE_BROWSER;
 	m_GamePage = PAGE_GAME;
 
 	m_pfnAppearanceSubpage = 0;
@@ -872,7 +872,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static CButtonContainer s_InternetButton;
-		if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
+		if(DoButton_MenuTab(&s_InternetButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, CUI::CORNER_T))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 			{
@@ -884,71 +884,8 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 
-			NewPage = PAGE_INTERNET;
+			NewPage = PAGE_BROWSER;
 			m_DoubleClickIndex = -1;
-		}
-
-		//Box.VSplitLeft(4.0f, 0, &Box);
-		Box.VSplitLeft(60.0f, &Button, &Box);
-		static CButtonContainer s_LanButton;
-		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
-		{
-			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !ServerBrowser()->IsRefreshing())
-				ServerBrowser()->SaveCache();
-
-			m_pClient->m_pCamera->m_RotationCenter = vec2(1000.0f, 1000.0f);
-
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-			NewPage = PAGE_LAN;
-			m_DoubleClickIndex = -1;
-		}
-
-		//box.VSplitLeft(4.0f, 0, &box);
-		Box.VSplitLeft(100.0f, &Button, &Box);
-		static CButtonContainer s_FavoritesButton;
-		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
-		{
-			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !ServerBrowser()->IsRefreshing())
-				ServerBrowser()->SaveCache();
-
-			m_pClient->m_pCamera->m_RotationCenter = vec2(1500.0f, 500.0f);
-
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-			NewPage = PAGE_FAVORITES;
-			m_DoubleClickIndex = -1;
-		}
-
-		Box.VSplitLeft(100.0f, &Button, &Box);
-		static CButtonContainer s_RecentButton;
-		if(DoButton_MenuTab(&s_RecentButton, Localize("Recent"), m_ActivePage==PAGE_RECENT, &Button, CUI::CORNER_TR*(1-g_Config.m_BrShowDDNet)))
-		{
-			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !ServerBrowser()->IsRefreshing())
-				ServerBrowser()->SaveCache();
-
-			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 1000.0f);
-
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_RECENT)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
-			NewPage = PAGE_RECENT;
-			m_DoubleClickIndex = -1;
-		}
-
-		//box.VSplitLeft(4.0f, 0, &box);
-		if(g_Config.m_BrShowDDNet)
-		{
-			Box.VSplitLeft(100.0f, &Button, &Box);
-			static CButtonContainer s_DDNetButton;
-			if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
-			{
-				m_pClient->m_pCamera->m_RotationCenter = vec2(1300.0f, 1300.0f);
-
-				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-				NewPage = PAGE_DDNET;
-				m_DoubleClickIndex = -1;
-			}
 		}
 
 		Box.VSplitLeft(10.0f, 0, &Box);
@@ -1020,31 +957,49 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	box.VSplitRight(30.0f, &box, 0);
 	*/
+	char aBuf[64];
+#define PREPARE_BUTTON(SYMBOL, LABEL) \
+		str_format(aBuf, sizeof(aBuf), SYMBOL " %s", LABEL); \
+		Box.VSplitRight(clamp(TextRender()->TextWidth(0, Box.h, aBuf, str_length(aBuf)), 90.0f, 150.0f), &Box, &Button);
 
-	Box.VSplitRight(30.0f, &Box, &Button);
-	static CButtonContainer s_QuitButton;
-	if(DoButton_MenuTab(&s_QuitButton, "×", 0, &Button, CUI::CORNER_TR))
-		m_Popup = POPUP_QUIT;
-
-	//Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(30.0f, &Box, &Button);
-	static CButtonContainer s_SettingsButton;
-	if(DoButton_MenuTab(&s_SettingsButton, "⚙", m_ActivePage==PAGE_SETTINGS, &Button, 0/*CUI::CORNER_T*/))
-		NewPage = PAGE_SETTINGS;
-
-	//Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(30.0f, &Box, &Button);
-	static CButtonContainer s_EditorButton;
-	if(DoButton_MenuTab(&s_EditorButton, "✎", g_Config.m_ClEditor, &Button, CUI::CORNER_TL))
 	{
-		g_Config.m_ClEditor = 1;
+		PREPARE_BUTTON("×", Localize("Quit"))
+		static CButtonContainer s_QuitButton;
+		if(DoButton_MenuTab(&s_QuitButton, aBuf, 0, &Button, CUI::CORNER_TR))
+			m_Popup = POPUP_QUIT;
 	}
 
-/*	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(80.0f, &Box, &Button);
-	static int s_ChatButton=0;
-	if(DoButton_MenuTab(&s_ChatButton, "Chat", m_ActivePage==PAGE_IRC, &Button, CUI::CORNER_T))
-		NewPage = PAGE_IRC;*/
+	//Box.VSplitRight(10.0f, &Box, &Button);
+	{
+		PREPARE_BUTTON("⚙", Localize("Settings"))
+		static CButtonContainer s_SettingsButton;
+		if(DoButton_MenuTab(&s_SettingsButton, aBuf, m_ActivePage == PAGE_SETTINGS, &Button, 0))
+			NewPage = PAGE_SETTINGS;
+	}
+
+	//Box.VSplitRight(10.0f, &Box, &Button);
+	{
+		PREPARE_BUTTON("ⅈ", Localize("Manual"))
+		static CButtonContainer s_InfoButton;
+		if(DoButton_MenuTab(&s_InfoButton, aBuf, m_ActivePage == PAGE_MANUAL, &Button, 0))
+			NewPage = PAGE_MANUAL;
+	}
+
+	//Box.VSplitRight(10.0f, &Box, &Button);
+	{
+		PREPARE_BUTTON("⬀", Localize("Chat"))
+		static CButtonContainer s_ChatButton;
+		if(DoButton_MenuTab(&s_ChatButton, aBuf, m_IRCActive, &Button, 0))
+			ToggleIRC();
+	}
+
+	//Box.VSplitRight(10.0f, &Box, &Button);
+	{
+		PREPARE_BUTTON("✎", Localize("Editor"))
+		static CButtonContainer s_EditorButton;
+		if(DoButton_MenuTab(&s_EditorButton, aBuf, g_Config.m_ClEditor, &Button, CUI::CORNER_TL))
+			g_Config.m_ClEditor = 1;
+	}
 
 	if(NewPage != -1)
 	{
@@ -1406,15 +1361,17 @@ void CMenus::RenderNews(CUIRect MainView)
 		while (std::getline(f, line))
 		{
 			if(line.size() > 0 && line.at(0) == '|' && line.at(line.size()-1) == '|')
-				s_TotalHeight[CURRENT_NEWS_PAGE] += 30.0f;
+				s_TotalHeight[CURRENT_NEWS_PAGE] += 32.0f;
 			else
-				s_TotalHeight[CURRENT_NEWS_PAGE] += 20.0f;
+				s_TotalHeight[CURRENT_NEWS_PAGE] += 22.0f;
 		}
+
+		s_TotalHeight[CURRENT_NEWS_PAGE] -= MainView.h;
 	}
 
 	// scrollbar if necessary
 	static float s_ScrollOffset[2] = {0.0f};
-	if(s_TotalHeight[CURRENT_NEWS_PAGE] > MainView.h-5.0f)
+	if(s_TotalHeight[CURRENT_NEWS_PAGE]+MainView.h > MainView.h)
 	{
 		static float s_WantedScrollOffset[2] = {0.0f};
 		CUIRect Scrollbar;
@@ -1437,7 +1394,7 @@ void CMenus::RenderNews(CUIRect MainView)
 		smooth_set(&s_ScrollOffset[CURRENT_NEWS_PAGE], s_WantedScrollOffset[CURRENT_NEWS_PAGE], 27.0f, Client()->RenderFrameTime());
 	}
 
-	Graphics()->ClipEnable((int)MainView.x, (int)MainView.y+15, (int)MainView.w, round_to_int(MainView.h*1.5f));
+	Graphics()->ClipEnable((int)MainView.x, (int)MainView.y+15, (int)MainView.w*2, round_to_int(MainView.h*1.5f));
 	CUIRect Label;
 
 	std::istringstream f;
@@ -1561,19 +1518,21 @@ int CMenus::Render()
 		s_Frame++;
 		m_DoubleClickIndex = -1;
 
-		if(g_Config.m_UiPage == PAGE_INTERNET)
+		if(g_Config.m_UiBrowserPage == PAGE_BROWSER)
 		{
-			if(m_pClient->ServerBrowser()->CacheExists())
-				m_pClient->ServerBrowser()->LoadCache();
-			else
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
+			{
+				if(m_pClient->ServerBrowser()->CacheExists())
+					m_pClient->ServerBrowser()->LoadCache();
+				else
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			} else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_LAN)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_FAVORITES)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_DDNET)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 		}
-		else if(g_Config.m_UiPage == PAGE_LAN)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-		else if(g_Config.m_UiPage == PAGE_FAVORITES)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-		else if(g_Config.m_UiPage == PAGE_DDNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE)
@@ -1624,7 +1583,7 @@ int CMenus::Render()
 				m_pClient->ServerBrowser()->LoadCache();
 			else
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			g_Config.m_UiPage = PAGE_INTERNET;
+			g_Config.m_UiPage = PAGE_BROWSER;
 			m_DoubleClickIndex = -1;
 		}
 
@@ -1648,26 +1607,20 @@ int CMenus::Render()
 			else if(m_GamePage == PAGE_GHOST)
 				RenderGhost(MainView);
 			else if(m_GamePage == PAGE_BROWSER)
-				RenderInGameBrowser(MainView);
+				RenderBrowser(MainView, true);
+			else if(m_GamePage == PAGE_MANUAL)
+				RenderManual(MainView);
 		}
 		else if(g_Config.m_UiPage == PAGE_NEWS_ATH || g_Config.m_UiPage == PAGE_NEWS_DDNET)
 			RenderNews(MainView);
-		else if(g_Config.m_UiPage == PAGE_INTERNET)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_LAN)
-			RenderServerbrowser(MainView);
+		else if(g_Config.m_UiPage == PAGE_BROWSER)
+			RenderBrowser(MainView, false);
 		else if(g_Config.m_UiPage == PAGE_DEMOS)
 			RenderDemoList(MainView);
-		else if(g_Config.m_UiPage == PAGE_FAVORITES)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_RECENT)
-			RenderServerbrowser(MainView);
-		else if(g_Config.m_UiPage == PAGE_DDNET)
-			RenderServerbrowser(MainView);
-	//	else if(g_Config.m_UiPage == PAGE_IRC)
-	//		RenderIrc(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);
+		else if(g_Config.m_UiPage == PAGE_MANUAL)
+			RenderManual(MainView);
 	}
 	else
 	{
@@ -2376,10 +2329,8 @@ bool CMenus::OnInput(IInput::CEvent e)
 		return true;
 	}
 
-	if(LockInput(e))
-		return true;
+	return LockInput(e);
 
-	return false;
 }
 
 void CMenus::OnStateChange(int NewState, int OldState)
