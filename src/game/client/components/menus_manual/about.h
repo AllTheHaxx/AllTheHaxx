@@ -11,7 +11,7 @@
 #endif
 
 PUTLINE("|AllTheHaxx Beta - Version " ATH_VERSION "|")
-PUTLINE("Build Date: " BUILD_DATE)
+PUTLINE("Exact version: 'ATH-" ALLTHEHAXX_VERSION "'  |  Build Date: " BUILD_DATE)
 PUTLINE("Teeworlds client by Henritees, FuroS, xush'")
 PUTLINE("Official Website: allthehaxx.github.io  - ANYTHING ELSE IS SCAM!!")
 NEWLINE()

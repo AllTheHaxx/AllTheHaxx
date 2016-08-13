@@ -6,6 +6,7 @@
 
 #define GAME_VERSION "0.6.3"
 #define ATH_VERSION "0.24"
+#define DDNET_VERSION "10.2.1"
 #define BUILD_DATE __DATE__ ", " __TIME__
 
 #ifdef GIT_SHORTREV_HASH
@@ -21,7 +22,7 @@ static const char GAME_ATH_VERSION[10] = ATH_VERSION;
 #define GAME_ATH_VERSION_NUMERIC 2400
 
 // do not modify these, they belong to ddnet
-static const char GAME_RELEASE_VERSION[8] = "10.2.1";
+static const char GAME_RELEASE_VERSION[8] = DDNET_VERSION;
 #define CLIENT_VERSIONNR 1002
 
 #endif

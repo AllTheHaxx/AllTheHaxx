@@ -128,7 +128,28 @@ void CMenus::RenderAbout(CUIRect MainView)
 
 void CMenus::RenderCredits(CUIRect MainView)
 {
+	RenderTools()->DrawUIRect(&MainView, vec4(0.7f, 0.7f, 0.2f, 0.3f), CUI::CORNER_ALL, 15.0f);
+	MainView.Margin(5.0f, &MainView);
 
+	static float s_TotalHeight = -1.0f;
+	if(s_TotalHeight < 0)
+	{
+		#include "menus_manual/__defines_cht.h"
+		#include "menus_manual/credits.h"
+		#include "menus_manual/__finish.h"
+		s_TotalHeight -= MainView.h;
+	}
+	PASTE_SCROLLCODE()
+
+	CUIRect Label;
+	TextRender()->TextColor(1,1,1,1);
+
+	Graphics()->ClipEnable((int)MainView.x, (int)MainView.y+20+10, (int)MainView.w*2, round_to_int(MainView.h*1.5f));
+	MainView.y -= s_ScrollOffset * s_TotalHeight;
+	#include "menus_manual/__defines_impl.h"
+	#include "menus_manual/credits.h"
+	#include "menus_manual/__finish.h"
+	Graphics()->ClipDisable();
 }
 
 void CMenus::RenderManual_General(CUIRect MainView)

@@ -860,6 +860,6 @@ set(SOURCE_FILES
     src/twping/twping.cpp
     src/versionsrv/mapversions.h
     src/versionsrv/versionsrv.cpp
-    src/versionsrv/versionsrv.h src/engine/client/debug.h src/engine/client/debug.cpp src/engine/client/curlwrapper.cpp src/engine/client/curlwrapper.h src/engine/curlwrapper.h src/tools/slc_unpack.cpp src/engine/client/lua_apidef.cpp src/tools/cdns.cpp src/game/client/components/menus_manual.cpp src/game/client/components/menus_manual/about.h src/game/client/components/menus_manual/__defines_impl.h src/game/client/components/menus_manual/__defines_cht.h src/game/client/components/menus_manual/__finish.h)
+    src/versionsrv/versionsrv.h src/engine/client/debug.h src/engine/client/debug.cpp src/engine/client/curlwrapper.cpp src/engine/client/curlwrapper.h src/engine/curlwrapper.h src/tools/slc_unpack.cpp src/engine/client/lua_apidef.cpp src/tools/cdns.cpp src/game/client/components/menus_manual.cpp src/game/client/components/menus_manual/about.h src/game/client/components/menus_manual/__defines_impl.h src/game/client/components/menus_manual/__defines_cht.h src/game/client/components/menus_manual/__finish.h src/game/client/components/menus_manual/credits.h)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})
