@@ -4,6 +4,16 @@
 #define GAME_VARIABLES_H
 #undef GAME_VARIABLES_H // this file will be included several times
 
+#ifndef MACRO_CONFIG_INT
+#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) ;
+#define undef1
+#endif
+#ifndef MACRO_CONFIG_STR
+#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) ;
+#define undef2
+#endif
+
+
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict client movements")
 MACRO_CONFIG_INT(ClAntiPingLimit, cl_antiping_limit, 0, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Antiping limit (0 to disable)")
@@ -273,4 +283,16 @@ MACRO_CONFIG_INT(SvRescueDelay, sv_rescue_delay, 5, 0, 1000, CFGFLAG_SERVER, "Nu
 
 MACRO_CONFIG_INT(DbgFocus, dbg_focus, 0, 0, 1, CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(DbgTuning, dbg_tuning, 0, 0, 1, CFGFLAG_CLIENT, "")
+
+
+#ifdef undef1
+#undef MACRO_CONFIG_INT
+#undef undef1
+#endif
+
+#ifdef undef2
+#undef MACRO_CONFIG_STR
+#undef undef2
+#endif
+
 #endif
