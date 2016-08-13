@@ -392,7 +392,8 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 
 		m_PermissionFlags = cert.PermissionFlags;
 
-		dbg_msg("lua", "success: certificate check for '%s' [[ ISSUER='%s' DATE='%s' PF=%i ]]", pFilename, cert.aIssuer, cert.aDate, cert.PermissionFlags);
+		if(g_Config.m_Debug)
+			dbg_msg("lua", "success: certificate check for '%s' [[ ISSUER='%s' DATE='%s' PF=%i ]]", pFilename, cert.aIssuer, cert.aDate, cert.PermissionFlags);
 	}
 
 
