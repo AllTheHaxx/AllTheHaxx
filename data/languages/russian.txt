@@ -258,6 +258,9 @@ Language
 Loading
 == Загрузка
 
+Load
+== Загрузить
+
 MOTD
 == MOTD
 
@@ -483,6 +486,9 @@ Stop record
 Strict gametype filter
 == Строгий фильтр р-мов
 
+Strict version filter
+== Строгий фильтр версий
+
 Sudden Death
 == Быстрая смерть
 
@@ -573,325 +579,325 @@ You must restart the game for all settings to take effect.
 ##### needs translation #####
 
 %.3f KiB
-== 
+==
 
 %d player left
-== 
+==
 
 %d player not ready
-== 
+==
 
 %d players left
-== 
+==
 
 %d players not ready
-== 
+==
 
 %d servers, %d players
-== 
+==
 
 '%s' called for vote to kick '%s' (%s)
-== 
+==
 
 '%s' called for vote to move '%s' to spectators (%s)
-== 
+==
 
 '%s' called vote to change server option '%s' (%s)
-== 
+==
 
 '%s' entered and joined the %s
-== 
+==
 
 '%s' has left the game
-== 
+==
 
 '%s' has left the game (%s)
-== 
+==
 
 '%s' joined the %s
-== 
+==
 
 Admin forced server option '%s' (%s)
-== 
+==
 
 Admin forced vote no
-== 
+==
 
 Admin forced vote yes
-== 
+==
 
 Admin moved '%s' to spectator (%s)
-== 
+==
 
 Alp:
-== 
+==
 
 Anti Aliasing
-== 
+==
 
 Are you sure you want to rename the demo?
-== 
+==
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+==
 
 Back
-== 
+==
 
 Basic
-== 
+==
 
 Bodies
-== 
+==
 
 Borderless window
-== 
+==
 
 Color
-== 
+==
 
 Crc
-== 
+==
 
 Created
-== 
+==
 
 Custom
-== 
+==
 
 Customize
-== 
+==
 
 Decoration
-== 
+==
 
 Demo
-== 
+==
 
 Detail
-== 
+==
 
 Editor
-== 
+== Редактор
 
 Eyes
-== 
+== Глаза
 
 Format
-== 
+== Формат
 
 Game paused
-== 
+==
 
 Game starts in
-== 
+==
 
 Global
-== 
+==
 
 Hands
-== 
+==
 
 Host address:
-== 
+==
 
 Hue:
-== 
+==
 
 Join
-== 
+==
 
 Joined
-== 
+==
 
 Joined blue
-== 
+==
 
 Joined red
-== 
+==
 
 Kick voting requires %d players on the server
-== 
+==
 
 Laser
-== 
+==
 
 Length
-== 
+==
 
 Letterbox
-== 
+==
 
 Lgt:
-== 
+==
 
 Local
-== 
+==
 
 Local server
-== 
+==
 
 Match
-== 
+==
 
 Max
-== 
+==
 
 Misc
-== 
+==
 
 Netversion
-== 
+==
 
 Nickname is empty.
-== 
+==
 
 Normal:
-== 
+==
 
 Only %d active players are allowed
-== 
+==
 
 Personal
-== 
+==
 
 Ready
-== 
+==
 
 Record
-== 
+==
 
 Recorded
-== 
+==
 
 Reset
-== 
+==
 
 Resolutions
-== 
+==
 
 Respawn
-== 
+==
 
 Round over
-== 
+==
 
 Round over!
-== 
+==
 
 Sat:
-== 
+==
 
 Save
-== 
+== Сохранить
 
 Save skin
-== 
+==
 
 Screen
-== 
+==
 
 Search:
-== 
+==
 
 Server does not allow voting to kick players
-== 
+==
 
 Server does not allow voting to move players to spectators
-== 
+==
 
 Servers
-== 
+==
 
 Show only chat messages from friends
-== 
+==
 
 Size
-== 
+==
 
 Skin
-== 
+== Скин
 
 Spectating
-== 
+==
 
 Spectators aren't allowed to start a vote.
-== 
+==
 
 Standard Gametype
-== 
+==
 
 Tattoo
-== 
+==
 
 Tattoos
-== 
+==
 
 Team:
-== 
+==
 
 Teams are locked
-== 
+==
 
 Teams are locked. Time to wait before changing team: %02d:%02d
-== 
+==
 
 Teams were locked
-== 
+==
 
 Teams were unlocked
-== 
+==
 
 Tee
-== 
+==
 
 Texture
-== 
+==
 
 Volume
-== 
+==
 
 Vote aborted
-== 
+==
 
 Vote failed
-== 
+==
 
 Vote passed
-== 
+==
 
 Wait for current vote to end before calling a new one.
-== 
+==
 
 Wait for next round
-== 
+==
 
 Wide
-== 
+==
 
 You must wait %d seconds before making another vote
-== 
+==
 
 blue
-== 
+==
 
 blue team
-== 
+==
 
 game
-== 
+==
 
 red
-== 
+==
 
 red team
-== 
+==
 
 spectators
-== 
+==
 
 wait for more players
-== 
+==
 
 ##### old translations #####
 
@@ -935,13 +941,13 @@ Length:
 == Длина
 
 Skin name
-== 
+==
 
 Rifle
 == Бластер
 
 Patterns
-== 
+==
 
 Netversion:
 == Версия:
@@ -953,7 +959,7 @@ Map:
 == %d байт
 
 Coloration
-== 
+==
 
 Info
 == Инфо
@@ -1007,7 +1013,7 @@ Alpha
 == Прозрачн.
 
 Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 
+==
 
 Current version: %s
 == Текущая версия: %s
@@ -1021,3 +1027,14 @@ Name plates size
 Type:
 == Тип:
 
+Connect automatically
+== Подключатся автоматически
+
+Cursor
+== Курсор
+
+Emoticons
+== Эмоции
+
+Fonts
+== Шрифты
