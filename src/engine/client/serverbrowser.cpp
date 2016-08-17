@@ -375,15 +375,12 @@ int CServerBrowser::SortHash() const
 	return i;
 }
 
-void CServerBrowser::Sort(bool IgnoreLazy)
+void CServerBrowser::Sort()
 {
 	int i;
 
 	// create filtered list
 	Filter();
-
-	if(!IgnoreLazy && g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90)
-		return;
 
 	// sort
 	if(g_Config.m_BrSort == IServerBrowser::SORT_NAME)
@@ -1006,11 +1003,12 @@ void CServerBrowser::Update(bool ForceResort)
 	}
 	pEntry = m_pFirstReqServer;
 	Count = 0;
-	while(1)
+	while(1) // go through all entries that we currently have and request the infos
 	{
 		if(!pEntry) // no more entries
 			break;
 
+		// check if entry timed out
 		if(pEntry->m_RequestTime && pEntry->m_RequestTime+Timeout < Now)
 		{
 			pEntry = pEntry->m_pNextReq;
@@ -1069,8 +1067,9 @@ void CServerBrowser::Update(bool ForceResort)
 	}
 
 	// check if we need to resort
-	if(m_Sorthash != SortHash() || ForceResort)
-		Sort();
+	if(!(g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90))
+		if(m_Sorthash != SortHash() || ForceResort)
+			Sort();
 }
 
 void CServerBrowser::Upgrade()
@@ -1145,9 +1144,7 @@ void CServerBrowser::AddFavorite(const NETADDR &Addr)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "added fav, %s", aAddrStr);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
+		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "added fav: %s", aAddrStr);
 	}
 }
 
