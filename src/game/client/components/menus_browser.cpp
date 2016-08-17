@@ -62,15 +62,15 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 //<<<! HEAD
 	static CColumn s_aCols[] = {
-		{-1,			-1,						" ",		-1, 2.0f, 0, 0, 0},
-		{COL_FLAG_LOCK,	-1,						" ",		-1, 14.0f, 0, 0, 0},
-		{COL_FLAG_FAV,	-1,						" ",		-1, 14.0f, 0, 0, 0},
-		{COL_NAME,		IServerBrowser::SORT_NAME,		"Name",		0, 50.0f, 0, 0, 0},	// Localize - these strings are localized within CLocConstString
-		{COL_GAMETYPE,	IServerBrowser::SORT_GAMETYPE,	"Type",		1, 50.0f, 0, 0, 0},
-		{COL_MAP,		IServerBrowser::SORT_MAP,			"Map", 		1, 100.0f + (Headers.w - 480) / 8, 0, 0, 0},
-		{COL_PLAYERS,	IServerBrowser::SORT_NUMPLAYERS,	"Players",	1, 60.0f, 0, 0, 0},
-		{-1,			-1,						" ",		1, 10.0f, 0, 0, 0},
-		{COL_PING,		IServerBrowser::SORT_PING,		"Ping",		1, 40.0f, FIXED, 0, 0},
+		{-1				, -1								, " "		, -1,   2.0f, 0, 0, 0},
+		{COL_FLAG_LOCK	, -1								, " "		, -1,  14.0f, 0, 0, 0},
+		{COL_FLAG_FAV	, -1								, " "		, -1,  14.0f, 0, 0, 0},
+		{COL_NAME		, IServerBrowser::SORT_NAME			, "Name"	,  0,  50.0f, 0, 0, 0},	// Localize - these strings are localized within CLocConstString
+		{COL_GAMETYPE	, IServerBrowser::SORT_GAMETYPE		, "Type"	,  1,  50.0f, 0, 0, 0},
+		{COL_MAP		, IServerBrowser::SORT_MAP			, "Map"		,  1, 100.0f + (Headers.w - 480) / 8, 0, 0, 0},
+		{COL_PLAYERS	, IServerBrowser::SORT_NUMPLAYERS	, "Players"	,  1,  60.0f, 0, 0, 0},
+		{-1				, -1								, " "		,  1,  10.0f, 0, 0, 0},
+		{COL_PING		, IServerBrowser::SORT_PING			, "Ping"	,  1,  40.0f, FIXED, 0, 0},
 /*=======
 	CColumn s_aCols[] = {
 		{-1,			-1,						" ",		-1, 2.0f, 0, {0}, {0}},
@@ -1401,7 +1401,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "Installing '%s'", Updater()->GetCurrentFile());
 		else if(State == IUpdater::FAIL)
 		{
-			str_format(aBuf, sizeof(aBuf), "Update failed: could not download %s", Updater()->GetFailedFile());
+			str_format(aBuf, sizeof(aBuf), "Update error: could not download %s", Updater()->GetFailedFile());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::NEED_RESTART)
