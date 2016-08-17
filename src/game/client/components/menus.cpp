@@ -1243,19 +1243,32 @@ void CMenus::RenderLoading()
 	RenderTools()->DrawRoundRect(x, y, w, h, 0.0f);
 	Graphics()->QuadsEnd();
 
-
-	const char pCaption[] = {
-			76, 111, 97, 100, 105, 110, 103, 32,
-			65, 108, 108, 84, 104, 101, 72, 97, 120, 120,
+#define MAGIC_NUMBER 51
+#define X(N) ((N)^(MAGIC_NUMBER))
+	const char pProtCaption[] = {
+			X(76), X(111), X(97), X(100), X(105), X(110), X(103), X(32),
+			X(65), X(108), X(108), X(84), X(104), X(101), X(72), X(97), X(120), X(120),
 			0
 	};
+#undef X
+
+	static char aCaption[sizeof(pProtCaption)] = {0};
+	if(aCaption[0] == 0)
+	{
+		mem_copy(aCaption, pProtCaption, sizeof(aCaption));
+		for(int i = 0; aCaption[i] != 0; i++)
+		{
+			aCaption[i] ^= MAGIC_NUMBER;
+		}
+	}
+#undef MAGIC_NUMBER
 
 	CUIRect r;
 	r.x = x;
 	r.y = y+20;
 	r.w = w;
 	r.h = h;
-	UI()->DoLabel(&r, pCaption, 48.0f, 0, -1);
+	UI()->DoLabel(&r, aCaption, 48.0f, 0, -1);
 
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
