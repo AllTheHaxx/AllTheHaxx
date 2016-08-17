@@ -437,8 +437,6 @@ public:
 		PAGE_BROWSER,
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
-		PAGE_DDRace,
-		PAGE_GHOST,
 		PAGE_MANUAL,
 		PAGE_SYSTEM,
 		NUM_PAGES,
@@ -526,7 +524,6 @@ private:
 	static int GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 
 	// found in menus_ingame.cpp
-	void RenderInGameDDRace(CUIRect MainView);
 	void RenderGhost(CUIRect MainView);
 	void RenderBrowser(CUIRect MainView, bool Ingame);
 

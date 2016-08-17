@@ -239,6 +239,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		EXTRAS_SERVERCONFIG_CREATOR,
 		EXTRAS_SNIFFER_SETTINGS,
 		EXTRAS_LUA_QUICKACCESS,
+		EXTRAS_GHOST,
 	};
 	static int s_ExtrasPage = EXTRAS_NONE;
 
@@ -255,6 +256,9 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		RenderSnifferSettings(Button);
 	else if(s_ExtrasPage == EXTRAS_LUA_QUICKACCESS)
 		RenderLuaQuickAccess(Button);
+	else if(s_ExtrasPage == EXTRAS_GHOST)
+		RenderGhost(Button);
+
 
 	// button bar
 	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
@@ -312,6 +316,14 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	//if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "Scripts can create GUIs in here as they like"))
 	//	s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
 
+	if(IsDDNet(Client()->GetServerInfo(0)) || IsDDRace(Client()->GetServerInfo(0)))
+	{
+		ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+		ButtonBar.VSplitLeft(140.0f, &Button, &ButtonBar);
+		static CButtonContainer s_GhostButton;
+		if(DoButton_Menu(&s_GhostButton, Localize("Ghost"), s_ExtrasPage == EXTRAS_GHOST, &Button))
+			s_ExtrasPage = s_ExtrasPage == EXTRAS_GHOST ? EXTRAS_NONE : EXTRAS_GHOST;
+	}
 }
 
 void CMenus::RenderServerConfigCreator(CUIRect MainView)
@@ -1828,45 +1840,6 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 	}
 }
 
-void CMenus::RenderInGameDDRace(CUIRect MainView) //XXX
-{
-	CALLSTACK_ADD();
-
-	CUIRect Box = MainView;
-	CUIRect Button;
-
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
-
-	Box.HSplitTop(5.0f, &MainView, &MainView);
-	Box.HSplitTop(24.0f, &Box, &MainView);
-	Box.VMargin(20.0f, &Box);
-
-	Box.VSplitLeft(100.0f, &Button, &Box);
-	static CButtonContainer s_BrwoserButton;
-	if(DoButton_MenuTab(&s_BrwoserButton, Localize("Browser"), m_DDRacePage==PAGE_BROWSER, &Button, CUI::CORNER_TL))
-	{
-		m_DDRacePage = PAGE_BROWSER;
-	}
-
-	//Box.VSplitLeft(4.0f, 0, &Box);
-	Box.VSplitLeft(80.0f, &Button, &Box);
-	static CButtonContainer s_GhostButton;
-	if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_DDRacePage==PAGE_GHOST, &Button, 0))
-	{
-		m_DDRacePage = PAGE_GHOST;
-	}
-
-	if(m_DDRacePage != -1)
-	{
-		if(m_DDRacePage == PAGE_GHOST)
-			RenderGhost(MainView);
-		else
-			RenderBrowser(MainView, true);
-	}
-
-	return;
-}
-
 // ghost stuff
 int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
@@ -1920,7 +1893,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	CALLSTACK_ADD();
 
 	// render background
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B|CUI::CORNER_TL, 10.0f);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
 	MainView.HSplitBottom(5.0f, &MainView, 0);

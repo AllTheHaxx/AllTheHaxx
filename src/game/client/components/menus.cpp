@@ -938,15 +938,6 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(DoButton_MenuTab(&s_SpoofingButton, Localize("Spoofing"), m_ActivePage==PAGE_SPOOFING, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_SPOOFING;
 #endif
-		CServerInfo tmp; Client()->GetServerInfo(&tmp);
-		if(IsDDNet(&tmp) || IsDDRace(&tmp))
-		{
-			Box.VSplitLeft(30.0f, &Button, &Box);
-			Box.VSplitLeft(90.0f, &Button, &Box);
-			static CButtonContainer s_GhostButton;
-			if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, CUI::CORNER_T))
-				NewPage = PAGE_GHOST;
-		}
 	}
 
 	/*
@@ -1599,16 +1590,12 @@ int CMenus::Render()
 				RenderPlayers(MainView);
 			else if(m_GamePage == PAGE_SERVER_INFO)
 				RenderServerInfo(MainView);
-			else if(m_GamePage == PAGE_DDRace)
-				RenderInGameDDRace(MainView);
 			else if(m_GamePage == PAGE_CALLVOTE)
 				RenderServerControl(MainView);
 			else if(m_GamePage == PAGE_SPOOFING)
 				RenderSpoofing(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
-			else if(m_GamePage == PAGE_GHOST)
-				RenderGhost(MainView);
 			else if(m_GamePage == PAGE_BROWSER)
 				RenderBrowser(MainView, true);
 			else if(m_GamePage == PAGE_MANUAL)
