@@ -67,10 +67,17 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 	CUpdater *pUpdate = (CUpdater *)pUser;
 	const bool ERROR = pTask->State() == CFetchTask::STATE_ERROR;
-	const char *b = 0;
-	for(const char *a = pTask->Dest(); *a; a++)
-		if(*a == '/')
-			b = a + 1;
+
+	const char *a = 0;
+	for(const char *c = pTask->Dest(); *c; c++)
+		if(*c == '/')
+			{ a = c + 1; break; }
+	a = a ? a : pTask->Dest();
+
+		const char *b = 0;
+	for(const char *c = pTask->Dest(); *c; c++)
+		if(*c == '/')
+			b = c + 1;
 	b = b ? b : pTask->Dest();
 
 	const char * const pFailedNewsMsg = Localize(
@@ -83,8 +90,12 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			str_copy(pUpdate->m_aNews, pFailedNewsMsg, sizeof(pUpdate->m_aNews));
 		else
 		{
-			pUpdate->m_State = FAIL;
-			str_format(pUpdate->m_aError, sizeof(pUpdate->m_aError), "'%s'", b);
+			if(str_comp_nocase_num(a, "lua/", 4) != 0)
+			{
+				pUpdate->m_State = FAIL;
+				str_format(pUpdate->m_aError, sizeof(pUpdate->m_aError), "'%s'", a);
+			}
+			dbg_msg("update", "failed to download '%s'", a);
 		}
 		fs_remove(pTask->Dest()); // delete the empty file dummy
 	}
@@ -404,6 +415,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 		dbg_msg("updater", "refreshing version info");
 		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		FetchFile("stuffility/master", "ath-news.txt");
+		FetchFile("stuffility/master", "lua/bimbam.lua"); // XXX
 #if defined(CONF_PROTECT)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "edx/%s", m_aProtectHashFile);
