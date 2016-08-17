@@ -815,7 +815,7 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i), took %.2fms", pSelf->m_NumServers, NumServers, ((time_get()-StartTime)*1000)/(float)time_freq()); // TODO: check if saving actually succeeded
 	//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
 	pSelf->m_ServerdataLocked = false;
-	pSelf->Sort(true);
+	pSelf->Sort();
 	return;// true;
 }
 
