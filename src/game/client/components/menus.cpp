@@ -1213,6 +1213,11 @@ static const char *s_apSayings[] = {
 		"Gotta get more sleep :(",
 		"We furfill every wish!",
 		"I hate fucking script kiddies",
+		"Don't be rude!",
+		"Nobody needs nothing",
+		"[IRC] received a CTCP FINGER",
+		"xoring you out!",
+		"Text formatting would be cool"
 };
 
 void CMenus::RenderLoading()
