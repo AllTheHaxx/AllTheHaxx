@@ -139,7 +139,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	pSelf->m_aSkins.add(Skin);
 
 	if(g_Config.m_Debug)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "loaded skin %s", Skin.m_aName);
+		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "loaded skin '%s'", Skin.m_aName);
 
 	return 0;
 }
