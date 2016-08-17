@@ -27,7 +27,7 @@ PUTLINE("- \"unsigned char*\" (@CytraL) for his IRC implementation in HClient, o
 PUTLINE("- \"Stitch626\" (@Stitch626) for spending hours and nights to help me with debugging even though he doesn't use the client :D")
 PUTLINE("- \"Paszczak\" (@paaszczak) for having wanted to help us at the very beginning (and clickable links)")
 PUTLINE("- \"heinrich5991\" for allowing us to use his maps database for webdl")
-PUTLINE("- \"Drazzer\" for ideas, ongoing feedback and spreading of the client")
+PUTLINE("- \"DrAzZeR\" for ideas, ongoing feedback and spreading of the client")
 NEWLINE()
 PUTLINE("|More general thanks go to...|")
 PUTLINE("- All our beta testers")
