@@ -145,8 +145,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("IntraGameTick", &IClient::IntraGameTick)
 			.addProperty("PredIntraGameTick", &IClient::PredIntraGameTick)
 			.addProperty("PredGameTick", &IClient::PredGameTick)
-			.addProperty("LocalTime", &IClient::LocalTime)
-			.addProperty("SteadyTimer", &IClient::SteadyTimer)
+			.addProperty("LocalTime", &IClient::SteadyTimer)
+			.addProperty("ConnTime", &IClient::LocalTime)
 
 			.addFunction("Connect", &IClient::Connect)
 			.addFunction("Disconnect", &IClient::Disconnect)
