@@ -981,24 +981,27 @@ int CMenus::RenderMenubar(CUIRect r)
 	{
 		PREPARE_BUTTON("ⅈ", Localize("Manual"))
 		static CButtonContainer s_InfoButton;
-		if(DoButton_MenuTab(&s_InfoButton, aBuf, m_ActivePage == PAGE_MANUAL, &Button, 0))
+		if(DoButton_MenuTab(&s_InfoButton, aBuf, m_ActivePage == PAGE_MANUAL, &Button, Client()->State() == IClient::STATE_OFFLINE ? 0 : CUI::CORNER_TL))
 			NewPage = PAGE_MANUAL;
 	}
 
-	//Box.VSplitRight(10.0f, &Box, &Button);
+	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
-		PREPARE_BUTTON("⬀", Localize("Chat"))
-		static CButtonContainer s_ChatButton;
-		if(DoButton_MenuTab(&s_ChatButton, aBuf, m_IRCActive, &Button, 0))
-			ToggleIRC();
-	}
+		//Box.VSplitRight(10.0f, &Box, &Button);
+		{
+			PREPARE_BUTTON("⬀", Localize("Chat"))
+			static CButtonContainer s_ChatButton;
+			if(DoButton_MenuTab(&s_ChatButton, aBuf, m_IRCActive, &Button, 0))
+				ToggleIRC();
+		}
 
-	//Box.VSplitRight(10.0f, &Box, &Button);
-	{
-		PREPARE_BUTTON("✎", Localize("Editor"))
-		static CButtonContainer s_EditorButton;
-		if(DoButton_MenuTab(&s_EditorButton, aBuf, g_Config.m_ClEditor, &Button, CUI::CORNER_TL))
-			g_Config.m_ClEditor = 1;
+		//Box.VSplitRight(10.0f, &Box, &Button);
+		{
+			PREPARE_BUTTON("✎", Localize("Editor"))
+			static CButtonContainer s_EditorButton;
+			if(DoButton_MenuTab(&s_EditorButton, aBuf, g_Config.m_ClEditor, &Button, CUI::CORNER_TL))
+				g_Config.m_ClEditor = 1;
+		}
 	}
 
 	if(NewPage != -1)
