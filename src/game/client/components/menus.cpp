@@ -1512,7 +1512,7 @@ int CMenus::Render()
 		s_Frame++;
 		m_DoubleClickIndex = -1;
 
-		if(g_Config.m_UiBrowserPage == PAGE_BROWSER)
+		if(g_Config.m_UiPage == PAGE_BROWSER)
 		{
 			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 			{
