@@ -12,9 +12,6 @@
 
 ##### translated strings #####
 
-%d%% loaded
-== %d%% загружено
-
 %ds left
 == осталось %d сек.
 
@@ -33,9 +30,6 @@
 %s wins!
 == %s победил!
 
--Page %d-
-== -Страница %d-
-
 Abort
 == Отмена
 
@@ -51,14 +45,8 @@ Address
 All
 == Все
 
-Always show name plates
-== Всегда показывать имена игроков
-
 Are you sure that you want to delete the demo?
 == Вы уверены, что хотите удалить демо?
-
-Are you sure that you want to quit?
-== Вы действительно желаете выйти?
 
 Are you sure that you want to remove the player from your friends list?
 == Вы уверены, что хотите удалить игрока из друзей?
@@ -249,14 +237,8 @@ Join red
 Jump
 == Прыжок
 
-Kick player
-== Забанить игрока
-
 Language
 == Язык
-
-Loading
-== Загрузка
 
 MOTD
 == MOTD
@@ -272,9 +254,6 @@ Mouse sens.
 
 Move left
 == Шаг влево
-
-Move player to spectators
-== Сделать наблюдателем
 
 Move right
 == Шаг вправо
@@ -356,9 +335,6 @@ Quality Textures
 
 Quit
 == Выход
-
-REC %3d:%02d
-== REC %3d:%02d
 
 Reason:
 == Причина:
@@ -495,9 +471,6 @@ Team
 Team chat
 == Командный чат
 
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== Вышла Teeworlds %s! Скачивайте на www.teeworlds.com!
-
 Texture Compression
 == Сжатие текстур
 
@@ -572,215 +545,29 @@ You must restart the game for all settings to take effect.
 
 ##### needs translation #####
 
-%.3f KiB
-== КБ
-
-%d player left
-== %d игрок осталось
-
-%d player not ready
-== %d игрок не готов
-
-%d players left
-== %d игроков вышло
-
-%d players not ready
-== %d игроков не готово
-
-%d servers, %d players
-== %d серверов, %d игроков
-
-'%s' called for vote to kick '%s' (%s)
-== '%s' голосует за кик '%s' (%s)
-
-'%s' called for vote to move '%s' to spectators (%s)
-== '%s' голосует за перенос '%s' в наблюдатели (%s)
-
-'%s' called vote to change server option '%s' (%s)
-== '%s' голосует за изменение опции '%s' (%s)
-
-'%s' entered and joined the %s
-== '%s' подключился вступил за %s
-
-'%s' has left the game
-== '%s' вышел из игры
-
-'%s' has left the game (%s)
-== '%s' вышел из игры (%s)
-
-'%s' joined the %s
-== 
-
-Admin forced server option '%s' (%s)
-== Администратор изменил опцию '%s' (%s)
-
-Admin forced vote no
-== Администратор проголосовал против
-
-Admin forced vote yes
-== Администратор проголосовал за
-
-Admin moved '%s' to spectator (%s)
-== Администратор перенёс '%s' в наблюдатели
-
-Alp:
-== 
-
-Anti Aliasing
-== Сглаживание
-
-Are you sure you want to rename the demo?
-== Вы действительно хотите переименовать демо?
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== Вы действительно хотите сохранить скин? Если скин с таким именем существует, он будет заменён.
-
-Back
-== Назад
-
-Basic
-== Основной
-
-Bodies
-== Тела
-
 Borderless window
 == Оконный режим
-
-Color
-== Цвет
-
-Crc
-== Crc
-
-Created
-== Создан
-
-Custom
-== 
-
-Customize
-== Настроить
-
-Decoration
-== Декорации
 
 Demo
 == Демо
 
-Detail
-== Детали
-
 Editor
 == Редактор
-
-Eyes
-== Глаза
-
-Format
-== Формат
 
 Game paused
 == Пауза
 
-Game starts in
-== Игра начнётся через
-
-Global
-== Глобально
-
-Hands
-== Руки
-
-Host address:
-== Адрес сервера:
-
-Hue:
-== Оттенок
-
 Join
 == Вступить
-
-Joined
-== Вступил
-
-Joined blue
-== Вступил за синих
-
-Joined red
-== Вступил за красных
-
-Kick voting requires %d players on the server
-== Чтобы голосовать за кик, требуется %d игроков на сервере
 
 Laser
 == Лазер
 
-Length
-== Длина
-
-Letterbox
-== 
-
-Lgt:
-== Яркость
-
-Local
-== Локальный
-
-Local server
-== Локальный сервер
-
-Match
-== 
-
-Max
-== Макс.
-
-Misc
-== Разное
-
-Netversion
-== Версия
-
-Nickname is empty.
-== 
-
-Normal:
-== 
-
-Only %d active players are allowed
-== Разрешены только %d активных игроков
-
-Personal
-== Личный
-
-Ready
-== Готово
-
-Record
-== Запись
-
-Recorded
-== Записано
-
 Reset
 == Сброс
 
-Resolutions
-== Разрешение
-
 Respawn
 == Респаун
-
-Round over
-== Раунд окончен
-
-Round over!
-== Раунд окончен!
-
-Sat:
-== Контраст
 
 Save
 == Сохр.
@@ -800,65 +587,14 @@ Exclude
 clear
 == очистить
 
-Save skin
-== Сохранить скин
-
 Screen
 == Экран
-
-Search:
-== Поиск:
 
 Search
 == Поиск
 
-Server does not allow voting to kick players
-== На сервере запрещено голосовать за кик 
-
-Server does not allow voting to move players to spectators
-== На сервере запрещено голосовать за перенос в наблюдатели 
-
-Servers
-== Сервера
-
 Show only chat messages from friends
 == Показывать сообщения только от друзей
-
-Size
-== Размер
-
-Skin
-== Скин
-
-Spectating
-== Наблюдает
-
-Spectators aren't allowed to start a vote.
-== Наблюдателям запрещено начинать голосование
-
-Standard Gametype
-== Стандартный режим
-
-Tattoo
-== Тату
-
-Tattoos
-== Тату
-
-Team:
-== Команда:
-
-Teams are locked
-== Команды заперты
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== Команды заперты. Время до смены команды: %02d:%02d
-
-Teams were locked
-== Команды были заперты
-
-Teams were unlocked
-== Команды были открыты
 
 Tee
 == Tee
@@ -866,59 +602,11 @@ Tee
 Texture
 == Текстура
 
-Volume
-== Громкость
-
-Vote aborted
-== 
-
-Vote failed
-== Голосование не состоялось
-
-Vote passed
-== Голосование состоялось
-
-Wait for current vote to end before calling a new one.
-== Дождитесь окончания текущего голосования перед вызовом нового.
-
-Wait for next round
-== Ожидайте следующий раунд
-
-Wide
-== 
-
-You must wait %d seconds before making another vote
-== Ожидайте %d секунд перед вызовом другого голосования
-
-blue
-== синия
-
-blue team
-== синяя команда
-
-game
-== игра
-
-red
-== красные
-
-red team
-== красная команда
-
-spectators
-== наблюдатели
-
-wait for more players
-== Ожидайте других игроков
-
 Manual
 == Инструкция
 
 Identities
 == Личности
-
-Open legacy view
-== 
 
 HUD
 == Интерфейс
@@ -992,9 +680,6 @@ Team message
 Normal message
 == Обычные сообщения
 
-Highlighted messages
-== Подсвеченные сообщения
-
 Inner color
 == Цвет внутреннего свечения
 
@@ -1007,23 +692,14 @@ Fonts
 Font Selector
 == Выберите шрифт
 
- %d fonts installed, %d loaded.
-== %d шрифтов установлено, %d загружено.
-
 Reload
 == Обновить
-
-Preload fonts on startup
-== Подгружать шрифты при запуске
 
 Haxx
 == Haxx
 
 Gather Statistics
 == Сбор статистики
-
-Colorful Client
-== Цветной режим
 
 Makes everything look way more awesome!
 == Делает всё еще более крутым!
@@ -1058,39 +734,6 @@ Skin Fetcher
 Clear downloaded skins cache
 == Очистить кеш загруженых скинов
 
-[EXPERIMENTAL!] Download skins from certain public skin databases automatically if a missing skin is used by somebody else on your server
-== [ЭКСПЕРИМЕНТАЛЬНО!] Загружает скин автоматически, если кто-либо использует скин, а этого скина нет
-
-Hidden Chat:
-== Скрытый чат:
-
-Crypted Chat:
-== Зашифрованный чат:
-
-Hookfly Dummy:
-== 
-
-Toggle X-Ray:
-== Включить X-Ray:
-
-Zoom in:
-== Приблизить:
-
-Zoom out:
-== Отдалить:
-
-Toggle IRC:
-== Показать IRC:
-
-Toggle Lua Console:
-== Lua консоль:
-
-Toggle Hotbar:
-== Показать хотбар:
-
-Unlock mouse:
-== Разблокировать курсор
-
 Connect automatically
 == Подключать IRC автоматически
 
@@ -1106,12 +749,6 @@ Play sound notification
 Allow others to join you
 == Разрешить другим подключаться к тебе
 
-Q Auth Name
-== 
-
-Q Auth Pass
-== 
-
 Modes
 == Режимы
 
@@ -1121,26 +758,14 @@ Leave Message
 Lua
 == Lua
 
-Use lua
-== Использовать Lua
-
 Lua files
 == Список Lua файлов
 
 Activate
 == Активировать
 
-This script has no additional permissions and is thus considered safe.
-== Этот скрипт не имеет каких-либо дополнительных разрешений, и таким образом, считается безопасным.
-
-This script has the  following additional permissions
-== Этот скрипт имеет следующие дополнительные разрешения:
-
 Autoload
 == Автозагрузка
-
-%d files listed (%d total - %d filtered), %d scripts active
-== В списке %d файлов (%d файлов - %d отфильтрованно), %d активный скриптов
 
 Showing all files
 == Показывать все файлы
@@ -1166,9 +791,6 @@ Update
 
 Refresh the serverlist completely
 == Обновить список серверов полностью
-
-Client version string: %s
-== Версия клиента: %s
 
 Strict version filter
 == Строгий фильтр версий
@@ -1209,14 +831,8 @@ Save ghost
 Gameplay
 == Геймплей
 
-Overlay entities
-== 
-
 Show others
 == Показывать остальных
-
-Show quads
-== 
 
 Show other players' hook collision lines
 == Показывать возможность хука других игроков
@@ -1226,9 +842,6 @@ Show other players' key presses
 
 Raw Mouse Input
 == Использовать необработанный сигнал ввода мыши
-
-Use raw mouse input mode (the \"new one\")\nWARNING: MIGHT BE BUGGY/SLOW ON SOME SYSTEMS! In that case turn it off.
-== ВНИМАНИЕ: МОГУТ БЫТЬ ЛАГИ / ПРОСЕДАТЬ ФПС на некоторых системах! В этом случае выключите.
 
 Background (regular)
 == Задний фон (обычный)
@@ -1283,26 +896,14 @@ Max Screenshots
 Length:
 == Длина
 
-Skin name
-== Название скина
-
 Rifle
 == Бластер
-
-Patterns
-== Узоры
 
 Netversion:
 == Версия:
 
 Map:
 == Карта:
-
-%d Bytes
-== %d байт
-
-Coloration
-== Расцветка
 
 Info
 == Инфо
@@ -1340,9 +941,6 @@ Lht.
 no limit
 == Без лимита
 
-Quick search:
-== Быстрый поиск:
-
 UI Color
 == Цвет интерфейса
 
@@ -1355,9 +953,6 @@ Crc:
 Alpha
 == Прозрачн.
 
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== Вы действительно хотите сохранить скин? Если скин с таким именем существует, он будет заменён.
-
 Current version: %s
 == Текущая версия: %s
 
@@ -1369,3 +964,731 @@ Name plates size
 
 Type:
 == Тип:
+
+##### generated by copy_fix.py, please translate this #####
+
+Title
+== 
+
+AntiPing
+== 
+
+Countries
+== 
+
+Grab IPs
+== 
+
+AllTheHaxx updated!
+== 
+
+CPU Throttle
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Open the IRC overlay (Key: %s)
+== 
+
+Packet sniffer settings
+== 
+
+Grabs
+== 
+
+Kill
+== 
+
+M15C 5TUFF
+== 
+
+DDNet
+== 
+
+Sniff incoming conn packets
+== 
+
+General queries
+== 
+
+Enable server message sound
+== 
+
+Fetch player IPs from master
+== 
+
+Save Skin as new Identity
+== 
+
+AntiPing limit
+== 
+
+Press %s to switch back to ingame mouse
+== 
+
+We will win
+== 
+
+Lua QuickAccess
+== 
+
+Connect dummy
+== 
+
+Reconnect on connection timeout
+== 
+
+Server-Dependent-Configuration Manager
+== 
+
+Use a custom IP as source address
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Manual %3d:%02d  
+== 
+
+Deactivate
+== 
+
+All Skins
+== 
+
+Dummy's Identity: 
+== 
+
+Zoom out
+== 
+
+Both's Identity: 
+== 
+
+Restart
+== 
+
+Default
+== 
+
+Reset on Disconnect
+== 
+
+none
+== 
+
+Smooths graphics at the expense of FPS
+== 
+
+[EXPERIMENTAL!] Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server
+== 
+
+Apply as
+== 
+
+Perform the actions for all players
+== 
+
+Hidden
+== 
+
+Hookfly Dummy
+== 
+
+Source:
+== 
+
+List of your RSA keys
+== 
+
+Remove chat
+== 
+
+Check now
+== 
+
+Non-Vanilla Skins only
+== 
+
+Unlock Mouse
+== 
+
+Sorted by name
+== 
+
+Load key with the name you entered above
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Automatically take statboard screenshot
+== 
+
+Loading Lua Script
+== 
+
+Destination:
+== 
+
+Updating...
+== 
+
+Nick:
+== 
+
+(only for advanced players - be careful!)
+== 
+
+Hide console window
+== 
+
+%.2f MiB
+== 
+
+Dummy Timeout code
+== 
+
+Suicides
+== 
+
+Enable Timeout Protection
+== 
+
+a custom title to display this identity
+== 
+
+Clan plates size
+== 
+
+Votebot 'No'
+== 
+
+Disconnect packet from client to server
+== 
+
+Connect dummies
+== 
+
+Open the IRC overlay
+== 
+
+Username
+== 
+
+Spree
+== 
+
+Dummy
+== 
+
+Vanilla Skins only
+== 
+
+Enable rifle sound
+== 
+
+Activate this if you use the DDNet serverbrowser
+== 
+
+High-DPI screen support
+== 
+
+Server Config
+== 
+
+1. Generate RSA key
+== 
+
+%.2f KiB
+== 
+
+New Client Version '%s' is available!
+== 
+
+Please use a different name
+== 
+
+Disable clipping
+== 
+
+Kick player from the server
+== 
+
+MOUSE UNLOCKED
+== 
+
+Length: %i/%i
+== 
+
+Render quads as triangles
+== 
+
+Connecting dummy
+== 
+
+Connect to server
+== 
+
+Console Mode
+== 
+
+Update now
+== 
+
+Rejoin the current server
+== 
+
+Stressing
+== 
+
+Load RSA key
+== 
+
+Disconnect dummies
+== 
+
+Enable highlighted chat sound
+== 
+
+Enable shotgun sound
+== 
+
+AllTheHaxx %s is out! Download it at allthehaxx.tk!
+== 
+
+Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.
+== 
+
+Main
+== 
+
+New Identity '%s' created!
+== 
+
+Action:
+== 
+
+Hello and welcome
+== 
+
+Highlighted message
+== 
+
+Credits
+== 
+
+Reset wanted weapon on death
+== 
+
+Q Auth Pass
+== 
+
+IRC Chat
+== 
+
+Vote-kick all
+== 
+
+removed markers due to broken demo
+== 
+
+Disable this if your game reacts too slow
+== 
+
+Chat message:
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Crypted Chat
+== 
+
+Enter your f1 commands here...
+== 
+
+Vote 'No'
+== 
+
+Ratio
+== 
+
+Connecting, please wait...
+== 
+
+Flood with the players IP to ban him
+== 
+
+Show quads
+== 
+
+Generates a new (256 b) RSA key you can then save and share
+== 
+
+Map sound volume
+== 
+
+UI Scale
+== 
+
+Enable hammer sound
+== 
+
+Sniff outgoing connless packets
+== 
+
+Network Sniffer
+== 
+
+Just update the info of the entries
+== 
+
+%i fonts installed, %i loaded.
+== 
+
+Are you handsome?
+== 
+
+Enable grenade sound
+== 
+
+May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.
+== 
+
+Connect to the spoofing-server
+== 
+
+Show map decoration elements
+== 
+
+No updates available
+== 
+
+Show clan above name plates
+== 
+
+READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider\nis not on your screen anymore, type in f1:\nui_scale 100
+== 
+
+Fire the laz0r!!!
+== 
+
+Look out!
+== 
+
+Dummy settings
+== 
+
+Preload fonts on starup
+== 
+
+Select a name
+== 
+
+An error occured
+== 
+
+Disconnect packet from server to client
+== 
+
+Enable team chat sound
+== 
+
+AllTheHaxx needs to be restarted to complete the update!
+== 
+
+You are now out of the solo part.
+== 
+
+Enable irc chat sound
+== 
+
+Hide DDRaceNetwork
+== 
+
+Deaths
+== 
+
+Zervor status
+== 
+
+Wait for GL commands to finish
+== 
+
+Fixes quad coloring on some GPUs
+== 
+
+Spectator
+== 
+
+Generate new Code
+== 
+
+Spoofing
+== 
+
+Enable spawn sound
+== 
+
+Send a chat message
+== 
+
+Skin Downloads
+== 
+
+Reconnect when server is full
+== 
+
+Toggle Lua Console
+== 
+
+Main Identity: 
+== 
+
+Grab dummy IPs
+== 
+
+Disable fancy effects to gain more fps
+== 
+
+Votebot 'Yes'
+== 
+
+Sorted by score
+== 
+
+Follow
+== 
+
+Hidden Chat
+== 
+
+Enable gun sound
+== 
+
+Enable game sounds
+== 
+
+2. Save RSA key
+== 
+
+Toggle Hotbar
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+About
+== 
+
+Threaded sound loading
+== 
+
+Race %3d:%02d  
+== 
+
+Disconnect dummy
+== 
+
+Be careful: experimental
+== 
+
+Tee controlling related
+== 
+
+-- Collection of all config variables --
+== 
+
+Render when inactive
+== 
+
+DUMMY SH1T
+== 
+
+Z3RV0R T00LZ
+== 
+
+Fetch IPs
+== 
+
+Allow Vanilla Skins only
+== 
+
+Sniff incoming connless packets
+== 
+
+Vote 'Yes'
+== 
+
+RSA Key name
+== 
+
+Overlay entities
+== 
+
+Q Auth Name
+== 
+
+Send (Dummies)
+== 
+
+Toggle IRC
+== 
+
+Move player to the spectators
+== 
+
+Stop flooding
+== 
+
+Show other ATH user
+== 
+
+Add a demo marker
+== 
+
+Timeout code
+== 
+
+Player related
+== 
+
+Send a chat message from the dummies
+== 
+
+Crypt
+== 
+
+You must give either 'activate', 'deactivate' or 'toggle' as first argument!
+== 
+
+Net
+== 
+
+Ingame sens.
+== 
+
+Chat is disabled. Set 'cl_chat' to 1 or 2 to send messages!
+== 
+
+Default zoom
+== 
+
+Toggle X-Ray
+== 
+
+Hammerfly Dummy
+== 
+
+Use Lua
+== 
+
+Receive hidden chat
+== 
+
+I don't care
+== 
+
+Best
+== 
+
+Use
+== 
+
+Enable regular chat sound
+== 
+
+Next refresh: %ds
+== 
+
+Translate incoming messages
+== 
+
+You are now in a solo part.
+== 
+
+Disable this if you get blurry textures
+== 
+
+Timeout
+== 
+
+Sniff outgoing conn packets
+== 
+
+Save key with the name you entered above
+== 
+
+Auto %3d:%02d  
+== 
+
+Add Identity
+== 
+
+Low Graphics Mode
+== 
+
+Please wait...
+== 
+
+Translate outgoing messages
+== 
+
+Use the command 'unlock_mouse' in f1
+== 
+
+Force disconnect
+== 
+
+Discard config changes when disconnecting
+== 
+
+AntiPing: predict weapons
+== 
+
+Kick
+== 
+
+Zoom in
+== 
+
+Are you sure?
+== 
+
+click to toggle
+== 
+
+Open legacy view
+== 
+
+FPM
+== 
+
+Page %i, Line %d
+== 
+
+Switch weapon when out of ammo
+== 
+
+View player IPs (run Fetch IPs first)
+== 
+
+There was no luafile with the name '%s' found!
+== 
+
+Render graphics when window is in background
+== 
+
+Start flooding
+== 
