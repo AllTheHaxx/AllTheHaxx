@@ -66,7 +66,8 @@ void CMenus::RenderGame(CUIRect MainView)
 #endif
 	ButtonBar.VMargin(10.0f, &ButtonBar);
 
-	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
+#define BUTTON_WIDTH(TEXT) max(120.0f, TextRender()->TextWidth(0, (ButtonBar.h-2.0f)*ms_FontmodHeight, TEXT, -1))
+	ButtonBar.VSplitRight(BUTTON_WIDTH(Localize("Disconnect")), &ButtonBar, &Button);
 	static CButtonContainer s_DisconnectButton;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
 	{
@@ -77,7 +78,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	}
 
 	ButtonBar.VSplitRight(7.0f, &ButtonBar, &Button);
-	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(BUTTON_WIDTH(Localize("Reconnect")), &ButtonBar, &Button);
 	static CButtonContainer s_ReconnectButton;
 	if(DoButton_Menu(&s_ReconnectButton, Localize("Reconnect"), 0, &Button, Localize("Rejoin the current server")))
 	{
@@ -102,7 +103,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
 			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+			ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Spectate")), &Button, &ButtonBar);
 			if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
 				if(g_Config.m_ClDummy == 0 || m_pClient->Client()->DummyConnected())
@@ -118,7 +119,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Join red")), &Button, &ButtonBar);
 				if(!DummyConnecting && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_RED);
@@ -129,7 +130,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_BLUE)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Join blue")), &Button, &ButtonBar);
 				if(!DummyConnecting && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_BLUE);
@@ -142,7 +143,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != 0)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Join game")), &Button, &ButtonBar);
 				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(0);
@@ -182,19 +183,19 @@ void CMenus::RenderGame(CUIRect MainView)
 
 
 	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(170.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(DummyConnecting ? Localize("Connecting dummy") : Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy")), &Button, &ButtonBar);
 
 	static CButtonContainer s_DummyButton;
 	if(DummyConnecting)
 		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
-	else if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy")), 0, &Button, 0, CUI::CORNER_L))
+	else if(DoButton_Menu(&s_DummyButton, Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy"), 0, &Button, 0, CUI::CORNER_L))
 	{
 		if(!Client()->DummyConnected())
 			Client()->DummyConnect();
 		else
 			Client()->DummyDisconnect(0);
 	}
-
+#undef BUTTON_WIDTH
 	ButtonBar.VSplitLeft(30.0f, &Button, &ButtonBar);
 
 	const CSkins::CSkin *pDummySkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(g_Config.m_ClDummySkin));
@@ -269,9 +270,11 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 #endif
 	ButtonBar.VMargin(10.0f, &ButtonBar);
 
+#define BUTTON_WIDTH(TEXT) (max(130.0f, TextRender()->TextWidth(0, (ButtonBar.h-2.0f)*ms_FontmodHeight, TEXT, -1)))
+
 	// render buttons
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Console Mode")), &Button, &ButtonBar);
 	static CButtonContainer s_ConModeButton;
 	if(DoButton_Menu(&s_ConModeButton, Localize("Console Mode"), 0, &Button, "Enter console mode (very low CPU usage, no graphics)"))
 	{
@@ -287,7 +290,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	}
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("IRC Chat")), &Button, &ButtonBar);
 	static CButtonContainer s_OpenChatButton;
 	char aBuf[64];
 	if(str_comp(GameClient()->m_pBinds->GetKey("+irc"), ""))
@@ -298,23 +301,23 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		ToggleIRC();
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(130.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Server Config")), &Button, &ButtonBar);
 	static CButtonContainer s_ServerConfigButton;
-	if(DoButton_Menu(&s_ServerConfigButton, Localize("Server Config"), s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR, &Button, "Execute commands when joining this server"))
+	if(DoButton_Menu(&s_ServerConfigButton, Localize("Server Config"), s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR, &Button, Localize("Execute commands when joining this server")))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR ? EXTRAS_NONE : EXTRAS_SERVERCONFIG_CREATOR;
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(140.0f, &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Network Sniffer")), &Button, &ButtonBar);
 	static CButtonContainer s_SnifferSettingsButton;
-	if(DoButton_Menu(&s_SnifferSettingsButton, Localize("Network Sniffer"), s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS, &Button, "Packet sniffing settings"))
+	if(DoButton_Menu(&s_SnifferSettingsButton, Localize("Network Sniffer"), s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS, &Button, Localize("Packet sniffing settings")))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS ? EXTRAS_NONE : EXTRAS_SNIFFER_SETTINGS;
 
 	// TODO add this back again when it has been done
-	//ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-	//ButtonBar.VSplitLeft(150.0f, &Button, &ButtonBar);
-	//static CButtonContainer s_LuaQuickAccessButton;
-	//if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "Scripts can create GUIs in here as they like"))
-	//	s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Lua QuickAccess")), &Button, &ButtonBar);
+	static CButtonContainer s_LuaQuickAccessButton;
+	if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "Scripts can create GUIs in here as they like"))
+		s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
 
 	if(IsDDNet(Client()->GetServerInfo(0)) || IsDDRace(Client()->GetServerInfo(0)))
 	{
@@ -324,6 +327,8 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		if(DoButton_Menu(&s_GhostButton, Localize("Ghost"), s_ExtrasPage == EXTRAS_GHOST, &Button))
 			s_ExtrasPage = s_ExtrasPage == EXTRAS_GHOST ? EXTRAS_NONE : EXTRAS_GHOST;
 	}
+
+#undef BUTTON_WIDTH
 }
 
 void CMenus::RenderServerConfigCreator(CUIRect MainView)
@@ -520,16 +525,19 @@ void CMenus::RenderLuaQuickAccess(CUIRect MainView)
 	CUIRect Button;
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
-	char aBuf[128];
-	CButtonContainer pBCs[128];
+	char aBuf[512];
+	static CButtonContainer pBCs[256];
 	MainView.HSplitTop(5.0f, 0, &MainView);
-	const int NumLuaScripts = Client()->Lua()->GetLuaFiles().size();
+	int NumActiveScripts = 0;
+	for(int i = 0; i < Client()->Lua()->GetLuaFiles().size(); i++)
+		if(Client()->Lua()->GetLuaFiles()[i]->State() == CLuaFile::STATE_LOADED)
+			NumActiveScripts++;
 
-	CButtonContainer s_Listbox;
+	static CButtonContainer s_Listbox;
 	static float s_ScrollVal = 0.0f;
-	UiDoListboxStart(&s_Listbox, &MainView, 20.0f, "", "", NumLuaScripts, 1, -1, s_ScrollVal);
-	static int s_ActivatedIndex = -1;
-	for(int i = 0; i < NumLuaScripts; i++)
+	UiDoListboxStart(&s_Listbox, &MainView, 20.0f, "", "", NumActiveScripts, 1, -1, s_ScrollVal);
+//	static int s_ActivatedIndex = -1;
+	for(int i = 0; i < Client()->Lua()->GetLuaFiles().size(); i++)
 	{
 		CLuaFile *L = Client()->Lua()->GetLuaFiles()[i];
 		if(!L || L->State() != CLuaFile::STATE_LOADED)
@@ -545,10 +553,16 @@ void CMenus::RenderLuaQuickAccess(CUIRect MainView)
 			L->Unload(false);
 
 		//ButtonBar.VSplitRight(ButtonBar.h, &ButtonBar, &Button);
-		str_format(aBuf, sizeof(aBuf), "[%s] '%s' (%s)", L->GetFilename(), L->GetScriptTitle(), L->GetScriptInfo());
+		str_format(aBuf, sizeof(aBuf), "[%s] '%s'", L->GetFilename(), L->GetScriptTitle());
+		if(L->GetScriptInfo()[0])
+		{
+			str_append(aBuf, " (", sizeof(aBuf));
+			str_append(aBuf, L->GetScriptInfo(), sizeof(aBuf));
+			str_append(aBuf, ")", sizeof(aBuf));
+		}
 		UI()->DoLabelScaled(&Item.m_Rect, aBuf, 10.0f, -1);
-		if(DoButton_Menu(&pBCs[i], "", 0, &Item.m_Rect, 0, 0/*i == 0 ? CUI::CORNER_T : i == NumLuaScripts-1 ? CUI::CORNER_B : 0*/))
-			s_ActivatedIndex = i;
+//		if(DoButton_Menu(&pBCs[i], "", 0, &Item.m_Rect, 0, 0/*i == 0 ? CUI::CORNER_T : i == NumLuaScripts-1 ? CUI::CORNER_B : 0*/))
+//			s_ActivatedIndex = i;
 
 	}
 
