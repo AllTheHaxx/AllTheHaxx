@@ -2846,7 +2846,7 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 	if(DoButton_CheckBox(&s_ButtonIRCAllowJoin, Localize("Allow others to join you"), g_Config.m_ClIRCAllowJoin, &Button))
 		g_Config.m_ClIRCAllowJoin ^= 1;
 
-	static const char *s_apLabels[] = {
+	const char *s_apLabels[] = {
 			Localize("Nickname"),
 		//	Localize("Username"),
 			Localize("Password"),
