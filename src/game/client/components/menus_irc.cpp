@@ -267,7 +267,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 
 		// Input Box
 		EntryBox.HSplitBottom(20.0f, &EntryBox, &InputBox);
-		InputBox.VSplitRight(50.0f, &InputBox, &Button);
+		InputBox.VSplitRight(max(50.0f, TextRender()->TextWidth(0, (InputBox.h-2.0f)*ms_FontmodHeight, Localize("Send"), -1)), &InputBox, &Button);
 		//Button.VSplitLeft(5.0f, 0x0, &Button);
 		static float s_Offset;
 		CPointerContainer s_EditboxInput(&m_IRCActive);
@@ -344,8 +344,8 @@ void CMenus::RenderIRC(CUIRect MainView)
 				s_UsersScrollValue = clamp(s_UsersScrollValue, 0.0f, 1.0f);
 			}*/
 			char aBuff[50];
-			str_format(aBuff, sizeof(aBuff), "Total: %d", pChan->m_Users.size());
-			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, "Users", aBuff, pChan->m_Users.size(), 1, Selected,
+			str_format(aBuff, sizeof(aBuff), Localize("Total: %d"), pChan->m_Users.size());
+			UiDoListboxStart(&s_UsersList, &UserList, 18.0f, Localize("Users"), aBuff, pChan->m_Users.size(), 1, Selected,
 							 s_UsersScrollValue, CUI::CORNER_TR);
 
 			for(int u = 0; u < pChan->m_Users.size(); u++)
