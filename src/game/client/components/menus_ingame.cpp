@@ -1264,7 +1264,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	// window
 	Box.HSplitTop(22.4f, &Button, &Box);
 	RenderTools()->DrawUIRect(&Button, vec4(0.6f, 0.17f, 0.17f, 0.6f), CUI::CORNER_T, 5.0f);
-	UI()->DoLabel(&Button, Localize("M15C 5TUFF"), 17.0f, 0);
+	UI()->DoLabel(&Button, ("M15C 5TUFF"), 17.0f, 0);
 	RenderTools()->DrawUIRect(&Box, vec4(0.7f, 0.1f, 0.1f, 0.6f), 0, 0);
 
 	Box.VMargin(10.0f, &Box);
@@ -1274,7 +1274,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	if(!m_pClient->m_pSpoofRemote->IsConnected())
 	{
 		static CButtonContainer s_ButtonConnect;
-		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect to server"), 0, &Button, Localize("Connect to the spoofing-server")))
+		if(DoButton_Menu(&s_ButtonConnect, ("Connect to server"), 0, &Button, ("Connect to the spoofing-server")))
 		{
 			if(!m_pClient->m_pSpoofRemote->IsConnected())
 				m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
@@ -1285,7 +1285,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static CButtonContainer s_ButtonTest;
-	if(DoButton_Menu(&s_ButtonTest, Localize("Zervor status"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonTest, ("Zervor status"), 0, &Button))
 	{
 		m_pClient->m_pSpoofRemote->SendCommand("status");
 	}
@@ -1293,7 +1293,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(70.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static CButtonContainer s_ButtonDC;
-	if(DoButton_Menu(&s_ButtonDC, Localize("Disconnect"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonDC, ("Disconnect"), 0, &Button))
 	{
 		if(m_pClient->m_pSpoofRemote->IsConnected())
 			m_pClient->m_pSpoofRemote->SendCommand("exit");
@@ -1302,7 +1302,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static CButtonContainer s_ButtonForceDC;
-	if(DoButton_Menu(&s_ButtonForceDC, Localize("Force disconnect"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonForceDC, ("Force disconnect"), 0, &Button))
 	{
 		m_pClient->m_pSpoofRemote->Disconnect();
 	}
@@ -1310,7 +1310,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(70.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static CButtonContainer s_ButtonRestart;
-	if(DoButton_Menu(&s_ButtonRestart, Localize("Restart"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonRestart, ("Restart"), 0, &Button))
 	{
 		if(m_pClient->m_pSpoofRemote->IsConnected())
 			m_pClient->m_pSpoofRemote->SendCommand("restart");
@@ -1324,14 +1324,14 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	// window
 	Box.HSplitTop(22.4f, &Button, &Box);
 	RenderTools()->DrawUIRect(&Button, vec4(0, 0.6f, 0.17f, 0.6f), CUI::CORNER_T, 5.0f);
-	UI()->DoLabel(&Button, Localize("Z3RV0R T00LZ"), 17.0f, 0);
+	UI()->DoLabel(&Button, ("Z3RV0R T00LZ"), 17.0f, 0);
 	RenderTools()->DrawUIRect(&Box, vec4(0, 0.7f, 0.1f, 0.6f), 0, 0);
 
 	Box.VMargin(10.0f, &Box);
 	Box.HSplitTop(25.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static CButtonContainer s_ButtonFetch;
-	if(DoButton_Menu(&s_ButtonFetch, Localize("Fetch IPs"), 0, &Button, Localize("Fetch player IPs from master")))
+	if(DoButton_Menu(&s_ButtonFetch, ("Fetch IPs"), 0, &Button, ("Fetch player IPs from master")))
 	{
 		m_pClient->m_pSpoofRemote->SendCommand("fetchips");
 	}
@@ -1339,7 +1339,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static CButtonContainer s_ButtonGet;
-	if(DoButton_Menu(&s_ButtonGet, Localize("Grab IPs"), 0, &Button, Localize("View player IPs (run Fetch IPs first)")))
+	if(DoButton_Menu(&s_ButtonGet, ("Grab IPs"), 0, &Button, ("View player IPs (run Fetch IPs first)")))
 	{
 		char aCmd[256];
 		str_format(aCmd, sizeof(aCmd), "ipspam %s", aServerAddr);
@@ -1351,7 +1351,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
 	{
 		static CButtonContainer s_ButtonGetDum;
-		if(DoButton_Menu(&s_ButtonGetDum, Localize("Grab dummy IPs"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonGetDum, ("Grab dummy IPs"), 0, &Button))
 		{
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd), "ipspamdummies %s", aServerAddr);
@@ -1362,7 +1362,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
 	static CButtonContainer s_ButtonKickAll;
-	if(DoButton_Menu(&s_ButtonKickAll, Localize("Vote-kick all"), 0, &Button))
+	if(DoButton_Menu(&s_ButtonKickAll, ("Vote-kick all"), 0, &Button))
 	{
 		m_pClient->m_pSpoofRemote->VotekickAll();
 	}
@@ -1376,7 +1376,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	// window
 	Box.HSplitTop(22.4f, &Button, &Box);
 	RenderTools()->DrawUIRect(&Button, vec4(0.17f, 0, 0.6f, 0.6f), CUI::CORNER_T, 5.0f);
-	UI()->DoLabel(&Button, Localize("DUMMY SH1T"), 17.0f, 0);
+	UI()->DoLabel(&Button, ("DUMMY SH1T"), 17.0f, 0);
 	RenderTools()->DrawUIRect(&Box, vec4(0.2f, 0, 0.7f, 0.6f), 0, 0);
 
 	Box.VMargin(10.0f, &Box);
@@ -1398,7 +1398,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(25.5f, &Button, 0);
 	static CButtonContainer s_ButtonDummiesConnect;
 	{
-		if(DoButton_Menu(&s_ButtonDummiesConnect, Localize("Connect dummies"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonDummiesConnect, ("Connect dummies"), 0, &Button))
 		{
 			char aCmd[256];
 				str_format(aCmd, sizeof(aCmd), "dum %s %i", aServerAddr, s_ScrollValue+1);
@@ -1411,7 +1411,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	static CButtonContainer s_ButtonDummiesDisconnect;
 	{
 		if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
-		if(DoButton_Menu(&s_ButtonDummiesDisconnect, Localize("Disconnect dummies"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonDummiesDisconnect, ("Disconnect dummies"), 0, &Button))
 		{
 			m_pClient->m_pSpoofRemote->SendCommand("dcdum");
 		}
@@ -1423,10 +1423,10 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	{
 		char aBuf[64];
 		if(!m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMYSPAM))
-			str_format(aBuf, sizeof(aBuf), Localize("Start flooding"));
+			str_format(aBuf, sizeof(aBuf), ("Start flooding"));
 		else
-			str_format(aBuf, sizeof(aBuf), Localize("Stop flooding"));
-		if(DoButton_Menu(&s_ButtonDummySpam, aBuf, 0, &Button, Localize("Fire the laz0r!!!")))
+			str_format(aBuf, sizeof(aBuf), ("Stop flooding"));
+		if(DoButton_Menu(&s_ButtonDummySpam, aBuf, 0, &Button, ("Fire the laz0r!!!")))
 		{
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd), "ds %s %i", aServerAddr, s_ScrollValue+1);
@@ -1440,7 +1440,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		Box.HSplitTop(43.0f, 0, &Box);
 		Box.HSplitTop(20.0f, &Button, 0);
 		static CButtonContainer s_ButtonVoteYes;
-		if(DoButton_Menu(&s_ButtonVoteYes, Localize("Votebot 'Yes'"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonVoteYes, ("Votebot 'Yes'"), 0, &Button))
 		{
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd), "vb %s %d 1", aServerAddr, s_ScrollValue);
@@ -1450,7 +1450,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		Box.HSplitTop(25.0f, 0, &Box);
 		Box.HSplitTop(20.0f, &Button, 0);
 		static CButtonContainer s_ButtonVoteNo;
-		if(DoButton_Menu(&s_ButtonVoteNo, Localize("Votebot 'No'"), 0, &Button))
+		if(DoButton_Menu(&s_ButtonVoteNo, ("Votebot 'No'"), 0, &Button))
 		{
 			char aCmd[256];
 			str_format(aCmd, sizeof(aCmd), "vb %s %d -1", aServerAddr, s_ScrollValue);
@@ -1557,7 +1557,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 		// general stuff, fetching IPs, kicking everyone, votebot etc.
 		TabBar.VSplitLeft(TabBar.w/2, &Button, &TabBar);
 		static CButtonContainer s_Button0;
-		if(DoButton_MenuTab(&s_Button0, Localize("General queries"), s_ControlPage == 0, &Button, 0))
+		if(DoButton_MenuTab(&s_Button0, ("General queries"), s_ControlPage == 0, &Button, 0))
 			s_ControlPage = 0;
 
 			if(m_pClient->m_pSpoofRemote->IsConnected())
@@ -1565,7 +1565,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				// control specific players
 				TabBar.VSplitRight(0, &Button, &TabBar);
 				static CButtonContainer s_Button1;
-				if(DoButton_MenuTab(&s_Button1, Localize("Tee controlling related"), s_ControlPage == 1, &Button, 0))
+				if(DoButton_MenuTab(&s_Button1, ("Tee controlling related"), s_ControlPage == 1, &Button, 0))
 					s_ControlPage = 1;
 			}
 			else
@@ -1633,7 +1633,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			static int PrevSelectedPlayer = -1;
 			if(s_DoForAll && m_SpoofSelectedPlayer > -1)
 				s_DoForAll = 0;
-			if(DoButton_CheckBox(&s_AllCheckbox, Localize("All"), s_DoForAll, &Button, Localize("Perform the actions for all players")))
+			if(DoButton_CheckBox(&s_AllCheckbox, ("All"), s_DoForAll, &Button, ("Perform the actions for all players")))
 			{
 				if(s_DoForAll ^= 1)
 				{
@@ -1663,7 +1663,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static CButtonContainer s_DCButton;
-			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button, Localize("Disconnect packet from client to server")))
+			if(DoButton_Menu(&s_DCButton, Localize("Disconnect"), 0, &Button, ("Disconnect packet from client to server")))
 			{
 				char aCmd[256];
 				if(s_DoForAll)
@@ -1676,7 +1676,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static CButtonContainer s_TimeoutButton;
-			if(DoButton_Menu(&s_TimeoutButton, Localize("Timeout"), 0, &Button, Localize("Disconnect packet from server to client")))
+			if(DoButton_Menu(&s_TimeoutButton, ("Timeout"), 0, &Button, ("Disconnect packet from server to client")))
 			{
 				// glitchy! found by accident :D
 				if(s_DoForAll)
@@ -1706,7 +1706,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static CButtonContainer s_StressingButton;
-			if(DoButton_Menu(&s_StressingButton, Localize("Stressing"), 0, &Button, Localize("Flood with the players IP to ban him")))
+			if(DoButton_Menu(&s_StressingButton, ("Stressing"), 0, &Button, ("Flood with the players IP to ban him")))
 			{
 				char aCmd[256];
 				if(s_DoForAll)
@@ -1720,7 +1720,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			//RenderTools()->DrawUIRect(&Bottom, vec4(0.5f, 0.5f, 0.5f, 0.3f), CUI::CORNER_ALL, 5.0f);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static CButtonContainer s_VoteYesButton;
-			if(DoButton_Menu(&s_VoteYesButton, Localize("Vote 'Yes'"), 0, &Button))
+			if(DoButton_Menu(&s_VoteYesButton, ("Vote 'Yes'"), 0, &Button))
 			{
 				char aCmd[256];
 				str_format(aCmd, sizeof(aCmd), "va %s 1", aServerAddr);
@@ -1730,7 +1730,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(100.0f, &Button, &Bottom);
 			static CButtonContainer s_VoteNoButton;
-			if(DoButton_Menu(&s_VoteNoButton, Localize("Vote 'No'"), 0, &Button))
+			if(DoButton_Menu(&s_VoteNoButton, ("Vote 'No'"), 0, &Button))
 			{
 				char aCmd[256];
 				str_format(aCmd, sizeof(aCmd), "va %s -1", aServerAddr); // ITS FRIGGIN' -1 NOT 0
@@ -1741,7 +1741,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Extended.HSplitTop(20.0f, &Bottom, &Extended);
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-			UI()->DoLabelScaled(&Button, Localize("Chat message:"), 14.0f, -1);
+			UI()->DoLabelScaled(&Button, ("Chat message:"), 14.0f, -1);
 
 			static char s_aChatMessage[128] = {0};
 			Extended.HSplitTop(20.0f, &Bottom, &Extended);
@@ -1771,7 +1771,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
 			static CButtonContainer s_SendChatButton;
-			if(DoButton_Menu(&s_SendChatButton, Localize("Send"), 0, &Button, Localize("Send a chat message")))
+			if(DoButton_Menu(&s_SendChatButton, Localize("Send"), 0, &Button, ("Send a chat message")))
 			{
 				char aCmd[256];
 				if(s_DoForAll)
@@ -1786,7 +1786,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
 			{
 				static CButtonContainer s_SendChatDummiesButton;
-				if(DoButton_Menu(&s_SendChatDummiesButton, Localize("Send (Dummies)"), 0, &Button, Localize("Send a chat message from the dummies")))
+				if(DoButton_Menu(&s_SendChatDummiesButton, ("Send (Dummies)"), 0, &Button, ("Send a chat message from the dummies")))
 				{
 					char aCmd[256];
 					str_format(aCmd, sizeof(aCmd), "chatdum %s", s_aChatMessage);
@@ -1826,7 +1826,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				static CButtonContainer s_UseCustomAddrButton;
 				if((s_CustomAddrState&1) && !(s_CustomAddrState&2)) // display button only if valid and not in use
 				{
-					if(DoButton_Menu(&s_UseCustomAddrButton, Localize("Use"), 0, &Button, Localize("Use a custom IP as source address")))
+					if(DoButton_Menu(&s_UseCustomAddrButton, ("Use"), 0, &Button, ("Use a custom IP as source address")))
 					{
 						s_CustomAddrState |= 2; // use
 						m_SpoofSelectedPlayer = -1;
