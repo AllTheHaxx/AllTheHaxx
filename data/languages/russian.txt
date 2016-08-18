@@ -121,7 +121,7 @@ Count players only
 == Считать только игроков
 
 Country
-== Флаг вашей страны
+== Флаг страны
 
 Current
 == Текущий
@@ -765,7 +765,7 @@ Recorded
 == Записано
 
 Reset
-== Сбросить
+== Сброс
 
 Resolutions
 == Разрешение
@@ -783,7 +783,22 @@ Sat:
 == Контраст
 
 Save
-== Сохранить
+== Сохр.
+
+Save the serverlist
+== Сохранить список серверов
+
+Load
+== Загр.
+
+Load the saved serverlist
+== Загрузить список серверов
+
+Exclude
+== Исключая
+
+clear
+== очистить
 
 Save skin
 == Сохранить скин
@@ -793,6 +808,9 @@ Screen
 
 Search:
 == Поиск:
+
+Search
+== Поиск
 
 Server does not allow voting to kick players
 == На сервере запрещено голосовать за кик 
@@ -892,6 +910,337 @@ spectators
 
 wait for more players
 == Ожидайте других игроков
+
+Manual
+== Инструкция
+
+Identities
+== Личности
+
+Open legacy view
+== 
+
+HUD
+== Интерфейс
+
+Textures
+== Текстуры
+
+Gameskin
+== Игра
+
+Particles
+== Частицы/Эффекты
+
+Emoticons
+== Эмоции
+
+Cursor
+== Курсоры
+
+Appearance
+== Интерфейс
+
+Use DDRace Scoreboard
+== Использовать DDRace табло
+
+Show IDs in Scoreboard
+== Показывать ID на табло
+
+Show IDs in Chat
+== Показывать ID в окне чата
+
+Show names in chat in team colors
+== Использовать цвета команд для ников в чате
+
+Show kill messages
+== Показывать сообщения о убийствах
+
+Show score
+== Показывать счёт
+
+Show health + ammo
+== Показывать индикаторы здоровья и брони
+
+Show health + ammo as bars
+== Показывать индикаторы здоровья и брони как полосы
+
+Show votes window after voting
+== Показывать окно голосования после голосования
+
+Show notifications
+== Показывать уведомления
+
+Show chatbox
+== Показывать окно чата
+
+Chatbox Alpha
+== Прозрачность окна чата
+
+Color Customization
+== Настройка цветов
+
+Messages
+== Сообщения
+
+System message
+== Системные сообщения
+
+Team message
+== Командные сообщения
+
+Normal message
+== Обычные сообщения
+
+Highlighted messages
+== Подсвеченные сообщения
+
+Inner color
+== Цвет внутреннего свечения
+
+Outline color
+== Цвет внешнего свечения
+
+Fonts
+== Шрифты
+
+Font Selector
+== Выберите шрифт
+
+ %d fonts installed, %d loaded.
+== %d шрифтов установлено, %d загружено.
+
+Reload
+== Обновить
+
+Preload fonts on startup
+== Подгружать шрифты при запуске
+
+Haxx
+== Haxx
+
+Gather Statistics
+== Сбор статистики
+
+Colorful Client
+== Цветной режим
+
+Makes everything look way more awesome!
+== Делает всё еще более крутым!
+
+A* Path Finding
+== Использовать алгоритм А*
+
+Find and visualize the shortest path to the finish on Race Maps
+== Находит и показывает кротчайший путь до финиша на Race картах
+
+Smart zoom
+== Умный зум
+
+Smart zoom on race gametypes
+== Умный зум на Race картах
+
+Console Mode Indicator
+== Индикатор консольного режима
+
+Send Zzz emotes when in console mode
+== Показывает эмоцию 'Zzz' когда включён консольный режим
+
+Chatbubble
+== Эмоция '...'
+
+Send the chatbubble when you are typing
+== Показывает эмоцию '...' при печати сообщения
+
+Skin Fetcher
+== Загрузчик скинов
+
+Clear downloaded skins cache
+== Очистить кеш загруженых скинов
+
+[EXPERIMENTAL!] Download skins from certain public skin databases automatically if a missing skin is used by somebody else on your server
+== [ЭКСПЕРИМЕНТАЛЬНО!] Загружает скин автоматически, если кто-либо использует скин, а этого скина нет
+
+Hidden Chat:
+== Скрытый чат:
+
+Crypted Chat:
+== Зашифрованный чат:
+
+Hookfly Dummy:
+== 
+
+Toggle X-Ray:
+== Включить X-Ray:
+
+Zoom in:
+== Приблизить:
+
+Zoom out:
+== Отдалить:
+
+Toggle IRC:
+== Показать IRC:
+
+Toggle Lua Console:
+== Lua консоль:
+
+Toggle Hotbar:
+== Показать хотбар:
+
+Unlock mouse:
+== Разблокировать курсор
+
+Connect automatically
+== Подключать IRC автоматически
+
+Connect to the Chat automatically on startup ... yeah, be social!
+== Подключатся к IRC чату автоматически при запуске ... даа, будь социальным!
+
+Print to console
+== Вывод сообщений в консоль
+
+Play sound notification
+== Звук уведомления
+
+Allow others to join you
+== Разрешить другим подключаться к тебе
+
+Q Auth Name
+== 
+
+Q Auth Pass
+== 
+
+Modes
+== Режимы
+
+Leave Message
+== Сообщение при выходе с IRC
+
+Lua
+== Lua
+
+Use lua
+== Использовать Lua
+
+Lua files
+== Список Lua файлов
+
+Activate
+== Активировать
+
+This script has no additional permissions and is thus considered safe.
+== Этот скрипт не имеет каких-либо дополнительных разрешений, и таким образом, считается безопасным.
+
+This script has the  following additional permissions
+== Этот скрипт имеет следующие дополнительные разрешения:
+
+Autoload
+== Автозагрузка
+
+%d files listed (%d total - %d filtered), %d scripts active
+== В списке %d файлов (%d файлов - %d отфильтрованно), %d активный скриптов
+
+Showing all files
+== Показывать все файлы
+
+Showing active scripts only
+== Показывать только активные скрипты
+
+Showing inactive scripts only
+== Показывать только неактивные скрипты
+
+< back
+== < назад
+
+Browser
+== Сервера
+
+Recent
+== Недавние
+
+Update
+== Актуализировать
+
+
+Refresh the serverlist completely
+== Обновить список серверов полностью
+
+Client version string: %s
+== Версия клиента: %s
+
+Strict version filter
+== Строгий фильтр версий
+
+Time in seconds to refresh the infos
+== Автообновление информации о серверах(сек)
+
+Cache Manager
+== Управление кешем
+
+Reconnect
+== Переподключиться
+
+Users
+== Участники
+
+Total: %d
+== Всего: %d
+
+Send
+== Отправить
+
+Misc.
+== Разное
+
+Save the best demo of each race
+== Сохранять лучшее Race демо
+
+Ghost
+== Призрак
+
+Show ghost
+== Показывать призрак
+
+Save ghost
+== Сохранять призраки
+
+Gameplay
+== Геймплей
+
+Overlay entities
+== 
+
+Show others
+== Показывать остальных
+
+Show quads
+== 
+
+Show other players' hook collision lines
+== Показывать возможность хука других игроков
+
+Show other players' key presses
+== Показывать клавиши направления других игроков
+
+Raw Mouse Input
+== Использовать необработанный сигнал ввода мыши
+
+Use raw mouse input mode (the \"new one\")\nWARNING: MIGHT BE BUGGY/SLOW ON SOME SYSTEMS! In that case turn it off.
+== ВНИМАНИЕ: МОГУТ БЫТЬ ЛАГИ / ПРОСЕДАТЬ ФПС на некоторых системах! В этом случае выключите.
+
+Background (regular)
+== Задний фон (обычный)
+
+Background (entities)
+== Задний фон (обычный)
+
+Show tiles layers from BG map
+== Показывать тайлы заднего фона карты
+
+Try fast HTTP map download first
+== Сначала использовать быструю загрузку карт по HTTP
 
 ##### old translations #####
 
@@ -1013,7 +1362,7 @@ Current version: %s
 == Текущая версия: %s
 
 LAN
-== ЛВС
+== LAN
 
 Name plates size
 == Размер
