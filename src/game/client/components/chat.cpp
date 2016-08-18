@@ -1013,9 +1013,10 @@ void CChat::OnRender()
 			CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_aLines[r].m_ClientID];
 			CTeeRenderInfo RenderInfo = pClientData->m_RenderInfo;
 			RenderInfo.m_Size = 8.0f;
-			RenderInfo.m_ColorBody.a = RenderInfo.m_ColorFeet.a = Blend;
+			RenderInfo.m_ColorBody.a = Blend;
+			RenderInfo.m_ColorFeet.a = Blend;
 
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfo, 0, vec2(-1.0f, 0.0f), vec2(Begin, y+FontSize-1.5f));
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfo, 0, vec2(-1.0f, 0.0f), vec2(Begin, y+FontSize-1.5f), true);
 		}
 
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
