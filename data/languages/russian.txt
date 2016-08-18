@@ -976,14 +976,8 @@ AntiPing
 Countries
 == Страны
 
-Grab IPs
-== 
-
 AllTheHaxx updated!
 == AllTheHaxx обновлён!
-
-CPU Throttle
-== 
 
 \n\nReconnect in %d sec
 == \n\nПереподключение через %d секунд
@@ -994,71 +988,14 @@ Open the IRC overlay (Key: %s)
 Packet sniffer settings
 == Настройка cниффера пакетов
 
-Grabs
-== 
-
 Kill
 == Убийство
-
-M15C 5TUFF
-== 
 
 DDNet
 == DDNet
 
-Sniff incoming conn packets
-== 
-
-General queries
-== Общие запросы
-
 Enable server message sound
 == Звук сообщений сервера
-
-Fetch player IPs from master
-== Извлечь IP-адреса игрока от ведущего
-
-Save Skin as new Identity
-== 
-
-AntiPing limit
-== 
-
-Press %s to switch back to ingame mouse
-== 
-
-We will win
-== 
-
-Lua QuickAccess
-== 
-
-Connect dummy
-== 
-
-Reconnect on connection timeout
-== 
-
-Server-Dependent-Configuration Manager
-== 
-
-Use a custom IP as source address
-== 
-
-DDNet Client needs to be restarted to complete update!
-== 
-
-Manual %3d:%02d  
-== 
-
-Deactivate
-== 
-
-All Skins
-== 
-
-Dummy's Identity: 
-== 
 
 Zoom out
 == Отдалить
@@ -1075,9 +1012,6 @@ Default
 Reset on Disconnect
 == Сбрасывать при отключении
 
-none
-== 
-
 Smooths graphics at the expense of FPS
 == Сглаживание графики за счет FPS
 
@@ -1087,14 +1021,8 @@ Smooths graphics at the expense of FPS
 Apply as
 == Применить к
 
-Perform the actions for all players
-== Выполните действия для всех игроков
-
 Hidden
 == Скрытый
-
-Hookfly Dummy
-== 
 
 Source:
 == Источник:
@@ -1129,14 +1057,8 @@ Frags
 AntiPing: predict other players
 == Анти-пинг: предсказывать других игроков
 
-Automatically take statboard screenshot
-== 
-
 Loading Lua Script
 == Загружаются Lua скрипты
-
-Destination:
-== 
 
 Updating...
 == Обновление...
@@ -1153,32 +1075,14 @@ Hide console window
 %.2f MiB
 == %.2f МБ
 
-Dummy Timeout code
-== 
-
 Suicides
 == Самоубийств
-
-Enable Timeout Protection
-== 
 
 a custom title to display this identity
 == Название личности в списке
 
 Clan plates size
 == Размер клан-тега
-
-Votebot 'No'
-== 
-
-Disconnect packet from client to server
-== 
-
-Connect dummies
-== Подключить dummy
-
-Open the IRC overlay
-== 
 
 Username
 == Имя пользователя
@@ -1234,9 +1138,6 @@ Render quads as triangles
 Connecting dummy
 == Подключить dummy
 
-Connect to server
-== Подключиться к серверу
-
 Console Mode
 == Консольный режим
 
@@ -1246,14 +1147,8 @@ Update now
 Rejoin the current server
 == Переподключиться к текущему серверу
 
-Stressing
-== 
-
 Load RSA key
 == Загрузите RSA ключ
-
-Disconnect dummies
-== Отключить dummy
 
 Enable highlighted chat sound
 == Звук упоминания в чате
@@ -1263,9 +1158,6 @@ Enable shotgun sound
 
 AllTheHaxx %s is out! Download it at allthehaxx.tk!
 == AllTheHaxx %s вышла! Скачивай на allthehaxx.tk!
-
-Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.
-== 
 
 Main
 == Основной
@@ -1279,32 +1171,14 @@ Action:
 Hello and welcome
 == Привет и добро пожаловать
 
-Highlighted message
-== 
-
-Credits
-== 
-
-Reset wanted weapon on death
-== 
-
-Q Auth Pass
-== 
-
 IRC Chat
 == IRC чат
-
-Vote-kick all
-== Голосовать за "Выгнать всех"
 
 removed markers due to broken demo
 == удалить метки из-за поломанной демо
 
 Disable this if your game reacts too slow
 == Отключите, если ваша игра реагирует слишком медленно
-
-Chat message:
-== Сообщение из чата:
 
 AntiPing: predict grenade paths
 == Анти-пинг: предсказывать пути гранат
@@ -1315,17 +1189,11 @@ Crypted Chat
 Enter your f1 commands here...
 == Вводить команды f1 здесь ...
 
-Vote 'No'
-== Голосовать "Против"
-
 Ratio
 == Коэффициент
 
 Connecting, please wait...
 == Подключение, пожалуйста подождите...
-
-Flood with the players IP to ban him
-== Нафлудить от IP игрока чтобы забанить его
 
 Show quads
 == Показывать квады
@@ -1360,12 +1228,6 @@ Are you handsome?
 Enable grenade sound
 == Звук гранат
 
-May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.
-== 
-
-Connect to the spoofing-server
-== Подключение к спуфинг-серверу
-
 Show map decoration elements
 == Показать элементы украшения карты
 
@@ -1374,12 +1236,6 @@ No updates available
 
 Show clan above name plates
 == Показывать клан-тег выше псевдонимов
-
-READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider\nis not on your screen anymore, type in f1:\nui_scale 100
-== 
-
-Fire the laz0r!!!
-== 
 
 Look out!
 == Берегись!
@@ -1395,9 +1251,6 @@ Select a name
 
 An error occured
 == Произошла ошибка
-
-Disconnect packet from server to client
-== 
 
 Enable team chat sound
 == Звук командных сообщений
@@ -1417,9 +1270,6 @@ Hide DDRaceNetwork
 Deaths
 == Смертей
 
-Zervor status
-== 
-
 Wait for GL commands to finish
 == Ждать пока 
 
@@ -1438,9 +1288,6 @@ Spoofing
 Enable spawn sound
 == Звук спавна
 
-Send a chat message
-== Отправить сообщение в чат
-
 Skin Downloads
 == Загрузки скинов
 
@@ -1453,14 +1300,8 @@ Toggle Lua Console
 Main Identity: 
 == Основная личность:
 
-Grab dummy IPs
-== 
-
 Disable fancy effects to gain more fps
 == Отключение красивостей повышает fps
-
-Votebot 'Yes'
-== Голосовать "За"
 
 Sorted by score
 == Отсортировано по счёту
@@ -1492,56 +1333,17 @@ Types
 About
 == О клиенте
 
-Threaded sound loading
-== 
-
 Race %3d:%02d  
 == Race %3d:%02d 
-
-Disconnect dummy
-== 
 
 Be careful: experimental
 == Будьте осторожны: экспериментально
 
-Tee controlling related
-== 
-
--- Collection of all config variables --
-== 
-
 Render when inactive
 == Рендерить когда окно неактивно
 
-DUMMY SH1T
-== 
-
-Z3RV0R T00LZ
-== 
-
-Fetch IPs
-== 
-
-Allow Vanilla Skins only
-== 
-
-Sniff incoming connless packets
-== 
-
-Vote 'Yes'
-== Голосовать "За"
-
 RSA Key name
 == Имя RSA ключа
-
-Overlay entities
-== 
-
-Q Auth Name
-== 
-
-Send (Dummies)
-== 
 
 Toggle IRC
 == Показать IRC
@@ -1549,32 +1351,14 @@ Toggle IRC
 Move player to the spectators
 == Переместить игрока в наблюдатели
 
-Stop flooding
-== Остановить флуд
-
 Show other ATH user
 == Показывать ATH пользователей
 
 Add a demo marker
 == Добавить метку
 
-Timeout code
-== 
-
-Player related
-== 
-
-Send a chat message from the dummies
-== Отправить сообщение в чат от dummy
-
 Crypt
 == Зашифровать
-
-You must give either 'activate', 'deactivate' or 'toggle' as first argument!
-== 
-
-Net
-== 
 
 Ingame sens.
 == Чувствительность в игре
@@ -1587,6 +1371,135 @@ Default zoom
 
 Toggle X-Ray
 == Включить X-Ray
+
+
+##### generated by copy_fix.py, please translate this #####
+
+Zoom in
+== 
+
+CPU Throttle
+== 
+
+Grabs
+== 
+
+Sniff incoming conn packets
+== 
+
+Save Skin as new Identity
+== 
+
+Press %s to switch back to ingame mouse
+== 
+
+We will win
+== 
+
+Lua QuickAccess
+== 
+
+Connect dummy
+== 
+
+Reconnect on connection timeout
+== 
+
+Server-Dependent-Configuration Manager
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Manual %3d:%02d  
+== 
+
+Deactivate
+== 
+
+All Skins
+== 
+
+Dummy's Identity: 
+== 
+
+none
+== 
+
+Hookfly Dummy
+== 
+
+Automatically take statboard screenshot
+== 
+
+Destination:
+== 
+
+Dummy Timeout code
+== 
+
+Enable Timeout Protection
+== 
+
+Open the IRC overlay
+== 
+
+Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.
+== 
+
+Highlighted message
+== 
+
+Credits
+== 
+
+Reset wanted weapon on death
+== 
+
+Q Auth Pass
+== 
+
+AntiPing limit
+== 
+
+May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.
+== 
+
+READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider\nis not on your screen anymore, type in f1:\nui_scale 100
+== 
+
+Threaded sound loading
+== 
+
+Disconnect dummy
+== 
+
+-- Collection of all config variables --
+== 
+
+Allow Vanilla Skins only
+== 
+
+Sniff incoming connless packets
+== 
+
+Overlay entities
+== 
+
+Q Auth Name
+== 
+
+Timeout code
+== 
+
+Player related
+== 
+
+You must give either 'activate', 'deactivate' or 'toggle' as first argument!
+== 
+
+Net
+== 
 
 Hammerfly Dummy
 == 
@@ -1603,9 +1516,6 @@ I don't care
 Best
 == 
 
-Use
-== 
-
 Enable regular chat sound
 == 
 
@@ -1619,9 +1529,6 @@ You are now in a solo part.
 == 
 
 Disable this if you get blurry textures
-== 
-
-Timeout
 == 
 
 Sniff outgoing conn packets
@@ -1648,9 +1555,6 @@ Translate outgoing messages
 Use the command 'unlock_mouse' in f1
 == 
 
-Force disconnect
-== 
-
 Discard config changes when disconnecting
 == 
 
@@ -1658,9 +1562,6 @@ AntiPing: predict weapons
 == 
 
 Kick
-== 
-
-Zoom in
 == 
 
 Are you sure?
@@ -1681,14 +1582,8 @@ Page %i, Line %d
 Switch weapon when out of ammo
 == 
 
-View player IPs (run Fetch IPs first)
-== 
-
 There was no luafile with the name '%s' found!
 == 
 
 Render graphics when window is in background
 == 
-
-Start flooding
-==
