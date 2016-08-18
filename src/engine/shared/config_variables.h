@@ -97,7 +97,12 @@ MACRO_CONFIG_INT(SndMapSoundVolume, snd_ambient_volume, 70, 0, 100, CFGFLAG_SAVE
 
 MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(SndGame, snd_game, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable game sounds")
+MACRO_CONFIG_INT(SndHammer, snd_hammer, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable hammer sound")
 MACRO_CONFIG_INT(SndGun, snd_gun, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable gun sound")
+MACRO_CONFIG_INT(SndShotgun, snd_shotgun, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable shotgun sound")
+MACRO_CONFIG_INT(SndGrenade, snd_grenade, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable grenade sound")
+MACRO_CONFIG_INT(SndRifle, snd_rifle, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable rifle sound")
+MACRO_CONFIG_INT(SndJump, snd_jump, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable jump sounds")
 MACRO_CONFIG_INT(SndSpawn, snd_spawn, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable spawn sounds")
 MACRO_CONFIG_INT(SndChat, snd_chat, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable regular chat sound")
 MACRO_CONFIG_INT(SndTeamChat, snd_team_chat, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable team chat sound")

@@ -1333,21 +1333,63 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	if(g_Config.m_SndGame)
 	{
-		MainView.HSplitTop(3.0f, 0, &MainView);
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(10.0f, 0, &Button);
-		static CButtonContainer s_CheckboxSndGun;
-		if(DoButton_CheckBox(&s_CheckboxSndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
-			g_Config.m_SndGun ^= 1;
+		{
+			MainView.HSplitTop(3.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable hammer sound"), g_Config.m_SndHammer, &Button))
+				g_Config.m_SndHammer ^= 1;
+		}
+
+		{
+			MainView.HSplitTop(3.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
+				g_Config.m_SndGun ^= 1;
+		}
+
+		{
+			MainView.HSplitTop(3.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable shotgun sound"), g_Config.m_SndShotgun, &Button))
+				g_Config.m_SndShotgun ^= 1;
+		}
+
+		{
+			MainView.HSplitTop(3.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable grenade sound"), g_Config.m_SndGrenade, &Button))
+				g_Config.m_SndGrenade ^= 1;
+		}
+
+		{
+			MainView.HSplitTop(3.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable rifle sound"), g_Config.m_SndRifle, &Button))
+				g_Config.m_SndRifle ^= 1;
+		}
+
+		{
+			MainView.HSplitTop(3.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable spawn sound"), g_Config.m_SndSpawn, &Button))
+				g_Config.m_SndSpawn ^= 1;
+		}
 
 		// TODO: Add more game sounds here!
 	}
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxSndSpawn;
-	if(DoButton_CheckBox(&s_CheckboxSndSpawn, Localize("Enable spawn sound"), g_Config.m_SndSpawn, &Button))
-		g_Config.m_SndSpawn ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -2977,13 +3019,13 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	}
 
 	CUIRect RefreshButton;
-	Button.VSplitRight(100.0f, &Button, &RefreshButton);
+	Button.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Button.h*ms_FontmodHeight, Localize("Refresh"), -1)), &Button, &RefreshButton);
 	static CButtonContainer s_RefreshButton, s_LuaButton;
 	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files"))
 	{
 		Client()->Lua()->LoadFolder();
 	}
-	if(DoButton_CheckBox(&s_LuaButton, Localize("Use lua"), g_Config.m_ClLua, &Button))
+	if(DoButton_CheckBox(&s_LuaButton, Localize("Use Lua"), g_Config.m_ClLua, &Button))
 	{
 		if(!(g_Config.m_ClLua ^= 1))
 		{
