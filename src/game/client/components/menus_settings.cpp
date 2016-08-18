@@ -2538,9 +2538,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("No updates available"));
-			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
-			Button.VSplitLeft(100.0f, &Button, 0);
+			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, Localize("No updates available"), -1) + 10.0f, &Label, &Button);
+			Button.VSplitLeft(max(100.0f, TextRender()->TextWidth(0, 14.0f, Localize("Check now"), -1)), &Button, 0);
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
