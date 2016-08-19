@@ -523,7 +523,7 @@ void CMenus::RenderSnifferSettings(CUIRect MainView)
 void CMenus::RenderLuaQuickAccess(CUIRect MainView)
 {
 	CUIRect Button;
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	char aBuf[512];
 	static CButtonContainer pBCs[256];
