@@ -13,7 +13,8 @@ luajit = {
 				if platform == "win32" then
 					option.value = true
 					option.use_winlib = 32
-			--	elseif platform == "win64" then
+				elseif platform == "win64" then
+					error("Compiling 64bit with CL is not available due to missing libraries. Please compile either with MinGW or switch to 32bit.")
 			--		option.value = true
 			--		option.use_winlib = 64
 				end
