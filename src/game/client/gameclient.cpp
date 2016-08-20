@@ -1074,12 +1074,16 @@ void CGameClient::OnEnterGame()
 
 void CGameClient::OnGameOver()
 {
+	LUA_FIRE_EVENT("OnGameOver");
+
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClEditor == 0)
 		Client()->AutoScreenshot_Start();
 }
 
 void CGameClient::OnStartGame()
 {
+	LUA_FIRE_EVENT("OnGameStart");
+
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Client()->DemoRecorder_HandleAutoStart();
 	m_pStatboard->OnReset();
@@ -1088,9 +1092,15 @@ void CGameClient::OnStartGame()
 void CGameClient::OnFlagGrab(int TeamID)
 {
 	if(TeamID == TEAM_RED)
+	{
+		LUA_FIRE_EVENT("OnFlagGrab", TeamID, m_Snap.m_pGameDataObj->m_FlagCarrierRed);
 		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierRed].m_FlagGrabs++;
+	}
 	else
+	{
+		LUA_FIRE_EVENT("OnFlagGrab", TeamID, m_Snap.m_pGameDataObj->m_FlagCarrierBlue);
 		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierBlue].m_FlagGrabs++;
+	}
 }
 
 void CGameClient::OnRconLine(const char *pLine)
@@ -1785,8 +1795,8 @@ void CGameClient::OnPredict()
 					case WEAPON_GUN:
 						{
 							WeaponFired = true;
-						} break;
-					case WEAPON_GRENADE:
+						} break; // case WEAPON_RIFLE | WEAPON_SHOTGUN | WEAPON_GUN
+						case WEAPON_GRENADE:
 						{
 							if(NumProjectiles >= MaxProjectiles)
 								break;
@@ -1801,8 +1811,8 @@ void CGameClient::OnPredict()
 									1, 0, 0, 1); //Explosive, Bouncing, Freeze, ExtraInfo
 							NumProjectiles++;
 							WeaponFired = true;
-						} break;
-					case WEAPON_HAMMER:
+						} break; // case WEAPON_GRENADE
+						case WEAPON_HAMMER:
 						{
 							vec2 ProjPos = ProjStartPos;
 							float Radius = ProximityRadius*0.5f;
@@ -1841,6 +1851,8 @@ void CGameClient::OnPredict()
 								Temp -= pTarget->m_Vel;
 								pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
 								Hits++;
+
+								LUA_FIRE_EVENT("OnPredHammerHit", i);
 							}
 							// if we Hit anything, we have to wait for the reload
 							if(Hits)
@@ -1848,7 +1860,7 @@ void CGameClient::OnPredict()
 								ReloadTimer = SERVER_TICK_SPEED/3;
 								WeaponFired = true;
 							}
-						} break;
+					} break; // case WEAPON_HAMMER
 				}
 				if(!ReloadTimer)
 				{

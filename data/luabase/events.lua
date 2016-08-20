@@ -109,6 +109,36 @@ function OnEnterGame()
     end
 end
 
+function OnFlagGrab(PlayerID, TeamID)
+    if Events["OnFlagGrab"] ~= nil then
+        for script, event in pairs(Events["OnFlagGrab"]) do
+            if event ~= nil then
+                event(PlayerID, TeamID)
+            end
+        end
+    end
+end
+
+function OnGameStart()
+    if Events["OnGameStart"] ~= nil then
+        for script, event in pairs(Events["OnGameStart"]) do
+            if event ~= nil then
+                event()
+            end
+        end
+    end
+end
+
+function OnGameOver()
+    if Events["OnGameOver"] ~= nil then
+        for script, event in pairs(Events["OnGameOver"]) do
+            if event ~= nil then
+                event()
+            end
+        end
+    end
+end
+
 function OnKeyPress(Key)
     if Events["OnKeyPress"] ~= nil then
         for script, event in pairs(Events["OnKeyPress"]) do
@@ -174,6 +204,16 @@ function OnRenderScoreboard(FadeVal)
         for script, event in pairs(Events["OnRenderScoreboard"]) do
             if event ~= nil then
                 event(FadeVal)
+            end
+        end
+    end
+end
+
+function OnPredHammerHit(PlayerID)
+    if Events["OnPredHammerHit"] ~= nil then
+        for script, event in pairs(Events["OnPredHammerHit"]) do
+            if event ~= nil then
+                event(PlayerID)
             end
         end
     end
