@@ -724,61 +724,72 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 	Graphics()->QuadsBegin();
 
-	const bool ShowNinjaTimer = g_Config.m_ClShowhudHealthAmmoBars && IsVanilla(Client()->GetServerInfo(0)) && pCharacter->m_Weapon == WEAPON_NINJA;
-
-	// if weaponstage is active, put a "glow" around the stage ammo
-
-	RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[pCharacter->m_Weapon%NUM_WEAPONS].m_pSpriteProj);
+	const bool ShowNinjaTimer = /*g_Config.m_ClShowhudHealthAmmoBars && */IsVanilla(Client()->GetServerInfo(0)) && pCharacter->m_Weapon == WEAPON_NINJA;
 	IGraphics::CQuadItem Array[10];
 	int i;
-	for (i = 0; i < (g_Config.m_ClShowhudHealthAmmoBars ? 1 : min(pCharacter->m_AmmoCount, 10)); i++)
-		Array[i] = IGraphics::CQuadItem(x+i*12,y+24,10,10);
-	Graphics()->QuadsDrawTL(Array, i);
-	Graphics()->QuadsEnd();
 
-	static int64 NinjaStartTime = 0;
-	if(ShowNinjaTimer)
+	// render ammo on non-ddnet or modded ddnet
+	if(!IsDDNet(Client()->GetServerInfo(0)) || pCharacter->m_AmmoCount > 0)
 	{
-		if(NinjaStartTime == 0)
-			NinjaStartTime = time_get();
-	}
-	else
-		NinjaStartTime = 0;
+		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[pCharacter->m_Weapon % NUM_WEAPONS].m_pSpriteProj);
 
-	if(g_Config.m_ClShowhudHealthAmmoBars &&
-			(pCharacter->m_Weapon != WEAPON_HAMMER && (pCharacter->m_Weapon != WEAPON_NINJA || (ShowNinjaTimer && NinjaStartTime > 0))))
-	{
-		m_MaxAmmo = max(m_MaxAmmo, pCharacter->m_AmmoCount);
-		CUIRect r;
+		for(i = 0; i < (g_Config.m_ClShowhudMode != 0 ? 1 : min(pCharacter->m_AmmoCount, 10)); i++)
+			Array[i] = IGraphics::CQuadItem(x + i * 12, y + 24, 10, 10);
+		Graphics()->QuadsDrawTL(Array, i);
+		Graphics()->QuadsEnd();
 
-		// background
-		r.x = x + 12; r.y = y+24; r.h = 10; r.w = 12 * 10;
-		RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
-
-		// bar
-		static float Width = 0.0f;
-		static int LastWeapon = -1;
-		if(pCharacter->m_Weapon != LastWeapon) // detect weapon switch
+		static int64 NinjaStartTime = 0;
+		if(ShowNinjaTimer)
 		{
-			if(!ShowNinjaTimer)
-				Width = ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo)*120.0f; // instantly set the value
-			else
-				Width = 120.0f;
-			LastWeapon = pCharacter->m_Weapon;
-		}
+			if(NinjaStartTime == 0)
+				NinjaStartTime = time_get();
+		} else
+			NinjaStartTime = 0;
 
-		float WantedWidth = !ShowNinjaTimer ? ((float)pCharacter->m_AmmoCount/(float)m_MaxAmmo) :
-				((float)round_to_int((((NinjaStartTime + ((int64)g_pData->m_Weapons.m_Ninja.m_Duration/1000LL+1LL) * time_freq())-time_get())&0x1F00000)>>5*4)/15.0f);
-		smooth_set(&Width, WantedWidth*120.0f, 20.0f, Client()->RenderFrameTime());
-
-		if(Width > 5)
+		if(pCharacter->m_Weapon != WEAPON_HAMMER && (pCharacter->m_Weapon != WEAPON_NINJA || (ShowNinjaTimer && NinjaStartTime > 0)))
 		{
-			r.w = min(m_Width/3, Width);
-			RenderTools()->DrawUIRect(&r, vec4(0.7f, (!ShowNinjaTimer)*0.7f, (!ShowNinjaTimer)*0.7f, 0.8f), CUI::CORNER_R, 3.0f);
+			if(g_Config.m_ClShowhudMode != 0) // bars/new
+			{
+				m_MaxAmmo = max(m_MaxAmmo, pCharacter->m_AmmoCount);
+				CUIRect r;
+
+				// background
+				if(g_Config.m_ClShowhudMode == 1) // bars
+				{
+					r.x = x + 12;
+					r.y = y + 24;
+					r.h = 10;
+					r.w = 12 * 10;
+					RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
+				}
+
+				// bar
+				static float Width = 0.0f;
+				static int LastWeapon = -1;
+				if(pCharacter->m_Weapon != LastWeapon) // detect weapon switch
+				{
+					if(!ShowNinjaTimer)
+						Width = ((float)pCharacter->m_AmmoCount / (float)m_MaxAmmo) * 120.0f; // instantly set the value
+					else
+						Width = 120.0f;
+					LastWeapon = pCharacter->m_Weapon;
+				}
+
+				float WantedWidth = !ShowNinjaTimer ? ((float)pCharacter->m_AmmoCount / (float)m_MaxAmmo) :
+									((float)round_to_int((((NinjaStartTime + ((int64)g_pData->m_Weapons.m_Ninja.m_Duration / 1000LL + 1LL) * time_freq()) - time_get()) & 0x1F00000) >> 5 * 4) / 15.0f);
+				smooth_set(&Width, WantedWidth * 120.0f, 20.0f, Client()->RenderFrameTime());
+
+				if(Width > 5 && g_Config.m_ClShowhudMode == 1)
+				{
+					r.w = min(m_Width / 3, Width);
+					RenderTools()->DrawUIRect(&r, vec4(0.7f, (!ShowNinjaTimer) * 0.7f, (!ShowNinjaTimer) * 0.7f, 0.8f), CUI::CORNER_R, 3.0f);
+				}
+
+				char aBuf[16];
+				str_format(aBuf, sizeof(aBuf), "%i", ShowNinjaTimer ? round_to_int((Width / 120.0f) * 15.0f) : pCharacter->m_AmmoCount);
+				TextRender()->Text(0, x + 13, y + 24, 6, aBuf, 100);
+			}
 		}
-		char aBuf[16];
-		str_format(aBuf, sizeof(aBuf), "%i", ShowNinjaTimer ? round_to_int((Width/120.0f)*15.0f) : pCharacter->m_AmmoCount);
-		TextRender()->Text(0, x+13, y+24, 6, aBuf, 100);
 	}
 
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
@@ -787,24 +798,30 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 	// render health
 	RenderTools()->SelectSprite(SPRITE_HEALTH_FULL);
-	for(; h < (g_Config.m_ClShowhudHealthAmmoBars ? 1 : min(pCharacter->m_Health, 10)); h++)
+	for(; h < (g_Config.m_ClShowhudMode != 0 ? 1 : min(pCharacter->m_Health, 10)); h++)
 		Array[h] = IGraphics::CQuadItem(x+h*12,y,10,10);
-	Graphics()->QuadsDrawTL(Array, g_Config.m_ClShowhudHealthAmmoBars ? 1 : h);
+	Graphics()->QuadsDrawTL(Array, g_Config.m_ClShowhudMode != 0 ? 1 : h);
 	Graphics()->QuadsEnd();
-	if(g_Config.m_ClShowhudHealthAmmoBars)
+	if(g_Config.m_ClShowhudMode)
 	{
-		m_MaxHealth = max(m_MaxHealth, pCharacter->m_Health);
-		CUIRect r;
-		// background
-		r.x = x + 12; r.y = y; r.h = 10; r.w = 12 * 10;
-		RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
-
-		// bar
-		static float Width = 0.0f;
-		if(smooth_set(&Width, ((float)pCharacter->m_Health/(float)m_MaxHealth)*120.0f, 20.0f, Client()->RenderFrameTime()) > 5)
+		if(g_Config.m_ClShowhudMode == 1) // bars
 		{
-			r.w = min(m_Width/3, Width);
-			RenderTools()->DrawUIRect(&r, vec4(g_Config.m_ClColorfulClient?1.0f-Width/120.0f:0.7f, g_Config.m_ClColorfulClient?Width/120.0f:0.0f, 0, 0.8f), CUI::CORNER_R, 3.0f);
+			m_MaxHealth = max(m_MaxHealth, pCharacter->m_Health);
+			CUIRect r;
+			// background
+			r.x = x + 12;
+			r.y = y;
+			r.h = 10;
+			r.w = 12 * 10;
+			RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
+
+			// bar
+			static float Width = 0.0f;
+			if(smooth_set(&Width, ((float)pCharacter->m_Health / (float)m_MaxHealth) * 120.0f, 20.0f, Client()->RenderFrameTime()) > 5)
+			{
+				r.w = min(m_Width / 3, Width);
+				RenderTools()->DrawUIRect(&r, vec4(g_Config.m_ClColorfulClient ? 1.0f - Width / 120.0f : 0.7f, g_Config.m_ClColorfulClient ? Width / 120.0f : 0.0f, 0, 0.8f), CUI::CORNER_R, 3.0f);
+			}
 		}
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%i", pCharacter->m_Health);
@@ -814,7 +831,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 	Graphics()->QuadsBegin();
 
-	if(!g_Config.m_ClShowhudHealthAmmoBars)
+	if(g_Config.m_ClShowhudMode == 0) // vanilla
 	{
 		i = 0;
 		RenderTools()->SelectSprite(SPRITE_HEALTH_EMPTY);
@@ -826,33 +843,41 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 	// render armor meter
 	h = 0;
-	RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
-	for(; h < (g_Config.m_ClShowhudHealthAmmoBars ? 1 : min(pCharacter->m_Armor, 10)); h++)
+	if(g_Config.m_ClShowhudMode == 2 && pCharacter->m_Armor == 0)
+		RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
+	else
+		RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
+	for(; h < (g_Config.m_ClShowhudMode != 0 ? 1 : min(pCharacter->m_Armor, 10)); h++)
 		Array[h] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
 	Graphics()->QuadsDrawTL(Array, /*g_Config.m_ClShowhudHealthAmmoBars ? 1 :*/ h);
 	Graphics()->QuadsEnd();
-	if(g_Config.m_ClShowhudHealthAmmoBars)
+	if(g_Config.m_ClShowhudMode != 0) // bars
 	{
-		m_MaxArmor = max(m_MaxArmor, pCharacter->m_Armor);
-		CUIRect r;
-		// background
-		r.x = x + 12; r.y = y + 12; r.h = 10; r.w = 12 * 10;
-		RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
-
-		// bar
-		static float Width = 0.0f;
-		if(smooth_set(&Width, ((float)pCharacter->m_Armor/(float)m_MaxArmor)*120.0f, 20.0f, Client()->RenderFrameTime()) > 5)
+		if(g_Config.m_ClShowhudMode == 1)
 		{
-			r.w = min(m_Width/3, Width);
-			RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.8f, 0, 0.8f), CUI::CORNER_R, 3.0f);
-		}
+			m_MaxArmor = max(m_MaxArmor, pCharacter->m_Armor);
+			CUIRect r;
+			// background
+			r.x = x + 12;
+			r.y = y + 12;
+			r.h = 10;
+			r.w = 12 * 10;
+			RenderTools()->DrawUIRect(&r, vec4(0, 0, 0, 0.4f), CUI::CORNER_R, 3.0f);
 
+			// bar
+			static float Width = 0.0f;
+			if(smooth_set(&Width, ((float)pCharacter->m_Armor / (float)m_MaxArmor) * 120.0f, 20.0f, Client()->RenderFrameTime()) > 5)
+			{
+				r.w = min(m_Width / 3, Width);
+				RenderTools()->DrawUIRect(&r, vec4(0.7f, 0.8f, 0, 0.8f), CUI::CORNER_R, 3.0f);
+			}
+		}
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%i", pCharacter->m_Armor);
 		TextRender()->Text(0, x+13, y+12, 6, aBuf, 100);
 	}
 
-	if(!g_Config.m_ClShowhudHealthAmmoBars)
+	if(g_Config.m_ClShowhudMode == 0)
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 		Graphics()->QuadsBegin();

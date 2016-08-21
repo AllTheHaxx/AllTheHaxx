@@ -1778,9 +1778,21 @@ void CMenus::RenderSettingsHUDGeneral(CUIRect MainView)
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(10.0f, 0, &Button);
 		static CButtonContainer s_CheckboxShowhudHealthAmmoBars;
-		if(DoButton_CheckBox(&s_CheckboxShowhudHealthAmmoBars, Localize("Show health + ammo as bars"), g_Config.m_ClShowhudHealthAmmoBars, &Button))
+		char aLabel[128];
+		if(g_Config.m_ClShowhudMode == 0)
+			str_format(aLabel, sizeof(aLabel), "Mode: vanilla");
+		if(g_Config.m_ClShowhudMode == 1)
+			str_format(aLabel, sizeof(aLabel), "Mode: bars");
+		if(g_Config.m_ClShowhudMode == 2)
+			str_format(aLabel, sizeof(aLabel), "Mode: numbers");
+		int ButtonUsed = DoButton_CheckBox_Number(&s_CheckboxShowhudHealthAmmoBars, aLabel, g_Config.m_ClShowhudMode, &Button);
+		if(ButtonUsed == 1)
 		{
-			g_Config.m_ClShowhudHealthAmmoBars ^= 1;
+			g_Config.m_ClShowhudMode = (g_Config.m_ClShowhudMode + 1) % 3;
+		}
+		else if(ButtonUsed == 2)
+		{
+			g_Config.m_ClShowhudMode = (g_Config.m_ClShowhudMode + 3 - 1) % 3;
 		}
 	}
 
