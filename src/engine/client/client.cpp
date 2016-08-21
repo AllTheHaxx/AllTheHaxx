@@ -3334,7 +3334,7 @@ void CClient::Run()
 #if defined(CONF_FAMILY_WINDOWS)
 		FreeConsole();
 #else
-		thread_destroy(m_pInputThread);
+		//thread_destroy(m_pInputThread); // this tends to cause segfaults sometimes, dunno why :o
 #endif
 	}
 	
