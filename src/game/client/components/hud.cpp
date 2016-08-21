@@ -720,9 +720,6 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	// render ammo count
 	// render gui stuff
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-
-	Graphics()->QuadsBegin();
 
 	const bool ShowNinjaTimer = /*g_Config.m_ClShowhudHealthAmmoBars && */IsVanilla(Client()->GetServerInfo(0)) && pCharacter->m_Weapon == WEAPON_NINJA;
 	IGraphics::CQuadItem Array[10];
@@ -731,10 +728,12 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	// render ammo on non-ddnet or modded ddnet
 	if(!IsDDNet(Client()->GetServerInfo(0)) || pCharacter->m_AmmoCount > 0)
 	{
-		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[pCharacter->m_Weapon % NUM_WEAPONS].m_pSpriteProj);
 
 		for(i = 0; i < (g_Config.m_ClShowhudMode != 0 ? 1 : min(pCharacter->m_AmmoCount, 10)); i++)
 			Array[i] = IGraphics::CQuadItem(x + i * 12, y + 24, 10, 10);
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		Graphics()->QuadsBegin();
+		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[pCharacter->m_Weapon % NUM_WEAPONS].m_pSpriteProj);
 		Graphics()->QuadsDrawTL(Array, i);
 		Graphics()->QuadsEnd();
 
@@ -792,14 +791,13 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		}
 	}
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->QuadsBegin();
-	int h = 0;
-
 	// render health
-	RenderTools()->SelectSprite(SPRITE_HEALTH_FULL);
+	int h = 0;
 	for(; h < (g_Config.m_ClShowhudMode != 0 ? 1 : min(pCharacter->m_Health, 10)); h++)
 		Array[h] = IGraphics::CQuadItem(x+h*12,y,10,10);
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+	Graphics()->QuadsBegin();
+	RenderTools()->SelectSprite(SPRITE_HEALTH_FULL);
 	Graphics()->QuadsDrawTL(Array, g_Config.m_ClShowhudMode != 0 ? 1 : h);
 	Graphics()->QuadsEnd();
 	if(g_Config.m_ClShowhudMode)
@@ -828,27 +826,27 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 		TextRender()->Text(0, x+13, y, 6, aBuf, 100);
 	}
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->QuadsBegin();
 
 	if(g_Config.m_ClShowhudMode == 0) // vanilla
 	{
 		i = 0;
-		RenderTools()->SelectSprite(SPRITE_HEALTH_EMPTY);
 
 		for(; h < 10; h++)
 			Array[i++] = IGraphics::CQuadItem(x+h*12,y,10,10);
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		Graphics()->QuadsBegin();
+		RenderTools()->SelectSprite(SPRITE_HEALTH_EMPTY);
 		Graphics()->QuadsDrawTL(Array, i);
+		Graphics()->QuadsEnd();
 	}
 
 	// render armor meter
 	h = 0;
-	if(g_Config.m_ClShowhudMode == 2 && pCharacter->m_Armor == 0)
-		RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
-	else
-		RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
 	for(; h < (g_Config.m_ClShowhudMode != 0 ? 1 : min(pCharacter->m_Armor, 10)); h++)
 		Array[h] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+	Graphics()->QuadsBegin();
+	RenderTools()->SelectSprite(g_Config.m_ClShowhudMode == 2 && pCharacter->m_Armor == 0 ? SPRITE_ARMOR_EMPTY : SPRITE_ARMOR_FULL);
 	Graphics()->QuadsDrawTL(Array, /*g_Config.m_ClShowhudHealthAmmoBars ? 1 :*/ h);
 	Graphics()->QuadsEnd();
 	if(g_Config.m_ClShowhudMode != 0) // bars
@@ -879,13 +877,12 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 	if(g_Config.m_ClShowhudMode == 0)
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-		Graphics()->QuadsBegin();
-
 		i = 0;
-		RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
 		for(; h < 10; h++)
 			Array[i++] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		Graphics()->QuadsBegin();
+		RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
 		Graphics()->QuadsDrawTL(Array, i);
 		Graphics()->QuadsEnd();
 	}
