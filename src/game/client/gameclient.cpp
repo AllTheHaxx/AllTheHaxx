@@ -1422,7 +1422,7 @@ void CGameClient::OnNewSnapshot()
 		{
 			// player died
 			m_pControls->OnPlayerDeath();
-			m_pAStar->OnPlayerDeath();
+//			m_pAStar->OnPlayerDeath();
 		}
 	}
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)

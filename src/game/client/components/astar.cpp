@@ -40,6 +40,16 @@ void CAStar::OnReset() // is being called right after OnMapLoad()
 	m_PathFound = false;
 }
 
+void CAStar::OnMessage(int MsgType, void *pRawMsg)
+{
+	if(MsgType != NETMSGTYPE_SV_KILLMSG)
+		return;
+
+	CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
+	if(pMsg->m_Victim == GameClient()->m_Snap.m_LocalClientID)
+		OnPlayerDeath();
+}
+
 void CAStar::OnPlayerDeath() // TODO!! FIX THIS!!
 {
 	if(!m_PathFound || !g_Config.m_ClPathFinding)
@@ -51,9 +61,9 @@ void CAStar::OnPlayerDeath() // TODO!! FIX THIS!!
 	for(int i = m_Path.size(); i >= 0; i--)
 	{
 		//dbg_msg("debug", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].x, m_Path[i].y);
-		if((distance<float>(m_LastPos, m_Path[i]) < ClosestNode || ClosestNode < 0.0f) && !Collision()->IntersectLine(m_LastPos, m_Path[i], 0x0, 0x0))
+		if((ClosestNode < 0.0f || distance(m_LastPos, m_Path[i].m_Pos) < ClosestNode)/* && !Collision()->IntersectLine(m_LastPos, m_Path[i], 0x0, 0x0)*/)
 		{
-			ClosestNode = distance<float>(m_LastPos, m_Path[i]);
+			ClosestNode = distance(m_LastPos, m_Path[i].m_Pos);
 			ClosestID = i;
 			//dbg_msg("FOUND NEW CLOSEST NODE", "i=%i with dist=%.2f", ClosestID, ClosestNode);
 		}
@@ -69,7 +79,7 @@ void CAStar::OnPlayerDeath() // TODO!! FIX THIS!!
 
 void CAStar::OnRender()
 {
-	if(!g_Config.m_ClPathFinding)
+	if(!g_Config.m_ClPathFinding || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	// find the path one second after joining to be buffered
@@ -78,6 +88,7 @@ void CAStar::OnRender()
 		if(m_MapReloaded)
 		{
 			activationTime = time_get();
+			m_MapReloaded = false;
 		}
 
 		if(activationTime && time_get() > activationTime+time_freq())
@@ -87,8 +98,6 @@ void CAStar::OnRender()
 			//thread_detach(m_pThread);
 			activationTime = 0;
 		}
-		else
-			m_MapReloaded = false;
 	}
 
 
@@ -98,21 +107,22 @@ void CAStar::OnRender()
 	if (pPlayerChar && pPrevChar)
 		m_LastPos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
 
-	if(Client()->State() != IClient::STATE_ONLINE)
-		return;
-
 	// visualize the path
 	Graphics()->BlendAdditive();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
 	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.9f, 0.9f, 0.9f, 0.85f);
 
 	for(int i = 0; i < m_Path.size(); i++)
 	{
+		// don't render out of view
+		if(distance(m_LastPos, m_Path[i].m_Pos) > 1000)
+			continue;
+
 		int aSprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
 		RenderTools()->SelectSprite(aSprites[i%3]);
 		//Graphics()->QuadsSetRotation(Client()->GameTick());
-		Graphics()->SetColor(0.9f, 0.9f, 0.9f, 0.85f);
-		IGraphics::CQuadItem QuadItem(m_Path[i].x, m_Path[i].y, 16, 16);
+		IGraphics::CQuadItem QuadItem(m_Path[i].m_Pos.x, m_Path[i].m_Pos.y, 16, 16);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 	Graphics()->QuadsEnd();
@@ -157,7 +167,7 @@ void CAStar::BuildPath(void *pUser)
 
 	{
 		CServerInfo Info; pSelf->Client()->GetServerInfo(&Info);
-		if(!g_Config.m_ClPathFinding || !(IsRace(&Info) || IsDDNet(&Info)))
+		if(!g_Config.m_ClPathFinding || (!IsRace(&Info) && !IsDDNet(&Info)))
 			return;
 	}
 
@@ -204,13 +214,15 @@ void CAStar::BuildPath(void *pUser)
 			pSelf->m_PathFound = true;
 			for(int i = SolutionLength; i >= 0 ; i--)
 			{
-				pSelf->m_Path.add(pSelf->Collision()->GetPos(pSolution[i]));
+				pSelf->m_Path.add_unsorted(Node(i-SolutionLength, pSelf->Collision()->GetPos(pSolution[i])));
 				thread_sleep(10);
 				if(pSelf->m_ThreadShouldExit)
 				{
+					free(pSolution);
 					return;
 				}
 			}
+			pSelf->m_Path.sort_range();
 		}
 		free(pSolution);
 	}
@@ -228,7 +240,7 @@ void CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
 		for(int x = 0; x < Collision()->GetWidth(); x++)
 		{
 			m_pField[y*Collision()->GetWidth()+x] =
-					(Collision()->CheckPoint(x * 32, y * 32) || (NoFreeze && Collision()->GetTileRaw(x*32, y*32) == TILE_FREEZE)) ? 0 : 1;
+					!(Collision()->CheckPoint(x * 32, y * 32) || (NoFreeze && Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE));
 		}
 	}
 }
