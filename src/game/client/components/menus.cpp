@@ -1217,7 +1217,8 @@ static const char *s_apSayings[] = {
 		"Nobody needs nothing",
 		"[IRC] received a CTCP FINGER",
 		"xoring you out!",
-		"Text formatting would be cool"
+		"Text formatting would be cool",
+		"Do penguins have knees?"
 };
 
 void CMenus::RenderLoading()
