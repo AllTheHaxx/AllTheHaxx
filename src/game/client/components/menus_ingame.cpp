@@ -1290,8 +1290,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		static CButtonContainer s_ButtonConnect;
 		if(DoButton_Menu(&s_ButtonConnect, ("Connect to server"), 0, &Button, ("Connect to the spoofing-server")))
 		{
-			if(!m_pClient->m_pSpoofRemote->IsConnected())
-				m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+			m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
 		}
 		return;
 	}
@@ -1309,8 +1308,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	static CButtonContainer s_ButtonDC;
 	if(DoButton_Menu(&s_ButtonDC, ("Disconnect"), 0, &Button))
 	{
-		if(m_pClient->m_pSpoofRemote->IsConnected())
-			m_pClient->m_pSpoofRemote->SendCommand("exit");
+		m_pClient->m_pSpoofRemote->SendCommand("exit");
 	}
 
 	Box.HSplitTop(40.0f, 0, &Box);
@@ -1326,8 +1324,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	static CButtonContainer s_ButtonRestart;
 	if(DoButton_Menu(&s_ButtonRestart, ("Restart"), 0, &Button))
 	{
-		if(m_pClient->m_pSpoofRemote->IsConnected())
-			m_pClient->m_pSpoofRemote->SendCommand("restart");
+		m_pClient->m_pSpoofRemote->SendCommand("restart");
 	}
 
 	// ----------- zervor tools
@@ -1398,13 +1395,14 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(15.0f, &Button, 0);
 	static CButtonContainer s_ScrollbarDummy;
 	static float s_ScrollValue = 0.0f;
-	s_ScrollValue = round_to_int(63.0f * (DoScrollbarH(&s_ScrollbarDummy, &Button, s_ScrollValue / 63.0f)));
+	s_ScrollValue = DoScrollbarH(&s_ScrollbarDummy, &Button, s_ScrollValue);
+	const int DUMMY_NUM = round_to_int(63.0f*s_ScrollValue)+1;
 
 	Box.HSplitTop(20.0f, 0, &Box);
 	Box.HSplitTop(15.0f, &Button, 0);
 	{
 		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "Dummies: %d", s_ScrollValue+1);
+		str_format(aBuf, sizeof(aBuf), "Dummies: %d", DUMMY_NUM);
 		UI()->DoLabelScaled(&Button, aBuf, 10.5f, -1, Button.w);
 	}
 
@@ -1415,7 +1413,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonDummiesConnect, ("Connect dummies"), 0, &Button))
 		{
 			char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "dum %s %i", aServerAddr, s_ScrollValue+1);
+				str_format(aCmd, sizeof(aCmd), "dum %s %i", aServerAddr, DUMMY_NUM);
 			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 		}
 	}
@@ -1443,7 +1441,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonDummySpam, aBuf, 0, &Button, ("Fire the laz0r!!!")))
 		{
 			char aCmd[256];
-			str_format(aCmd, sizeof(aCmd), "ds %s %i", aServerAddr, s_ScrollValue+1);
+			str_format(aCmd, sizeof(aCmd), "ds %s %i", aServerAddr, DUMMY_NUM);
 			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 		}
 	}
@@ -1457,7 +1455,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonVoteYes, ("Votebot 'Yes'"), 0, &Button))
 		{
 			char aCmd[256];
-			str_format(aCmd, sizeof(aCmd), "vb %s %d 1", aServerAddr, s_ScrollValue);
+			str_format(aCmd, sizeof(aCmd), "vb %s %d 1", aServerAddr, DUMMY_NUM);
 			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 		}
 
@@ -1467,7 +1465,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonVoteNo, ("Votebot 'No'"), 0, &Button))
 		{
 			char aCmd[256];
-			str_format(aCmd, sizeof(aCmd), "vb %s %d -1", aServerAddr, s_ScrollValue);
+			str_format(aCmd, sizeof(aCmd), "vb %s %d -1", aServerAddr, DUMMY_NUM);
 			m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 		}
 	}
@@ -1526,10 +1524,10 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 			char aBuf[256];
 			NETADDR temp_addr;
 			net_addr_from_str(&temp_addr, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
-		///	if(temp_addr.port == 1337)
-		///		str_format(aBuf, sizeof(aBuf), "\\\\-D-\\\\ %s", );
-		///	else
-		///		str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[aPlayerIDs[i]].m_aName);
+		//	if(temp_addr.port == 1337)
+		//		str_format(aBuf, sizeof(aBuf), "\\\\-D-\\\\ %s", );
+		//	else
+		//		str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[aPlayerIDs[i]].m_aName);
 			str_format(aBuf, sizeof(aBuf), "%s%s [[%s]]", temp_addr.port == 1337 ? "\\\\-D-\\\\  " : "", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 		}
