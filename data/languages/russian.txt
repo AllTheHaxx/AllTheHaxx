@@ -1364,7 +1364,7 @@ Chat is disabled. Set 'cl_chat' to 1 or 2 to send messages!
 == Чат отключен. Установите 'cl_chat' 1 или 2 для отправки сообщений!
 
 Default zoom
-== Сбросить 
+== Стандартный зум 
 
 Toggle X-Ray
 == Включить X-Ray
