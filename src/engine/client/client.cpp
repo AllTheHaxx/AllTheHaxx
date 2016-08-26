@@ -4148,8 +4148,7 @@ int main(int argc, const char **argv) // ignore_convention
 	mem_free(pDebugger);
 
 	if(pClient->m_Restarting)
-		system(argv[0]);
-		//shell_execute(argv[0]);
+		shell_execute(argv[0]);
 
 
 	bool WantReport = false;
