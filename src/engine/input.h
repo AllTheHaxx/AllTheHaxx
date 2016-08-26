@@ -103,6 +103,10 @@ public:
 	virtual void SimulateKeyRelease(int Key) = 0;
 	virtual void SimulateKeyReleaseSTD(std::string Key) = 0;
 
+	virtual bool GetIMEState() = 0;
+	virtual void SetIMEState(bool activate) = 0;
+	virtual const char* GetIMECandidate() = 0;
+	virtual int GetEditingCursor() = 0;
 };
 
 

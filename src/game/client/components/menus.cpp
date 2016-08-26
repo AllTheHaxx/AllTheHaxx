@@ -523,6 +523,31 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 		pDisplayStr = aStars;
 	}
 
+	char aInputing[32] = {0};
+	if(UI()->HotItem() == pBC->GetID() && Input()->GetIMEState())
+	{
+		str_format(aInputing, sizeof(aInputing), pStr);
+		const char *Text = Input()->GetIMECandidate();
+		if (str_length(Text))
+		{
+		int NewTextLen = str_length(Text);
+		int CharsLeft = StrSize - str_length(aInputing) - 1;
+		int FillCharLen = min(NewTextLen, CharsLeft);
+		//Push Char Backward
+		for(int i = str_length(aInputing); i >= s_AtIndex ; i--)
+			aInputing[i+FillCharLen] = aInputing[i];
+		for(int i = 0; i < FillCharLen; i++)
+		{
+			if(Text[i] == '\n')
+				aInputing[s_AtIndex + i] = ' ';
+			else
+				aInputing[s_AtIndex + i] = Text[i];
+		}
+		//s_AtIndex = s_AtIndex+FillCharLen;	
+		pDisplayStr = aInputing;
+		}
+	}
+
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pBC->GetID() && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
@@ -557,7 +582,20 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	// render the cursor
 	if(UI()->LastActiveItem() == pBC->GetID() && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, Align ? s_AtIndex : -1);
+//<<<! HEAD
+//		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, Align ? s_AtIndex : -1);
+//=======
+		if (str_length(aInputing))
+		{
+			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor());
+			Textbox = *pRect;
+			Textbox.VSplitLeft(2.0f, 0, &Textbox);
+			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+
+			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+		}
+		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+//>>>>>>> ddnet/master
 		Textbox = *pRect;
 		if(Align < 0)
 		{
@@ -2228,6 +2266,7 @@ void CMenus::SetActive(bool Active)
 {
 	CALLSTACK_ADD();
 
+	Input()->SetIMEState(Active);
 	m_MenuActive = Active;
 #if defined(__ANDROID__)
 	UI()->AndroidShowScreenKeys(!m_MenuActive && !m_pClient->m_pControls->m_UsingGamepad);

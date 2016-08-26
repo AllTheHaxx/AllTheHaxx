@@ -2369,7 +2369,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(130.0f, &Label, &Button);
-	char aBuf[64];
+	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	//Right.HSplitTop(20.0f, &Button, 0);
@@ -2529,7 +2529,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		bool NeedUpdate = Client()->LatestVersion()[2] && str_comp(Client()->LatestVersion(), GAME_ATH_VERSION) != 0;
-		char aBuf[256];
 		int State = Updater()->GetCurrentState();
 
 		// update button
@@ -2537,7 +2536,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("New Client Version '%s' is available!"), Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
-			Button.VSplitLeft(100.0f, &Button, 0);
+			Button.VSplitLeft(TextRender()->TextWidth(0, Button.h*ms_FontmodHeight, Localize("Update now"), -1), &Button, 0);
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
 				Updater()->InitiateUpdate();
@@ -2550,6 +2549,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		}
 		else
 		{
+			str_copy(aBuf, Localize("No updates available"), sizeof(aBuf));
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, Localize("No updates available"), -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(max(100.0f, TextRender()->TextWidth(0, 14.0f, Localize("Check now"), -1)), &Button, 0);
 			static CButtonContainer s_ButtonUpdate;

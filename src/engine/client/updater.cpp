@@ -415,7 +415,6 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 		dbg_msg("updater", "refreshing version info");
 		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		FetchFile("stuffility/master", "ath-news.txt");
-		FetchFile("stuffility/master", "lua/bimbam.lua"); // XXX
 #if defined(CONF_PROTECT)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "edx/%s", m_aProtectHashFile);
