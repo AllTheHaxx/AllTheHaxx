@@ -622,8 +622,20 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	static CButtonContainer s_BrFilterEmptyCheckbox;
-	if (DoButton_CheckBox(&s_BrFilterEmptyCheckbox, Localize("Has people playing"), g_Config.m_BrFilterEmpty, &Button))
-		g_Config.m_BrFilterEmpty ^= 1;
+	if(DoButton_CheckBox(&s_BrFilterEmptyCheckbox, Localize("Has people playing"), g_Config.m_BrFilterEmpty, &Button))
+	{
+		if(g_Config.m_BrFilterEmpty ^= 1)
+			g_Config.m_BrFilterNonEmpty = 0;
+	}
+
+	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+	static CButtonContainer s_BrFilterNonEmptyCheckbox;
+	if(DoButton_CheckBox(&s_BrFilterNonEmptyCheckbox, Localize("Server is empty"), g_Config.m_BrFilterNonEmpty, &Button))
+	{
+		if(g_Config.m_BrFilterNonEmpty ^= 1)
+			g_Config.m_BrFilterEmpty = 0;
+	}
 
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);

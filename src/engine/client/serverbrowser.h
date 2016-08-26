@@ -184,7 +184,7 @@ private:
 	float m_UpgradeProgression;
 	int m_NumServerCapacity;
 
-	int m_Sorthash;
+	int64 m_Sorthash;
 	char m_aFilterString[64];
 	char m_aFilterGametypeString[128];
 
@@ -207,7 +207,7 @@ private:
 	//
 	void Filter();
 	void Sort();
-	int SortHash() const;
+	int64 SortHash() const;
 
 	CServerEntry *Add(const NETADDR &Addr);
 

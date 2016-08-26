@@ -220,6 +220,8 @@ void CServerBrowser::Filter()
 
 		if(g_Config.m_BrFilterEmpty && ((g_Config.m_BrFilterSpectators && m_ppServerlist[i]->m_Info.m_NumPlayers == 0) || m_ppServerlist[i]->m_Info.m_NumClients == 0))
 			Filtered = 1;
+		else if(g_Config.m_BrFilterNonEmpty && ((g_Config.m_BrFilterSpectators && m_ppServerlist[i]->m_Info.m_NumPlayers != 0) || m_ppServerlist[i]->m_Info.m_NumClients != 0))
+			Filtered = 1;
 		else if(g_Config.m_BrFilterFull && ((g_Config.m_BrFilterSpectators && m_ppServerlist[i]->m_Info.m_NumPlayers == m_ppServerlist[i]->m_Info.m_MaxPlayers) ||
 				m_ppServerlist[i]->m_Info.m_NumClients == m_ppServerlist[i]->m_Info.m_MaxClients))
 			Filtered = 1;
@@ -356,22 +358,24 @@ void CServerBrowser::Filter()
 	}
 }
 
-int CServerBrowser::SortHash() const
+int64 CServerBrowser::SortHash() const
 {
-	int i = g_Config.m_BrSort&0xf;
-	i |= g_Config.m_BrFilterEmpty<<4;
-	i |= g_Config.m_BrFilterFull<<5;
-	i |= g_Config.m_BrFilterSpectators<<6;
-	i |= g_Config.m_BrFilterFriends<<7;
-	i |= g_Config.m_BrFilterPw<<8;
-	i |= g_Config.m_BrSortOrder<<9;
-	i |= g_Config.m_BrFilterCompatversion<<10;
-	i |= g_Config.m_BrFilterPure<<11;
-	i |= g_Config.m_BrFilterPureMap<<12;
-	i |= g_Config.m_BrFilterGametypeStrict<<13;
-	i |= g_Config.m_BrFilterVersionStrict<<14;
-	i |= g_Config.m_BrFilterCountry<<15;
-	i |= g_Config.m_BrFilterPing<<16;
+	int n=4;
+	int64 i = g_Config.m_BrSort&0xf;
+	i |= g_Config.m_BrFilterEmpty			<< n++;
+	i |= g_Config.m_BrFilterNonEmpty		<< n++;
+	i |= g_Config.m_BrFilterFull			<< n++;
+	i |= g_Config.m_BrFilterSpectators		<< n++;
+	i |= g_Config.m_BrFilterFriends			<< n++;
+	i |= g_Config.m_BrFilterPw				<< n++;
+	i |= g_Config.m_BrSortOrder				<< n++;
+	i |= g_Config.m_BrFilterCompatversion	<< n++;
+	i |= g_Config.m_BrFilterPure			<< n++;
+	i |= g_Config.m_BrFilterPureMap			<< n++;
+	i |= g_Config.m_BrFilterGametypeStrict	<< n++;
+	i |= g_Config.m_BrFilterVersionStrict	<< n++;
+	i |= g_Config.m_BrFilterCountry			<< n++;
+	i |= g_Config.m_BrFilterPing			<< n++;
 	return i;
 }
 
