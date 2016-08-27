@@ -34,13 +34,13 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		//.addFunction("KillScript", &CLuaBinding::LuaKillScript)
 		//.addFunction("print", &CLuaFile::LuaPrintOverride)       // TODO: do this with a low level implementation :D
 
-		// client namespace
+		// client namespace XXX: cleanup
 		.beginNamespace("_client")
 			// external info
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
 		.endNamespace()
 
-		// graphics namespace
+		// graphics namespace XXX: cleanup
 		.beginNamespace("_graphics")
 			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
 			.addFunction("RenderQuad", &CLuaBinding::LuaRenderQuadRaw)
@@ -104,7 +104,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("b", &vector4_base<float>::b)
 			.addData("a", &vector4_base<float>::a)
 		.endClass()
-		
+
 		.beginClass< CUIRect >("UIRect")
 			.addConstructor <void (*) ()> ()
 			.addConstructor <void (*) (float)> ()
@@ -138,8 +138,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addConstructor <void (*) ()> ()
 		.endClass()
 
-		//OOP BEGINS HERE
-		//ICLIENT
+
+		// ------------------------------ ICLIENT ------------------------------
+
+		/// Game.Client
 		.beginClass<IClient>("IClient")
 			.addProperty("Tick", &IClient::GameTick)
 			.addProperty("IntraGameTick", &IClient::IntraGameTick)
@@ -171,7 +173,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Quit", &IClient::Quit)
 		.endClass()
 
-		//COMPONENTS
+
+		// ------------------------------ COMPONENTS ------------------------------
+
+		/// Game.UI
 		.beginClass<CUI>("CUI")
 			.addFunction("DoLabel", &CUI::DoLabel)
 			.addFunction("DoLabelScaled", &CUI::DoLabelScaled)
@@ -186,6 +191,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("MouseInside", &CUI::MouseInside)
 		.endClass()
 
+		/// Game.RenderTools
 		.beginClass<CRenderTools>("CRenderTools")
 			.addFunction("SelectSprite", &CRenderTools::SelectSpriteLua)
 			.addFunction("DrawSprite", &CRenderTools::DrawSprite)
@@ -195,26 +201,30 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DrawCircle", &CRenderTools::DrawCircle)
 		.endClass()
 
-		.beginClass<CChat>("CChat") /// Game.Chat
+		/// Game.Chat
+		.beginClass<CChat>("CChat")
 			.addFunction("Say", &CChat::Say)
 			.addFunction("Print", &CChat::AddLine)
 			.addFunction("AddLine", &CChat::AddLine)
 			.addProperty("Mode", &CChat::GetMode)
 		.endClass()
 
+		/// Game.Console
 		.beginClass<IConsole>("IConsole")
 			.addFunction("Print", &IConsole::Print)
 			.addFunction("LineIsValid", &IConsole::LineIsValid)
 			.addFunction("ExecuteLine", &IConsole::ExecuteLine)
 		.endClass()
 
-		.beginClass<CEmoticon>("CEmoticon") /// Game.Emote
+		/// Game.Emote
+		.beginClass<CEmoticon>("CEmoticon")
 			.addFunction("Send", &CEmoticon::Emote)
 			.addFunction("SendEye", &CEmoticon::EyeEmote)
 			.addProperty("Active", &CEmoticon::Active)
 		.endClass()
 
-		.beginClass<CCollision>("CCollision") /// Game.Collision
+		/// Game.Collision
+		.beginClass<CCollision>("CCollision")
 			.addProperty("GetMapWidth", &CCollision::GetWidth)
 			.addProperty("GetMapHeight", &CCollision::GetHeight)
 
@@ -231,11 +241,13 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("TestBox", &CCollision::TestBox)
 		.endClass()
 
-		.beginClass<CHud>("CHud") /// Game.HUD
+		/// Game.HUD
+		.beginClass<CHud>("CHud")
 			.addFunction("PushNotification", &CHud::PushNotification)
 		.endClass()
 
-		.beginClass<CMenus>("CMenus") /// Game.Menus
+		/// Game.Menus
+		.beginClass<CMenus>("CMenus")
 			.addProperty("Active", &CMenus::IsActive)
 			.addProperty("ActivePage", &CMenus::GetActivePage, &CMenus::SetActivePage)
 			.addProperty("MousePos", &CMenus::GetMousePos, &CMenus::SetMousePos)
@@ -250,7 +262,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DoScrollbarH", &CMenus::DoScrollbarH)
 		.endClass()
 
-		.beginClass<CVoting>("CVoting") /// Game.Voting
+		/// Game.Voting
+		.beginClass<CVoting>("CVoting")
 			.addFunction("CallvoteSpectate", &CVoting::CallvoteSpectate)
 			.addFunction("CallvoteKick", &CVoting::CallvoteKick)
 			.addFunction("CallvoteOption", &CVoting::CallvoteOption)
@@ -262,7 +275,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		// local playerinfo
-		.beginClass<CNetObj_CharacterCore>("CNetObj_CharacterCore")  //TODO : Add the whole class!
+		/// TODO: doc!
+		.beginClass<CNetObj_CharacterCore>("CNetObj_CharacterCore")  // TODO : Add the whole class!
 			.addData("PosX", &CNetObj_CharacterCore::m_X, false)
 			.addData("PosY", &CNetObj_CharacterCore::m_Y, false)
 			.addData("VelX", &CNetObj_CharacterCore::m_VelX, false)
@@ -326,7 +340,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 #undef MACRO_TUNING_PARAM
 
-		.beginClass<CControls>("CControls") /// Game.Input
+		/// Game.Input
+		.beginClass<CControls>("CControls")
 			.addProperty("Direction", &CControls::GetDirection, &CControls::SetDirection)
 			.addProperty("Fire", &CControls::GetFire, &CControls::SetFire)
 			.addProperty("Hook", &CControls::GetHook, &CControls::SetHook)
@@ -338,7 +353,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
 		.endClass()
 
-		.beginClass<IInput>("IInput") /// Engine.Input
+		/// Engine.Input
+		.beginClass<IInput>("IInput")
 			.addFunction("KeyPress", &IInput::KeyPress)
 			.addFunction("KeyIsPressed", &IInput::KeyIsPressedLua)
 			.addFunction("KeyName", &IInput::KeyNameSTD)
@@ -356,12 +372,13 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
 		.endClass()
 
-		.beginClass<ICurlWrapper>("ICurlWrapper") /// Engine.Curl
+		/// Engine.Curl
+		.beginClass<ICurlWrapper>("ICurlWrapper")
 			.addFunction("httpSimplePost", &ICurlWrapper::PerformSimplePOST)
 		.endClass()
 
-		// serverinfo
-		.beginClass<CServerInfo>("CServerInfo") /// Game.ServerInfo
+		/// Game.ServerInfo
+		.beginClass<CServerInfo>("CServerInfo")
 			.addProperty("GameMode", &CServerInfo::LuaGetGameType)
 			.addProperty("Name", &CServerInfo::LuaGetName)
 			.addProperty("Map", &CServerInfo::LuaGetMap)
@@ -372,16 +389,19 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("NumPlayers", &CServerInfo::m_NumPlayers, false)
 		.endClass()
 
+		/// TODO: doc!
 		.beginClass<CGameClient::CSnapState>("CSnapState")
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
 			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)
 		.endClass()
 
-		.beginClass<CGameClient::CSnapState::CCharacterInfo>("CCharacterInfo") // Game.CharSnap(ID)
+		/// Game.CharSnap(ID)
+		.beginClass<CGameClient::CSnapState::CCharacterInfo>("CCharacterInfo")
 			.addData("Active", &CGameClient::CSnapState::CCharacterInfo::m_Active, false)
 			.addData("Cur", &CGameClient::CSnapState::CCharacterInfo::m_Cur, false)
 		.endClass()
 
+		/// Game.SpecInfo
 		.beginClass<CGameClient::CSnapState::CSpectateInfo>("CSpectateInfo")
 			.addData("Active", &CGameClient::CSnapState::CSpectateInfo::m_Active)
 			.addData("SpectatorID", &CGameClient::CSnapState::CSpectateInfo::m_SpectatorID)
@@ -389,7 +409,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Position", &CGameClient::CSnapState::CSpectateInfo::m_Position)
 		.endClass()
 
-		.beginClass<CGameClient::CClientData>("CClientData") /// Game.Players(ID)
+		/// Game.Players(ID)
+		.beginClass<CGameClient::CClientData>("CClientData")
 			.addData("Active", &CGameClient::CClientData::m_Active)
 			.addData("ColorBody", &CGameClient::CClientData::m_ColorBody)
 			.addData("ColorFeet", &CGameClient::CClientData::m_ColorFeet)
@@ -408,7 +429,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Tee", &CGameClient::CClientData::m_Predicted)
 		.endClass()
 
-		.beginClass<IGraphics>("IGraphics") /// Engine.Graphics
+		/// Engine.Graphics
+		.beginClass<IGraphics>("IGraphics")
 			.addFunction("QuadsBegin", &IGraphics::QuadsBegin)
 			.addFunction("QuadsEnd", &IGraphics::QuadsEnd)
 			.addFunction("QuadsDraw", &IGraphics::QuadsDraw)
@@ -432,6 +454,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
 		.endClass()
 
+		/// Engine.TextRender
 		.beginClass<ITextRender>("ITextRender")
 			.addFunction("Text", &ITextRender::Text)
 			.addFunction("TextWidth", &ITextRender::TextWidth)
@@ -440,6 +463,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("TextOutlineColor", &ITextRender::TextOutlineColor)
 		.endClass()
 
+		// XXX: cleanup!
 		.beginClass<CGameClient>("CGameClient")   //this class is kinda outdated due to "Game"
 		/*	.addData("Chat", &CGameClient::m_pChat)
 			.addData("ServerInfo", &CGameClient::m_CurrentServerInfo, false)
@@ -470,7 +494,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Menus", &CLua::m_pCGameClient->m_pMenus, false)
 			.addVariable("Voting", &CLua::m_pCGameClient->m_pVoting, false)
 			.addVariable("SpecInfo", &CLua::m_pCGameClient->m_Snap.m_SpecInfo, false)
-			//.addData("Client", &CGameClient::m_pClient, false)   //"Game" resembles GameClient, Game.Client => Client
+			//.addData("Client", &CGameClient::m_pClient, false)   // "Game" resembles GameClient, Game.Client => Client
 			.addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
 			.addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
 			.addVariable("Ui", &CLua::m_pCGameClient->m_UI, false)
@@ -486,13 +510,14 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endNamespace()
 
 		.beginNamespace("Engine")
-			.addVariable("Graphics", &CLua::m_pCGameClient->m_pGraphics) //dunno, this should be maybe an own subspace :O
+			.addVariable("Graphics", &CLua::m_pCGameClient->m_pGraphics)
 			.addVariable("TextRender", &CLua::m_pCGameClient->m_pTextRender)
-			.addVariable("Input", &CLua::m_pCGameClient->m_pInput) //dunno, this should be maybe an own subspace :O
+			.addVariable("Input", &CLua::m_pCGameClient->m_pInput)
 			.addVariable("Curl", &CLua::m_pCGameClient->m_pCurlWrapper)
 		.endNamespace()
 
 		// g_Config stuff... EVERYTHING AT ONCE!
+		/// Config.<var_name>
 #define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) \
 			.addStaticProperty(#Name, &CConfigProperties::GetConfig_##Name, &CConfigProperties::SetConfig_##Name) \
 			.addStaticProperty(#ScriptName, &CConfigProperties::GetConfig_##Name, &CConfigProperties::SetConfig_##Name)
@@ -511,9 +536,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		// OOP ENDS HERE
 	;
 
-	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil"); // TODO
+	// kill everything malicious
+	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil dofile=nil require=nil");
 	lua_pcall(L, 0, LUA_MULTRET, 0);
-	
+
 	if(g_Config.m_Debug)
 		dbg_msg("lua", "registering lua bindings complete (L=%p)", L);
 

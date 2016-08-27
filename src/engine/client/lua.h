@@ -22,7 +22,7 @@
 				if(lfunc) try { lfunc(__VA_ARGS__); } catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[ijdfg]); } \
 			} \
 			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, EVENTNAME); \
-			if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); } \
+			if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); } \
 	}
 #else
 #define LUA_FIRE_EVENT(EVENTNAME, ...) ;
@@ -67,17 +67,10 @@ class CLua
 	IStorageTW *m_pStorage;
 	class IConsole *m_pConsole;
 
-	struct LuaErrorCounter
-	{
-		CLuaFile* culprit;
-		int count;
-	};
-	array<LuaErrorCounter> m_ErrorCounter;
-
 public:
 	CLua();
 	~CLua();
-	
+
 	void Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole);
 	void Shutdown();
 	void SaveAutoloads();
@@ -89,7 +82,10 @@ public:
 
 	static int ErrorFunc(lua_State *L);
 	static int Panic(lua_State *L);
-	int HandleException(std::exception &e, CLuaFile*);
+	int HandleException(std::exception &e, lua_State *L);
+	int HandleException(std::exception &e, CLuaFile *pLF);
+	int HandleException(const char *pError, lua_State *L);
+	int HandleException(const char *pError, CLuaFile *pLF);
 
 	static CClient * m_pCClient;
 	static IClient *m_pClient;
@@ -97,7 +93,7 @@ public:
 	static IClient *Client() { return m_pClient; }
 	static IGameClient *GameClient() { return m_pGameClient; }
 	static CGameClient * m_pCGameClient;
-	
+
 	void SetGameClient(IGameClient *pGameClient);
 	array<CLuaFile*> &GetLuaFiles() { return m_pLuaFiles; }
 

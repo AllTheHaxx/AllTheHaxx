@@ -47,11 +47,32 @@ int CLuaBinding::LuaImport(lua_State *L)
 	const char *pFilename = luaL_checklstring(L, 1, 0);
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename); // force path to make stuff more intuitive
+	for(; *pFilename && (*pFilename == '.' || *pFilename == '/'); pFilename++); // sandbox it
 
+	// try same folder as the script first as it's the most intuitive thing
+	str_copy(aBuf, pLF->GetFilename(), sizeof(aBuf)); // get the whole path
+	str_replace_char_rev_num(aBuf, 1, '/', '\0'); // cut off the file name
+	str_append(aBuf, "/", sizeof(aBuf)); // re-append the slash
+	str_append(aBuf, pFilename, sizeof(aBuf)); // append the wanted file's path
 	bool ret = pLF->LoadFile(aBuf);
-	lua_pushboolean(L, (int)ret);
-	return 1;
+
+	if(!ret)
+	{
+		// try libraries after that
+		str_format(aBuf, sizeof(aBuf), "lua/.library/%s", pFilename);
+		ret = pLF->LoadFile(aBuf);
+
+		if(!ret)
+		{
+			// try lua base folder if all fails
+			if(str_comp_num(pFilename, "lua/", 4) != 0)
+				str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename);
+			ret = pLF->LoadFile(aBuf);
+		}
+	}
+	lua_pushboolean(L, (int)ret); // success?
+	lua_pushstring(L, (const char *)aBuf); // actual relative path of the loaded file
+	return 2;
 }
 
 int CLuaBinding::LuaListdir(lua_State *L)

@@ -1,12 +1,23 @@
 #include <fstream>
 
 #include <base/math.h>
+#include <game/localization.h>
 
 #include "luafile.h"
 #include "lua.h"
 #include "luabinding.h"
 
-
+// little helper
+#if defined(FEATURE_LUA)
+#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) { try { \
+	LuaRef func = getGlobal(LUA_STATE, FUNC_NAME); \
+	if(func) \
+		RETURN = func(__VA_ARGS__).cast<TYPE>(); }\
+	catch (std::exception& e) \
+	{ Lua()->HandleException(e, LUA_STATE); } }
+#else
+#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) ;;
+#endif
 
 CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
 {
@@ -31,7 +42,7 @@ void CLuaFile::Reset(bool error)
 
 	m_ScriptHasSettings = false;
 
-	m_State = error ? STATE_ERROR: STATE_IDLE;
+	m_State = error ? STATE_ERROR : STATE_IDLE;
 }
 
 void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interface for non-compiled scripts
@@ -109,7 +120,6 @@ void CLuaFile::Unload(bool error)
 	}
 	catch(std::exception &e)
 	{
-		//printf("LUA EXCEPTION: %s\n", e.what());
 		m_pLua->HandleException(e, this);
 	}
 
@@ -158,16 +168,16 @@ void CLuaFile::Init()
 	if(m_State == STATE_LOADED)
 		Unload();
 
+	m_Exceptions.clear();
+
 	m_State = STATE_IDLE;
 
 	OpenLua();
 
 	if(!LoadFile("data/luabase/events.lua")) // try the usual script file first
 	{
-//		if(!LoadFile("data/lua/events.clc")) // try for the compiled file if script not found
-			m_State = STATE_ERROR;
-//		else
-//			RegisterLuaCallbacks(m_pLuaState);
+		m_State = STATE_ERROR;
+		m_pErrorStr = Localize("Failed to load 'data/luabase/events.lua'");
 	}
 	else
 		RegisterLuaCallbacks(m_pLuaState);
@@ -191,26 +201,25 @@ void CLuaFile::Init()
 	lua_getglobal(m_pLuaState, "g_ScriptTitle");
 	if(lua_isstring(m_pLuaState, -1))
 		str_copy(m_aScriptTitle, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptTitle));
-	lua_pop(m_pLuaState, -1);
+	lua_pop(m_pLuaState, 1);
 
 	lua_getglobal(m_pLuaState, "g_ScriptInfo");
 	if(lua_isstring(m_pLuaState, -1))
 		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
-	lua_pop(m_pLuaState, -1);
+	lua_pop(m_pLuaState, 1);
 
-	m_ScriptHasSettings = ScriptHasSettings();
-
-	// pass the uid to the script
-//	lua_pushinteger(m_pLuaState, m_UID);
-//	lua_setglobal(m_pLuaState, "g_ScriptUID");
+/*	lua_getglobal(m_pLuaState, "g_ScriptSettings"); // TODO: implement the new settings interface
+	if(lua_isuserdata(m_pLuaState, -1))
+		m_ScriptHasSettings = true;
+	lua_pop(m_pLuaState, 1);
+*/
+	m_ScriptHasSettings |= ScriptHasSettings();
 
 	// call the OnScriptInit function if we have one
-	bool success = true;
-	LUA_CALL_FUNC(m_pLuaState, "OnScriptInit", bool, success);
-	if(!success)
+	if(!CallFunc<bool>("OnScriptInit", true))
 	{
 		dbg_msg("lua", "script '%s' rejected being loaded, did 'OnScriptInit()' return true...?", m_Filename.c_str());
-		m_pErrorStr = "OnScriptInit didn't return true";
+		m_pErrorStr = Localize("OnScriptInit() didn't return true");
 		Unload(true);
 		return;
 	}
@@ -221,17 +230,17 @@ void CLuaFile::Init()
 #if defined(FEATURE_LUA)
 luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 {
-	return getGlobal(m_pLuaState, pFuncName);
+	return luabridge::getGlobal(m_pLuaState, pFuncName);
 }
 #endif
 
 template<class T>
-T CLuaFile::CallFunc(const char *pFuncName) // just for quick access
+T CLuaFile::CallFunc(const char *pFuncName, T def) // just for quick access
 {
 	if(!m_pLuaState)
 		return (T)0;
 
-	T ret;
+	T ret = def;
 	LUA_CALL_FUNC(m_pLuaState, pFuncName, T, ret);
 	return ret;
 }
@@ -241,27 +250,28 @@ bool CLuaFile::LoadFile(const char *pFilename)
 #if defined(FEATURE_LUA)
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") &&
-			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") &&
-			str_comp_nocase(&pFilename[str_length(pFilename)]-7, ".config")) || !m_pLuaState)
+			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") /*&&
+			str_comp_nocase(&pFilename[str_length(pFilename)]-7, ".config")*/) || !m_pLuaState)
 		return false;
 
 	// some security steps right here...
 	LoadPermissionFlags(m_Filename.c_str());
 	if(!CheckCertificate(m_Filename.c_str()))
 	{
-		m_pErrorStr = "certificate check failed";
+		m_pErrorStr = Localize("Certificate check failed");
 		Reset(true);
 		return false;
 	}
 
-	dbg_msg("lua/debug", "loading '%s' with flags %i", pFilename, m_PermissionFlags);
+	if(g_Config.m_Debug)
+		dbg_msg("lua/debug", "loading '%s' with flags %i", pFilename, m_PermissionFlags);
 
 	// make sure that source code scripts are what they're supposed to be
 	bool Compiled = str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") == 0;
 	IOHANDLE f = io_open(pFilename, IOFLAG_READ);
 	if(!f)
 	{
-		dbg_msg("Failed to open script '%s' for integrity check", pFilename);
+		dbg_msg("Lua", "Failed to open script '%s' for integrity check", pFilename);
 		return false;
 	}
 
@@ -276,12 +286,14 @@ bool CLuaFile::LoadFile(const char *pFilename)
 	{
 		dbg_msg("lua", "!! WARNING: PREVENTED LOADING A PRECOMPILED SCRIPT PRETENDING TO BE A SOURCE CODE SCRIPT !!");
 		dbg_msg("lua", "!! :  %s", pFilename);
+		m_pErrorStr = Localize("Probably malicious!");
 		return false;
 	}
 	else if(str_comp(aHeader[0], aHeader[1]) != 0 && Compiled)
 	{
 		dbg_msg("lua", "!! WARNING: PREVENTED LOADING AN INVALID PRECOMPILED SCRIPT (%s != %s) !!", aHeader[0], aHeader[1]);
 		dbg_msg("lua", "!! :  %s", pFilename);
+		m_pErrorStr = Localize("Invalid clc header");
 		return false;
 	}
 
@@ -292,7 +304,7 @@ bool CLuaFile::LoadFile(const char *pFilename)
 		CLua::ErrorFunc(m_pLuaState);
 		return false;
 	}
-	
+
 	lua_resume(m_pLuaState, 0);
 
 	//Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);

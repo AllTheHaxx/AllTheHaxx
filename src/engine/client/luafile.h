@@ -5,22 +5,14 @@
 #include <lua.hpp>
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
+
 #else
 #define lua_State int
 #endif
 
-#include "base/system.h"
+#include <base/system.h>
+#include <base/tl/array.h>
 
-#if defined(FEATURE_LUA)
-#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) { try { \
-	LuaRef func = getGlobal(LUA_STATE, FUNC_NAME); \
-	if(func) \
-		RETURN = func(__VA_ARGS__).cast<TYPE>(); }\
-	catch (std::exception& e) \
-	{ printf("LUA EXCEPTION: %s\n", e.what()); } }
-#else
-#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) ;;
-#endif
 
 class IClient;
 class IStorageTW;
@@ -50,6 +42,7 @@ public:
 	};
 
 	const char *m_pErrorStr;
+	array<std::string> m_Exceptions;
 
 private:
 	CLua *m_pLua;
@@ -74,7 +67,7 @@ public:
 #if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName);
 #endif
-	template<class T> T CallFunc(const char *pFuncName);
+	template<class T> T CallFunc(const char *pFuncName, T def);
 
 	int State() const { return m_State; }
 	int GetPermissionFlags() const { return m_PermissionFlags; }
@@ -87,7 +80,7 @@ public:
 	lua_State *L() const { return m_pLuaState; }
 
 	CLua *Lua() const { return m_pLua; }
-	
+
 	static void RegisterLuaCallbacks(lua_State * L);
 
 	void LuaPrintOverride(std::string str);

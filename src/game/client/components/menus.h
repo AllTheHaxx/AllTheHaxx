@@ -345,12 +345,13 @@ public:	int m_LoadTotal;
 	void RenderSettingsIRC(CUIRect MainView);
 #if defined(FEATURE_LUA)
 	void RenderSettingsLua(CUIRect MainView);
+	void RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L);
+	void RenderLoadingLua();
 #else
 	void RenderSettingsLua(CUIRect MainView){};
 #endif
-	void RenderSettingsAll(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
-	void RenderLoadingLua();
+	void RenderSettingsAll(CUIRect MainView);
 	static int SkinCacheListdirCallback(const char *name, int is_dir, int dir_type, void *user);
 
 	// found in menus_identity.cpp

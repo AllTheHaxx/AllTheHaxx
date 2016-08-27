@@ -2744,7 +2744,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 		UiDoGetButtons(33, 43, Left);
 		Left.h = 100.0f;
 	}
-	
+
 	RenderSettingsIRC(Right);
 }
 
@@ -2971,7 +2971,7 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 #undef DO_NEXT_LABEL
 }
 
-
+#if defined(FEATURE_LUA)
 void CMenus::RenderLoadingLua()
 {
 	CALLSTACK_ADD();
@@ -2992,13 +2992,57 @@ void CMenus::RenderLoadingLua()
 	Graphics()->Swap();
 }
 
-#if defined(FEATURE_LUA)
+void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
+{
+	static CButtonContainer s_BCListbox;
+	static float s_ScrollVal = 1.0f;
+
+	char aBuf[256];
+	char aTitle[256];
+	char aBottomText[32];
+	str_format(aTitle, sizeof(aTitle), Localize("Exceptions thrown by script '%s'"), L->GetFilename());
+	if(L->State() == CLuaFile::STATE_LOADED)
+	{
+		str_format(aBuf, sizeof(aBuf), " [%s]", Localize("Running"));
+		str_append(aTitle, aBuf, sizeof(aTitle));
+	}
+	else if(L->State() == CLuaFile::STATE_ERROR)
+	{
+		str_format(aBuf, sizeof(aBuf), " [%s]", Localize("Aborted"));
+		str_append(aTitle, aBuf, sizeof(aTitle));
+	}
+	str_format(aBottomText, sizeof(aBottomText), "%i/100", L->m_Exceptions.size());
+	UiDoListboxStart(&s_BCListbox, &MainView, 20.0f, aTitle, aBottomText, L->m_Exceptions.size(), 1, -1, s_ScrollVal);
+
+	for(int i = 0; i < L->m_Exceptions.size(); i++)
+	{
+		CPointerContainer Container(&(L->m_Exceptions[i]));
+		CListboxItem Item = UiDoListboxNextItem(&Container);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Button;
+		str_format(aBuf, sizeof(aBuf), "[%i]", i+1);
+		//const float tw = TextRender()->TextWidth(0, 16.0f, aBuf, -1);
+		Item.m_Rect.VSplitLeft(35.0f, &Button, &Item.m_Rect);
+		UI()->DoLabelScaled(&Button, aBuf, 16.0f, 0);
+
+		Item.m_Rect.VSplitLeft(10.0f, 0, &Item.m_Rect);
+		str_format(aBuf, sizeof(aBuf), "Line %s", L->m_Exceptions[i].c_str() + str_length(L->GetFilename()) + 1);
+		UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
+	}
+
+	UiDoListboxEnd(&s_ScrollVal, 0);
+}
+
+
 void CMenus::RenderSettingsLua(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
 	CUIRect Button, BottomBar;
 	static int s_ActiveLuaSettings = -1;
+	static int s_ActiveLuaExceptions = -1;
 
 	MainView.HSplitBottom(30.0f, &MainView, &BottomBar);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -3019,6 +3063,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			{
 				MainView.HSplitTop(10.0f, 0, &MainView);
 				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView.x, MainView.y, MainView.w, MainView.h);
+				return;
 			}
 		}
 		catch(std::exception &e)
@@ -3026,7 +3071,23 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]);
 			s_ActiveLuaSettings = -1;
 		}
-		return;
+	}
+
+	if(s_ActiveLuaExceptions >= 0)
+	{
+		CUIRect CloseButton;
+		MainView.HSplitTop(20.0f, &CloseButton, &MainView);
+		static CButtonContainer s_CloseButton;
+		if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
+		{
+			s_ActiveLuaExceptions = -1;
+		}
+		else
+		{
+			MainView.HSplitTop(10.0f, 0, &MainView);
+			RenderSettingsLuaExceptions(MainView, Client()->Lua()->GetLuaFiles()[s_ActiveLuaExceptions]);
+			return;
+		}
 	}
 
 	CUIRect RefreshButton;
@@ -3058,12 +3119,13 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		// display mode list
 		static float s_ScrollValue = 0;
-		static CButtonContainer pIDItem[128];
-		static CButtonContainer pIDCheckboxAutoload[128];
-		static CButtonContainer pIDButtonPermissions[128];
-		static CButtonContainer pIDButtonReload[128];
-		static CButtonContainer pIDButtonDeactivate[128];
-		static CButtonContainer pIDButtonSettings[128];
+		static CButtonContainer pIDItem[256];
+		static CButtonContainer pIDCheckboxAutoload[256];
+		static CButtonContainer pIDButtonPermissions[256];
+		static CButtonContainer pIDButtonReload[256];
+		static CButtonContainer pIDButtonDeactivate[256];
+		static CButtonContainer pIDButtonSettings[256];
+		static CButtonContainer pIDButtonExceptions[256];
 		int OldSelected = -1;
 
 		static CButtonContainer s_Listbox;
@@ -3079,16 +3141,16 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			if(!L)
 				continue;
 
+			if(L->State() == CLuaFile::STATE_LOADED)
+				NumActiveScripts++;
+
+			// filter
 			if(g_Config.m_ClLuaFilterString[0] != '\0' && (!str_find_nocase(L->GetFilename(), g_Config.m_ClLuaFilterString) && !str_find_nocase(L->GetScriptTitle(), g_Config.m_ClLuaFilterString)))
 				continue;
-
 			if(ShowActiveOnly == 1 && L->State() != CLuaFile::STATE_LOADED)
 				continue;
 			else if(ShowActiveOnly == 2 && L->State() == CLuaFile::STATE_LOADED)
 				continue;
-
-			if(L->State() == CLuaFile::STATE_LOADED)
-				NumActiveScripts++;
 
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
 			NumListedFiles++;
@@ -3105,9 +3167,11 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				if(i%2)
 					Color.a += 0.2f;
 
-				RenderTools()->DrawUIRect(&Item.m_Rect, Color, CUI::CORNER_ALL, 5.0f);
+				RenderTools()->DrawUIRect(&Item.m_Rect, Color, 0*CUI::CORNER_ALL, 5.0f);
 
 				Item.m_Rect.HSplitTop(24.0f, &LabelTitle, &LabelInfo);
+				LabelTitle.VSplitLeft(5.0f, 0, &LabelTitle);
+				LabelInfo.VSplitLeft(5.0f, 0, &LabelInfo);
 
 				Buttons = Item.m_Rect;
 				Buttons.HMargin(15.0f, &Buttons);
@@ -3127,38 +3191,32 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					int PermissionFlags = L->GetPermissionFlags();
 					char aTooltip[1024] = {0};
 					if(PermissionFlags == 0)
-						str_format(aTooltip, sizeof(aTooltip), "This script has no additional permissions and is thus considered safe.");
+						str_format(aTooltip, sizeof(aTooltip), Localize("This script has no additional permissions and is thus considered safe."));
 					else
 					{
-						str_format(aTooltip, sizeof(aTooltip), "This script has the following additional permission:");
-
-						if(PermissionFlags&CLuaFile::PERMISSION_IO)
-							str_append(aTooltip, "\n\n- IO (Write and read files)", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::PERMISSION_DEBUG)
-							str_append(aTooltip, "\n\n- DEBUG (Dunno what this is used for o.O)", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::PERMISSION_FFI)
-							str_append(aTooltip, "\n\n- FFI (Execution of native code)", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::PERMISSION_OS)
-							str_append(aTooltip, "\n\n- OS (Access to various operation system functionalities, BE CAREFUL!", sizeof(aTooltip));
-						if(PermissionFlags&CLuaFile::PERMISSION_PACKAGE)
-							str_append(aTooltip, "\n\n- PACKAGE (Modules)", sizeof(aTooltip));
+						str_format(aTooltip, sizeof(aTooltip), Localize("This script has the following additional permission:"));
+#define PERM_STR(TYPE, STR) if(PermissionFlags&CLuaFile::PERMISSION_##TYPE) { str_append(aTooltip, "\n\n- ", sizeof(aTooltip)); str_append(aTooltip, STR, sizeof(aTooltip)); }
+						PERM_STR(IO, Localize("IO (Write and read files)"))
+						PERM_STR(DEBUG, Localize("DEBUG (WARNING: if you are not currently debugging this script, DO NOT TO USE IT!! It may cause security and performance problems!)"))
+						PERM_STR(FFI, Localize("FFI (Execution of native C code from within Lua - please be sure that this code is not malicious, as the ATH API cannot control it"))
+						PERM_STR(OS, Localize("OS (Access to various operation system functionalities such as time and date"))
+						PERM_STR(PACKAGE, Localize("PACKAGE (Modules)"))
+#undef PERM_APPEND
 					}
 					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Button, aTooltip, CUI::CORNER_ALL, vec4(PermissionFlags > 0 ? .7f : .2f, PermissionFlags > 0 ? .2f : .7f, .2f, .8f)))
 						dbg_msg("lua/permissions", "'%s' | %i (%i)", L->GetFilename(), PermissionFlags, L->GetPermissionFlags());
 
-
+#define PREPARE_BUTTON(TEXT) Buttons.VSplitRight(5.0f, &Buttons, 0); Buttons.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Buttons.h*ms_FontmodHeight, TEXT, -1)), &Buttons, &Button);
 					if(L->State() == CLuaFile::STATE_LOADED)
 					{
-						Buttons.VSplitRight(5.0f, &Buttons, 0);
-						Buttons.VSplitRight(100.0f, &Buttons, &Button);
+						PREPARE_BUTTON(Localize("Deactivate"));
 						if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Deactivate"), 0, &Button))
 						{
 							L->Unload();
 							continue;
 						}
 
-						Buttons.VSplitRight(5.0f, &Buttons, 0);
-						Buttons.VSplitRight(100.0f, &Buttons, &Button);
+						PREPARE_BUTTON(Localize("Reload"));
 						if (DoButton_Menu(&pIDButtonReload[i], Localize("Reload"), 0, &Button))
 						{
 							RenderLoadingLua();
@@ -3167,14 +3225,24 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					}
 					else
 					{
-						Buttons.VSplitRight(5.0f, &Buttons, 0);
-						Buttons.VSplitRight(100.0f, &Buttons, &Button);
+						PREPARE_BUTTON(Localize("Activate"));
 						if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Activate"), 0, &Button))
 						{
 							RenderLoadingLua();
 							L->Init();
 						}
 					}
+
+					if(L->m_Exceptions.size() > 0)
+					{
+						str_format(aBuf, sizeof(aBuf), Localize("Exceptions (%i)"), L->m_Exceptions.size());
+						PREPARE_BUTTON(aBuf);
+						if(DoButton_Menu(&pIDButtonExceptions[i], aBuf, 0, &Button, "", CUI::CORNER_ALL, mix(vec4(0,1,0,0.5f), vec4(1,0,0,0.5f), (float)L->m_Exceptions.size()/100.0f)))
+						{
+							s_ActiveLuaExceptions = i;
+						}
+					}
+
 
 					if(L->State() == CLuaFile::STATE_ERROR)
 					{
@@ -3196,12 +3264,13 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				if (L->GetScriptTitle()[0] != '\0')
 					UI()->DoLabelScaled(&LabelTitle, L->GetScriptTitle(), 16.0f, -1, LabelTitle.w, g_Config.m_ClLuaFilterString);
 				else
-					UI()->DoLabelScaled(&LabelTitle, L->GetFilename(), 16.0f, -1, LabelTitle.w, g_Config.m_ClLuaFilterString);
+					UI()->DoLabelScaled(&LabelTitle, L->GetFilename()+4, 16.0f, -1, LabelTitle.w, g_Config.m_ClLuaFilterString);
 				UI()->DoLabelScaled(&LabelInfo, L->GetScriptInfo(), 14.0f, -1);
 			}
 		}
 
 		UiDoListboxEnd(&s_ScrollValue, 0);
+#undef PREPARE_BUTTON
 
 		if(NumLuaFiles == 0)
 		{

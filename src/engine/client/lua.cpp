@@ -11,7 +11,7 @@
 #include "luabinding.h"
 
 
-IClient * CLua::m_pClient = 0; 
+IClient * CLua::m_pClient = 0;
 CClient * CLua::m_pCClient = 0;
 IGameClient * CLua::m_pGameClient = 0;
 CGameClient * CLua::m_pCGameClient = 0;
@@ -205,31 +205,40 @@ int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pU
 	return 0;
 }
 
-int CLua::HandleException(std::exception &e, CLuaFile* culprit)
+int CLua::HandleException(std::exception &e, lua_State *L)
 {
-	for(int i = 0; i < m_ErrorCounter.size(); i++)
-	{
-		if(m_ErrorCounter[i].culprit == culprit)
-		{
-			char aError[1024];
-			str_format(aError, sizeof(aError), "{%i/511} %s", m_ErrorCounter[i].count, e.what());
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lua|EXCEPTION", aError);
-			if(++m_ErrorCounter[i].count < 512)
-				return m_ErrorCounter[i].count;
-			m_ErrorCounter[i].count = 0;
-			culprit->m_pErrorStr = "Error count limit exceeded (too many exceptions thrown)";
-			culprit->Unload(true);
-			dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", culprit->GetFilename());
-		}
-	}
-
-	LuaErrorCounter x;
-	x.culprit = culprit;
-	x.count = 1;
-	m_ErrorCounter.add(x);
-
-	return 1;
+	return HandleException(e.what(), L);
 }
+
+int CLua::HandleException(const char *pError, lua_State *L)
+{
+	return HandleException(pError, CLuaBinding::GetLuaFile(L));
+}
+
+int CLua::HandleException(std::exception &e, CLuaFile *pLF)
+{
+	return HandleException(e.what(), pLF);
+}
+
+int CLua::HandleException(const char *pError, CLuaFile *pLF)
+{
+	if(!pLF)
+		return -1;
+
+	pLF->m_Exceptions.add(std::string(pError));
+
+	char aError[1024];
+	str_format(aError, sizeof(aError), "{%i/100} %s", pLF->m_Exceptions.size(), pError);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lua|EXCEPTION", aError);
+	if(pLF->m_Exceptions.size() < 100)
+		return pLF->m_Exceptions.size();
+	pLF->m_pErrorStr = "Error count limit exceeded (too many exceptions thrown)";
+	pLF->Unload(true);
+	dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", pLF->GetFilename());
+
+	return 0;
+}
+
 
 int CLua::Panic(lua_State *L)
 {
@@ -242,43 +251,20 @@ int CLua::Panic(lua_State *L)
 	return 0;
 }
 
-int CLua::ErrorFunc(lua_State *L)
+int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown as an exception)
 {
 	CALLSTACK_ADD();
 
 #if defined(FEATURE_LUA)
-	dbg_msg("Lua", "Lua Script Error! :");
-	//lua_getglobal(L, "pLUA");
-	//CLua *pSelf = (CLua *)lua_touserdata(L, -1);
-	//lua_pop(L, 1);
 
-	//int depth = 0;
-	//int frameskip = 1;
-	//lua_Debug frame;
+	if (!lua_isstring(L, -1))
+		CLuaBinding::GetLuaFile(L)->Lua()->HandleException(": unknown error", L);
+	else
+		CLuaBinding::GetLuaFile(L)->Lua()->HandleException(lua_tostring(L, -1), L);
 
-	if (lua_tostring(L, -1) == 0)
-	{
-		//dbg_msg("Lua", "PANOS");
-		return 0;
-	}
-	
-	//dbg_msg("Lua", pSelf->m_aFilename);
-	dbg_msg("Lua", lua_tostring(L, -1));
-	/*dbg_msg("Lua", "Backtrace:");
-
-	while(lua_getstack(L, depth, &frame) == 1)
-	{
-		depth++;
-		lua_getinfo(L, "nlSf", &frame);
-		// check for functions that just report errors. these frames just confuses more then they help
-		if(frameskip && str_comp(frame.short_src, "[C]") == 0 && frame.currentline == -1)
-			continue;
-		frameskip = 0;
-		// print stack frame
-		dbg_msg("Lua", "%s(%d): %s %s", frame.short_src, frame.currentline, frame.name, frame.namewhat);
-	}*/
 	lua_pop(L, 1); // remove error message
 	lua_gc(L, LUA_GCCOLLECT, 0);
+
 #endif
 	return 0;
 }
