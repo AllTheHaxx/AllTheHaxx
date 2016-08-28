@@ -4,10 +4,10 @@
 
 class CLuaRender : public CComponent
 {
-	int m_Level;
+	const int m_Level;
 
 public:
-	CLuaRender(int lv) { m_Level = lv; }
+	CLuaRender(int lv) : m_Level(lv) { }
 	virtual void OnRender();
 };
 
