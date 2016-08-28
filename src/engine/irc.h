@@ -47,7 +47,7 @@ public:
 		{
 			LEVEL_USER=0,
 			LEVEL_VOICE=1 << 0,
-			LEVEL_ADMIN=2 << 1,
+			LEVEL_ADMIN=1 << 1,
 		};
 
 		int m_Level;

@@ -227,9 +227,12 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 
 	pLF->m_Exceptions.add(std::string(pError));
 
-	char aError[1024];
-	str_format(aError, sizeof(aError), "{%i/100} %s", pLF->m_Exceptions.size(), pError);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lua|EXCEPTION", aError);
+	if(g_Config.m_Debug)
+	{
+		char aError[1024];
+		str_format(aError, sizeof(aError), "{%i/100} %s", pLF->m_Exceptions.size(), pError);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "lua|EXCEPTION", aError);
+	}
 	if(pLF->m_Exceptions.size() < 100)
 		return pLF->m_Exceptions.size();
 	pLF->m_pErrorStr = "Error count limit exceeded (too many exceptions thrown)";

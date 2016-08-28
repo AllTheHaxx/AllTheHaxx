@@ -175,7 +175,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		*pDestID = SkinID;
 		return;
 	}
-	
+
 	// don't fetch anything if it's disabled or the tasklist is full
 	if(!g_Config.m_ClSkinFetcher || g_Config.m_ClVanillaSkinsOnly)
 		return;
@@ -189,6 +189,7 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 			return;
 
 	// protect against malicious skin names
+	for(; *pName && (*pName == '.' || *pName == '/'); pName++);
 #if defined(CONF_FAMILY_WINDOWS)
 	if(	str_find(pName, "/") || str_find(pName, "*") || str_find(pName, "\"") || str_find(pName, "?") ||
 		str_find(pName, "\\") || str_find(pName, ":") || str_find(pName, ">") || str_find(pName, "<") || str_find(pName, "|"))
