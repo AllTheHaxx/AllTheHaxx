@@ -536,10 +536,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		// OOP ENDS HERE
 	;
 
-	// kill everything malicious
-	luaL_loadstring(L, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil dofile=nil require=nil");
-	lua_pcall(L, 0, LUA_MULTRET, 0);
-
 	if(g_Config.m_Debug)
 		dbg_msg("lua", "registering lua bindings complete (L=%p)", L);
 

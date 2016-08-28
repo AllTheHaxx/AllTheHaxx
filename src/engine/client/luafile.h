@@ -87,7 +87,8 @@ public:
 
 private:
 	void OpenLua();
-	bool LoadFile(const char *pFilename);
+	void ApplyPermissions(int Flags);
+	bool LoadFile(const char *pFilename, bool Import);
 	bool CheckCertificate(const char *pFilename);
 
 	bool ScriptHasSettings();

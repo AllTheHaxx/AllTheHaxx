@@ -44,30 +44,35 @@ int CLuaBinding::LuaImport(lua_State *L)
 	if(n != 1)
 		return luaL_argerror(L, 1, "expected a string value, got nil");
 
-	const char *pFilename = luaL_checklstring(L, 1, 0);
+	char aFilename[128];
+	{
+		const char *pFilename = luaL_checklstring(L, 1, 0);
+		for(; *pFilename && (*pFilename == '.' || *pFilename == '/'); pFilename++); // sandbox it
+		str_copy(aFilename, pFilename, sizeof(aFilename));
+		if(str_comp_nocase(aFilename+str_length(aFilename)-4, ".lua") != 0 && str_comp_nocase(aFilename+str_length(aFilename)-4, ".clc") != 0)
+			str_append(aFilename, ".lua", sizeof(aFilename)); // assume plain lua files as default
+	}
 
 	char aBuf[512];
-	for(; *pFilename && (*pFilename == '.' || *pFilename == '/'); pFilename++); // sandbox it
-
 	// try same folder as the script first as it's the most intuitive thing
 	str_copy(aBuf, pLF->GetFilename(), sizeof(aBuf)); // get the whole path
 	str_replace_char_rev_num(aBuf, 1, '/', '\0'); // cut off the file name
 	str_append(aBuf, "/", sizeof(aBuf)); // re-append the slash
-	str_append(aBuf, pFilename, sizeof(aBuf)); // append the wanted file's path
-	bool ret = pLF->LoadFile(aBuf);
+	str_append(aBuf, aFilename, sizeof(aBuf)); // append the wanted file's path
+	bool ret = pLF->LoadFile(aBuf, true);
 
 	if(!ret)
 	{
 		// try libraries after that
-		str_format(aBuf, sizeof(aBuf), "lua/.library/%s", pFilename);
-		ret = pLF->LoadFile(aBuf);
+		str_format(aBuf, sizeof(aBuf), "lua/.library/%s", aFilename);
+		ret = pLF->LoadFile(aBuf, true);
 
 		if(!ret)
 		{
 			// try lua base folder if all fails
-			if(str_comp_num(pFilename, "lua/", 4) != 0)
-				str_format(aBuf, sizeof(aBuf), "lua/%s", pFilename);
-			ret = pLF->LoadFile(aBuf);
+			if(str_comp_num(aFilename, "lua/", 4) != 0)
+				str_format(aBuf, sizeof(aBuf), "lua/%s", aFilename);
+			ret = pLF->LoadFile(aBuf, true);
 		}
 	}
 	lua_pushboolean(L, (int)ret); // success?

@@ -6,6 +6,7 @@
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/shared/network.h>
+#include <game/localization.h>
 
 #include "lua.h"
 #include "luabinding.h"
@@ -235,7 +236,7 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 	}
 	if(pLF->m_Exceptions.size() < 100)
 		return pLF->m_Exceptions.size();
-	pLF->m_pErrorStr = "Error count limit exceeded (too many exceptions thrown)";
+	pLF->m_pErrorStr = Localize("Error count limit exceeded (too many exceptions thrown)");
 	pLF->Unload(true);
 	dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", pLF->GetFilename());
 
@@ -379,7 +380,7 @@ bool CLuaFile::CheckCertificate(const char *pFilename)
 			return false;
 		}
 
-		m_PermissionFlags = cert.PermissionFlags;
+		m_PermissionFlags |= cert.PermissionFlags;
 
 		if(g_Config.m_Debug)
 			dbg_msg("lua", "success: certificate check for '%s' [[ ISSUER='%s' DATE='%s' PF=%i ]]", pFilename, cert.aIssuer, cert.aDate, cert.PermissionFlags);

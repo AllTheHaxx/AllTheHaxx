@@ -38,6 +38,7 @@ void CLuaFile::Reset(bool error)
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 
+	m_PermissionFlags = 0;
 	LoadPermissionFlags(m_Filename.c_str());
 
 	m_ScriptHasSettings = false;
@@ -51,8 +52,7 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0)
 		return;
 
-	m_PermissionFlags = 0;
-	std::ifstream f(m_Filename.c_str());
+	std::ifstream f(pFilename);
 	std::string line; bool searching = true;
 	while(std::getline(f, line))
 	{
@@ -149,17 +149,22 @@ void CLuaFile::OpenLua()
 	luaopen_bit(m_pLuaState);	// bit operations
 	//luaopen_jit(m_pLuaState);	// control the jit-compiler [don't needed]
 
-	if(m_PermissionFlags&PERMISSION_IO)
-		luaopen_io(m_pLuaState);	// input/output of files
-	//if(m_PermissionFlags&PERMISSION_DEBUG) XXX
-		luaopen_debug(m_pLuaState);	// debug stuff for whatever... can be removed in further patches
-	if(m_PermissionFlags&PERMISSION_FFI)
-		luaopen_ffi(m_pLuaState);	// register and write own C-Functions and call them in lua (whoever may need that...)
-	//if(m_PermissionFlags&PERMISSION_OS) XXX
-		luaopen_os(m_pLuaState);	// evil
-	if(m_PermissionFlags&PERMISSION_PACKAGE)
-		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
 #endif
+}
+
+void CLuaFile::ApplyPermissions(int Flags)
+{
+	if(Flags&PERMISSION_IO)
+		luaopen_io(m_pLuaState);	// input/output of files
+	//if(Flags&PERMISSION_DEBUG) XXX
+	luaopen_debug(m_pLuaState);	// debug stuff for whatever... can be removed in further patches
+	if(Flags&PERMISSION_FFI)
+		luaopen_ffi(m_pLuaState);	// register and write own C-Functions and call them in lua (whoever may need that...)
+	//if(Flags&PERMISSION_OS) XXX
+	luaopen_os(m_pLuaState);	// evil
+	if(Flags&PERMISSION_PACKAGE)
+		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
+
 }
 
 void CLuaFile::Init()
@@ -172,19 +177,17 @@ void CLuaFile::Init()
 
 	m_State = STATE_IDLE;
 
-	OpenLua();
+	OpenLua(); // create the state, open basic libraries
 
-	if(!LoadFile("data/luabase/events.lua")) // try the usual script file first
+	if(!LoadFile("data/luabase/events.lua", false)) // load all default event callbacks
 	{
 		m_State = STATE_ERROR;
 		m_pErrorStr = Localize("Failed to load 'data/luabase/events.lua'");
 	}
-	else
-		RegisterLuaCallbacks(m_pLuaState);
-
-	if(m_State != STATE_ERROR)
+	else // if successful
 	{
-		if(LoadFile(m_Filename.c_str()))
+		RegisterLuaCallbacks(m_pLuaState);
+		if(LoadFile(m_Filename.c_str(), false))
 			m_State = STATE_LOADED;
 		else
 			m_State = STATE_ERROR;
@@ -245,7 +248,7 @@ T CLuaFile::CallFunc(const char *pFuncName, T def) // just for quick access
 	return ret;
 }
 
-bool CLuaFile::LoadFile(const char *pFilename)
+bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 {
 #if defined(FEATURE_LUA)
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
@@ -255,25 +258,33 @@ bool CLuaFile::LoadFile(const char *pFilename)
 		return false;
 
 	// some security steps right here...
-	LoadPermissionFlags(m_Filename.c_str());
-	if(!CheckCertificate(m_Filename.c_str()))
+	int BeforePermissions = m_PermissionFlags;
+	LoadPermissionFlags(pFilename);
+	if(!CheckCertificate(pFilename))
 	{
 		m_pErrorStr = Localize("Certificate check failed");
 		Reset(true);
 		return false;
 	}
 
-	if(g_Config.m_Debug)
-		dbg_msg("lua/debug", "loading '%s' with flags %i", pFilename, m_PermissionFlags);
+	ApplyPermissions(m_PermissionFlags ^ BeforePermissions); // only apply those that are new
+
+	// kill everything malicious
+	luaL_dostring(m_pLuaState, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil dofile=nil require=nil");
+
 
 	// make sure that source code scripts are what they're supposed to be
 	bool Compiled = str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") == 0;
 	IOHANDLE f = io_open(pFilename, IOFLAG_READ);
 	if(!f)
 	{
-		dbg_msg("Lua", "Failed to open script '%s' for integrity check", pFilename);
+		dbg_msg("Lua", "Could not load file '%s' (file not accessible)", pFilename);
 		return false;
 	}
+
+	if(g_Config.m_Debug)
+		dbg_msg("lua/debug", "loading '%s' with flags %i", pFilename, m_PermissionFlags);
+
 
 	char aData[sizeof(LUA_SIGNATURE)] = {0};
 	io_read(f, aData, sizeof(aData));
@@ -305,14 +316,16 @@ bool CLuaFile::LoadFile(const char *pFilename)
 		return false;
 	}
 
-	lua_resume(m_pLuaState, 0);
+	if(Import)
+		Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0); // execute imported files straight away to get all of their stuff
+	else
+		Status = lua_resume(m_pLuaState, 0);
 
-	//Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
-	//if (Status)
-	//{
-	//	CLua::ErrorFunc(m_pLuaState);
-	//	return false;
-	//}
+	if (Status != 0)
+	{
+		CLua::ErrorFunc(m_pLuaState);
+		return false;
+	}
 
 	return true;
 #else
