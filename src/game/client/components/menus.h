@@ -368,13 +368,13 @@ public:	int m_LoadTotal;
 	void RenderIdents(CUIRect MainView);
 	void RenderTrans(CUIRect MainView);
 	void RenderCrypt(CUIRect MainView);
-	static void ConKeyShortcut(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyToggleHotbar(IConsole::IResult *pResult, void *pUserData);
 
 	// found in menus_irc.cpp
 	bool m_IRCActive;
 	void RenderIRC(CUIRect MainView);
 	bool ToggleIRC();
-	static void ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyToggleIRC(IConsole::IResult *pResult, void *pUserData);
 
 	// found in menus_texture.cpp
 	void RenderSettingsTexture(CUIRect MainView);

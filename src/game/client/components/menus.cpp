@@ -153,8 +153,8 @@ void CMenus::OnConsoleInit()
 {
 	CALLSTACK_ADD();
 
-	Console()->Register("+hotbar", "", CFGFLAG_CLIENT, ConKeyShortcut, this, "Access the hotbar");
-	Console()->Register("+irc", "", CFGFLAG_CLIENT, ConKeyShortcutIRC, this, "Toggle the IRC");
+	Console()->Register("+hotbar", "", CFGFLAG_CLIENT, ConKeyToggleHotbar, this, "Access the hotbar");
+	Console()->Register("+irc", "", CFGFLAG_CLIENT, ConKeyToggleIRC, this, "Toggle the IRC");
 
 	Console()->Register("+unlock_mouse", "", CFGFLAG_CLIENT, ConKeyShortcutRelMouse, this, "Release the mouse");
 }
@@ -543,7 +543,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 			else
 				aInputing[s_AtIndex + i] = Text[i];
 		}
-		//s_AtIndex = s_AtIndex+FillCharLen;	
+		//s_AtIndex = s_AtIndex+FillCharLen;
 		pDisplayStr = aInputing;
 		}
 	}

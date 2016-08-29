@@ -10,7 +10,7 @@
 #include <game/client/components/console.h>
 #include <game/generated/client_data.h>
 
-void CMenus::ConKeyShortcutIRC(IConsole::IResult *pResult, void *pUserData)
+void CMenus::ConKeyToggleIRC(IConsole::IResult *pResult, void *pUserData)
 {
 	CALLSTACK_ADD();
 
@@ -63,7 +63,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 	}
 
 	smooth_set(&YOffset, 50.0f, 35.0f, Client()->RenderFrameTime());
-	
+
 	// small0r
 	MainView.x = 50;
 	MainView.y = YOffset;

@@ -19,7 +19,7 @@
 #include "skins.h"
 #include "identity.h"
 
-void CMenus::ConKeyShortcut(IConsole::IResult *pResult, void *pUserData)
+void CMenus::ConKeyToggleHotbar(IConsole::IResult *pResult, void *pUserData)
 {
 	CALLSTACK_ADD();
 
@@ -27,7 +27,13 @@ void CMenus::ConKeyShortcut(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->Client()->State() == IClient::STATE_ONLINE)
 	{
 		if(pResult->GetInteger(0) != 0)
-			pSelf->m_HotbarActive ^= 1;
+		{
+			if(pSelf->m_HotbarActive ^= 1)
+				pSelf->Input()->SetIMEState(true);
+			else
+				pSelf->Input()->SetIMEState(false);
+		}
+
 	}
 }
 
@@ -304,7 +310,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 
 			if(UI()->MouseInside(&Item.m_Rect))
 				RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1, 1, 1, 0.3f), 0, 0);
-	
+
 			UI()->DoLabelScaled(&Item.m_Rect, s_RSAKeyList[i].c_str(), 12.0f, -1, -1, 0);
 		}
 
