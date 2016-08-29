@@ -29,7 +29,7 @@ class CAStar : public CComponent
 
 protected:
 	int GetTileAreaCenter(int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
-	int GetStart() {return GetTileAreaCenter(TILE_BEGIN); }
+	int GetStart() { return GetTileAreaCenter(TILE_BEGIN); }
 	int GetFinish() { return GetTileAreaCenter(TILE_END); }
 	void FillGrid(bool NoFreeze);
 	static void BuildPath(void *pUser);

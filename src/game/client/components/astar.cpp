@@ -150,6 +150,8 @@ int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
 			if(Collision()->GetTileRaw(ix*32, iy*32) == TileID)
 			{
 				//dbg_msg("path/tilefinder", "Found: tile=%i at x=%i y=%i", TileID, ix, iy);
+				if(NumTiles >= sizeof(aTiles))
+					break;
 				aTiles[NumTiles++] = iy*w+ix;
 			}
 		}
@@ -206,7 +208,7 @@ void CAStar::BuildPath(void *pUser)
 		else
 			pSelf->m_pClient->m_pHud->PushNotification("No possible path found.");
 	}
-	
+
 	if(pSolution)
 	{
 		if(SolutionLength > 0)
@@ -235,12 +237,18 @@ void CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
 
 	// feed the grid with data from the map
 	m_pField = (char *)mem_alloc(Collision()->GetWidth() * Collision()->GetHeight() * sizeof(char), 1);
-	for(int y = 0; y < Collision()->GetHeight(); y++)
+	for(int y = 0; y < Collision()->GetHeight()-1; y++)
 	{
-		for(int x = 0; x < Collision()->GetWidth(); x++)
+		for(int x = 0; x < Collision()->GetWidth()-1; x++)
 		{
-			m_pField[y*Collision()->GetWidth()+x] =
-					!(Collision()->CheckPoint(x * 32, y * 32) || (NoFreeze && Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE));
+			m_pField[y*Collision()->GetWidth()+x] = (NoFreeze && Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE) || // treat freeze as air if allowed
+					!(
+							Collision()->CheckPoint(x * 32, y * 32) || // the following assures that the path isn't going through edge-passages
+									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
+									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
+									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
+									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32))
+					);
 		}
 	}
 }
