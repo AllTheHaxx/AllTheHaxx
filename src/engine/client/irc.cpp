@@ -35,7 +35,7 @@ CIRC::CIRC()
 	m_StartTime = 0;
 	m_ActiveCom = 0;
 	mem_zero(m_CmdToken, sizeof(m_CmdToken));
-	
+
 	m_Debug = false;
 }
 
@@ -85,7 +85,7 @@ void CIRC::SetActiveCom(unsigned index)
 void CIRC::SetActiveCom(CIRCCom *pCom)
 {
 	dbg_assert(pCom != NULL, "CIRC::SetActiveCom called with nullptr");
-	
+
 	for(unsigned i = 0; i < (unsigned)m_apIRCComs.size(); i++)
 		if(m_apIRCComs[i] == pCom)
 		{
@@ -217,7 +217,7 @@ void CIRC::StartConnection() // call this from a thread only!
 
 		if(m_Debug)
 			dbg_msg("irc/dbg", "%s", aNetBuff);
-			
+
 		for (int i=0; i < CurrentRecv; i++)
 		{
 			if (aNetBuff[i]=='\r' || aNetBuff[i]=='\t')
@@ -686,7 +686,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									static int64 LastUpdateTime = 0;
 									if(time_get() > LastUpdateTime + 3 * time_freq())
 									{
-										set_new_tick();
+//										set_new_tick();
 										LastUpdateTime = time_get();
 										s_AvailableQueries.clear();
 										for(unsigned c = 0; c < GetNumComs(); c++)
@@ -953,7 +953,7 @@ void CIRC::OpenQuery(const char *to)
 {
 	char aSanNick[25] = {0};
 	str_copy(aSanNick, to, sizeof(aSanNick));
-	
+
 	CIRCCom *pCom = GetCom(aSanNick);
 	if(pCom)
 		SetActiveCom(pCom);

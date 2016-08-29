@@ -671,11 +671,17 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, Player.x, Player.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
+		if(pCurrClient->m_Friend)
+			TextRender()->TextColor(0.2f, 0.7f, 0.2f, 1); // TODO: settings plx
 		TextRender()->TextEx(&Cursor, pCurrClient->m_aName, -1);
+		TextRender()->TextColor(1,1,1,1);
 
 		TextRender()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
+		if(str_comp(pCurrClient->m_aClan, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aClan) == 0)
+			TextRender()->TextColor(0.2f, 0.7f, 0.2f, 1); // TODO: settings plx
 		TextRender()->TextEx(&Cursor, pCurrClient->m_aClan, -1);
+		TextRender()->TextColor(1,1,1,1);
 
 		//TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		//Cursor.m_LineWidth = Button.w;

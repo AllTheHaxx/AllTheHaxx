@@ -58,7 +58,7 @@ void CSpoofRemote::OnRender()
 		static int CurClientID = 0;
 		static bool Step = false;
 
-		set_new_tick();
+//		set_new_tick();
 		const int64 Now = time_get();
 		if(Now-LastKickTime > time_freq()/4)
 		{

@@ -826,7 +826,7 @@ void CClient::OnEnterGame()
 
 	// EVENT CALL
 	LUA_FIRE_EVENT("OnEnterGame");
-	
+
 	// reset input
 	int i;
 	for(i = 0; i < 200; i++)
@@ -1197,7 +1197,7 @@ void CClient::DebugRender()
 	{
 		static int LastTick[2] = {0};
 		static int64 LastTime = 0;
-		set_new_tick();
+//		set_new_tick();
 		if(time_get() > LastTime + time_freq()/2)
 		{
 			TickSpeed += 2*(m_CurGameTick[g_Config.m_ClDummy] - LastTick[g_Config.m_ClDummy]);
@@ -3022,7 +3022,7 @@ void CClient::Run()
 	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
-	
+
 	int LastConsoleMode = g_Config.m_ClConsoleMode;
 	int64 ConsoleModeEmote = 0, LastTick = 0;  //timestamps
 
@@ -3035,17 +3035,17 @@ void CClient::Run()
 		{
 			CServerInfo Info;
 			GetServerInfo(&Info);
-			
+
 			//m_pGrahpics is IEngineGraphics, the base class of CGraphics_Threaded which we need here
 			CGraphics_Threaded * pGraph = dynamic_cast<CGraphics_Threaded*> (m_pGraphics);
-			
+
 			if(g_Config.m_ClConsoleMode) // hide
 			{
 				pGraph->HideWindow();
-				
+
 				if(IsDDNet(&Info) || IsDDRace(&Info))
 				{
-					//eye emote 
+					//eye emote
 					CNetMsg_Cl_Say Msg;
 					Msg.m_Team = 0;
 					Msg.m_pMessage = "/emote blink 999999";
@@ -3055,7 +3055,7 @@ void CClient::Run()
 			else // show
 			{
 				pGraph->UnhideWindow();
-				
+
 				if(str_comp_num(Info.m_aGameType, "DD", 2) == 0)
 				{
 					//eye emote
@@ -3068,7 +3068,7 @@ void CClient::Run()
 
 			LastConsoleMode = g_Config.m_ClConsoleMode;
 		}
-		
+
 		if(g_Config.m_ClConsoleMode && g_Config.m_ClConsoleModeEmotes && time_get() - ConsoleModeEmote > time_freq())
 		{
 			ConsoleModeEmote = time_get();
@@ -3076,7 +3076,7 @@ void CClient::Run()
 			Msg.m_Emoticon = 12;
 			SendPackMsg(&Msg, MSGFLAG_VITAL);
 		}
-		
+
 		if(time_get() > LastTick+time_freq()*(1/50))
 		{
 			LastTick = time_get();
@@ -3084,7 +3084,7 @@ void CClient::Run()
 		}
 
 		//
-		
+
 		VersionUpdate();
 
 		// handle pending connects
@@ -3267,10 +3267,10 @@ void CClient::Run()
 			while(t > TickStartTime(m_CurMenuTick+1))
 				m_CurMenuTick++;
 		}
-		
+
 		//for(int oz = 0; oz < m_Lua.GetLuaFiles().size(); oz++)
 		//	;
-	
+
 		LUA_FIRE_EVENT("ResumeThreads");
 
 #if defined(CONF_FAMILY_UNIX)
@@ -3329,7 +3329,7 @@ void CClient::Run()
 	{
 		SDL_Quit();
 	}
-	
+
 	if(m_pInputThread)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
@@ -3338,7 +3338,7 @@ void CClient::Run()
 		//thread_destroy(m_pInputThread); // this tends to cause segfaults sometimes, dunno why :o
 #endif
 	}
-	
+
 	if(m_Updater.GetCurrentState() == IUpdater::CLEAN)
 	{
 		// do cleanups - much hack.
@@ -4266,10 +4266,10 @@ void CClient::InputThread(void *pUser)
 	CClient *pSelf = (CClient *)pUser;
 	char aInput[64];
 	char *pInput = aInput;
-	
+
 	char aData[128];
 	mem_zero(aData, sizeof(aData));
-	
+
 #if defined(CONF_FAMILY_WINDOWS)
 	system("chcp 1252");
 #else
@@ -4279,7 +4279,7 @@ void CClient::InputThread(void *pUser)
 	flags |= O_NONBLOCK;
 	fcntl(fd, F_SETFL, flags);
 #endif
-	
+
 	while(1)
 	{
 		if(pSelf->m_State == IClient::STATE_QUITING)
@@ -4294,12 +4294,12 @@ void CClient::InputThread(void *pUser)
 			{
 				char Temp[4];
 				int Length = 0;
-				
+
 				while(*pInput)
 				{
 					//dbg_msg("Client", "%s", Temp);
 					int Size = str_utf8_encode(Temp, static_cast<const unsigned char>(*pInput++));
-							
+
 					if((unsigned int)(Length+Size) < sizeof(aData))
 					{
 						mem_copy(aData+Length, &Temp, Size);
@@ -4309,7 +4309,7 @@ void CClient::InputThread(void *pUser)
 						break;
 				}
 				aData[Length] = 0;
-				
+
 				pSelf->m_pConsole->ExecuteLineFlag(aData, CFGFLAG_CLIENT);
 			}
 			else
@@ -4318,7 +4318,7 @@ void CClient::InputThread(void *pUser)
 			pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
 			mem_zero(aInput, sizeof(aInput));
 		#endif
-	
+
 	}
 }
 

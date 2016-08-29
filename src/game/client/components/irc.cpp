@@ -98,7 +98,7 @@ void CIRCBind::OnRender()
 	{
 		if(time_get() > LastConnTry + 10*time_freq())
 		{
-			set_new_tick();
+//			set_new_tick();
 			LastConnTry = time_get();
 			Connect();
 		}

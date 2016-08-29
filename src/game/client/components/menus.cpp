@@ -127,24 +127,25 @@ float CMenus::ButtonFade(CButtonContainer *pBC, float Seconds, int Checked)
 
 void CMenusTooltip::OnRender()
 {
-	if(m_aTooltip[0])
-	{
-		CUIRect Rect;
-		const float FONT_SIZE = 13.0f;
-		Rect.x = UI()->MouseX() + 25.0f;
-		Rect.y = UI()->MouseY() + 0.5f;
-		const float mtw = UI()->Screen()->w-Rect.x-10.0f;
-		const int lc = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, mtw);
-		const float tw = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, str_length(m_aTooltip)) + 0.5f;
-		Rect.w = clamp(tw, tw < 5.0f ? mtw : tw, mtw+2.5f);
-		Rect.h = (float)((FONT_SIZE) * lc + 2.5);
-		Rect.Margin(-3.0f, &Rect);
-		Rect.y = clamp(Rect.y, 0.0f, UI()->Screen()->h - Rect.h);
-		RenderTools()->DrawUIRect(&Rect, vec4(0,0,0.2f,0.8f), CUI::CORNER_ALL, 2.5f);
-		TextRender()->Text(0, Rect.x+1.5f, Rect.y, FONT_SIZE, m_aTooltip, mtw);
+	if(m_aTooltip[0] == '\0')
+		return;
 
-		m_aTooltip[0] = 0;
-	}
+	const float FONT_SIZE = 13.0f;
+	CUIRect Rect;
+	Rect.x = UI()->MouseX() + 25.0f;
+	Rect.y = UI()->MouseY() + 0.5f;
+	const float maxWidth = UI()->Screen()->w-Rect.x-10.0f;
+	const int lineCount = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, maxWidth);
+	//Rect.w = clamp(tw, tw < 5.0f ? maxWidth : tw, maxWidth+2.5f);
+	Rect.w = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, -1, maxWidth);
+	Rect.h = (FONT_SIZE * (float)lineCount + 2.5f);
+	Rect.Margin(-3.0f, &Rect);
+	Rect.y = clamp(Rect.y, 0.0f, UI()->Screen()->h - Rect.h);
+	RenderTools()->DrawUIRect(&Rect, vec4(0,0,0.2f,0.8f), CUI::CORNER_ALL, 2.5f);
+	TextRender()->Text(0, Rect.x+1.5f, Rect.y, FONT_SIZE, m_aTooltip, maxWidth);
+
+	m_aTooltip[0] = 0;
+
 }
 
 void CMenus::OnConsoleInit()

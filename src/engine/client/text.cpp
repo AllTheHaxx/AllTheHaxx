@@ -392,8 +392,7 @@ class CTextRender : public IEngineTextRender
 
 		// search for the character
 		// TODO: remove this linear search
-		int i;
-		for(i = 0; i < pSizeData->m_CurrentCharacter; i++)
+		for(int i = 0; i < pSizeData->m_CurrentCharacter; i++)
 		{
 			if(pSizeData->m_aCharacters[i].m_ID == Chr)
 			{
@@ -411,7 +410,7 @@ class CTextRender : public IEngineTextRender
 		}
 
 		// touch the character
-		// TODO: don't call time_get here
+		// TODO: don't call time_get here || shouldn't be too bad at all since caching is used...
 		if(pFontchr)
 			pFontchr->m_TouchTime = time_get();
 
@@ -507,7 +506,7 @@ public:
 	}
 
 
-	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, int MaxWidth)
+	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float MaxWidth)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
@@ -515,12 +514,13 @@ public:
 		TextEx(&Cursor, pText, -1);
 	}
 
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int Length)
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int Length, float LineWidth = -1)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
-		TextEx(&Cursor, pText, Length);
-		return Cursor.m_X;
+		if(LineWidth > 0)
+			Cursor.m_LineWidth = LineWidth;
+		return TextEx(&Cursor, pText, Length);
 	}
 
 	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth)
@@ -548,7 +548,7 @@ public:
 		m_TextOutlineA = a;
 	}
 
-	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
+	virtual float TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
 		CFont *pFont = pCursor->m_pFont;
 		CFontSizeData *pSizeData = NULL;
@@ -571,13 +571,13 @@ public:
 		// to correct coords, convert to screen coords, round, and convert back
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		FakeToScreenX = (Graphics()->ScreenWidth()/(ScreenX1-ScreenX0));
-		FakeToScreenY = (Graphics()->ScreenHeight()/(ScreenY1-ScreenY0));
+		FakeToScreenX = (((float)Graphics()->ScreenWidth())/(ScreenX1-ScreenX0));
+		FakeToScreenY = (((float)Graphics()->ScreenHeight())/(ScreenY1-ScreenY0));
 		ActualX = (int)(pCursor->m_X * FakeToScreenX);
-		ActualY = (int)(pCursor->m_Y * FakeToScreenY);
+		ActualY = (int)(pCursor->m_Y * FakeToScreenY); // XXX: NOTE: maybe properly round this...? OR why even round it at all??
 
-		CursorX = ActualX / FakeToScreenX;
-		CursorY = ActualY / FakeToScreenY;
+		CursorX = ((float)ActualX) / FakeToScreenX;
+		CursorY = ((float)ActualY) / FakeToScreenY;
 
 		// same with size
 		ActualSize = (unsigned int)round_to_int(Size * FakeToScreenY);
@@ -588,22 +588,23 @@ public:
 			pFont = m_pDefaultFont;
 
 		if(!pFont)
-			return;
+			return -1;
 
 		pSizeData = GetSize(pFont, ActualSize);
 		RenderSetup(pFont, ActualSize);
 
-		float Scale = 1/pSizeData->m_FontSize;
+		float Scale = 1.0f/(float)pSizeData->m_FontSize;
 
 		// set length
 		if(Length < 0)
 			Length = str_length(pText);
 
+		float MaxLineWidth = 0.0f;
+
 		// if we don't want to render, we can just skip the first outline pass
 		i = 1;
 		if(pCursor->m_Flags&TEXTFLAG_RENDER)
 			i = 0;
-
 		for(;i < 2; i++)
 		{
 			const char *pCurrent = (char *)pText;
@@ -627,7 +628,7 @@ public:
 					Graphics()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
 			}
 
-			set_new_tick();
+//			set_new_tick();
 			int64 InitTime = time_get();
 			while(time_get() < InitTime + time_freq()/50 && pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
 			{
@@ -683,6 +684,7 @@ public:
 						DrawY += Size;
 						DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
 						DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+						MaxLineWidth = max(MaxLineWidth, DrawX);
 						++LineCount;
 						if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
 							break;
@@ -709,6 +711,7 @@ public:
 
 						DrawX += Advance*Size;
 						pCursor->m_CharCount++;
+						MaxLineWidth = max(MaxLineWidth, DrawX);
 					}
 				}
 
@@ -720,6 +723,7 @@ public:
 					DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
 					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 					++LineCount;
+					MaxLineWidth = max(MaxLineWidth, DrawX);
 				}
 			}
 
@@ -729,9 +733,11 @@ public:
 
 		pCursor->m_X = DrawX;
 		pCursor->m_LineCount = LineCount;
-
 		if(GotNewLine)
 			pCursor->m_Y = DrawY;
+
+		return MaxLineWidth;
+
 	}
 
 };

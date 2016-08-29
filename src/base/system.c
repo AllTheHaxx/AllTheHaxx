@@ -227,7 +227,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 		va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
 		//see http://www.cplusplus.com/articles/2ywTURfi/
-		
+
 		if(str_comp_nocase(sys, "chat") == 0)
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); // gamechat: white
 		else if(str_comp_nocase(sys, "teamchat") == 0)
@@ -240,7 +240,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 3); // irc-chat: blue
 		else
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 8); // everything else: gray
-		
+
 		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #else
 		// colored output
@@ -2895,14 +2895,14 @@ int simpleSHA256(void* input, unsigned long length, unsigned char* md)
 void open_default_browser(const char *url)
 {
 	char aUrl[255] = {0};
-	
+
 	if (!url || url[0] == 0)
 		return;
 
 	// only read the first string before whitespace for prevent injection
 	str_copy(aUrl, url, sizeof(aUrl));
 	str_skip_to_whitespace(aUrl);
-	
+
 	// make sure the string is sane
 	{
 		int i = 0;
