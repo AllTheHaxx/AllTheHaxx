@@ -113,16 +113,14 @@ CMenus::CMenus()
 
 float CMenus::ButtonFade(CButtonContainer *pBC, float Seconds, int Checked)
 {
-	if(pBC->m_FadeStartTime > Client()->LocalTime())
-		pBC->m_FadeStartTime = 0.0f;
 	if (UI()->HotItem() == pBC->GetID() || Checked)
 	{
-		pBC->m_FadeStartTime = Client()->LocalTime();
+		pBC->m_FadeStartTime = Client()->SteadyTimer();
 		return Seconds;
 	}
-	else if (pBC->m_FadeStartTime + Seconds > Client()->LocalTime())
+	else if (pBC->m_FadeStartTime + Seconds > Client()->SteadyTimer())
 	{
-		return pBC->m_FadeStartTime + Seconds - Client()->LocalTime();
+		return pBC->m_FadeStartTime + Seconds - Client()->SteadyTimer();
 	}
 	return 0.0f;
 }

@@ -633,7 +633,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 #endif
 
 	// options
-	static int s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
+	static CButtonContainer s_Buttons[MAX_CLIENTS][3];
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -653,13 +653,15 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		if(!Item.m_Visible)
 			continue;
 
+		CGameClient::CClientData *pCurrClient = &(m_pClient->m_aClients[Index]);
+
 		if(Count%2 == 1)
 			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 		Item.m_Rect.VSplitRight(300.0f, &Player, &Item.m_Rect);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
-		CTeeRenderInfo Info = m_pClient->m_aClients[Index].m_RenderInfo;
+		CTeeRenderInfo Info = pCurrClient->m_RenderInfo;
 		Info.m_Size = Button.h;
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Button.x+Button.h/2, Button.y+Button.h/2));
 
@@ -669,17 +671,17 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, Player.x, Player.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aName, -1);
+		TextRender()->TextEx(&Cursor, pCurrClient->m_aName, -1);
 
 		TextRender()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
+		TextRender()->TextEx(&Cursor, pCurrClient->m_aClan, -1);
 
 		//TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		//Cursor.m_LineWidth = Button.w;
 
 		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[Index].m_Country, &Color,
+		m_pClient->m_pCountryFlags->Render(pCurrClient->m_Country, &Color,
 										   Button2.x, (float)(Button2.y + Button2.h / 2.0f - 0.75 * Button2.h / 2.0f), 1.5f * Button2.h, 0.75f * Button2.h);
 
 		// ignore button
@@ -687,16 +689,14 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
-		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+		if(g_Config.m_ClShowChatFriends && !pCurrClient->m_Friend)
 		{
-			CPointerContainer FriendContainer(&s_aPlayerIDs[Index][0]);
-			DoButton_Toggle(&FriendContainer, 1, &Button, false);
+			DoButton_Toggle(&(s_Buttons[Index][0]), 1, &Button, false, Localize("Disable 'Show Chat from Friends only' to use this button!"));
 		}
 		else
 		{
-			CPointerContainer IgnoreContainer(&s_aPlayerIDs[Index][0]);
-			if(DoButton_Toggle(&IgnoreContainer, m_pClient->m_aClients[Index].m_ChatIgnore, &Button, true))
-				m_pClient->m_aClients[Index].m_ChatIgnore ^= 1;
+			if(DoButton_Toggle(&(s_Buttons[Index][0]), pCurrClient->m_ChatIgnore, &Button, true))
+				pCurrClient->m_ChatIgnore ^= 1;
 		}
 
 		// friend button
@@ -704,13 +704,12 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
-		CPointerContainer Container2(&s_aPlayerIDs[Index][1]);
-		if(DoButton_Toggle(&Container2, m_pClient->m_aClients[Index].m_Friend, &Button, true))
+		if(DoButton_Toggle(&(s_Buttons[Index][1]), pCurrClient->m_Friend, &Button, true))
 		{
-			if(m_pClient->m_aClients[Index].m_Friend)
-				m_pClient->Friends()->RemoveFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
+			if(pCurrClient->m_Friend)
+				m_pClient->Friends()->RemoveFriend(pCurrClient->m_aName, pCurrClient->m_aClan);
 			else
-				m_pClient->Friends()->AddFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
+				m_pClient->Friends()->AddFriend(pCurrClient->m_aName, pCurrClient->m_aClan);
 		}
 
 		// copy ident
@@ -719,32 +718,31 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Button.VSplitLeft(Button.h, &Button, 0);
 		static CIdentity::CIdentEntry s_CmpIdents[MAX_CLIENTS];
 		CIdentity::CIdentEntry * const pIdent = &s_CmpIdents[Index];
-		if(std::string(pIdent->m_aName) != std::string(m_pClient->m_aClients[Index].m_aName)) // update the cache entry if necessary | std::string hack because str_comp can only handle A-Z
+		if(std::string(pIdent->m_aName) != std::string(pCurrClient->m_aName)) // update the cached entry if necessary | std::string hack because str_comp can only handle A-Z
 		{
-			str_copy(pIdent->m_aName, m_pClient->m_aClients[Index].m_aName, sizeof(m_pClient->m_aClients[Index].m_aName));
-			str_copy(pIdent->m_aClan, m_pClient->m_aClients[Index].m_aClan, sizeof(m_pClient->m_aClients[Index].m_aClan));
-			str_copy(pIdent->m_aSkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(m_pClient->m_aClients[Index].m_aSkinName));
-			pIdent->m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
-			pIdent->m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
-			pIdent->m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
-			pIdent->m_Country = m_pClient->m_aClients[Index].m_Country;
+			str_copy(pIdent->m_aName, pCurrClient->m_aName, sizeof(pCurrClient->m_aName));
+			str_copy(pIdent->m_aClan, pCurrClient->m_aClan, sizeof(pCurrClient->m_aClan));
+			str_copy(pIdent->m_aSkin, pCurrClient->m_aSkinName, sizeof(pCurrClient->m_aSkinName));
+			pIdent->m_UseCustomColor = pCurrClient->m_UseCustomColor;
+			pIdent->m_ColorBody = pCurrClient->m_ColorBody;
+			pIdent->m_ColorFeet = pCurrClient->m_ColorFeet;
+			pIdent->m_Country = pCurrClient->m_Country;
 		}
 
 		// only render the ID button if we don't have him already
 		if(GameClient()->m_pIdentity->GetIdentID(s_CmpIdents[Index]) == -1) // this costs so much D:
 		{
-			static CButtonContainer s_IDButton[MAX_CLIENTS];
-			if(DoButton_Menu(&s_IDButton[Index], "ID", 0, &Button, "Add as new identity"))
+			if(DoButton_Menu(&(s_Buttons[Index][2]), "ID", 0, &Button, Localize("Add as new identity")))
 			{
 				CIdentity::CIdentEntry Entry;
 				mem_zero(&Entry, sizeof(Entry));
-				str_copy(Entry.m_aName, m_pClient->m_aClients[Index].m_aName, sizeof(Entry.m_aName));
-				str_copy(Entry.m_aClan, m_pClient->m_aClients[Index].m_aClan, sizeof(Entry.m_aClan));
-				str_copy(Entry.m_aSkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(Entry.m_aSkin));
-				Entry.m_UseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
-				Entry.m_ColorBody = m_pClient->m_aClients[Index].m_ColorBody;
-				Entry.m_ColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
-				Entry.m_Country = m_pClient->m_aClients[Index].m_Country;
+				str_copy(Entry.m_aName, pCurrClient->m_aName, sizeof(Entry.m_aName));
+				str_copy(Entry.m_aClan, pCurrClient->m_aClan, sizeof(Entry.m_aClan));
+				str_copy(Entry.m_aSkin, pCurrClient->m_aSkinName, sizeof(Entry.m_aSkin));
+				Entry.m_UseCustomColor = pCurrClient->m_UseCustomColor;
+				Entry.m_ColorBody = pCurrClient->m_ColorBody;
+				Entry.m_ColorFeet = pCurrClient->m_ColorFeet;
+				Entry.m_Country = pCurrClient->m_Country;
 				m_pClient->m_pIdentity->AddIdent(Entry);
 			}
 		}
