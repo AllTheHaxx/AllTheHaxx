@@ -445,17 +445,14 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// ath
-		if(g_Config.m_ClScoreboardShowATH)
-			if(m_pClient->m_aClients[pInfo->m_ClientID].m_ATH |=
-					(m_pClient->m_Snap.m_aCharacters[pInfo->m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH1) &&
-					(m_pClient->m_Snap.m_aCharacters[pInfo->m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH2))
-			{
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
-				Graphics()->QuadsBegin();
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.f*m_FadeVal);
-				RenderTools()->DrawRoundRect(x-3.f, y+Spacing, 3.f*min(40.0f, LineHeight)/2.f, min(40.0f, LineHeight), 0.f);
-				Graphics()->QuadsEnd();
-			}
+		if(g_Config.m_ClScoreboardShowATH && m_pClient->m_aClients[pInfo->m_ClientID].m_ATH)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.f*m_FadeVal);
+			RenderTools()->DrawRoundRect(x-3.f, y+Spacing, 3.f*min(40.0f, LineHeight)/2.f, min(40.0f, LineHeight), 0.f);
+			Graphics()->QuadsEnd();
+		}
 
 		// score
 		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
@@ -546,7 +543,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			TextRender()->TextColor(clamp(pInfo->m_Latency, 0, 1000)/150.0f, 200.0f/clamp(pInfo->m_Latency, 0, 1000), 0, 0.75f*m_FadeVal);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 		TextRender()->TextColor(1,1,1,m_FadeVal);
-	
+
 
 
 		y += LineHeight+Spacing;
@@ -557,7 +554,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		} else {
 			if (rendered == 16) break;
 		}
-	
+
 	}
 	TextRender()->TextColor(1,1,1,1);
 }
