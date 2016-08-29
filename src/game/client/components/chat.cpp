@@ -1182,16 +1182,16 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
 				continue;
 			LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChatSend");
-			if(lfunc) try { if(lfunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+			if(lfunc) try { if(lfunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[ijdfg]); }
 		}
 		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
-		if(confunc) try { if(confunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+		if(confunc) try { if(confunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
 	}
 #endif
 
 	if(!g_Config.m_ClChat || DiscardChat)
 	{
-		if(!DiscardChat)
+		if(!g_Config.m_ClChat)
 			m_pClient->m_pHud->PushNotification(Localize("Chat is disabled. Set 'cl_chat' to 1 or 2 to send messages!"));
 		return;
 	}
@@ -1225,7 +1225,7 @@ char *CChat::ReadPubKey(RSA *pKeyPair)
 	char *PEMKey = new char[512];
 	int KeyLen = BIO_pending(pBio);
 	BIO_read(pBio, PEMKey, KeyLen);
-	
+
 	return PEMKey;
 }
 
@@ -1239,7 +1239,7 @@ char *CChat::ReadPrivKey(RSA *pKeyPair)
 	char *PEMKey = new char[512];
 	int KeyLen = BIO_pending(pBio);
 	BIO_read(pBio, PEMKey, KeyLen);
-	
+
 	return PEMKey;
 }
 
@@ -1302,7 +1302,7 @@ char *CChat::DecryptMsg(const char *pMsg)
 	if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_PADDING) != -1)
 	{
 		str_copy(pClear, (char *)aDecrypted, 512);
-		return pClear; 
+		return pClear;
 	}
 	else
 		return 0;

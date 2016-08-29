@@ -85,16 +85,16 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 		luaopen_bit(m_LuaHandler.m_pLuaState);
 		luaopen_jit(m_LuaHandler.m_pLuaState);
 		luaopen_ffi(m_LuaHandler.m_pLuaState); // don't know about this yet. could be a sand box leak.
-		
+
 		m_LuaHandler.m_Inited = false;
 		m_LuaHandler.m_ScopeCount = 0;
-		
+
 		//Some luaconsole funcs!
 		getGlobalNamespace(m_LuaHandler.m_pLuaState)
 			.addFunction("print", &CGameConsole::PrintLuaLine);
-			
+
 		LoadLuaFile("data/luabase/events.lua");
-		
+
 		CGameConsole::m_pStatLuaConsole = this;
 	}
 #endif
@@ -125,10 +125,10 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 				if(m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
 					continue;
 				LuaRef lfunc = m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnConsoleCommand");
-				if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+				if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { m_pGameConsole->Client()->Lua()->HandleException(e, m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]); }
 			}
 			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
-			if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: %s\n", e.what()); }
+			if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
 
 			if(DiscardCommand)
 				return;
@@ -156,13 +156,13 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		int Status = 0;
 		char ErrorMsg[512];
 		bool ScopeIncreased = false;
-		
+
 		if(!m_LuaHandler.m_Inited)  // this is yet quite retarded!
 		{
 			CLuaFile::RegisterLuaCallbacks(m_LuaHandler.m_pLuaState);
 			m_LuaHandler.m_Inited = true;
 		}
-		
+
 		// SCOPING DETECT!
 		std::string ActLine(pLine); // cuz after an elseif is no extra end!
 		if(ActLine.find("while") == 0 || ActLine.find("function") == 0 || (ActLine.find("if") == 0 && ActLine.find("elseif") == std::string::npos) || ActLine.find("for") == 0)
@@ -176,34 +176,34 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			// so we remove all whitespaces and check again
 			bool RealEnd = false;
 			std::string testbuf = ActLine;
-			
+
 			while(testbuf.find(" ") != std::string::npos)   //remove all whitespaces
 			{
 				testbuf.replace(testbuf.find(" "),testbuf.size(),"");
 			}
-			
+
 			if(testbuf.compare("end") == 0)
 				RealEnd = true;
-			
+
 			if(ActLine.find(" end") != std::string::npos)
 				RealEnd = true;
-			
+
 			if(RealEnd)
 			{
 				char aBuf[512] = { 0 };
 				if(m_LuaHandler.m_ScopeCount > 0)
-				{	
+				{
 					int RemoveElseScope = 0;
-						
+
 					if(ActLine.find("else") != std::string::npos)  //works for else and elseif
 						RemoveElseScope = 1;
-					
+
 					for(int i = 0; i < m_LuaHandler.m_ScopeCount-1-RemoveElseScope; i++)
 						str_append(aBuf, "     ", sizeof(aBuf));
 					str_append(aBuf, pLine, sizeof(aBuf));
 				}
 				m_LuaHandler.m_ScopeCount--;
-				
+
 				if(m_LuaHandler.m_ScopeCount == 0)  //if we are now at zero after decreasing => print new line!
 				{
 					PrintLine(aBuf);
@@ -211,32 +211,32 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 				}
 			}
 		}
-		
+
 		m_LuaHandler.m_FullLine.append(pLine);
 		m_LuaHandler.m_FullLine.append(" ");
-		
+
 		if(m_LuaHandler.m_ScopeCount == 0)
 		{
 			try
 			{
 				luaL_loadstring(m_LuaHandler.m_pLuaState, m_LuaHandler.m_FullLine.c_str());
 				Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
-				
+
 				if(Status)
 				{
 					str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
-					
+
 					if(!str_comp(ErrorMsg, "attempt to call a string value"))  //HACKISH SOLUTION : Try recompile pLine with a print!
 					{
 						Status = 0;
-						
+
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "print(%s)", m_LuaHandler.m_FullLine.c_str());
-						
+
 						luaL_loadstring(m_LuaHandler.m_pLuaState, aBuf);
 						Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
 					}
-				}			
+				}
 			}
 			catch(std::exception &e)  //just to be sure...
 			{
@@ -268,19 +268,19 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
 		}
-		
+
 		if(ScopeIncreased || m_LuaHandler.m_ScopeCount > 0)   //bigger 0
 		{
 			char aBuf[512] = { 0 };
-			
+
 			int Limit = ScopeIncreased == true ? m_LuaHandler.m_ScopeCount-1 : m_LuaHandler.m_ScopeCount;
-			
+
 			if(ActLine.find("else") != std::string::npos)
 				Limit--;
-			
+
 			for(int i = 0; i < Limit; i++)
 				str_append(aBuf, "     ", sizeof(aBuf));
-			
+
 			str_append(aBuf, pLine, sizeof(aBuf));
 			PrintLine(aBuf);
 		}
@@ -366,10 +366,10 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 					{
 						//if(m_LuaHandler.m_FullLine.size())
 						//	m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
-					
+
 						std::string Complete = m_LuaHandler.m_FullLine;
 						Complete.append(m_Input.GetString());
-					
+
 						//add this to the history :3
 						char *pEntry = m_History.Allocate(Complete.size()+1);
 						mem_copy(pEntry, Complete.c_str(), Complete.size()+1);
@@ -575,7 +575,7 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 #if defined(FEATURE_LUA)
 	if(m_Type != CONSOLETYPE_LUA)
 		return false;
-	
+
 	if(!pFile || pFile[0] == '\0' || !m_LuaHandler.m_pLuaState)
 	{
 		char aBuf[256];
@@ -583,7 +583,7 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 		PrintLine(aBuf);
 		return false;
 	}
-		
+
 	int Status = luaL_loadfile(m_LuaHandler.m_pLuaState, pFile);
 	if (Status)
 	{
@@ -598,7 +598,7 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 		PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
 		return false;
 	}
-	
+
 	return true;
 #else
 	return false;
