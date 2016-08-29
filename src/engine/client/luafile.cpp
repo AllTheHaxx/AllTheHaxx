@@ -23,7 +23,6 @@ CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLu
 {
 	m_pLuaState = 0;
 	m_State = STATE_IDLE;
-	m_pErrorStr = 0;
 	CheckCertificate(Filename.c_str()); // just to load the permission flags
 	Reset();
 }
@@ -37,6 +36,9 @@ void CLuaFile::Reset(bool error)
 {
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
+
+	if(!error)
+		m_pErrorStr = 0;
 
 	m_PermissionFlags = 0;
 	LoadPermissionFlags(m_Filename.c_str());
