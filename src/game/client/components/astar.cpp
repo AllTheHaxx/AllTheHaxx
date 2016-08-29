@@ -38,41 +38,34 @@ void CAStar::OnReset() // is being called right after OnMapLoad()
 {
 	m_Path.clear();
 	m_PathFound = false;
-}
-
-void CAStar::OnMessage(int MsgType, void *pRawMsg)
-{
-	if(MsgType != NETMSGTYPE_SV_KILLMSG)
-		return;
-
-	CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
-	if(pMsg->m_Victim == GameClient()->m_Snap.m_LocalClientID)
-		OnPlayerDeath();
+	m_LastClosestNode = -1;
+	m_LastPos = vec2(0);
 }
 
 void CAStar::OnPlayerDeath() // TODO!! FIX THIS!!
 {
-	if(!m_PathFound || !g_Config.m_ClPathFinding)
+	if(!m_PathFound || !g_Config.m_ClPathFinding || m_LastPos == vec2(0))
 		return;
 
 	// fitness calculation
-	float ClosestNode = -1.0f;
+	float ClosestNodeDist = -1.0f;
 	int ClosestID = -1;
-	for(int i = m_Path.size(); i >= 0; i--)
+	for(int i = 1; i < m_Path.size(); i++)
 	{
 		//dbg_msg("debug", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].x, m_Path[i].y);
-		if((ClosestNode < 0.0f || distance(m_LastPos, m_Path[i].m_Pos) < ClosestNode)/* && !Collision()->IntersectLine(m_LastPos, m_Path[i], 0x0, 0x0)*/)
+		if(((ClosestNodeDist < 0.0f || distance(m_LastPos, m_Path[i].m_Pos) < ClosestNodeDist)) && !Collision()->IntersectLine(m_LastPos, m_Path[i].m_Pos, 0x0, 0x0))
 		{
-			ClosestNode = distance(m_LastPos, m_Path[i].m_Pos);
+			ClosestNodeDist = distance(m_LastPos, m_Path[i].m_Pos);
 			ClosestID = i;
-			//dbg_msg("FOUND NEW CLOSEST NODE", "i=%i with dist=%.2f", ClosestID, ClosestNode);
+			//dbg_msg("FOUND NEW CLOSEST NODE", "i=%i with dist=%.2f", ClosestID, ClosestNodeDist);
 		}
 	}
 
-	if(g_Config.m_ClNotifications && ClosestID != -1)
+	m_LastClosestNode = ClosestID;
+	if(g_Config.m_ClNotifications && ClosestID > 0)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", m_Path.size()-ClosestID, m_Path.size(), ((float)(m_Path.size()-ClosestID)/(float)m_Path.size())*100.0f);
+		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", m_Path.size()-ClosestID, m_Path.size(), (((float)m_Path.size()-ClosestID)/(float)m_Path.size())*100.0f);
 		m_pClient->m_pHud->PushNotification(aBuf);
 	}
 }
@@ -115,14 +108,19 @@ void CAStar::OnRender()
 
 	for(int i = 0; i < m_Path.size(); i++)
 	{
+		if(i == m_LastClosestNode)
+			Graphics()->SetColor(0.6f, 0.6f, 0.6f, 0.4f);
+
 		// don't render out of view
-		if(distance(m_LastPos, m_Path[i].m_Pos) > 1000)
+		vec2 Pos = GameClient()->m_Snap.m_SpecInfo.m_Active ? vec2(GameClient()->m_Snap.m_pSpectatorInfo->m_X, GameClient()->m_Snap.m_pSpectatorInfo->m_X) : m_LastPos;
+		if(distance(Pos, m_Path[i].m_Pos) > 1000)
 			continue;
 
-		int aSprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
+		static const int aSprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
 		RenderTools()->SelectSprite(aSprites[i%3]);
 		//Graphics()->QuadsSetRotation(Client()->GameTick());
 		IGraphics::CQuadItem QuadItem(m_Path[i].m_Pos.x, m_Path[i].m_Pos.y, 16, 16);
+
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 	Graphics()->QuadsEnd();

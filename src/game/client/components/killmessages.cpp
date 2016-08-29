@@ -10,6 +10,7 @@
 #include <game/client/animstate.h>
 #include "killmessages.h"
 #include "console.h"
+#include "astar.h"
 
 void CKillMessages::OnReset()
 {
@@ -23,6 +24,9 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
+
+		if(pMsg->m_Victim == GameClient()->m_Snap.m_LocalClientID)
+			GameClient()->m_pAStar->OnPlayerDeath();
 
 		// unpack messages
 		CKillMsg Kill;

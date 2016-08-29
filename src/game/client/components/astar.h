@@ -25,7 +25,7 @@ class CAStar : public CComponent
 	void* m_pThread;
 	bool m_ThreadShouldExit;
 
-	void OnPlayerDeath();
+	int m_LastClosestNode; // death position
 
 protected:
 	int GetTileAreaCenter(int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
@@ -45,10 +45,11 @@ public:
 	~CAStar();
 
 	virtual void OnReset();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnRender();
 	virtual void OnMapLoad();
 	virtual void OnStateChange(int NewState, int OldState);
+
+	void OnPlayerDeath();
 };
 
 #endif
