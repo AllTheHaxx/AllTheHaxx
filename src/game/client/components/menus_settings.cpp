@@ -3297,11 +3297,11 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		// clear button
 		{
-			CPointerContainer s_ClearButton(&g_Config.m_ClLuaFilterString);
+			static CButtonContainer s_ClearButton;
 			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClLuaFilterString[0] = 0;
-				UI()->SetActiveItem(&g_Config.m_ClLuaFilterString);
+				UI()->SetActiveItem(s_LuaFilterStringEditbox.GetID());
 			}
 		}
 	}
@@ -3325,20 +3325,16 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		Checkbox.HSplitTop(5.0f, 0, &Checkbox);
 
 		static CButtonContainer s_Checkbox;
-		int MouseButton = DoButton_CheckBox_Number(&s_Checkbox, s_apLabels[ShowActiveOnly], ShowActiveOnly, &Checkbox)-1;
-		if(MouseButton >= 0)
+		int MouseButton = DoButton_CheckBox_Number(&s_Checkbox, s_apLabels[ShowActiveOnly], ShowActiveOnly, &Checkbox);
+		if(MouseButton == 1)
 		{
-			switch (MouseButton)
-			{
-			case 0:
-				if(++ShowActiveOnly > 2)
-					ShowActiveOnly = 0;
-			break;
-			case 1:
-				if(--ShowActiveOnly < 0)
-					ShowActiveOnly = 2;
-			break;
-			}
+			if(++ShowActiveOnly > 2)
+				ShowActiveOnly = 0;
+		}
+		else if(MouseButton == 2)
+		{
+			if(--ShowActiveOnly < 0)
+				ShowActiveOnly = 2;
 		}
 	}
 }
