@@ -305,7 +305,11 @@ void CMenus::RenderIRC(CUIRect MainView)
 				m_aIRCBacklog.add(std::string(aEntryText));
 			s_CurrBacklogIndex = -1;
 			aEntryText[0] = 0;
+			UI()->SetActiveItem(s_EditboxInput.GetID());
 		}
+
+		if(!UI()->HotItem())
+			UI()->SetActiveItem(s_EditboxInput.GetID());
 
 		//Channel/Query
 		CIRCCom *pCom = m_pClient->IRC()->GetActiveCom();
