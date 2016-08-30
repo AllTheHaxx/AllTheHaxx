@@ -3,7 +3,7 @@ config.lua
 datasrc/__pycache__
 datasrc/*.pyc
 objs
-lua/
+/lua/
 rsa
 src/game/generated
 update/
