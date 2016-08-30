@@ -5,6 +5,10 @@ dependencies:
         sudo apt-get update
         sudo apt-get build-dep teeworlds
         sudo apt-get install libsdl2-dev
+        
+        sudo apt-get install mingw-w64 mingw-w64-common
+        sudo apt-get install mingw-w64-i686-dev mingw-w64-x86-64-dev
+        sudo apt-get install gcc-mingw-w64-base gcc-mingw-w64 g++-mingw-w64 
 
         if [ ! -x ~/bam/bam ]; then
           git clone https://github.com/matricks/bam ~/bam/
@@ -14,13 +18,35 @@ dependencies:
         cd ./other/luajit/LuaJIT-2.0.2
         make -j$(nproc)
         cp -l src/libluajit.a ../unix/libluajit.a
+        
+        mkdir $CIRCLE_ARTIFACTS/linux
+        mkdir $CIRCLE_ARTIFACTS/windows
 
   cache_directories:
     - "~/bam/"
     - "./other/luajit/"
 
 ## Customize test commands
+# first we will build the usual linux-amd64 stuff
+# then we setup the environment for win32 and win64 cross-compiling
 test:
   override:
     - |
         ~/bam/bam client_release
+        ~/bam/bam tools_release
+        mv "./AllTheHaxx" $CIRCLE_ARTIFACTS"/linux/."
+        mv "./slc_unpack" $CIRCLE_ARTIFACTS"/linux/."
+        
+        export TARGET_FAMILY=windows TARGET_PLATFORM=win64 TARGET_ARCH=amd64 PREFIX=x86_64-w64-mingw32- PATH=/usr/x86_64-w64-mingw32/bin:$PATH
+        alias windres=${PREFIX}windres
+        ~/bam/bam client_release
+        ~/bam/bam tools_release
+        mv "./AllTheHaxx.exe" $CIRCLE_ARTIFACTS"/AllTheHaxx-win64.exe"
+        mv "./slc_unpack.exe" $CIRCLE_ARTIFACTS"/slc_unpack-win64.exe"
+        
+        export TARGET_FAMILY=windows TARGET_PLATFORM=win32 TARGET_ARCH=ia32 PREFIX=i686-w64-mingw32- PATH=/usr/i686-w64-mingw32/bin:$PATH
+        alias windres=${PREFIX}windres
+        ~/bam/bam client_release
+        ~/bam/bam tools_release
+        mv "./AllTheHaxx.exe" $CIRCLE_ARTIFACTS"/AllTheHaxx-win32.exe"
+        mv "./slc_unpack.exe" $CIRCLE_ARTIFACTS"/slc_unpack-win32.exe"
