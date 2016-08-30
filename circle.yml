@@ -6,6 +6,7 @@ dependencies:
         sudo apt-get build-dep teeworlds
         sudo apt-get install libsdl2-dev
 
+        # install cross-compiler stuff for windows
         if [ $CIRCLE_NODE_INDEX -gt 0 ]; then
           sudo apt-get install mingw-w64 mingw-w64-common
           sudo apt-get install mingw-w64-i686-dev mingw-w64-x86-64-dev
@@ -17,6 +18,7 @@ dependencies:
           cd ~/bam; ./make_unix.sh
         fi
 
+        # luajit will only be compiled dynamically on linux
         if [ $CIRCLE_NODE_INDEX -eq 0 ]; then
           cd ./other/luajit/LuaJIT-2.0.2
           make -j$(nproc)
@@ -32,10 +34,41 @@ dependencies:
     - "./other/luajit/"
 
 ## Customize test commands
-# first we will build the usual linux-amd64 stuff
-# then we setup the environment for win32 and win64 cross-compiling
+# Container 1 builds linux 64 bit
+# Container 2 builds windows 64 bit
+# Container 3 builds windows 32 bit
+# everything will be collected as artifacts.
 test:
   override:
-    - case $CIRCLE_NODE_INDEX in 0) ~/bam/bam client_release && ~/bam/bam tools_release && mv ./AllTheHaxx $CIRCLE_ARTIFACTS/linux/. && mv ./slc_unpack $CIRCLE_ARTIFACTS/linux/. ;; 1) export TARGET_FAMILY=windows TARGET_PLATFORM=win64 TARGET_ARCH=amd64 PREFIX=x86_64-w64-mingw32- PATH=/usr/x86_64-w64-mingw32/bin:$PATH && alias windres=$PREFIXwindres && ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false CC=$PREFIXgcc CXX=$PREFIXg++ WINDRES=$PREFIXwindres && ~/bam/bam client_release && ~/bam/bam tools_release && mv ./AllTheHaxx.exe $CIRCLE_ARTIFACTS/win64/AllTheHaxx.exe && mv ./slc_unpack.exe $CIRCLE_ARTIFACTS/win64/slc_unpack.exe ;; 2) export TARGET_FAMILY=windows TARGET_PLATFORM=win32 TARGET_ARCH=ia32 PREFIX=i686-w64-mingw32- PATH=/usr/i686-w64-mingw32/bin:$PATH && alias windres=$PREFIXwindres && ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false CC=$PREFIXgcc CXX=$PREFIXg++ WINDRES=$PREFIXwindres && ~/bam/bam client_release && ~/bam/bam tools_release && mv ./AllTheHaxx.exe $CIRCLE_ARTIFACTS/win32/AllTheHaxx.exe && mv ./slc_unpack.exe $CIRCLE_ARTIFACTS/win32/slc_unpack.exe ;; esac:
+    - ?
+        >
+        case $CIRCLE_NODE_INDEX in
+          0)
+            ~/bam/bam client_release;
+            ~/bam/bam tools_release;
+            mv "./AllTheHaxx" $CIRCLE_ARTIFACTS"/linux/.";
+            mv "./slc_unpack" $CIRCLE_ARTIFACTS"/linux/."
+            ;;
+          1)
+            export TARGET_FAMILY=windows TARGET_PLATFORM=win64 TARGET_ARCH=amd64 PREFIX=x86_64-w64-mingw32- PATH=/usr/x86_64-w64-mingw32/bin:$PATH;
+            export CC=${PREFIX}gcc CXX=${PREFIX}g++ WINDRES=${PREFIX}windres;
+            ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false;
+            ~/bam/bam client_release;
+            ~/bam/bam tools_release;
+            mv "./AllTheHaxx.exe" $CIRCLE_ARTIFACTS"/win64/AllTheHaxx.exe";
+            mv "./slc_unpack.exe" $CIRCLE_ARTIFACTS"/win64/slc_unpack.exe"
+            mv "./*.dll" $CIRCLE_ARTIFACTS"/win64/."
+            ;;
+          2)
+            export TARGET_FAMILY=windows TARGET_PLATFORM=win32 TARGET_ARCH=ia32 PREFIX=i686-w64-mingw32- PATH=/usr/i686-w64-mingw32/bin:$PATH;
+            export CC=${PREFIX}gcc CXX=${PREFIX}g++ WINDRES=${PREFIX}windres;
+            ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false;
+            ~/bam/bam client_release;
+            ~/bam/bam tools_release;
+            mv "./AllTheHaxx.exe" $CIRCLE_ARTIFACTS"/win32/AllTheHaxx.exe";
+            mv "./slc_unpack.exe" $CIRCLE_ARTIFACTS"/win32/slc_unpack.exe"
+            mv "./*.dll" $CIRCLE_ARTIFACTS"/win32/."
+            ;;
+        esac
+      :
         parallel: true
-
