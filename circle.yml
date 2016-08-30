@@ -5,22 +5,27 @@ dependencies:
         sudo apt-get update
         sudo apt-get build-dep teeworlds
         sudo apt-get install libsdl2-dev
-        
-        sudo apt-get install mingw-w64 mingw-w64-common
-        sudo apt-get install mingw-w64-i686-dev mingw-w64-x86-64-dev
-        sudo apt-get install gcc-mingw-w64-base gcc-mingw-w64 g++-mingw-w64 
+
+        if [ $CIRCLE_NODE_INDEX -gt 0 ]; then
+          sudo apt-get install mingw-w64 mingw-w64-common
+          sudo apt-get install mingw-w64-i686-dev mingw-w64-x86-64-dev
+          sudo apt-get install gcc-mingw-w64-base gcc-mingw-w64 g++-mingw-w64
+        fi
 
         if [ ! -x ~/bam/bam ]; then
           git clone https://github.com/matricks/bam ~/bam/
           cd ~/bam; ./make_unix.sh
         fi
-        
-        cd ./other/luajit/LuaJIT-2.0.2
-        make -j$(nproc)
-        cp -l src/libluajit.a ../unix/libluajit.a
-        
+
+        if [ $CIRCLE_NODE_INDEX -eq 0 ]; then
+          cd ./other/luajit/LuaJIT-2.0.2
+          make -j$(nproc)
+          cp -l src/libluajit.a ../unix/libluajit.a
+        fi
+
         mkdir $CIRCLE_ARTIFACTS/linux
-        mkdir $CIRCLE_ARTIFACTS/windows
+        mkdir $CIRCLE_ARTIFACTS/win32
+        mkdir $CIRCLE_ARTIFACTS/win64
 
   cache_directories:
     - "~/bam/"
@@ -31,22 +36,6 @@ dependencies:
 # then we setup the environment for win32 and win64 cross-compiling
 test:
   override:
-    - |
-        ~/bam/bam client_release
-        ~/bam/bam tools_release
-        mv "./AllTheHaxx" $CIRCLE_ARTIFACTS"/linux/."
-        mv "./slc_unpack" $CIRCLE_ARTIFACTS"/linux/."
-        
-        export TARGET_FAMILY=windows TARGET_PLATFORM=win64 TARGET_ARCH=amd64 PREFIX=x86_64-w64-mingw32- PATH=/usr/x86_64-w64-mingw32/bin:$PATH
-        alias windres=${PREFIX}windres
-        ~/bam/bam client_release
-        ~/bam/bam tools_release
-        mv "./AllTheHaxx.exe" $CIRCLE_ARTIFACTS"/AllTheHaxx-win64.exe"
-        mv "./slc_unpack.exe" $CIRCLE_ARTIFACTS"/slc_unpack-win64.exe"
-        
-        export TARGET_FAMILY=windows TARGET_PLATFORM=win32 TARGET_ARCH=ia32 PREFIX=i686-w64-mingw32- PATH=/usr/i686-w64-mingw32/bin:$PATH
-        alias windres=${PREFIX}windres
-        ~/bam/bam client_release
-        ~/bam/bam tools_release
-        mv "./AllTheHaxx.exe" $CIRCLE_ARTIFACTS"/AllTheHaxx-win32.exe"
-        mv "./slc_unpack.exe" $CIRCLE_ARTIFACTS"/slc_unpack-win32.exe"
+    - case $CIRCLE_NODE_INDEX in 0) ~/bam/bam client_release && ~/bam/bam tools_release && mv ./AllTheHaxx $CIRCLE_ARTIFACTS/linux/. && mv ./slc_unpack $CIRCLE_ARTIFACTS/linux/. ;; 1) export TARGET_FAMILY=windows TARGET_PLATFORM=win64 TARGET_ARCH=amd64 PREFIX=x86_64-w64-mingw32- PATH=/usr/x86_64-w64-mingw32/bin:$PATH && alias windres=$PREFIXwindres && ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false CC=$PREFIXgcc CXX=$PREFIXg++ WINDRES=$PREFIXwindres && ~/bam/bam client_release && ~/bam/bam tools_release && mv ./AllTheHaxx.exe $CIRCLE_ARTIFACTS/win64/AllTheHaxx.exe && mv ./slc_unpack.exe $CIRCLE_ARTIFACTS/win64/slc_unpack.exe ;; 2) export TARGET_FAMILY=windows TARGET_PLATFORM=win32 TARGET_ARCH=ia32 PREFIX=i686-w64-mingw32- PATH=/usr/i686-w64-mingw32/bin:$PATH && alias windres=$PREFIXwindres && ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false CC=$PREFIXgcc CXX=$PREFIXg++ WINDRES=$PREFIXwindres && ~/bam/bam client_release && ~/bam/bam tools_release && mv ./AllTheHaxx.exe $CIRCLE_ARTIFACTS/win32/AllTheHaxx.exe && mv ./slc_unpack.exe $CIRCLE_ARTIFACTS/win32/slc_unpack.exe ;; esac:
+        parallel: true
+
