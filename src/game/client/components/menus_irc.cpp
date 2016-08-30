@@ -381,7 +381,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				//DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_JOIN, &ButtonQS/*, vec4(0.47f, 0.58f, 0.72f, 1.0f)*/);
 				CPointerContainer s_JoinButton(pUser);
 				ButtonQS.Margin(2.0f, &ButtonQS);
-				if(!pUser->IsVoice() && str_comp(pUser->m_Nick.c_str(), m_pClient->IRC()->GetNick()) != 0)
+				if(!pUser->IsVoice() && !pUser->IsAdmin() && str_comp(pUser->m_Nick.c_str(), m_pClient->IRC()->GetNick()) != 0)
 					if(DoButton_Menu(&s_JoinButton, "→", 0, &ButtonQS, Localize("Join"), CUI::CORNER_ALL, vec4(0, 0, 1, 0.7f)))
 					//if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
 					{
@@ -400,7 +400,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			Selected = UiDoListboxEnd(&s_UsersScrollValue, 0);
 
 			static CButtonContainer s_Chat;
-			static float s_ChatScrollValue = 100.0f;
+			static float s_ChatScrollValue = 1.0f;
 			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat))
 			{
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) // to the right
@@ -454,7 +454,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 			}
 
 			static CButtonContainer s_Chat;
-			static float s_ChatScrollValue = 100.0f;
+			static float s_ChatScrollValue = 1.0f;
 			/*if(!Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat))
 			{
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) // to the right
@@ -483,8 +483,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 			// the join button
 			if(str_comp_nocase(pQuery->User(), "@status") != 0 && str_comp(pQuery->User(), m_pClient->IRC()->GetNick()) != 0 &&
 					((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User())) && // this is kinda inefficient but whatever...
-					!((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsVoice()
-					)
+					!((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsVoice() &&
+					!((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsAdmin()
+				)
 			{
 				CUIRect ButtonQS;
 				Chat.VSplitRight(32.0f, 0x0, &ButtonQS);
