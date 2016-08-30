@@ -111,8 +111,8 @@ void CLua::AddUserscript(const char *pFilename)
 	CALLSTACK_ADD();
 
 #if defined(FEATURE_LUA)
-	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || (str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua")
-																		&& str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc"))) // "compiled lua chunk/code/cackwurst"
+	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 || (str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0) || // hide config files from the list
+			(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") && str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc"))) // "compiled lua chunk/code/cackwurst"
 		return;
 
 	// don't add duplicates

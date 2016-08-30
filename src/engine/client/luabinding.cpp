@@ -75,6 +75,11 @@ int CLuaBinding::LuaImport(lua_State *L)
 			ret = pLF->LoadFile(aBuf, true);
 		}
 	}
+
+	if(g_Config.m_Debug)
+		dbg_msg("Lua/debug", "script '%s' %s '%s'", pLF->GetFilename()+4, ret ? "successfully Import()'ed" : "failed to Import()", aFilename);
+
+	// return some stuff to the script
 	lua_pushboolean(L, (int)ret); // success?
 	lua_pushstring(L, (const char *)aBuf); // actual relative path of the loaded file
 	return 2;
@@ -90,13 +95,13 @@ int CLuaBinding::LuaListdir(lua_State *L)
 	if(nargs != 2)
 		return luaL_error(L, "Listdir expects 2 arguments");
 
-#define argcheck(cond, narg, msg) if(!(cond)) {dbg_msg("LUAERRROR", "narg=%i msg='%s'", narg, msg); return luaL_argerror(L, (narg), (msg));}
+#define argcheck(cond, narg, msg) if(!(cond)) { if(g_Config.m_Debug) dbg_msg("Lua/debug", "Listdir: narg=%i msg='%s'", narg, msg); return luaL_argerror(L, (narg), (msg)); }
 
 	argcheck(lua_isstring(L, 1), 1, ""); // path
-	argcheck(lua_isstring(L, 2), 2, "must be the name of the callback function (as a string)"); // function callback
+	argcheck(lua_isstring(L, 2), 2, "must be the name of the callback function (given as a string)"); // function callback
 
 	lua_getglobal(L, lua_tostring(L, 2)); // check if the given callback function actually exists
-	luaL_argcheck(L, lua_isfunction(L, -1), 2, "must be the name of the callback function (as a string)");
+	luaL_argcheck(L, lua_isfunction(L, -1), 2, "must be the name of the callback function (given as a string)");
 	lua_pop(L, 1); // pop temporary lua function
 
 	const char *pDir = luaL_optstring(L, 1, 0);

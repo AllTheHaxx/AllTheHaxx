@@ -537,7 +537,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	;
 
 	if(g_Config.m_Debug)
-		dbg_msg("lua", "registering lua bindings complete (L=%p)", L);
+		dbg_msg("lua/debug", "registering lua bindings complete (L=%p)", L);
 
 #endif
 }

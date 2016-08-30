@@ -3028,7 +3028,7 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 		UI()->DoLabelScaled(&Button, aBuf, 16.0f, 0);
 
 		Item.m_Rect.VSplitLeft(10.0f, 0, &Item.m_Rect);
-		str_format(aBuf, sizeof(aBuf), "Line %s", L->m_Exceptions[i].c_str() + str_length(L->GetFilename()) + 1);
+		str_format(aBuf, sizeof(aBuf), "@@ %s", L->m_Exceptions[i].c_str() +4/* + (str_find(L->m_Exceptions[i].c_str(), L->GetFilename()) != NULL ? str_length(L->GetFilename()) + 1 : 0)*/);
 		UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 	}
 

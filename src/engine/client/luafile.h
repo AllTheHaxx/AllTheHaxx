@@ -54,16 +54,14 @@ private:
 
 	char m_aScriptTitle[64];
 	char m_aScriptInfo[128];
-	bool m_ScriptHasSettings;
+	bool m_ScriptHasSettingsPage;
 	bool m_ScriptAutoload;
 
 public:
 	CLuaFile(CLua *pLua, std::string Filename, bool Autoload);
 	~CLuaFile();
-	void Init();
-	void Reset(bool error = false);
-	void LoadPermissionFlags(const char *pFilename);
-	void Unload(bool error = false);
+	void Init(); // starts the script
+	void Unload(bool error = false); // stops the script
 #if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName);
 #endif
@@ -74,7 +72,7 @@ public:
 	const char* GetFilename() const { return m_Filename.c_str(); }
 	const char* GetScriptTitle() const { return m_aScriptTitle; }
 	const char* GetScriptInfo() const { return m_aScriptInfo; }
-	bool GetScriptHasSettings() const { return m_ScriptHasSettings; }
+	bool GetScriptHasSettings() const { return m_ScriptHasSettingsPage; }
 	bool GetScriptIsAutoload() const { return m_ScriptAutoload; }
 	bool SetScriptIsAutoload(bool NewVal) { bool ret = m_ScriptAutoload; m_ScriptAutoload = NewVal; return ret; }
 	lua_State *L() const { return m_pLuaState; }
@@ -86,12 +84,14 @@ public:
 	void LuaPrintOverride(std::string str);
 
 private:
+	void Reset(bool error = false);
 	void OpenLua();
+	void LoadPermissionFlags(const char *pFilename);
 	void ApplyPermissions(int Flags);
 	bool LoadFile(const char *pFilename, bool Import);
 	bool CheckCertificate(const char *pFilename);
 
-	bool ScriptHasSettings();
+	bool ScriptHasSettingsPage();
 };
 
 #endif

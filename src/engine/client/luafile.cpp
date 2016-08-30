@@ -43,7 +43,7 @@ void CLuaFile::Reset(bool error)
 	m_PermissionFlags = 0;
 	LoadPermissionFlags(m_Filename.c_str());
 
-	m_ScriptHasSettings = false;
+	m_ScriptHasSettingsPage = false;
 
 	m_State = error ? STATE_ERROR : STATE_IDLE;
 }
@@ -51,7 +51,7 @@ void CLuaFile::Reset(bool error)
 void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interface for non-compiled scripts
 {
 #if defined(FEATURE_LUA)
-	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0)
+	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0 || str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0) // clc's and config files won't have permission flags!
 		return;
 
 	std::ifstream f(pFilename);
@@ -92,7 +92,6 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 		if(str_comp_nocase("package", p) == 0)
 			m_PermissionFlags |= PERMISSION_PACKAGE;
 	}
-	// ----------------- END OLD INTERFACE -----------------
 
 #endif
 }
@@ -213,13 +212,6 @@ void CLuaFile::Init()
 		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
 	lua_pop(m_pLuaState, 1);
 
-/*	lua_getglobal(m_pLuaState, "g_ScriptSettings"); // TODO: implement the new settings interface
-	if(lua_isuserdata(m_pLuaState, -1))
-		m_ScriptHasSettings = true;
-	lua_pop(m_pLuaState, 1);
-*/
-	m_ScriptHasSettings |= ScriptHasSettings();
-
 	// call the OnScriptInit function if we have one
 	if(!CallFunc<bool>("OnScriptInit", true))
 	{
@@ -228,6 +220,9 @@ void CLuaFile::Init()
 		Unload(true);
 		return;
 	}
+
+	m_ScriptHasSettingsPage |= ScriptHasSettingsPage();
+
 #endif
 }
 
@@ -260,7 +255,7 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 		return false;
 
 	// some security steps right here...
-	int BeforePermissions = m_PermissionFlags;
+	int BeforePermissions = Import ? m_PermissionFlags : 0;
 	LoadPermissionFlags(pFilename);
 	if(!CheckCertificate(pFilename))
 	{
@@ -269,7 +264,7 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 		return false;
 	}
 
-	ApplyPermissions(m_PermissionFlags ^ BeforePermissions); // only apply those that are new
+	ApplyPermissions(m_PermissionFlags & ~BeforePermissions); // only apply those that are new
 
 	// kill everything malicious
 	luaL_dostring(m_pLuaState, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil dofile=nil require=nil");
@@ -280,7 +275,8 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	IOHANDLE f = io_open(pFilename, IOFLAG_READ);
 	if(!f)
 	{
-		dbg_msg("Lua", "Could not load file '%s' (file not accessible)", pFilename);
+		if(g_Config.m_Debug)
+			dbg_msg("Lua/debug", "Could not load file '%s' (file not accessible)", pFilename);
 		return false;
 	}
 
@@ -319,7 +315,7 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 	if(Import)
-		Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0); // execute imported files straight away to get all of their stuff
+		Status = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0); // execute imported files straight away to get all their stuff
 	else
 		Status = lua_resume(m_pLuaState, 0);
 
@@ -335,7 +331,7 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 #endif
 }
 
-bool CLuaFile::ScriptHasSettings()
+bool CLuaFile::ScriptHasSettingsPage()
 {
 #if defined(FEATURE_LUA)
 	LuaRef func1 = GetFunc("OnScriptRenderSettings");
