@@ -1083,81 +1083,82 @@ bool CChat::HandleTCommands(const char *pMsg)
 {
 	CALLSTACK_ADD();
 
-	if(g_Config.m_ClTransChatCmds && pMsg[0] == '$')
+	if(!g_Config.m_ClTransChatCmds || !(pMsg[0] == '$' && pMsg[1] == '$'))
+		return false;
+
+	char aCmd[512][256] = {{0}};
+
+	int Cmd = 0;
+	int Char = 0;
+
+	for(int i = 1; i < str_length(pMsg); i++)
 	{
-		char aCmd[512][256] = {{0}};
-		mem_zero(&aCmd, sizeof(aCmd));
-		int Cmd = 0;
-		int Char = 0;
-
-		for(int i = 1; i < str_length(pMsg); i++)
+		if(pMsg[i] == ' ')
 		{
-			if(pMsg[i] == ' ')
-			{
-				Cmd++;
-				Char = 0;
-				continue;
-			}
-
-			aCmd[Cmd][Char] = pMsg[i];
-			Char++;
+			Cmd++;
+			Char = 0;
+			continue;
 		}
 
-		if(!str_comp_nocase(aCmd[0], "cmdlist"))
+		aCmd[Cmd][Char] = pMsg[i];
+		Char++;
+	}
+
+	if(!str_comp_nocase(aCmd[0], "$cmdlist"))
+	{
+		AddLine(-1337, 0, "~~~~ Commands ~~~~");
+		AddLine(-1337, 0, "'$$tout <dst> <message>': Translate a message");
+		AddLine(-1337, 0, "'$$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
+		return true;
+	}
+	else if(!str_comp_nocase(aCmd[0], "$tout"))
+	{
+		if(!aCmd[1][0] || !aCmd[2][0])
 		{
-			AddLine(-1337, 0, "~~~~ Commands ~~~~");
-			AddLine(-1337, 0, "'$tout <dst> <message>': Translate a message");
-			AddLine(-1337, 0, "'$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
-			return true;
-		}
-		else if(!str_comp_nocase(aCmd[0], "tout"))
-		{
-			if(!aCmd[1][0] || !aCmd[2][0])
-			{
-				AddLine(-1337, 0, "Please use '$tout <dst> <message>'");
-				return true;
-			}
-
-			int i = 2;
-			char aBuf[256];
-			char RawMsg[512];
-
-			mem_zero(&RawMsg, sizeof(RawMsg));
-
-			while(aCmd[i][0])
-			{
-				str_format(aBuf, sizeof(aBuf), "%s ", aCmd[i]);
-				str_append(RawMsg, aBuf, sizeof(RawMsg));
-				i++;
-			}
-
-			m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, aCmd[1], RawMsg, false);
-			return true;
-		}
-		else if(!str_comp_nocase(aCmd[0], "tin"))
-		{
-			if(!aCmd[1][0] || !aCmd[2][0])
-			{
-				AddLine(-1337, 0, "Please use '$tin <src> <ID>'");
-				return true;
-			}
-
-			int MsgID = str_toint(aCmd[2]);
-
-			m_pTranslator->RequestTranslation(aCmd[1], g_Config.m_ClTransInDst, m_aLines[m_CurrentLine-MsgID].m_aText, true);
+			AddLine(-1337, 0, "Please use '$$tout <dst> <message>'");
 			return true;
 		}
 
-		AddLine(-1337, 0, "Unknown command. Try '$cmdlist'!");
+		int i = 2;
+		char aBuf[256];
+		char RawMsg[512];
+
+		mem_zero(&RawMsg, sizeof(RawMsg));
+
+		while(aCmd[i][0])
+		{
+			str_format(aBuf, sizeof(aBuf), "%s ", aCmd[i]);
+			str_append(RawMsg, aBuf, sizeof(RawMsg));
+			i++;
+		}
+
+		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, aCmd[1], RawMsg, false);
+		return true;
+	}
+	else if(!str_comp_nocase(aCmd[0], "$tin"))
+	{
+		if(!aCmd[1][0] || !aCmd[2][0])
+		{
+			AddLine(-1337, 0, "Please use '$$tin <src> <ID>'");
+			return true;
+		}
+
+		int MsgID = str_toint(aCmd[2]);
+
+		m_pTranslator->RequestTranslation(aCmd[1], g_Config.m_ClTransInDst, m_aLines[m_CurrentLine-MsgID].m_aText, true);
 		return true;
 	}
 
-	return false;
+	AddLine(-1337, 0, "Unknown command. Try '$$cmdlist'!");
+	return true;
 }
 
 void CChat::Say(int Team, const char *pLine, bool NoTrans)
 {
 	CALLSTACK_ADD();
+
+	if(!pLine)
+		return;
 
 	m_LastChatSend = time_get();
 
@@ -1192,7 +1193,8 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	if(!g_Config.m_ClChat || DiscardChat)
 	{
 		if(!g_Config.m_ClChat)
-			m_pClient->m_pHud->PushNotification(Localize("Chat is disabled. Set 'cl_chat' to 1 or 2 to send messages!"));
+			//m_pClient->m_pHud->PushNotification(Localize("Chat is disabled. Set 'cl_chat' to 1 or 2 to send messages!"));
+			AddLine(-1, 0, Localize("Chat is disabled. Set 'cl_chat' to 1 or 2 to send messages!"), true);
 		return;
 	}
 
