@@ -31,7 +31,7 @@ luajit = {
                 settings.link.libpath:Add(luajit.basepath .. "/unix")
                -- AddJob(luajit.basepath .. "/unix/libluajit.a", "Build LuaJIT lirary", "cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j2 >NUL;cp src/libluajit.a ../unix/libluajit.a")
                -- TODO! XXX! HACK! this is run four times ALWAYS, but it does well. So I nevermind.
-				ExecuteSilent("cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j$(nproc) >NUL;rm NUL;cp -l src/libluajit.a ../unix/libluajit.a") -- build dynamically
+				ExecuteSilent("cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j$(nproc) >/dev/null;cp -l src/libluajit.a ../unix/libluajit.a") -- build dynamically
 				settings.link.libs:Add("luajit")
             end
 		end
