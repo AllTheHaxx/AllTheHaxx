@@ -1,2 +1,0 @@
-In this folder, the luajit library will be generated. 
-Do not remove this folder or building will fail!

@@ -24,16 +24,18 @@ luajit = {
 
 		local apply = function(option, settings)
             settings.cc.includes:Add(luajit.basepath .. "/include")
+            
             if option.use_winlib > 0 then
                 settings.link.libpath:Add(luajit.basepath .. "/windows/lib" .. option.use_winlib)
                 settings.link.libs:Add("lua51")
-            elseif option.value == true then -- not windows but can have it anyway? -> build dynamically
-                settings.link.libpath:Add(luajit.basepath .. "/unix")
-               -- AddJob(luajit.basepath .. "/unix/libluajit.a", "Build LuaJIT lirary", "cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j2 >NUL;cp src/libluajit.a ../unix/libluajit.a")
-               -- TODO! XXX! HACK! this is run four times ALWAYS, but it does well. So I nevermind.
-				ExecuteSilent("cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j$(nproc) >/dev/null;cp -l src/libluajit.a ../unix/libluajit.a") -- build dynamically
+            elseif option.value == true then
+		        if arch == "amd64" then
+		            settings.link.libpath:Add(luajit.basepath .. "/unix/lib64")
+		        else
+		        	settings.link.libpath:Add(luajit.basepath .. "/unix/lib32")
+		        end
 				settings.link.libs:Add("luajit")
-            end
+			end
 		end
 
 		local save = function(option, output)
@@ -45,7 +47,7 @@ luajit = {
             if option.value == true then
 				if option.use_winlib == 32 then return "using supplied win32 libraries" end
 				if option.use_winlib == 64 then return "using supplied win64 libraries" end
-				return "building dynamically"
+				return "using bundled libs"
 			else
 				if option.required then
 					return "not found (required)"
