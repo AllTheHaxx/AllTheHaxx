@@ -3062,7 +3062,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			else
 			{
 				MainView.HSplitTop(10.0f, 0, &MainView);
-				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView.x, MainView.y, MainView.w, MainView.h);
+				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView);
 				return;
 			}
 		}
