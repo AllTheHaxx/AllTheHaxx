@@ -31,7 +31,7 @@ dependencies:
 # Container 1 builds linux 64 bit
 # Container 2 builds windows 64 bit
 # Container 3 builds windows 32 bit
-# everything will be collected as artifacts.
+# all artifacts will be collected.
 test:
   override:
     - ?
@@ -40,14 +40,14 @@ test:
           1) export TARGET_FAMILY=windows TARGET_PLATFORM=win64 TARGET_ARCH=amd64 PREFIX=x86_64-w64-mingw32- PATH=/usr/x86_64-w64-mingw32/bin:$PATH ;;
           2) export TARGET_FAMILY=windows TARGET_PLATFORM=win32 TARGET_ARCH=ia32 PREFIX=i686-w64-mingw32- PATH=/usr/i686-w64-mingw32/bin:$PATH ;;
         esac
-
+        
         if [ ! $CIRCLE_NODE_INDEX -eq 0 ]; then
           export CC=${PREFIX}gcc CXX=${PREFIX}g++ WINDRES=${PREFIX}windres;
           ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false;
           EXT=.exe
         fi;
-
-
+        
+        
         DST=linux;
         if [ $CIRCLE_NODE_INDEX -eq 1 ]; then
           DST=win64
@@ -56,23 +56,17 @@ test:
         if [ $CIRCLE_NODE_INDEX -eq 2 ]; then
           DST=win32
         fi;
-
-
+        
         ~/bam/bam client_release;
         ~/bam/bam tools_release;
-
-
-        if [ -s "./AllTheHaxx"$EXT ]; then
-          mv "./AllTheHaxx"$EXT $CIRCLE_ARTIFACTS/$DST;
-        fi;
         
-        if [ -s "./slc_unpack"$EXT ]; then
-          mv "./slc_unpack"$EXT $CIRCLE_ARTIFACTS/$DST;
-        fi;
-
+        strip -s -o $CIRCLE_ARTIFACTS/$DST/"./AllTheHaxx"$EXT "./AllTheHaxx"$EXT;
+        strip -s -o $CIRCLE_ARTIFACTS/$DST/"./slc_unpack"$EXT "./slc_unpack"$EXT;
 
         if [ ! $CIRCLE_NODE_INDEX -eq 0 ]; then
-          mv *.dll $CIRCLE_ARTIFACTS/$DST
+          strip -s *.dll;
+          zip -q -T -X DLLs . *.dll;
+          mv DLLs.zip $CIRCLE_ARTIFACTS/$DST;
         fi
       :
         parallel: true
