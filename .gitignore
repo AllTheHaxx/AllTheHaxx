@@ -26,6 +26,9 @@ datasrc/*.pyc
 /cdns*
 luacert*
 
+/*.dll
+/*.a
+/*.so
 *.txt
 *.bat
 *.sh
@@ -34,8 +37,6 @@ luacert*
 *.exe
 *.res
 *.o
-#*.a
-#*.so
 *.s
 *.patch
 *.prefs
@@ -51,7 +52,6 @@ luacert*
 *.cmd
 *.opensdf
 *.pyc
-*.dll
 *.db
 *.db-journal
 *.pdf
