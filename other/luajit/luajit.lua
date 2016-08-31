@@ -14,9 +14,10 @@ luajit = {
 					option.value = true
 					option.use_winlib = 32
 				elseif platform == "win64" then
-					error("Compiling 64bit with CL is not available due to missing libraries. Please compile either with MinGW or switch to 32bit.")
-			--		option.value = true
-			--		option.use_winlib = 64
+				-- we would have to detect the compiler here, which we cannot. So let's jsut assume that the user knows what he's doing...
+				--	error("Compiling 64bit with CL is not available due to missing libraries. Please compile either with MinGW or switch to 32bit.")
+					option.value = true
+					option.use_winlib = 64
 				end
 			end
 		end
@@ -30,7 +31,7 @@ luajit = {
                 settings.link.libpath:Add(luajit.basepath .. "/unix")
                -- AddJob(luajit.basepath .. "/unix/libluajit.a", "Build LuaJIT lirary", "cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j2 >NUL;cp src/libluajit.a ../unix/libluajit.a")
                -- TODO! XXX! HACK! this is run four times ALWAYS, but it does well. So I nevermind.
-				ExecuteSilent("cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j2 >NUL;rm NUL;cp -l src/libluajit.a ../unix/libluajit.a") -- build dynamically
+				ExecuteSilent("cd " .. luajit.basepath .. "/LuaJIT-2.0.2;make -j$(nproc) >NUL;rm NUL;cp -l src/libluajit.a ../unix/libluajit.a") -- build dynamically
 				settings.link.libs:Add("luajit")
             end
 		end
@@ -43,7 +44,7 @@ luajit = {
 		local display = function(option)
             if option.value == true then
 				if option.use_winlib == 32 then return "using supplied win32 libraries" end
-			--	if option.use_winlib == 64 then return "using supplied win64 libraries" end
+				if option.use_winlib == 64 then return "using supplied win64 libraries" end
 				return "building dynamically"
 			else
 				if option.required then

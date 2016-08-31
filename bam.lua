@@ -183,6 +183,9 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libogg-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopusfile-0.dll"))
+		if config.lua.value and config.luajit.value then
+			table.insert(client_depends, CopyToDirectory(".", "other/luajit/windows/lib64/lua51.dll"))
+		end
 	end
 	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/libmysql.dll"))
