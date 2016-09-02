@@ -1149,8 +1149,9 @@ bool CChat::HandleTCommands(const char *pMsg)
 		return true;
 	}
 
-	AddLine(-1337, 0, "Unknown command. Try '$$cmdlist'!");
-	return true;
+	//AddLine(-1337, 0, "Unknown command. Try '$$cmdlist'!");
+	//return true;
+	return false;
 }
 
 void CChat::Say(int Team, const char *pLine, bool NoTrans)
