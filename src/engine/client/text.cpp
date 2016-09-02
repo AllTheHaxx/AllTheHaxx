@@ -550,6 +550,9 @@ public:
 
 	virtual float TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
+		if(!pText)
+			return -1.0f;
+
 		CFont *pFont = pCursor->m_pFont;
 		CFontSizeData *pSizeData = NULL;
 
