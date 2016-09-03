@@ -744,6 +744,7 @@ void CServerBrowser::LoadCache()
 {
 	if(m_ServerdataLocked)
 		return;
+	m_ServerlistType = TYPE_INTERNET;
 	m_ServerdataLocked = true;
 	void *pThread = thread_init(LoadCacheThread, this);
 	thread_detach(pThread);

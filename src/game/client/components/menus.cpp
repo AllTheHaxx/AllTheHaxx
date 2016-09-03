@@ -911,17 +911,27 @@ int CMenus::RenderMenubar(CUIRect r)
 		static CButtonContainer s_InternetButton;
 		if(DoButton_MenuTab(&s_InternetButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, CUI::CORNER_T))
 		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 			{
-				if(ServerBrowser()->CacheExists())
-					ServerBrowser()->LoadCache();
-				else
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+				{
+					if(ServerBrowser()->CacheExists())
+						ServerBrowser()->LoadCache();
+					else
+						ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+				}
 			}
-
-			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_LAN)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_FAVORITES)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_DDNET)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_RECENT)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
 
 			NewPage = PAGE_BROWSER;
+			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 			m_DoubleClickIndex = -1;
 		}
 
@@ -1627,13 +1637,15 @@ int CMenus::Render()
 		RenderMenubar(TabBar);
 
 		// make sure the ui page doesn't go wild
-		if(g_Config.m_UiPage < PAGE_NEWS_ATH || g_Config.m_UiPage >= NUM_PAGES || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
+		if(g_Config.m_UiPage < PAGE_NEWS_ATH || g_Config.m_UiPage >= NUM_PAGES || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage > PAGE_NEWS_DDNET && g_Config.m_UiPage < PAGE_BROWSER))
 		{
+			g_Config.m_UiPage = PAGE_BROWSER;
+			g_Config.m_UiBrowserPage = PAGE_BROWSER_INTERNET;
+
 			if(m_pClient->ServerBrowser()->CacheExists())
 				m_pClient->ServerBrowser()->LoadCache();
 			else
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			g_Config.m_UiPage = PAGE_BROWSER;
 			m_DoubleClickIndex = -1;
 		}
 
