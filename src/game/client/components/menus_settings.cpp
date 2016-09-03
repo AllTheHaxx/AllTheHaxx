@@ -2974,6 +2974,7 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 #if defined(FEATURE_LUA)
 void CMenus::RenderLoadingLua()
 {
+	return;
 	CALLSTACK_ADD();
 
 	Graphics()->Swap();
@@ -3040,13 +3041,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-	CUIRect Button, BottomBar;
+	CUIRect ListView, Button, BottomBar;
 	static int s_ActiveLuaSettings = -1;
 	static int s_ActiveLuaExceptions = -1;
+	static int s_SelectedScript = -1;
 
-	MainView.HSplitBottom(30.0f, &MainView, &BottomBar);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-
+	// render settings page if open
 	if(s_ActiveLuaSettings >= 0)
 	{
 		try
@@ -3073,6 +3073,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 	}
 
+	// render exceptions page if open
 	if(s_ActiveLuaExceptions >= 0)
 	{
 		CUIRect CloseButton;
@@ -3090,25 +3091,34 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 	}
 
+	// render the main selection view
+	MainView.VSplitLeft(MainView.w/2.0f, &ListView, &MainView);
+	ListView.HSplitBottom(50.0f+5.0f, &ListView, &BottomBar);
+	ListView.HSplitTop(20.0f, &Button, &ListView);
+
+
 	CUIRect RefreshButton;
 	Button.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Button.h*ms_FontmodHeight, Localize("Refresh"), -1)), &Button, &RefreshButton);
 	static CButtonContainer s_RefreshButton, s_LuaButton;
-	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files"))
+	if(g_Config.m_ClLua)
+		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files", s_SelectedScript > -1 ? 0 : CUI::CORNER_TR))
+		{
+			s_SelectedScript = -1;
+			Client()->Lua()->LoadFolder();
+		}
+
+	if(DoButton_CheckBox(&s_LuaButton, Localize("Use Lua"), g_Config.m_ClLua, &Button, 0, g_Config.m_ClLua ? CUI::CORNER_TL : CUI::CORNER_ALL))
 	{
-		Client()->Lua()->LoadFolder();
-	}
-	if(DoButton_CheckBox(&s_LuaButton, Localize("Use Lua"), g_Config.m_ClLua, &Button))
-	{
+		s_SelectedScript = -1;
 		if(!(g_Config.m_ClLua ^= 1))
 		{
 			Client()->Lua()->SaveAutoloads();
 			Client()->Lua()->GetLuaFiles().delete_all();
 			Client()->Lua()->GetLuaFiles().clear();
 		}
-		//else
-		//	Client()->Lua()->LoadFolder();
+		else
+			Client()->Lua()->LoadFolder();
 	}
-
 	if(!g_Config.m_ClLua)
 		return;
 
@@ -3120,20 +3130,17 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		// display mode list
 		static float s_ScrollValue = 0;
 		static CButtonContainer pIDItem[256];
-		static CButtonContainer pIDCheckboxAutoload[256];
+		static CButtonContainer pIDButtonToggleScript[256];
 		static CButtonContainer pIDButtonPermissions[256];
-		static CButtonContainer pIDButtonReload[256];
-		static CButtonContainer pIDButtonDeactivate[256];
-		static CButtonContainer pIDButtonSettings[256];
-		static CButtonContainer pIDButtonExceptions[256];
-		int OldSelected = -1;
+		static CButtonContainer pIDButtonAutoload[256];
 
 		static CButtonContainer s_Listbox;
-		CUIRect ListBox = MainView;
-		char aBuf[128];
+		CUIRect ListBox = ListView;
+		char aHeadline[128], aBottomLine[128];
 		static int NumListedFiles = 0, NumActiveScripts = 0;
-		str_format(aBuf, sizeof(aBuf), "%i files listed (%i total – %i filtered), %i scripts active", NumListedFiles, Client()->Lua()->GetLuaFiles().size(), Client()->Lua()->GetLuaFiles().size() - NumListedFiles, NumActiveScripts);
-		UiDoListboxStart(&s_Listbox, &ListBox, 50.0f, Localize("Lua files"), aBuf, NumListedFiles, 1, OldSelected, s_ScrollValue);
+		str_format(aHeadline, sizeof(aHeadline), Localize("%s (%i files listed, %i scripts active)"), Localize("Lua files"), NumListedFiles, NumActiveScripts);
+		str_format(aBottomLine, sizeof(aBottomLine), Localize("(%i files found – %i filtered away)"), Client()->Lua()->GetLuaFiles().size(), Client()->Lua()->GetLuaFiles().size() - NumListedFiles);
+		UiDoListboxStart(&s_Listbox, &ListBox, 50.0f, aHeadline, aBottomLine, NumListedFiles, 1, -1/*s_SelectedScript*/, s_ScrollValue, 0, 0);
 		NumListedFiles = 0; NumActiveScripts = 0;
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
@@ -3157,36 +3164,33 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 			if(Item.m_Visible)
 			{
-				CUIRect LabelTitle;
-				CUIRect LabelInfo;
-				CUIRect Buttons, Button;
+				CUIRect Label, Buttons, Button;
 
-				vec4 Color = L->State() == CLuaFile::STATE_ERROR ? vec4(0.7f,0,0,0.3f) :
-						L->State() == CLuaFile::STATE_LOADED ? vec4(0,0.7f,0,0.3f) : vec4(0,0,0,0.3f);
+				Item.m_Rect.HMargin(2.5f, &Item.m_Rect);
+				Item.m_Rect.HSplitTop(5.0f, 0, &Label);
 
-				if(i%2)
-					Color.a += 0.2f;
-
-				RenderTools()->DrawUIRect(&Item.m_Rect, Color, 0*CUI::CORNER_ALL, 5.0f);
-
-				Item.m_Rect.HSplitTop(24.0f, &LabelTitle, &LabelInfo);
-				LabelTitle.VSplitLeft(5.0f, 0, &LabelTitle);
-				LabelInfo.VSplitLeft(5.0f, 0, &LabelInfo);
-
-				Buttons = Item.m_Rect;
-				Buttons.HMargin(15.0f, &Buttons);
-
-				if(Buttons.y+Buttons.h > Item.m_HitRect.y)
+				if(Item.m_Rect.y+Item.m_Rect.h > Item.m_HitRect.y)
 				{
-					Buttons.VMargin(5.0f, &Buttons);
-					Buttons.VSplitRight(5.0f, &Buttons, 0);
-					Buttons.VSplitRight(Buttons.h, &Buttons, &Button);
-					CPointerContainer Container(&pIDCheckboxAutoload[i]);
-					if(DoButton_CheckBox(&Container, "", L->GetScriptIsAutoload(), &Button, Localize("Autoload")))
-						L->SetScriptIsAutoload(!L->GetScriptIsAutoload());
+					if(UI()->MouseInside(&Item.m_Rect) && Input()->KeyPress(KEY_MOUSE_1))
+						s_SelectedScript = i;
 
-					Buttons.VSplitRight(5.0f, &Buttons, 0);
-					Buttons.VSplitRight(Buttons.h, &Buttons, &Button);
+					// activate button
+					Item.m_Rect.VSplitRight(Item.m_Rect.h*0.83f, &Item.m_Rect, &Button);
+					if (DoButton_Menu(&pIDButtonToggleScript[i], L->State() == CLuaFile::STATE_LOADED ? "×" : "→", 0, &Button, L->State() == CLuaFile::STATE_LOADED ? Localize("Deactivate") : Localize("Activate"), CUI::CORNER_R))
+					{
+						if(L->State() == CLuaFile::STATE_LOADED)
+							L->Unload();
+						else
+						{
+							RenderLoadingLua();
+							L->Init();
+						}
+					}
+
+
+					// permission indicator
+					Item.m_Rect.VSplitRight(Item.m_Rect.h/2.0f, &Item.m_Rect, &Buttons);
+					Buttons.HSplitMid(&Buttons, &Button); // top: permission indicator, bottom: autoload checkbox
 
 					int PermissionFlags = L->GetPermissionFlags();
 					char aTooltip[1024] = {0};
@@ -3203,69 +3207,32 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						PERM_STR(PACKAGE, Localize("PACKAGE (Modules)"))
 #undef PERM_APPEND
 					}
-					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Button, aTooltip, CUI::CORNER_ALL, vec4(PermissionFlags > 0 ? .7f : .2f, PermissionFlags > 0 ? .2f : .7f, .2f, .8f)))
+					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Buttons, aTooltip, 0, vec4(PermissionFlags > 0 ? .7f : .2f, PermissionFlags > 0 ? .2f : .7f, .2f, .8f)))
 						dbg_msg("lua/permissions", "'%s' | %i (%i)", L->GetFilename(), PermissionFlags, L->GetPermissionFlags());
 
-#define PREPARE_BUTTON(TEXT) Buttons.VSplitRight(5.0f, &Buttons, 0); Buttons.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Buttons.h*ms_FontmodHeight, TEXT, -1)), &Buttons, &Button);
-					if(L->State() == CLuaFile::STATE_LOADED)
-					{
-						PREPARE_BUTTON(Localize("Deactivate"));
-						if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Deactivate"), 0, &Button))
-						{
-							L->Unload();
-							continue;
-						}
 
-						PREPARE_BUTTON(Localize("Reload"));
-						if (DoButton_Menu(&pIDButtonReload[i], Localize("Reload"), 0, &Button))
-						{
-							RenderLoadingLua();
-							L->Init();
-						}
-					}
-					else
+					// autoload button
+					if(DoButton_CheckBox(&pIDButtonAutoload[i], "", L->GetScriptIsAutoload(), &Button, Localize("Autoload"), 0))
 					{
-						PREPARE_BUTTON(Localize("Activate"));
-						if (DoButton_Menu(&pIDButtonDeactivate[i], Localize("Activate"), 0, &Button))
-						{
-							RenderLoadingLua();
-							L->Init();
-						}
-					}
-
-					if(L->m_Exceptions.size() > 0)
-					{
-						str_format(aBuf, sizeof(aBuf), Localize("Exceptions (%i)"), L->m_Exceptions.size());
-						PREPARE_BUTTON(aBuf);
-						if(DoButton_Menu(&pIDButtonExceptions[i], aBuf, 0, &Button, "", CUI::CORNER_ALL, mix(vec4(0,1,0,0.5f), vec4(1,0,0,0.5f), (float)L->m_Exceptions.size()/100.0f)))
-						{
-							s_ActiveLuaExceptions = i;
-						}
+						L->SetScriptIsAutoload(!L->GetScriptIsAutoload());
 					}
 
 
-					if(L->State() == CLuaFile::STATE_ERROR)
-					{
-						Buttons.VSplitRight(5.0f, &Buttons, 0);
-						Buttons.VSplitRight(200.0f, &Buttons, &Button);
-						UI()->DoLabel(&Button, L->m_pErrorStr && L->m_pErrorStr[0] != '\0' ? L->m_pErrorStr : Localize("An error occured"), 10.0f, -1, Button.w, 0);
-					}
+					// nice background
+					vec4 Color = L->State() == CLuaFile::STATE_ERROR ? vec4(0.7f,0,0,0.3f) :
+								 L->State() == CLuaFile::STATE_LOADED ? vec4(0,0.7f,0,0.3f) : vec4(0,0,0,0.3f);
+					if(i == s_SelectedScript)
+						RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1,1,1,0.5f), 0, 0);
+					else if(i%2)
+						Color.a += 0.2f;
 
-					if (L->GetScriptHasSettings())
-					{
-						Buttons.VSplitRight(5.0f, &Buttons, 0);
-						Buttons.VSplitRight(100.0f, &Buttons, &Button);
-						if (DoButton_Menu(&pIDButtonSettings[i], Localize("Settings"), 0, &Button))
-						{
-							s_ActiveLuaSettings = i;
-						}
-					}
+					RenderTools()->DrawUIRect(&Item.m_Rect, Color, 0, 0);
+
+					// script filename
+					UI()->DoLabelScaled(&Label, L->GetFilename()+4, 14.0f, -1, -1/*Buttons.w-5.0f*/, g_Config.m_ClLuaFilterString);
+
 				}
-				if (L->GetScriptTitle()[0] != '\0')
-					UI()->DoLabelScaled(&LabelTitle, L->GetScriptTitle(), 16.0f, -1, LabelTitle.w, g_Config.m_ClLuaFilterString);
-				else
-					UI()->DoLabelScaled(&LabelTitle, L->GetFilename()+4, 16.0f, -1, LabelTitle.w, g_Config.m_ClLuaFilterString);
-				UI()->DoLabelScaled(&LabelInfo, L->GetScriptInfo(), 14.0f, -1);
+
 			}
 		}
 
@@ -3275,16 +3242,119 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		if(NumLuaFiles == 0)
 		{
 			CUIRect Label;
-			MainView.HSplitBottom(MainView.h/2+15.0f, 0, &Label);
+			ListView.HSplitBottom(ListView.h/2+15.0f, 0, &Label);
 			UI()->DoLabelScaled(&Label, Localize("No files listed, click \"Refresh\" to reload the list"), 15.0f, 0, -1);
 		}
 	}
 
+
+	// render the box at the right
+	if(s_SelectedScript > -1 && s_SelectedScript < Client()->Lua()->GetLuaFiles().size())
+	{
+		RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarInactive, CUI::CORNER_R, 5.0f);
+
+		CLuaFile *L = Client()->Lua()->GetLuaFiles()[s_SelectedScript];
+		CUIRect Label;
+		MainView.HSplitTop(10.0f, 0, &MainView);
+		MainView.HSplitTop(25.0f, &Label, &MainView);
+		if (L->GetScriptTitle()[0] != '\0')
+			UI()->DoLabelScaled(&Label, L->GetScriptTitle(), 18.0f, 0, Label.w, g_Config.m_ClLuaFilterString);
+		else
+			UI()->DoLabelScaled(&Label, L->GetFilename()+4, 18.0f, 0, Label.w, g_Config.m_ClLuaFilterString);
+
+		MainView.HSplitTop(10.0f, 0, &MainView);
+		MainView.HSplitTop(20.0f, &Label, &MainView);
+		UI()->DoLabelScaled(&Label, L->GetScriptInfo(), 14.0f, 0, Label.w);
+
+
+		// button bar at the bottom right
+		CUIRect Button, Bar;
+		MainView.HSplitBottom(10.0f, &MainView, 0);
+		MainView.HSplitBottom(35.0f, &MainView, &Bar);
+
+		Bar.VMargin(7.5f, &Bar);
+//		Bar.VSplitRight(Bar.w/4.0f-4*5.0f, &Bar, &Button);
+
+#define PREPARE_BUTTON(TEXT) Bar.VSplitRight(5.0f, &Bar, 0); Bar.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Bar.h*ms_FontmodHeight, TEXT, -1)), &Bar, &Button);
+		if(L->State() == CLuaFile::STATE_LOADED)
+		{
+			PREPARE_BUTTON(Localize("Deactivate"));
+			static CButtonContainer s_DeactivateButton;
+			if (DoButton_Menu(&s_DeactivateButton, Localize("Deactivate"), 0, &Button))
+			{
+				L->Unload();
+			}
+
+			static float s_ButtonReloadColorFade = 0.0f;
+			static int s_PrevScriptIndex = s_SelectedScript;
+			if(s_SelectedScript != s_PrevScriptIndex) s_ButtonReloadColorFade = 0.0f;
+			smooth_set(&s_ButtonReloadColorFade, 0.0f, 15.0f, Client()->RenderFrameTime());
+			PREPARE_BUTTON(Localize("Reload"));
+			static CButtonContainer s_ReloadButton;
+			if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button, 0, CUI::CORNER_ALL, vec4(1.0f-s_ButtonReloadColorFade, 1.0f-s_ButtonReloadColorFade, 1.0f, 0.5f)))
+			{
+				s_ButtonReloadColorFade = 1.0f;
+				RenderLoadingLua();
+				L->Init();
+			}
+
+
+			if (L->GetScriptHasSettings())
+			{
+				PREPARE_BUTTON(Localize("Settings"));
+				static CButtonContainer s_ButtonSettings;
+				if (DoButton_Menu(&s_ButtonSettings, Localize("Settings"), 0, &Button))
+				{
+					s_ActiveLuaSettings = s_SelectedScript;
+				}
+			}
+
+		}
+		else
+		{
+			PREPARE_BUTTON(Localize("Activate"));
+			static CButtonContainer s_ButtonActivate;
+			if (DoButton_Menu(&s_ButtonActivate, Localize("Activate"), 0, &Button))
+			{
+				RenderLoadingLua();
+				L->Init();
+			}
+		}
+
+#undef PREPARE_BUTTON
+
+		MainView.HSplitBottom(5.0f, &MainView, 0);
+		MainView.HSplitBottom(20.0f, &MainView, &Bar);
+		Bar.VMargin(7.5f+5.0f, &Bar);
+
+		if(L->m_Exceptions.size() > 0)
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), Localize("Exceptions (%i)"), L->m_Exceptions.size());
+			Bar.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Bar.h*ms_FontmodHeight, aBuf, -1)), &Bar, &Button);
+			static CButtonContainer s_ButtonExceptions;
+			if(DoButton_Menu(&s_ButtonExceptions, aBuf, 0, &Button, "", CUI::CORNER_ALL, mix(vec4(0,1,0,0.5f), vec4(1,0,0,0.5f), (float)L->m_Exceptions.size()/100.0f)))
+			{
+				s_ActiveLuaExceptions = s_SelectedScript;
+			}
+		}
+
+		if(L->State() == CLuaFile::STATE_ERROR)
+		{
+			UI()->DoLabelScaled(&Bar, L->m_pErrorStr[0] ? L->m_pErrorStr : Localize("An error occured"), 12.0f, -1, Label.w);
+		}
+
+	}
+
+
+	// render the bottom bar at the left
+	RenderTools()->DrawUIRect(&BottomBar, vec4(1,1,1,0.25f), s_SelectedScript > -1 ? CUI::CORNER_BL : CUI::CORNER_B, 5.0f);
+	BottomBar.VMargin(10.0f, &BottomBar);
+	BottomBar.HSplitBottom(5.0f, &BottomBar, 0);
 	// render quick search
 	{
 		CUIRect QuickSearch, QuickSearchClearButton;
-		//MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
-		BottomBar.VSplitLeft(240.0f, &QuickSearch, &BottomBar);
+		BottomBar.HSplitTop(25.0f, &QuickSearch, &BottomBar);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 		UI()->DoLabelScaled(&QuickSearch, "⚲", 14.0f, -1);
 		float wSearch = TextRender()->TextWidth(0, 14.0f, "⚲", -1);
@@ -3308,7 +3378,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 	// render script-activation-filter button
 	{
-		static const char *s_apLabels[] = {
+		const char *s_apLabels[] = {
 				Localize("Showing all files"),
 				Localize("Showing active scripts only"),
 				Localize("Showing inactive scripts only")
@@ -3320,9 +3390,9 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				Width = max(Width, TextRender()->TextWidth(0, BottomBar.h-10.0f, s_apLabels[i], -1));
 
 		CUIRect Checkbox;
-		BottomBar.VSplitLeft(10.0f, 0, &BottomBar);
-		BottomBar.VSplitLeft(Width-5.0f, &Checkbox, &BottomBar);
-		Checkbox.HSplitTop(5.0f, 0, &Checkbox);
+		BottomBar.HSplitTop(5.0f, 0, &BottomBar);
+		BottomBar.VSplitLeft(TextRender()->TextWidth(0, 14.0f, Localize("Quickfilter:"), -1) + 5.0f, &BottomBar, &Checkbox);
+		UI()->DoLabelScaled(&BottomBar, Localize("Quickfilter:"), 14.0f, -1);
 
 		static CButtonContainer s_Checkbox;
 		int MouseButton = DoButton_CheckBox_Number(&s_Checkbox, s_apLabels[ShowActiveOnly], ShowActiveOnly, &Checkbox);
@@ -3343,7 +3413,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 // sort arrays
 template<class T>
-void sort_simple_array(array<T> *pArray)
+static void sort_simple_array(array<T> *pArray)
 {
 	const int NUM = pArray->size();
 	if(NUM < 2)

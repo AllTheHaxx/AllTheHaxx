@@ -83,9 +83,9 @@ private:
 	int DoButton_Menu(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL, vec4 Color = vec4(1,1,1,0.5f));
 	int DoButton_MenuTab(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive = ms_ColorTabbarActive, vec4 ColorInactive = ms_ColorTabbarInactive, const char *pTooltip = 0);
 
-	int DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false);
-	int DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
-	int DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
+	int DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false, int Corner = CUI::CORNER_ALL);
+	int DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL);
+	int DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL);
 
 	/*static void ui_draw_menu_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_keyselect_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -125,7 +125,7 @@ private:
 	};
 
 	void UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-						int ItemsPerRow, int SelectedIndex, float ScrollValue, int Corners = CUI::CORNER_T);
+						int ItemsPerRow, int SelectedIndex, float ScrollValue, int CornersHead = CUI::CORNER_T, int CornersBottom = CUI::CORNER_B);
 	CListboxItem UiDoListboxNextItem(CButtonContainer *pBC, bool Selected = false, bool KeyEvents = true);
 	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated);

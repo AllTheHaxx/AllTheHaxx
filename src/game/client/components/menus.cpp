@@ -308,11 +308,11 @@ int CMenus::DoButton_GridHeader(CButtonContainer *pBC, const char *pText, int Ch
 	return UI()->DoButtonLogic(pBC->GetID(), pText, Checked, pRect);
 }
 
-int CMenus::DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip, bool Checked)
+int CMenus::DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip, bool Checked, int Corner)
 {
 	CALLSTACK_ADD();
 
-	RenderTools()->DrawUIRect(pRect, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(pRect, vec4(0.0f, 0.0f, 0.0f, 0.25f), Corner, 5.0f);
 
 	CUIRect c = *pRect;
 	CUIRect t = *pRect;
@@ -348,21 +348,21 @@ int CMenus::DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, c
 	return UI()->DoButtonLogic(pBC->GetID(), pText, 0, pRect);
 }
 
-int CMenus::DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
+int CMenus::DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner)
 {
 	CALLSTACK_ADD();
 
-	return DoButton_CheckBox_Common(pBC, pText, "", pRect, pTooltip, Checked);
+	return DoButton_CheckBox_Common(pBC, pText, "", pRect, pTooltip, Checked, Corner);
 }
 
 
-int CMenus::DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
+int CMenus::DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner)
 {
 	CALLSTACK_ADD();
 
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d", Checked);
-	return DoButton_CheckBox_Common(pBC, pText, aBuf, pRect, pTooltip);
+	return DoButton_CheckBox_Common(pBC, pText, aBuf, pRect, pTooltip, false, Corner);
 }
 
 int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText, int Align, const char *pTooltip)

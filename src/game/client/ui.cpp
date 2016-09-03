@@ -529,13 +529,13 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 }*/
 
 // TODO: if pHighlight is supplied, MaxWidth will be ignored! Fix this!
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, int MaxWidth, const char *pHighlight)
+void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
 {
 	// TODO: FIX ME!!!!
 	//Graphics()->BlendNormal();
 	if(Align == 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
+		float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
 
 		// highlight the parts that matches
 		if(pHighlight && pHighlight[0] != '\0')
@@ -595,7 +595,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, in
 	}
 	else if(Align > 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
+		float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
 		// highlight the parts that matches
 		if(pHighlight && pHighlight[0] != '\0')
 		{
@@ -619,7 +619,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, in
 	}
 }
 
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, int MaxWidth, const char *pHighlight)
+void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
 {
 	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight);
 }
