@@ -6,7 +6,7 @@
 
 #define GAME_VERSION "0.6.3"
 #define ATH_VERSION "0.25.1"
-#define DDNET_VERSION "10.3"
+#define DDNET_VERSION "10.3.1"
 #define BUILD_DATE __DATE__ ", " __TIME__
 
 #ifdef GIT_SHORTREV_HASH
