@@ -60,12 +60,15 @@ test:
         ~/bam/bam client_release;
         ~/bam/bam tools_release;
         
-        strip -s -o $CIRCLE_ARTIFACTS/$DST/"./slc_unpack"$EXT "./slc_unpack"$EXT;
 
         if [ $CIRCLE_NODE_INDEX -eq 2 ]; then
-          strip -s -o $CIRCLE_ARTIFACTS/$DST/"./AllTheHaxx"$EXT "./AllTheHaxx"$EXT;
+          strip -s "./AllTheHaxx"$EXT;
+          strip -s "./slc_unpack"$EXT;
           strip -s *.dll;
         fi
+        
+        mv "./AllTheHaxx"$EXT $CIRCLE_ARTIFACTS/$DST;
+        mv "./slc_unpack"$EXT $CIRCLE_ARTIFACTS/$DST;
         
         if [ ! $CIRCLE_NODE_INDEX -eq 0 ]; then
           zip -q -T -X DLLs . *.dll;
