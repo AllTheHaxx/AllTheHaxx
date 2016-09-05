@@ -60,13 +60,6 @@ test:
         ~/bam/bam client_release;
         ~/bam/bam tools_release;
         
-
-        if [ $CIRCLE_NODE_INDEX -eq 2 ]; then
-          strip -s "./AllTheHaxx"$EXT;
-          strip -s "./slc_unpack"$EXT;
-          strip -s *.dll;
-        fi
-        
         mv "./AllTheHaxx"$EXT $CIRCLE_ARTIFACTS/$DST;
         mv "./slc_unpack"$EXT $CIRCLE_ARTIFACTS/$DST;
         
