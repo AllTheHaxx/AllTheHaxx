@@ -601,6 +601,8 @@ public:
 		// set length
 		if(Length < 0)
 			Length = str_length(pText);
+		if(Length == 0)
+			return 0.0f;
 
 		float MaxLineWidth = 0.0f;
 
