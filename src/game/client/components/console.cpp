@@ -951,7 +951,7 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(Editing), -1);
 
 		// render possible commands
-		if(!m_pSearchString && m_ConsoleType != CONSOLETYPE_LUA && (m_ConsoleType == CONSOLETYPE_LOCAL || m_ConsoleType == CONSOLETYPE_REMOTE && Client()->RconAuthed()))
+		if(!m_pSearchString && m_ConsoleType != CONSOLETYPE_LUA && (m_ConsoleType == CONSOLETYPE_LOCAL || (m_ConsoleType == CONSOLETYPE_REMOTE && Client()->RconAuthed())))
 		{
 			if(pConsole->m_Input.GetString()[0] != 0)
 			{
@@ -985,7 +985,7 @@ void CGameConsole::OnRender()
 			pConsole->m_BacklogActLineOld = 0; // reset var
 			for(int i = 0; i < pConsole->m_BacklogActLine; i++)
 			{
-				if(!pEntry || (pEntry == pConsole->m_Backlog.First()) && str_length(pEntry->m_aText) >= 3)
+				if(!pEntry || ((pEntry == pConsole->m_Backlog.First()) && str_length(pEntry->m_aText) >= 3))
 				{
 					pConsole->m_BacklogActLine = pConsole->m_BacklogActLineOld;
 					if(m_pSearchString)
@@ -1079,7 +1079,7 @@ void CGameConsole::OnRender()
 				mx = (mx / (float)Graphics()->ScreenWidth()) * Screen.w;
 				my = (my / (float)Graphics()->ScreenHeight()) * Screen.h;
 
-				int strWidth = TextRender()->TextWidth(Cursor.m_pFont, FontSize, sText.c_str(), sText.length());
+				int strWidth = round_to_int(TextRender()->TextWidth(Cursor.m_pFont, FontSize, sText.c_str(), sText.length()));
 				CUIRect seltextRect(0, y - OffsetY, strWidth, FontSize + 3.0f);
 
 				if(my > seltextRect.y && my < seltextRect.y + seltextRect.h)
@@ -1089,7 +1089,7 @@ void CGameConsole::OnRender()
 
 					float offacumx = 0;
 					float charwi = 0;
-					int i = 0;
+					unsigned i = 0;
 					for(i = 0; i < sText.length(); i++)
 					{
 						char toAn[2] = {sText.at(i), '\0'};
@@ -1130,7 +1130,7 @@ void CGameConsole::OnRender()
 
 				if(!Input()->NativeMousePressed(1) && mousePress)
 				{
-					if(copyIndexStart != -1 && !sText.empty() && copyIndexEnd <= sText.length())
+					if(copyIndexStart != -1 && !sText.empty() && copyIndexEnd <= (signed)sText.length())
 					{
 						Input()->SetClipboardTextSTD(sText.substr(copyIndexStart, copyIndexEnd - copyIndexStart));
 						//dbg_msg("Clipboard", "Copied '%s' to clipboard...", sText.substr(copyIndexStart, copyIndexEnd-copyIndexStart).c_str());
