@@ -3022,11 +3022,14 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 		if(!Item.m_Visible)
 			continue;
 
+		if(UI()->MouseInside(&Item.m_Rect))
+			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 8.0f);
+
 		CUIRect Button;
-		str_format(aBuf, sizeof(aBuf), "[%i]", i+1);
+		str_format(aBuf, sizeof(aBuf), "#%i", i+1);
 		//const float tw = TextRender()->TextWidth(0, 16.0f, aBuf, -1);
 		Item.m_Rect.VSplitLeft(35.0f, &Button, &Item.m_Rect);
-		UI()->DoLabelScaled(&Button, aBuf, 16.0f, 0);
+		UI()->DoLabelScaled(&Button, aBuf, 16.0f, -1);
 
 		Item.m_Rect.VSplitLeft(10.0f, 0, &Item.m_Rect);
 		str_format(aBuf, sizeof(aBuf), "@@ %s", L->m_Exceptions[i].c_str() +4/* + (str_find(L->m_Exceptions[i].c_str(), L->GetFilename()) != NULL ? str_length(L->GetFilename()) + 1 : 0)*/);
@@ -3046,49 +3049,58 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	static int s_ActiveLuaExceptions = -1;
 	static int s_SelectedScript = -1;
 
-	// render settings page if open
-	if(s_ActiveLuaSettings >= 0)
+	if(g_Config.m_ClLua)
 	{
-		try
+		// render settings page if open
+		if(s_ActiveLuaSettings >= 0)
+		{
+			try
+			{
+				CUIRect CloseButton;
+				MainView.HSplitTop(20.0f, &CloseButton, &MainView);
+				static CButtonContainer s_CloseButton;
+				if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
+				{
+					Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptSaveSettings")();
+					s_ActiveLuaSettings = -1;
+				}
+				else
+				{
+					MainView.HSplitTop(10.0f, 0, &MainView);
+					Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView);
+					return;
+				}
+			}
+			catch(std::exception& e)
+			{
+				Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]);
+				s_ActiveLuaSettings = -1;
+			}
+		}
+
+		// render exceptions page if open
+		if(s_ActiveLuaExceptions >= 0)
 		{
 			CUIRect CloseButton;
 			MainView.HSplitTop(20.0f, &CloseButton, &MainView);
 			static CButtonContainer s_CloseButton;
 			if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
 			{
-				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptSaveSettings")();
-				s_ActiveLuaSettings = -1;
+				s_ActiveLuaExceptions = -1;
 			}
 			else
 			{
 				MainView.HSplitTop(10.0f, 0, &MainView);
-				Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView);
+				RenderSettingsLuaExceptions(MainView, Client()->Lua()->GetLuaFiles()[s_ActiveLuaExceptions]);
 				return;
 			}
 		}
-		catch(std::exception &e)
-		{
-			Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]);
-			s_ActiveLuaSettings = -1;
-		}
 	}
-
-	// render exceptions page if open
-	if(s_ActiveLuaExceptions >= 0)
+	else
 	{
-		CUIRect CloseButton;
-		MainView.HSplitTop(20.0f, &CloseButton, &MainView);
-		static CButtonContainer s_CloseButton;
-		if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
-		{
-			s_ActiveLuaExceptions = -1;
-		}
-		else
-		{
-			MainView.HSplitTop(10.0f, 0, &MainView);
-			RenderSettingsLuaExceptions(MainView, Client()->Lua()->GetLuaFiles()[s_ActiveLuaExceptions]);
-			return;
-		}
+		s_ActiveLuaSettings = -1;
+		s_ActiveLuaExceptions = -1;
+		s_SelectedScript = -1;
 	}
 
 	// render the main selection view
@@ -3251,7 +3263,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 	// render the box at the right
 	if(s_SelectedScript > -1 && s_SelectedScript < Client()->Lua()->GetLuaFiles().size())
 	{
-		RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarInactive, CUI::CORNER_R, 5.0f);
+		RenderTools()->DrawUIRect(&MainView, vec4(0,0,0,0.25f), CUI::CORNER_R, 5.0f);
 
 		CLuaFile *L = Client()->Lua()->GetLuaFiles()[s_SelectedScript];
 		CUIRect Label;
@@ -3341,7 +3353,28 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 		if(L->State() == CLuaFile::STATE_ERROR)
 		{
-			UI()->DoLabelScaled(&Bar, L->m_pErrorStr[0] ? L->m_pErrorStr : Localize("An error occured"), 12.0f, -1, Label.w);
+			float FadeVal = sinf(Client()->SteadyTimer()*1.4f)/2.0f+0.5f;
+			TextRender()->TextColor(1.0f, 0.25f+FadeVal*0.75f, 0.25f+FadeVal*0.75f, 1.0f);
+			UI()->DoLabelScaled(&Bar, L->m_pErrorStr && L->m_pErrorStr[0] ? L->m_pErrorStr : Localize("An error occured"), 12.0f, -1, Bar.w);
+			TextRender()->TextColor(1,1,1,1);
+		}
+
+
+		if(L->State() == CLuaFile::STATE_LOADED)
+		{
+			// let the script render stuff, if it wants to
+			CUIRect View;
+			MainView.VMargin(7.5f, &View);
+			View.HSplitBottom(10.0f, &View, 0);
+			View.HSplitTop(14.0f*(TextRender()->TextLineCount(0, 14.0f, L->GetScriptInfo(), MainView.w)-1)+5.0f, 0, &View);
+			LuaRef func = Client()->Lua()->GetLuaFiles()[s_SelectedScript]->GetFunc("OnScriptRenderInfo");
+			if(func.cast<bool>())
+			{
+				try
+				{
+					func(View);
+				} catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[s_SelectedScript]); }
+			}
 		}
 
 	}
