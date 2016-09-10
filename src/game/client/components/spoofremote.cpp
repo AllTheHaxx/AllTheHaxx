@@ -38,7 +38,7 @@ void CSpoofRemote::OnConsoleInit()
 	Console()->Register("spf_connect", "", CFGFLAG_CLIENT, ConConnect, (void *)this, "connect to teh zervor 4 h4xX0r");
 	Console()->Register("spf_disconnect", "", CFGFLAG_CLIENT, ConDisconnect, (void *)this, "disconnect from teh zervor 4 h4xX0r");
 	Console()->Register("spf_forceclose", "s", CFGFLAG_CLIENT, ConForceClose, (void *)this, "force-close the connection");
-	Console()->Register("spf", "s", CFGFLAG_CLIENT, ConCommand, (void *)this, "3X3CUT3 C0MM4ND!");
+	Console()->Register("spf", "r", CFGFLAG_CLIENT, ConCommand, (void *)this, "3X3CUT3 C0MM4ND!");
 #endif
 }
 

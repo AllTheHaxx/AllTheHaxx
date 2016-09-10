@@ -233,9 +233,9 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
-	
+
 	m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
-		
+
 	if(m_pClient->m_pChat->m_CryptSendQueue.size())
 	{
 		int buf = m_pClient->m_pChat->m_CryptSendQueue[0] << 16;
@@ -368,7 +368,7 @@ int CControls::SnapInput(int *pData)
 
 	// remove the hookline flag from the sent data
 	CServerInfo ServerInfo; Client()->GetServerInfo(&ServerInfo);
-	if((!g_Config.m_ClSendHookline || str_find_nocase(ServerInfo.m_aGameType, "stitch")) && (m_InputData[g_Config.m_ClDummy].m_PlayerFlags & PLAYERFLAG_AIM))
+	if((m_InputData[g_Config.m_ClDummy].m_PlayerFlags & PLAYERFLAG_AIM) && (!g_Config.m_ClSendHookline || str_find_nocase(ServerInfo.m_aGameType, "stitch") || str_find_nocase(ServerInfo.m_aGameType, "626")))
 	{
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags ^= PLAYERFLAG_AIM;
 		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
@@ -564,7 +564,7 @@ void CControls::ClampMousePos()
 	}
 	else
 	{
-		float CameraMaxDistance = 200.0f;
+		float CameraMaxDistance = g_Config.m_ClCameraMaxDistance;
 		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
 		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
