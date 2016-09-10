@@ -1396,6 +1396,9 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		char aBuf[128];
 		int State = Updater()->GetCurrentState();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0") != 0;
+#if defined(CONF_SPOOFING)
+		NeedUpdate = false;
+#endif
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
 			str_format(aBuf, sizeof(aBuf), "New Version '%s' is out!", Client()->LatestVersion());
@@ -1413,7 +1416,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "Installing '%s'", Updater()->GetCurrentFile());
 		else if(State == IUpdater::FAIL)
 		{
-			str_format(aBuf, sizeof(aBuf), "Update error: could not download %s", Updater()->GetFailedFile());
+			str_format(aBuf, sizeof(aBuf), "Updater: %s failed. Download manually?", Updater()->GetFailedFile());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::NEED_RESTART)
