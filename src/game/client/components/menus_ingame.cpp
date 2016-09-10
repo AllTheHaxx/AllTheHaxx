@@ -1336,7 +1336,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	// ----------- zervor tools
 
-	MainView.VSplitLeft(70.0f, &Box, &MainView);
+	MainView.VSplitLeft(20.0f, &Box, &MainView);
 	MainView.VSplitLeft(200.0f, &Box, &MainView);
 
 	// window
@@ -1388,7 +1388,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	// ----------- dummy tools
 
-	MainView.VSplitLeft(70.0f, &Box, &MainView);
+	MainView.VSplitLeft(20.0f, &Box, &MainView);
 	MainView.VSplitLeft(200.0f, &Box, &MainView);
 
 	// window
@@ -1499,8 +1499,8 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 		if(!m_pClient->m_aClients[Index].m_Spoofable)
 			continue;
 
-		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
-			continue;
+//		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
+//			continue;
 
 		if(m_SpoofSelectedPlayer == Index)
 			Selected = NumOptions;
@@ -1527,7 +1527,7 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 			Info.m_Size = Item.m_Rect.h;
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1,0), vec2(Item.m_Rect.x+Item.m_Rect.h/2, Item.m_Rect.y+Item.m_Rect.h/2));
-			Item.m_Rect.x +=Info.m_Size;
+			Item.m_Rect.x += Info.m_Size;
 			char aBuf[256];
 			NETADDR temp_addr;
 			net_addr_from_str(&temp_addr, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
@@ -1535,8 +1535,13 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 		//		str_format(aBuf, sizeof(aBuf), "\\\\-D-\\\\ %s", );
 		//	else
 		//		str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[aPlayerIDs[i]].m_aName);
-			str_format(aBuf, sizeof(aBuf), "%s%s [[%s]]", temp_addr.port == 1337 ? "\\\\-D-\\\\  " : "", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
+			str_format(aBuf, sizeof(aBuf), "%s%s - %s [[%s]]", temp_addr.port == 1337 ? "\\\\-D-\\\\  " : "", m_pClient->m_aClients[aPlayerIDs[i]].m_aName, m_pClient->m_aClients[aPlayerIDs[i]].m_aClan, m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
+			Item.m_Rect.VSplitRight(Item.m_Rect.h, 0, &Item.m_Rect);
+			Item.m_Rect.Margin(2.0f, &Item.m_Rect);
+			CPointerContainer CopyButton(&(m_pClient->m_aClients[aPlayerIDs[i]]));
+			if(DoButton_Menu(&CopyButton, "IP", 0, &Item.m_Rect, "Copy address to clipboard"))
+				Input()->SetClipboardText(m_pClient->m_aClients[aPlayerIDs[i]].m_Addr);
 		}
 	}
 
@@ -1762,7 +1767,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 			UI()->DoLabelScaled(&Button, ("Chat message:"), 14.0f, -1);
 
-			static char s_aChatMessage[128] = {0};
+			static char s_aChatMessage[255] = {0};
 			Extended.HSplitTop(20.0f, &Bottom, &Extended);
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
@@ -1800,10 +1805,10 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
-			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(110.0f, &Button, &Bottom);
 			if(m_pClient->m_pSpoofRemote->IsSpfState(CSpoofRemote::STATE_DUMMIES))
 			{
+				Bottom.VSplitLeft(5.0f, 0, &Bottom);
+				Bottom.VSplitLeft(110.0f, &Button, &Bottom);
 				static CButtonContainer s_SendChatDummiesButton;
 				if(DoButton_Menu(&s_SendChatDummiesButton, ("Send (Dummies)"), 0, &Button, ("Send a chat message from the dummies")))
 				{
@@ -1811,6 +1816,19 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 					str_format(aCmd, sizeof(aCmd), "chatdum %s", s_aChatMessage);
 					m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 				}
+			}
+
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
+			static CButtonContainer s_SendRconButton;
+			if(DoButton_Menu(&s_SendRconButton, Localize("Rcon"), 0, &Button, ("Send a rcon command")))
+			{
+				char aCmd[256];
+				if(s_DoForAll)
+					str_format(aCmd, sizeof(aCmd), "rconall %s %s", aServerAddr, s_aChatMessage);
+				else
+					str_format(aCmd, sizeof(aCmd), "rcon %s %s %s", aClientAddr, aServerAddr, s_aChatMessage);
+				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
 			Bottom.VSplitLeft(7.5f, 0, &Bottom);

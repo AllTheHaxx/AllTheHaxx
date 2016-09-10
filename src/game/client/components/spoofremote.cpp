@@ -222,20 +222,16 @@ void CSpoofRemote::Listener(void *pUserData)
 			if(pSelf->m_SpoofRemoteID < 0)
 				pSelf->m_SpoofRemoteID = atoi(rBuffer);
 
-			if(rBuffer[0] == '\x16') // keepalive from server
+			if(str_comp_nocase(rBuffer, "ping") == 0) // keepalive from server
 			{
 				pSelf->m_LastAck = time(NULL);
 			}
-			else if(rBuffer[0] == '\x04') // EOT
+			else if(str_comp_nocase_num(rBuffer, "exit", 4) == 0) // connection ended
 			{
-				pSelf->Console()->Print(0, "spfrmt", "End of transmission: ", true);
-
-				if(rBuffer[1] == '\x06')
+				if(str_length(rBuffer) == 4)
 					pSelf->Console()->Print(0, "spfrmt", "Disconneted from teh zervor.", true); // maybe leave these message to the server?
-				else if(rBuffer[1] == '\x15')
-					pSelf->Console()->Print(0, "spfrmt", "Ack timeout.", true);
 				else
-					pSelf->Console()->Print(0, "spfrmt", "No reason given.", true);
+					pSelf->Console()->Print(0, "spfrmt", rBuffer, true);
 
 				pSelf->Disconnect();
 			}
@@ -258,6 +254,7 @@ void CSpoofRemote::Worker(void *pUserData)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "spfrmt", "started worker thread", false);
+	int64 LastAck = time_get();
 	while(1)
 	{
 		thread_sleep(1); // be nice
@@ -270,27 +267,6 @@ void CSpoofRemote::Worker(void *pUserData)
 
 		if(pSelf->m_SpoofRemoteID < 0)
 			continue;
-
-	/*	static bool HasWarned = false;
-		if(!HasWarned && time(0) > pSelf->m_LastAck + 1*60) // after one minute: warning
-		{
-			pSelf->Console()->Print(0, "spfrmt", "Warning: zervor hasn't responded for a minute!", true);
-			pSelf->Console()->Print(0, "spfrmt", "Warning: disconnecting 60 seconds!", true);
-			HasWarned = true;
-		}
-		else if(HasWarned && time(0) < pSelf->m_LastAck + 2)
-		{
-			pSelf->Console()->Print(0, "spfrmt", "Yey, teh zervor has just came back alive :P", true);
-			HasWarned = false;
-		}
-		if(time(0) > pSelf->m_LastAck + 2*60) // after two minutes: disconenct
-		{
-			pSelf->Console()->Print(0, "spfrmt", "Warning: zervor hasn't responded for two minutes!", true);
-			pSelf->Console()->Print(0, "spfrmt", "Warning: it most likely won't come back, disconnecting!", true);
-			pSelf->Disconnect();
-		}
-	*/
-		static int64 LastAck = time_get();
 
 		// keep alive every 15 seconds
 		if(time_get() < LastAck + 15*time_freq())
