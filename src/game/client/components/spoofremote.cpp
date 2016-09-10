@@ -2,6 +2,7 @@
 
 #include <engine/shared/config.h>
 #include <engine/serverbrowser.h>
+#include <cstring>
 #include "voting.h"
 #include "spoofremote.h"
 
@@ -23,6 +24,7 @@ void CSpoofRemote::Reset()
 	m_LastAck = 0;
 	m_SpoofRemoteID = -1;
 	m_State = 0;
+	m_ConnState = 0;
 	mem_zero(m_aLastMessage, sizeof(m_aLastMessage));
 	mem_zero(m_aLastCommand, sizeof(m_aLastCommand));
 	m_LastMessageTime = 0;
@@ -43,8 +45,8 @@ void CSpoofRemote::OnConsoleInit()
 void CSpoofRemote::OnInit()
 {
 #if defined(CONF_SPOOFING)
-	if(!IsState(SPOOF_STATE_CONNECTING) && !IsConnected() && g_Config.m_ClSpoofAutoconnect)
-		Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+	if(IsConnState(CONNSTATE_DISCONNECTED) && g_Config.m_ClSpoofAutoconnect)
+		Connect();
 #endif
 }
 
@@ -52,7 +54,7 @@ void CSpoofRemote::OnRender()
 {
 #if defined(CONF_SPOOFING)
 	// nevar forgetti moms spaghetti
-	if(IsState(SPOOF_STATE_VOTEKICKALL))
+	if(IsSpfState(STATE_VOTEKICKALL))
 	{
 		static int64 LastKickTime;
 		static int CurClientID = 0;
@@ -97,7 +99,7 @@ void CSpoofRemote::OnRender()
 
 		if(CurClientID > MAX_CLIENTS)
 		{
-			m_State &= ~SPOOF_STATE_VOTEKICKALL;
+			m_State &= ~STATE_VOTEKICKALL;
 			LastKickTime = 0;
 			CurClientID = 0;
 		}
@@ -105,31 +107,57 @@ void CSpoofRemote::OnRender()
 #endif
 }
 
-void CSpoofRemote::Connect(const char *pAddr, int Port)
+void CSpoofRemote::StartConnection(void *pUserData)
 {
 #if defined(CONF_SPOOFING)
-	m_State |= SPOOF_STATE_CONNECTING;
 
-	// Info
+	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
+
+	pSelf->m_ConnState = CONNSTATE_CONNECTING;
+	pSelf->Console()->Print(0, "spfrmt", "Connecting to zervor...", false);
+
 	NETADDR BindAddr;
-	BindAddr.type = NETTYPE_ALL;
-	BindAddr.port = (unsigned short)(secure_rand() % 40000 + 16000);
-	m_Socket = net_tcp_create(BindAddr);
+	mem_zero(&pSelf->m_HostAddress, sizeof(pSelf->m_HostAddress));
+	mem_zero(&BindAddr, sizeof(BindAddr));
 
-	// Socket
-	if(g_Config.m_Debug)
-		Console()->Printf(0, "spfrmt", "opening socket on port %i", BindAddr.port);
-	if (m_Socket.type == NETTYPE_INVALID)
+	// lookup
+	if(net_host_lookup(g_Config.m_ClSpoofSrvIP, &pSelf->m_HostAddress, NETTYPE_IPV4) != 0)
 	{
-		//dbg_msg("spfrmt", "failed to create socket");
-		Console()->Print(0, "spfrmt", "error while creating socket", true);
+		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "spfrmt", "ERROR: Can't resolve %s", g_Config.m_ClSpoofSrvIP);
+		pSelf->m_ConnState = CONNSTATE_CONNECTING;
 		return;
 	}
 
-	// Connect in a thread so that the game doesn't get hung
-	m_LastAck = time_get();
-	str_format(m_aNetAddr, sizeof(m_aNetAddr), "%s:%i", pAddr, Port);
-	thread_init(CSpoofRemote::CreateThreads, (void *)this);
+	pSelf->m_HostAddress.port = (unsigned short)g_Config.m_ClSpoofSrvPort;
+
+	// connect
+	BindAddr.type = NETTYPE_IPV4;
+	pSelf->m_Socket = net_tcp_create(BindAddr);
+	if(net_tcp_connect(pSelf->m_Socket, &pSelf->m_HostAddress) != 0)
+	{
+		net_tcp_close(pSelf->m_Socket);
+		char aBuf[128];
+		net_addr_str(&pSelf->m_HostAddress, aBuf, sizeof(aBuf), 0);
+		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "spfrmt", "ERROR: Can't connect to '%s:%d' on type=%i", aBuf, pSelf->m_HostAddress.port, pSelf->m_HostAddress.type);
+		pSelf->m_ConnState = CONNSTATE_DISCONNECTED;
+		int error = net_errno();
+#if defined(CONF_FAMILY_WINDOWS)
+		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, aBuf, sizeof(buf), 0) == 0)
+			aBuf[0] = 0;
+		dbg_msg("spfrmt", " : (%d '%s')", error, buf);
+#else
+		dbg_msg("spfrmt", " : (%d '%s')", error, strerror(error));
+#endif
+		return;
+	}
+
+	pSelf->m_LastAck = time_get();
+
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "spfrmt", "connected, creating threads...", false);
+	pSelf->m_ConnState = CONNSTATE_CONNECTED;
+	pSelf->m_pWorkerThread = thread_init(CSpoofRemote::Worker, pUserData);
+	pSelf->m_pListenerThread = thread_init(CSpoofRemote::Listener, pUserData);
+
 #endif
 }
 
@@ -144,48 +172,25 @@ void CSpoofRemote::Disconnect()
 #endif
 }
 
-void CSpoofRemote::CreateThreads(void *pUserData)
-{
-#if defined(CONF_SPOOFING)
-	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
-
-	pSelf->Console()->Print(0, "spfrmt", "Connecting to zervor...", false);
-
-	NETADDR Addr;
-	net_addr_from_str(&Addr, pSelf->m_aNetAddr);
-	if (net_tcp_connect(pSelf->m_Socket, &Addr) != 0)
-	{
-		pSelf->Console()->Printf(0, "spfrmt", "failed to connect to '%s'", pSelf->m_aNetAddr);
-		return;
-	}
-
-	pSelf->Console()->Print(0, "spfrmt", "connected, creating threads...", false);
-	pSelf->m_State &= ~SPOOF_STATE_CONNECTING;
-	pSelf->m_State |= SPOOF_STATE_CONNECTED;
-	pSelf->m_pWorkerThread = thread_init(CSpoofRemote::Worker, pUserData);
-	pSelf->m_pListenerThread = thread_init(CSpoofRemote::Listener, pUserData);
-#endif
-}
-
 void CSpoofRemote::ParseZervorMessage(const char *pMessage)
 {
 	// ~~~ concerning dummies
-	if(!IsState(SPOOF_STATE_DUMMIES) && (
+	if(!IsSpfState(STATE_DUMMIES) && (
 			str_comp_nocase("[Server]: Dummies connected!", pMessage) == 0 ||
 			str_comp_nocase("[Server]: Dummies connected (voting...)!", pMessage) == 0))
-		m_State |= SPOOF_STATE_DUMMIES;
+		m_State |= STATE_DUMMIES;
 
-	if(IsState(SPOOF_STATE_DUMMIES) &&
+	if(IsSpfState(STATE_DUMMIES) &&
 			str_comp_nocase("[Server]: Dummies disconnected.", pMessage) == 0)
-		m_State &= ~SPOOF_STATE_DUMMIES;
+		m_State &= ~STATE_DUMMIES;
 
-	if(!IsState(SPOOF_STATE_DUMMYSPAM) &&
+	if(!IsSpfState(STATE_DUMMYSPAM) &&
 			str_comp_nocase("[Server]: Dummyspam started!", pMessage) == 0)
-		m_State |= SPOOF_STATE_DUMMYSPAM;
+		m_State |= STATE_DUMMYSPAM;
 
-	if(IsState(SPOOF_STATE_DUMMYSPAM) &&
+	if(IsSpfState(STATE_DUMMYSPAM) &&
 			str_comp_nocase("[Server]: Dummyspam stopped!", pMessage) == 0)
-		m_State &= ~SPOOF_STATE_DUMMYSPAM;
+		m_State &= ~STATE_DUMMYSPAM;
 }
 
 void CSpoofRemote::Listener(void *pUserData)
@@ -194,6 +199,7 @@ void CSpoofRemote::Listener(void *pUserData)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
 	pSelf->Console()->Print(0, "spfrmt", "started listener thread", false);
+	char rBuffer[512];
 	while(1)
 	{
 		if(!pSelf->IsConnected())
@@ -203,7 +209,6 @@ void CSpoofRemote::Listener(void *pUserData)
 		}
 
 		// receive
-		char rBuffer[256];
 		mem_zero(&rBuffer, sizeof(rBuffer));
 		int ret = net_tcp_recv(pSelf->m_Socket, rBuffer, sizeof(rBuffer));
 		if(ret <= 0 || str_comp(rBuffer, "") == 0)
@@ -252,14 +257,14 @@ void CSpoofRemote::Worker(void *pUserData)
 #if defined(CONF_SPOOFING)
 	CSpoofRemote *pSelf = (CSpoofRemote *)pUserData;
 
-	pSelf->Console()->Print(0, "spfrmt", "started worker thread", false);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "spfrmt", "started worker thread", false);
 	while(1)
 	{
 		thread_sleep(1); // be nice
 
 		if(!pSelf->IsConnected())
 		{
-			pSelf->Console()->Print(0, "spfrmt", "closed worker thread", false);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "spfrmt", "closed worker thread", false);
 			return;
 		}
 
@@ -333,10 +338,10 @@ void CSpoofRemote::ConConnect(IConsole::IResult *pResult, void *pUserData)
 {
 #if defined(CONF_SPOOFING)
 	CSpoofRemote *pSelf = ((CSpoofRemote *)pUserData);
-	if(pSelf->IsConnected())
+	if(!pSelf->IsConnState(CONNSTATE_DISCONNECTED))
 		pSelf->Console()->Print(0, "spfrmt", "Disconnect first before opening a new connection!", false);
 	else
-		pSelf->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+		pSelf->Connect();
 #endif
 }
 

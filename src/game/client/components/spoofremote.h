@@ -10,11 +10,12 @@ class CSpoofRemote : public CComponent
 public:
 	enum
 		{
-			SPOOF_STATE_CONNECTING  = 1 << 0,
-			SPOOF_STATE_CONNECTED   = 1 << 1,
-			SPOOF_STATE_DUMMIES     = 1 << 2,
-			SPOOF_STATE_DUMMYSPAM   = 1 << 3,
-			SPOOF_STATE_VOTEKICKALL = 1 << 4,
+			CONNSTATE_DISCONNECTED = 0,
+			CONNSTATE_CONNECTING,
+			CONNSTATE_CONNECTED,
+			STATE_DUMMIES     = 1 << 0,
+			STATE_DUMMYSPAM   = 1 << 1,
+			STATE_VOTEKICKALL = 1 << 2,
 		};
 
 private:
@@ -22,10 +23,12 @@ private:
 	void *m_pListenerThread;
 	void *m_pWorkerThread;
 	int64 m_LastAck;
+	NETADDR m_HostAddress;
 	NETSOCKET m_Socket;
 	char m_aNetAddr[NETADDR_MAXSTRSIZE];
 
 	// control variables
+	int m_ConnState; // current state, see above
 	int m_State; // current state, see above
 	int m_SpoofRemoteID; // our id at teh zervor
 	char m_aLastMessage[256]; // the last message from zervor
@@ -36,7 +39,7 @@ private:
 	void Reset();
 
 	void ParseZervorMessage(const char *pMessage);
-	static void CreateThreads(void *pUserData);
+	static void StartConnection(void *pUserData);
 	static void Listener(void *pUserData);
 	static void Worker(void *pUserData);
 
@@ -49,15 +52,16 @@ public:
 	CSpoofRemote();
 	~CSpoofRemote();
 
-	inline bool IsConnected() const { return (m_State&SPOOF_STATE_CONNECTED) != 0; }
-	inline int IsState(int state) const { return m_State&state; }
+	inline bool IsConnected() const { return m_ConnState == CONNSTATE_CONNECTED; }
+	inline int IsConnState(int State) const { return m_ConnState == State; }
+	inline int IsSpfState(int State) const { return m_State&State; }
 	inline const char *LastMessage() const { return m_aLastMessage; }
 	inline int64 LastMessageTime() const { return m_LastMessageTime; }
 	inline const char *LastCommand() const { return m_aLastCommand; }
 
-	inline void VotekickAll() { m_State |= SPOOF_STATE_VOTEKICKALL; }
+	inline void VotekickAll() { m_State |= STATE_VOTEKICKALL; }
 
-	void Connect(const char *pAddr, int Port);
+	void Connect() { thread_init(StartConnection, this); };
 	void Disconnect();
 
 	void OnConsoleInit();

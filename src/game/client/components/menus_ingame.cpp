@@ -1291,10 +1291,13 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	if(!m_pClient->m_pSpoofRemote->IsConnected())
 	{
-		static CButtonContainer s_ButtonConnect;
-		if(DoButton_Menu(&s_ButtonConnect, ("Connect to server"), 0, &Button, ("Connect to the spoofing-server")))
+		if(m_pClient->m_pSpoofRemote->IsConnState(CSpoofRemote::CONNSTATE_DISCONNECTED))
 		{
-			m_pClient->m_pSpoofRemote->Connect(g_Config.m_ClSpoofSrvIP, g_Config.m_ClSpoofSrvPort);
+			static CButtonContainer s_ButtonConnect;
+			if(DoButton_Menu(&s_ButtonConnect, ("Connect to server"), 0, &Button, ("Connect to the spoofing-server")))
+			{
+				m_pClient->m_pSpoofRemote->Connect();
+			}
 		}
 		return;
 	}
@@ -1363,7 +1366,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 	Box.HSplitTop(40.0f, 0, &Box);
 	Box.HSplitTop(25.0f, &Button, 0);
-	if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
+	if(m_pClient->m_pSpoofRemote->IsSpfState(CSpoofRemote::STATE_DUMMIES))
 	{
 		static CButtonContainer s_ButtonGetDum;
 		if(DoButton_Menu(&s_ButtonGetDum, ("Grab dummy IPs"), 0, &Button))
@@ -1426,7 +1429,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	Box.HSplitTop(25.5f, &Button, 0);
 	static CButtonContainer s_ButtonDummiesDisconnect;
 	{
-		if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
+		if(m_pClient->m_pSpoofRemote->IsSpfState(CSpoofRemote::STATE_DUMMIES))
 		if(DoButton_Menu(&s_ButtonDummiesDisconnect, ("Disconnect dummies"), 0, &Button))
 		{
 			m_pClient->m_pSpoofRemote->SendCommand("dcdum");
@@ -1438,7 +1441,7 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 	static CButtonContainer s_ButtonDummySpam;
 	{
 		char aBuf[64];
-		if(!m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMYSPAM))
+		if(!m_pClient->m_pSpoofRemote->IsSpfState(CSpoofRemote::STATE_DUMMYSPAM))
 			str_format(aBuf, sizeof(aBuf), ("Start flooding"));
 		else
 			str_format(aBuf, sizeof(aBuf), ("Stop flooding"));
@@ -1799,7 +1802,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(110.0f, &Button, &Bottom);
-			if(m_pClient->m_pSpoofRemote->IsState(CSpoofRemote::SPOOF_STATE_DUMMIES))
+			if(m_pClient->m_pSpoofRemote->IsSpfState(CSpoofRemote::STATE_DUMMIES))
 			{
 				static CButtonContainer s_SendChatDummiesButton;
 				if(DoButton_Menu(&s_SendChatDummiesButton, ("Send (Dummies)"), 0, &Button, ("Send a chat message from the dummies")))
