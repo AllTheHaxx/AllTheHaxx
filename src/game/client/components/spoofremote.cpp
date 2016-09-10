@@ -142,9 +142,7 @@ void CSpoofRemote::StartConnection(void *pUserData)
 		pSelf->m_ConnState = CONNSTATE_DISCONNECTED;
 		int error = net_errno();
 #if defined(CONF_FAMILY_WINDOWS)
-		if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, aBuf, sizeof(buf), 0) == 0)
-			aBuf[0] = 0;
-		dbg_msg("spfrmt", " : (%d '%s')", error, buf);
+		dbg_msg("spfrmt", " : (errorcode=%d)", error);
 #else
 		dbg_msg("spfrmt", " : (%d '%s')", error, strerror(error));
 #endif
