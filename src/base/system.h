@@ -88,7 +88,11 @@ void dbg_break();
 	See Also:
 		<dbg_assert>
 */
-void dbg_msg(const char *sys, const char *fmt, ...);
+void dbg_msg(const char *sys, const char *fmt, ...)
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__ ((format (printf, 2, 3))) /* Warn if you specify wrong arguments in printf format string */
+#endif
+;
 
 /* Group: Memory */
 
@@ -830,7 +834,11 @@ int str_length(const char *str);
 		- The strings are treated as zero-termineted strings.
 		- Garantees that dst string will contain zero-termination.
 */
-int str_format(char *buffer, int buffer_size, const char *format, ...);
+int str_format(char *buffer, int buffer_size, const char *format, ...)
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__ ((format (printf, 3, 4))) /* Warn if you specify wrong arguments in printf format string */
+#endif
+;
 #define str_formatb(BUF, FMT, ...) str_format(BUF, sizeof(BUF), FMT, __VA_ARGS__)
 
 int str_replace_char(char *str_in, char find, char replace);

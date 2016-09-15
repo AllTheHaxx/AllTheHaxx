@@ -240,16 +240,16 @@ function build(settings)
 	if config.debugger.value then
 		settings.cc.defines:Add("FEATURE_DEBUGGER")
 	end
-	
+
 	if config.lua.value and config.luajit.value then
 		settings.cc.defines:Add("FEATURE_LUA")
 		--settings.cc.includes:Add("src/engine/external/luabridge")
 	end
-	
+
 	if config.protect.value then
 		settings.cc.defines:Add("CONF_PROTECT")
 	end
-	
+
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
@@ -258,7 +258,7 @@ function build(settings)
 		settings.cc.flags:Add("/D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS")
 	else
 		settings.cc.flags:Add("-Wall")
-		settings.cc.flags:Add("-Wno-deprecated")
+		settings.cc.flags:Add("-Wno-deprecated", "-Werror=format")
 		if family == "windows" then
 			if config.compiler.driver == "gcc" then
 				settings.link.flags:Add("-static-libgcc")
