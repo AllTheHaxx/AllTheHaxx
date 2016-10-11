@@ -239,7 +239,7 @@ void CEmoticon::OnRender()
 
 	if(!m_Active)
 		return;
-	
+
 #if defined(CONF_FAMILY_WINDOWS)
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 #else

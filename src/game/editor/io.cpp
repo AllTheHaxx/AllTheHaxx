@@ -578,10 +578,27 @@ int CEditorMap::Save(class IStorageTW *pStorage, const char *pFileName)
 	return 1;
 }
 
+void CEditor::LoadCurrentMap()
+{
+	Load(m_pClient->GetCurrentMapPath(), IStorageTW::TYPE_ALL);
+	m_ValidSaveFilename = true;
+}
+
 int CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
-	return m_Map.Load(Kernel()->RequestInterface<IStorageTW>(), pFileName, StorageType);
+	int result = m_Map.Load(Kernel()->RequestInterface<IStorageTW>(), pFileName, StorageType);
+	if (result)
+	{
+		str_copy(m_aFileName, pFileName, 512);
+		SortImages();
+	}
+	else
+	{
+		m_aFileName[0] = 0;
+		Reset();
+	}
+	return result;
 }
 
 int CEditorMap::Load(class IStorageTW *pStorage, const char *pFileName, int StorageType)
