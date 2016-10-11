@@ -1104,16 +1104,17 @@ void CIRC::Disconnect(const char *pReason)
 	if (m_State == STATE_CONNECTED)
 	{
 		if(pReason && pReason[0])
+		{
 			SendRaw("QUIT :%s", pReason);
+			m_apIRCComs.delete_all();
+		}
 		else
 			SendRaw("QUIT");
 	}
-
+	
 	net_tcp_close(m_Socket);
 	m_State = STATE_DISCONNECTED;
-
-	m_apIRCComs.delete_all();
-
+	
 	mem_zero(m_CmdToken, sizeof(m_CmdToken));
 }
 
