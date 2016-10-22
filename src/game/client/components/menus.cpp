@@ -131,18 +131,28 @@ void CMenusTooltip::OnRender()
 		return;
 
 	const float FONT_SIZE = 13.0f;
+	const float LINE_WIDTH = 130.0f * UI()->Scale();
+	const int lineCount = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, LINE_WIDTH);
+
 	CUIRect Rect;
-	Rect.x = UI()->MouseX() + 25.0f;
-	Rect.y = UI()->MouseY() + 0.5f;
-	const float maxWidth = UI()->Screen()->w-Rect.x-10.0f;
-	const int lineCount = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, maxWidth);
-	//Rect.w = clamp(tw, tw < 5.0f ? maxWidth : tw, maxWidth+2.5f);
-	Rect.w = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, -1, maxWidth);
+	Rect.x = UI()->MouseX() + 30.0f;
+	Rect.y = UI()->MouseY() + 5.0f;
 	Rect.h = (FONT_SIZE * (float)lineCount + 2.5f);
-	Rect.Margin(-3.0f, &Rect);
+	Rect.w = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, -1, LINE_WIDTH);
+	Rect.Margin(-3.0f, &Rect); // outsize it a bit to give it a little padding to the text
+
+	// make sure that the thing doesn't go out of view (right)
+	Rect.x = clamp(Rect.x, 0.0f, UI()->Screen()->w - Rect.w);
+
+	// make sure we don't hide the cursor -> move the tooltip down if we would
+	if(UI()->MouseX() + 20.0f > Rect.x)
+		Rect.y += 20.0f * UI()->Scale();
+
+	// make sure that the thing doesn't go out of view (bottom)
 	Rect.y = clamp(Rect.y, 0.0f, UI()->Screen()->h - Rect.h);
+
 	RenderTools()->DrawUIRect(&Rect, vec4(0,0,0.2f,0.8f), CUI::CORNER_ALL, 2.5f);
-	TextRender()->Text(0, Rect.x+1.5f, Rect.y, FONT_SIZE, m_aTooltip, maxWidth);
+	TextRender()->Text(0, Rect.x+1.5f, Rect.y, FONT_SIZE, m_aTooltip, LINE_WIDTH);
 
 	m_aTooltip[0] = 0;
 
