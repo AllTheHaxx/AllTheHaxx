@@ -131,7 +131,7 @@ void CMenusTooltip::OnRender()
 		return;
 
 	const float FONT_SIZE = 13.0f;
-	const float LINE_WIDTH = 130.0f * UI()->Scale();
+	const float LINE_WIDTH = 250.0f * UI()->Scale();
 	const int lineCount = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, LINE_WIDTH);
 
 	CUIRect Rect;

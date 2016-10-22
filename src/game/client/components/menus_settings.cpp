@@ -2574,7 +2574,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(Button.w*(2.0f/3.0f), &Button, &Label);
-		if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button, Localize("WARNING: In case you recently timed out, this will invalidate your timeout protection on all servers!")))
+		if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button, Localize("WARNING: In case you recently timed out somewhere:\nGenerating a new code will invalidate your timeout protection on all servers!")))
 		{
 			Client()->GenerateTimeoutSeed();
 		}
