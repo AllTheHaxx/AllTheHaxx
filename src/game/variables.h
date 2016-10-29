@@ -27,6 +27,7 @@ MACRO_CONFIG_INT(ClNameplatesTeamcolors, cl_nameplates_teamcolors, 1, 0, 1, CFGF
 MACRO_CONFIG_INT(ClNameplatesSize, cl_nameplates_size, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Size of the name plates from 0 to 100%")
 MACRO_CONFIG_INT(ClNameplatesClan, cl_nameplates_clan, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show clan in name plates")
 MACRO_CONFIG_INT(ClNameplatesClanSize, cl_nameplates_clan_size, 30, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Size of the clan plates from 0 to 100%")
+MACRO_CONFIG_INT(ClNameplatesClancolors, cl_nameplates_clancolors, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight your clan")
 MACRO_CONFIG_INT(ClNamePlatesScore, cl_nameplates_score, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show score in name plates")
 MACRO_CONFIG_INT(ClNamePlatesATH, cl_nameplates_ath, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show who uses this client.")
 MACRO_CONFIG_INT(ClNamePlatesATHBlinkTime, cl_nameplates_ath_blinktime, 90, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How fast the ATH sign blinks (in percent)")

@@ -127,7 +127,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
 		static CButtonContainer s_CheckboxNameplates;
-		if(DoButton_CheckBox(&s_CheckboxNameplates, Localize("Show name plates"), g_Config.m_ClNameplates, &Button))
+		if(DoButton_CheckBox(&s_CheckboxNameplates, Localize("Show name above Tees"), g_Config.m_ClNameplates, &Button))
 			g_Config.m_ClNameplates ^= 1;
 
 		if(g_Config.m_ClNameplates)
@@ -144,13 +144,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			static CButtonContainer s_CheckboxNameplatesTeamcolors;
 			if(DoButton_CheckBox(&s_CheckboxNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
 				g_Config.m_ClNameplatesTeamcolors ^= 1;
-
-			Right.HSplitTop(5.0f, 0, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			static CButtonContainer s_CheckboxNameplatesClan;
-			if(DoButton_CheckBox(&s_CheckboxNameplatesClan, Localize("Show clan above name plates"), g_Config.m_ClNameplatesClan, &Button))
-				g_Config.m_ClNameplatesClan ^= 1;
 		}
+
+		Right.HSplitTop(5.0f, 0, &Right);
+		Right.HSplitTop(20.0f, &Button, &Right);
+		static CButtonContainer s_CheckboxNameplatesClan;
+		if(DoButton_CheckBox(&s_CheckboxNameplatesClan, Localize("Show clan above Tees"), g_Config.m_ClNameplatesClan, &Button))
+			g_Config.m_ClNameplatesClan ^= 1;
 
 		if(g_Config.m_ClNameplatesClan)
 		{
@@ -161,6 +161,11 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 			CButtonContainer s_Scrollbar;
 			g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_ClNameplatesClanSize/100.0f, 0, g_Config.m_ClNameplatesClanSize)*100.0f+0.1f);
+
+			Right.HSplitTop(20.0f, &Button, &Right);
+			static CButtonContainer s_CheckboxNameplatesClancolors;
+			if(DoButton_CheckBox(&s_CheckboxNameplatesClancolors, Localize("Highlight your clan"), g_Config.m_ClNameplatesTeamcolors, &Button))
+				g_Config.m_ClNameplatesClancolors ^= 1;
 		}
 
 		Right.HSplitTop(5.0f, 0, &Right);

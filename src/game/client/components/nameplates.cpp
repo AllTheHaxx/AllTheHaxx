@@ -82,6 +82,8 @@ void CNamePlates::RenderNameplate(
 			TextRender()->Text(0, Position.x - twName / 2.0f, Position.y - FontSizeName - 38.0f - FontSizeClan - 3.0f, FontSizeName, aName, -1);
 
 			// clan
+			if(g_Config.m_ClNameplatesClancolors && str_comp(pClan, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aClan) == 0)
+				TextRender()->TextColor(0, .7f, 0, a);
 			const float tw = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
 			TextRender()->Text(0, Position.x - tw / 2.0f, Position.y - FontSizeClan - 38.0f, FontSizeClan, pClan, -1);
 		}
@@ -108,7 +110,7 @@ void CNamePlates::RenderNameplate(
 
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
-		
+
 		// render ATH sign
 		if(g_Config.m_ClNamePlatesATH &&
 				(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2))
