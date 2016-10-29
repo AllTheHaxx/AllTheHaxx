@@ -164,7 +164,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 			Right.HSplitTop(20.0f, &Button, &Right);
 			static CButtonContainer s_CheckboxNameplatesClancolors;
-			if(DoButton_CheckBox(&s_CheckboxNameplatesClancolors, Localize("Highlight your clan"), g_Config.m_ClNameplatesTeamcolors, &Button))
+			if(DoButton_CheckBox(&s_CheckboxNameplatesClancolors, Localize("Highlight your clan"), g_Config.m_ClNameplatesClancolors, &Button))
 				g_Config.m_ClNameplatesClancolors ^= 1;
 		}
 
