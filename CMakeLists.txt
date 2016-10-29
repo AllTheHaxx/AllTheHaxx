@@ -13,7 +13,6 @@ include_directories(
         other/curl/include
         other/freetype/include
         other/luajit/include
-        other/luajit/LuaJIT-2.0.2/src
         other/mysql/include
         other/opus/include
         src
