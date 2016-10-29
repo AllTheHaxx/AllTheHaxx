@@ -1584,16 +1584,16 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 		if(DoButton_MenuTab(&s_Button0, ("General queries"), s_ControlPage == 0, &Button, 0))
 			s_ControlPage = 0;
 
-			if(m_pClient->m_pSpoofRemote->IsConnected())
-			{
-				// control specific players
+		if(m_pClient->m_pSpoofRemote->IsConnected())
+		{
+			// control specific players
 				TabBar.VSplitRight(0, &Button, &TabBar);
-				static CButtonContainer s_Button1;
-				if(DoButton_MenuTab(&s_Button1, ("Tee controlling related"), s_ControlPage == 1, &Button, 0))
-					s_ControlPage = 1;
-			}
-			else
-				RenderTools()->DrawUIRect(&TabBar, ms_ColorTabbarActive, 0, 0);
+			static CButtonContainer s_Button1;
+			if(DoButton_MenuTab(&s_Button1, ("Tee controlling related"), s_ControlPage == 1, &Button, 0))
+				s_ControlPage = 1;
+		}
+		else
+			RenderTools()->DrawUIRect(&TabBar, ms_ColorTabbarActive, 0, 0);
 	}
 
 	// render page

@@ -1297,7 +1297,7 @@ void CGameClient::OnNewSnapshot()
 			{
 				const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_ID);
 				m_Snap.m_aCharacters[Item.m_ID].m_Cur = *((const CNetObj_Character *)pData);
-				
+
 				//m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags;
 				if(pOld)
 				{
@@ -1309,11 +1309,11 @@ void CGameClient::OnNewSnapshot()
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
 				}
-				
+
 				if(g_Config.m_ClFlagChat && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
 				{
 					int serial = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 24;
-					
+
 					char msg = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 16;
 					msg -= serial << 8;
 
@@ -2289,7 +2289,7 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 			else
 				str_format(aBuf, sizeof(aBuf), "Toggled script '%s' %s", pResult->GetString(1),
 						pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED ? "on" : "off");
-				pSelf->m_pHud->PushNotification(aBuf);
+			pSelf->m_pHud->PushNotification(aBuf);
 		}
 		else
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "luafile", Localize("You must give either 'activate', 'deactivate' or 'toggle' as first argument!"), false);
