@@ -14,6 +14,9 @@ int IRChook_join(IIRC::ReplyData* hostd, void* user, void* engine)
 {
 	CIRCBind *pData = (CIRCBind *)user;
 
+	if(str_comp(hostd->from.c_str(), pData->GameClient()->IRC()->GetNick()) == 0)
+		return 0;
+
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "[%s] %s joined the chat", hostd->channel.c_str(), hostd->from.c_str());
 	pData->GameClient()->m_pHud->PushNotification(aBuf, vec4(0.2f, 1, 0.2f, 1));

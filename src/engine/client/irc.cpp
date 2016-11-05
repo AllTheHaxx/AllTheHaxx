@@ -190,10 +190,26 @@ void CIRC::StartConnection() // call this from a thread only!
 		return;
 	}
 
-	if(str_length(g_Config.m_ClIRCNick) == 0 || str_comp(g_Config.m_ClIRCNick, "haxxless tee") == 0)
-		str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
+	// set nickname
+	{
+		char aSanitizedNick[32];
+		str_copy(aSanitizedNick, g_Config.m_ClIRCNick, sizeof(aSanitizedNick));
+		str_irc_sanitize(aSanitizedNick);
 
-	SetNick(g_Config.m_ClIRCNick);
+		bool OnlyUnderscores = true;
+		for(int i = 0; i < str_length(aSanitizedNick); i++)
+		{
+			if(aSanitizedNick[i] != '_')
+			{
+				OnlyUnderscores = false;
+				break;
+			}
+		}
+		if(str_length(aSanitizedNick) == 0 || str_comp(aSanitizedNick, "haxxless tee") == 0 || OnlyUnderscores)
+			str_copy(aSanitizedNick, g_Config.m_PlayerName, sizeof(aSanitizedNick));
+
+		SetNick(aSanitizedNick);
+	}
 
 	// send request
 	SendRaw("CAP LS");
@@ -1111,10 +1127,10 @@ void CIRC::Disconnect(const char *pReason)
 		else
 			SendRaw("QUIT");
 	}
-	
+
 	net_tcp_close(m_Socket);
 	m_State = STATE_DISCONNECTED;
-	
+
 	mem_zero(m_CmdToken, sizeof(m_CmdToken));
 }
 
