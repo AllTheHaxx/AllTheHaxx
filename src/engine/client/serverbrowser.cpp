@@ -158,8 +158,7 @@ bool CServerBrowser::SortCompareName(int Index1, int Index2) const
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
 	//	make sure empty entries are listed last
-	return (a->m_GotInfo && b->m_GotInfo) || (!a->m_GotInfo && !b->m_GotInfo) ? str_comp(a->m_Info.m_aName, b->m_Info.m_aName) < 0 :
-			a->m_GotInfo ? true : false;
+	return (a->m_GotInfo && b->m_GotInfo) || (!a->m_GotInfo && !b->m_GotInfo) ? str_comp(a->m_Info.m_aName, b->m_Info.m_aName) < 0 : a->m_GotInfo != 0;
 }
 
 bool CServerBrowser::SortCompareMap(int Index1, int Index2) const
@@ -1145,6 +1144,9 @@ void CServerBrowser::AddFavorite(const NETADDR &Addr)
 	if(pEntry)
 		pEntry->m_Info.m_Favorite = 1;
 
+	if(g_Config.m_UiBrowserPage == CMenus::PAGE_BROWSER_FAVORITES)
+		Refresh(IServerBrowser::TYPE_FAVORITES);
+
 	if(g_Config.m_Debug)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -1169,6 +1171,9 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 			if(pEntry)
 				pEntry->m_Info.m_Favorite = 0;
 
+			if(g_Config.m_UiBrowserPage == CMenus::PAGE_BROWSER_FAVORITES)
+				Refresh(IServerBrowser::TYPE_FAVORITES);
+
 			return;
 		}
 	}
@@ -1192,6 +1197,8 @@ void CServerBrowser::AddRecent(const NETADDR& Addr)
 		CQueryRecent *pQuery = new CQueryRecent();
 		pQuery->Query(m_pRecentDB, pQueryBuf);
 		sqlite3_free(pQueryBuf);
+
+		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG, "srvbrowse", "added recent '%s'", aNetAddrStr);
 	}
 
 	// add it to our current session recent cache
@@ -1200,7 +1207,55 @@ void CServerBrowser::AddRecent(const NETADDR& Addr)
 		if(m_aRecentServers[i] == e)
 			m_aRecentServers.remove_index(i);
 	m_aRecentServers.add(e);
+
+	if(g_Config.m_UiBrowserPage == CMenus::PAGE_BROWSER_RECENT)
+		Refresh(IServerBrowser::TYPE_RECENT);
 }
+
+void CServerBrowser::RemoveRecent(const NETADDR& Addr)
+{
+	// remove the address into the database
+	{
+		char aNetAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aNetAddrStr, sizeof(aNetAddrStr), Addr.port);
+		char *pQueryBuf = sqlite3_mprintf("DELETE FROM recent WHERE addr = '%q';", aNetAddrStr);
+		CQueryRecent *pQuery = new CQueryRecent();
+		pQuery->Query(m_pRecentDB, pQueryBuf);
+		sqlite3_free(pQueryBuf);
+
+		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG, "srvbrowse", "removed recent '%s'", aNetAddrStr);
+	}
+
+	// remove it from our current session recent cache
+	RecentServer e(Addr, m_aRecentServers.size());
+	for(int i = 0; i < m_aRecentServers.size(); i++)
+		if(m_aRecentServers[i] == e)
+			m_aRecentServers.remove_index(i);
+
+	if(g_Config.m_UiBrowserPage == CMenus::PAGE_BROWSER_RECENT)
+		Refresh(IServerBrowser::TYPE_RECENT);
+}
+
+void CServerBrowser::ClearRecent()
+{
+	// remove the address into the database
+	{
+		char *pQueryBuf = sqlite3_mprintf("DROP TABLE IF EXISTS recent;");
+		CQueryRecent *pQuery = new CQueryRecent();
+		pQuery->Query(m_pRecentDB, pQueryBuf);
+		sqlite3_free(pQueryBuf);
+
+	}
+
+	// remove it from our current session recent cache
+	m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG, "srvbrowse", "cleared recent, removed %i entries", m_aRecentServers.size());
+	m_aRecentServers.clear();
+
+	if(g_Config.m_UiBrowserPage == CMenus::PAGE_BROWSER_RECENT)
+		Refresh(IServerBrowser::TYPE_RECENT);
+
+}
+
 
 void CServerBrowser::LoadDDNet()
 {

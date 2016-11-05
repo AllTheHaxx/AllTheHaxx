@@ -1541,22 +1541,56 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
-		if(m_ActivePage == PAGE_BROWSER)
+		if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 		{
 			CUIRect Right;
 			Button.VSplitMid(&Button, &Right);
 			static CButtonContainer s_SaveButton;
 			if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, Localize("Save the serverlist"), CUI::CORNER_L))
-			{
-				if(g_Config.m_UiBrowserPage != PAGE_BROWSER_RECENT)
-					ServerBrowser()->SaveCache();
-			}
+				ServerBrowser()->SaveCache();
+
 			static CButtonContainer s_LoadButton;
 			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, Localize("Load the saved serverlist"), CUI::CORNER_R))
 			{
-				if(g_Config.m_UiBrowserPage != PAGE_BROWSER_RECENT)
-					/*if(!*/ServerBrowser()->LoadCache()/*)
-						Console()->Print(0, "browser", "failed to load cache file", false)*/;
+				/*if(!*/ServerBrowser()->LoadCache()/*)
+					Console()->Print(0, "browser", "failed to load cache file", false)*/;
+			}
+		}
+		else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_FAVORITES)
+		{
+		/*	NETADDR netaddr;
+			static CButtonContainer s_Button;
+			if(net_addr_from_str(&netaddr, g_Config.m_UiServerAddress) == 0)
+				if(DoButton_Menu(&s_Button, Localize("Remove"), 0, &Button, Localize("Remove the selected entry from your favorites"), CUI::CORNER_ALL, vec4(1, 0.5f, 0.5f, 0.5f)))
+					ServerBrowser()->RemoveFavorite(netaddr);*/
+		}
+		else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_RECENT)
+		{
+		/*	NETADDR netaddr;
+			static CButtonContainer s_Button;
+			if(net_addr_from_str(&netaddr, g_Config.m_UiServerAddress) == 0)
+				if(DoButton_Menu(&s_Button, Localize("Remove"), 0, &Button, Localize("Remove the selected entry from the list of recent servers"), CUI::CORNER_ALL, vec4(1, 0.5f, 0.5f, 0.5f)))
+					ServerBrowser()->RemoveRecent(netaddr);*/
+			const int64 Now = time_get();
+			static int64 Pressed = 0;
+			if(Pressed && Now > Pressed+3*time_freq())
+				Pressed = 0;
+
+			char aLabel[64];
+			if(Pressed)
+				str_format(aLabel, sizeof(aLabel), "%s (%i)", Localize("Really?"), round_to_int(Pressed+3*time_freq()-Now)/time_freq()+1);
+			else
+				str_copy(aLabel, Localize("Clear Recent"), sizeof(aLabel));
+			static CButtonContainer s_Button;
+			if(DoButton_Menu(&s_Button, aLabel, 0, &Button, Localize("WARNING: removes all servers from your recents!"), CUI::CORNER_ALL, Pressed ? vec4(1, 0.5f, 0.5f, 0.5f) : vec4(1,1,1,0.5f)))
+			{
+				if(Pressed)
+				{
+					ServerBrowser()->ClearRecent();
+					Pressed = 0;
+				}
+				else
+					Pressed = Now;
 			}
 		}
 

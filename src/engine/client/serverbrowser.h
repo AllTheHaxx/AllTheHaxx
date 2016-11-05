@@ -108,8 +108,11 @@ public:
 
 	bool IsFavorite(const NETADDR &Addr) const;
 	void AddFavorite(const NETADDR &Addr);
-	void AddRecent(const NETADDR& Addr);
 	void RemoveFavorite(const NETADDR &Addr);
+
+	void AddRecent(const NETADDR& Addr);
+	void RemoveRecent(const NETADDR& Addr);
+	void ClearRecent();
 
 	void LoadDDNet();
 	int NumDDNetCountries() { return m_NumDDNetCountries; }

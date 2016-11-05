@@ -50,7 +50,7 @@ public:
 	char m_aVersion[32];
 	char m_aAddress[NETADDR_MAXSTRSIZE];
 	CClient m_aClients[MAX_CLIENTS];
-	
+
 	std::string LuaGetGameType() const { return std::string(m_aGameType); }
 	std::string LuaGetName() const { return std::string(m_aName); }
 	std::string LuaGetMap() const { return std::string(m_aMap); }
@@ -129,6 +129,8 @@ public:
 	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
 
 	virtual void AddRecent(const NETADDR& Addr) = 0;
+	virtual void RemoveRecent(const NETADDR& Addr) = 0;
+	virtual void ClearRecent() = 0;
 
 	virtual int NumDDNetCountries() = 0;
 	virtual int GetDDNetCountryFlag(int Index) = 0;
