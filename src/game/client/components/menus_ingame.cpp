@@ -1774,6 +1774,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			Bottom.VSplitLeft(300.0f, &Button, &Bottom);
 			static float s_OffsetChatMsg = 0.0f;
 			Button.w -= Button.h;
+
 			static CButtonContainer s_ChatMessageEditbox;
 			DoEditBox(&s_ChatMessageEditbox, &Button, s_aChatMessage, sizeof(s_aChatMessage), 14.0f, &s_OffsetChatMsg, false, CUI::CORNER_L);
 			// hacky clear button
@@ -1792,6 +1793,15 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			}
 			Button.w += Button.h;
 
+			static int s_TeamChat = 0;
+			{
+				Bottom.VSplitLeft(5.0f, 0, &Bottom);
+				Bottom.VSplitLeft(75.0f, &Button, &Bottom);
+				static CButtonContainer s_Checkbox;
+				if(DoButton_CheckBox(&s_Checkbox, "Team", s_TeamChat, &Button))
+					s_TeamChat ^= 1;
+			}
+
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
 			Bottom.VSplitLeft(75.0f, &Button, &Bottom);
 			static CButtonContainer s_SendChatButton;
@@ -1799,9 +1809,9 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 			{
 				char aCmd[256];
 				if(s_DoForAll)
-					str_format(aCmd, sizeof(aCmd), "chatall %s %s", aServerAddr, s_aChatMessage);
+					str_format(aCmd, sizeof(aCmd), "chatall %s %i %s", aServerAddr, s_TeamChat, s_aChatMessage);
 				else
-					str_format(aCmd, sizeof(aCmd), "chat %s %s %s", aClientAddr, aServerAddr, s_aChatMessage);
+					str_format(aCmd, sizeof(aCmd), "chat %s %s %i %s", aClientAddr, aServerAddr, s_TeamChat, s_aChatMessage);
 				m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 			}
 
@@ -1813,7 +1823,7 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 				if(DoButton_Menu(&s_SendChatDummiesButton, ("Send (Dummies)"), 0, &Button, ("Send a chat message from the dummies")))
 				{
 					char aCmd[256];
-					str_format(aCmd, sizeof(aCmd), "chatdum %s", s_aChatMessage);
+					str_format(aCmd, sizeof(aCmd), "chatdum %i %s", s_TeamChat, s_aChatMessage);
 					m_pClient->m_pSpoofRemote->SendCommand(aCmd);
 				}
 			}
