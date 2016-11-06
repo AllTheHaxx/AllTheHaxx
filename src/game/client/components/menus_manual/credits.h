@@ -12,8 +12,10 @@
 
 PUTLINE("|AllTheHaxx Beta - Version " ATH_VERSION "|")
 PUTLINE("Exact version: 'ATH-" ALLTHEHAXX_VERSION "'  |  Build Date: " BUILD_DATE)
-PUTLINE("Teeworlds client by Henritees, FuroS, xush'")
-PUTLINE("Official Website: https://allthehaxx.github.io  - ANYTHING ELSE IS SCAM!!")
+PUTLINE("Teeworlds client by the teeworlds (and also the DDNet) community. There are too many developers to list,")
+PUTLINE("so credits to everyone who ever played DDNet and/or teeworlds, especially to all active developers.")
+PUTLINE("However currently the maintainers of this client are FuroS and xush'. Former maintainers: Henritees, fallenkn")
+PUTLINE("Official Website: https://allthehaxx.github.io  - ANYTHING ELSE IS SCAM!!!")
 NEWLINE()
 NEWLINE()
 PUTLINE("|- Credits and Thanks -|")
