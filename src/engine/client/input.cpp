@@ -219,17 +219,18 @@ int CInput::Update()
 	m_InputCounter = (m_InputCounter%0xFFFF)+1;
 
 	// these states must always be updated manually because they are not in the GetKeyState from SDL
-	int i = SDL_GetMouseState(NULL, NULL);
-	if(i&SDL_BUTTON(1)) m_aInputState[KEY_MOUSE_1] = 1; // 1 is left
-	if(i&SDL_BUTTON(3)) m_aInputState[KEY_MOUSE_2] = 1; // 3 is right
-	if(i&SDL_BUTTON(2)) m_aInputState[KEY_MOUSE_3] = 1; // 2 is middle
-	if(i&SDL_BUTTON(4)) m_aInputState[KEY_MOUSE_4] = 1;
-	if(i&SDL_BUTTON(5)) m_aInputState[KEY_MOUSE_5] = 1;
-	if(i&SDL_BUTTON(6)) m_aInputState[KEY_MOUSE_6] = 1;
-	if(i&SDL_BUTTON(7)) m_aInputState[KEY_MOUSE_7] = 1;
-	if(i&SDL_BUTTON(8)) m_aInputState[KEY_MOUSE_8] = 1;
-	if(i&SDL_BUTTON(9)) m_aInputState[KEY_MOUSE_9] = 1;
-
+	{
+		int i = SDL_GetMouseState(NULL, NULL);
+		if(i & SDL_BUTTON(1)) m_aInputState[KEY_MOUSE_1] = 1; // 1 is left
+		if(i & SDL_BUTTON(3)) m_aInputState[KEY_MOUSE_2] = 1; // 3 is right
+		if(i & SDL_BUTTON(2)) m_aInputState[KEY_MOUSE_3] = 1; // 2 is middle
+		if(i & SDL_BUTTON(4)) m_aInputState[KEY_MOUSE_4] = 1;
+		if(i & SDL_BUTTON(5)) m_aInputState[KEY_MOUSE_5] = 1;
+		if(i & SDL_BUTTON(6)) m_aInputState[KEY_MOUSE_6] = 1;
+		if(i & SDL_BUTTON(7)) m_aInputState[KEY_MOUSE_7] = 1;
+		if(i & SDL_BUTTON(8)) m_aInputState[KEY_MOUSE_8] = 1;
+		if(i & SDL_BUTTON(9)) m_aInputState[KEY_MOUSE_9] = 1;
+	}
 	{
 		SDL_Event Event;
 		bool IgnoreKeys = false;
@@ -291,8 +292,9 @@ int CInput::Update()
 
 					if(Event.button.button == 1) // ignore_convention
 					{
-						m_ReleaseDelta = time_get() - m_LastRelease;
-						m_LastRelease = time_get();
+						int64 Now = time_get();
+						m_ReleaseDelta = Now - m_LastRelease;
+						m_LastRelease = Now;
 					}
 
 					// fall through

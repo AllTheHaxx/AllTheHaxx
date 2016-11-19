@@ -40,7 +40,7 @@ public:
 	virtual void Init();
 
 	bool KeyIsPressed(int Key) const { return KeyState(Key); }
-	bool KeyPress(int Key, bool CheckCounter) const { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
+	bool KeyPress(int Key, bool CheckCounter) const { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key] != 0; }
 
 	virtual void MouseRelative(float *x, float *y);
 	virtual void MouseModeAbsolute();

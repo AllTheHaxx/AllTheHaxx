@@ -138,6 +138,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addConstructor <void (*) ()> ()
 		.endClass()
 
+		.beginClass< CMenus::lua::CEditboxContainer >("EditboxContainer")
+			.addConstructor <void (*) ()> ()
+		.endClass()
+
 
 		// ------------------------------ ICLIENT ------------------------------
 
@@ -176,7 +180,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		// ------------------------------ COMPONENTS ------------------------------
 
-		/// Game.UI
+		/// Game.Ui
 		.beginClass<CUI>("CUI")
 			.addFunction("DoLabel", &CUI::DoLabel)
 			.addFunction("DoLabelScaled", &CUI::DoLabelScaled)
@@ -260,6 +264,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DoButton_Sprite", &CMenus::DoButton_Sprite)
 			.addFunction("DoScrollbarV", &CMenus::DoScrollbarV)
 			.addFunction("DoScrollbarH", &CMenus::DoScrollbarH)
+			.addFunction("DoEditbox", &CMenus::DoEditBoxLua)
 		.endClass()
 
 		/// Game.Voting
@@ -370,6 +375,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SimulateKeyPress", &IInput::SimulateKeyPressSTD)
 			.addFunction("SimulateKeyReleaseDirect", &IInput::SimulateKeyRelease)
 			.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
+
+			.addFunction("SetIMEState", &IInput::SetIMEState)
+			.addFunction("GetIMEState", &IInput::GetIMEState)
 		.endClass()
 
 		/// Engine.Curl
@@ -389,7 +397,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("NumPlayers", &CServerInfo::m_NumPlayers, false)
 		.endClass()
 
-		/// TODO: doc!
+		// TODO: doc!
 		.beginClass<CGameClient::CSnapState>("CSnapState")
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
 			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)

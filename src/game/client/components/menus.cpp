@@ -636,6 +636,22 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	return ReturnValue;
 }
 
+int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, float FontSize, bool Hidden, int Corners, const char *pEmptyText, const char *pTooltip)
+{
+	static char *pBuffer = NULL;
+	const int MAX_STR_LEN = max(16, (int)pBC->GetString().length()*2); // always go with
+	pBuffer = (char *)mem_realloc(pBuffer, (unsigned)MAX_STR_LEN); // make sure there is always enough space
+	str_copy(pBuffer, pBC->GetString().c_str(), MAX_STR_LEN);
+
+	dbg_msg("DBG!", "pBuffer before (SIZE=%i, CAN INPUT=%x): '%s'", MAX_STR_LEN, Input()->GetIMEState(), pBuffer);
+	int result = DoEditBox(pBC, pRect, pBuffer, (unsigned)MAX_STR_LEN, FontSize, &pBC->m_Offset, Hidden, Corners, pEmptyText, 0, pTooltip);
+	dbg_msg("DBG!", "pBuffer danach (RSLT=%i): '%s'", result, pBuffer);
+
+	// copy it back
+	pBC->SetString(pBuffer);
+	return result;
+}
+
 float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
 {
 	CALLSTACK_ADD();
@@ -1380,11 +1396,11 @@ void CMenus::RenderLoading()
 		timeinfo = localtime ( &rawtime );
 
 		// for teh lulz
-		if(timeinfo->tm_mday == 20 && timeinfo->tm_mon == 12)
+		if(timeinfo->tm_mday == 20 && timeinfo->tm_mon == 12-1)
 			pSaying = "Happy Birthday, xush' :D (December 20th)";
-		else if(timeinfo->tm_mday == 16 && timeinfo->tm_mon == 10)
+		else if(timeinfo->tm_mday == 16 && timeinfo->tm_mon == 10-1)
 			pSaying = "Happy Birthday, Henritees :D (October 16th)";
-		else if(timeinfo->tm_mday == 24 && timeinfo->tm_mon == 10)
+		else if(timeinfo->tm_mday == 24 && timeinfo->tm_mon == 10-1)
 			pSaying = "Happy Birthday, FuroS :D (October 24th)";
 	}
 

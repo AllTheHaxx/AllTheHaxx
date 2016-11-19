@@ -8,7 +8,7 @@
 #include <string.h>
 #include <climits>
 #include <fstream>
-//#include <csignal>
+#include <csignal>
 #include <locale.h> //setlocale
 
 #include <base/math.h>
@@ -4051,6 +4051,8 @@ int main(int argc, const char **argv) // ignore_convention
 			break;
 		}
 	}
+#else
+	signal(SIGPIPE, SIG_IGN);
 #endif
 
 #if !defined(CONF_PLATFORM_MACOSX)
