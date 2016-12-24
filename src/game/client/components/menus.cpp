@@ -643,9 +643,9 @@ int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, floa
 	pBuffer = (char *)mem_realloc(pBuffer, (unsigned)MAX_STR_LEN); // make sure there is always enough space
 	str_copy(pBuffer, pBC->GetString().c_str(), MAX_STR_LEN);
 
-	dbg_msg("DBG!", "pBuffer before (SIZE=%i, CAN INPUT=%x): '%s'", MAX_STR_LEN, Input()->GetIMEState(), pBuffer);
+	//dbg_msg("DBG!", "pBuffer before (SIZE=%i, CAN INPUT=%x): '%s'", MAX_STR_LEN, Input()->GetIMEState(), pBuffer);
 	int result = DoEditBox(pBC, pRect, pBuffer, (unsigned)MAX_STR_LEN, FontSize, &pBC->m_Offset, Hidden, Corners, pEmptyText, 0, pTooltip);
-	dbg_msg("DBG!", "pBuffer danach (RSLT=%i): '%s'", result, pBuffer);
+	//dbg_msg("DBG!", "pBuffer danach (RSLT=%i): '%s'", result, pBuffer);
 
 	// copy it back
 	pBC->SetString(pBuffer);

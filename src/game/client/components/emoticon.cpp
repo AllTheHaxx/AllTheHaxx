@@ -86,7 +86,7 @@ void CEmoticon::OnRender()
 	CALLSTACK_ADD();
 
 	static float s_Val = 0.0;
-
+	static float s_aBubbleVal[NUM_EMOTICONS];
 
 	if(!m_Active)
 	{
@@ -97,6 +97,7 @@ void CEmoticon::OnRender()
 			 if(m_SelectedEyeEmote != -1)
 				 EyeEmote(m_SelectedEyeEmote);
 			m_WasActive = false;
+			mem_zero(s_aBubbleVal, sizeof(s_aBubbleVal));
 		}
 		if(g_Config.m_ClSmoothEmoteWheel)
 			smooth_set(&s_Val, 0.0f, (float)g_Config.m_ClSmoothEmoteWheelDelay, Client()->RenderFrameTime());
@@ -120,6 +121,7 @@ void CEmoticon::OnRender()
 		m_Active = false;
 		m_WasActive = false;
 		s_Val = 0.0f;
+		mem_zero(s_aBubbleVal, sizeof(s_aBubbleVal));
 		return;
 	}
 
@@ -183,13 +185,14 @@ void CEmoticon::OnRender()
 
 		bool Selected = m_SelectedEmote == i;
 
-		float Size = Selected ? 80.0f : 50.0f;
+		smooth_set(&s_aBubbleVal[i], Selected ? 35.0f : 0.0f, 25.0f, Client()->RenderFrameTime());
+		float WantedSize = s_aBubbleVal[i] + 50.0f;
 
 		float NudgeX = s_PopVal*150.0f * cosf(Angle);
 		float NudgeY = s_PopVal*150.0f * sinf(Angle);
 		RenderTools()->SelectSprite(SPRITE_OOP + i);
 		Graphics()->SetColor(1.0,1.0,1.0,s_Val);
-		IGraphics::CQuadItem QuadItem(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY, Size, Size);
+		IGraphics::CQuadItem QuadItem(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY, WantedSize, WantedSize);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
