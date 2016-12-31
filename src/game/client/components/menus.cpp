@@ -1208,6 +1208,7 @@ static const char *s_apSayings[] = {
 		"Life is strange :o",
 		"¿¡¿¡¿¡¿¡¿¡¿¡¿¡¿¡",
 		"...REISUB!",
+		"WO\xD0\xAFK\xC6\xA7 FO\xD0\xAF M\xC6\x8E",
 		"Do you get the insiders...? :D",
 		"Ask if you need something!",
 		//"Ignore the spoofing tab!!!",
@@ -1278,7 +1279,6 @@ static const char *s_apSayings[] = {
 		"[21:00:00] ReD: auutsch",
 		"\"Red nur du ReD\"",
 		"BAUM!",
-		"Uhh, got a brain freeze :0",
 		"epppiiiiccc",
 		"Gimme dat muzic!",
 		"...it's evolving!",
@@ -1383,6 +1383,8 @@ void CMenus::RenderLoading()
 	c.y = y+160;
 	c.w = w;
 	c.h = h;
+
+	srand((unsigned)time_get()&0x6BEEFB0B&rand());
 	size_t n = rand()%(sizeof(s_apSayings)/sizeof(s_apSayings[0]));
 	static const char *pSaying;
 	if(!pSaying)
@@ -1396,12 +1398,18 @@ void CMenus::RenderLoading()
 		timeinfo = localtime ( &rawtime );
 
 		// for teh lulz
-		if(timeinfo->tm_mday == 20 && timeinfo->tm_mon == 12-1)
+		#define ISDATE(D, M) (timeinfo->tm_mday == (D) && timeinfo->tm_mon == (M-1))
+		if(ISDATE(20, 12))
 			pSaying = "Happy Birthday, xush' :D (December 20th)";
-		else if(timeinfo->tm_mday == 16 && timeinfo->tm_mon == 10-1)
+		else if(ISDATE(16, 10))
 			pSaying = "Happy Birthday, Henritees :D (October 16th)";
-		else if(timeinfo->tm_mday == 24 && timeinfo->tm_mon == 10-1)
+		else if(ISDATE(24, 10))
 			pSaying = "Happy Birthday, FuroS :D (October 24th)";
+		else if(ISDATE(1, 1))
+			pSaying = "Happy new Year!";
+		else if(ISDATE(24, 12) || ISDATE(25, 12))
+			pSaying = "Merry Christmas!";
+		#undef ISDATE
 	}
 
 	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
