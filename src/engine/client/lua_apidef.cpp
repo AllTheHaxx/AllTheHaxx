@@ -140,6 +140,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginClass< CMenus::lua::CEditboxContainer >("EditboxContainer")
 			.addConstructor <void (*) ()> ()
+            .addFunction("GetString", &CMenus::lua::CEditboxContainer::GetString)
+            .addFunction("SetString", &CMenus::lua::CEditboxContainer::SetString)
 		.endClass()
 
 
