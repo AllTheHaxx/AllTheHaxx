@@ -69,7 +69,7 @@ private:
 				m_String = "";
 			}
 
-			void SetString(const char *pStr) { m_String = std::string(pStr); }
+			void SetString(std::string Str) { m_String = Str; }
 			const std::string& GetString() const { return m_String; }
 		private:
 			std::string m_String;

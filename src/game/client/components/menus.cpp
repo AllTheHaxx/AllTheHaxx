@@ -648,7 +648,7 @@ int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, floa
 	//dbg_msg("DBG!", "pBuffer danach (RSLT=%i): '%s'", result, pBuffer);
 
 	// copy it back
-	pBC->SetString(pBuffer);
+	pBC->SetString(std::string(pBuffer));
 	return result;
 }
 

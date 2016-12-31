@@ -21,6 +21,8 @@ public:
 		}
 	};
 	// global namespace
+	static int LuaPrintOverride(lua_State *L);
+	static int LuaStrIsNetAddr(lua_State *L);
 
 	// low level lua callbacks
 	/** @LuaFunc @code bool Import(const char *pFilename) */
