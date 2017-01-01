@@ -177,7 +177,7 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 
 	// construct the message from all arguments
 	char aMsg[512] = {0};
-	for(int i = 0; i < nargs; i++)
+	for(int i = 1; i <= nargs; i++)
 	{
 		argcheck(lua_isstring(L, i) || lua_isnumber(L, i), i, "string or number");
 		str_append(aMsg, lua_tostring(L, i), sizeof(aMsg));
@@ -186,8 +186,7 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 	aMsg[str_length(aMsg)-1] = '\0'; // remove the last tab character
 
 	// pop all to clean up the stack
-	for(int i = 0; i < nargs; i++)
-		lua_pop(L, 1);
+    lua_pop(L, nargs);
 
 	dbg_msg(aSys, "%s", aMsg);
 	return 0;
