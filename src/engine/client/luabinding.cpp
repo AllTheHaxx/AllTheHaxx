@@ -4,15 +4,6 @@
 
 #include "luabinding.h"
 
-#define argcheck(cond, narg, expected) \
-		if(!(cond)) \
-		{ \
-			if(g_Config.m_Debug) \
-				dbg_msg("Lua/debug", "%s: argcheck: narg=%i expected='%s'", __FUNCTION__, narg, expected); \
-			char buf[64]; \
-			str_format(buf, sizeof(buf), "expected a %s value, got %s", expected, lua_typename(L, lua_type(L, narg))); \
-			return luaL_argerror(L, (narg), (buf)); \
-		}
 
 int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, void *user)
 {
@@ -143,10 +134,6 @@ int CLuaBinding::LuaScriptPath(lua_State *L)
 
 int CLuaBinding::LuaStrIsNetAddr(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
-
 	int nargs = lua_gettop(L);
 	if(nargs != 1)
 		return luaL_error(L, "StrIsNetAddr expects 1 argument");

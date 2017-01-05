@@ -31,6 +31,7 @@
 
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
+#include <engine/client/luabinding.h>
 
 #include "controls.h"
 #include "binds.h"
@@ -73,14 +74,14 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 		//lua_atpanic(m_pLuaState, CLua::Panic);
 		//lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
 
+		// load everything for the lua console
 		luaL_openlibs(m_LuaHandler.m_pLuaState);
 		luaopen_base(m_LuaHandler.m_pLuaState);
 		luaopen_math(m_LuaHandler.m_pLuaState);
 		luaopen_string(m_LuaHandler.m_pLuaState);
 		luaopen_table(m_LuaHandler.m_pLuaState);
-		//luaopen_io(m_pLua);
+		luaopen_io(m_LuaHandler.m_pLuaState);
 		luaopen_os(m_LuaHandler.m_pLuaState);
-		//luaopen_package(m_pLua); // not sure whether we should load this
 		luaopen_debug(m_LuaHandler.m_pLuaState);
 		luaopen_bit(m_LuaHandler.m_pLuaState);
 		luaopen_jit(m_LuaHandler.m_pLuaState);
@@ -88,10 +89,6 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 		m_LuaHandler.m_Inited = false;
 		m_LuaHandler.m_ScopeCount = 0;
-
-		//Some luaconsole funcs!
-		getGlobalNamespace(m_LuaHandler.m_pLuaState)
-			.addFunction("print", &CGameConsole::PrintLuaLine);
 
 		LoadLuaFile("data/luabase/events.lua");
 
@@ -160,6 +157,10 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		if(!m_LuaHandler.m_Inited)  // this is yet quite retarded!
 		{
 			CLuaFile::RegisterLuaCallbacks(m_LuaHandler.m_pLuaState);
+
+			// override stuff that has to be different for the lua console
+			lua_register(m_LuaHandler.m_pLuaState, "print", CGameConsole::PrintLuaLine);
+
 			m_LuaHandler.m_Inited = true;
 		}
 
@@ -587,7 +588,6 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 	int Status = luaL_loadfile(m_LuaHandler.m_pLuaState, pFile);
 	if (Status)
 	{
-		// does this work? -- I don't think so, Henritees.
 		PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
 		return false;
 	}
@@ -1451,15 +1451,6 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 	}
 }
 
-// TODO: This should be moved to elsewhere
-void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	CGameConsole *pThis = static_cast<CGameConsole *>(pUserData);
-	pThis->m_pClient->m_pIRCBind->OnNickChange(g_Config.m_ClIRCNick);
-}
-
-
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_REMOTE)
@@ -1470,13 +1461,34 @@ void CGameConsole::PrintLine(int Type, const char *pLine)
 		m_LocalConsole.PrintLine(pLine);
 }
 
-void CGameConsole::PrintLuaLine(const char *pLine)
+int CGameConsole::PrintLuaLine(lua_State *L)
 {
-	//if the thing is nil in lua then pLine == 0!
-	if(pLine == 0)
-		CGameConsole::m_pStatLuaConsole->PrintLine("nil");
-	else
-		CGameConsole::m_pStatLuaConsole->PrintLine(pLine);
+	int nargs = lua_gettop(L);
+	if(nargs < 1)
+		return luaL_error(L, "print expects 1 argument or more");
+
+	// construct the message from all arguments
+	char aLine[512] = {0};
+	for(int i = 1; i <= nargs; i++)
+	{
+		if(lua_isnil(L, i)) // allow nil
+			str_append(aLine, "<nil>", sizeof(aLine));
+		else
+		{
+			argcheck(lua_isstring(L, i) || lua_isnumber(L, i), i, "string or number");
+			str_append(aLine, lua_tostring(L, i), sizeof(aLine));
+		}
+		str_append(aLine, "    ", sizeof(aLine));
+	}
+	aLine[str_length(aLine)-1] = '\0'; // remove the last tab character
+
+	// pop all to clean up the stack
+	lua_pop(L, nargs);
+
+	dbg_msg("LUA|console", "%s", aLine);
+
+	CGameConsole::m_pStatLuaConsole->PrintLine(aLine);
+	return 0;
 }
 
 void CGameConsole::OnConsoleInit()
@@ -1500,11 +1512,11 @@ void CGameConsole::OnConsoleInit()
 
 #if defined(FEATURE_LUA)
 	Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
-	Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
+	// XXX security leak! the lua console has elevated permissions, but this one can be used by every script!
+	//Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
 #endif
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This should be moved to elsewhere
 
 }
 
