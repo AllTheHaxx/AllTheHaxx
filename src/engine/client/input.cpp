@@ -8,6 +8,7 @@
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
+#include <game/client/components/console.h>
 
 #include "lua.h"
 #include "input.h"
@@ -370,20 +371,10 @@ int CInput::Update()
 					m_aInputState[Scancode] = 1;
 					m_aInputCount[Key] = m_InputCounter;
 
-					// EVENT CALL
 					if(!HoldKeys[Key])
 					{
-						//LastKey = Key;
-#if defined(FEATURE_LUA)
-						for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
-						{
-							if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
-								continue;
-							LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyPress");
-							if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }
-						}
-						//CLua::LUA_FIRE_EVENT_V("OnKeyPress", IInput::KeyName(Key));
-#endif
+						// EVENT CALL
+						LUA_FIRE_EVENT("OnKeyPress", IInput::KeyName(Key));
 						HoldKeys[Key] = true;
 					}
 				}
@@ -391,16 +382,7 @@ int CInput::Update()
 				if(Action&IInput::FLAG_RELEASE)
 				{
 					// EVENT CALL
-#if defined(FEATURE_LUA)
-					for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
-					{
-						if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
-							continue;
-						LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyRelease");
-						if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }
-					}
-					//CLua::LUA_FIRE_EVENT_V("OnKeyRelease", IInput::KeyName(Key));
-#endif
+					LUA_FIRE_EVENT("OnKeyRelease", IInput::KeyName(Key));
 					HoldKeys[Key] = false;
 				}
 

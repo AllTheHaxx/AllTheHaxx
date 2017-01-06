@@ -117,16 +117,19 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 #if defined(FEATURE_LUA)
 		{
 			bool DiscardCommand = false;
-			for(int ijdfg = 0; ijdfg < m_pGameConsole->Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+			if(g_Config.m_ClLua)
 			{
-				if(m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
-					continue;
-				LuaRef lfunc = m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnConsoleCommand");
-				if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { m_pGameConsole->Client()->Lua()->HandleException(e, m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]); }
+				for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+				{
+					CLuaFile *pLF = CLua::Client()->Lua()->GetLuaFiles()[ijdfg];
+					if(pLF->State() != CLuaFile::STATE_LOADED)
+						continue;
+					LuaRef lfunc = pLF->GetFunc("OnConsoleCommand");
+					if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; CLua::Client()->LuaCheckDrawingState(pLF->L(), "OnConsoleCommand"); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); }
+				}
+				LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
+				if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
 			}
-			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
-			if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
-
 			if(DiscardCommand)
 				return;
 		}
