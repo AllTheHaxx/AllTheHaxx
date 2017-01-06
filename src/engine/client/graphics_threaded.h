@@ -383,6 +383,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	float m_Rotation;
 	int m_Drawing;
+	int m_DrawingLua;
 	bool m_DoScreenshot;
 	char m_aScreenshotName[128];
 
@@ -421,6 +422,9 @@ public:
 	virtual void LinesBegin();
 	virtual void LinesEnd();
 	virtual void LinesDraw(const CLineItem *pArray, int Num);
+	virtual void LinesBeginLua(struct lua_State *L);
+	virtual void LinesEndLua(struct lua_State *L);
+	virtual int LinesDrawLua(struct lua_State *L);
 
 	virtual int UnloadTexture(int Index);
 	virtual int LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags);
@@ -433,15 +437,20 @@ public:
 	void ScreenshotDirect();
 
 	virtual void TextureSet(int TextureID);
+	virtual void TextureSetLua(int TextureID, struct lua_State *L);
 
 	virtual void Clear(float r, float g, float b);
 
 	virtual void QuadsBegin();
 	virtual void QuadsEnd();
 	virtual void QuadsSetRotation(float Angle);
+	virtual void QuadsBeginLua(struct lua_State *L);
+	virtual void QuadsEndLua(struct lua_State *L);
+	virtual void QuadsSetRotationLua(float Angle, struct lua_State *L);
 
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
 	virtual void SetColor(float r, float g, float b, float a);
+	virtual void SetColorLua(float r, float g, float b, float a, struct lua_State *L);
 
 	virtual void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV);
 	virtual void QuadsSetSubsetFree(
@@ -449,6 +458,7 @@ public:
 		float x2, float y2, float x3, float y3);
 
 	virtual void QuadsDraw(CQuadItem *pArray, int Num);
+	virtual int QuadsDrawLua(struct lua_State *L);
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num);
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
@@ -487,6 +497,8 @@ public:
 	virtual void InsertSignal(semaphore *pSemaphore);
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
+
+	virtual bool LuaCheckDrawingState(struct lua_State *L, const char *pFuncName);
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

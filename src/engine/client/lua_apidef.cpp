@@ -439,22 +439,22 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		/// Engine.Graphics
 		.beginClass<IGraphics>("IGraphics")
-			.addFunction("QuadsBegin", &IGraphics::QuadsBegin)
-			.addFunction("QuadsEnd", &IGraphics::QuadsEnd)
-			.addFunction("QuadsDraw", &IGraphics::QuadsDraw)
-			.addFunction("LinesBegin", &IGraphics::LinesBegin)
-			.addFunction("LinesEnd", &IGraphics::LinesEnd)
-			.addFunction("LinesDraw", &IGraphics::LinesDraw)
+			.addFunction("QuadsBegin", &IGraphics::QuadsBeginLua)
+			.addFunction("QuadsEnd", &IGraphics::QuadsEndLua)
+			.addFunction("QuadsDraw", &IGraphics::QuadsDrawLua)
+			.addFunction("LinesBegin", &IGraphics::LinesBeginLua)
+			.addFunction("LinesEnd", &IGraphics::LinesEndLua)
+			.addFunction("LinesDraw", &IGraphics::LinesDrawLua)
 
-			.addFunction("SetRotation", &IGraphics::QuadsSetRotation)
-			.addFunction("SetColor", &IGraphics::SetColor)
+			.addFunction("SetRotation", &IGraphics::QuadsSetRotationLua)
+			.addFunction("SetColor", &IGraphics::SetColorLua)
 			.addFunction("BlendNone", &IGraphics::BlendNone)
 			.addFunction("BlendNormal", &IGraphics::BlendNormal)
 			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
 
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
 			.addFunction("UnloadTexture", &IGraphics::UnloadTexture)
-			.addFunction("TextureSet", &IGraphics::TextureSet)
+			.addFunction("TextureSet", &IGraphics::TextureSetLua)
 
 			.addFunction("MapScreen", &IGraphics::MapScreen)
 

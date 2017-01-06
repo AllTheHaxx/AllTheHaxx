@@ -4404,3 +4404,16 @@ int CClient::GetPredictionTime()
 	int64 Now = time_get();
 	return (int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq());
 }
+
+void CClient::LuaCheckDrawingState(lua_State *L, const char *pFuncName)
+{
+	// propagate the exception upwards
+	//try
+	//{
+		Graphics()->LuaCheckDrawingState(L, pFuncName);
+	//}
+	//catch(std::exception& e)
+	//{
+	//	throw e;
+	//}
+}

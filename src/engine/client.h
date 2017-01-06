@@ -134,6 +134,7 @@ public:
 	virtual void ToggleFullscreen() = 0;
 	virtual void ToggleWindowBordered() = 0;
 	virtual void ToggleWindowVSync() = 0;
+	virtual void LuaCheckDrawingState(struct lua_State *L, const char *pFuncName) = 0;
 
 	// networking
 	virtual void EnterGame() = 0;
