@@ -689,7 +689,10 @@ Map sound volume
 == Lautstärke von Mapsounds
 
 Countries
-== Ländern
+== Länder
+
+Types
+== Typen
 
 Inner color
 == Innere Farbe

@@ -8,6 +8,7 @@ datasrc/*.pyc
 /src/game/generated
 /update/
 
+/confusables*
 /crapnet*
 /config_store*
 /config_retrieve*
