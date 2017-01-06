@@ -225,6 +225,8 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 	if(!pLF)
 		return -1;
 
+	Client()->LuaCheckDrawingState(pLF->L(), "exception", true); // clean up the rendering pipeline if necessary
+
 	pLF->m_Exceptions.add(std::string(pError));
 
 	if(g_Config.m_Debug)

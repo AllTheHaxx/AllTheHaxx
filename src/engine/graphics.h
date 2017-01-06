@@ -162,7 +162,7 @@ public:
 	virtual bool IsIdle() = 0;
 	virtual void WaitForIdle() = 0;
 
-	virtual bool LuaCheckDrawingState(struct lua_State *L, const char *pFuncName) = 0;
+	virtual bool LuaCheckDrawingState(struct lua_State *L, const char *pFuncName, bool NoThrow=false) = 0;
 
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;

@@ -102,7 +102,7 @@ public:
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access
-	inline int   GetFPS() const { return (int)1.f/m_RenderFrameTime; }
+	inline int   GetFPS() const { return (int)(1.f/m_RenderFrameTime); }
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
 	inline float LocalTime() const { return m_LocalTime; }
 	inline float SteadyTimer() const { return m_SteadyTimer; }
@@ -134,7 +134,7 @@ public:
 	virtual void ToggleFullscreen() = 0;
 	virtual void ToggleWindowBordered() = 0;
 	virtual void ToggleWindowVSync() = 0;
-	virtual void LuaCheckDrawingState(struct lua_State *L, const char *pFuncName) = 0;
+	virtual void LuaCheckDrawingState(struct lua_State *L, const char *pFuncName, bool NoThrow=false) = 0;
 
 	// networking
 	virtual void EnterGame() = 0;

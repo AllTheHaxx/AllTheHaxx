@@ -250,7 +250,6 @@ void CGraphics_Threaded::LinesBegin()
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->LinesBegin twice");
 	m_Drawing = DRAWING_LINES;
-	m_DrawingLua = DRAWING_LINES;
 	SetColor(1,1,1,1);
 }
 
@@ -259,7 +258,6 @@ void CGraphics_Threaded::LinesEnd()
 	dbg_assert(m_Drawing == DRAWING_LINES, "called Graphics()->LinesEnd without begin");
 	FlushVertices();
 	m_Drawing = 0;
-	m_DrawingLua = 0;
 }
 
 void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
@@ -285,12 +283,14 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 void CGraphics_Threaded::LinesBeginLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == 0, "called Graphics()->LinesBegin within begin");
+	m_DrawingLua = DRAWING_LINES;
 	LinesBegin();
 }
 
 void CGraphics_Threaded::LinesEndLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == DRAWING_LINES, "called Graphics()->LinesEnd without begin");
+	m_DrawingLua = 0;
 	LinesEnd();
 }
 
@@ -300,7 +300,7 @@ int CGraphics_Threaded::LinesDrawLua(lua_State *L)
 
 	int n = lua_gettop(L);
 	if(n != 1 && n != 2)
-		return luaL_error(L, "%s", "Engine.Graphics:LinesDraw expects a table as an argument");
+		return luaL_error(L, "%s", "Engine.Graphics:LinesDraw expects a table as the first argument, got nil");
 
 	argcheck(lua_istable(L, 1), 1, "table");
 	int MaxNum = (int)luaL_optinteger(L, 2, (MAX_VERTICES-m_NumVertices)/2);
@@ -569,7 +569,6 @@ void CGraphics_Threaded::QuadsBegin()
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->QuadsBegin twice");
 	m_Drawing = DRAWING_QUADS;
-	m_DrawingLua = DRAWING_QUADS;
 
 	QuadsSetSubset(0,0,1,1);
 	QuadsSetRotation(0);
@@ -581,7 +580,6 @@ void CGraphics_Threaded::QuadsEnd()
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsEnd without begin");
 	FlushVertices();
 	m_Drawing = 0;
-	m_DrawingLua = 0;
 }
 
 void CGraphics_Threaded::QuadsSetRotation(float Angle)
@@ -593,12 +591,14 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 void CGraphics_Threaded::QuadsBeginLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == 0, "called Graphics()->QuadsBegin twice");
+	m_DrawingLua = DRAWING_QUADS;
 	QuadsBegin();
 }
 
 void CGraphics_Threaded::QuadsEndLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsEnd without begin");
+	m_DrawingLua = 0;
 	QuadsEnd();
 }
 
@@ -676,7 +676,7 @@ int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
 
 	int n = lua_gettop(L);
 	if(n != 1 && n != 2)
-		return luaL_error(L, "%s", "Engine.Graphics:QuadsDraw expects a table as an argument");
+		return luaL_error(L, "%s", "Engine.Graphics:QuadsDraw expects a table as the first argument");
 
 	argcheck(lua_istable(L, 1), 1, "table");
 	int MaxNum = (int)luaL_optinteger(L, 2, (MAX_VERTICES-m_NumVertices)/(3*2));
@@ -892,28 +892,27 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
-bool CGraphics_Threaded::LuaCheckDrawingState(lua_State *L, const char *pFuncName)
+bool CGraphics_Threaded::LuaCheckDrawingState(lua_State *L, const char *pFuncName, bool NoThrow)
 {
-	dbg_assert(m_DrawingLua == m_Drawing, "Graphics()->LuaCheckDrawingState called with rendering pipeline in unsynced state");
-	if(m_Drawing != 0)
+	//dbg_assert(m_DrawingLua == m_Drawing, "Graphics()->LuaCheckDrawingState called with rendering pipeline in unsynced state");
+	if(m_Drawing == m_DrawingLua && m_DrawingLua != 0)
 	{
-		// prepare the error message
-		char aBuf[256] = {0};
-		str_format(aBuf, sizeof(aBuf), "    event callback for %s left the rendering pipeline in dirty state %s", pFuncName,
-				   m_DrawingLua == DRAWING_QUADS ? "DRAWING_QUADS" :
-				   m_DrawingLua == DRAWING_LINES ? "DRAWING_LINES" :
-				   "UNKNOWN (wtf?)"
-		);
-
 		// clean up the rendering pipeline for em
 		switch(m_Drawing)
 		{
-			case DRAWING_QUADS: QuadsEnd(); break;
-			case DRAWING_LINES: LinesEnd(); break;
+			case DRAWING_QUADS: QuadsEndLua(L); break;
+			case DRAWING_LINES: LinesEndLua(L); break;
 		}
 
-		// raise a lua error that results in panic, which then throws our exception
-		dbg_assert_lua(false, aBuf);
+		if(!NoThrow)
+		{
+			// raise a lua error that results in panic, which then throws our exception
+			luaL_error(L, "    event callback for %s left the rendering pipeline in dirty state %s", pFuncName,
+					   m_DrawingLua == DRAWING_QUADS ? "DRAWING_QUADS" :
+					   m_DrawingLua == DRAWING_LINES ? "DRAWING_LINES" :
+					   "UNKNOWN (wtf?)"
+			);
+		}
 	}
 	return false;
 }

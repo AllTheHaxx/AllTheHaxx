@@ -498,7 +498,7 @@ public:
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
 
-	virtual bool LuaCheckDrawingState(struct lua_State *L, const char *pFuncName);
+	virtual bool LuaCheckDrawingState(struct lua_State *L, const char *pFuncName, bool NoThrow=false);
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

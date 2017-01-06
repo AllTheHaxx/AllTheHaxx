@@ -410,7 +410,7 @@ public:
 	void ToggleFullscreen();
 	void ToggleWindowBordered();
 	void ToggleWindowVSync();
-	void LuaCheckDrawingState(struct lua_State *L, const char *pFuncName);
+	void LuaCheckDrawingState(struct lua_State *L, const char *pFuncName, bool NoThrow=false);
 
 
 	// DDRace
