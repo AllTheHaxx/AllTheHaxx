@@ -10,11 +10,12 @@
 #define NEWLINE() ;
 #endif
 
-PUTLINE("|AllTheHaxx Beta - Version " ATH_VERSION "|")
+PUTLINE("|AllTheHaxx Final - Version " ATH_VERSION "|")
 PUTLINE("Exact version: 'ATH-" ALLTHEHAXX_VERSION "'  |  Build Date: " BUILD_DATE)
 PUTLINE("Teeworlds client by the teeworlds (and also the DDNet) community. There are too many developers to list,")
 PUTLINE("so credits to everyone who ever played DDNet and/or teeworlds, especially to all active developers.")
-PUTLINE("However currently the maintainers of this client are FuroS and xush'. Former maintainers: Henritees, fallenkn")
+PUTLINE("This project is discontinued, so don't expect anymore updates nor support.'")
+PUTLINE("When it was still in active developement, it was maintained by xush' and FuroS aswell as FallenKN")
 PUTLINE("Official Website: https://allthehaxx.github.io  - ANYTHING ELSE IS SCAM!!!")
 NEWLINE()
 NEWLINE()
@@ -36,11 +37,8 @@ PUTLINE("- All our beta testers")
 PUTLINE("- All contributors to DDNet and Teeworlds")
 PUTLINE("- matricks for inventing this awesome game! :P")
 NEWLINE()
-PUTLINE("This is just a draft, so if you feel like I forgot you here, please tell me!")
-NEWLINE()
 NEWLINE()
 PUTLINE("|Contact|")
 PUTLINE("For general questions or just wanting to have a good talk, join the IRC #AllTheHaxx@Quakenet (→ press F5 :D)")
-PUTLINE("For more specific requests or script proposes, add me to Skype ('henningstone') or write me an email: henritees@mein-twserver.de")
 
 #endif
