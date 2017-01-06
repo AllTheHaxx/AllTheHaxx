@@ -298,20 +298,20 @@ int CGraphics_Threaded::LinesDrawLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == DRAWING_LINES, "called Graphics()->LinesDraw without begin");
 
-	int n = lua_gettop(L);
+	int n = lua_gettop(L)-1; // REMEMBER THAT THERE IS A 'self' ON THE STACK!
 	if(n != 1 && n != 2)
 		return luaL_error(L, "Engine.Graphics:LinesDraw expects 1 or 2 arguments, got %d", n);
 
-	argcheck(lua_istable(L, 1) || lua_isuserdata(L, 1), 1, "table or LineItem");
-	int MaxNum = (int)luaL_optinteger(L, 2, (MAX_VERTICES-m_NumVertices)/2);
+	argcheck(lua_istable(L, 2), 2, "table");
+	int MaxNum = (int)luaL_optinteger(L, 3, (MAX_VERTICES-m_NumVertices)/2);
 
-	size_t len = lua_objlen(L, 1);
+	size_t len = lua_objlen(L, 2);
 	if(len == 0)
 		return luaL_error(L, "the given table doesn't contain any elements!");
 
 	const int NUM = min((int)len, MaxNum);
 
-	LuaRef v = LuaRef::fromStack(L, 1);
+	LuaRef v = LuaRef::fromStack(L, 2);
 	if(!v.isTable()) // this case should never actually happen
 		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
 
@@ -674,20 +674,20 @@ int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsDraw without begin");
 
-	int n = lua_gettop(L);
+	int n = lua_gettop(L)-1; // REMEMBER THE 'self'!!
 	if(n != 1 && n != 2)
-		return luaL_error(L, "%s", "Engine.Graphics:QuadsDraw expects a table as the first argument");
+		return luaL_error(L, "Engine.Graphics:QuadsDraw expects 1 or 2 arguments, got %d", n);
 
-	argcheck(lua_istable(L, 1), 1, "table");
-	int MaxNum = (int)luaL_optinteger(L, 2, (MAX_VERTICES-m_NumVertices)/(3*2));
+	argcheck(lua_istable(L, 2), 2, "table");
+	int MaxNum = (int)luaL_optinteger(L, 3, (MAX_VERTICES-m_NumVertices)/(3*2));
 
-	size_t len = lua_objlen(L, 1);
+	size_t len = lua_objlen(L, 2);
 	if(len == 0)
 		return luaL_error(L, "the given table doesn't contain any elements!");
 
 	const int NUM = min((int)len, MaxNum);
 
-	LuaRef v = LuaRef::fromStack(L, 1);
+	LuaRef v = LuaRef::fromStack(L, 2);
 	if(!v.isTable()) // this case should never actually happen
 		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
 
