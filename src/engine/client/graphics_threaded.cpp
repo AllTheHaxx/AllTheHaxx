@@ -300,9 +300,9 @@ int CGraphics_Threaded::LinesDrawLua(lua_State *L)
 
 	int n = lua_gettop(L);
 	if(n != 1 && n != 2)
-		return luaL_error(L, "%s", "Engine.Graphics:LinesDraw expects a table as the first argument, got nil");
+		return luaL_error(L, "Engine.Graphics:LinesDraw expects 1 or 2 arguments, got %d", n);
 
-	argcheck(lua_istable(L, 1), 1, "table");
+	argcheck(lua_istable(L, 1) || lua_isuserdata(L, 1), 1, "table or LineItem");
 	int MaxNum = (int)luaL_optinteger(L, 2, (MAX_VERTICES-m_NumVertices)/2);
 
 	size_t len = lua_objlen(L, 1);
@@ -897,6 +897,8 @@ bool CGraphics_Threaded::LuaCheckDrawingState(lua_State *L, const char *pFuncNam
 	//dbg_assert(m_DrawingLua == m_Drawing, "Graphics()->LuaCheckDrawingState called with rendering pipeline in unsynced state");
 	if(m_Drawing == m_DrawingLua && m_DrawingLua != 0)
 	{
+		int PrevState = m_DrawingLua;
+
 		// clean up the rendering pipeline for em
 		switch(m_Drawing)
 		{
@@ -907,10 +909,10 @@ bool CGraphics_Threaded::LuaCheckDrawingState(lua_State *L, const char *pFuncNam
 		if(!NoThrow)
 		{
 			// raise a lua error that results in panic, which then throws our exception
-			luaL_error(L, "    event callback for %s left the rendering pipeline in dirty state %s", pFuncName,
-					   m_DrawingLua == DRAWING_QUADS ? "DRAWING_QUADS" :
-					   m_DrawingLua == DRAWING_LINES ? "DRAWING_LINES" :
-					   "UNKNOWN (wtf?)"
+			luaL_error(L, "callback for %s left the rendering pipeline in dirty state %d (%s)", pFuncName, PrevState,
+					   PrevState == DRAWING_QUADS ? "DRAWING_QUADS" :
+					   PrevState == DRAWING_LINES ? "DRAWING_LINES" :
+					   "UNKNOWN"
 			);
 		}
 	}
