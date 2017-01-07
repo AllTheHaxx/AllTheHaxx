@@ -307,7 +307,7 @@ int CGraphics_Threaded::LinesDrawLua(lua_State *L)
 
 	size_t len = lua_objlen(L, 2);
 	if(len == 0)
-		return luaL_error(L, "the given table doesn't contain any elements!");
+		return 0;//luaL_error(L, "the given table doesn't contain any elements!");
 
 	const int NUM = min((int)len, MaxNum);
 
@@ -683,7 +683,7 @@ int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
 
 	size_t len = lua_objlen(L, 2);
 	if(len == 0)
-		return luaL_error(L, "the given table doesn't contain any elements!");
+		return 0;//luaL_error(L, "the given table doesn't contain any elements!");
 
 	const int NUM = min((int)len, MaxNum);
 
