@@ -225,6 +225,13 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 	if(!pLF)
 		return -1;
 
+	if(str_comp_nocase(pError, "not enough memory") == 0)
+	{
+		dbg_msg("lua/FATAL", "script %s hit OOM condition, killing it!", pLF->GetFilename());
+		pLF->Unload(true);
+		return 0;
+	}
+
 	Client()->LuaCheckDrawingState(pLF->L(), "exception", true); // clean up the rendering pipeline if necessary
 
 	// error messages come as "filename:line: message" - we don't need the 'filename' part if it's the current scriptfile's name
