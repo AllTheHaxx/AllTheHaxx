@@ -1291,7 +1291,9 @@ static const char *s_apSayings[] = {
 		"[IRC] received a CTCP FINGER",
 		"xoring you out!",
 		"Text formatting would be cool",
-		"Do penguins have knees?"
+		"Do penguins have knees?",
+		"Did you know: You can use CTRL+F in the consoles to search for text",
+		"Did you know: In the consoles, you can mark text to copy it"
 };
 
 void CMenus::RenderLoading()

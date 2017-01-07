@@ -227,11 +227,16 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 
 	Client()->LuaCheckDrawingState(pLF->L(), "exception", true); // clean up the rendering pipeline if necessary
 
-	// error messages come as "filename:line: message" - we don't need the 'filename' part
+	// error messages come as "filename:line: message" - we don't need the 'filename' part if it's the current scriptfile's name
 	{
-		const char *pFilenameEnding = str_find_nocase(pError, ".lua:");
-		if(pFilenameEnding)
-			pError = pFilenameEnding+4;
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "%s:", pLF->GetFilename());
+		if(str_find_nocase(pError, aBuf)) // <- we need to truncate the filename in this case
+		{
+			const char *pFilenameEnding = str_find_nocase(pError, ".lua:");
+			if(pFilenameEnding)
+				pError = pFilenameEnding+4;
+		}
 	}
 	pLF->m_Exceptions.add(std::string(pError));
 

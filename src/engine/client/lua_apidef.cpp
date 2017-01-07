@@ -75,6 +75,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass< vector2_base<float> >("vec2f")
+			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float)> ()
 			.addFunction("__add", &vector2_base<float>::operator+)
 			.addFunction("__sub", &vector2_base<float>::operator-)
@@ -85,6 +86,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("y", &vector2_base<float>::y)
 		.endClass()
 		.beginClass< vector3_base<float> >("vec3f")
+			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float, float)> ()
 			.addFunction("__add", &vector3_base<float>::operator+)
 			.addFunction("__sub", &vector3_base<float>::operator-)
@@ -96,6 +98,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("z", &vector3_base<float>::z)
 		.endClass()
 		.beginClass< vector4_base<float> >("vec4f")
+			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
 			.addData("r", &vector4_base<float>::r)
 			.addData("g", &vector4_base<float>::g)
