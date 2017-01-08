@@ -45,11 +45,25 @@ int CLuaBinding::LuaImport(lua_State *L)
 	if(n != 1)
 		return luaL_argerror(L, 1, "expected a string value, got nil");
 
-	char aFilename[128];
+	char aFilename[512];
 	{
 		const char *pFilename = luaL_checklstring(L, 1, 0);
-		for(; *pFilename && (*pFilename == '.' || *pFilename == '/'); pFilename++); // sandbox it
+		if(!pFilename)
+			return false;
+
+		// replace all backslashes with forward slashes
+		char aTmp[512];
+		{
+			str_copy(aTmp, pFilename, sizeof(aTmp));
+			for(char *p = aTmp; *p; p++)
+				if(*p == '\\')
+					*p = '/';
+			pFilename = aTmp;
+		}
+		// sandbox it
+		for(; *pFilename && ((*pFilename == '.' && pFilename[1] == '/') || *pFilename == '/'); pFilename++);
 		str_copy(aFilename, pFilename, sizeof(aFilename));
+		// auto-append the file ending if omitted
 		if(str_comp_nocase(aFilename+str_length(aFilename)-4, ".lua") != 0 && str_comp_nocase(aFilename+str_length(aFilename)-4, ".clc") != 0)
 			str_append(aFilename, ".lua", sizeof(aFilename)); // assume plain lua files as default
 	}
