@@ -26,6 +26,7 @@
 #include "hud.h"
 #include "chat.h"
 #include "console.h"
+#include "menus.h"
 
 
 CChat::CChat()
@@ -183,269 +184,271 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V)) // paste
+	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{
-		const char *pText = Input()->GetClipboardText();
-		if(pText)
+		if(Input()->KeyIsPressed(KEY_LCTRL))
 		{
-			// if the text has more than one line, we send all lines except the last one
-			// the last one is set as in the text field
-			char aLine[256];
-			int i, Begin = 0;
-			for(i = 0; i < str_length(pText); i++)
+			if(Event.m_Key == KEY_V) // paste
 			{
-				if(pText[i] == '\n')
+				const char *pText = Input()->GetClipboardText();
+				if(pText)
 				{
-					int max = min(i - Begin + 1, (int)sizeof(aLine));
-					str_copy(aLine, pText + Begin, max);
-					Begin = i+1;
-					SayChat(aLine);
-					while(pText[i] == '\n') i++;
+					// if the text has more than one line, we send all lines except the last one
+					// the last one is set as in the text field
+					char aLine[256];
+					int i, Begin = 0;
+					for(i = 0; i < str_length(pText); i++)
+					{
+						if(pText[i] == '\n')
+						{
+							int max = min(i - Begin + 1, (int)sizeof(aLine));
+							str_copy(aLine, pText + Begin, max);
+							Begin = i+1;
+							SayChat(aLine);
+							while(pText[i] == '\n') i++;
+						}
+					}
+					pText += Begin;
+
+					char aRightPart[256];
+					str_copy(aRightPart, m_Input.GetString() + m_Input.GetCursorOffset(), sizeof(aRightPart));
+					str_copy(aLine, m_Input.GetString(), min(m_Input.GetCursorOffset()+1, (int)sizeof(aLine)));
+					str_append(aLine, pText, sizeof(aLine));
+					str_append(aLine, aRightPart, sizeof(aLine));
+					m_Input.Set(aLine);
+					m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
 				}
 			}
-			pText += Begin;
-
-			char aRightPart[256];
-			str_copy(aRightPart, m_Input.GetString() + m_Input.GetCursorOffset(), sizeof(aRightPart));
-			str_copy(aLine, m_Input.GetString(), min(m_Input.GetCursorOffset()+1, (int)sizeof(aLine)));
-			str_append(aLine, pText, sizeof(aLine));
-			str_append(aLine, aRightPart, sizeof(aLine));
-			m_Input.Set(aLine);
-			m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
-		}
-	}
-
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C)) // copy
-	{
-		Input()->SetClipboardText(m_Input.GetString());
-	}
-
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_X)) // cut
-	{
-		Input()->SetClipboardText(m_Input.GetString());
-		m_Input.Clear();
-	}
-
-	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
-	{
-		int SearchDirection = 0;
-		if(Input()->KeyPress(KEY_LEFT))
-			SearchDirection = -1;
-		else if(Input()->KeyPress(KEY_RIGHT))
-			SearchDirection = 1;
-
-		if(SearchDirection != 0)
-		{
-			int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
-			for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+			else if(Event.m_Key == KEY_C || Event.m_Key == KEY_X) // copy/cut
 			{
-				int next = i+SearchDirection;
-				if(	(m_Input.GetString()[next] == ' ') ||
-					(m_Input.GetString()[next] >= 32 && m_Input.GetString()[next] <= 47) ||
-					(m_Input.GetString()[next] >= 58 && m_Input.GetString()[next] <= 64) ||
-					(m_Input.GetString()[next] >= 91 && m_Input.GetString()[next] <= 96) )
+				Input()->SetClipboardText(m_Input.GetString());
+				if(Event.m_Key == KEY_X)
+					m_Input.Clear();
+			}
+			else // handle skipping: jump to spaces and special ASCII characters
+			{
+				int SearchDirection = 0;
+				if(Event.m_Key == KEY_LEFT)
+					SearchDirection = -1;
+				else if(Event.m_Key == KEY_RIGHT)
+					SearchDirection = 1;
+
+				if(SearchDirection != 0)
 				{
-					FoundAt = i;
-					if(SearchDirection < 0)
-						FoundAt++;
-					break;
+					int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
+					for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+					{
+						int next = i+SearchDirection;
+						if(	(m_Input.GetString()[next] == ' ') ||
+							   (m_Input.GetString()[next] >= 32 && m_Input.GetString()[next] <= 47) ||
+							   (m_Input.GetString()[next] >= 58 && m_Input.GetString()[next] <= 64) ||
+							   (m_Input.GetString()[next] >= 91 && m_Input.GetString()[next] <= 96) )
+						{
+							FoundAt = i;
+							if(SearchDirection < 0)
+								FoundAt++;
+							break;
+						}
+					}
+					m_Input.SetCursorOffset(FoundAt);
 				}
 			}
-			m_Input.SetCursorOffset(FoundAt);
 		}
-	}
+		else if(Event.m_Key == KEY_ESCAPE)
+		{
+			m_Mode = MODE_NONE;
+			if(!m_pClient->m_pMenus->IsActive())
+				m_pClient->m_pMenus->UseMouseButtons(false);
+			m_pClient->OnRelease();
+			if(g_Config.m_ClChatReset)
+				m_Input.Clear();
 
-	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
-	{
-		m_Mode = MODE_NONE;
-		m_pClient->OnRelease();
-		if(g_Config.m_ClChatReset)
+			// abort text editing when pressing escape
+			Input()->SetIMEState(false);
+		}
+		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
+		{
+			if(m_Input.GetString()[0])
+			{
+				bool AddEntry = false;
+
+				if(m_LastChatSend+time_freq() < time_get())
+				{
+					if(m_Mode == MODE_HIDDEN)
+						m_CryptSendQueue = std::string(m_Input.GetString());
+					else if(m_Mode == MODE_CRYPT)
+					{
+						char *pEncrypted = EncryptMsg(m_Input.GetString());
+						if(pEncrypted)
+						{
+							Say(0, pEncrypted);
+							delete[] pEncrypted;
+						}
+
+					}
+					else
+						Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
+					AddEntry = true;
+				}
+				else if(m_PendingChatCounter < 3)
+				{
+					++m_PendingChatCounter;
+					AddEntry = true;
+				}
+
+				if(AddEntry)
+				{
+					CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry)+m_Input.GetLength());
+					pEntry->m_Team = m_Mode == MODE_TEAM ? 1 : 0;
+					mem_copy(pEntry->m_aText, m_Input.GetString(), m_Input.GetLength()+1);
+				}
+			}
+			m_pHistoryEntry = 0x0;
+			m_Mode = MODE_NONE;
+			if(!m_pClient->m_pMenus->IsActive())
+				m_pClient->m_pMenus->UseMouseButtons(false);
+			m_pClient->OnRelease();
 			m_Input.Clear();
 
-		// abort text editing when pressing escape
-		Input()->SetIMEState(false);
-	}
-	else if(Event.m_Flags&IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
-	{
-		if(m_Input.GetString()[0])
-		{
-			bool AddEntry = false;
-
-			if(m_LastChatSend+time_freq() < time_get())
-			{
-				if(m_Mode == MODE_HIDDEN)
-					m_CryptSendQueue = std::string(m_Input.GetString());
-				else if(m_Mode == MODE_CRYPT)
-				{
-					char *pEncrypted = EncryptMsg(m_Input.GetString());
-					if(pEncrypted)
-					{
-						Say(0, pEncrypted);
-						delete[] pEncrypted;
-					}
-
-				}
-				else
-					Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
-				AddEntry = true;
-			}
-			else if(m_PendingChatCounter < 3)
-			{
-				++m_PendingChatCounter;
-				AddEntry = true;
-			}
-
-			if(AddEntry)
-			{
-				CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry)+m_Input.GetLength());
-				pEntry->m_Team = m_Mode == MODE_TEAM ? 1 : 0;
-				mem_copy(pEntry->m_aText, m_Input.GetString(), m_Input.GetLength()+1);
-			}
+			// stop text editing after send chat.
+			Input()->SetIMEState(false);
 		}
-		m_pHistoryEntry = 0x0;
-		m_Mode = MODE_NONE;
-		m_pClient->OnRelease();
-		m_Input.Clear();
-
-		// stop text editing after send chat.
-		Input()->SetIMEState(false);
-	}
-	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
-	{
-		// fill the completion buffer
-		if(m_CompletionChosen < 0)
+		else if(Event.m_Key == KEY_TAB)
 		{
-			const char *pCursor = m_Input.GetString()+m_Input.GetCursorOffset();
-			for(int Count = 0; Count < m_Input.GetCursorOffset() && *(pCursor-1) != ' '; --pCursor, ++Count);
-			m_PlaceholderOffset = pCursor-m_Input.GetString();
+			// fill the completion buffer
+			if(m_CompletionChosen < 0)
+			{
+				const char *pCursor = m_Input.GetString()+m_Input.GetCursorOffset();
+				for(int Count = 0; Count < m_Input.GetCursorOffset() && *(pCursor-1) != ' '; --pCursor, ++Count);
+				m_PlaceholderOffset = pCursor-m_Input.GetString();
 
-			for(m_PlaceholderLength = 0; *pCursor && *pCursor != ' '; ++pCursor)
-				++m_PlaceholderLength;
+				for(m_PlaceholderLength = 0; *pCursor && *pCursor != ' '; ++pCursor)
+					++m_PlaceholderLength;
 
-			str_copy(m_aCompletionBuffer, m_Input.GetString()+m_PlaceholderOffset, min(static_cast<int>(sizeof(m_aCompletionBuffer)), m_PlaceholderLength+1));
-		}
+				str_copy(m_aCompletionBuffer, m_Input.GetString()+m_PlaceholderOffset, min(static_cast<int>(sizeof(m_aCompletionBuffer)), m_PlaceholderLength+1));
+			}
 
-		// find next possible name
-		const char *pCompletionString = 0;
+			// find next possible name
+			const char *pCompletionString = 0;
 
 			if(m_ReverseTAB)
 				m_CompletionChosen = (m_CompletionChosen-1 + 2*MAX_CLIENTS)%(2*MAX_CLIENTS);
 			else
 				m_CompletionChosen = (m_CompletionChosen+1)%(2*MAX_CLIENTS);
 
-		for(int i = 0; i < 2*MAX_CLIENTS; ++i)
-		{
-			int SearchType;
-			int Index;
-
-			if(m_ReverseTAB)
+			for(int i = 0; i < 2*MAX_CLIENTS; ++i)
 			{
-				SearchType = ((m_CompletionChosen-i +2*MAX_CLIENTS)%(2*MAX_CLIENTS))/MAX_CLIENTS;
-				Index = (m_CompletionChosen-i + MAX_CLIENTS )%MAX_CLIENTS;
+				int SearchType;
+				int Index;
+
+				if(m_ReverseTAB)
+				{
+					SearchType = ((m_CompletionChosen-i +2*MAX_CLIENTS)%(2*MAX_CLIENTS))/MAX_CLIENTS;
+					Index = (m_CompletionChosen-i + MAX_CLIENTS )%MAX_CLIENTS;
+				}
+				else
+				{
+					SearchType = ((m_CompletionChosen+i)%(2*MAX_CLIENTS))/MAX_CLIENTS;
+					Index = (m_CompletionChosen+i)%MAX_CLIENTS;
+				}
+
+
+				if(!m_pClient->m_Snap.m_paInfoByName[Index])
+					continue;
+
+				int Index2 = m_pClient->m_Snap.m_paInfoByName[Index]->m_ClientID;
+
+				bool Found = false;
+				if(SearchType == 1)
+				{
+					if(str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
+					   str_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
+						Found = true;
+				}
+				else if(!str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
+					Found = true;
+
+				if(Found)
+				{
+					pCompletionString = m_pClient->m_aClients[Index2].m_aName;
+					m_CompletionChosen = Index+SearchType*MAX_CLIENTS;
+					break;
+				}
+			}
+
+			// insert the name
+			if(pCompletionString)
+			{
+				char aBuf[256];
+				// add part before the name
+				str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+
+				// add the name
+				str_append(aBuf, pCompletionString, sizeof(aBuf));
+
+				// add seperator
+				const char *pSeparator = "";
+				if(*(m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength) != ' ')
+					pSeparator = m_PlaceholderOffset == 0 ? ": " : " ";
+				else if(m_PlaceholderOffset == 0)
+					pSeparator = ":";
+				if(*pSeparator)
+					str_append(aBuf, pSeparator, sizeof(aBuf));
+
+				// add part after the name
+				str_append(aBuf, m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength, sizeof(aBuf));
+
+				m_PlaceholderLength = str_length(pSeparator)+str_length(pCompletionString);
+				m_OldChatStringLength = m_Input.GetLength();
+				m_Input.Set(aBuf); // TODO: Use Add instead
+				m_Input.SetCursorOffset(m_PlaceholderOffset+m_PlaceholderLength);
+				m_InputUpdate = true;
+			}
+		}
+		else if(Event.m_Key == KEY_UP)
+		{
+			if(m_pHistoryEntry)
+			{
+				CHistoryEntry *pTest = m_History.Prev(m_pHistoryEntry);
+
+				if(pTest)
+					m_pHistoryEntry = pTest;
 			}
 			else
-			{
-				SearchType = ((m_CompletionChosen+i)%(2*MAX_CLIENTS))/MAX_CLIENTS;
-				Index = (m_CompletionChosen+i)%MAX_CLIENTS;
-			}
+				m_pHistoryEntry = m_History.Last();
 
-
-			if(!m_pClient->m_Snap.m_paInfoByName[Index])
-				continue;
-
-			int Index2 = m_pClient->m_Snap.m_paInfoByName[Index]->m_ClientID;
-
-			bool Found = false;
-			if(SearchType == 1)
-			{
-				if(str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
-					str_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
-					Found = true;
-			}
-			else if(!str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
-				Found = true;
-
-			if(Found)
-			{
-				pCompletionString = m_pClient->m_aClients[Index2].m_aName;
-				m_CompletionChosen = Index+SearchType*MAX_CLIENTS;
-				break;
-			}
+			if(m_pHistoryEntry)
+				m_Input.Set(m_pHistoryEntry->m_aText);
 		}
-
-		// insert the name
-		if(pCompletionString)
+		else if (Event.m_Key == KEY_DOWN)
 		{
-			char aBuf[256];
-			// add part before the name
-			str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+			if(m_pHistoryEntry)
+				m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
 
-			// add the name
-			str_append(aBuf, pCompletionString, sizeof(aBuf));
-
-			// add seperator
-			const char *pSeparator = "";
-			if(*(m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength) != ' ')
-				pSeparator = m_PlaceholderOffset == 0 ? ": " : " ";
-			else if(m_PlaceholderOffset == 0)
-				pSeparator = ":";
-			if(*pSeparator)
-				str_append(aBuf, pSeparator, sizeof(aBuf));
-
-			// add part after the name
-			str_append(aBuf, m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength, sizeof(aBuf));
-
-			m_PlaceholderLength = str_length(pSeparator)+str_length(pCompletionString);
-			m_OldChatStringLength = m_Input.GetLength();
-			m_Input.Set(aBuf); // TODO: Use Add instead
-			m_Input.SetCursorOffset(m_PlaceholderOffset+m_PlaceholderLength);
-			m_InputUpdate = true;
+			if (m_pHistoryEntry)
+				m_Input.Set(m_pHistoryEntry->m_aText);
+			else
+				m_Input.Clear();
 		}
-	}
-	else
-	{
-		// reset name completion process
-		if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key != KEY_TAB)
-			if(Event.m_Key != KEY_LSHIFT)
-				m_CompletionChosen = -1;
-
-		m_OldChatStringLength = m_Input.GetLength();
-		m_Input.ProcessInput(Event);
-		m_InputUpdate = true;
-	}
-	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_LSHIFT)
-	{
-		m_ReverseTAB = true;
+		else if(Event.m_Key == KEY_LSHIFT)
+		{
+			m_ReverseTAB = true;
+		}
 	}
 	else if(Event.m_Flags&IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
 	{
 		m_ReverseTAB = false;
 	}
-	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_UP)
-	{
-		if(m_pHistoryEntry)
-		{
-			CHistoryEntry *pTest = m_History.Prev(m_pHistoryEntry);
 
-			if(pTest)
-				m_pHistoryEntry = pTest;
-		}
-		else
-			m_pHistoryEntry = m_History.Last();
 
-		if(m_pHistoryEntry)
-			m_Input.Set(m_pHistoryEntry->m_aText);
-	}
-	else if (Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_DOWN)
-	{
-		if(m_pHistoryEntry)
-			m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
+	// reset name completion process
+	if(Event.m_Key != KEY_TAB && Event.m_Key != KEY_LSHIFT)
+		m_CompletionChosen = -1;
 
-		if (m_pHistoryEntry)
-			m_Input.Set(m_pHistoryEntry->m_aText);
-		else
-			m_Input.Clear();
-	}
+	m_OldChatStringLength = m_Input.GetLength();
+	m_Input.ProcessInput(Event);
+	m_InputUpdate = true;
+
 
 	return true;
 }
@@ -471,6 +474,7 @@ void CChat::EnableMode(int Team)
 
 		Input()->SetIMEState(true);
 		Input()->Clear();
+		m_pClient->m_pMenus->UseMouseButtons(true);
 		m_CompletionChosen = -1;
 		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
 	}
@@ -688,26 +692,26 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 		m_aLines[m_CurrentLine].m_Team = Team;
 		m_aLines[m_CurrentLine].m_NameColor = -2;
 
-		// check for highlighted name
-		if (Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		{
-			if(ClientID != m_pClient->Client()->m_LocalIDs[0])
+			// check for highlighted name
+			if (Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			{
-				// main character
-				if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName))
-					Highlighted = true;
-				// dummy
-				if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName))
+				if(ClientID != m_pClient->Client()->m_LocalIDs[0])
+				{
+					// main character
+					if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName))
+						Highlighted = true;
+					// dummy
+					if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName))
+						Highlighted = true;
+				}
+			}
+			else
+			{
+				// on demo playback use local id from snap directly,
+				// since m_LocalIDs isn't valid there
+				if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName))
 					Highlighted = true;
 			}
-		}
-		else
-		{
-			// on demo playback use local id from snap directly,
-			// since m_LocalIDs isn't valid there
-			if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName))
-				Highlighted = true;
-		}
 
 		m_aLines[m_CurrentLine].m_Hidden = false;
 		if(!Hidden)
