@@ -246,6 +246,14 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	return 0;
 }
 
+int CCollision::IntersectLineTeleHookLua(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision)
+{
+	int TeleNr;
+	int result = IntersectLineTeleHook(Pos0, Pos1, pOutCollision, pOutBeforeCollision, &TeleNr);
+	// TODO: return TeleNr aswell
+	return result;
+}
+
 int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr)
 {
 	float Distance = distance(Pos0, Pos1);
