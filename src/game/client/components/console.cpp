@@ -35,6 +35,7 @@
 
 #include "controls.h"
 #include "binds.h"
+#include "chat.h"
 #include "menus.h"
 #include "irc.h"
 #include "console.h"
@@ -1345,7 +1346,7 @@ void CGameConsole::Toggle(int Type)
 			m_StateChangeEnd = TimeNow()+ReversedProgress;
 		}
 
-		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
+		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING) // WHEN OPENING
 		{
 			Input()->MouseModeAbsolute();
 			m_pClient->m_pMenus->UseMouseButtons(false);
@@ -1355,14 +1356,15 @@ void CGameConsole::Toggle(int Type)
 
 			Input()->SetIMEState(true);
 		}
-		else
+		else // WHEN CLOSING
 		{
 			Input()->MouseModeRelative();
-			m_pClient->m_pMenus->UseMouseButtons(true);
+			m_pClient->m_pMenus->UseMouseButtons(m_pClient->m_pMenus->IsActive() || m_pClient->m_pChat->IsActive());
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 
-			Input()->SetIMEState(false);
+			if(!m_pClient->m_pMenus->IsActive() && !m_pClient->m_pChat->IsActive())
+				Input()->SetIMEState(false);
 		}
 	}
 
