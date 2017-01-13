@@ -75,7 +75,7 @@ class CGameConsole : public CComponent
 			int m_ScopeCount;
 			std::string m_FullLine;
 
-		}m_LuaHandler;
+		} m_LuaHandler;
 
 		bool LoadLuaFile(const char *pFile);
 	};

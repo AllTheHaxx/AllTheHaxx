@@ -1,6 +1,7 @@
 #include <engine/client.h>
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
+#include <game/client/components/console.h>
 
 #include "luabinding.h"
 
@@ -21,12 +22,19 @@ int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, 
 	return ret;
 }
 
-CLuaFile* CLuaBinding::GetLuaFile(lua_State *l)
+CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(L == pGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState)
+	{
+		static CLuaFile ConLuaFile(pGameClient->Client()->Lua(), "[console]", false);
+		ConLuaFile.m_pLuaState = L;
+		return &ConLuaFile;
+	}
+
 	for(int i = 0; i < pGameClient->Client()->Lua()->GetLuaFiles().size(); i++)
 	{
-		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->L() == l)
+		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->L() == L)
 		{
 			return pGameClient->Client()->Lua()->GetLuaFiles()[i];
 		}
