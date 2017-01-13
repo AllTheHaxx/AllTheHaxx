@@ -153,14 +153,27 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
 #if defined(FEATURE_LUA)
-		if(str_comp(pLine, "!reset") == 0)
+		if(str_comp(pLine, "!help") == 0)
+		{
+			PrintLine("> ---------------------------[ LUACONSOLE HELP ]---------------------------");
+			PrintLine("> In this console you can execute Lua code!");
+			PrintLine("> Try it by typing 'print(\"Hello World!\")', you'll see the result right on the screen.");
+			PrintLine("> ");
+			PrintLine("> Meta-Commands:");
+			PrintLine(">     !help - view this help");
+			PrintLine(">     !reset - reset the current multi-line entry");
+			PrintLine(">     !reload - re-init the lua console; everything you did here will be lost!");
+			PrintLine("");
+			return;
+		}
+		else if(str_comp(pLine, "!reset") == 0)
 		{
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
 			PrintLine("Reset complete");
 			return;
 		}
-		if(str_comp(pLine, "!reload") == 0)
+		else if(str_comp(pLine, "!reload") == 0)
 		{
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
