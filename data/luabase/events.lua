@@ -1,12 +1,17 @@
-__CTRL = {}
+local __CTRL = {}
 __CTRL.Events = {}
 __CTRL.Threads = {}	--3D Table which contains the 'threadobject' and its pause stuff
 
 -- YOU SHOULD NOT TOUCH THIS FUNCTION IF YOU DON'T KNOW WHAT YOU ARE DOING!
 function RegisterEvent(EventName, ...)
 	local FuncNames = {...}
+    if type(EventName) ~= "string" then
+        error("RegisterEvent expects a string as first argument", 2)
+        return
+    end
+
 	if #FuncNames < 1 then
-		print("RegisterEvent(\"" .. EventName .. ") expects two or more arguments")
+		error("RegisterEvent(\"" .. EventName .. ") expects two or more arguments", 2)
 		return
 	end
 
@@ -270,7 +275,7 @@ function OnTick()
 	end
 end
 
-function RegisterThread(FuncName)
+function RegisterThread(FuncName, argtable)
 	local Func = getfenv()[FuncName]
 
 	if Func ~= nil then

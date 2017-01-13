@@ -67,7 +67,12 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 {
 	m_pGameConsole = pGameConsole;
 
-#if defined(FEATURE_LUA)
+	InitLua();
+};
+
+void CGameConsole::CInstance::InitLua()
+{
+	#if defined(FEATURE_LUA)
 	if(m_Type == CONSOLETYPE_LUA)
 	{
 		m_LuaHandler.m_pLuaState = luaL_newstate();
@@ -95,8 +100,9 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 		CGameConsole::m_pStatLuaConsole = this;
 	}
-#endif
-};
+	#endif
+
+}
 
 void CGameConsole::CInstance::ClearBacklog()
 {
@@ -147,11 +153,21 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
 #if defined(FEATURE_LUA)
-		if(str_comp(pLine, "reset") == 0)
+		if(str_comp(pLine, "!reset") == 0)
 		{
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
 			PrintLine("Reset complete");
+			return;
+		}
+		if(str_comp(pLine, "!reload") == 0)
+		{
+			m_LuaHandler.m_ScopeCount = 0;
+			m_LuaHandler.m_FullLine = "";
+			m_LuaHandler.m_Inited = false;
+			lua_close(m_LuaHandler.m_pLuaState);
+			InitLua();
+			PrintLine("Reload complete");
 			return;
 		}
 		int Status = 0;

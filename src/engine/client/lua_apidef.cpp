@@ -314,6 +314,17 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("AttackTick", &CNetObj_Character::m_AttackTick)
 		.endClass()
 
+		/// Game.VClient(i).Input
+		.beginClass<CNetObj_PlayerInput>("CNetObj_PlayerInput")
+			.addData("Direction", &CNetObj_PlayerInput::m_Direction)
+			.addData("Fire", &CNetObj_PlayerInput::m_Fire)
+			.addData("Hook", &CNetObj_PlayerInput::m_Hook)
+			.addData("Jump", &CNetObj_PlayerInput::m_Jump)
+			.addData("WantedWeapon", &CNetObj_PlayerInput::m_WantedWeapon)
+			.addData("TargetX", &CNetObj_PlayerInput::m_TargetX)
+			.addData("TargetY", &CNetObj_PlayerInput::m_TargetY)
+		.endClass()
+
 		/// Game.Players(ID).Tee
 		/// Game.LocalTee        <--self
 		.beginClass<CCharacterCore>("CCharacterCore")
@@ -519,6 +530,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Players", &CGameClient::LuaGetClientData)
 			.addFunction("CharSnap", &CGameClient::LuaGetCharacterInfo)
 			.addFunction("Tuning", &CGameClient::LuaGetTuning)
+			//dummy access
+			.addFunction("DummyInput", &CControls::LuaGetInputData)
 		.endNamespace()
 
 		.beginNamespace("Engine")

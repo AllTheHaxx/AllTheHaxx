@@ -55,6 +55,7 @@ class CGameConsole : public CComponent
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
+		void InitLua();
 
 		void ClearBacklog();
 		void ClearHistory();
