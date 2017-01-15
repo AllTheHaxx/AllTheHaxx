@@ -10,10 +10,10 @@
 #define NEWLINE() ;
 #endif
 
-PUTLINE("|AllTheHaxx Beta - Version " ATH_VERSION "|")
+PUTLINE("|AllTheHaxx - Version " ATH_VERSION "|")
 PUTLINE("Exact version: 'ATH-" ALLTHEHAXX_VERSION "'  |  Build Date: " BUILD_DATE)
-PUTLINE("Teeworlds client by Henritees, FuroS, xush'")
-PUTLINE("Official Website: allthehaxx.github.io  - ANYTHING ELSE IS SCAM!!")
+PUTLINE("Teeworlds client modification by xush', FuroS, Henritees")
+PUTLINE("Official Website: https://allthehaxx.github.io - ANYTHING ELSE IS SCAM!!")
 NEWLINE()
 PUTLINE("This client provides cool features like a full-featured Lua API, a special design with many colors and much smoothness an a built-in IRC client to get you chatting with each other ;)")
 PUTLINE("The Lua-API provides it's users with an interface to create their own \"addons\" and add features to the client modularily")
