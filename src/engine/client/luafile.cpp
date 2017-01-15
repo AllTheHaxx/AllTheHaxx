@@ -23,7 +23,6 @@ CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLu
 {
 	m_pLuaState = 0;
 	m_State = STATE_IDLE;
-	CheckCertificate(Filename.c_str()); // just to load the permission flags
 	Reset();
 }
 
@@ -212,6 +211,31 @@ void CLuaFile::Init()
 		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
 	lua_pop(m_pLuaState, 1);
 
+#define CHECKSTUFF(CMPSTR) \
+	{ \
+		std::string str(m_aScriptTitle), ustr, lstr; \
+		std::string cmp(CMPSTR), ucmp, lcmp; \
+		for(int i = 0; i < 2; i++) \
+		{ \
+			std::transform(str.begin(), str.end(), ustr.begin(), ::toupper); \
+			std::transform(str.begin(), str.end(), ustr.begin(), ::tolower); \
+			std::transform(cmp.begin(), cmp.end(), ucmp.begin(), ::toupper); \
+			std::transform(cmp.begin(), cmp.end(), ucmp.begin(), ::tolower); \
+			if(str.find(cmp) != std::string::npos || \
+			   ustr.find(ucmp) != std::string::npos || \
+			   lstr.find(lcmp) != std::string::npos) \
+			{ \
+				/*m_pErrorStr = "Malicious script detected!";*/ \
+				Unload(/*true*/false); \
+				return; \
+			} \
+			str = m_aScriptInfo; \
+		} \
+	}
+	if(str_find_nocase(m_aScriptTitle, "b|ice") || str_find_nocase(m_aScriptTitle, "b| ice") || str_find_nocase(m_aScriptTitle, "b | ice") || str_find_nocase(m_aScriptTitle, "b |ice") || str_find_nocase(m_aScriptInfo, "b|ice") || str_find_nocase(m_aScriptInfo, "b| ice") || str_find_nocase(m_aScriptInfo, "b | ice") || str_find_nocase(m_aScriptInfo, "b |ice")) { Unload(false); return; } // oh how I with I had regex!
+	CHECKSTUFF("B|Îςع¤")CHECKSTUFF("B| Îςع¤")CHECKSTUFF("B |Îςع¤")CHECKSTUFF("B | Îςع¤")CHECKSTUFF("b|Îςع¤")CHECKSTUFF("b| Îςع¤")CHECKSTUFF("b |Îςع¤")CHECKSTUFF("b | Îςع¤")CHECKSTUFF("B|Îςع")CHECKSTUFF("B| Îςع")CHECKSTUFF("B |Îςع")CHECKSTUFF("B | Îςع")CHECKSTUFF("b|Îςع")CHECKSTUFF("b| Îςع")CHECKSTUFF("b |Îςع")CHECKSTUFF("b | Îςع")
+
+
 	// call the OnScriptInit function if we have one
 	if(!CallFunc<bool>("OnScriptInit", true))
 	{
@@ -257,21 +281,32 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	// some security steps right here...
 	int BeforePermissions = Import ? m_PermissionFlags : 0;
 	LoadPermissionFlags(pFilename);
-	if(!CheckCertificate(pFilename))
-	{
-		m_pErrorStr = Localize("Certificate check failed");
-		Reset(true);
-		return false;
-	}
-
 	ApplyPermissions(m_PermissionFlags & ~BeforePermissions); // only apply those that are new
 
 	// kill everything malicious
-	luaL_dostring(m_pLuaState, "os.exit=nil os.execute=nil os.rename=nil os.remove=nil os.setlocal=nil dofile=nil require=nil");
+	static const char s_aBlacklist[][64] = {
+			"os.exit",
+			"os.execute",
+			"os.rename",
+			"os.remove",
+			"os.setlocal",
+			"dofile",
+			"require",
+			"load",
+			"loadfile",
+			"loadstring",
+	};
+	for(unsigned i = 0; i < sizeof(s_aBlacklist)/sizeof(s_aBlacklist[0]); i++)
+	{
+		char aCmd[128];
+		str_format(aCmd, sizeof(aCmd), "%s=nil", s_aBlacklist[i]);
+		luaL_dostring(m_pLuaState, aCmd);
+		if(g_Config.m_Debug)
+			dbg_msg("lua", "disabler: '%s'", aCmd);
+	}
 
 
 	// make sure that source code scripts are what they're supposed to be
-	bool Compiled = str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") == 0;
 	IOHANDLE f = io_open(pFilename, IOFLAG_READ);
 	if(!f)
 	{
@@ -291,21 +326,13 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	str_format(aHeader[0], sizeof(aHeader[0]), "\\x%02x%s", aData[0], aData+1);
 	str_format(aHeader[1], sizeof(aHeader[1]), "\\x%02x%s", LUA_SIGNATURE[0], LUA_SIGNATURE+1);
 
-	if(str_comp(aHeader[0], aHeader[1]) == 0 && !Compiled)
+	if(str_comp(aHeader[0], aHeader[1]) == 0)
 	{
-		dbg_msg("lua", "!! WARNING: PREVENTED LOADING A PRECOMPILED SCRIPT PRETENDING TO BE A SOURCE CODE SCRIPT !!");
+		dbg_msg("lua", "!! WARNING: YOU CANNOT LOAD PRECOMPILED SCRIPTS FOR SECURITY REASONS !!");
 		dbg_msg("lua", "!! :  %s", pFilename);
-		m_pErrorStr = Localize("Probably malicious!");
+		m_pErrorStr = Localize("Cannot load bytecode scripts!");
 		return false;
 	}
-	else if(str_comp(aHeader[0], aHeader[1]) != 0 && Compiled)
-	{
-		dbg_msg("lua", "!! WARNING: PREVENTED LOADING AN INVALID PRECOMPILED SCRIPT (%s != %s) !!", aHeader[0], aHeader[1]);
-		dbg_msg("lua", "!! :  %s", pFilename);
-		m_pErrorStr = Localize("Invalid clc header");
-		return false;
-	}
-
 
 	int Status = luaL_loadfile(m_pLuaState, pFilename);
 	if (Status != 0)
