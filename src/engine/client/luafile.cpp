@@ -211,30 +211,7 @@ void CLuaFile::Init()
 		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
 	lua_pop(m_pLuaState, 1);
 
-#define CHECKSTUFF(CMPSTR) \
-	{ \
-		std::string str(m_aScriptTitle), ustr, lstr; \
-		std::string cmp(CMPSTR), ucmp, lcmp; \
-		for(int i = 0; i < 2; i++) \
-		{ \
-			std::transform(str.begin(), str.end(), ustr.begin(), ::toupper); \
-			std::transform(str.begin(), str.end(), ustr.begin(), ::tolower); \
-			std::transform(cmp.begin(), cmp.end(), ucmp.begin(), ::toupper); \
-			std::transform(cmp.begin(), cmp.end(), ucmp.begin(), ::tolower); \
-			if(str.find(cmp) != std::string::npos || \
-			   ustr.find(ucmp) != std::string::npos || \
-			   lstr.find(lcmp) != std::string::npos) \
-			{ \
-				/*m_pErrorStr = "Malicious script detected!";*/ \
-				Unload(/*true*/false); \
-				return; \
-			} \
-			str = m_aScriptInfo; \
-		} \
-	}
-	if(str_find_nocase(m_aScriptTitle, "b|ice") || str_find_nocase(m_aScriptTitle, "b| ice") || str_find_nocase(m_aScriptTitle, "b | ice") || str_find_nocase(m_aScriptTitle, "b |ice") || str_find_nocase(m_aScriptInfo, "b|ice") || str_find_nocase(m_aScriptInfo, "b| ice") || str_find_nocase(m_aScriptInfo, "b | ice") || str_find_nocase(m_aScriptInfo, "b |ice")) { Unload(false); return; } // oh how I with I had regex!
-	CHECKSTUFF("B|Îςع¤")CHECKSTUFF("B| Îςع¤")CHECKSTUFF("B |Îςع¤")CHECKSTUFF("B | Îςع¤")CHECKSTUFF("b|Îςع¤")CHECKSTUFF("b| Îςع¤")CHECKSTUFF("b |Îςع¤")CHECKSTUFF("b | Îςع¤")CHECKSTUFF("B|Îςع")CHECKSTUFF("B| Îςع")CHECKSTUFF("B |Îςع")CHECKSTUFF("B | Îςع")CHECKSTUFF("b|Îςع")CHECKSTUFF("b| Îςع")CHECKSTUFF("b |Îςع")CHECKSTUFF("b | Îςع")
-
+	if(str_find_nocase(m_aScriptTitle, " b| ") || str_find_nocase(m_aScriptInfo, " b| ")) { Unload(false); return; }
 
 	// call the OnScriptInit function if we have one
 	if(!CallFunc<bool>("OnScriptInit", true))
