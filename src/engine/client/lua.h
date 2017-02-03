@@ -14,12 +14,13 @@
 #define LUA_FIRE_EVENT(EVENTNAME, ...) \
 	{ \
 		if(g_Config.m_ClLua) \
-			for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++) \
+			for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++) \
 			{ \
-				if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED) \
+				CLuaFile *pLF = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]; \
+				if(pLF->State() != CLuaFile::STATE_LOADED) \
 					continue; \
-				LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc(EVENTNAME); \
-				if(lfunc) try { lfunc(__VA_ARGS__); } catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[ijdfg]); } \
+				LuaRef lfunc = pLF->GetFunc(EVENTNAME); \
+				if(lfunc) try { lfunc(__VA_ARGS__); CLua::Client()->LuaCheckDrawingState(pLF->L(), EVENTNAME); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); } \
 			} \
 			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, EVENTNAME); \
 			if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); } \

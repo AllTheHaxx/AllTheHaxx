@@ -2996,7 +2996,7 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 		UI()->DoLabelScaled(&Button, aBuf, 16.0f, -1);
 
 		Item.m_Rect.VSplitLeft(10.0f, 0, &Item.m_Rect);
-		str_format(aBuf, sizeof(aBuf), "@@ %s", L->m_Exceptions[i].c_str() +4/* + (str_find(L->m_Exceptions[i].c_str(), L->GetFilename()) != NULL ? str_length(L->GetFilename()) + 1 : 0)*/);
+		str_format(aBuf, sizeof(aBuf), "@@ %s", L->m_Exceptions[i].c_str());
 		UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 	}
 
@@ -3018,27 +3018,32 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		// render settings page if open
 		if(s_ActiveLuaSettings >= 0)
 		{
-			try
+			if(Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->State() != CLuaFile::STATE_LOADED)
+				s_ActiveLuaSettings = -1;
+			else
 			{
-				CUIRect CloseButton;
-				MainView.HSplitTop(20.0f, &CloseButton, &MainView);
-				static CButtonContainer s_CloseButton;
-				if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
+				try
 				{
-					Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptSaveSettings")();
+					CUIRect CloseButton;
+					MainView.HSplitTop(20.0f, &CloseButton, &MainView);
+					static CButtonContainer s_CloseButton;
+					if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &CloseButton, 0, CUI::CORNER_B) || !g_Config.m_ClLua)
+					{
+						Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptSaveSettings")();
+						s_ActiveLuaSettings = -1;
+					}
+					else
+					{
+						MainView.HSplitTop(10.0f, 0, &MainView);
+						Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView);
+						return;
+					}
+				}
+				catch(std::exception& e)
+				{
+					Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]);
 					s_ActiveLuaSettings = -1;
 				}
-				else
-				{
-					MainView.HSplitTop(10.0f, 0, &MainView);
-					Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]->GetFunc("OnScriptRenderSettings")(MainView);
-					return;
-				}
-			}
-			catch(std::exception& e)
-			{
-				Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[s_ActiveLuaSettings]);
-				s_ActiveLuaSettings = -1;
 			}
 		}
 

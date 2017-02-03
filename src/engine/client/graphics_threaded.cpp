@@ -19,8 +19,10 @@
 #include <engine/console.h>
 
 #include <math.h> // cosf, sinf
+#include <lua.hpp>
 
 #include "graphics_threaded.h"
+#include "luabinding.h"
 
 static CVideoMode g_aFakeModes[] = {
 	{320,240,8,8,8}, {400,300,8,8,8}, {640,480,8,8,8},
@@ -165,6 +167,7 @@ CGraphics_Threaded::CGraphics_Threaded()
 
 	m_Rotation = 0;
 	m_Drawing = 0;
+	m_DrawingLua = 0;
 	m_InvalidTexture = 0;
 
 	m_TextureMemoryUsage = 0;
@@ -275,6 +278,52 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 	}
 
 	AddVertices(2*Num);
+}
+
+void CGraphics_Threaded::LinesBeginLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == 0, "called Graphics()->LinesBegin within begin");
+	m_DrawingLua = DRAWING_LINES;
+	LinesBegin();
+}
+
+void CGraphics_Threaded::LinesEndLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == DRAWING_LINES, "called Graphics()->LinesEnd without begin");
+	m_DrawingLua = 0;
+	LinesEnd();
+}
+
+int CGraphics_Threaded::LinesDrawLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == DRAWING_LINES, "called Graphics()->LinesDraw without begin");
+
+	int n = lua_gettop(L)-1; // REMEMBER THAT THERE IS A 'self' ON THE STACK!
+	if(n != 1 && n != 2)
+		return luaL_error(L, "Engine.Graphics:LinesDraw expects 1 or 2 arguments, got %d", n);
+
+	argcheck(lua_istable(L, 2), 2, "table");
+	int MaxNum = (int)luaL_optinteger(L, 3, (MAX_VERTICES-m_NumVertices)/2);
+
+	size_t len = lua_objlen(L, 2);
+	if(len == 0)
+		return 0;//luaL_error(L, "the given table doesn't contain any elements!");
+
+	const int NUM = min((int)len, MaxNum);
+
+	LuaRef v = LuaRef::fromStack(L, 2);
+	if(!v.isTable()) // this case should never actually happen
+		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
+
+	CLineItem *aLineItems = (CLineItem *)mem_alloc(NUM*sizeof(CLineItem), 0);
+	for(int i = 1; i <= NUM; i++)
+	{
+		aLineItems[i-1] = v[i].cast<CLineItem>();
+	}
+	LinesDraw(aLineItems, NUM);
+	mem_free(aLineItems);
+
+	return 0;
 }
 
 int CGraphics_Threaded::UnloadTexture(int Index)
@@ -500,6 +549,12 @@ void CGraphics_Threaded::TextureSet(int TextureID)
 	m_State.m_Texture = TextureID;
 }
 
+void CGraphics_Threaded::TextureSetLua(int TextureID, lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == 0, "called Graphics()->TextureSet within begin");
+	TextureSet(TextureID);
+}
+
 void CGraphics_Threaded::Clear(float r, float g, float b)
 {
 	CCommandBuffer::SCommand_Clear Cmd;
@@ -533,6 +588,26 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 	m_Rotation = Angle;
 }
 
+void CGraphics_Threaded::QuadsBeginLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == 0, "called Graphics()->QuadsBegin twice");
+	m_DrawingLua = DRAWING_QUADS;
+	QuadsBegin();
+}
+
+void CGraphics_Threaded::QuadsEndLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsEnd without begin");
+	m_DrawingLua = 0;
+	QuadsEnd();
+}
+
+void CGraphics_Threaded::QuadsSetRotationLua(float Angle, lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsSetRotation without begin");
+	QuadsSetRotation(Angle);
+}
+
 void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, int Num)
 {
 	dbg_assert(m_Drawing != 0, "called Graphics()->SetColorVertex without begin");
@@ -555,6 +630,12 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 		CColorVertex(2, r, g, b, a),
 		CColorVertex(3, r, g, b, a)};
 	SetColorVertex(Array, 4);
+}
+
+void CGraphics_Threaded::SetColorLua(float r, float g, float b, float a, lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua != 0, "called Graphics()->SetColor without begin");
+	SetColor(r, g, b, a);
 }
 
 void CGraphics_Threaded::QuadsSetSubset(float TlU, float TlV, float BrU, float BrV)
@@ -587,6 +668,38 @@ void CGraphics_Threaded::QuadsDraw(CQuadItem *pArray, int Num)
 	}
 
 	QuadsDrawTL(pArray, Num);
+}
+
+int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsDraw without begin");
+
+	int n = lua_gettop(L)-1; // REMEMBER THE 'self'!!
+	if(n != 1 && n != 2)
+		return luaL_error(L, "Engine.Graphics:QuadsDraw expects 1 or 2 arguments, got %d", n);
+
+	argcheck(lua_istable(L, 2), 2, "table");
+	int MaxNum = (int)luaL_optinteger(L, 3, (MAX_VERTICES-m_NumVertices)/(3*2));
+
+	size_t len = lua_objlen(L, 2);
+	if(len == 0)
+		return 0;//luaL_error(L, "the given table doesn't contain any elements!");
+
+	const int NUM = min((int)len, MaxNum);
+
+	LuaRef v = LuaRef::fromStack(L, 2);
+	if(!v.isTable()) // this case should never actually happen
+		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
+
+	CQuadItem *aQuadItems = (CQuadItem *)mem_alloc(NUM*sizeof(CQuadItem), 0);
+	for(int i = 1; i <= NUM; i++)
+	{
+		aQuadItems[i-1] = v[i].cast<CQuadItem>();
+	}
+	QuadsDraw(aQuadItems, NUM);
+	mem_free(aQuadItems);
+
+	return 0;
 }
 
 void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
@@ -777,6 +890,33 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 			x += Size/2;
 		}
 	}
+}
+
+bool CGraphics_Threaded::LuaCheckDrawingState(lua_State *L, const char *pFuncName, bool NoThrow)
+{
+	//dbg_assert(m_DrawingLua == m_Drawing, "Graphics()->LuaCheckDrawingState called with rendering pipeline in unsynced state");
+	if(m_Drawing == m_DrawingLua && m_DrawingLua != 0)
+	{
+		int PrevState = m_DrawingLua;
+
+		// clean up the rendering pipeline for em
+		switch(m_Drawing)
+		{
+			case DRAWING_QUADS: QuadsEndLua(L); break;
+			case DRAWING_LINES: LinesEndLua(L); break;
+		}
+
+		if(!NoThrow)
+		{
+			// raise a lua error that results in panic, which then throws our exception
+			luaL_error(L, "callback for %s left the rendering pipeline in dirty state %d (%s)", pFuncName, PrevState,
+					   PrevState == DRAWING_QUADS ? "DRAWING_QUADS" :
+					   PrevState == DRAWING_LINES ? "DRAWING_LINES" :
+					   "UNKNOWN"
+			);
+		}
+	}
+	return false;
 }
 
 int CGraphics_Threaded::IssueInit()

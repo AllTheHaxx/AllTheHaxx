@@ -8,6 +8,7 @@
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
+#include <game/client/components/console.h>
 
 #include "lua.h"
 #include "input.h"
@@ -219,17 +220,18 @@ int CInput::Update()
 	m_InputCounter = (m_InputCounter%0xFFFF)+1;
 
 	// these states must always be updated manually because they are not in the GetKeyState from SDL
-	int i = SDL_GetMouseState(NULL, NULL);
-	if(i&SDL_BUTTON(1)) m_aInputState[KEY_MOUSE_1] = 1; // 1 is left
-	if(i&SDL_BUTTON(3)) m_aInputState[KEY_MOUSE_2] = 1; // 3 is right
-	if(i&SDL_BUTTON(2)) m_aInputState[KEY_MOUSE_3] = 1; // 2 is middle
-	if(i&SDL_BUTTON(4)) m_aInputState[KEY_MOUSE_4] = 1;
-	if(i&SDL_BUTTON(5)) m_aInputState[KEY_MOUSE_5] = 1;
-	if(i&SDL_BUTTON(6)) m_aInputState[KEY_MOUSE_6] = 1;
-	if(i&SDL_BUTTON(7)) m_aInputState[KEY_MOUSE_7] = 1;
-	if(i&SDL_BUTTON(8)) m_aInputState[KEY_MOUSE_8] = 1;
-	if(i&SDL_BUTTON(9)) m_aInputState[KEY_MOUSE_9] = 1;
-
+	{
+		int i = SDL_GetMouseState(NULL, NULL);
+		if(i & SDL_BUTTON(1)) m_aInputState[KEY_MOUSE_1] = 1; // 1 is left
+		if(i & SDL_BUTTON(3)) m_aInputState[KEY_MOUSE_2] = 1; // 3 is right
+		if(i & SDL_BUTTON(2)) m_aInputState[KEY_MOUSE_3] = 1; // 2 is middle
+		if(i & SDL_BUTTON(4)) m_aInputState[KEY_MOUSE_4] = 1;
+		if(i & SDL_BUTTON(5)) m_aInputState[KEY_MOUSE_5] = 1;
+		if(i & SDL_BUTTON(6)) m_aInputState[KEY_MOUSE_6] = 1;
+		if(i & SDL_BUTTON(7)) m_aInputState[KEY_MOUSE_7] = 1;
+		if(i & SDL_BUTTON(8)) m_aInputState[KEY_MOUSE_8] = 1;
+		if(i & SDL_BUTTON(9)) m_aInputState[KEY_MOUSE_9] = 1;
+	}
 	{
 		SDL_Event Event;
 		bool IgnoreKeys = false;
@@ -291,8 +293,9 @@ int CInput::Update()
 
 					if(Event.button.button == 1) // ignore_convention
 					{
-						m_ReleaseDelta = time_get() - m_LastRelease;
-						m_LastRelease = time_get();
+						int64 Now = time_get();
+						m_ReleaseDelta = Now - m_LastRelease;
+						m_LastRelease = Now;
 					}
 
 					// fall through
@@ -368,20 +371,10 @@ int CInput::Update()
 					m_aInputState[Scancode] = 1;
 					m_aInputCount[Key] = m_InputCounter;
 
-					// EVENT CALL
 					if(!HoldKeys[Key])
 					{
-						//LastKey = Key;
-#if defined(FEATURE_LUA)
-						for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
-						{
-							if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
-								continue;
-							LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyPress");
-							if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }
-						}
-						//CLua::LUA_FIRE_EVENT_V("OnKeyPress", IInput::KeyName(Key));
-#endif
+						// EVENT CALL
+						LUA_FIRE_EVENT("OnKeyPress", IInput::KeyName(Key));
 						HoldKeys[Key] = true;
 					}
 				}
@@ -389,16 +382,7 @@ int CInput::Update()
 				if(Action&IInput::FLAG_RELEASE)
 				{
 					// EVENT CALL
-#if defined(FEATURE_LUA)
-					for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
-					{
-						if(CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
-							continue;
-						LuaRef lfunc = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnKeyRelease");
-						if(lfunc) try { lfunc(IInput::KeyName(Key)); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CLua::Client()->Lua()->GetLuaFiles()[ijdfg]); }
-					}
-					//CLua::LUA_FIRE_EVENT_V("OnKeyRelease", IInput::KeyName(Key));
-#endif
+					LUA_FIRE_EVENT("OnKeyRelease", IInput::KeyName(Key));
 					HoldKeys[Key] = false;
 				}
 

@@ -54,8 +54,8 @@ template<typename T>
 inline vector2_base<T> rotate(const vector2_base<T> &a, float angle)
 {
 	angle = angle * 3.1415926535897932384626433f / 180.0f;
-	float s = sin(angle);
-	float c = cos(angle);
+	float s = sinf(angle);
+	float c = cosf(angle);
 	return vector2_base<T>((T)(c*a.x - s*a.y), (T)(s*a.x + c*a.y));
 }
 
@@ -108,8 +108,8 @@ template<typename T>
 class vector3_base
 {
 public:
-	union { T x,r,h; };
-	union { T y,g,s; };
+	union { T x,r,  h; };
+	union { T y,g,  s; };
 	union { T z,b,v,l; };
 
 	vector3_base() {}
@@ -160,6 +160,7 @@ public:
 	bool operator ==(const vector3_base &v) const { return x == v.x && y == v.y && z == v.z; } //TODO: do this with an eps instead
 
 	operator const T* () { return &x; }
+	operator const vector2_base<T>* () { return vector2_base<T>(x,y); }
 };
 
 template<typename T>
@@ -285,6 +286,8 @@ public:
 	bool operator ==(const vector4_base &v) const { return x == v.x && y == v.y && z == v.z && w == v.w; } //TODO: do this with an eps instead
 
 	operator const T* () { return &x; }
+	operator const vector3_base<T> () { return vector3_base<T>(r,g,b); }
+	operator const vector2_base<T> () { return vector2_base<T>(r,g); }
 };
 
 typedef vector4_base<float> vec4;

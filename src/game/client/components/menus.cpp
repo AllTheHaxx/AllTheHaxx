@@ -636,6 +636,22 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	return ReturnValue;
 }
 
+int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, float FontSize, bool Hidden, int Corners, const char *pEmptyText, const char *pTooltip)
+{
+	static char *pBuffer = NULL;
+	const int MAX_STR_LEN = max(16, (int)pBC->GetString().length()*2); // always go with
+	pBuffer = (char *)mem_realloc(pBuffer, (unsigned)MAX_STR_LEN); // make sure there is always enough space
+	str_copy(pBuffer, pBC->GetString().c_str(), MAX_STR_LEN);
+
+	//dbg_msg("DBG!", "pBuffer before (SIZE=%i, CAN INPUT=%x): '%s'", MAX_STR_LEN, Input()->GetIMEState(), pBuffer);
+	int result = DoEditBox(pBC, pRect, pBuffer, (unsigned)MAX_STR_LEN, FontSize, &pBC->m_Offset, Hidden, Corners, pEmptyText, 0, pTooltip);
+	//dbg_msg("DBG!", "pBuffer danach (RSLT=%i): '%s'", result, pBuffer);
+
+	// copy it back
+	pBC->SetString(std::string(pBuffer));
+	return result;
+}
+
 float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
 {
 	CALLSTACK_ADD();
@@ -1192,6 +1208,7 @@ static const char *s_apSayings[] = {
 		"Life is strange :o",
 		"¿¡¿¡¿¡¿¡¿¡¿¡¿¡¿¡",
 		"...REISUB!",
+		"WO\xD0\xAFK\xC6\xA7 FO\xD0\xAF M\xC6\x8E",
 		"Do you get the insiders...? :D",
 		"Ask if you need something!",
 		//"Ignore the spoofing tab!!!",
@@ -1262,7 +1279,6 @@ static const char *s_apSayings[] = {
 		"[21:00:00] ReD: auutsch",
 		"\"Red nur du ReD\"",
 		"BAUM!",
-		"Uhh, got a brain freeze :0",
 		"epppiiiiccc",
 		"Gimme dat muzic!",
 		"...it's evolving!",
@@ -1275,7 +1291,9 @@ static const char *s_apSayings[] = {
 		"[IRC] received a CTCP FINGER",
 		"xoring you out!",
 		"Text formatting would be cool",
-		"Do penguins have knees?"
+		"Do penguins have knees?",
+		"Did you know: You can use CTRL+F in the consoles to search for text",
+		"Did you know: In the consoles, you can mark text to copy it"
 };
 
 void CMenus::RenderLoading()
@@ -1367,6 +1385,8 @@ void CMenus::RenderLoading()
 	c.y = y+160;
 	c.w = w;
 	c.h = h;
+
+	srand((unsigned)time_get()&0x6BEEFB0B&rand());
 	size_t n = rand()%(sizeof(s_apSayings)/sizeof(s_apSayings[0]));
 	static const char *pSaying;
 	if(!pSaying)
@@ -1380,12 +1400,18 @@ void CMenus::RenderLoading()
 		timeinfo = localtime ( &rawtime );
 
 		// for teh lulz
-		if(timeinfo->tm_mday == 20 && timeinfo->tm_mon == 12)
+		#define ISDATE(D, M) (timeinfo->tm_mday == (D) && timeinfo->tm_mon == (M-1))
+		if(ISDATE(20, 12))
 			pSaying = "Happy Birthday, xush' :D (December 20th)";
-		else if(timeinfo->tm_mday == 16 && timeinfo->tm_mon == 10)
+		else if(ISDATE(16, 10))
 			pSaying = "Happy Birthday, Henritees :D (October 16th)";
-		else if(timeinfo->tm_mday == 24 && timeinfo->tm_mon == 10)
+		else if(ISDATE(24, 10))
 			pSaying = "Happy Birthday, FuroS :D (October 24th)";
+		else if(ISDATE(1, 1))
+			pSaying = "Happy new Year!";
+		else if(ISDATE(24, 12) || ISDATE(25, 12))
+			pSaying = "Merry Christmas!";
+		#undef ISDATE
 	}
 
 	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
@@ -1496,50 +1522,6 @@ void CMenus::RenderNews(CUIRect MainView)
 void CMenus::OnInit()
 {
 	CALLSTACK_ADD();
-
-
-	/*
-	array<string> my_strings;
-	array<string>::range r2;
-	my_strings.add("4");
-	my_strings.add("6");
-	my_strings.add("1");
-	my_strings.add("3");
-	my_strings.add("7");
-	my_strings.add("5");
-	my_strings.add("2");
-
-	for(array<string>::range r = my_strings.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%s", r.front().cstr());
-
-	sort(my_strings.all());
-
-	dbg_msg("", "after:");
-	for(array<string>::range r = my_strings.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%s", r.front().cstr());
-
-
-	array<int> myarray;
-	myarray.add(4);
-	myarray.add(6);
-	myarray.add(1);
-	myarray.add(3);
-	myarray.add(7);
-	myarray.add(5);
-	myarray.add(2);
-
-	for(array<int>::range r = myarray.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%d", r.front());
-
-	sort(myarray.all());
-	sort_verify(myarray.all());
-
-	dbg_msg("", "after:");
-	for(array<int>::range r = myarray.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%d", r.front());
-
-	exit(-1);
-	// */
 
 	if(g_Config.m_ClShowWelcome)
 	{
@@ -2460,7 +2442,7 @@ void CMenus::OnRender()
 		RenderDemoPlayer(Screen);
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
+	if(/*XXX !g_Config.m_ClAllowPuremod && */Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
 	{
 		Client()->Disconnect();
 		SetActive(true);
@@ -2499,6 +2481,8 @@ void CMenus::OnRender()
 		m_NumInputEvents = 0;
 		return;
 	}
+	else
+		UseMouseButtons(true);
 
 	if(!Client()->MapLoaded())
 	{

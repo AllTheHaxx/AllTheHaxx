@@ -51,6 +51,7 @@ extern "C" {
 */
 void dbg_assert(int test, const char *msg);
 #define dbg_assert(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
+#define dbg_assert_lua(test,msg) if(!(test)) { luaL_error(L, "%s", msg); }
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 
 
@@ -110,8 +111,10 @@ void dbg_msg(const char *sys, const char *fmt, ...);
 	See Also:
 		<mem_free>
 */
-void *mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment);
+void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment);
+void* mem_realloc_debug(void *block, const char *filename, int line, unsigned size);
 #define mem_alloc(s,a) mem_alloc_debug(__FILE__, __LINE__, (s), (a))
+#define mem_realloc(p,s) mem_realloc_debug(p,__FILE__, __LINE__, (s))
 
 /*
 	Function: mem_free

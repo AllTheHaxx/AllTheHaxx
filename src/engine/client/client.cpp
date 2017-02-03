@@ -8,7 +8,7 @@
 #include <string.h>
 #include <climits>
 #include <fstream>
-//#include <csignal>
+#include <csignal>
 #include <locale.h> //setlocale
 
 #include <base/math.h>
@@ -3043,14 +3043,15 @@ void CClient::Run()
 	if(!LoadData())
 		return;
 
+	// init lua
+	m_Lua.Init(this, Storage(), m_pConsole);
+
 	GameClient()->OnInit();
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
-	// init lua
-	m_Lua.Init(this, Storage(), m_pConsole);
 	m_Lua.SetGameClient(GameClient());
 
 	if((m_pInputThread = thread_init(InputThread, this)))
@@ -4051,6 +4052,8 @@ int main(int argc, const char **argv) // ignore_convention
 			break;
 		}
 	}
+#else
+	signal(SIGPIPE, SIG_IGN);
 #endif
 
 #if !defined(CONF_PLATFORM_MACOSX)
@@ -4401,4 +4404,9 @@ int CClient::GetPredictionTime()
 
 	int64 Now = time_get();
 	return (int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq());
+}
+
+void CClient::LuaCheckDrawingState(lua_State *L, const char *pFuncName, bool NoThrow)
+{
+	Graphics()->LuaCheckDrawingState(L, pFuncName, NoThrow);
 }

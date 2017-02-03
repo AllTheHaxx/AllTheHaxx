@@ -41,20 +41,40 @@ public:
 class CMenus : public CComponent
 {
 public:
-		struct CButtonContainer
-		{
-			CButtonContainer() { m_FadeStartTime = 0.0f; }
-			float m_FadeStartTime;
-			virtual const void *GetID() const { return &m_FadeStartTime; }
-		};
+	struct CButtonContainer
+	{
+		CButtonContainer() { m_FadeStartTime = 0.0f; }
+		float m_FadeStartTime;
+		virtual const void *GetID() const { return &m_FadeStartTime; }
+	};
 
-		struct CPointerContainer : public CButtonContainer
+	struct CPointerContainer : public CButtonContainer
+	{
+		CPointerContainer(const void *pID) : CButtonContainer(), m_pID(pID) { }
+		const void *GetID() const { return m_pID; }
+	private:
+		const void *m_pID;
+	};
+
+private:
+	struct lua // container to keep the scope clean
+	{
+		struct CEditboxContainer : public CButtonContainer
 		{
-			CPointerContainer(const void *pID) : m_pID(pID) { m_FadeStartTime = 0.0f; }
-			const void *GetID() const { return m_pID; }
+			float m_Offset;
+
+			CEditboxContainer() : CButtonContainer()
+			{
+				m_Offset = 0;
+				m_String = "";
+			}
+
+			void SetString(std::string Str) { m_String = Str; }
+			const std::string& GetString() const { return m_String; }
 		private:
-			const void *m_pID;
+			std::string m_String;
 		};
+	};
 
 private:
 	typedef float (*FDropdownCallback)(CUIRect View, void *pUser, void *pArgs);
@@ -104,6 +124,7 @@ private:
 	static void ui_draw_checkbox_number(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	*/
 	int DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", int Align = 0, const char *pTooltip = 0);
+	int DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, float FontSize, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", const char *pTooltip = 0);
 	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
 
 	float DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0);

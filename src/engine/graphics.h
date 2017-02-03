@@ -95,6 +95,7 @@ public:
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual void TextureSet(int TextureID) = 0;
+	virtual void TextureSetLua(int TextureID, struct lua_State *L) = 0;
 
 	struct CLineItem
 	{
@@ -105,10 +106,16 @@ public:
 	virtual void LinesBegin() = 0;
 	virtual void LinesEnd() = 0;
 	virtual void LinesDraw(const CLineItem *pArray, int Num) = 0;
+	virtual void LinesBeginLua(struct lua_State *L) = 0;
+	virtual void LinesEndLua(struct lua_State *L) = 0;
+	virtual int LinesDrawLua(struct lua_State *L) = 0;
 
 	virtual void QuadsBegin() = 0;
 	virtual void QuadsEnd() = 0;
 	virtual void QuadsSetRotation(float Angle) = 0;
+	virtual void QuadsBeginLua(struct lua_State *L) = 0;
+	virtual void QuadsEndLua(struct lua_State *L) = 0;
+	virtual void QuadsSetRotationLua(float Angle, struct lua_State *L) = 0;
 	virtual void QuadsSetSubset(float TopLeftU, float TopLeftV, float BottomRightU, float BottomRightV) = 0;
 	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) = 0;
 
@@ -119,6 +126,7 @@ public:
 		CQuadItem(float x, float y, float w, float h) : m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
+	virtual int QuadsDrawLua(struct lua_State *L) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
 
 	struct CFreeformItem
@@ -140,6 +148,7 @@ public:
 	};
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
+	virtual void SetColorLua(float r, float g, float b, float a, struct lua_State *L) = 0;
 
 	virtual void TakeScreenshot(const char *pFilename) = 0;
 	virtual void TakeCustomScreenshot(const char *pFilename) = 0;
@@ -152,6 +161,8 @@ public:
 	virtual void InsertSignal(class semaphore *pSemaphore) = 0;
 	virtual bool IsIdle() = 0;
 	virtual void WaitForIdle() = 0;
+
+	virtual bool LuaCheckDrawingState(struct lua_State *L, const char *pFuncName, bool NoThrow=false) = 0;
 
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
@@ -169,7 +180,7 @@ public:
 
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
-	
+
 	virtual void HideWindow() = 0;
 	virtual void UnhideWindow() = 0;
 };

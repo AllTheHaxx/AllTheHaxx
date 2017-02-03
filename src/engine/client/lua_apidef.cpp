@@ -23,16 +23,14 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 {
 #if defined(FEATURE_LUA)
 
+	lua_register(L, "print", CLuaBinding::LuaPrintOverride);
 	lua_register(L, "Import", CLuaBinding::LuaImport);
 	lua_register(L, "KillScript", CLuaBinding::LuaKillScript);
 	lua_register(L, "Listdir", CLuaBinding::LuaListdir);
 	lua_register(L, "ScriptPath", CLuaBinding::LuaScriptPath);
+	lua_register(L, "StrIsNetAddr", CLuaBinding::LuaStrIsNetAddr);
 
 	getGlobalNamespace(L)
-
-		//.addFunction("Import", &CLuaBinding::LuaImport)
-		//.addFunction("KillScript", &CLuaBinding::LuaKillScript)
-		//.addFunction("print", &CLuaFile::LuaPrintOverride)       // TODO: do this with a low level implementation :D
 
 		// client namespace XXX: cleanup
 		.beginNamespace("_client")
@@ -77,6 +75,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass< vector2_base<float> >("vec2f")
+			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float)> ()
 			.addFunction("__add", &vector2_base<float>::operator+)
 			.addFunction("__sub", &vector2_base<float>::operator-)
@@ -87,6 +86,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("y", &vector2_base<float>::y)
 		.endClass()
 		.beginClass< vector3_base<float> >("vec3f")
+			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float, float)> ()
 			.addFunction("__add", &vector3_base<float>::operator+)
 			.addFunction("__sub", &vector3_base<float>::operator-)
@@ -98,6 +98,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("z", &vector3_base<float>::z)
 		.endClass()
 		.beginClass< vector4_base<float> >("vec4f")
+			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
 			.addData("r", &vector4_base<float>::r)
 			.addData("g", &vector4_base<float>::g)
@@ -138,6 +139,12 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addConstructor <void (*) ()> ()
 		.endClass()
 
+		.beginClass< CMenus::lua::CEditboxContainer >("EditboxContainer")
+			.addConstructor <void (*) ()> ()
+            .addFunction("GetString", &CMenus::lua::CEditboxContainer::GetString)
+            .addFunction("SetString", &CMenus::lua::CEditboxContainer::SetString)
+		.endClass()
+
 
 		// ------------------------------ ICLIENT ------------------------------
 
@@ -176,7 +183,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		// ------------------------------ COMPONENTS ------------------------------
 
-		/// Game.UI
+		/// Game.Ui
 		.beginClass<CUI>("CUI")
 			.addFunction("DoLabel", &CUI::DoLabel)
 			.addFunction("DoLabelScaled", &CUI::DoLabelScaled)
@@ -236,6 +243,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("CheckPoint", &CCollision::CheckPointLua)
 
 			.addFunction("IntersectLine", &CCollision::IntersectLine)
+			.addFunction("IntersectLineTeleHook", &CCollision::IntersectLineTeleHookLua)
 			.addFunction("MovePoint", &CCollision::MovePoint)
 			.addFunction("MoveBox", &CCollision::MoveBox)
 			.addFunction("TestBox", &CCollision::TestBox)
@@ -260,6 +268,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DoButton_Sprite", &CMenus::DoButton_Sprite)
 			.addFunction("DoScrollbarV", &CMenus::DoScrollbarV)
 			.addFunction("DoScrollbarH", &CMenus::DoScrollbarH)
+			.addFunction("DoEditbox", &CMenus::DoEditBoxLua)
 		.endClass()
 
 		/// Game.Voting
@@ -303,6 +312,17 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addData("Emote", &CNetObj_Character::m_Emote)
 			.addData("AttackTick", &CNetObj_Character::m_AttackTick)
+		.endClass()
+
+		/// Game.VClient(i).Input
+		.beginClass<CNetObj_PlayerInput>("CNetObj_PlayerInput")
+			.addData("Direction", &CNetObj_PlayerInput::m_Direction)
+			.addData("Fire", &CNetObj_PlayerInput::m_Fire)
+			.addData("Hook", &CNetObj_PlayerInput::m_Hook)
+			.addData("Jump", &CNetObj_PlayerInput::m_Jump)
+			.addData("WantedWeapon", &CNetObj_PlayerInput::m_WantedWeapon)
+			.addData("TargetX", &CNetObj_PlayerInput::m_TargetX)
+			.addData("TargetY", &CNetObj_PlayerInput::m_TargetY)
 		.endClass()
 
 		/// Game.Players(ID).Tee
@@ -370,6 +390,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SimulateKeyPress", &IInput::SimulateKeyPressSTD)
 			.addFunction("SimulateKeyReleaseDirect", &IInput::SimulateKeyRelease)
 			.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
+
+			.addFunction("SetIMEState", &IInput::SetIMEState)
+			.addFunction("GetIMEState", &IInput::GetIMEState)
 		.endClass()
 
 		/// Engine.Curl
@@ -389,7 +412,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("NumPlayers", &CServerInfo::m_NumPlayers, false)
 		.endClass()
 
-		/// TODO: doc!
+		// TODO: doc!
 		.beginClass<CGameClient::CSnapState>("CSnapState")
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
 			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)
@@ -431,22 +454,22 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		/// Engine.Graphics
 		.beginClass<IGraphics>("IGraphics")
-			.addFunction("QuadsBegin", &IGraphics::QuadsBegin)
-			.addFunction("QuadsEnd", &IGraphics::QuadsEnd)
-			.addFunction("QuadsDraw", &IGraphics::QuadsDraw)
-			.addFunction("LinesBegin", &IGraphics::LinesBegin)
-			.addFunction("LinesEnd", &IGraphics::LinesEnd)
-			.addFunction("LinesDraw", &IGraphics::LinesDraw)
+			.addFunction("QuadsBegin", &IGraphics::QuadsBeginLua)
+			.addFunction("QuadsEnd", &IGraphics::QuadsEndLua)
+			.addFunction("QuadsDraw", &IGraphics::QuadsDrawLua)
+			.addFunction("LinesBegin", &IGraphics::LinesBeginLua)
+			.addFunction("LinesEnd", &IGraphics::LinesEndLua)
+			.addFunction("LinesDraw", &IGraphics::LinesDrawLua)
 
-			.addFunction("SetRotation", &IGraphics::QuadsSetRotation)
-			.addFunction("SetColor", &IGraphics::SetColor)
+			.addFunction("SetRotation", &IGraphics::QuadsSetRotationLua)
+			.addFunction("SetColor", &IGraphics::SetColorLua)
 			.addFunction("BlendNone", &IGraphics::BlendNone)
 			.addFunction("BlendNormal", &IGraphics::BlendNormal)
 			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
 
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
 			.addFunction("UnloadTexture", &IGraphics::UnloadTexture)
-			.addFunction("TextureSet", &IGraphics::TextureSet)
+			.addFunction("TextureSet", &IGraphics::TextureSetLua)
 
 			.addFunction("MapScreen", &IGraphics::MapScreen)
 
@@ -507,6 +530,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Players", &CGameClient::LuaGetClientData)
 			.addFunction("CharSnap", &CGameClient::LuaGetCharacterInfo)
 			.addFunction("Tuning", &CGameClient::LuaGetTuning)
+			//dummy access
+			.addFunction("DummyInput", &CControls::LuaGetInputData)
 		.endNamespace()
 
 		.beginNamespace("Engine")

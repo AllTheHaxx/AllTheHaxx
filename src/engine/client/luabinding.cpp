@@ -1,8 +1,10 @@
 #include <engine/client.h>
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
+#include <game/client/components/console.h>
 
 #include "luabinding.h"
+
 
 int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, void *user)
 {
@@ -20,12 +22,19 @@ int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, 
 	return ret;
 }
 
-CLuaFile* CLuaBinding::GetLuaFile(lua_State *l)
+CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(L == pGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState)
+	{
+		static CLuaFile ConLuaFile(pGameClient->Client()->Lua(), "[console]", false);
+		ConLuaFile.m_pLuaState = L;
+		return &ConLuaFile;
+	}
+
 	for(int i = 0; i < pGameClient->Client()->Lua()->GetLuaFiles().size(); i++)
 	{
-		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->L() == l)
+		if(pGameClient->Client()->Lua()->GetLuaFiles()[i]->L() == L)
 		{
 			return pGameClient->Client()->Lua()->GetLuaFiles()[i];
 		}
@@ -44,11 +53,25 @@ int CLuaBinding::LuaImport(lua_State *L)
 	if(n != 1)
 		return luaL_argerror(L, 1, "expected a string value, got nil");
 
-	char aFilename[128];
+	char aFilename[512];
 	{
 		const char *pFilename = luaL_checklstring(L, 1, 0);
-		for(; *pFilename && (*pFilename == '.' || *pFilename == '/'); pFilename++); // sandbox it
+		if(!pFilename)
+			return false;
+
+		// replace all backslashes with forward slashes
+		char aTmp[512];
+		{
+			str_copy(aTmp, pFilename, sizeof(aTmp));
+			for(char *p = aTmp; *p; p++)
+				if(*p == '\\')
+					*p = '/';
+			pFilename = aTmp;
+		}
+		// sandbox it
+		for(; *pFilename && ((*pFilename == '.' && pFilename[1] == '/') || *pFilename == '/'); pFilename++);
 		str_copy(aFilename, pFilename, sizeof(aFilename));
+		// auto-append the file ending if omitted
 		if(str_comp_nocase(aFilename+str_length(aFilename)-4, ".lua") != 0 && str_comp_nocase(aFilename+str_length(aFilename)-4, ".clc") != 0)
 			str_append(aFilename, ".lua", sizeof(aFilename)); // assume plain lua files as default
 	}
@@ -77,7 +100,7 @@ int CLuaBinding::LuaImport(lua_State *L)
 	}
 
 	if(g_Config.m_Debug)
-		dbg_msg("Lua/debug", "script '%s' %s '%s'", pLF->GetFilename()+4, ret ? "successfully Import()'ed" : "failed to Import()", aFilename);
+		dbg_msg("Lua/debug", "script '%s' %s '%s'", pLF->GetFilename()+4, ret ? "successfully Import()ed" : "failed to Import()", aFilename);
 
 	// return some stuff to the script
 	lua_pushboolean(L, (int)ret); // success?
@@ -95,17 +118,15 @@ int CLuaBinding::LuaListdir(lua_State *L)
 	if(nargs != 2)
 		return luaL_error(L, "Listdir expects 2 arguments");
 
-#define argcheck(cond, narg, msg) if(!(cond)) { if(g_Config.m_Debug) dbg_msg("Lua/debug", "Listdir: narg=%i msg='%s'", narg, msg); return luaL_argerror(L, (narg), (msg)); }
-
-	argcheck(lua_isstring(L, 1), 1, ""); // path
-	argcheck(lua_isstring(L, 2), 2, "must be the name of the callback function (given as a string)"); // function callback
+	argcheck(lua_isstring(L, 1), 1, "string"); // path
+	argcheck(lua_isstring(L, 2), 2, "function name (as a string)"); // function callback
 
 	lua_getglobal(L, lua_tostring(L, 2)); // check if the given callback function actually exists
-	luaL_argcheck(L, lua_isfunction(L, -1), 2, "must be the name of the callback function (given as a string)");
+	argcheck(lua_isfunction(L, -1), 2, "function name (as a string)");
 	lua_pop(L, 1); // pop temporary lua function
 
-	const char *pDir = luaL_optstring(L, 1, 0);
-	LuaListdirCallbackParams params(L, lua_tostring(L, 2));
+	const char *pDir = lua_tostring(L, 1); // arg1
+	LuaListdirCallbackParams params(L, lua_tostring(L, 2)); // arg2
 	lua_pop(L, 1); // pop arg2
 	lua_Number ret = (lua_Number)fs_listdir(pDir, LuaListdirCallback, IStorageTW::TYPE_ALL, &params);
 	lua_pop(L, 1); // pop arg1
@@ -133,11 +154,51 @@ int CLuaBinding::LuaScriptPath(lua_State *L)
 	return 1;
 }
 
-void CLuaFile::LuaPrintOverride(std::string str)
+int CLuaBinding::LuaStrIsNetAddr(lua_State *L)
 {
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "LUA|%s", m_Filename.c_str()+4);
-	dbg_msg(aBuf, "%s", str.c_str());
+	int nargs = lua_gettop(L);
+	if(nargs != 1)
+		return luaL_error(L, "StrIsNetAddr expects 1 argument");
+
+	argcheck(lua_isstring(L, 1), 1, "string");
+
+	NETADDR temp;
+	int ret = net_addr_from_str(&temp, lua_tostring(L, 1)); // arg1
+	lua_pop(L, 1), // pop arg1
+
+	lua_pushboolean(L, ret == 0);
+	return 1;
+}
+
+
+int CLuaBinding::LuaPrintOverride(lua_State *L)
+{
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	int nargs = lua_gettop(L);
+	if(nargs < 1)
+		return luaL_error(L, "print expects 1 argument or more");
+
+	char aSys[64];
+	str_format(aSys, sizeof(aSys), "LUA|%s", pLF->GetFilename());
+
+	// construct the message from all arguments
+	char aMsg[512] = {0};
+	for(int i = 1; i <= nargs; i++)
+	{
+		argcheck(lua_isstring(L, i) || lua_isnumber(L, i), i, "string or number");
+		str_append(aMsg, lua_tostring(L, i), sizeof(aMsg));
+		str_append(aMsg, "\t", sizeof(aMsg));
+	}
+	aMsg[str_length(aMsg)-1] = '\0'; // remove the last tab character
+
+	// pop all to clean up the stack
+    lua_pop(L, nargs);
+
+	dbg_msg(aSys, "%s", aMsg);
+	return 0;
 }
 
 // external info

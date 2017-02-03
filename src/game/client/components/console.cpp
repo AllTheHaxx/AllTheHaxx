@@ -31,9 +31,11 @@
 
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
+#include <engine/client/luabinding.h>
 
 #include "controls.h"
 #include "binds.h"
+#include "chat.h"
 #include "menus.h"
 #include "irc.h"
 #include "console.h"
@@ -65,7 +67,12 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 {
 	m_pGameConsole = pGameConsole;
 
-#if defined(FEATURE_LUA)
+	InitLua();
+};
+
+void CGameConsole::CInstance::InitLua()
+{
+	#if defined(FEATURE_LUA)
 	if(m_Type == CONSOLETYPE_LUA)
 	{
 		m_LuaHandler.m_pLuaState = luaL_newstate();
@@ -73,14 +80,14 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 		//lua_atpanic(m_pLuaState, CLua::Panic);
 		//lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
 
+		// load everything for the lua console
 		luaL_openlibs(m_LuaHandler.m_pLuaState);
 		luaopen_base(m_LuaHandler.m_pLuaState);
 		luaopen_math(m_LuaHandler.m_pLuaState);
 		luaopen_string(m_LuaHandler.m_pLuaState);
 		luaopen_table(m_LuaHandler.m_pLuaState);
-		//luaopen_io(m_pLua);
+		luaopen_io(m_LuaHandler.m_pLuaState);
 		luaopen_os(m_LuaHandler.m_pLuaState);
-		//luaopen_package(m_pLua); // not sure whether we should load this
 		luaopen_debug(m_LuaHandler.m_pLuaState);
 		luaopen_bit(m_LuaHandler.m_pLuaState);
 		luaopen_jit(m_LuaHandler.m_pLuaState);
@@ -89,16 +96,13 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 		m_LuaHandler.m_Inited = false;
 		m_LuaHandler.m_ScopeCount = 0;
 
-		//Some luaconsole funcs!
-		getGlobalNamespace(m_LuaHandler.m_pLuaState)
-			.addFunction("print", &CGameConsole::PrintLuaLine);
-
 		LoadLuaFile("data/luabase/events.lua");
 
 		CGameConsole::m_pStatLuaConsole = this;
 	}
-#endif
-};
+	#endif
+
+}
 
 void CGameConsole::CInstance::ClearBacklog()
 {
@@ -120,16 +124,19 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 #if defined(FEATURE_LUA)
 		{
 			bool DiscardCommand = false;
-			for(int ijdfg = 0; ijdfg < m_pGameConsole->Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+			if(g_Config.m_ClLua)
 			{
-				if(m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
-					continue;
-				LuaRef lfunc = m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnConsoleCommand");
-				if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { m_pGameConsole->Client()->Lua()->HandleException(e, m_pGameConsole->Client()->Lua()->GetLuaFiles()[ijdfg]); }
+				for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
+				{
+					CLuaFile *pLF = CLua::Client()->Lua()->GetLuaFiles()[ijdfg];
+					if(pLF->State() != CLuaFile::STATE_LOADED)
+						continue;
+					LuaRef lfunc = pLF->GetFunc("OnConsoleCommand");
+					if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; CLua::Client()->LuaCheckDrawingState(pLF->L(), "OnConsoleCommand"); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); }
+				}
+				LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
+				if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
 			}
-			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
-			if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
-
 			if(DiscardCommand)
 				return;
 		}
@@ -146,11 +153,34 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
 #if defined(FEATURE_LUA)
-		if(str_comp(pLine, "reset") == 0)
+		if(str_comp(pLine, "!help") == 0)
+		{
+			PrintLine("> ---------------------------[ LUACONSOLE HELP ]---------------------------");
+			PrintLine("> In this console you can execute Lua code!");
+			PrintLine("> Try it by typing 'print(\"Hello World!\")', you'll see the result right on the screen.");
+			PrintLine("> ");
+			PrintLine("> Meta-Commands:");
+			PrintLine(">     !help - view this help");
+			PrintLine(">     !reset - reset the current multi-line entry");
+			PrintLine(">     !reload - re-init the lua console; everything you did here will be lost!");
+			PrintLine("");
+			return;
+		}
+		else if(str_comp(pLine, "!reset") == 0)
 		{
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
 			PrintLine("Reset complete");
+			return;
+		}
+		else if(str_comp(pLine, "!reload") == 0)
+		{
+			m_LuaHandler.m_ScopeCount = 0;
+			m_LuaHandler.m_FullLine = "";
+			m_LuaHandler.m_Inited = false;
+			lua_close(m_LuaHandler.m_pLuaState);
+			InitLua();
+			PrintLine("Reload complete");
 			return;
 		}
 		int Status = 0;
@@ -160,6 +190,10 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		if(!m_LuaHandler.m_Inited)  // this is yet quite retarded!
 		{
 			CLuaFile::RegisterLuaCallbacks(m_LuaHandler.m_pLuaState);
+
+			// override stuff that has to be different for the lua console
+			lua_register(m_LuaHandler.m_pLuaState, "print", CGameConsole::PrintLuaLine);
+
 			m_LuaHandler.m_Inited = true;
 		}
 
@@ -300,50 +334,50 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
 
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_V))
-	{
-		const char *pText = m_pGameConsole->Input()->GetClipboardText();
-		if(pText)
-		{
-			char aLine[256];
-			int i, Begin = 0;
-			for(i = 0; i < str_length(pText); i++)
-			{
-				if(pText[i] == '\n')
-				{
-					int max = min(i - Begin + 1, (int)sizeof(aLine));
-					str_copy(aLine, pText + Begin, max);
-					Begin = i+1;
-					ExecuteLine(aLine);
-					while(pText[i] == '\n') i++;
-				}
-			}
-			pText += Begin;
-
-			char aRightPart[256];
-			str_copy(aRightPart, m_Input.GetString() + m_Input.GetCursorOffset(), sizeof(aRightPart));
-			str_copy(aLine, m_Input.GetString(), min(m_Input.GetCursorOffset()+1, (int)sizeof(aLine)));
-			str_append(aLine, pText, sizeof(aLine));
-			str_append(aLine, aRightPart, sizeof(aLine));
-			m_Input.Set(aLine);
-			m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
-		}
-	}
-
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
-	{
-		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
-	}
-
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_X))
-	{
-		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
-		m_Input.Clear();
-	}
-
 	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{
-		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
+		if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL))
+		{
+			Handled = true;
+
+			// handle copy/cut
+			if(Event.m_Key == KEY_C || Event.m_Key == KEY_X)
+				m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
+			if(Event.m_Key == KEY_X)
+				m_Input.Clear();
+
+			// handle paste
+			if(Event.m_Key == KEY_V)
+			{
+				const char *pText = m_pGameConsole->Input()->GetClipboardText();
+				if(pText)
+				{
+					char aLine[256];
+					int i, Begin = 0;
+					for(i = 0; i < str_length(pText); i++)
+					{
+						if(pText[i] == '\n')
+						{
+							int max = min(i - Begin + 1, (int)sizeof(aLine));
+							str_copy(aLine, pText + Begin, max);
+							Begin = i+1;
+							ExecuteLine(aLine);
+							while(pText[i] == '\n') i++;
+						}
+					}
+					pText += Begin;
+
+					char aRightPart[256];
+					str_copy(aRightPart, m_Input.GetString() + m_Input.GetCursorOffset(), sizeof(aRightPart));
+					str_copy(aLine, m_Input.GetString(), min(m_Input.GetCursorOffset()+1, (int)sizeof(aLine)));
+					str_append(aLine, pText, sizeof(aLine));
+					str_append(aLine, aRightPart, sizeof(aLine));
+					m_Input.Set(aLine);
+					m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
+				}
+			}
+		}
+		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
 			//if search is actice, skip to next position
 			if(m_pSearchString)
@@ -587,7 +621,6 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 	int Status = luaL_loadfile(m_LuaHandler.m_pLuaState, pFile);
 	if (Status)
 	{
-		// does this work? -- I don't think so, Henritees.
 		PrintLine(lua_tostring(m_LuaHandler.m_pLuaState, -1));
 		return false;
 	}
@@ -1342,7 +1375,7 @@ void CGameConsole::Toggle(int Type)
 			m_StateChangeEnd = TimeNow()+ReversedProgress;
 		}
 
-		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
+		if (m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING) // WHEN OPENING
 		{
 			Input()->MouseModeAbsolute();
 			m_pClient->m_pMenus->UseMouseButtons(false);
@@ -1352,14 +1385,15 @@ void CGameConsole::Toggle(int Type)
 
 			Input()->SetIMEState(true);
 		}
-		else
+		else // WHEN CLOSING
 		{
 			Input()->MouseModeRelative();
-			m_pClient->m_pMenus->UseMouseButtons(true);
+			m_pClient->m_pMenus->UseMouseButtons(m_pClient->m_pMenus->IsActive() || m_pClient->m_pChat->IsActive());
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 
-			Input()->SetIMEState(false);
+			if(!m_pClient->m_pMenus->IsActive() && !m_pClient->m_pChat->IsActive())
+				Input()->SetIMEState(false);
 		}
 	}
 
@@ -1451,15 +1485,6 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 	}
 }
 
-// TODO: This should be moved to elsewhere
-void CGameConsole::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	CGameConsole *pThis = static_cast<CGameConsole *>(pUserData);
-	pThis->m_pClient->m_pIRCBind->OnNickChange(g_Config.m_ClIRCNick);
-}
-
-
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_REMOTE)
@@ -1470,13 +1495,34 @@ void CGameConsole::PrintLine(int Type, const char *pLine)
 		m_LocalConsole.PrintLine(pLine);
 }
 
-void CGameConsole::PrintLuaLine(const char *pLine)
+int CGameConsole::PrintLuaLine(lua_State *L)
 {
-	//if the thing is nil in lua then pLine == 0!
-	if(pLine == 0)
-		CGameConsole::m_pStatLuaConsole->PrintLine("nil");
-	else
-		CGameConsole::m_pStatLuaConsole->PrintLine(pLine);
+	int nargs = lua_gettop(L);
+	if(nargs < 1)
+		return luaL_error(L, "print expects 1 argument or more");
+
+	// construct the message from all arguments
+	char aLine[512] = {0};
+	for(int i = 1; i <= nargs; i++)
+	{
+		if(lua_isnil(L, i)) // allow nil
+			str_append(aLine, "<nil>", sizeof(aLine));
+		else
+		{
+			argcheck(lua_isstring(L, i) || lua_isnumber(L, i), i, "string or number");
+			str_append(aLine, lua_tostring(L, i), sizeof(aLine));
+		}
+		str_append(aLine, "    ", sizeof(aLine));
+	}
+	aLine[str_length(aLine)-1] = '\0'; // remove the last tab character
+
+	// pop all to clean up the stack
+	lua_pop(L, nargs);
+
+	dbg_msg("LUA|console", "%s", aLine);
+
+	CGameConsole::m_pStatLuaConsole->PrintLine(aLine);
+	return 0;
 }
 
 void CGameConsole::OnConsoleInit()
@@ -1500,11 +1546,11 @@ void CGameConsole::OnConsoleInit()
 
 #if defined(FEATURE_LUA)
 	Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
-	Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
+	// XXX security leak! the lua console has elevated permissions, but this one can be used by every script!
+	//Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
 #endif
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This should be moved to elsewhere
 
 }
 

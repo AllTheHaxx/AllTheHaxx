@@ -1,26 +1,31 @@
-__CTRL = {}
+local __CTRL = {}
 __CTRL.Events = {}
 __CTRL.Threads = {}	--3D Table which contains the 'threadobject' and its pause stuff
 
 -- YOU SHOULD NOT TOUCH THIS FUNCTION IF YOU DON'T KNOW WHAT YOU ARE DOING!
 function RegisterEvent(EventName, ...)
 	local FuncNames = {...}
+    if type(EventName) ~= "string" then
+        error("RegisterEvent expects a string as first argument", 2)
+        return
+    end
+
 	if #FuncNames < 1 then
-		print("RegisterEvent(\"" .. EventName .. ") expects two or more arguments")
+		error("RegisterEvent(\"" .. EventName .. ") expects two or more arguments", 2)
 		return
 	end
-	
+
 	if __CTRL.Events[EventName] == nil then  --create new table if it's empty
 		__CTRL.Events[EventName] = {}
 	end
-	
+
 	for i, FuncName in next, FuncNames do
 		local Func = getfenv()[FuncName]
-		
+
 		if Func ~= nil then
 			__CTRL.Events[EventName][FuncName] = Func
 		else
-			error("Cannot register global '" .. FuncName .. "' (a nil value) for event " .. EventName)
+			error("Cannot register global '" .. FuncName .. "' (a nil value) for event " .. EventName, 2)
 		end
 	end
 end
@@ -30,7 +35,7 @@ function RemoveEvent(EventName, ...)
 	if #FuncNames < 1 or __CTRL.Events[EventName] == nil then
 		return
 	end
-	
+
 	for i, FuncName in next, FuncNames do
 		__CTRL.Events[EventName][FuncName] = nil
 	end
@@ -41,7 +46,7 @@ function EventList(EventName)
 		for name, func in pairs(__CTRL.Events[EventName]) do
 			print(" -> " .. name)
 		end
-	else 
+	else
 		print("No Functions found under this Eventname.")
 	end
 end
@@ -270,27 +275,27 @@ function OnTick()
 	end
 end
 
-function RegisterThread(FuncName)
+function RegisterThread(FuncName, argtable)
 	local Func = getfenv()[FuncName]
-	
+
 	if Func ~= nil then
 		if __CTRL.Threads[Func] == nil then  --create new table if it's empty
 			__CTRL.Threads[Func] = {}
 		end
-		
+
 		__CTRL.Threads[Func].Routine = coroutine.create(Func)
 		__CTRL.Threads[Func].ResTick = 0
 		__CTRL.Threads[Func].ResSec = 0
-		
+
 		--FOLLOWING CODE IS INFINITE LOOP PROTECTION!
 		--This creates a hook which can register up to 10000 events; if that value is exceeded, the script is cancelled!
 		--if there is some sort of sleeping function in that (so no infinite loop) then coroutine.resume will exit and the hook thus deleted!
-		debug.sethook(function() print("Please, don't use infinite loops as they will crash your client!") error("Infinite Loop") end, "", 10000)
-		
+		debug.sethook(function() print("Please, don't use infinite loops as they will crash your client!") error("Infinite Loop", 2) end, "", 10000)
+
 		coroutine.resume(__CTRL.Threads[Func].Routine)
-		
+
 		debug.sethook()
-		
+
 		--END OF INFINITE LOOPS
 		--this stuff is genius mate
 	end
@@ -315,7 +320,7 @@ function RemoveThread(Name)
 end
 
 function thread_sleep_ticks(num)
-	__CTRL.Threads[debug.getinfo(2).func].ResTick = Game.Client.Tick + num	
+	__CTRL.Threads[debug.getinfo(2).func].ResTick = Game.Client.Tick + num
 	coroutine.yield()
 end
 

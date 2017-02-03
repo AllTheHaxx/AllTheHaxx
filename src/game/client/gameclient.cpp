@@ -384,6 +384,8 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
 
 	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
+	Console()->Chain("cl_irc_nick", ConchainIRCNickUpdate, this); // TODO: This should be moved to elsewhere
+
 
 	//
 	m_SuppressEvents = false;
@@ -2316,6 +2318,14 @@ void CGameClient::ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserDa
 		if(g_Config.m_ClDummy && !((CGameClient*)pUserData)->Client()->DummyConnected())
 			g_Config.m_ClDummy = 0;
 }
+
+void CGameClient::ConchainIRCNickUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	pSelf->m_pIRCBind->OnNickChange(g_Config.m_ClIRCNick);
+}
+
 
 IGameClient *CreateGameClient()
 {

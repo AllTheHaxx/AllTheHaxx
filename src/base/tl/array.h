@@ -54,7 +54,8 @@ public:
 	*/
 	~array()
 	{
-		ALLOCATOR::free_array(list);
+		if(list)
+			ALLOCATOR::free_array(list);
 		list = 0x0;
 	}
 
@@ -81,9 +82,12 @@ public:
 	*/
 	void clear()
 	{
-		ALLOCATOR::free_array(list);
-		list_size = 1;
-		list = ALLOCATOR::alloc_array(list_size);
+		if(list)
+			ALLOCATOR::free_array(list);
+		//list_size = 1;
+		//list = ALLOCATOR::alloc_array(list_size);
+		list_size = 0;
+		list = 0x0;
 		num_elements = 0;
 	}
 
@@ -334,7 +338,7 @@ protected:
 		if(num_elements == list_size)
 		{
 			if(list_size < 2)
-				alloc(list_size+1);
+				alloc(list_size+2);
 			else
 				alloc(list_size+list_size/2);
 		}
@@ -349,7 +353,8 @@ protected:
 		for(int i = 0; i < end; i++)
 			new_list[i] = list[i];
 
-		ALLOCATOR::free_array(list);
+		if(list)
+			ALLOCATOR::free_array(list);
 
 		num_elements = num_elements < list_size ? num_elements : list_size;
 		list = new_list;

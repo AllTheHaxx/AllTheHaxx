@@ -15,6 +15,7 @@
 #include <game/client/components/chat.h>
 #include <game/client/components/menus.h>
 #include <game/client/components/scoreboard.h>
+#include <engine/client/luabinding.h>
 
 #include "console.h"
 #include "controls.h"
@@ -573,4 +574,15 @@ void CControls::ClampMousePos()
 		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
 			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;
 	}
+}
+
+CNetObj_PlayerInput* CControls::LuaGetInputData(lua_State *L)
+{
+	CControls *pSelf = CLua::m_pCGameClient->m_pControls;
+
+	const int NUM_VCLIENTS = sizeof(m_InputData)/sizeof(pSelf->m_InputData[0]);
+	int vclient = (int)luaL_optinteger(L, 1+1, 1);
+	if(vclient < 0 || !(vclient < NUM_VCLIENTS))
+		luaL_error(L, "given VClient index of %d is out of range (allowed: 0-%d)", vclient, NUM_VCLIENTS);
+	return &(pSelf->m_InputData[vclient]);
 }

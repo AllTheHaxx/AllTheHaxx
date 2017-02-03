@@ -225,6 +225,26 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 	if(!pLF)
 		return -1;
 
+	if(str_comp_nocase(pError, "not enough memory") == 0)
+	{
+		dbg_msg("lua/FATAL", "script %s hit OOM condition, killing it!", pLF->GetFilename());
+		pLF->Unload(true);
+		return 0;
+	}
+
+	Client()->LuaCheckDrawingState(pLF->L(), "exception", true); // clean up the rendering pipeline if necessary
+
+	// error messages come as "filename:line: message" - we don't need the 'filename' part if it's the current scriptfile's name
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "%s:", pLF->GetFilename());
+		if(str_find_nocase(pError, aBuf)) // <- we need to truncate the filename in this case
+		{
+			const char *pFilenameEnding = str_find_nocase(pError, ".lua:");
+			if(pFilenameEnding)
+				pError = pFilenameEnding+4;
+		}
+	}
 	pLF->m_Exceptions.add(std::string(pError));
 
 	if(g_Config.m_Debug)
@@ -248,10 +268,12 @@ int CLua::Panic(lua_State *L)
 	CALLSTACK_ADD();
 
 #if defined(FEATURE_LUA)
-	dbg_msg("LUA/FATAL", "panic [%p] %s", L, lua_tostring(L, -1));
-	dbg_break();
-#endif
+	if(g_Config.m_Debug)
+		dbg_msg("LUA/FATAL", "[%s] error in unprotected call resulted in panic, throwing an exception:", CLuaBinding::GetLuaFile(L)->GetFilename());
+	throw luabridge::LuaException(L, 0);
+#else
 	return 0;
+#endif
 }
 
 int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown as an exception)
