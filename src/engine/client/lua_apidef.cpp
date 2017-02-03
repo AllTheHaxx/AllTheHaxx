@@ -210,7 +210,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		/// Game.Chat
 		.beginClass<CChat>("CChat")
-			.addFunction("Say", &CChat::Say)
+			.addFunction("Say", &CChat::SayLua)
 			.addFunction("Print", &CChat::AddLine)
 			.addFunction("AddLine", &CChat::AddLine)
 			.addProperty("Mode", &CChat::GetMode)

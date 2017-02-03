@@ -68,7 +68,7 @@ function OnChatSend(Team, Msg)
 	if __CTRL.Events["OnChatSend"] ~= nil then
 		for script, event in pairs(__CTRL.Events["OnChatSend"]) do
 			if event ~= nil then
-				ret = ret or event(Team, Message)
+				ret = ret or event(Team, Msg)
 			end
 		end
 	end

@@ -1158,7 +1158,7 @@ bool CChat::HandleTCommands(const char *pMsg)
 	return false;
 }
 
-void CChat::Say(int Team, const char *pLine, bool NoTrans)
+void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 {
 	CALLSTACK_ADD();
 
@@ -1182,6 +1182,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	bool DiscardChat = false;
 #if defined(FEATURE_LUA)
 	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
+	if(!CalledByLua)
 	{
 		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 		{
@@ -1208,6 +1209,11 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans)
 	Msg.m_Team = Team;
 	Msg.m_pMessage = aMessage;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+}
+
+void CChat::SayLua(int Team, const char *pLine, bool NoTrans)
+{
+	Say(Team, pLine, NoTrans, true);
 }
 
 ////////////////////////////

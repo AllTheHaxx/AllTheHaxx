@@ -110,7 +110,8 @@ public:
 
 	void EnableMode(int Team);
 
-	void Say(int Team, const char *pLine, bool NoTrans = false);
+	void Say(int Team, const char *pLine, bool NoTrans = false, bool CalledByLua = false);
+	void SayLua(int Team, const char *pLine, bool NoTrans = false);
 
 	void SayChat(const char *pLine);
 
