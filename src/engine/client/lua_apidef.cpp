@@ -367,10 +367,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("Hook", &CControls::GetHook, &CControls::SetHook)
 			.addProperty("Jump", &CControls::GetJump, &CControls::SetJump)
 			.addProperty("WantedWeapon", &CControls::GetWantedWeapon, &CControls::SetWantedWeapon)
-			.addProperty("TargetX", &CControls::GetTargetX)
-			.addProperty("TargetY", &CControls::GetTargetY)
-			.addProperty("MouseX", &CControls::GetMouseX)
-			.addProperty("MouseY", &CControls::GetMouseY)
+			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
+			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
+			.addProperty("MouseX", &CControls::GetMouseX, &CControls::SetMouseX)
+			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
 		.endClass()
 
 		/// Engine.Input
