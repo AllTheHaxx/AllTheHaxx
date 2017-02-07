@@ -837,39 +837,40 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 // TODO::XXX::REIMPLEMENT
 void CGraphicsBackend_SDL_OpenGL::HideWindow()
 {
+#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 	//I don't know if that's needed here!
 	// get window handle
-	/*SDL_SysWMinfo info;
+	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
 	if(!SDL_GetWindowWMInfo(m_pWindow, &info))
 	{
 		dbg_msg("gfx", "unable to obtain window handle");
 		return;
-	}*/
+	}
 
-	
-	SDL_HideWindow(m_pWindow);
-/*#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 	XUnmapWindow(info.info.x11.display, info.info.x11.window);
-#endif*/
+#else
+	SDL_HideWindow(m_pWindow);
+#endif
 }
 
 void CGraphicsBackend_SDL_OpenGL::UnhideWindow()
 {
+#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 	// get window handle
-	/*SDL_SysWMinfo info;
+	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
 	if(SDL_GetWindowWMInfo(m_pWindow, &info) != SDL_TRUE)
 	{
 		dbg_msg("gfx", "unable to obtain window handle");
 		dbg_msg("gfx", "SDL ERROR: %s", SDL_GetError());
 		return;
-	}*/
+	}
 
-	SDL_ShowWindow(m_pWindow);
-/*#if defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 	XMapWindow(info.info.x11.display, info.info.x11.window);
-#endif*/
+#else
+	SDL_ShowWindow(m_pWindow);
+#endif
 }
 
 
