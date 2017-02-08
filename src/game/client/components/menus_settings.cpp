@@ -2638,7 +2638,7 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
 	static CButtonContainer s_ButtonPathFinding;
-	if(DoButton_CheckBox(&s_ButtonPathFinding, Localize("A* Path Finding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
+	if(DoButton_CheckBox(&s_ButtonPathFinding, Localize("A* Pathfinding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
 		g_Config.m_ClPathFinding ^= 1;
 
 	Left.HSplitTop(5.0f, 0, &Left);
