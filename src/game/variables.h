@@ -183,6 +183,7 @@ MACRO_CONFIG_INT(ClSkinFetcher, cl_skin_fetcher, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG
 MACRO_CONFIG_INT(ClChatbubble, cl_chatbubble, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Notifiy others that you are typing")
 MACRO_CONFIG_STR(FtFont, ft_font, 128, "fonts/DejaVuSansCJKName.ttf", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font to use")
 MACRO_CONFIG_INT(FtPreloadFonts, ft_preload_fonts, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Load all fonts in 'data/fonts/' into memory on client start (enables font-preview!)")
+MACRO_CONFIG_INT(ClConsoleLowCPU, cl_console_low_cpu, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Limits FPS while console is open in order to lower our CPU usage")
 
 // irc
 MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to IRC on startup automatically")

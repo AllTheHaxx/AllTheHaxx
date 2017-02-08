@@ -1318,7 +1318,8 @@ void CGameConsole::OnRender()
 			// reset color
 			TextRender()->TextColor(1,1,1,1);
 
-			thread_sleep(1); //be nice to our cpu!
+			if(g_Config.m_ClConsoleLowCPU)
+				thread_sleep(1); //be nice to our cpu!
 		}
 
 		// render page
