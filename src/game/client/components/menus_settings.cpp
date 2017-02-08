@@ -1207,6 +1207,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CheckSettings = true;
 	}
 
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	static CButtonContainer s_CheckboxConsoleCPU;
+	if(DoButton_CheckBox(&s_CheckboxConsoleCPU, Localize("Low CPU usage console"), g_Config.m_ClConsoleLowCPU, &Button, Localize("Limits FPS while console is open in order to lower our CPU usage")))
+		g_Config.m_ClConsoleLowCPU ^= 1;
+
 
 	// check if the new settings require a restart
 	if(CheckSettings)
