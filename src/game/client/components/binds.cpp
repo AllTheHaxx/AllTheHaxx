@@ -156,6 +156,7 @@ void CBinds::SetDefaults()
 	Bind(KEY_F6, "toggle_lua_console");
 	Bind(KEY_F7, "+hotbar");
 
+	Bind(KEY_F11, "toggle gfx_fullscreen 0 1");
 	Bind(KEY_F12, "+unlock_mouse");
 
 	// DDRace
