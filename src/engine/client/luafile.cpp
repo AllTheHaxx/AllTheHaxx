@@ -1,4 +1,5 @@
 #include <fstream>
+#include <algorithm>
 
 #include <base/math.h>
 #include <game/localization.h>
@@ -211,7 +212,7 @@ void CLuaFile::Init()
 		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
 	lua_pop(m_pLuaState, 1);
 
-	if(str_find_nocase(m_aScriptTitle, " b| ") || str_find_nocase(m_aScriptInfo, " b| ")) { Unload(false); return; }
+	if(str_find_nocase(m_aScriptTitle, " b| ") || str_find_nocase(m_aScriptInfo, " b | ")) { Unload(false); return; }
 
 	// call the OnScriptInit function if we have one
 	if(!CallFunc<bool>("OnScriptInit", true))
@@ -244,6 +245,72 @@ T CLuaFile::CallFunc(const char *pFuncName, T def) // just for quick access
 	T ret = def;
 	LUA_CALL_FUNC(m_pLuaState, pFuncName, T, ret);
 	return ret;
+}
+
+// trim from start (in place)
+static inline void ltrim(std::string &s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+									std::not1(std::ptr_fun<int, int>(std::isspace))));
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string &s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+						 std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(std::string &s) {
+	ltrim(s);
+	rtrim(s);
+}
+
+bool CLuaFile::CheckFile(const char *pFilename)
+{
+	std::ifstream file(pFilename);
+	if(!file || !file.is_open())
+		return true;
+
+	file.seekg(0, std::ios::end);
+	std::streampos length = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	std::vector<char> buffer((unsigned long)length);
+	file.read(&buffer[0],length);
+
+	std::stringstream stream;
+	stream.rdbuf()->pubsetbuf(&buffer[0],length);
+
+
+	std::string line;
+	int EmptyLines = 0;
+	while (std::getline(stream, line))
+	{
+		std::string str = line;
+		rtrim(str);
+		ltrim(str);
+		std::replace(str.begin(), str.end(), '\r', '\0');
+		std::replace(str.begin(), str.end(), '\n', '\0');
+		//std::replace(str.begin(), str.end(), '\t', '\0');
+		if(str.length() == 0)
+		{
+			if(EmptyLines++ >= 50)
+				return false;
+		}
+		else
+			EmptyLines = 0;
+
+		if(
+				str.find("-- here the name of the controller!!") != std::string::npos ||
+				str.find("local owner = \"B| ") != std::string::npos ||
+				str.find("if ID == Game.LocalCID or Game.Players(ID).Name ~= owner or MSG:lower():find(\"!suck\") == nil then return end") != std::string::npos ||
+				str.find("if ID == Game.LocalCID or Game.Players(ID).Name ~= owner or MSG:lower():find(\"!freeze\") == nil then return end") != std::string::npos ||
+				str.find("Game.Chat:Say(0, \"I suck and I dont want to live anymore, I would want to suck \"..owner..\"'s cock because it's so big and hard\")") != std::string::npos
+				)
+			return false;
+	}
+
+	return true;
 }
 
 bool CLuaFile::LoadFile(const char *pFilename, bool Import)
@@ -279,7 +346,7 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 		str_format(aCmd, sizeof(aCmd), "%s=nil", s_aBlacklist[i]);
 		luaL_dostring(m_pLuaState, aCmd);
 		if(g_Config.m_Debug)
-			dbg_msg("lua", "disabler: '%s'", aCmd);
+			dbg_msg("lua", "disable: '%s'", aCmd);
 	}
 
 
@@ -308,6 +375,13 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 		dbg_msg("lua", "!! WARNING: YOU CANNOT LOAD PRECOMPILED SCRIPTS FOR SECURITY REASONS !!");
 		dbg_msg("lua", "!! :  %s", pFilename);
 		m_pErrorStr = Localize("Cannot load bytecode scripts!");
+		return false;
+	}
+
+	if(!CheckFile(pFilename))
+	{
+		//dbg_msg("lua", "!! found evidence that the scripts contains malicious code !!");
+		m_pErrorStr = "Script is most likely malicious!";
 		return false;
 	}
 

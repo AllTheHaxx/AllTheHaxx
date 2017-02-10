@@ -87,6 +87,7 @@ private:
 	void LoadPermissionFlags(const char *pFilename);
 	void ApplyPermissions(int Flags);
 	bool LoadFile(const char *pFilename, bool Import);
+	bool CheckFile(const char *pFilename);
 
 	bool ScriptHasSettingsPage();
 };
