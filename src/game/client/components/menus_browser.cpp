@@ -1402,7 +1402,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
 			str_format(aBuf, sizeof(aBuf), "New Version '%s' is out!", Client()->LatestVersion());
-			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+			float fade = sinf(Client()->LocalTime()*3.1415f)*0.2f;
+			TextRender()->TextColor(1.0f, 0.4f+fade, 0.4f+fade, 1.0f+fade/2.0f-0.1f);
 		}
 		else if(State == IUpdater::CLEAN)
 			str_format(aBuf, sizeof(aBuf), "Client version string: tw.%s-%s-ddnet.%s", GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
