@@ -280,7 +280,7 @@ bool CLuaFile::CheckFile(const char *pFilename)
 
 	std::stringstream stream;
 	stream.rdbuf()->pubsetbuf(&buffer[0],length);
-
+	file.close();
 
 	std::string line;
 	int EmptyLines = 0;
