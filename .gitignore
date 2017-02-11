@@ -62,6 +62,7 @@ luacert*
 *.key
 
 autoexec.cfg
+storage.cfg
 
 /DDNet*
 /AllTheHaxx*
