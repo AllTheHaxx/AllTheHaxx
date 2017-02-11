@@ -15,7 +15,6 @@ public:
 	CIRCBind();
 
 	void Connect();
-	void Disconnect(char *pReason);
 
 	void SendCommand(const char *pCmd);
 	void OnNickChange(const char *pNewNick);

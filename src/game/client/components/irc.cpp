@@ -120,7 +120,7 @@ void CIRCBind::SendCommand(const char* pCmd)
 	m_pClient->IRC()->SendRaw(++pCmd);
 }
 
-void CIRCBind::Connect() // XXX this is deprecated and only for compatibility
+void CIRCBind::Connect()
 {
 	if(IsConnected())
 		return;
@@ -129,15 +129,7 @@ void CIRCBind::Connect() // XXX this is deprecated and only for compatibility
 	thread_init(ListenIRCThread, this);
 }
 
-void CIRCBind::Disconnect(char *pReason) // XXX this is deprecated and only for compatibility
-{
-	if(!IsConnected())
-		return;
-
-	m_pClient->IRC()->Disconnect(pReason);
-}
-
-void CIRCBind::OnNickChange(const char *pNewNick) // XXX this is deprecated and only for compatibility
+void CIRCBind::OnNickChange(const char *pNewNick)
 {
 	m_pClient->IRC()->SetNick(pNewNick);
 }
@@ -157,5 +149,6 @@ void CIRCBind::OnReset()
 
 void CIRCBind::OnShutdown()
 {
-	Disconnect(g_Config.m_ClIRCLeaveMsg);
+	if(IsConnected())
+		m_pClient->IRC()->Disconnect(g_Config.m_ClIRCLeaveMsg);
 }

@@ -9,7 +9,9 @@
 class CIdentity : public CComponent
 {
 public:
-	void OnInit();
+	virtual void OnInit();
+	virtual void OnShutdown();
+
 	void SaveIdents();
 
 	struct CIdentEntry

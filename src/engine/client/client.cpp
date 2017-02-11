@@ -2938,7 +2938,6 @@ void CClient::InitInterfaces()
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
 	m_Fetcher.Init();
-	m_CurlWrapper.Init();
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();
@@ -4066,6 +4065,12 @@ int main(int argc, const char **argv) // ignore_convention
 		return -1;
 	}
 
+	if(curl_global_init(CURL_GLOBAL_DEFAULT) != 0)
+	{
+		dbg_msg("curl", "could not initialize libcurl");
+		return -1;
+	}
+
 	// initialize the debugger
 	CDebugger *pDebugger = new CDebugger();
 #if defined(CONF_FAMILY_UNIX) && defined(FEATURE_DEBUGGER) && !defined(CONF_DEBUG)
@@ -4218,6 +4223,8 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pEngineMasterServer;
 */
 	mem_free(pDebugger);
+
+	curl_global_cleanup();
 
 	if(pClient->m_Restarting)
 		shell_execute(argv[0]);

@@ -139,7 +139,6 @@ void CLuaFile::OpenLua()
 
 	lua_atpanic(m_pLuaState, CLua::Panic);
 	lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
-	//lua_register(m_pLuaState, "print", CLuaFile::LuaPrintOverride);
 
 	//luaL_openlibs(m_pLuaState);  // we don't need certain libs -> open them all manually
 
@@ -148,7 +147,7 @@ void CLuaFile::OpenLua()
 	luaopen_string(m_pLuaState);// string.* functions
 	luaopen_table(m_pLuaState);	// table operations
 	luaopen_bit(m_pLuaState);	// bit operations
-	//luaopen_jit(m_pLuaState);	// control the jit-compiler [don't needed]
+	//luaopen_jit(m_pLuaState);	// control the jit-compiler [not needed]
 
 #endif
 }

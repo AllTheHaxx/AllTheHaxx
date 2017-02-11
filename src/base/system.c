@@ -590,7 +590,7 @@ void io_read_threaded(void *io_data)
 	d->ret = fread(d->buffer, 1, d->size, (FILE*)d->io);
 }
 
-unsigned io_skip(IOHANDLE io, int size)
+long io_skip(IOHANDLE io, long size)
 {
 	fseek((FILE*)io, size, SEEK_CUR);
 	return size;
@@ -634,7 +634,7 @@ long int io_length(IOHANDLE io)
 
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size)
 {
-	return fwrite(buffer, 1, size, (FILE*)io);
+	return (unsigned int)fwrite(buffer, 1, size, (FILE*)io);
 }
 
 unsigned io_write_newline(IOHANDLE io)
@@ -642,7 +642,7 @@ unsigned io_write_newline(IOHANDLE io)
 #if defined(CONF_FAMILY_WINDOWS)
 	return fwrite("\r\n", 1, 2, (FILE*)io);
 #else
-	return fwrite("\n", 1, 1, (FILE*)io);
+	return (unsigned int)fwrite("\n", 1, 1, (FILE*)io);
 #endif
 }
 
@@ -986,7 +986,7 @@ void net_addr_split(char *pAddr, int max_length)
 	}
 }
 
-static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
+static int priv_net_extract(const char *hostname, char *host, int max_host, unsigned short *port)
 {
 	int i;
 
@@ -1004,7 +1004,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 
 		i++;
 		if(hostname[i] == ':')
-			*port = atol(hostname+i+1);
+			*port = (unsigned short)atol(hostname + i + 1);
 	}
 	else
 	{
@@ -1014,7 +1014,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 		host[i] = 0;
 
 		if(hostname[i] == ':')
-			*port = atol(hostname+i+1);
+			*port = (unsigned short)atol(hostname+i+1);
 	}
 
 	return 0;
@@ -1026,7 +1026,7 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 	struct addrinfo *result = NULL;
 	int e;
 	char host[256];
-	int port = 0;
+	unsigned short port = 0;
 
 	if(priv_net_extract(hostname, host, sizeof(host), &port))
 		return -1;
@@ -1096,7 +1096,7 @@ static int parse_uint8(unsigned char *out, const char **str)
 	int i;
 	if(parse_int(&i, str) != 0) return -1;
 	if(i < 0 || i > 0xff) return -1;
-	*out = i;
+	*out = (unsigned char)i;
 	return 0;
 }
 
@@ -1105,7 +1105,7 @@ static int parse_uint16(unsigned short *out, const char **str)
 	int i;
 	if(parse_int(&i, str) != 0) return -1;
 	if(i < 0 || i > 0xffff) return -1;
-	*out = i;
+	*out = (unsigned short)i;
 	return 0;
 }
 
@@ -1376,10 +1376,10 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	return sock;
 }
 
-int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
+long net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, unsigned int size)
 {
 #ifndef FUZZING
-	int d = -1;
+	long d = -1;
 
 	if(addr->type&NETTYPE_IPV4)
 	{
@@ -1458,12 +1458,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 #endif /* FUZZING */
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
+long net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, unsigned int maxsize)
 {
 #ifndef FUZZING
 	char sockaddrbuf[128];
 	socklen_t fromlen;// = sizeof(sockaddrbuf);
-	int bytes = 0;
+	long bytes = 0;
 
 	if(bytes == 0 && sock.ipv4sock >= 0)
 	{
@@ -1701,9 +1701,9 @@ int net_tcp_connect_non_blocking(NETSOCKET sock, NETADDR bindaddr)
 	return res;
 }
 
-int net_tcp_send(NETSOCKET sock, const void *data, int size)
+long net_tcp_send(NETSOCKET sock, const void *data, unsigned int size)
 {
-	int bytes = -1;
+	long bytes = -1;
 
 	if(sock.ipv4sock >= 0)
 		bytes = send((int)sock.ipv4sock, (const char*)data, size, 0);
@@ -1713,9 +1713,9 @@ int net_tcp_send(NETSOCKET sock, const void *data, int size)
 	return bytes;
 }
 
-int net_tcp_recv(NETSOCKET sock, void *data, int maxsize)
+long net_tcp_recv(NETSOCKET sock, void *data, unsigned int maxsize)
 {
-	int bytes = -1;
+	long bytes = -1;
 
 	if(sock.ipv4sock >= 0)
 		bytes = recv((int)sock.ipv4sock, (char*)data, maxsize, 0);
@@ -1886,8 +1886,8 @@ int fs_storage_path(const char *appname, char *path, int max)
 	snprintf(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
 	snprintf(path, max, "%s/.%s", home, appname);
-	for(i = strlen(home)+2; path[i]; i++)
-		path[i] = tolower(path[i]);
+	for(i = (int)(strlen(home) + 2); path[i]; i++)
+		path[i] = (char)tolower(path[i]);
 #endif
 
 	return 0;
@@ -2096,14 +2096,14 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	return 0;
 }
 
-int time_timestamp()
+int64 time_timestamp()
 {
 	return time(0);
 }
 
 void str_append(char *dst, const char *src, int dst_size)
 {
-	int s = strlen(dst);
+	int s = (int)strlen(dst);
 	int i = 0;
 	while(s < dst_size)
 	{
@@ -2442,7 +2442,7 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 	}
 }
 
-void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
+void str_timestamp_ex(time_t time_data, char *buffer, unsigned int buffer_size, const char *format)
 {
 	struct tm *time_info;
 
@@ -2451,7 +2451,7 @@ void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const cha
 	buffer[buffer_size-1] = 0;	/* assure null termination */
 }
 
-void str_timestamp(char *buffer, int buffer_size)
+void str_timestamp(char *buffer, unsigned int buffer_size)
 {
 	time_t time_data;
 	time(&time_data);
@@ -2477,9 +2477,9 @@ const char *str_next_word(char *str, char delim, char *buf, int *cursor)
 }
 
 
-int mem_comp(const void *a, const void *b, int size)
+int mem_comp(const void *a, const void *b, unsigned int size)
 {
-	return memcmp(a,b,size);
+	return memcmp(a,b, size);
 }
 
 const MEMSTATS *mem_stats()
@@ -2541,13 +2541,13 @@ int str_isdigit(char c) { return c > 47 && c < 58; }
 char str_uppercase(char c)
 {
 	if(c >= 'a' && c <= 'z')
-		return 'A' + (c-'a');
+		return (char)('A' + (c-'a'));
 	return c;
 }
 
 int str_toint(const char *str) { return atoi(str); }
-int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
-float str_tofloat(const char *str) { return atof(str); }
+int str_toint_base(const char *str, int base) { return (int)strtol(str, NULL, base); }
+float str_tofloat(const char *str) { return (float)atof(str); }
 
 
 int str_utf8_isspace(int code)
@@ -2638,23 +2638,23 @@ int str_utf8_encode(char *ptr, int chr)
 	}
 	else if(chr <= 0x7FF)
 	{
-		ptr[0] = 0xC0|((chr>>6)&0x1F);
-		ptr[1] = 0x80|(chr&0x3F);
+		ptr[0] = (char)(0xC0|((chr>>6)&0x1F));
+		ptr[1] = (char)(0x80|(chr&0x3F));
 		return 2;
 	}
 	else if(chr <= 0xFFFF)
 	{
-		ptr[0] = 0xE0|((chr>>12)&0x0F);
-		ptr[1] = 0x80|((chr>>6)&0x3F);
-		ptr[2] = 0x80|(chr&0x3F);
+		ptr[0] = (char)(0xE0|((chr>>12)&0x0F));
+		ptr[1] = (char)(0x80|((chr>>6)&0x3F));
+		ptr[2] = (char)(0x80|(chr&0x3F));
 		return 3;
 	}
 	else if(chr <= 0x10FFFF)
 	{
-		ptr[0] = 0xF0|((chr>>18)&0x07);
-		ptr[1] = 0x80|((chr>>12)&0x3F);
-		ptr[2] = 0x80|((chr>>6)&0x3F);
-		ptr[3] = 0x80|(chr&0x3F);
+		ptr[0] = (char)(0xF0|((chr>>18)&0x07));
+		ptr[1] = (char)(0x80|((chr>>12)&0x3F));
+		ptr[2] = (char)(0x80|((chr>>6)&0x3F));
+		ptr[3] = (char)(0x80|(chr&0x3F));
 		return 4;
 	}
 
@@ -2663,7 +2663,7 @@ int str_utf8_encode(char *ptr, int chr)
 
 static unsigned char str_byte_next(const char **ptr)
 {
-	unsigned char byte = **ptr;
+	unsigned char byte = (unsigned char)**ptr;
 	(*ptr)++;
 	return byte;
 }

@@ -65,7 +65,7 @@ void CIdentity::SaveIdents()
 		str_format(aTeeEntry[USE_CUSTOM_COLOR], 64, "%d", pEntry->m_UseCustomColor);
 		str_format(aTeeEntry[COLOR_BODY], 64, "%d", pEntry->m_ColorBody);
 		str_format(aTeeEntry[COLOR_FEET], 64, "%d", pEntry->m_ColorFeet);
-		
+
 		for(int j = 0; j < NUM_ENTRIES; j++)
 		{
 			io_write(File, aTeeEntry[j], (unsigned int)str_length(aTeeEntry[j]));
@@ -75,6 +75,11 @@ void CIdentity::SaveIdents()
 		Successful++;
 	}
 	dbg_msg("ident", "successfully saved %i/%i identities", Successful, NumIdents());
+}
+
+void CIdentity::OnShutdown()
+{
+	SaveIdents();
 }
 
 int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser)

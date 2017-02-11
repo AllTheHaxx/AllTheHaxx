@@ -33,18 +33,26 @@ CChat::CChat()
 {
 	OnReset();
 
-	m_pTranslator = new(mem_alloc(sizeof(CTranslator), sizeof(void*))) CTranslator();
-	m_pTranslator->Init();
-
 	m_GotKeys = false;
 	//m_pKeyPair = GenerateKeyPair(512, 3);
 }
 
-CChat::~CChat()
+
+void CChat::OnInit()
+{
+	m_pTranslator = new CTranslator();
+	if(!m_pTranslator->Init())
+	{
+		delete m_pTranslator;
+		m_pTranslator = 0;
+		dbg_msg("chat", "failed to init translator");
+	}
+}
+
+void CChat::OnShutdown()
 {
 	if(m_pTranslator)
-		mem_free(m_pTranslator);
-	m_pTranslator = 0;
+		delete m_pTranslator;
 }
 
 void CChat::OnReset()
@@ -601,7 +609,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			}
 		}
 
-		if(g_Config.m_ClTransIn &&
+		if(TranslatorAvailable() && g_Config.m_ClTransIn &&
 			str_length(pMsg->m_pMessage) > 4 &&
 			pMsg->m_ClientID != m_pClient->m_Snap.m_LocalClientID &&
 			pMsg->m_ClientID != -1)
@@ -825,18 +833,21 @@ void CChat::OnRender()
 {
 	CALLSTACK_ADD();
 
-	if(m_pTranslator->GetTranslation())
+	if(TranslatorAvailable())
 	{
-		char aBuf[512];
-		if(m_pTranslator->GetTranslation()->m_In)
+		if(m_pTranslator->GetTranslation())
 		{
-			str_format(aBuf, sizeof(aBuf), "'%s' (%s → %s)", m_pTranslator->GetTranslation()->m_Text, m_pTranslator->GetTranslation()->m_SrcLang, m_pTranslator->GetTranslation()->m_DstLang);
-			AddLine(-1337, 0, aBuf);
-		}
-		else
-			Say(0, m_pTranslator->GetTranslation()->m_Text, true);
+			char aBuf[512];
+			if(m_pTranslator->GetTranslation()->m_In)
+			{
+				str_format(aBuf, sizeof(aBuf), "'%s' (%s → %s)", m_pTranslator->GetTranslation()->m_Text, m_pTranslator->GetTranslation()->m_SrcLang, m_pTranslator->GetTranslation()->m_DstLang);
+				AddLine(-1337, 0, aBuf);
+			}
+			else
+				Say(0, m_pTranslator->GetTranslation()->m_Text, true);
 
-		m_pTranslator->RemoveTranslation();
+			m_pTranslator->RemoveTranslation();
+		}
 	}
 
 	if (!g_Config.m_ClShowChat)
@@ -1087,7 +1098,7 @@ bool CChat::HandleTCommands(const char *pMsg)
 {
 	CALLSTACK_ADD();
 
-	if(!g_Config.m_ClTransChatCmds || !(pMsg[0] == '$' && pMsg[1] == '$'))
+	if(!TranslatorAvailable() || !g_Config.m_ClTransChatCmds || !(pMsg[0] == '$' && pMsg[1] == '$'))
 		return false;
 
 	char aCmd[512][256] = {{0}};
@@ -1173,7 +1184,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 	if(HandleTCommands(pLine))
 		return;
 
-	if(g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
+	if(TranslatorAvailable() && g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
 	{
 		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
 		return;

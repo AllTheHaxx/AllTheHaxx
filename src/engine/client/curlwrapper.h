@@ -20,12 +20,13 @@ class CCurlWrapper : public ICurlWrapper
 		}
 	};
 
-private:
-	static void PerformPOST_ex(void *pUser);
 
 public:
-	virtual bool Init();
 	virtual void PerformSimplePOST(const char *pUrl, const char *pFields);
+
+
+private:
+	static void PerformPOST_ex(void *pUser);
 };
 
 #endif

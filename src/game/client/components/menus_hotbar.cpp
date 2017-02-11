@@ -380,12 +380,15 @@ void CMenus::RenderHotbar(CUIRect MainView)
 	r.y = MainView.h - r.h;
 	RenderIdents(r);
 
-	CUIRect t;
-	MainView.HSplitTop(115.0f, &t, 0);
-	t.w = 340.0f;
-	t.x = MainView.w - t.w;
-	t.y = MainView.h / 2.0f - t.h / 2.0f;
-	RenderTrans(t);
+	if(m_pClient->m_pChat->TranslatorAvailable())
+	{
+		CUIRect t;
+		MainView.HSplitTop(115.0f, &t, 0);
+		t.w = 340.0f;
+		t.x = MainView.w - t.w;
+		t.y = MainView.h / 2.0f - t.h / 2.0f;
+		RenderTrans(t);
+	}
 
 	CUIRect c;
 	MainView.HSplitTop(125.0f, &c, 0);

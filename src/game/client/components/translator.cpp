@@ -16,35 +16,35 @@ CTranslator::CTranslator()
 	m_pHandle = NULL;
 }
 
-bool CTranslator::Init()
-{
-	if(!curl_global_init(CURL_GLOBAL_DEFAULT) && (m_pHandle = curl_easy_init()))
-	{
-		thread_init(TranslationWorker, this);
-		return true;
-	}
-	return false;
-}
-
 CTranslator::~CTranslator()
 {
 	// clean up
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
-	curl_global_cleanup();
+}
+
+bool CTranslator::Init()
+{
+	if((m_pHandle = curl_easy_init()))
+	{
+		void *pThread = thread_init(TranslationWorker, this);
+		thread_detach(pThread);
+		return true;
+	}
+	return false;
 }
 
 void CTranslator::TranslationWorker(void *pUser)
 {
 	CTranslator *pTrans = (CTranslator *)pUser;
 
-	while(true)
+	while(pTrans->m_pHandle != NULL)
 	{
 		thread_sleep(50);
 
-		if(pTrans->Queue.size())
+		if(pTrans->m_Queue.size())
 		{
-			CTransEntry Entry = pTrans->Queue.front();
+			CTransEntry Entry = pTrans->m_Queue.front();
 
 			char aPost[2048*8];
 			char aResponse[2048*8];
@@ -54,7 +54,7 @@ void CTranslator::TranslationWorker(void *pUser)
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_URL, "http://api.mymemory.translated.net/get");
 			str_format(aPost, sizeof(aPost), "q=%s&langpair=%s|%s&de=associatingblog@gmail.com", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang);
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_POSTFIELDS, aPost);
-		 	
+
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEFUNCTION, &CTranslator::write_to_string);
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEDATA, &response);
 			curl_easy_perform(pTrans->m_pHandle);
@@ -76,13 +76,13 @@ void CTranslator::TranslationWorker(void *pUser)
 
 				// put the result to the queue
 				str_copy(Entry.m_Text, aTranslated, sizeof(Entry.m_Text));
-				pTrans->Results.push_back(Entry);
+				pTrans->m_Results.push_back(Entry);
 			}
 			else
 				dbg_msg("trans", "translating '%s' from '%s' to '%s' failed", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang);
 
 			// done, remove the element from our queue
-			pTrans->Queue.erase(pTrans->Queue.begin());
+			pTrans->m_Queue.erase(pTrans->m_Queue.begin());
 		}
 	}
 }
@@ -99,5 +99,5 @@ void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang,
 	Entry.m_In = In;
 
 	// insert the entry
-	Queue.push_back(Entry);
+	m_Queue.push_back(Entry);
 }

@@ -1,9 +1,5 @@
 #include "curlwrapper.h"
 
-bool CCurlWrapper::Init()
-{
-	return !curl_global_init(CURL_GLOBAL_DEFAULT);
-}
 
 void CCurlWrapper::PerformSimplePOST(const char *pUrl, const char *pFields)
 {

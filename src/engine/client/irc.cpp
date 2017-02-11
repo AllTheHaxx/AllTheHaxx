@@ -553,7 +553,7 @@ void CIRC::StartConnection() // call this from a thread only!
 													else
 														str_format(aBuf, sizeof(aBuf),
 																"*** '%s' sent invalid information!", aMsgFrom.c_str());
-													pCom->m_Buffer.push_back(aBuf);
+													pCom->m_Buffer.push_back(std::string(aBuf));
 												}
 											}
 
@@ -698,12 +698,8 @@ void CIRC::StartConnection() // call this from a thread only!
 								if(!pCom)
 								{
 									// search through all users
-									static std::list<const char *> s_AvailableQueries;
-									static int64 LastUpdateTime = 0;
-									if(time_get() > LastUpdateTime + 3 * time_freq())
+									std::vector<const char *> s_AvailableQueries;
 									{
-//										set_new_tick();
-										LastUpdateTime = time_get();
 										s_AvailableQueries.clear();
 										for(unsigned c = 0; c < GetNumComs(); c++)
 										{
@@ -721,7 +717,7 @@ void CIRC::StartConnection() // call this from a thread only!
 										}
 									}
 
-									for(std::list<const char *>::iterator it = s_AvailableQueries.begin(); it != s_AvailableQueries.end(); it++)
+									for(std::vector<const char *>::iterator it = s_AvailableQueries.begin(); it != s_AvailableQueries.end(); it++)
 									{
 										if(str_comp(*it, aMsgFrom.c_str()) == 0)
 										{
@@ -731,7 +727,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									}
 
 									if(!pCom)
-										pCom = dynamic_cast<CIRCCom *>(GetCom(0)); // otherwise print it to the Status com
+										pCom = GetCom(0); // otherwise print it to the Status com
 								}
 
 								if(pCom)
@@ -742,7 +738,7 @@ void CIRC::StartConnection() // call this from a thread only!
 									if(MsgType == MSG_TYPE_ACTION)
 										pCom->AddMessage(aMsgText.substr(8, -1).c_str());
 									else
-										pCom->AddMessage_nofmt(aMsgText.c_str());
+										pCom->AddMessage_nofmt((aMsgFrom + ": " + aMsgText).c_str());
 								}
 							}
 							else
@@ -946,7 +942,11 @@ void CIRC::StartConnection() // call this from a thread only!
 		}
 	}
 
-	Disconnect();
+	net_tcp_close(m_Socket);
+
+	mem_zero(m_CmdToken, sizeof(m_CmdToken));
+	m_State = STATE_DISCONNECTED;
+
 }
 
 void CIRC::NextRoom()
@@ -1128,10 +1128,7 @@ void CIRC::Disconnect(const char *pReason)
 			SendRaw("QUIT");
 	}
 
-	net_tcp_close(m_Socket);
 	m_State = STATE_DISCONNECTED;
-
-	mem_zero(m_CmdToken, sizeof(m_CmdToken));
 }
 
 void CIRC::SendMsg(const char *to, const char *msg, int type)

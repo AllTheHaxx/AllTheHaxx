@@ -99,7 +99,6 @@ class CChat : public CComponent
 
 public:
 	CChat();
-	~CChat();
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
 	int GetMode() const { return m_Mode; }
@@ -115,6 +114,8 @@ public:
 
 	void SayChat(const char *pLine);
 
+	virtual void OnInit();
+	virtual void OnShutdown();
 	virtual void OnReset();
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
@@ -122,6 +123,8 @@ public:
 	virtual void OnRelease();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Event);
+
+	bool TranslatorAvailable() const { return m_pTranslator != NULL; }
 
 	// crypt stuff
 	RSA *m_pKeyPair;
@@ -133,7 +136,7 @@ public:
 	char *DecryptMsg(const char *pMsg);
 	void SaveKeys(RSA *pKeyPair, const char *pKeyName);
 	void LoadKeys(const char *pKeyName);
-	
+
 	std::string m_CryptSendQueue;
 };
 #endif

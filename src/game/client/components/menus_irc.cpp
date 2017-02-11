@@ -141,7 +141,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		ButtonBox.VSplitRight(80.0f, &ButtonBox, &Button);
 		static CButtonContainer s_ButtonDisc;
 		if(DoButton_Menu(&s_ButtonDisc, g_Config.m_ClIRCAutoconnect ? Localize("Reconnect") : Localize("Disconnect"), 0, &Button))
-			m_pClient->m_pIRCBind->Disconnect(g_Config.m_ClIRCLeaveMsg);
+			m_pClient->IRC()->Disconnect(g_Config.m_ClIRCLeaveMsg);
 
 		// scroll through the tabs
 		if(UI()->MouseInside(&ButtonBox) && m_pClient->m_pGameConsole->IsClosed())

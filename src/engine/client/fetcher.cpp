@@ -25,16 +25,13 @@ bool CFetcher::Init()
 	CALLSTACK_ADD();
 
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
-	if(!curl_global_init(CURL_GLOBAL_DEFAULT) && (m_pHandle = curl_easy_init()))
-		return true;
-	return false;
+	return (m_pHandle = curl_easy_init()) != NULL;
 }
 
 CFetcher::~CFetcher()
 {
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
-	curl_global_cleanup();
 }
 
 void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)

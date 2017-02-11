@@ -1051,9 +1051,8 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 void CGameClient::OnShutdown()
 {
-	m_pIdentity->SaveIdents();
-	m_pRaceDemo->OnShutdown();
-	m_pIRCBind->OnShutdown();
+	for(int i = 0; i < m_All.m_Num; i++)
+		m_All.m_paComponents[i]->OnShutdown();
 }
 
 void CGameClient::OnEnterGame()

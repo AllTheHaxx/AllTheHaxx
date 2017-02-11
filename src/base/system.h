@@ -190,7 +190,7 @@ void mem_zero(void *block, unsigned size);
 		0 - Block a is equal to block b
 		>0 - Block a is greater than block b
 */
-int mem_comp(const void *a, const void *b, int size);
+int mem_comp(const void *a, const void *b, unsigned int size);
 
 /*
 	Function: mem_check
@@ -261,7 +261,7 @@ void io_read_threaded(void *io_data);
 	Returns:
 		Number of bytes skipped.
 */
-unsigned io_skip(IOHANDLE io, int size);
+long io_skip(IOHANDLE io, long size);
 
 /*
 	Function: io_write
@@ -504,7 +504,7 @@ int64 time_freq();
 	Returns:
 		The time as a UNIX timestamp
 */
-int time_timestamp();
+int64 time_timestamp();
 
 /* Group: Network General */
 typedef struct
@@ -633,7 +633,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr);
 		On success it returns the number of bytes sent. Returns -1
 		on error.
 */
-int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size);
+long net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, unsigned int size);
 
 /*
 	Function: net_udp_recv
@@ -649,7 +649,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		On success it returns the number of bytes recived. Returns -1
 		on error.
 */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize);
+long net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, unsigned int maxsize);
 
 /*
 	Function: net_udp_close
@@ -731,7 +731,7 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *addr);
 	Returns:
 		Number of bytes sent. Negative value on failure.
 */
-int net_tcp_send(NETSOCKET sock, const void *data, int size);
+long net_tcp_send(NETSOCKET sock, const void *data, unsigned int size);
 
 /*
 	Function: net_tcp_recv
@@ -747,7 +747,7 @@ int net_tcp_send(NETSOCKET sock, const void *data, int size);
 		non-blocking mode, it returns 0 when there is no more data to
 		be fetched.
 */
-int net_tcp_recv(NETSOCKET sock, void *data, int maxsize);
+long net_tcp_recv(NETSOCKET sock, void *data, unsigned int maxsize);
 
 /*
 	Function: net_tcp_close
@@ -1077,8 +1077,8 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 	Remarks:
 		- Guarantees that buffer string will contain zero-termination.
 */
-void str_timestamp(char *buffer, int buffer_size);
-void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
+void str_timestamp(char *buffer, unsigned int buffer_size);
+void str_timestamp_ex(time_t time, char *buffer, unsigned int buffer_size, const char *format);
 
 /* Group: Filesystem */
 

@@ -7,12 +7,14 @@
 #include "curl/curl.h"
 #include "curl/easy.h"
 
-class CTranslator : public CComponent
+class CTranslator
 {
+	MACRO_ALLOC_HEAP()
 public:
 	CTranslator();
-	virtual bool Init();
 	~CTranslator();
+
+	bool Init();
 
 	struct CTransEntry
 	{
@@ -27,15 +29,15 @@ public:
 	void RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In);
 	inline CTransEntry *GetTranslation()
 	{
-		if(!Results.size())
+		if(!m_Results.size())
 			return NULL;
-		return &Results.front();
+		return &m_Results.front();
 	}
 	inline void RemoveTranslation()
 	{
-		if(!Results.size())
+		if(!m_Results.size())
 			return;
-		Results.erase(Results.begin());
+		m_Results.erase(m_Results.begin());
 	}
 private:
 	CURL *m_pHandle;
@@ -43,8 +45,8 @@ private:
 
 	static void TranslationWorker(void *pUser);
 
-	std::vector<CTransEntry> Queue;
-	std::vector<CTransEntry> Results;
+	std::vector<CTransEntry> m_Queue;
+	std::vector<CTransEntry> m_Results;
 };
 
 #endif
