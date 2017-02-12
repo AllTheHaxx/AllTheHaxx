@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_TEXTRENDER_H
 #define ENGINE_TEXTRENDER_H
+
 #include "kernel.h"
 
 enum
@@ -12,11 +13,13 @@ enum
 };
 
 class CFont;
+class CFontFile;
 
 class CTextCursor
 {
 public:
 	int m_Flags;
+	int m_Formatting;
 	int m_LineCount;
 	int m_CharCount;
 	int m_MaxLines;
@@ -26,15 +29,17 @@ public:
 	float m_LineWidth;
 	float m_X, m_Y;
 
-	CFont *m_pFont;
+	CFontFile *m_pFont;
 	float m_FontSize;
+
+	CFont *GetFont() const;
 };
 
 class ITextRender : public IInterface
 {
 	MACRO_INTERFACE("textrender", 0)
 public:
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, class CFont *pFont = 0) = 0;
+	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, int Formatting = 0, class CFontFile *pFont = 0) = 0;
 
 	virtual CFont *LoadFont(const char *pFilename) = 0;
 	virtual void DestroyFont(CFont *pFont) = 0;

@@ -11,6 +11,7 @@
 
 // ft2 texture
 #include <ft2build.h>
+#include <game/client/components/fontmgr.h>
 #include FT_FREETYPE_H
 
 // TODO: Refactor: clean this up
@@ -491,7 +492,7 @@ public:
 	}
 
 
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, class CFont *pFont = 0)
+	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, int Formatting = CFontFile::REGULAR, CFontFile *pFont = 0)
 	{
 		mem_zero(pCursor, sizeof(*pCursor));
 		pCursor->m_FontSize = FontSize;
@@ -501,8 +502,9 @@ public:
 		pCursor->m_Y = y;
 		pCursor->m_LineCount = 1;
 		pCursor->m_LineWidth = -1;
-		pCursor->m_Flags = Flags;
 		pCursor->m_CharCount = 0;
+		pCursor->m_Flags = Flags;
+		pCursor->m_Formatting = Formatting;
 		pCursor->m_pFont = pFont;
 	}
 
@@ -557,7 +559,13 @@ public:
 		if(str_length(pText) == 0)
 			return 0.0f;
 
-		CFont *pFont = pCursor->m_pFont;
+		CFont *pFont = NULL;
+		if(pCursor->m_pFont)
+		{
+			pFont = pCursor->m_pFont->m_apFonts[pCursor->m_Formatting];
+			if(!pFont)
+				pFont = pCursor->m_pFont->m_apFonts[CFontFile::REGULAR];
+		}
 		CFontSizeData *pSizeData = NULL;
 
 		//dbg_msg("textrender", "rendering text '%s'", text);
@@ -750,5 +758,12 @@ public:
 	}
 
 };
+
+CFont *CTextCursor::GetFont() const
+{
+	if(!m_pFont)
+		return NULL;
+	return m_pFont->m_apFonts[m_Formatting];
+}
 
 IEngineTextRender *CreateEngineTextRender() { return new CTextRender; }
