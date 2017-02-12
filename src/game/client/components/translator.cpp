@@ -38,6 +38,7 @@ void CTranslator::Shutdown()
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
 	m_pHandle = NULL;
+	m_Queue.clear();
 }
 
 void CTranslator::TranslationWorker(void *pUser)
