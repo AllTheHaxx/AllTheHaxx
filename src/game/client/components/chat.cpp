@@ -52,7 +52,10 @@ void CChat::OnInit()
 void CChat::OnShutdown()
 {
 	if(m_pTranslator)
+	{
+		m_pTranslator->Shutdown();
 		delete m_pTranslator;
+	}
 }
 
 void CChat::OnReset()

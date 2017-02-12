@@ -14,17 +14,14 @@ size_t CTranslator::write_to_string(void *ptr, size_t size, size_t count, void *
 CTranslator::CTranslator()
 {
 	m_pHandle = NULL;
+	m_Lock = lock_create();
 }
 
-CTranslator::~CTranslator()
-{
-	// clean up
-	if(m_pHandle)
-		curl_easy_cleanup(m_pHandle);
-}
 
 bool CTranslator::Init()
 {
+	CALLSTACK_ADD();
+
 	if((m_pHandle = curl_easy_init()))
 	{
 		void *pThread = thread_init(TranslationWorker, this);
@@ -34,13 +31,38 @@ bool CTranslator::Init()
 	return false;
 }
 
+void CTranslator::Shutdown()
+{
+	CALLSTACK_ADD();
+
+	lock_wait(m_Lock);
+
+	// clean up
+	if(m_pHandle)
+		curl_easy_cleanup(m_pHandle);
+	m_pHandle = NULL;
+
+	lock_unlock(m_Lock);
+}
+
 void CTranslator::TranslationWorker(void *pUser)
 {
 	CTranslator *pTrans = (CTranslator *)pUser;
 
-	while(pTrans->m_pHandle != NULL)
+	while(true)
 	{
+		CALLSTACK_ADD();
+
 		thread_sleep(50);
+		if(lock_trylock(pTrans->m_Lock) != 0)
+			continue;
+
+		if(pTrans->m_pHandle == NULL)
+		{
+			lock_unlock(pTrans->m_Lock);
+			lock_destroy(pTrans->m_Lock);
+			return;
+		}
 
 		if(pTrans->m_Queue.size())
 		{
@@ -84,12 +106,17 @@ void CTranslator::TranslationWorker(void *pUser)
 			// done, remove the element from our queue
 			pTrans->m_Queue.erase(pTrans->m_Queue.begin());
 		}
+
+		lock_unlock(pTrans->m_Lock);
+
 	}
 }
 
 void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In)
 {
 	CALLSTACK_ADD();
+
+	lock_wait(m_Lock);
 
 	// prepare the entry
 	CTransEntry Entry;
@@ -100,4 +127,6 @@ void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang,
 
 	// insert the entry
 	m_Queue.push_back(Entry);
+
+	lock_unlock(m_Lock);
 }
