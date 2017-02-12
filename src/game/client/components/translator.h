@@ -12,9 +12,10 @@ class CTranslator
 	MACRO_ALLOC_HEAP()
 public:
 	CTranslator();
+	~CTranslator();
 
 	bool Init();
-	void Shutdown();
+	//void Shutdown();
 
 	struct CTransEntry
 	{
