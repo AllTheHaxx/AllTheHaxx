@@ -21,6 +21,7 @@ class CFontMgr : public CComponent
 
 	array<FontFile> m_FontFiles;
 	int m_ActiveFontIndex;
+	int m_ActiveMonoFont;
 
 	void SortList();
 	void LoadFolder(const char *pFolder);
@@ -37,6 +38,7 @@ public:
 	int GetSelectedFontIndex() const { return m_ActiveFontIndex; }
 	const char *GetFontPath(int i) const { if(i >= 0 && i < m_FontFiles.size()) return m_FontFiles[i].m_Path.c_str(); return ""; }
 	CFont *GetFont(int i) const { if(i >= 0 && i < m_FontFiles.size()) return m_FontFiles[i].m_pFont; return 0; }
+	CFont *GetMonoFont() const { if(m_ActiveMonoFont >= 0 && m_ActiveMonoFont < m_FontFiles.size()) return m_FontFiles[m_ActiveMonoFont].m_pFont; return 0; }
 
 protected:
 	IStorageTW *m_pStorage;

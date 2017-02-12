@@ -8,6 +8,7 @@ void CFontMgr::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_FontFiles.clear();
 	m_FontFiles.hint_size(10);
+	m_ActiveMonoFont = -1;
 
 	ReloadFontlist();
 
@@ -31,7 +32,10 @@ void CFontMgr::Init()
 
 		// load default mono font
 		if(str_comp(m_FontFiles[i].m_Path.c_str(), "fonts/UbuntuMono-R.ttf") == 0)
+		{
 			InitFont(&m_FontFiles[i]);
+			m_ActiveMonoFont = i;
+		}
 	}
 }
 

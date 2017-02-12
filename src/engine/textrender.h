@@ -34,7 +34,7 @@ class ITextRender : public IInterface
 {
 	MACRO_INTERFACE("textrender", 0)
 public:
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
+	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, class CFont *pFont = 0) = 0;
 
 	virtual CFont *LoadFont(const char *pFilename) = 0;
 	virtual void DestroyFont(CFont *pFont) = 0;

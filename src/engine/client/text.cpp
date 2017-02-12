@@ -491,7 +491,7 @@ public:
 	}
 
 
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags)
+	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, class CFont *pFont = 0)
 	{
 		mem_zero(pCursor, sizeof(*pCursor));
 		pCursor->m_FontSize = FontSize;
@@ -503,6 +503,7 @@ public:
 		pCursor->m_LineWidth = -1;
 		pCursor->m_Flags = Flags;
 		pCursor->m_CharCount = 0;
+		pCursor->m_pFont = pFont;
 	}
 
 

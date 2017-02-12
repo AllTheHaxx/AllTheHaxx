@@ -38,6 +38,7 @@
 #include "chat.h"
 #include "menus.h"
 #include "irc.h"
+#include "fontmgr.h"
 #include "console.h"
 
 CGameConsole::CInstance * CGameConsole::m_pStatLuaConsole = 0;
@@ -376,6 +377,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 					m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
 				}
 			}
+			else if(Event.m_Key == KEY_F) // handle searching
+			{
+				if(!m_pSearchString)
+					m_pSearchString = m_Input.GetString();
+				else
+					m_pSearchString = 0;
+			}
 		}
 		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
@@ -489,16 +497,6 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			if(m_BacklogActLine < 0)
 				m_BacklogActLine = 0;
 			Handled = true;
-		}
-		else if(Event.m_Key == KEY_F)
-		{
-			if(m_CTRLPressed)
-			{
-				if(!m_pSearchString)
-					m_pSearchString = m_Input.GetString();
-				else
-					m_pSearchString = 0;
-			}
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
 		{
@@ -896,11 +894,11 @@ void CGameConsole::OnRender()
 		Info.m_Offset = pConsole->m_CompletionRenderOffset;
 		Info.m_Width = Screen.w;
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
-		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgr->GetMonoFont());
 
 		// render prompt
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgr->GetMonoFont());
 		const char *pPrompt = "> ";
 		if(m_pSearchString)
 			pPrompt = "[CTRL+F] SEARCHING» ";
@@ -965,14 +963,14 @@ void CGameConsole::OnRender()
 		}
 
 		// render console input (wrap line)
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, 0);
+		TextRender()->SetCursor(&Cursor, x, y, FontSize, 0, m_pClient->m_pFontMgr->GetMonoFont());
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
 		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(Editing), -1);
 		int Lines = Cursor.m_LineCount;
 
 		y -= (Lines - 1) * FontSize;
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgr->GetMonoFont());
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 
 		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
@@ -1088,7 +1086,7 @@ void CGameConsole::OnRender()
 			{
 				if(pEntry->m_YOffset < 0.0f)
 				{
-					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0);
+					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0, m_pClient->m_pFontMgr->GetMonoFont());
 					Cursor.m_LineWidth = Screen.w-10;
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 					pEntry->m_YOffset = Cursor.m_Y+Cursor.m_FontSize+LineOffset;
@@ -1180,7 +1178,7 @@ void CGameConsole::OnRender()
 				// -------------------- end clipboard selection code -------------------
 
 				//url highlighting
-				TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER);
+				TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgr->GetMonoFont());
 				Cursor.m_LineWidth = Screen.w-10.0f;
 
 				const char *pCursor = pEntry->m_aText;
