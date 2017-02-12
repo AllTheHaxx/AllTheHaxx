@@ -112,8 +112,18 @@ public:
 
 			if(Pos >= MAX_PATH_LENGTH || !File)
 			{
-				dbg_msg("storage", "couldn't open storage.cfg");
-				return;
+				dbg_msg("storage", "couldn't open storage.cfg, generating one");
+				if(!GenerateStorageCfg())
+				{
+					dbg_msg("storage", "failed to generate storage.cfg");
+					return;
+				}
+				File = io_open("storage.cfg", IOFLAG_READ);
+				if(!File)
+				{
+					dbg_msg("storage", "couldn't open storage.cfg after generating it");
+					return;
+				}
 			}
 		}
 
@@ -493,6 +503,53 @@ public:
 	const char* GetExecutableName() const
 	{
 		return m_aExecutableName;
+	}
+
+	bool GenerateStorageCfg() const
+	{
+		IOHANDLE file = io_open("storage.cfg", IOFLAG_WRITE);
+		if(!file)
+			return false;
+
+		#define write_line(line) io_write(file, line, sizeof(line)-1); io_write_newline(file)
+
+		write_line("####");
+		write_line("# This specifies where and in which order Teeworlds looks");
+		write_line("# for its data (sounds, skins, ...). The search goes top");
+		write_line("# down which means the first path has the highest priority.");
+		write_line("# Furthermore the top entry also defines the save path where");
+		write_line("# all data (settings.cfg, screenshots, ...) are stored.");
+		write_line("# There are 3 special paths available:");
+		write_line("#    $USERDIR");
+		write_line("#    - ~/.appname on UNIX based systems");
+		write_line("#    - ~/Library/Applications Support/appname on Mac OS X");
+		write_line("#    - %APPDATA%/Appname on Windows based systems");
+		write_line("#    $DATADIR");
+		write_line("#    - the 'data' directory which is part of an official");
+		write_line("#    release");
+		write_line("#    $CURRENTDIR");
+		write_line("#    - current working directory");
+		write_line("#");
+		write_line("#");
+		write_line("# The default file has the following entries:");
+		write_line("#    add_path $USERDIR");
+		write_line("#    add_path $DATADIR");
+		write_line("#    add_path $CURRENTDIR");
+		write_line("#");
+		write_line("# A customised one could look like this:");
+		write_line("#    add_path user");
+		write_line("#    add_path mods/mymod");
+		write_line("####");
+		write_line("");
+		write_line("add_path $USERDIR");
+		write_line("add_path $DATADIR");
+		write_line("add_path $CURRENTDIR");
+
+		#undef write_line
+
+		io_close(file);
+
+		return true;
 	}
 
 	static IStorageTW *Create(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
