@@ -197,7 +197,12 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 	// pop all to clean up the stack
     lua_pop(L, nargs);
 
+	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
+	if(pGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == L)
+		pGameClient->m_pGameConsole->m_pStatLuaConsole->PrintLine(aMsg);
+
 	dbg_msg(aSys, "%s", aMsg);
+
 	return 0;
 }
 

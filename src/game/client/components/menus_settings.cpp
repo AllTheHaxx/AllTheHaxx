@@ -33,6 +33,7 @@
 #include "menus.h"
 #include "identity.h"
 #include "skins.h"
+#include "console.h"
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -3410,7 +3411,19 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			}
 		}
 
-		if(L->State() == CLuaFile::STATE_ERROR)
+
+		if(L->State() == CLuaFile::STATE_LOADED && m_pClient->m_pGameConsole->GetDebuggerChild() != L->L())
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s", Localize("Debug"));
+			Bar.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Bar.h*ms_FontmodHeight, aBuf, -1)), &Bar, &Button);
+			static CButtonContainer s_ButtonDebug;
+			if(DoButton_Menu(&s_ButtonDebug, aBuf, 0, &Button, "Attach the lua console as a debugger to this script"))
+			{
+				m_pClient->m_pGameConsole->AttachLuaDebugger(L);
+			}
+		}
+		else if(L->State() == CLuaFile::STATE_ERROR)
 		{
 			float FadeVal = sinf(Client()->SteadyTimer()*1.4f)/2.0f+0.5f;
 			TextRender()->TextColor(1.0f, 0.25f+FadeVal*0.75f, 0.25f+FadeVal*0.75f, 1.0f);

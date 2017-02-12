@@ -70,7 +70,8 @@ class CGameConsole : public CComponent
 
 		struct
 		{
-			lua_State * m_pLuaState;
+			lua_State *m_pLuaState;
+			lua_State *m_pDebugChild;
 			bool m_Inited;
 
 			int m_ScopeCount;
@@ -126,6 +127,8 @@ public:
 	void PrintLine(int Type, const char *pLine);
 
 	static int PrintLuaLine(lua_State *L);
+	void AttachLuaDebugger(const class CLuaFile *pLF);
+	lua_State *GetDebuggerChild() const { return m_LuaConsole.m_LuaHandler.m_pDebugChild; }
 	static CInstance * m_pStatLuaConsole;
 
 	virtual void OnStateChange(int NewState, int OldState);

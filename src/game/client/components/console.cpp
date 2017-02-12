@@ -171,6 +171,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		{
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
+			m_LuaHandler.m_pDebugChild = 0;
 			PrintLine("Reset complete");
 			return;
 		}
@@ -179,13 +180,13 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
 			m_LuaHandler.m_Inited = false;
+			m_LuaHandler.m_pDebugChild = 0;
 			lua_close(m_LuaHandler.m_pLuaState);
 			InitLua();
 			PrintLine("Reload complete");
 			return;
 		}
 		int Status = 0;
-		char ErrorMsg[512];
 		bool ScopeIncreased = false;
 
 		if(!m_LuaHandler.m_Inited)  // this is yet quite retarded!
@@ -239,10 +240,12 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 				}
 				m_LuaHandler.m_ScopeCount--;
 
-				if(m_LuaHandler.m_ScopeCount == 0)  //if we are now at zero after decreasing => print new line!
+				if(m_LuaHandler.m_ScopeCount == 0 &&
+						m_LuaHandler.m_FullLine.c_str()[0] != '\0' && str_comp(aBuf, m_LuaHandler.m_FullLine.c_str()) != 0)  //if we are now at zero after decreasing => print new line! (but only if it was multiline entry)
 				{
-					PrintLine(aBuf);
-					PrintLine("");
+					PrintLine(pLine);
+					//PrintLine(aBuf, true);
+					//PrintLine("", true);
 				}
 			}
 		}
@@ -252,29 +255,46 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 
 		if(m_LuaHandler.m_ScopeCount == 0)
 		{
+			lua_State *L = m_LuaHandler.m_pLuaState;
+			if(m_LuaHandler.m_pDebugChild != NULL)
+				L = m_LuaHandler.m_pDebugChild;
+
+			PrintLine(("> " + m_LuaHandler.m_FullLine).c_str(), true);
+			if(m_LuaHandler.m_FullLine.c_str()[0] == '=')
+				m_LuaHandler.m_FullLine = std::string("return ") + std::string(m_LuaHandler.m_FullLine.c_str()+1);
+
 			try
 			{
-				luaL_loadstring(m_LuaHandler.m_pLuaState, m_LuaHandler.m_FullLine.c_str());
-				Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
-
-				if(Status)
+				lua_pushcclosure(L, CLua::ErrorFunc, 0);
+				if(luaL_loadstring(L, m_LuaHandler.m_FullLine.c_str()) != 0)
+					m_pGameConsole->m_pClient->Client()->Lua()->HandleException(lua_tostring(L, -1), L);
+				else
 				{
-					str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
+					int stacksize = lua_gettop(L);
+					Status = lua_pcall(L, 0, LUA_MULTRET, lua_gettop(L)-1);
 
-					if(!str_comp(ErrorMsg, "attempt to call a string value"))  //HACKISH SOLUTION : Try recompile pLine with a print!
+					if(Status == 0)
 					{
-						Status = 0;
-
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "print(%s)", m_LuaHandler.m_FullLine.c_str());
-
-						luaL_loadstring(m_LuaHandler.m_pLuaState, aBuf);
-						Status = lua_pcall(m_LuaHandler.m_pLuaState, 0, LUA_MULTRET, 0);
+						/*
+						 * at this point, the stack will have 1 additional function (errorfunc) and all return values on top.
+						 */
+						int nresults = lua_gettop(L) - stacksize + 1;
+						//for(int i = 1; i <= lua_gettop(L); i++) // this one is for debugging purposes (prints the whole stack)
+						for(int i = stacksize; i < stacksize+nresults; i++)
+						{
+							if(lua_isstring(L, i) || lua_isnumber(L, i))
+								PrintLine(lua_tostring(L, i));
+							else
+								PrintLine(luaL_typename(L, i));
+						}
+						lua_pop(L, nresults+1); // clean up the stack
 					}
 				}
 			}
 			catch(std::exception &e)  //just to be sure...
 			{
+				if(m_LuaHandler.m_pDebugChild)
+					m_pGameConsole->m_pClient->Client()->Lua()->HandleException(e, m_LuaHandler.m_pDebugChild);
 				PrintLine(e.what());
 			}
 			catch(...)
@@ -291,15 +311,14 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			m_LuaHandler.m_FullLine = "";
 			m_LuaHandler.m_ScopeCount = 0;
 
-			if(Status)
+			if(Status) // this is kinda deprecated...
 			{
-				str_format(ErrorMsg, sizeof(ErrorMsg), "%s", lua_tostring(m_LuaHandler.m_pLuaState, -1));
-				PrintLine(ErrorMsg);
+				m_pGameConsole->m_pClient->Client()->Lua()->HandleException(lua_tostring(L, -1), L);
 			}
 		}
 		else if(m_LuaHandler.m_ScopeCount < 0)
 		{
-			PrintLine("Please don't end your stuff before you already started.");
+			PrintLine("Please don't end your stuff before even having started.");
 			m_LuaHandler.m_ScopeCount = 0;
 			m_LuaHandler.m_FullLine = "";
 		}
@@ -308,16 +327,17 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		{
 			char aBuf[512] = { 0 };
 
-			int Limit = ScopeIncreased == true ? m_LuaHandler.m_ScopeCount-1 : m_LuaHandler.m_ScopeCount;
+			int Limit = ScopeIncreased ? m_LuaHandler.m_ScopeCount-1 : m_LuaHandler.m_ScopeCount;
 
 			if(ActLine.find("else") != std::string::npos)
 				Limit--;
 
 			for(int i = 0; i < Limit; i++)
-				str_append(aBuf, "     ", sizeof(aBuf));
+				str_append(aBuf, "…     ", sizeof(aBuf));
 
 			str_append(aBuf, pLine, sizeof(aBuf));
-			PrintLine(aBuf);
+			if(Limit >= 0)
+				PrintLine(aBuf);
 		}
 #endif // defined(FEATURE_LUA)
 	}
@@ -917,7 +937,17 @@ void CGameConsole::OnRender()
 		else if(m_ConsoleType == CONSOLETYPE_LUA)
 		{
 			if(g_Config.m_ClLua)
-				pPrompt = "Lua> ";
+			{
+				if(m_LuaConsole.m_LuaHandler.m_pDebugChild)
+				{
+					CLuaFile *pLF = CLuaBinding::GetLuaFile(m_LuaConsole.m_LuaHandler.m_pDebugChild);
+					static char s_aPrompt[128];
+					str_format(s_aPrompt, sizeof(s_aPrompt), "(%s) DEBUGGER> ", pLF->GetFilename()+4);
+					pPrompt = s_aPrompt;
+				}
+				else
+					pPrompt = "Lua> ";
+			}
 			else
 				pPrompt = "Lua disabled. Please enable Lua first. ";
 		}
@@ -1517,6 +1547,34 @@ int CGameConsole::PrintLuaLine(lua_State *L)
 
 	CGameConsole::m_pStatLuaConsole->PrintLine(aLine);
 	return 0;
+}
+
+void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
+{
+	//m_LuaConsole.ClearBacklog();
+	for(int i = 0; i < 27-10; i++)
+		m_LuaConsole.PrintLine("");
+
+	m_LuaConsole.m_LuaHandler.m_ScopeCount = 0;
+	m_LuaConsole.m_LuaHandler.m_FullLine = "";
+	m_LuaConsole.m_LuaHandler.m_pDebugChild = pLF->L();
+
+	luaL_loadstring(pLF->L(), "Import(\"debug\")");
+	lua_pcall(pLF->L(), 0, LUA_MULTRET, 0);
+
+	m_LuaConsole.PrintLine("> ---------------------------[ DEBUGGER STARTED ]---------------------------");
+	{ char aBuf[256]; str_format(aBuf, sizeof(aBuf), "> The lua debugger was attached to the script '%s'", pLF->GetFilename()); m_LuaConsole.PrintLine(aBuf);}
+	m_LuaConsole.PrintLine("> Everything you execute from here will now be executed in the scope of the script.");
+	m_LuaConsole.PrintLine("> Please note that you can break the running script by doing the wrong changes.");
+	m_LuaConsole.PrintLine("> ");
+	m_LuaConsole.PrintLine("> The debug library has automatically been imported.");
+	m_LuaConsole.PrintLine("> You may now use locals() and upvalues() to print all variables of the script.");
+	m_LuaConsole.PrintLine("> ");
+	m_LuaConsole.PrintLine("> To exit the debugger, type !reset or !reload");
+	m_LuaConsole.PrintLine("> ");
+
+	Toggle(CONSOLETYPE_LUA);
+
 }
 
 void CGameConsole::OnConsoleInit()

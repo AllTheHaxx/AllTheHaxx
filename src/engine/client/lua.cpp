@@ -7,6 +7,8 @@
 #include <engine/console.h>
 #include <engine/shared/network.h>
 #include <game/localization.h>
+#include <game/client/gameclient.h>
+#include <game/client/components/console.h>
 
 #include "lua.h"
 #include "luabinding.h"
@@ -224,11 +226,24 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 {
 	if(!pLF)
 		return -1;
+	bool Console = str_comp(pLF->GetFilename(), "[console]") == 0;
 
 	if(str_comp_nocase(pError, "not enough memory") == 0)
 	{
-		dbg_msg("lua/FATAL", "script %s hit OOM condition, killing it!", pLF->GetFilename());
-		pLF->Unload(true);
+		if(!Console)
+		{
+			dbg_msg("lua/FATAL", "script %s hit OOM condition, killing it!", pLF->GetFilename());
+			pLF->Unload(true);
+		}
+		else
+		{
+			lua_close(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState);
+			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->InitLua();
+			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_FullLine = "";
+			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = 0;
+			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_ScopeCount = 0;
+			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_Inited = false;
+		}
 		return 0;
 	}
 
@@ -245,15 +260,22 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 				pError = pFilenameEnding+4;
 		}
 	}
+
 	pLF->m_Exceptions.add(std::string(pError));
+	if(Console)
+	{
+		char aLine[512];
+		str_format(aLine, sizeof(aLine), "EXCEPTION(%03i): %s", pLF->m_Exceptions.size(), pError);
+		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->PrintLine(aLine);
+	}
 
 	if(g_Config.m_Debug)
 	{
 		char aError[1024];
-		str_format(aError, sizeof(aError), "{%i/100} %s", pLF->m_Exceptions.size(), pError);
+		str_format(aError, sizeof(aError), "{%i/100} [%s] %s", pLF->m_Exceptions.size(), pLF->GetFilename(), pError);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "lua|EXCEPTION", aError);
 	}
-	if(pLF->m_Exceptions.size() < 100)
+	if(Console || pLF->m_Exceptions.size() < 100)
 		return pLF->m_Exceptions.size();
 	pLF->m_pErrorStr = Localize("Error count limit exceeded (too many exceptions thrown)");
 	pLF->Unload(true);
