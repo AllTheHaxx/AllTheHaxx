@@ -265,7 +265,7 @@ void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		return;
 	}
-	pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "no command bound to key %s", pResult->GetString(0));
+	pBinds->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "no command bound to key %s", pResult->GetString(0));
 
 }
 
