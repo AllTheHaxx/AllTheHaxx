@@ -49,12 +49,15 @@ public:
 	void Init();
 	void ReloadFontlist();
 	void ActivateFont(int ListIndex);
+	void ActivateMonoFont(int ListIndex);
 
 	int GetNumFonts() const { return m_lFontFiles.size(); }
 	int GetNumLoadedFonts() const { int ret = 0; for(int i = 0; i < m_lFontFiles.size(); i++) if(m_lFontFiles[i].m_apFonts[0]) ret++; return ret; }
 	int GetSelectedFontIndex() const { return m_ActiveFontIndex; }
+	int GetNumMonoFonts() const { return m_lMonoFontFiles.size(); }
 	int GetSelectedMonoFontIndex() const { return m_ActiveMonoFontIndex; }
 	const char *GetFontPath(int i) const { if(i >= 0 && i < m_lFontFiles.size()) return m_lFontFiles[i].m_Path.c_str(); return ""; }
+	const char *GetMonoFontPath(int i) const { if(i >= 0 && i < m_lMonoFontFiles.size()) return m_lMonoFontFiles[i].m_Path.c_str()+6; return ""; }
 	CFontFile *GetFont(int i = -1)
 	{
 		if(i < 0) i = m_ActiveFontIndex;

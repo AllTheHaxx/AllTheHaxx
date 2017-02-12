@@ -78,6 +78,24 @@ void CFontMgr::ActivateFont(int ListIndex)
 	}
 }
 
+void CFontMgr::ActivateMonoFont(int ListIndex)
+{
+	if(ListIndex > m_lMonoFontFiles.size())
+	{
+		dbg_msg("fontmgr/error", "tried to load font that doesn't exist (%i > %i)", ListIndex, m_lMonoFontFiles.size());
+		return;
+	}
+
+	CFontFile *f = &m_lMonoFontFiles[ListIndex];
+	if(!f->m_apFonts[CFontFile::REGULAR])
+		InitFont(f);
+
+	if(f->m_apFonts[CFontFile::REGULAR])
+	{
+		m_ActiveMonoFontIndex = ListIndex;
+	}
+}
+
 void CFontMgr::InitFont(CFontFile *f)
 {
 	if(g_Config.m_Debug)

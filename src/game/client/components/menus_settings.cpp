@@ -2772,11 +2772,12 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 
 	//RenderTools()->DrawUIRect(&MainView, vec4(1,1,0,1), 0, 0);
 	const int NUM_FONTS = m_pClient->m_pFontMgr->GetNumFonts();
+	const int NUM_MONO_FONTS = m_pClient->m_pFontMgr->GetNumMonoFonts();
 
 	{
 		char aBuf[64];
 		CUIRect OptionsBar, Button;
-		MainView.VSplitRight(MainView.w/3, &MainView, &OptionsBar);
+		MainView.VSplitRight(MainView.w*0.4f, &MainView, &OptionsBar);
 		OptionsBar.x += 5.0f;
 
 		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
@@ -2793,46 +2794,129 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 		OptionsBar.HSplitTop(10.0f, &Button, &OptionsBar);
 		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
 		static CButtonContainer s_Checkbox;
-		if(DoButton_CheckBox(&s_Checkbox, Localize("Preload fonts on starup"), g_Config.m_FtPreloadFonts, &Button))
+		if(DoButton_CheckBox(&s_Checkbox, Localize("Preload fonts on startup"), g_Config.m_FtPreloadFonts, &Button))
 			g_Config.m_FtPreloadFonts ^= 1;
-	}
 
-	const int OldSelected = m_pClient->m_pFontMgr->GetSelectedFontIndex();
-	static int pIDItem[128] = {0};
-	static CButtonContainer s_Listbox;
-	static float s_ScrollValue = 0.0f;
-	UiDoListboxStart(&s_Listbox, &MainView, 30.0f, Localize("Font Selector"), 0, NUM_FONTS, 1, OldSelected, s_ScrollValue, CUI::CORNER_ALL);
-	for(int i = 0; i < NUM_FONTS; i++)
-	{
-		const char *pFilePath = m_pClient->m_pFontMgr->GetFontPath(i);
-		if(!pFilePath || pFilePath[0] == '\0') continue;
 
-		CPointerContainer Container(&pIDItem[i]);
-		CListboxItem Item = UiDoListboxNextItem(&Container, 0);
-
-		if(Item.m_Visible)
+		// render some preview text in different sizes
+		for(float s = 9.0f; s <= 19.0f;
+			s == 9.0f ? s = 13.0f :
+				s == 13.0f ? s = 19.0f :
+				s++)
 		{
-			if((i%2) && i != OldSelected)
-				RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0,0,0,0.35f), CUI::CORNER_ALL, 4.0f);
-			//UI()->DoLabelScaled(&Item.m_Rect, pFilePath, Item.m_Rect.h-10.0f, -1, -1, 0, m_pClient->m_pFontMgr->GetFont(i));
+			OptionsBar.HSplitTop(30.0f, &Button, &OptionsBar);
+			OptionsBar.HSplitTop(10.0f, &Button, &OptionsBar);
+			{
+				char aText[32];
+				str_format(aText, sizeof(aText), "Some size %i text:", round_to_int(s));
+				UI()->DoLabelScaled(&Button, aText, s, -1);
+			}
+
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, Item.m_Rect.x, Item.m_Rect.y, 17.0f, TEXTFLAG_RENDER);
-			Cursor.m_pFont = m_pClient->m_pFontMgr->GetFont(i);
-			if(m_pClient->m_pFontMgr->GetFont(i))
-				TextRender()->TextColor(1,1,0.85f, 1);
-			else
-				TextRender()->TextColor(1,1,1,1);
-			TextRender()->TextEx(&Cursor, pFilePath, -1);
+			OptionsBar.HSplitTop(5.0f+s, &Button, &OptionsBar);
+			OptionsBar.HSplitTop(3.0f+s, &Button, &OptionsBar);
+			TextRender()->SetCursor(&Cursor, Button.x, Button.y, s, TEXTFLAG_RENDER, CFontFile::BOLD, m_pClient->m_pFontMgr->GetFont());
+			TextRender()->TextEx(&Cursor, "Some bold text", -1);
+
+			OptionsBar.HSplitTop(5.0f, &Button, &OptionsBar);
+			OptionsBar.HSplitTop(3.0f+s, &Button, &OptionsBar);
+			TextRender()->SetCursor(&Cursor, Button.x, Button.y, s, TEXTFLAG_RENDER, CFontFile::ITALIC, m_pClient->m_pFontMgr->GetFont());
+			TextRender()->TextEx(&Cursor, "Some italic text", -1);
+
+			OptionsBar.HSplitTop(5.0f, &Button, &OptionsBar);
+			OptionsBar.HSplitTop(3.0f+s, &Button, &OptionsBar);
+			TextRender()->SetCursor(&Cursor, Button.x, Button.y, s, TEXTFLAG_RENDER, CFontFile::BOLD_ITALIC, m_pClient->m_pFontMgr->GetFont());
+			TextRender()->TextEx(&Cursor, "Bold and italic text", -1);
+
+
+			OptionsBar.HSplitTop(7.0f, &Button, &OptionsBar);
+			OptionsBar.HSplitTop(3.0f+s, &Button, &OptionsBar);
+			TextRender()->SetCursor(&Cursor, Button.x, Button.y, s, TEXTFLAG_RENDER, CFontFile::BOLD, m_pClient->m_pFontMgr->GetMonoFont());
+			TextRender()->TextEx(&Cursor, "Some bold monospace text", -1);
+
+			OptionsBar.HSplitTop(5.0f, &Button, &OptionsBar);
+			OptionsBar.HSplitTop(3.0f+s, &Button, &OptionsBar);
+			TextRender()->SetCursor(&Cursor, Button.x, Button.y, s, TEXTFLAG_RENDER, CFontFile::ITALIC, m_pClient->m_pFontMgr->GetMonoFont());
+			TextRender()->TextEx(&Cursor, "Some italic monospace text", -1);
+
+			OptionsBar.HSplitTop(5.0f, &Button, &OptionsBar);
+			OptionsBar.HSplitTop(3.0f+s, &Button, &OptionsBar);
+			TextRender()->SetCursor(&Cursor, Button.x, Button.y, s, TEXTFLAG_RENDER, CFontFile::BOLD_ITALIC, m_pClient->m_pFontMgr->GetMonoFont());
+			TextRender()->TextEx(&Cursor, "Bold and italic monospace text", -1);
 		}
 	}
 
-	int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
-	if(NewSelected != OldSelected)
+	CUIRect Selection;
+	MainView.HSplitMid(&Selection, &MainView);
+
 	{
-		m_pClient->m_pFontMgr->ActivateFont(NewSelected);
-		str_copy(g_Config.m_FtFont, m_pClient->m_pFontMgr->GetFontPath(NewSelected), sizeof(g_Config.m_FtFont));
+		const int OldSelected = m_pClient->m_pFontMgr->GetSelectedFontIndex();
+		static int pIDItem[128] = {0};
+		static CButtonContainer s_Listbox;
+		static float s_ScrollValue = 0.0f;
+		UiDoListboxStart(&s_Listbox, &Selection, 30.0f, Localize("Font Selector - Game Font"), 0, NUM_FONTS, 2, OldSelected, s_ScrollValue, CUI::CORNER_ALL);
+		for(int i = 0; i < NUM_FONTS; i++)
+		{
+			const char *pFilePath = m_pClient->m_pFontMgr->GetFontPath(i);
+			if(!pFilePath || pFilePath[0] == '\0') continue;
+
+			CPointerContainer Container(&pIDItem[i]);
+			CListboxItem Item = UiDoListboxNextItem(&Container, 0);
+
+			if(Item.m_Visible)
+			{
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, Item.m_Rect.x, Item.m_Rect.y, 17.0f, TEXTFLAG_RENDER, 0, m_pClient->m_pFontMgr->GetFont(i));
+				if(m_pClient->m_pFontMgr->GetFont(i)->m_apFonts[0])
+					TextRender()->TextColor(1,1,0.85f, 1);
+				else
+					TextRender()->TextColor(1,1,1,1);
+				TextRender()->TextEx(&Cursor, pFilePath, -1);
+			}
+		}
+
+		int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+		if(NewSelected != OldSelected)
+		{
+			m_pClient->m_pFontMgr->ActivateFont(NewSelected);
+			str_copy(g_Config.m_FtFont, m_pClient->m_pFontMgr->GetFontPath(NewSelected), sizeof(g_Config.m_FtFont));
+		}
 	}
 
+	// mono font
+	{
+		const int OldSelected = m_pClient->m_pFontMgr->GetSelectedMonoFontIndex();
+		static int pIDItem[128] = {0};
+		static CButtonContainer s_Listbox;
+		static float s_ScrollValue = 0.0f;
+		UiDoListboxStart(&s_Listbox, &MainView, 30.0f, Localize("Font Selector - Monospace Font"), 0, NUM_MONO_FONTS, 2, OldSelected, s_ScrollValue, CUI::CORNER_ALL);
+		for(int i = 0; i < NUM_MONO_FONTS; i++)
+		{
+			const char *pFilePath = m_pClient->m_pFontMgr->GetMonoFontPath(i);
+			if(!pFilePath || pFilePath[0] == '\0') continue;
+
+			CPointerContainer Container(&pIDItem[i]);
+			CListboxItem Item = UiDoListboxNextItem(&Container, 0);
+
+			if(Item.m_Visible)
+			{
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, Item.m_Rect.x, Item.m_Rect.y, 17.0f, TEXTFLAG_RENDER, 0, m_pClient->m_pFontMgr->GetMonoFont(i));
+				if(m_pClient->m_pFontMgr->GetMonoFont(i)->m_apFonts[0])
+					TextRender()->TextColor(1,1,0.85f, 1);
+				else
+					TextRender()->TextColor(1,1,1,1);
+				TextRender()->TextEx(&Cursor, pFilePath, -1);
+			}
+		}
+
+		int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+		if(NewSelected != OldSelected)
+		{
+			m_pClient->m_pFontMgr->ActivateMonoFont(NewSelected);
+			str_copy(g_Config.m_FtMonoFont, m_pClient->m_pFontMgr->GetMonoFontPath(NewSelected), sizeof(g_Config.m_FtMonoFont));
+		}
+	}
 }
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)
