@@ -553,6 +553,9 @@ public:
 		if(!pText)
 			return -1.0f;
 
+		if(str_length(pText) == 0)
+			return 0.0f;
+
 		CFont *pFont = pCursor->m_pFont;
 		CFontSizeData *pSizeData = NULL;
 

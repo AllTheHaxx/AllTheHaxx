@@ -28,6 +28,10 @@ void CFontMgr::Init()
 	{
 		if(str_comp(m_FontFiles[i].m_Path.c_str(), aFontFile) == 0)
 			ActivateFont(i);
+
+		// load default mono font
+		if(str_comp(m_FontFiles[i].m_Path.c_str(), "fonts/UbuntuMono-R.ttf") == 0)
+			InitFont(&m_FontFiles[i]);
 	}
 }
 
@@ -60,7 +64,7 @@ void CFontMgr::InitFont(FontFile *f)
 		f->m_pFont = TextRender()->LoadFont(aFilename);
 	}
 	else
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "fontmgr/error", "failed to load font. file='%s'", f->m_Path.c_str());
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "fontmgr/error", "failed to load font. file='%s'", f->m_Path.c_str());
 }
 
 void CFontMgr::LoadFolder(const char *pFolder)
@@ -94,7 +98,13 @@ int CFontMgr::LoadFolderCallback(const char *pName, int IsDir, int DirType, void
 	if(IsDir)
 		pSelf->LoadFolder(aFile);
 	else
+	{
+		// make sure we don't add fonts multiple times
+		for(int i = 0; i < pSelf->m_FontFiles.size(); i++)
+			if(pSelf->m_FontFiles[i].m_Path == std::string(aFile))
+				return 0;
 		pSelf->m_FontFiles.add(FontFile(aFile));
+	}
 
 	return 0;
 }
@@ -128,12 +138,12 @@ void CFontMgr::SortList()
 void CFontMgr::ReloadFontlist()
 {
 	// delete the fonts from memory first and clear the list
-	while(m_FontFiles.size() > 0)
+/*	while(m_FontFiles.size() > 0)
 	{
 		if(m_FontFiles[0].m_pFont)
 			TextRender()->DestroyFont(m_FontFiles[0].m_pFont);
 		m_FontFiles.remove_index_fast(0);
-	}
+	}*/
 
 	LoadFolder("fonts");
 }
