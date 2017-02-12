@@ -21,14 +21,17 @@ CTranslator::~CTranslator()
 	// clean up
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
+	m_pHandle = NULL;
+	m_Queue.clear();
+
+	thread_wait(m_pThread);
 }
 
 bool CTranslator::Init()
 {
 	if((m_pHandle = curl_easy_init()))
 	{
-		void *pThread = thread_init(TranslationWorker, this);
-		//thread_detach(pThread);
+		m_pThread = thread_init(TranslationWorker, this);
 		return true;
 	}
 	return false;
@@ -38,11 +41,9 @@ void CTranslator::TranslationWorker(void *pUser)
 {
 	CTranslator *pTrans = (CTranslator *)pUser;
 
-	while(true)
+	while(pTrans->m_pHandle != NULL)
 	{
 		CALLSTACK_ADD();
-
-		thread_sleep(50);
 
 		if(pTrans->m_Queue.size())
 		{
@@ -86,6 +87,8 @@ void CTranslator::TranslationWorker(void *pUser)
 			// done, remove the element from our queue
 			pTrans->m_Queue.erase(pTrans->m_Queue.begin());
 		}
+
+		thread_sleep(50);
 	}
 }
 
