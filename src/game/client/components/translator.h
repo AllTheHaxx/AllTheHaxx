@@ -40,7 +40,6 @@ public:
 		m_Results.erase(m_Results.begin());
 	}
 private:
-	LOCK m_Lock;
 	CURL *m_pHandle;
 	static size_t write_to_string(void *ptr, size_t size, size_t count, void *stream);
 

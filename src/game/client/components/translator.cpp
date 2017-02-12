@@ -14,7 +14,6 @@ size_t CTranslator::write_to_string(void *ptr, size_t size, size_t count, void *
 CTranslator::CTranslator()
 {
 	m_pHandle = NULL;
-	m_Lock = lock_create();
 }
 
 
@@ -35,14 +34,10 @@ void CTranslator::Shutdown()
 {
 	CALLSTACK_ADD();
 
-	lock_wait(m_Lock);
-
 	// clean up
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
 	m_pHandle = NULL;
-
-	lock_unlock(m_Lock);
 }
 
 void CTranslator::TranslationWorker(void *pUser)
@@ -54,13 +49,9 @@ void CTranslator::TranslationWorker(void *pUser)
 		CALLSTACK_ADD();
 
 		thread_sleep(50);
-		if(lock_trylock(pTrans->m_Lock) != 0)
-			continue;
 
 		if(pTrans->m_pHandle == NULL)
 		{
-			lock_unlock(pTrans->m_Lock);
-			lock_destroy(pTrans->m_Lock);
 			return;
 		}
 
@@ -107,16 +98,12 @@ void CTranslator::TranslationWorker(void *pUser)
 			pTrans->m_Queue.erase(pTrans->m_Queue.begin());
 		}
 
-		lock_unlock(pTrans->m_Lock);
-
 	}
 }
 
 void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In)
 {
 	CALLSTACK_ADD();
-
-	lock_wait(m_Lock);
 
 	// prepare the entry
 	CTransEntry Entry;
@@ -127,6 +114,4 @@ void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang,
 
 	// insert the entry
 	m_Queue.push_back(Entry);
-
-	lock_unlock(m_Lock);
 }
