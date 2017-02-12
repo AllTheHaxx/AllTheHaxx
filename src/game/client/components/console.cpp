@@ -1383,18 +1383,13 @@ void CGameConsole::Toggle(int Type)
 			m_ConsoleState = CONSOLE_OPENING;
 			/*// reset controls - no don't do it because we want swag!
 			m_pClient->m_pControls->OnReset();*/
-
-			Input()->SetIMEState(true);
 		}
 		else // WHEN CLOSING
 		{
 			Input()->MouseModeRelative();
-			m_pClient->m_pMenus->UseMouseButtons(m_pClient->m_pMenus->IsActive() || m_pClient->m_pChat->IsActive());
+
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
-
-			if(!m_pClient->m_pMenus->IsActive() && !m_pClient->m_pChat->IsActive())
-				Input()->SetIMEState(false);
 		}
 	}
 

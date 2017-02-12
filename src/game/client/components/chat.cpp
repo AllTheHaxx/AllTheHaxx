@@ -98,7 +98,6 @@ void CChat::OnStateChange(int NewState, int OldState)
 	if(OldState <= IClient::STATE_CONNECTING)
 	{
 		m_Mode = MODE_NONE;
-		Input()->SetIMEState(false);
 		for(int i = 0; i < MAX_LINES; i++)
 		{
 			m_aLines[i].m_Time = 0;
@@ -273,9 +272,6 @@ bool CChat::OnInput(IInput::CEvent Event)
 			m_pClient->OnRelease();
 			if(g_Config.m_ClChatReset)
 				m_Input.Clear();
-
-			// abort text editing when pressing escape
-			Input()->SetIMEState(false);
 		}
 		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
@@ -320,9 +316,6 @@ bool CChat::OnInput(IInput::CEvent Event)
 				m_pClient->m_pMenus->UseMouseButtons(false);
 			m_pClient->OnRelease();
 			m_Input.Clear();
-
-			// stop text editing after send chat.
-			Input()->SetIMEState(false);
 		}
 		else if(Event.m_Key == KEY_TAB)
 		{
@@ -483,9 +476,7 @@ void CChat::EnableMode(int Team)
 		else
 			m_Mode = MODE_ALL;
 
-		Input()->SetIMEState(true);
 		Input()->Clear();
-		m_pClient->m_pMenus->UseMouseButtons(true);
 		m_CompletionChosen = -1;
 		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
 	}

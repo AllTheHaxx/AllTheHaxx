@@ -273,7 +273,7 @@ public:
 		// haxx
 		bool m_Spoofable;
 		char m_Addr[NETADDR_MAXSTRSIZE];
-		
+
 		//lua
 		std::string GetName() const { return std::string(m_aName); }
 		std::string GetClan() const { return std::string(m_aClan); }
@@ -342,6 +342,7 @@ public:
 
 
 	// actions
+	void UpdateInputState();
 	// TODO: move these
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
@@ -413,13 +414,13 @@ public:
 	static CClientData * LuaGetClientData(int ID) { return &CLua::m_pCGameClient->m_aClients[ID]; }
 	static CSnapState::CCharacterInfo * LuaGetCharacterInfo(int ID) { return &CLua::m_pCGameClient->m_Snap.m_aCharacters[ID]; }
 	static CTuningParams * LuaGetTuning() { return &CLua::m_pCGameClient->m_Tuning[g_Config.m_ClDummy]; }
-	
+
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];
 
 	bool m_ResetConfig;
-	
+
 	std::string m_HiddenMessages[MAX_CLIENTS];
 };
 

@@ -28,12 +28,8 @@ void CMenus::ConKeyToggleHotbar(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pResult->GetInteger(0) != 0)
 		{
-			if(pSelf->m_HotbarActive ^= 1)
-				pSelf->Input()->SetIMEState(true);
-			else
-				pSelf->Input()->SetIMEState(false);
+			pSelf->m_HotbarActive ^= true;
 		}
-
 	}
 }
 
