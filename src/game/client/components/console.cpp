@@ -271,7 +271,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 				else
 				{
 					int stacksize = lua_gettop(L);
-					Status = lua_pcall(L, 0, LUA_MULTRET, lua_gettop(L)-1);
+					Status = lua_pcall(L, 0, LUA_MULTRET, stacksize-1);
 
 					if(Status == 0)
 					{
@@ -302,19 +302,9 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 				PrintLine("An unknown error occured!");
 			}
 
-			/*m_LuaHandler.m_FullLine.resize(m_LuaHandler.m_FullLine.size()-1);  //remove the last " "
-			//add this to the history :3
-			char *pEntry = m_History.Allocate(m_LuaHandler.m_FullLine.size()+1);
-			mem_copy(pEntry, m_LuaHandler.m_FullLine.c_str(), m_LuaHandler.m_FullLine.size()+1);*/
-
-
 			m_LuaHandler.m_FullLine = "";
 			m_LuaHandler.m_ScopeCount = 0;
 
-			if(Status) // this is kinda deprecated...
-			{
-				m_pGameConsole->m_pClient->Client()->Lua()->HandleException(lua_tostring(L, -1), L);
-			}
 		}
 		else if(m_LuaHandler.m_ScopeCount < 0)
 		{
@@ -1568,7 +1558,7 @@ void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
 	m_LuaConsole.PrintLine("> Please note that you can break the running script by doing the wrong changes.");
 	m_LuaConsole.PrintLine("> ");
 	m_LuaConsole.PrintLine("> The debug library has automatically been imported.");
-	m_LuaConsole.PrintLine("> You may now use locals() and upvalues() to print all variables of the script.");
+	m_LuaConsole.PrintLine("> You may now use locals(), globals() and upvalues() to print all variables.");
 	m_LuaConsole.PrintLine("> ");
 	m_LuaConsole.PrintLine("> To exit the debugger, type !reset or !reload");
 	m_LuaConsole.PrintLine("> ");

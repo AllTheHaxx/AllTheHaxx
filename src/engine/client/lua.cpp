@@ -228,6 +228,9 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 		return -1;
 	bool Console = str_comp(pLF->GetFilename(), "[console]") == 0;
 
+	if(!pError)
+		pError = "no error message";
+
 	if(str_comp_nocase(pError, "not enough memory") == 0)
 	{
 		if(!Console)
@@ -275,11 +278,28 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 		str_format(aError, sizeof(aError), "{%i/100} [%s] %s", pLF->m_Exceptions.size(), pLF->GetFilename(), pError);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "lua|EXCEPTION", aError);
 	}
-	if(Console || pLF->m_Exceptions.size() < 100)
+	if(pLF->m_Exceptions.size() < 100)
 		return pLF->m_Exceptions.size();
-	pLF->m_pErrorStr = Localize("Error count limit exceeded (too many exceptions thrown)");
-	pLF->Unload(true);
-	dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", pLF->GetFilename());
+	if(!Console)
+	{
+		pLF->m_pErrorStr = Localize("Error count limit exceeded (too many exceptions thrown)");
+		pLF->Unload(true);
+		dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", pLF->GetFilename());
+	}
+	else
+	{
+		// reload the lua console
+		//lua_close(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState);
+		//m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->InitLua();
+		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->LoadLuaFile("data/luabase/events.lua");
+		lua_gc(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState, LUA_GCCOLLECT, 0),
+		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_FullLine = "";
+		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = 0;
+		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_ScopeCount = 0;
+		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_Inited = true; // this must be true if we don't recreate the whole lua state
+		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->PrintLine("--- LUA CONSOLE RELOADED ---");
+		pLF->m_Exceptions.clear();
+	}
 
 	return 0;
 }
