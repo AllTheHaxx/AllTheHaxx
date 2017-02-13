@@ -701,7 +701,7 @@ void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
 
 	if(pInfo->m_EnumCount == pInfo->m_WantedCompletion)
 	{
-		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.GetFont(), pInfo->m_Cursor.m_FontSize, pStr, -1);
+		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1);
 		pInfo->m_pSelf->Graphics()->TextureSet(-1);
 		pInfo->m_pSelf->Graphics()->QuadsBegin();
 			pInfo->m_pSelf->Graphics()->SetColor(229.0f/255.0f,185.0f/255.0f,4.0f/255.0f,0.85f);
@@ -1130,7 +1130,7 @@ void CGameConsole::OnRender()
 				mx = (mx / (float)Graphics()->ScreenWidth()) * Screen.w;
 				my = (my / (float)Graphics()->ScreenHeight()) * Screen.h;
 
-				int strWidth = round_to_int(TextRender()->TextWidth(Cursor.GetFont(), FontSize, sText.c_str(), sText.length()));
+				int strWidth = round_to_int(TextRender()->TextWidth(Cursor.m_pFont, FontSize, sText.c_str(), sText.length()));
 				CUIRect seltextRect(0, y - OffsetY, strWidth, FontSize + 3.0f);
 
 				if(my > seltextRect.y && my < seltextRect.y + seltextRect.h)

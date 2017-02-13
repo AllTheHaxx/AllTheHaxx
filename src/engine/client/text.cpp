@@ -509,27 +509,27 @@ public:
 	}
 
 
-	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float MaxWidth)
+	virtual void Text(CFontFile *pFontSetV, float x, float y, float Size, const char *pText, float MaxWidth)
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
+		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER, 0, pFontSetV);
 		Cursor.m_LineWidth = MaxWidth;
 		TextEx(&Cursor, pText, -1);
 	}
 
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int Length, float LineWidth = -1)
+	virtual float TextWidth(CFontFile *pFontSetV, float Size, const char *pText, int Length, float LineWidth = -1)
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0);
+		SetCursor(&Cursor, 0, 0, Size, 0, 0, pFontSetV);
 		if(LineWidth > 0)
 			Cursor.m_LineWidth = LineWidth;
 		return TextEx(&Cursor, pText, Length);
 	}
 
-	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth)
+	virtual int TextLineCount(CFontFile *pFontSetV, float Size, const char *pText, float LineWidth)
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0);
+		SetCursor(&Cursor, 0, 0, Size, 0, 0, pFontSetV);
 		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, -1);
 		return Cursor.m_LineCount;

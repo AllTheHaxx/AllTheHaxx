@@ -7,6 +7,7 @@
 
 #include "irc.h"
 #include "menus.h"
+#include "fontmgr.h"
 #include <game/client/components/console.h>
 #include <game/generated/client_data.h>
 
@@ -174,7 +175,9 @@ void CMenus::RenderIRC(CUIRect MainView)
 			{
 				CComChan *pChan = static_cast<CComChan*>(pCom);
 				static float FadeVal[64] = { 0.0f };
+				mem_zero(&FadeVal, sizeof(FadeVal));
 				static bool Add[64] = { true };
+				mem_set(&Add, true, sizeof(Add));
 
 				if(Add[i])
 					smooth_set(&FadeVal[i], 1.0f, 120.0f, Client()->RenderFrameTime());
@@ -427,7 +430,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 						vec3 rgb = HslToRgb(vec3((float)g_Config.m_ClMessageHighlightHue/255.0f, (float)g_Config.m_ClMessageHighlightSat/255.0f, (float)g_Config.m_ClMessageHighlightLht/255.0f));
 						TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 					}
-					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 10.0f, -1);
+					UI()->DoLabelScaled(&Item.m_Rect, pChan->m_Buffer[i].c_str(), 10.0f, -1, -1.0f, 0, m_pClient->m_pFontMgr->GetMonoFont());
 					TextRender()->TextColor(1,1,1,1);
 				}
 			}
@@ -474,7 +477,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;
 					if(pQuery->m_Buffer[i].c_str())
 						if(str_length(pQuery->m_Buffer[i].c_str()))
-							UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 10.0f, -1);
+							UI()->DoLabelScaled(&Item.m_Rect, pQuery->m_Buffer[i].c_str(), 10.0f, -1, -1.0f, 0, m_pClient->m_pFontMgr->GetMonoFont());
 				}
 			}
 			UiDoListboxEnd(&s_ChatScrollValue, 0);

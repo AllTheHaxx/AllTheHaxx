@@ -101,8 +101,8 @@ public:
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
 	// TODO: Refactor: Remove this?
-	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
-	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
+	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFontFile *pFont = 0);
+	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFontFile *pFont = 0);
 
 	void AndroidShowScreenKeys(bool shown);
 	void AndroidShowTextInput(const char *text, const char *hintText);

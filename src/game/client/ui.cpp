@@ -6,6 +6,7 @@
 #include <engine/shared/config.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
+#include <game/client/components/fontmgr.h>
 #include "ui.h"
 
 #if defined(__ANDROID__)
@@ -529,7 +530,7 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 }*/
 
 // TODO: if pHighlight is supplied, MaxWidth will be ignored! Fix this!
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
+void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFontFile *pFont)
 {
 	// TODO: FIX ME!!!!
 	//Graphics()->BlendNormal();
@@ -543,7 +544,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 			const char * const _pOrigText = pText;
 
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+			TextRender()->SetCursor(&Cursor, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END, 0, pFont);
 			Cursor.m_LineWidth = r->w;
 			while(pText)
 			{
@@ -568,7 +569,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 			}
 		}
 		else
-			TextRender()->Text(0, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, pText, MaxWidth);
+			TextRender()->Text(pFont, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, pText, MaxWidth);
 	}
 	else if(Align < 0)
 	{
@@ -576,7 +577,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 		if(pHighlight && pHighlight[0] != '\0')
 		{
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+			TextRender()->SetCursor(&Cursor, r->x, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, 0, pFont);
 			Cursor.m_LineWidth = r->w;
 			const char *pStr = str_find_nocase(pText, pHighlight);
 			if(pStr)
@@ -591,7 +592,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 				TextRender()->TextEx(&Cursor, pText, -1);
 		}
 		else
-			TextRender()->Text(0, r->x, r->y - Size/10, Size, pText, MaxWidth);
+			TextRender()->Text(pFont, r->x, r->y - Size/10, Size, pText, MaxWidth);
 	}
 	else if(Align > 0)
 	{
@@ -600,7 +601,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 		if(pHighlight && pHighlight[0] != '\0')
 		{
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x + r->w-tw, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+			TextRender()->SetCursor(&Cursor, r->x + r->w-tw, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, 0, pFont);
 			Cursor.m_LineWidth = r->w;
 			const char *pStr = str_find_nocase(pText, pHighlight);
 			if(pStr)
@@ -615,11 +616,11 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 				TextRender()->TextEx(&Cursor, pText, -1);
 		}
 		else
-			TextRender()->Text(0, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
+			TextRender()->Text(pFont, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
 	}
 }
 
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
+void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFontFile *pFont)
 {
-	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight);
+	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight, pFont);
 }

@@ -546,9 +546,14 @@ void mem_move(void *dest, const void *source, unsigned size)
 	memmove(dest, source, size);
 }
 
-void mem_zero(void *block,unsigned size)
+void mem_zero(void *block, unsigned size)
 {
 	memset(block, 0, size);
+}
+
+void mem_set(void *block, int value, unsigned size)
+{
+	memset(block, value, size);
 }
 
 int mem_check_imp()

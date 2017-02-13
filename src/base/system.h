@@ -176,6 +176,8 @@ void mem_move(void *dest, const void *source, unsigned size);
 */
 void mem_zero(void *block, unsigned size);
 
+void mem_set(void *block, int value, unsigned size);
+
 /*
 	Function: mem_comp
 		Compares two blocks of memory
