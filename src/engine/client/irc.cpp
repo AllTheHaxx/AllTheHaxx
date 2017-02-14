@@ -156,6 +156,9 @@ bool CIRC::CanCloseCom(CIRCCom *pCom)
 
 void CIRC::StartConnection() // call this from a thread only!
 {
+	m_apIRCComs.delete_all();
+	m_apIRCComs.clear();
+
 	NETADDR BindAddr;
 	mem_zero(&m_HostAddress, sizeof(m_HostAddress));
 	mem_zero(&BindAddr, sizeof(BindAddr));
