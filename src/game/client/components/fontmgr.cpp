@@ -30,10 +30,8 @@ void CFontMgr::Init()
 
 	for(int i = 0; i < m_lFontFiles.size(); i++)
 	{
-		dbg_msg("fonti", "'%s' '%s'", m_lFontFiles[i].m_Path.c_str(), aFontFile);
 		if(str_comp(m_lFontFiles[i].m_Path.c_str(), aFontFile) == 0)
 		{
-			dbg_msg("fonti", "YEAH FOUND IT");
 			ActivateFont(i);
 			break;
 		}
