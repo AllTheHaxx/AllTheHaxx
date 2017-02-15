@@ -881,7 +881,7 @@ void CGameConsole::OnRender()
 
 	CInstance *pConsole = CurrentConsole();
 	{
-		float FontSize = 10.0f;
+		float FontSize = 12.0f;
 		float RowHeight = FontSize*1.25f;
 		float x = 3;
 		float y = ConsoleHeight - RowHeight - 5.0f;
