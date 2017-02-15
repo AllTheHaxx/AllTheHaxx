@@ -138,7 +138,6 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Events);
 
-	bool IsClosed() const { return m_ConsoleState == CONSOLE_CLOSED; }
-	bool IsActive() const { return m_ConsoleState == CONSOLE_OPEN || m_ConsoleState == CONSOLE_OPENING; }
+	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
 };
 #endif

@@ -559,8 +559,6 @@ void CGameClient::OnInit()
 
 void CGameClient::OnUpdate()
 {
-	UpdateInputState();
-
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
 	Input()->MouseRelative(&x, &y);
@@ -2640,10 +2638,4 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], -1);
 		IsWeaker[g_Config.m_ClDummy][HookedPlayer] = (DirAccumulated[g_Config.m_ClDummy][HookedPlayer] > 0);
 	}
-}
-
-void CGameClient::UpdateInputState()
-{
-	Input()->SetIMEState(m_pMenus->IsActive() || m_pChat->IsActive() || m_pGameConsole->IsActive());
-	m_pMenus->UseMouseButtons((m_pMenus->IsActive() || m_pChat->IsActive()) && !m_pGameConsole->IsActive());
 }

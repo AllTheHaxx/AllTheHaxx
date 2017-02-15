@@ -47,6 +47,7 @@ bool CMenus::ToggleIRC()
 	}
 	RenderIRC(*UI()->Screen());
 
+	Input()->SetIMEState(m_IRCActive);
 	return m_IRCActive;
 }
 
