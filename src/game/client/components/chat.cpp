@@ -967,6 +967,15 @@ void CChat::OnRender()
 		if(Now > m_aLines[r].m_Time+g_Config.m_ClShowhudChatMsgTime*time_freq() && !m_Show)
 			break;
 
+		float SmoothBlend = 1.0f;
+		float SmoothYOffs = 0.0f;
+		if(g_Config.m_ClSmoothChat)
+		{
+			float X = ((float)Now - (float)m_aLines[r].m_Time+1.0f) / time_freq();
+			SmoothBlend = 1.0f - 3.0f * expf(-4.0f * (X + 0.5f) + 1.6f);
+			SmoothYOffs = 3.0f - SmoothBlend * 3.0f;
+		}
+
 		char aName[64] = "";
 		if(g_Config.m_ClShowIDsChat && m_aLines[r].m_ClientID != -1 && m_aLines[r].m_aName[0] != '\0')
 		{
@@ -996,7 +1005,9 @@ void CChat::OnRender()
 		if(y < HeightLimit)
 			break;
 
-		float Blend = Now > m_aLines[r].m_Time+14*time_freq() && !m_Show ? 1.0f-(Now-m_aLines[r].m_Time-14*time_freq())/(2.0f*time_freq()) : 1.0f;
+		y += SmoothYOffs;
+
+		float Blend = min(SmoothBlend, Now > m_aLines[r].m_Time+14*time_freq() && !m_Show ? 1.0f-(Now-m_aLines[r].m_Time-14*time_freq())/(2.0f*time_freq()) : 1.0f);
 
 		// reset the cursor
 		TextRender()->SetCursor(&Cursor, Begin + (g_Config.m_ClChatAvatar ? 3.0f : 0.0f), y, FontSize, TEXTFLAG_RENDER);
