@@ -6,6 +6,7 @@
 #include <engine/textrender.h>
 
 #include "irc.h"
+#include "chat.h"
 #include "menus.h"
 #include "fontmgr.h"
 #include <game/client/components/console.h>
@@ -47,7 +48,9 @@ bool CMenus::ToggleIRC()
 	}
 	RenderIRC(*UI()->Screen());
 
-	Input()->SetIMEState(m_IRCActive);
+	Input()->SetIMEState(m_IRCActive || m_MenuActive || m_pClient->m_pChat->IsActive());
+	UseMouseButtons(m_IRCActive || m_MenuActive);
+
 	return m_IRCActive;
 }
 

@@ -195,6 +195,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
+	if(m_pClient->m_pMenus->IsActive() && Event.m_Key != KEY_ESCAPE)
+		return false;
+
 	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{
 		if(Input()->KeyIsPressed(KEY_LCTRL))

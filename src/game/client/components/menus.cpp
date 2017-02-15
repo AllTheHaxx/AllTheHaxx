@@ -2725,7 +2725,7 @@ bool CMenus::LockInput(IInput::CEvent e)
 
 	if(m_HotbarActive || m_IRCActive)
 	{
-		if((e.m_Flags&IInput::FLAG_PRESS) && (e.m_Key == KEY_MOUSE_1 || e.m_Key == KEY_MOUSE_2))
+		if((e.m_Flags&IInput::FLAG_PRESS)/* && (e.m_Key == KEY_MOUSE_1 || e.m_Key == KEY_MOUSE_2)*/)
 			return true;
 	}
 	return false;
