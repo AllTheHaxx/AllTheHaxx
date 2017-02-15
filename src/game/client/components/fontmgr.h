@@ -20,15 +20,15 @@ struct CFontFile
 		NUM_TYPES
 	};
 
-	std::string m_Path;
+	std::string m_Name;
 	CFont *m_apFonts[NUM_TYPES];
 
 	CFontFile() { clear(); }
-	CFontFile(const std::string& Path) { clear(); m_Path = Path; }
+	CFontFile(const std::string& Name) { clear(); m_Name = Name; }
 
 	void clear()
 	{
-		m_Path = "";
+		m_Name = "";
 		mem_zero(m_apFonts, sizeof(m_apFonts));
 	}
 };
@@ -56,8 +56,8 @@ public:
 	int GetSelectedFontIndex() const { return m_ActiveFontIndex; }
 	int GetNumMonoFonts() const { return m_lMonoFontFiles.size(); }
 	int GetSelectedMonoFontIndex() const { return m_ActiveMonoFontIndex; }
-	const char *GetFontPath(int i) const { if(i >= 0 && i < m_lFontFiles.size()) return m_lFontFiles[i].m_Path.c_str(); return ""; }
-	const char *GetMonoFontPath(int i) const { if(i >= 0 && i < m_lMonoFontFiles.size()) return m_lMonoFontFiles[i].m_Path.c_str()+6; return ""; }
+	const char *GetFontPath(int i) const { if(i >= 0 && i < m_lFontFiles.size()) return m_lFontFiles[i].m_Name.c_str(); return ""; }
+	const char *GetMonoFontPath(int i) const { if(i >= 0 && i < m_lMonoFontFiles.size()) return m_lMonoFontFiles[i].m_Name.c_str()+6; return ""; }
 	CFontFile *GetFont(int i = -1)
 	{
 		if(i < 0) i = m_ActiveFontIndex;

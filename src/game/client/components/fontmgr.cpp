@@ -30,7 +30,7 @@ void CFontMgr::Init()
 
 	for(int i = 0; i < m_lFontFiles.size(); i++)
 	{
-		if(str_comp(m_lFontFiles[i].m_Path.c_str(), aFontFile) == 0)
+		if(str_comp(m_lFontFiles[i].m_Name.c_str(), aFontFile) == 0)
 		{
 			ActivateFont(i);
 			break;
@@ -48,7 +48,7 @@ void CFontMgr::Init()
 	for(int i = 0; i < m_lMonoFontFiles.size(); i++)
 	{
 		// load default mono font
-		if(str_comp(m_lMonoFontFiles[i].m_Path.c_str(), aMonoFontFile) == 0)
+		if(str_comp(m_lMonoFontFiles[i].m_Name.c_str(), aMonoFontFile) == 0)
 		{
 			InitFont(&m_lMonoFontFiles[i]);
 			m_ActiveMonoFontIndex = i;
@@ -97,25 +97,36 @@ void CFontMgr::ActivateMonoFont(int ListIndex)
 void CFontMgr::InitFont(CFontFile *f)
 {
 	if(g_Config.m_Debug)
-		dbg_msg("fontmgr/debug", "loading font %p '%s' into memory", f, f->m_Path.c_str());
+		dbg_msg("fontmgr/debug", "loading font %p '%s' into memory", f, f->m_Name.c_str());
 
-	static const char s_apTypes[4][3] = { "r", "b", "i", "bi" };
+	static const char *s_apTypes[2][4] = {
+			{ "r", "b", "i", "bi" },
+			{ "Regular", "Bold", "Italic", "BoldItalic" }
+	};
 
 	for(int i = 0; i < CFontFile::NUM_TYPES; i++)
 	{
-		char aPath[512];
-		str_format(aPath, sizeof(aPath), "fonts/%s/%s.ttf", f->m_Path.c_str(), s_apTypes[i]);
+		for(int x = 0; x < 2; x++)
+		{
+			char aPath[512];
+			if(x == 0)
+				str_format(aPath, sizeof(aPath), "fonts/%s/%s.ttf", f->m_Name.c_str(), s_apTypes[x][i]);
+			else
+				str_format(aPath, sizeof(aPath), "fonts/%s/%s-%s.ttf", f->m_Name.c_str(), f->m_Name.c_str(), s_apTypes[x][i]);
 
-		char aFilename[512];
-		IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorageTW::TYPE_ALL, aFilename, sizeof(aFilename));
-		if(File)
-		{
-			io_close(File);
-			f->m_apFonts[i] = TextRender()->LoadFont(aFilename);
-		}
-		else if(i == 0)
-		{
-			Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load font. file='%s'", f->m_Path.c_str());
+			char aFilename[512];
+			IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorageTW::TYPE_ALL, aFilename, sizeof(aFilename));
+			if(File)
+			{
+				io_close(File);
+				f->m_apFonts[i] = TextRender()->LoadFont(aFilename);
+			}
+			else if(x == 0)
+				continue;
+			else if(i == 0)
+			{
+				Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load font. file='%s'", f->m_Name.c_str());
+			}
 		}
 	}
 }
@@ -145,7 +156,7 @@ int CFontMgr::LoadFolderCallback(const char *pName, int IsDir, int DirType, void
 
 	// make sure we don't add fonts multiple times
 	for(int i = 0; i < pList->size(); i++)
-		if((*pList)[i].m_Path == std::string(aFile))
+		if((*pList)[i].m_Name == std::string(aFile))
 			return 0;
 
 	if(IsDir)
@@ -178,8 +189,8 @@ void CFontMgr::SortList(bool mono)
 		for(int i = curr + 1; i < NUM; i++)
 		{
 			int c = 4;
-			for(; str_uppercase(list[i].m_Path.c_str()[c]) == str_uppercase(list[minIndex].m_Path.c_str()[c]); c++);
-			if(str_uppercase(list[i].m_Path.c_str()[c]) < str_uppercase(list[minIndex].m_Path.c_str()[c]))
+			for(; str_uppercase(list[i].m_Name.c_str()[c]) == str_uppercase(list[minIndex].m_Name.c_str()[c]); c++);
+			if(str_uppercase(list[i].m_Name.c_str()[c]) < str_uppercase(list[minIndex].m_Name.c_str()[c]))
 				minIndex = i;
 		}
 
@@ -205,5 +216,5 @@ void CFontMgr::ReloadFontlist()
 	LoadFolder("fonts", false);
 	LoadFolder("fonts/.mono", true);
 	for(int i = 0; i < m_lMonoFontFiles.size(); i++)
-		m_lMonoFontFiles[i].m_Path = ".mono/" + m_lMonoFontFiles[i].m_Path;
+		m_lMonoFontFiles[i].m_Name = ".mono/" + m_lMonoFontFiles[i].m_Name;
 }
