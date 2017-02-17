@@ -262,6 +262,6 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		mem_copy(g_Config.m_TexCursor, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexCursor));
-		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_CURSOR, g_Config.m_TexCursor);
+		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_HUDCURSOR, g_Config.m_TexCursor);
 	}
 }

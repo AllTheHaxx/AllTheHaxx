@@ -2556,7 +2556,7 @@ void CMenus::OnRender()
 	// render cursor
 	if(m_pClient->m_pGameConsole->IsClosed())
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_HUDCURSOR].m_Id);
 		Graphics()->QuadsBegin();
 		Graphics()->QuadsSetRotation((float)g_Config.m_ClMouseRotation*((2.0f*3.1415926f)/360.0f));
 		Graphics()->SetColor(1,1,1,1);

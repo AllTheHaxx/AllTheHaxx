@@ -86,7 +86,7 @@ void CGameTextureManager::OnInit()
 void CGameTextureManager::OnReset()
 {
 	SetTexture(IMAGE_GAME, g_Config.m_TexGame);
-	SetTexture(IMAGE_CURSOR, g_Config.m_TexCursor);
+	SetTexture(IMAGE_HUDCURSOR, g_Config.m_TexCursor);
 	SetTexture(IMAGE_EMOTICONS, g_Config.m_TexEmoticons);
 	SetTexture(IMAGE_PARTICLES, g_Config.m_TexParticles);
 }
@@ -94,7 +94,7 @@ void CGameTextureManager::OnReset()
 int CGameTextureManager::SetTexture(int Image, const char *pName)
 {
 	int Group =	 Image == IMAGE_GAME  ? TEXTURE_GROUP_GAME :
-				 Image == IMAGE_CURSOR  ? TEXTURE_GROUP_CURSOR :
+				 Image == IMAGE_HUDCURSOR  ? TEXTURE_GROUP_CURSOR :
 				 Image == IMAGE_EMOTICONS  ? TEXTURE_GROUP_EMOTE :
 				 Image == IMAGE_PARTICLES  ? TEXTURE_GROUP_PARTICLES : -1;
 

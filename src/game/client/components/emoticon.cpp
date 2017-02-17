@@ -246,7 +246,7 @@ void CEmoticon::OnRender()
 #if defined(CONF_FAMILY_WINDOWS)
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 #else
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_HUDCURSOR].m_Id);
 #endif
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1, 1, 1, s_Val*1);

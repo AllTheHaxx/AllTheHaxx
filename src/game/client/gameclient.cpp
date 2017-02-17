@@ -436,7 +436,7 @@ void CGameClient::OnInit()
 
 		// load the textures
 		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages &&
-				i-m_All.m_Num != IMAGE_GAME && i-m_All.m_Num != IMAGE_CURSOR &&
+				i-m_All.m_Num != IMAGE_GAME && i-m_All.m_Num != IMAGE_HUDCURSOR &&
 				i-m_All.m_Num != IMAGE_PARTICLES && i-m_All.m_Num != IMAGE_EMOTICONS)
 		{
 			SET_LOAD_LABEL_V("Loading Textures (%i/%i): \"%s\"", i-m_All.m_Num+1, g_pData->m_NumImages, g_pData->m_aImages[i-m_All.m_Num].m_pFilename);
