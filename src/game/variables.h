@@ -185,6 +185,7 @@ MACRO_CONFIG_INT(ClChatbubble, cl_chatbubble, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SA
 MACRO_CONFIG_STR(FtFont, ft_font_pack, 128, "DejaVuSansCJKName", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font to use")
 MACRO_CONFIG_STR(FtMonoFont, ft_mono_font_pack, 128, "UbuntuMono", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Monospace font to use")
 MACRO_CONFIG_INT(FtPreloadFonts, ft_preload_fonts, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Load all fonts in 'data/fonts/' into memory on client start (enables font-preview!)")
+MACRO_CONFIG_INT(ClMonoFontSize, cl_monofont_size, 10, 6, 16, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font size in Console and IRC")
 MACRO_CONFIG_INT(ClConsoleLowCPU, cl_console_low_cpu, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Limits FPS while console is open in order to lower our CPU usage")
 
 // irc
