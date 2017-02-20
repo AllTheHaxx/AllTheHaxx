@@ -21,6 +21,7 @@ struct CFontFile
 	};
 
 	std::string m_Name;
+	std::string m_Path;
 	CFont *m_apFonts[NUM_TYPES];
 
 	CFontFile() { clear(); }
@@ -57,7 +58,7 @@ public:
 	int GetNumMonoFonts() const { return m_lMonoFontFiles.size(); }
 	int GetSelectedMonoFontIndex() const { return m_ActiveMonoFontIndex; }
 	const char *GetFontPath(int i) const { if(i >= 0 && i < m_lFontFiles.size()) return m_lFontFiles[i].m_Name.c_str(); return ""; }
-	const char *GetMonoFontPath(int i) const { if(i >= 0 && i < m_lMonoFontFiles.size()) return m_lMonoFontFiles[i].m_Name.c_str()+6; return ""; }
+	const char *GetMonoFontPath(int i) const { if(i >= 0 && i < m_lMonoFontFiles.size()) return m_lMonoFontFiles[i].m_Name.c_str(); return ""; }
 	CFontFile *GetFont(int i = -1)
 	{
 		if(i < 0) i = m_ActiveFontIndex;

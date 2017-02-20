@@ -112,7 +112,7 @@ void CFontMgr::InitFont(CFontFile *f)
 			if(x == 0)
 				str_format(aPath, sizeof(aPath), "fonts/%s/%s.ttf", f->m_Name.c_str(), s_apTypes[x][i]);
 			else
-				str_format(aPath, sizeof(aPath), "fonts/%s/%s-%s.ttf", f->m_Name.c_str(), f->m_Name.c_str(), s_apTypes[x][i]);
+				str_format(aPath, sizeof(aPath), "fonts/%s/%s-%s.ttf", f->m_Path.c_str(), f->m_Name.c_str(), s_apTypes[x][i]);
 
 			char aFilename[512];
 			IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorageTW::TYPE_ALL, aFilename, sizeof(aFilename));
@@ -121,11 +121,11 @@ void CFontMgr::InitFont(CFontFile *f)
 				io_close(File);
 				f->m_apFonts[i] = TextRender()->LoadFont(aFilename);
 			}
-			else if(x == 0)
-				continue;
-			else if(i == 0)
+			else
 			{
-				Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load font. file='%s'", f->m_Name.c_str());
+				Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load font [%i|%i] file='%s' (%s)", i, x, aPath, aFilename);
+				if(x == 0)
+					continue;
 			}
 		}
 	}
@@ -215,6 +215,8 @@ void CFontMgr::ReloadFontlist()
 
 	LoadFolder("fonts", false);
 	LoadFolder("fonts/.mono", true);
+	for(int i = 0; i < m_lFontFiles.size(); i++)
+		m_lFontFiles[i].m_Path = m_lFontFiles[i].m_Name;
 	for(int i = 0; i < m_lMonoFontFiles.size(); i++)
-		m_lMonoFontFiles[i].m_Name = ".mono/" + m_lMonoFontFiles[i].m_Name;
+		m_lMonoFontFiles[i].m_Path = ".mono/" + m_lMonoFontFiles[i].m_Name;
 }
