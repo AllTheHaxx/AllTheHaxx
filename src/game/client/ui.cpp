@@ -530,6 +530,11 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 }*/
 
 // TODO: if pHighlight is supplied, MaxWidth will be ignored! Fix this!
+void CUI::DoLabelLua(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
+{
+	DoLabel(r, pText, Size, Align, MaxWidth, pHighlight);
+}
+
 void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFontFile *pFont)
 {
 	// TODO: FIX ME!!!!
@@ -618,6 +623,11 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 		else
 			TextRender()->Text(pFont, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
 	}
+}
+
+void CUI::DoLabelScaledLua(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
+{
+	DoLabelScaled(r, pText, Size, Align, MaxWidth, pHighlight);
 }
 
 void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFontFile *pFont)
