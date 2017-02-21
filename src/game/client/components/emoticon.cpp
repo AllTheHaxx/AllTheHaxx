@@ -243,11 +243,7 @@ void CEmoticon::OnRender()
 	if(!m_Active)
 		return;
 
-#if defined(CONF_FAMILY_WINDOWS)
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-#else
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_HUDCURSOR].m_Id);
-#endif
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1, 1, 1, s_Val*1);
 	IGraphics::CQuadItem QuadItem(s_Val*m_SelectorMouse.x + Screen.w / 2, s_Val*m_SelectorMouse.y + Screen.h / 2, 24, 24);
