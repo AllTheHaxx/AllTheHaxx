@@ -2222,7 +2222,7 @@ void CGameClient::SendDummyInfo(bool Start)
 	}
 }
 
-void CGameClient::SendKill(int ClientID)
+void CGameClient::SendKill()
 {
 	CNetMsg_Cl_Kill Msg;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
@@ -2241,7 +2241,7 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameClient*)pUserData)->SendKill(-1);
+	((CGameClient*)pUserData)->SendKill();
 }
 
 void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)

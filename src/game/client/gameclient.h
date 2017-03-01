@@ -346,7 +346,7 @@ public:
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
 	virtual void SendDummyInfo(bool Start);
-	void SendKill(int ClientID);
+	void SendKill();
 
 	// pointers to all systems
 	class CGameConsole *m_pGameConsole;

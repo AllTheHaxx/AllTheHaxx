@@ -500,6 +500,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("LocalTee", &CGameClient::m_PredictedChar) */
 
 			.addFunction("IntersectCharacter", &CGameClient::IntersectCharacterLua)
+			.addFunction("SendKill", &CGameClient::SendKill)
 		.endClass()
 
 		// MAIN NAMESPACE
