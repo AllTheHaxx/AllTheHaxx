@@ -3,26 +3,17 @@
 
 #include <string>
 
-#include <base/tl/array.h>
+#include <base/tl/sorted_array.h>
+#include <game/client/component.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <game/client/component.h>
 
 struct CFontFile
 {
-	enum
-	{
-		REGULAR = 0,
-		BOLD,
-		ITALIC,
-		BOLD_ITALIC,
-		NUM_TYPES
-	};
-
 	std::string m_Name;
 	std::string m_Path;
-	CFont *m_apFonts[NUM_TYPES];
+	CFont *m_apFonts[FONT_NUM_TYPES];
 
 	CFontFile() { clear(); }
 	CFontFile(const std::string& Name) { clear(); m_Name = Name; }
@@ -32,50 +23,59 @@ struct CFontFile
 		m_Name = "";
 		mem_zero(m_apFonts, sizeof(m_apFonts));
 	}
+
+	bool operator<(const CFontFile& other) { return str_comp(this->m_Name.c_str(), other.m_Name.c_str()) < 0; }
 };
 
-class CFontMgr : public CComponent
+class IFontMgr : public CComponent
 {
-	array<CFontFile> m_lFontFiles;
-	array<CFontFile> m_lMonoFontFiles;
+public:
+	enum { TYPE_BASIC, TYPE_MONO };
+
+	virtual void Init() = 0;
+	virtual void ReloadFontlist() = 0;
+	virtual bool ActivateFont(int ListIndex) = 0;
+
+	virtual int GetNumFonts() const = 0;
+	virtual int GetSelectedFontIndex() const = 0;
+	virtual const char *GetFontPath(int ListIndex) const = 0;
+	virtual CFont *GetFont(int FontFace) = 0;
+};
+
+class CFontMgr : public IFontMgr
+{
 	int m_ActiveFontIndex;
-	int m_ActiveMonoFontIndex;
+	sorted_array<CFontFile> m_lFontFiles;
 
-	void SortList(bool mono);
-	void LoadFolder(const char *pFolder, bool mono);
-	void InitFont(CFontFile *f);
-
+	void LoadFolder();
+	bool InitFont(CFontFile *f);
+	bool InitFont_impl(CFontFile *f, int Type, const char *pTypeStr);
+	void UnloadFont(int ListIndex);
+	void RemoveFont(int ListIndex);
 
 public:
+	const int m_Type;
+	CFontMgr(int Type)
+			: m_Type(Type)
+	{
+	}
+
 	void Init();
 	void ReloadFontlist();
-	void ActivateFont(int ListIndex);
-	void ActivateMonoFont(int ListIndex);
+	bool ActivateFont(int ListIndex);
 
 	int GetNumFonts() const { return m_lFontFiles.size(); }
-	int GetNumLoadedFonts() const { int ret = 0; for(int i = 0; i < m_lFontFiles.size(); i++) if(m_lFontFiles[i].m_apFonts[0]) ret++; return ret; }
 	int GetSelectedFontIndex() const { return m_ActiveFontIndex; }
-	int GetNumMonoFonts() const { return m_lMonoFontFiles.size(); }
-	int GetSelectedMonoFontIndex() const { return m_ActiveMonoFontIndex; }
 	const char *GetFontPath(int i) const { if(i >= 0 && i < m_lFontFiles.size()) return m_lFontFiles[i].m_Name.c_str(); return ""; }
-	const char *GetMonoFontPath(int i) const { if(i >= 0 && i < m_lMonoFontFiles.size()) return m_lMonoFontFiles[i].m_Name.c_str(); return ""; }
-	CFontFile *GetFont(int i = -1)
+	CFont *GetFont(int FontFace)
 	{
-		if(i < 0) i = m_ActiveFontIndex;
-		if(i >= 0 && i < m_lFontFiles.size())
-			return &m_lFontFiles[i];
-		return 0;
+		if(FontFace < 0 || FontFace >= FONT_NUM_TYPES)
+			FontFace = FONT_REGULAR;
+		CFont *pFont = m_lFontFiles[m_ActiveFontIndex].m_apFonts[FontFace];
+		if(!pFont)
+			pFont = m_lFontFiles[m_ActiveFontIndex].m_apFonts[FONT_REGULAR]; // default to regular if wanted fontface not present
+		return pFont;
 	}
-	CFontFile *GetMonoFont(int i = -1)
-	{
-		if(i < 0) i = m_ActiveMonoFontIndex;
-		if(i >= 0 && i < m_lMonoFontFiles.size())
-			return &m_lMonoFontFiles[i];
-		return 0;
-	}
-
-protected:
-	IStorageTW *m_pStorage;
 
 private:
 	static int LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser);

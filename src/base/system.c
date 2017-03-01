@@ -1871,6 +1871,61 @@ int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 #endif
 }
 
+int fs_listdir_verbose(const char *dir, FS_LISTDIR_CALLBACK_VERBOSE cb, int type, void *user)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WIN32_FIND_DATA finddata;
+	HANDLE handle;
+	char buffer[1024*2];
+	int length;
+	str_format(buffer, sizeof(buffer), "%s/*", dir);
+
+	handle = FindFirstFileA(buffer, &finddata);
+
+	if (handle == INVALID_HANDLE_VALUE)
+		return 0;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+	int result = 0;
+
+	/* add all the entries */
+	do
+	{
+		str_copy(buffer+length, finddata.cFileName, (int)sizeof(buffer)-length);
+		if((result = cb(finddata.cFileName, buffer, fs_is_dir(buffer), type, user)))
+			break;
+	}
+	while (FindNextFileA(handle, &finddata));
+
+	FindClose(handle);
+	return result;
+#else
+	struct dirent *entry;
+	char buffer[1024*2];
+	int length;
+	DIR *d = opendir(dir);
+
+	if(!d)
+		return 0;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+	int result = 0;
+
+	while((entry = readdir(d)) != NULL)
+	{
+		str_copy(buffer+length, entry->d_name, (int)sizeof(buffer)-length);
+		if((result = cb(entry->d_name, buffer, fs_is_dir(buffer), type, user)))
+			break;
+	}
+
+	/* close the directory and return */
+	closedir(d);
+	return result;
+#endif
+}
+
 int fs_storage_path(const char *appname, char *path, int max)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -2446,6 +2501,16 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 		dst[b*3+3] = 0;
 	}
 }
+void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data_size)
+{
+	mem_zero(dst, sizeof(dst));
+	for(int i = 0; i < data_size; i++)
+	{
+		char buf[3];
+		str_format(buf, sizeof(buf), "%02x", data[i]);
+		str_append(dst, buf, dst_size);
+	}
+}
 
 void str_timestamp_ex(time_t time_data, char *buffer, unsigned int buffer_size, const char *format)
 {
@@ -2552,6 +2617,7 @@ char str_uppercase(char c)
 
 int str_toint(const char *str) { return atoi(str); }
 int str_toint_base(const char *str, int base) { return (int)strtol(str, NULL, base); }
+unsigned long str_toulong_base(const char *str, int base) { return strtoul(str, NULL, base); }
 float str_tofloat(const char *str) { return (float)atof(str); }
 
 
@@ -2909,6 +2975,13 @@ int secure_rand()
 	unsigned int i;
 	secure_random_fill(&i, sizeof(i));
 	return (int)(i%RAND_MAX);
+}
+
+unsigned secure_rand_u()
+{
+	unsigned int i;
+	secure_random_fill(&i, sizeof(i));
+	return (i%RAND_MAX);
 }
 
 int simpleSHA256(void* input, unsigned long length, unsigned char* md)

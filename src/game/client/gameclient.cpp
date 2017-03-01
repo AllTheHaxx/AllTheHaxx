@@ -1,5 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include <base/system.h>
+#include <base/tl/sorted_array.h>
+
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/friends.h>
@@ -63,15 +67,12 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/voting.h"
-#include "game/client/components/gametexture.h"
 #include "components/drawing.h"
-#include "components/fontmgr.h"
 #include "components/skindownload.h"
-
-#include <base/system.h>
 #include "components/race_demo.h"
 #include "components/ghost.h"
-#include <base/tl/sorted_array.h>
+#include "components/gametexture.h"
+#include "components/fontmgr.h"
 
 
 CGameClient g_GameClient;
@@ -137,7 +138,8 @@ static CSpoofRemote gs_SpoofRemote;
 static CIdentity gs_Identity;
 static CGameTextureManager gs_GameTextureManager;
 static CDrawing gs_Drawing;
-static CFontMgr gs_FontMgr;
+static CFontMgr gs_FontMgrBasic(IFontMgr::TYPE_BASIC);
+static CFontMgr gs_FontMgrMono(IFontMgr::TYPE_MONO);
 static CSkinDownload gs_SkinDownload;
 
 static CPlayers gs_Players;
@@ -230,7 +232,8 @@ void CGameClient::OnConsoleInit()
 	m_pIRCBind = &::gs_IRC;
 	m_pIdentity = &::gs_Identity;
 	m_pGameTextureManager = &::gs_GameTextureManager;
-	m_pFontMgr = &::gs_FontMgr;
+	m_pFontMgrBasic = &::gs_FontMgrBasic;
+	m_pFontMgrMono = &::gs_FontMgrMono;
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
@@ -317,7 +320,8 @@ void CGameClient::OnConsoleInit()
 	ADD_LUARENDER(24);
 	// stuff that doesn't render anything:
 	m_All.Add(&gs_SpoofRemote);
-	m_All.Add(m_pFontMgr);
+	m_All.Add(m_pFontMgrBasic);
+	m_All.Add(m_pFontMgrMono);
 
 #undef ADD_LUARENDER
 
@@ -410,8 +414,9 @@ void CGameClient::OnInit()
 	for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		Client()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
-	// load default font
-	m_pFontMgr->Init();
+	// load fontmanagers
+	m_pFontMgrBasic->Init();
+	m_pFontMgrMono->Init();
 
 	// init all components
 	char aBuf[256];

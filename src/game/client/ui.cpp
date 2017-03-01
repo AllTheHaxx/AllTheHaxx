@@ -530,12 +530,7 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 }*/
 
 // TODO: if pHighlight is supplied, MaxWidth will be ignored! Fix this!
-void CUI::DoLabelLua(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
-{
-	DoLabel(r, pText, Size, Align, MaxWidth, pHighlight);
-}
-
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFontFile *pFont)
+void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont)
 {
 	// TODO: FIX ME!!!!
 	//Graphics()->BlendNormal();
@@ -549,7 +544,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 			const char * const _pOrigText = pText;
 
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END, 0, pFont);
+			TextRender()->SetCursor(&Cursor, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END, pFont);
 			Cursor.m_LineWidth = r->w;
 			while(pText)
 			{
@@ -582,7 +577,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 		if(pHighlight && pHighlight[0] != '\0')
 		{
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, 0, pFont);
+			TextRender()->SetCursor(&Cursor, r->x, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, pFont);
 			Cursor.m_LineWidth = r->w;
 			const char *pStr = str_find_nocase(pText, pHighlight);
 			if(pStr)
@@ -606,7 +601,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 		if(pHighlight && pHighlight[0] != '\0')
 		{
 			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x + r->w-tw, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, 0, pFont);
+			TextRender()->SetCursor(&Cursor, r->x + r->w-tw, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, pFont);
 			Cursor.m_LineWidth = r->w;
 			const char *pStr = str_find_nocase(pText, pHighlight);
 			if(pStr)
@@ -625,12 +620,17 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 	}
 }
 
-void CUI::DoLabelScaledLua(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
-{
-	DoLabelScaled(r, pText, Size, Align, MaxWidth, pHighlight);
-}
-
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFontFile *pFont)
+void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont)
 {
 	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight, pFont);
+}
+
+void CUI::DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, int FontFace)
+{
+	DoLabel(pRect, pText, Size, Align, MaxWidth, pHighlight, CLua::m_pCGameClient->m_pFontMgrBasic->GetFont(FontFace));
+}
+
+void CUI::DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, int FontFace)
+{
+	DoLabelScaled(pRect, pText, Size, Align, MaxWidth, pHighlight, CLua::m_pCGameClient->m_pFontMgrBasic->GetFont(FontFace));
 }

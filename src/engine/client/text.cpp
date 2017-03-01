@@ -492,7 +492,7 @@ public:
 	}
 
 
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, int Formatting = CFontFile::REGULAR, CFontFile *pFont = 0)
+	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags, CFont *pFont = 0)
 	{
 		mem_zero(pCursor, sizeof(*pCursor));
 		pCursor->m_FontSize = FontSize;
@@ -504,32 +504,31 @@ public:
 		pCursor->m_LineWidth = -1;
 		pCursor->m_CharCount = 0;
 		pCursor->m_Flags = Flags;
-		pCursor->m_Formatting = Formatting;
 		pCursor->m_pFont = pFont;
 	}
 
 
-	virtual void Text(CFontFile *pFontSetV, float x, float y, float Size, const char *pText, float MaxWidth)
+	virtual void Text(CFont *pFontSetV, float x, float y, float Size, const char *pText, float MaxWidth)
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER, 0, pFontSetV);
+		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER, pFontSetV);
 		Cursor.m_LineWidth = MaxWidth;
 		TextEx(&Cursor, pText, -1);
 	}
 
-	virtual float TextWidth(CFontFile *pFontSetV, float Size, const char *pText, int Length, float LineWidth = -1)
+	virtual float TextWidth(CFont *pFontSetV, float Size, const char *pText, int Length, float LineWidth = -1)
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0, 0, pFontSetV);
+		SetCursor(&Cursor, 0, 0, Size, 0, pFontSetV);
 		if(LineWidth > 0)
 			Cursor.m_LineWidth = LineWidth;
 		return TextEx(&Cursor, pText, Length);
 	}
 
-	virtual int TextLineCount(CFontFile *pFontSetV, float Size, const char *pText, float LineWidth)
+	virtual int TextLineCount(CFont *pFontSetV, float Size, const char *pText, float LineWidth)
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0, 0, pFontSetV);
+		SetCursor(&Cursor, 0, 0, Size, 0, pFontSetV);
 		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, -1);
 		return Cursor.m_LineCount;
@@ -562,9 +561,9 @@ public:
 		CFont *pFont = NULL;
 		if(pCursor->m_pFont)
 		{
-			pFont = pCursor->m_pFont->m_apFonts[pCursor->m_Formatting];
+			pFont = pCursor->m_pFont;
 			if(!pFont)
-				pFont = pCursor->m_pFont->m_apFonts[CFontFile::REGULAR];
+				pFont = pCursor->m_pFont;
 		}
 		CFontSizeData *pSizeData = NULL;
 
@@ -758,12 +757,5 @@ public:
 	}
 
 };
-
-CFont *CTextCursor::GetFont() const
-{
-	if(!m_pFont)
-		return NULL;
-	return m_pFont->m_apFonts[m_Formatting];
-}
 
 IEngineTextRender *CreateEngineTextRender() { return new CTextRender; }

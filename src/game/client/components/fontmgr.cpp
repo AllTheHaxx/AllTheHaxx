@@ -1,146 +1,167 @@
 
 #include <engine/console.h>
+#include <engine/shared/config.h>
 
 #include "fontmgr.h"
 
+#define ConfigFtFont (m_Type == TYPE_BASIC ? g_Config.m_FtFont : g_Config.m_FtMonoFont)
+static const char *s_apFontFolders[] = { "basic", "mono" };
+
 void CFontMgr::Init()
 {
-	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_lFontFiles.clear();
-	m_lFontFiles.hint_size(10);
-	m_lMonoFontFiles.clear();
-	m_lMonoFontFiles.hint_size(10);
-	m_ActiveMonoFontIndex = -1;
+	m_ActiveFontIndex = -1;
 
 	ReloadFontlist();
 
-	if(g_Config.m_FtPreloadFonts)
-		for(int i = 0; i < m_lFontFiles.size(); i++)
-			InitFont(&m_lFontFiles[i]);
+	// load selected font
+	if(str_length(ConfigFtFont) == 0)
+		str_copy(ConfigFtFont, "DejaVuSansCJKName", sizeof(ConfigFtFont));
 
-	// load default font
-	char aFontFile[256];
-	str_format(aFontFile, sizeof(aFontFile), "%s", g_Config.m_FtFont);
-	if(str_comp(g_Config.m_FtFont, "DejaVuSansCJKName") == 0)
-		if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
-			str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
-				str_format(aFontFile, sizeof(aFontFile), "DejavuWenQuanYiMicroHei");
+	char aFontFile[256] = {0};
+	if(str_comp(ConfigFtFont, "DejaVuSansCJKName") == 0)
+	{
+		// for the combination of DejaVuSansCJKName and one of these languages, use a replacement font
+		if(str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL || str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
+			str_copy(ConfigFtFont, "DejavuWenQuanYiMicroHei", sizeof(ConfigFtFont));
+	}
 	if(str_length(aFontFile) == 0)
-		str_copy(aFontFile, "DejaVuSansCJKName", sizeof(aFontFile));
+		str_copy(aFontFile, ConfigFtFont, sizeof(ConfigFtFont));
 
 	for(int i = 0; i < m_lFontFiles.size(); i++)
 	{
 		if(str_comp(m_lFontFiles[i].m_Name.c_str(), aFontFile) == 0)
 		{
 			ActivateFont(i);
-			break;
+			return;
 		}
 	}
 
-
-	// load default mono font
-	char aMonoFontFile[256];
-	if(str_length(g_Config.m_FtMonoFont) > 0)
-		str_format(aMonoFontFile, sizeof(aMonoFontFile), ".mono/%s", g_Config.m_FtMonoFont);
-	else
-		str_copy(aMonoFontFile, ".mono/UbuntuMono", sizeof(aFontFile));
-
-	for(int i = 0; i < m_lMonoFontFiles.size(); i++)
-	{
-		// load default mono font
-		if(str_comp(m_lMonoFontFiles[i].m_Name.c_str(), aMonoFontFile) == 0)
-		{
-			InitFont(&m_lMonoFontFiles[i]);
-			m_ActiveMonoFontIndex = i;
-			break;
-		}
-	}
+	// if all fails, just pick the first in our list
+	ActivateFont(0);
 }
 
-void CFontMgr::ActivateFont(int ListIndex)
+bool CFontMgr::ActivateFont(int ListIndex)
 {
 	if(ListIndex > m_lFontFiles.size())
 	{
 		dbg_msg("fontmgr/error", "tried to load font that doesn't exist (%i > %i)", ListIndex, m_lFontFiles.size());
-		return;
+		return false;
 	}
 
 	CFontFile *f = &m_lFontFiles[ListIndex];
-	if(!f->m_apFonts[CFontFile::REGULAR])
-		InitFont(f);
 
-	if(f->m_apFonts[CFontFile::REGULAR])
+	if(InitFont(f))
 	{
-		TextRender()->SetDefaultFont(f->m_apFonts[CFontFile::REGULAR]);
+		if(m_Type == TYPE_BASIC)
+			TextRender()->SetDefaultFont(f->m_apFonts[FONT_REGULAR]);
+		if(m_ActiveFontIndex >= 0)
+			UnloadFont(m_ActiveFontIndex);
 		m_ActiveFontIndex = ListIndex;
+			str_copy(ConfigFtFont, m_lFontFiles[m_ActiveFontIndex].m_Name.c_str(), sizeof(ConfigFtFont));
+		return true;
 	}
+	return false;
 }
 
-void CFontMgr::ActivateMonoFont(int ListIndex)
-{
-	if(ListIndex > m_lMonoFontFiles.size())
-	{
-		dbg_msg("fontmgr/error", "tried to load font that doesn't exist (%i > %i)", ListIndex, m_lMonoFontFiles.size());
-		return;
-	}
-
-	CFontFile *f = &m_lMonoFontFiles[ListIndex];
-	if(!f->m_apFonts[CFontFile::REGULAR])
-		InitFont(f);
-
-	if(f->m_apFonts[CFontFile::REGULAR])
-	{
-		m_ActiveMonoFontIndex = ListIndex;
-	}
-}
-
-void CFontMgr::InitFont(CFontFile *f)
+bool CFontMgr::InitFont(CFontFile *f)
 {
 	if(g_Config.m_Debug)
 		dbg_msg("fontmgr/debug", "loading font %p '%s' into memory", f, f->m_Name.c_str());
 
-	static const char *s_apTypes[2][4] = {
-			{ "r", "b", "i", "bi" },
-			{ "Regular", "Bold", "Italic", "BoldItalic" }
-	};
+	// load regular
+	if(!InitFont_impl(f, FONT_REGULAR, "r"))
+		if(!InitFont_impl(f, FONT_REGULAR, "R"))
+			if(!InitFont_impl(f, FONT_REGULAR, "-R"))
+				if(!InitFont_impl(f, FONT_REGULAR, "-Regular"))
+					if(!InitFont_impl(f, FONT_REGULAR, "Regular"))
+						if(!InitFont_impl(f, FONT_REGULAR, ""))
+							Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load REGULAR font type for font='%s'", f->m_Name.c_str());
 
-	for(int i = 0; i < CFontFile::NUM_TYPES; i++)
-	{
-		for(int x = 0; x < 2; x++)
-		{
-			char aPath[512];
-			if(x == 0)
-				str_format(aPath, sizeof(aPath), "fonts/%s/%s.ttf", f->m_Name.c_str(), s_apTypes[x][i]);
-			else
-				str_format(aPath, sizeof(aPath), "fonts/%s/%s-%s.ttf", f->m_Path.c_str(), f->m_Name.c_str(), s_apTypes[x][i]);
+	// load bold
+	if(!InitFont_impl(f, FONT_BOLD, "b"))
+		if(!InitFont_impl(f, FONT_BOLD, "B"))
+			if(!InitFont_impl(f, FONT_BOLD, "-B"))
+				if(!InitFont_impl(f, FONT_BOLD, "-Bold"))
+					if(!InitFont_impl(f, FONT_BOLD, "Bold"))
+						Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load BOLD font type for font='%s'", f->m_Name.c_str());
 
-			char aFilename[512];
-			IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorageTW::TYPE_ALL, aFilename, sizeof(aFilename));
-			if(File)
-			{
-				io_close(File);
-				f->m_apFonts[i] = TextRender()->LoadFont(aFilename);
-			}
-			else
-			{
-				Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load font [%i|%i] file='%s' (%s)", i, x, aPath, aFilename);
-				if(x == 0)
-					continue;
-			}
-		}
-	}
+	// load italic
+	if(!InitFont_impl(f, FONT_ITALIC, "i"))
+		if(!InitFont_impl(f, FONT_ITALIC, "I"))
+			if(!InitFont_impl(f, FONT_ITALIC, "-I"))
+				if(!InitFont_impl(f, FONT_ITALIC, "-Italic"))
+					if(!InitFont_impl(f, FONT_ITALIC, "Italic"))
+						if(!InitFont_impl(f, FONT_ITALIC, "-Oblique"))
+							if(!InitFont_impl(f, FONT_ITALIC, "Oblique"))
+								Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load ITALIC font type for font='%s'", f->m_Name.c_str());
+
+	// load bold italic
+	if(!InitFont_impl(f, FONT_BOLD_ITALIC, "bi"))
+		if(!InitFont_impl(f, FONT_BOLD_ITALIC, "BI"))
+			if(!InitFont_impl(f, FONT_BOLD_ITALIC, "-BI"))
+				if(!InitFont_impl(f, FONT_BOLD_ITALIC, "-BoldItalic"))
+					if(!InitFont_impl(f, FONT_BOLD_ITALIC, "BoldItalic"))
+						if(!InitFont_impl(f, FONT_BOLD_ITALIC, "-BoldOblique"))
+							if(!InitFont_impl(f, FONT_BOLD_ITALIC, "BoldOblique"))
+								Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "fontmgr/error", "failed to load BOLD ITALIC font type for font='%s'", f->m_Name.c_str());
+
+	return f->m_apFonts[FONT_REGULAR] != NULL;
 }
 
-void CFontMgr::LoadFolder(const char *pFolder, bool mono)
+bool CFontMgr::InitFont_impl(CFontFile *f, int Type, const char *pTypeStr)
 {
-	dbg_msg("fontmgr", "scanning folder '%s' (mono=%x)", pFolder, mono);
-	array<CFontFile> *pList = &m_lFontFiles;
-	if(mono)
-		pList = &m_lMonoFontFiles;
+	char aPath[512];
+	mem_zerob(aPath);
+	if(str_length(pTypeStr) > 2 || pTypeStr[0] == '-' || pTypeStr[0] == '\0')
+		str_formatb(aPath, "fonts/%s/%s/%s%s.ttf", s_apFontFolders[m_Type], f->m_Path.c_str(), f->m_Name.c_str(), pTypeStr);
+	else
+		str_formatb(aPath, "fonts/%s/%s/%s.ttf", s_apFontFolders[m_Type], f->m_Path.c_str(), pTypeStr);
 
-	m_pStorage->ListDirectory(IStorageTW::TYPE_ALL, pFolder, LoadFolderCallback, pList);
+	char aFullPath[512];
+	mem_zerob(aFullPath);
+	IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath));
+	if(File)
+	{
+		io_close(File);
+		f->m_apFonts[Type] = TextRender()->LoadFont(aFullPath);
+		return true;
+	}
+	else if(g_Config.m_Debug)
+		dbg_msg("fontmgr/debug", "failed trying to load '%s'", aPath);
+	return false;
+}
 
-	SortList(mono);
+void CFontMgr::UnloadFont(int ListIndex)
+{
+	CFontFile *pFontFile = &m_lFontFiles[ListIndex];
+
+	for(int i = 0; i < FONT_NUM_TYPES; i++)
+	{
+		CFont* pFont = pFontFile->m_apFonts[i];
+		if(pFont)
+		{
+			if(g_Config.m_Debug)
+				dbg_msg("fontmgr/debug", "destroying font data [%s:%i]:%p", pFontFile->m_Name.c_str(), i, pFont);
+			TextRender()->DestroyFont(pFont);
+		}
+	}
+	mem_zerob(pFontFile->m_apFonts);
+	dbg_msg("fontmgr", "unloaded font '%s'", pFontFile->m_Name.c_str());
+}
+
+void CFontMgr::RemoveFont(int ListIndex)
+{
+	UnloadFont(ListIndex);
+	m_lFontFiles.remove_index(ListIndex);
+}
+
+void CFontMgr::LoadFolder()
+{
+	char aPath[64];
+	str_formatb(aPath, "fonts/%s", s_apFontFolders[m_Type]);
+	Storage()->ListDirectory(IStorageTW::TYPE_ALL, aPath, LoadFolderCallback, &m_lFontFiles);
+	m_lFontFiles.sort_range();
 }
 
 int CFontMgr::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)
@@ -148,7 +169,7 @@ int CFontMgr::LoadFolderCallback(const char *pName, int IsDir, int DirType, void
 	if(pName[0] == '.')
 		return 0;
 
-	array<CFontFile> *pList = (array<CFontFile>*)pUser;
+	sorted_array<CFontFile> *pList = (sorted_array<CFontFile>*)pUser;
 
 	char aFile[128];
 	str_format(aFile, sizeof(aFile), "%s", pName);
@@ -161,7 +182,7 @@ int CFontMgr::LoadFolderCallback(const char *pName, int IsDir, int DirType, void
 
 	if(IsDir)
 	{
-		pList->add(CFontFile(aFile));
+		pList->add_unsorted(CFontFile(std::string(aFile)));
 	}
 	else
 	{
@@ -172,51 +193,16 @@ int CFontMgr::LoadFolderCallback(const char *pName, int IsDir, int DirType, void
 	return 0;
 }
 
-void CFontMgr::SortList(bool mono)
-{
-	array<CFontFile> *pList = &m_lFontFiles;
-	if(mono)
-		pList = &m_lMonoFontFiles;
-	array<CFontFile>& list = *pList;
-
-	const int NUM = list.size();
-	if(NUM < 2)
-		return;
-
-	for(int curr = 0; curr < NUM-1; curr++)
-	{
-		int minIndex = curr;
-		for(int i = curr + 1; i < NUM; i++)
-		{
-			int c = 4;
-			for(; str_uppercase(list[i].m_Name.c_str()[c]) == str_uppercase(list[minIndex].m_Name.c_str()[c]); c++);
-			if(str_uppercase(list[i].m_Name.c_str()[c]) < str_uppercase(list[minIndex].m_Name.c_str()[c]))
-				minIndex = i;
-		}
-
-		if(minIndex != curr)
-		{
-			CFontFile temp = list[curr];
-			list[curr] = list[minIndex];
-			list[minIndex] = temp;
-		}
-	}
-}
-
 void CFontMgr::ReloadFontlist()
 {
-	// delete the fonts from memory first and clear the list
-/*	while(m_FontFiles.size() > 0)
+	// delete all but the active
+	for(int i = 0; i < m_lFontFiles.size(); i++)
 	{
-		if(m_FontFiles[0].m_pFont)
-			TextRender()->DestroyFont(m_FontFiles[0].m_pFont);
-		m_FontFiles.remove_index_fast(0);
-	}*/
+		if(i != m_ActiveFontIndex)
+			RemoveFont(i);
+	}
 
-	LoadFolder("fonts", false);
-	LoadFolder("fonts/.mono", true);
+	LoadFolder();
 	for(int i = 0; i < m_lFontFiles.size(); i++)
 		m_lFontFiles[i].m_Path = m_lFontFiles[i].m_Name;
-	for(int i = 0; i < m_lMonoFontFiles.size(); i++)
-		m_lMonoFontFiles[i].m_Path = ".mono/" + m_lMonoFontFiles[i].m_Name;
 }

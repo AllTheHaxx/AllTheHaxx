@@ -320,6 +320,27 @@ public:
 		}
 	}
 
+	virtual int ListDirectoryVerbose(int Type, const char *pPath, FS_LISTDIR_CALLBACK_VERBOSE pfnCallback, void *pUser)
+	{
+		char aBuffer[MAX_PATH_LENGTH];
+		int result = 0;
+		if(Type == TYPE_ALL)
+		{
+			// list all available directories
+			for(int i = 0; i < m_NumPaths; ++i)
+				result = fs_listdir_verbose(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
+		}
+		else if(Type >= 0 && Type < m_NumPaths)
+		{
+			// list wanted directory
+			result = fs_listdir_verbose(GetPath(Type, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, Type, pUser);
+		}
+		else
+			dbg_msg("storage", "tried to list directory '%s' with invalid type %i", pPath, Type);
+
+		return result;
+	}
+
 	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aaStoragePaths[Type], !m_aaStoragePaths[Type][0] ? "" : "/", pDir);

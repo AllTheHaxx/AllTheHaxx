@@ -399,8 +399,8 @@ set(SOURCE_FILES
     src/game/client/components/menus.cpp
     src/game/client/components/gametexture.cpp
     src/game/client/components/luarender.cpp
-    src/game/client/components/fontmgr.h
-    src/game/client/components/ghost.h
+        src/game/client/components/fontmgr.h
+        src/game/client/components/ghost.h
     src/game/client/components/console.cpp
     src/game/client/components/drawing.cpp
     src/game/client/components/debughud.cpp
@@ -428,15 +428,15 @@ set(SOURCE_FILES
     src/game/client/components/maplayers.h
     src/game/client/components/spoofremote.cpp
     src/game/client/components/identity.h
-    src/game/client/components/menus_identity.cpp
-    src/game/client/components/menus_settings.cpp
+        src/game/client/components/menus_settings/settings_identity.cpp
+    src/game/client/components/menus_settings/settings.cpp
     src/game/client/components/astar.h
     src/game/client/components/particles.cpp
     src/game/client/components/menus_manual.cpp
     src/game/client/components/emoticon.h
     src/game/client/components/menus_hotbar.cpp
     src/game/client/components/scoreboard.cpp
-    src/game/client/components/fontmgr.cpp
+        src/game/client/components/fontmgr.cpp
     src/game/client/components/sounds.cpp
     src/game/client/components/menus_demo.cpp
     src/game/client/components/translator.h
@@ -532,6 +532,14 @@ set(SOURCE_FILES
     src/versionsrv/mapversions.h
     src/versionsrv/versionsrv.cpp
     src/versionsrv/versionsrv.h
-)
-
+    src/game/client/components/menus_settings/settings_general.cpp
+    src/game/client/components/menus_settings/settings_player.cpp
+    src/game/client/components/menus_settings/settings_tee.cpp
+    src/game/client/components/menus_settings/settings_lua.cpp
+    src/game/client/components/menus_settings/settings_controls.cpp
+    src/game/client/components/menus_settings/settings_graphics.cpp
+    src/game/client/components/menus_settings/settings_sound.cpp
+    src/game/client/components/menus_settings/settings_appearance.cpp
+    src/game/client/components/menus_settings/settings_hud.cpp
+        )
 add_executable(AllTheHaxx ${SOURCE_FILES})

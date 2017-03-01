@@ -11,9 +11,9 @@
 #include <game/client/animstate.h>
 #include <game/localization.h>
 
-#include "countryflags.h"
-#include "menus.h"
-#include "identity.h"
+#include "game/client/components/countryflags.h"
+#include "game/client/components/menus.h"
+#include "game/client/components/identity.h"
 
 int CMenus::RenderSettingsIdentLegacy(CUIRect MainView)
 {

@@ -114,6 +114,7 @@ void dbg_msg(const char *sys, const char *fmt, ...);
 void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment);
 void* mem_realloc_debug(void *block, const char *filename, int line, unsigned size);
 #define mem_alloc(s,a) mem_alloc_debug(__FILE__, __LINE__, (s), (a))
+#define mem_allocb(t,n) (t*)mem_alloc_debug(__FILE__, __LINE__, (sizeof(t)*n), 0)
 #define mem_realloc(p,s) mem_realloc_debug(p,__FILE__, __LINE__, (s))
 
 /*
@@ -147,6 +148,7 @@ void mem_free(void *block);
 		<mem_move>
 */
 void mem_copy(void *dest, const void *source, unsigned size);
+#define mem_copyb(BUF, SOURCE) mem_copy(BUF, SOURCE, sizeof(BUF))
 
 /*
 	Function: mem_move
@@ -175,6 +177,7 @@ void mem_move(void *dest, const void *source, unsigned size);
 		size - Size of the block
 */
 void mem_zero(void *block, unsigned size);
+#define mem_zerob(BUF) mem_zero(BUF, sizeof(BUF))
 
 void mem_set(void *block, int value, unsigned size);
 
@@ -779,6 +782,7 @@ int net_tcp_close(NETSOCKET sock);
 		- Garantees that dst string will contain zero-termination.
 */
 void str_append(char *dst, const char *src, int dst_size);
+#define str_appendb(BUF, SRC) str_append(BUF, SRC, sizeof(BUF))
 
 /*
 	Function: str_copy
@@ -794,6 +798,7 @@ void str_append(char *dst, const char *src, int dst_size);
 		- Garantees that dst string will contain zero-termination.
 */
 void str_copy(char *dst, const char *src, int dst_size);
+#define str_copyb(BUF, SRC) str_copy(BUF, SRC, sizeof(BUF))
 
 /*
 	Function: str_length
@@ -826,6 +831,7 @@ int str_length(const char *str);
 		- Garantees that dst string will contain zero-termination.
 */
 int str_format(char *buffer, int buffer_size, const char *format, ...);
+#define str_formatb(BUF, FMT, ...) str_format(BUF, sizeof(BUF), FMT, __VA_ARGS__)
 
 int str_replace_char(char *str_in, char find, char replace);
 int str_replace_char_num(char *str_in, int max_replace, char find, char replace);
@@ -1067,6 +1073,9 @@ const char *str_find_rev(const char *haystack, const char *needle);
 		- The desination buffer will be zero-terminated
 */
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
+#define str_hexb(BUF, DATA) str_hex(BUF, sizeof(BUF), DATA, sizeof(DATA))
+void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data_size);
+#define str_hex_simpleb(BUF, DATA, NUM) str_hex_simple(BUF, sizeof(BUF), DATA, NUM)
 
 /*
 	Function: str_timestamp
@@ -1081,6 +1090,7 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 */
 void str_timestamp(char *buffer, unsigned int buffer_size);
 void str_timestamp_ex(time_t time, char *buffer, unsigned int buffer_size, const char *format);
+#define str_timestampb(BUF) str_timestamp(BUF, sizeof(BUF))
 
 /* Group: Filesystem */
 
@@ -1098,8 +1108,10 @@ void str_timestamp_ex(time_t time, char *buffer, unsigned int buffer_size, const
 		Always returns 0.
 */
 typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
+typedef int (*FS_LISTDIR_CALLBACK_VERBOSE)(const char *name, const char *full_path, int is_dir, int dir_type, void *user);
 typedef int (*FS_LISTDIR_INFO_CALLBACK)(const char *name, time_t date, int is_dir, int dir_type, void *user);
 int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
+int fs_listdir_verbose(const char *dir, FS_LISTDIR_CALLBACK_VERBOSE cb, int type, void *user);
 int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user);
 
 /*
@@ -1312,6 +1324,7 @@ void net_stats(NETSTATS *stats);
 
 int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
+unsigned long str_toulong_base(const char *str, int base);
 float str_tofloat(const char *str);
 int str_isspace(char c);
 int str_isdigit(char c);
@@ -1505,6 +1518,7 @@ void secure_random_fill(void *bytes, unsigned length);
 		Returns random int (replacement for rand()).
 */
 int secure_rand();
+unsigned secure_rand_u();
 
 /*
   Usage:

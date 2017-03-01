@@ -43,30 +43,10 @@ class CLuaFile;
 using namespace luabridge;
 #endif
 
-struct LuaBinaryCert
-{
-	char aIssuer[64];
-	char aDate[64];
-	unsigned char aHashMD[SHA256_DIGEST_LENGTH];
-	int PermissionFlags;
-};
-
-struct LuaCertHeader
-{
-	enum { LUA_CERT_VERSION = 3 };
-	short Version;
-	bool FileBigEndian;
-	int DataSize;
-};
-
-class CUnzip
-{
-
-};
 
 class CLua
 {
-	array<CLuaFile*> m_pLuaFiles;
+	array<CLuaFile*> m_apLuaFiles;
 	array<std::string> m_aAutoloadFiles;
 	IStorageTW *m_pStorage;
 	class IConsole *m_pConsole;
@@ -99,7 +79,15 @@ public:
 	static CGameClient * m_pCGameClient;
 
 	void SetGameClient(IGameClient *pGameClient);
-	array<CLuaFile*> &GetLuaFiles() { return m_pLuaFiles; }
+	array<CLuaFile*> &GetLuaFiles() { return m_apLuaFiles; }
+	int NumActiveScripts() const
+	{
+		int num = 0;
+		for(int i = 0; i < m_apLuaFiles.size(); i++)
+			if(m_apLuaFiles[i]->State() == CLuaFile::STATE_LOADED)
+				num++;
+		return num;
+	}
 
 	IStorageTW *Storage() const { return m_pStorage; }
 

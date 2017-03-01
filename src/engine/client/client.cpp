@@ -1009,9 +1009,9 @@ void CClient::Disconnect()
 	CALLSTACK_ADD();
 
 	if(m_DummyConnected)
-		DummyDisconnect("> AllTheHaxx < ");
+		DummyDisconnect(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0);
 	if(m_State != IClient::STATE_OFFLINE)
-		DisconnectWithReason("> AllTheHaxx < ");
+		DisconnectWithReason(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0);
 }
 
 bool CClient::DummyConnected()

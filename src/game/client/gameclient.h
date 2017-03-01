@@ -385,7 +385,8 @@ public:
 	class CIdentity *m_pIdentity;
 	class CCollision *m_pCollision;
 	class CGameTextureManager *m_pGameTextureManager;
-	class CFontMgr *m_pFontMgr;
+	class CFontMgr *m_pFontMgrBasic;
+	class CFontMgr *m_pFontMgrMono;
 	class CUI *m_pUi;
 
 	// DDRace

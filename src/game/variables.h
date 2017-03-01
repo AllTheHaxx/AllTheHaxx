@@ -29,6 +29,7 @@ MACRO_CONFIG_INT(ClNameplatesClan, cl_nameplates_clan, 1, 0, 1, CFGFLAG_CLIENT|C
 MACRO_CONFIG_INT(ClNameplatesClanSize, cl_nameplates_clan_size, 30, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Size of the clan plates from 0 to 100%")
 MACRO_CONFIG_INT(ClNameplatesClancolors, cl_nameplates_clancolors, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight your clan")
 MACRO_CONFIG_INT(ClNamePlatesScore, cl_nameplates_score, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show score in name plates")
+MACRO_CONFIG_INT(ClNamePlatesBroadcastATH, cl_nameplates_ath_broadcast, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show others that you use this client (only effective with no lua scripts enabled")
 MACRO_CONFIG_INT(ClNamePlatesATH, cl_nameplates_ath, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show who uses this client.")
 MACRO_CONFIG_INT(ClNamePlatesATHBlinkTime, cl_nameplates_ath_blinktime, 90, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How fast the ATH sign blinks (in percent)")
 MACRO_CONFIG_INT(ClTextEntities, cl_text_entities, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render textual entity data")
@@ -184,7 +185,6 @@ MACRO_CONFIG_INT(ClSkinFetcher, cl_skin_fetcher, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG
 MACRO_CONFIG_INT(ClChatbubble, cl_chatbubble, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Notifiy others that you are typing")
 MACRO_CONFIG_STR(FtFont, ft_font_pack, 128, "DejaVuSansCJKName", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font to use")
 MACRO_CONFIG_STR(FtMonoFont, ft_mono_font_pack, 128, "UbuntuMono", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Monospace font to use")
-MACRO_CONFIG_INT(FtPreloadFonts, ft_preload_fonts, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Load all fonts in 'data/fonts/' into memory on client start (enables font-preview!)")
 MACRO_CONFIG_INT(ClMonoFontSize, cl_monofont_size, 10, 6, 16, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font size in Console and IRC")
 MACRO_CONFIG_INT(ClConsoleLowCPU, cl_console_low_cpu, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Limits FPS while console is open in order to lower our CPU usage")
 

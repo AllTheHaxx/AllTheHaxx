@@ -53,8 +53,8 @@ void CLua::Shutdown()
 
 	SaveAutoloads();
 
-	m_pLuaFiles.delete_all();
-	m_pLuaFiles.clear();
+	m_apLuaFiles.delete_all();
+	m_apLuaFiles.clear();
 }
 
 void CLua::SaveAutoloads()
@@ -65,9 +65,9 @@ void CLua::SaveAutoloads()
 	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
 	str_append(aFilePath, "/luafiles.cfg", sizeof(aFilePath));
 	std::ofstream f(aFilePath, std::ios::out | std::ios::trunc);
-	for(int i = 0; i < m_pLuaFiles.size(); i++)
-		if(m_pLuaFiles[i]->GetScriptIsAutoload())
-			f << m_pLuaFiles[i]->GetFilename() << std::endl;
+	for(int i = 0; i < m_apLuaFiles.size(); i++)
+		if(m_apLuaFiles[i]->GetScriptIsAutoload())
+			f << m_apLuaFiles[i]->GetFilename() << std::endl;
 	f.close();
 #endif
 }
@@ -76,7 +76,7 @@ void CLua::SortLuaFiles()
 {
 	CALLSTACK_ADD();
 
-	const int NUM = m_pLuaFiles.size();
+	const int NUM = m_apLuaFiles.size();
 	if(NUM < 2)
 		return;
 
@@ -86,16 +86,16 @@ void CLua::SortLuaFiles()
 		for(int i = curr + 1; i < NUM; i++)
 		{
 			int c = 4;
-			for(; str_uppercase(m_pLuaFiles[i]->GetFilename()[c]) == str_uppercase(m_pLuaFiles[minIndex]->GetFilename()[c]); c++);
-			if(str_uppercase(m_pLuaFiles[i]->GetFilename()[c]) < str_uppercase(m_pLuaFiles[minIndex]->GetFilename()[c]))
+			for(; str_uppercase(m_apLuaFiles[i]->GetFilename()[c]) == str_uppercase(m_apLuaFiles[minIndex]->GetFilename()[c]); c++);
+			if(str_uppercase(m_apLuaFiles[i]->GetFilename()[c]) < str_uppercase(m_apLuaFiles[minIndex]->GetFilename()[c]))
 				minIndex = i;
 		}
 
 		if(minIndex != curr)
 		{
-			CLuaFile* temp = m_pLuaFiles[curr];
-			m_pLuaFiles[curr] = m_pLuaFiles[minIndex];
-			m_pLuaFiles[minIndex] = temp;
+			CLuaFile* temp = m_apLuaFiles[curr];
+			m_apLuaFiles[curr] = m_apLuaFiles[minIndex];
+			m_apLuaFiles[minIndex] = temp;
 		}
 	}
 }
@@ -119,8 +119,8 @@ void CLua::AddUserscript(const char *pFilename)
 		return;
 
 	// don't add duplicates
-	for(int i = 0; i < m_pLuaFiles.size(); i++)
-		if(str_comp(m_pLuaFiles[i]->GetFilename(), pFilename) == 0)
+	for(int i = 0; i < m_apLuaFiles.size(); i++)
+		if(str_comp(m_apLuaFiles[i]->GetFilename(), pFilename) == 0)
 			return;
 
 	std::string file = pFilename;
@@ -134,9 +134,9 @@ void CLua::AddUserscript(const char *pFilename)
 	if(g_Config.m_Debug)
 		dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
 
-	int index = m_pLuaFiles.add(new CLuaFile(this, file, Autoload));
+	int index = m_apLuaFiles.add(new CLuaFile(this, file, Autoload));
 	if(Autoload)
-		m_pLuaFiles[index]->Init();
+		m_apLuaFiles[index]->Init();
 #endif
 }
 

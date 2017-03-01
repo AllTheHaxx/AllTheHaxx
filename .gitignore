@@ -61,8 +61,11 @@ luacert*
 *.pdf
 *.key
 
-autoexec.cfg
-storage.cfg
+/*.svg
+/callgrind.out.*
+
+/autoexec.cfg
+/storage.cfg
 
 /DDNet*
 /AllTheHaxx*
