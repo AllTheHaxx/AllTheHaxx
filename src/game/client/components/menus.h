@@ -403,6 +403,7 @@ public:	int m_LoadTotal;
 	void RenderSettingsParticles(CUIRect MainView);
 	void RenderSettingsEmoticons(CUIRect MainView);
 	void RenderSettingsCursor(CUIRect MainView);
+	void RenderSettingsEntities(CUIRect MainView);
 
 	// found in menus_manual.cpp
 	void RenderManual(CUIRect MainView);

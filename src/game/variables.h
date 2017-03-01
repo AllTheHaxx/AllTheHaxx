@@ -209,11 +209,12 @@ MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "THIS VERS
 #endif
 MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console") // TODO: DO!
 //
-MACRO_CONFIG_INT(TexLazyLoading, tex_lazy_loading, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Wait with loading the actual textures until they're needed")
+MACRO_CONFIG_INT(TexLazyLoading, tex_lazy_loading, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Don't load gametextures until needed (WARNING: enabling this takes up a HUGE amount of ram!!)")
 MACRO_CONFIG_STR(TexGame, tex_game, 128, "!default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gameskin texture")
 MACRO_CONFIG_STR(TexParticles, tex_particles, 128, "!default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Particle texture")
 MACRO_CONFIG_STR(TexEmoticons, tex_emoticon, 128, "!default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Emoticons texture")
 MACRO_CONFIG_STR(TexCursor, tex_cursor, 128, "!default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Cursor texture")
+MACRO_CONFIG_STR(TexEntities, tex_entities, 128, "!default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "X-Ray entities")
 
 // translator stuff
 MACRO_CONFIG_INT(ClTransIn, cl_trans_in, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Translate incoming messages")

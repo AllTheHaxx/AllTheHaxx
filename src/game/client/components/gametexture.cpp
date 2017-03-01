@@ -13,7 +13,8 @@ static const char *ms_pTextureDirs[] = {
 		"game",
 		"cursor",
 		"emotes",
-		"particles"
+		"particles",
+		"entities"
 };
 
 
@@ -32,7 +33,8 @@ int CGameTextureManager::SkinScan(const char *pName, int IsDir, int DirType, voi
 	bool IsUsed = ((pData->m_ScanType == TEXTURE_GROUP_GAME && str_comp(pName, g_Config.m_TexGame) == 0)	||
 	 			(pData->m_ScanType == TEXTURE_GROUP_CURSOR && str_comp(pName, g_Config.m_TexCursor) == 0)	||
 				(pData->m_ScanType == TEXTURE_GROUP_EMOTE && str_comp(pName, g_Config.m_TexEmoticons) == 0)	||
-				(pData->m_ScanType == TEXTURE_GROUP_PARTICLES && str_comp(pName, g_Config.m_TexParticles) == 0));
+				(pData->m_ScanType == TEXTURE_GROUP_PARTICLES && str_comp(pName, g_Config.m_TexParticles) == 0) ||
+				(pData->m_ScanType == TEXTURE_GROUP_ENTITIES && str_comp(pName, g_Config.m_TexEntities) == 0));
 
 
 	// set skin data

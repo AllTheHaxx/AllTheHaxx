@@ -23,24 +23,29 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 
 	// tab bar
 	{
-		TabBar.VSplitLeft(TabBar.w/4, &Button, &TabBar);
+		TabBar.VSplitLeft(TabBar.w/5, &Button, &TabBar);
 		static CButtonContainer s_Button0;
 		if(DoButton_MenuTab(&s_Button0, Localize("Gameskin"), s_ControlPage == 0, &Button, CUI::CORNER_L))
 			s_ControlPage = 0;
 
-		TabBar.VSplitLeft(TabBar.w/3, &Button, &TabBar);
+		TabBar.VSplitLeft(TabBar.w/4, &Button, &TabBar);
 		static CButtonContainer s_Button1;
 		if(DoButton_MenuTab(&s_Button1, Localize("Particles"), s_ControlPage == 1, &Button, 0))
 			s_ControlPage = 1;
 
-		TabBar.VSplitMid(&Button, &TabBar);
+		TabBar.VSplitLeft(TabBar.w/3, &Button, &TabBar);
 		static CButtonContainer s_Button2;
 		if(DoButton_MenuTab(&s_Button2, Localize("Emoticons"), s_ControlPage == 2, &Button, 0))
 			s_ControlPage = 2;
 
+		TabBar.VSplitMid(&Button, &TabBar);
 		static CButtonContainer s_Button3;
-		if(DoButton_MenuTab(&s_Button3, Localize("Cursor"), s_ControlPage == 3, &TabBar, CUI::CORNER_R))
+		if(DoButton_MenuTab(&s_Button3, Localize("Cursor"), s_ControlPage == 3, &Button, 0))
 			s_ControlPage = 3;
+
+		static CButtonContainer s_Button4;
+		if(DoButton_MenuTab(&s_Button4, Localize("X-Ray Entities"), s_ControlPage == 4, &TabBar, CUI::CORNER_R))
+			s_ControlPage = 4;
 	}
 
 	// render page
@@ -52,6 +57,8 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 		RenderSettingsEmoticons(MainView);
 	else if(s_ControlPage == 3)
 		RenderSettingsCursor(MainView);
+	else if(s_ControlPage == 4)
+		RenderSettingsEntities(MainView);
 	else
 		s_ControlPage = 0;
 }
@@ -87,27 +94,26 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->Texture();
-			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_GAME, s->m_aName)) <= 0) continue;
-			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);
-			Graphics()->TextureSet(gTexture);
+			int Texture = s->Texture();
+			if(Texture <= 0) if((Texture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_GAME, s->m_aName)) <= 0) continue;
+			char aName[512];
+			str_copyb(aName, s->m_aName);
+			Graphics()->TextureSet(Texture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 120.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 240.0f, 120.0f);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
-			UI()->DoLabel(&Label, gName, 10.0f, 0);
+			UI()->DoLabel(&Label, aName, 10.0f, 0);
 		}
 	}
 
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_TexGame, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexGame));
+		str_copy(g_Config.m_TexGame, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexGame));
 		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_GAME, g_Config.m_TexGame);
 	}
 }
-	
 
 void CMenus::RenderSettingsParticles(CUIRect MainView)
 {
@@ -141,23 +147,23 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->Texture();
-			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_PARTICLES, s->m_aName)) <= 0) continue;
-			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);
-			Graphics()->TextureSet(gTexture);
+			int Texture = s->Texture();
+			if(Texture <= 0) if((Texture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_PARTICLES, s->m_aName)) <= 0) continue;
+			char aName[512];
+			str_copyb(aName, s->m_aName);
+			Graphics()->TextureSet(Texture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
-			UI()->DoLabel(&Label, gName, 10.0f, 0);
+			UI()->DoLabel(&Label, aName, 10.0f, 0);
 		}
 	}
 
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_TexParticles, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexParticles));
+		str_copy(g_Config.m_TexParticles, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexParticles));
 		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_PARTICLES, g_Config.m_TexParticles);
 	}
 }
@@ -193,23 +199,23 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->Texture();
-			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_EMOTE, s->m_aName)) <= 0) continue;
-			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);
-			Graphics()->TextureSet(gTexture);
+			int Texture = s->Texture();
+			if(Texture <= 0) if((Texture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_EMOTE, s->m_aName)) <= 0) continue;
+			char aName[512];
+			str_copyb(aName, s->m_aName);
+			Graphics()->TextureSet(Texture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
-			UI()->DoLabel(&Label, gName, 10.0f, 0);
+			UI()->DoLabel(&Label, aName, 10.0f, 0);
 		}
 	}
 
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_TexEmoticons, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexEmoticons));
+		str_copy(g_Config.m_TexEmoticons, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexEmoticons));
 		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_EMOTICONS, g_Config.m_TexEmoticons);
 	}
 }
@@ -245,23 +251,75 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 
-			int gTexture = s->Texture();
-			if(gTexture <= 0) if((gTexture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_CURSOR, s->m_aName)) <= 0) continue;
-			char gName[512];
-			str_format(gName, sizeof(gName), "%s", s->m_aName);
-			Graphics()->TextureSet(gTexture);
+			int Texture = s->Texture();
+			if(Texture <= 0) if((Texture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_CURSOR, s->m_aName)) <= 0) continue;
+			char aName[512];
+			str_copyb(aName, s->m_aName);
+			Graphics()->TextureSet(Texture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
-			UI()->DoLabel(&Label, gName, 10.0f, 0);
+			UI()->DoLabel(&Label, aName, 10.0f, 0);
 		}
 	}
 
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_TexCursor, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexCursor));
+		str_copy(g_Config.m_TexCursor, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexCursor));
 		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_HUDCURSOR, g_Config.m_TexCursor);
 	}
+}
+
+void CMenus::RenderSettingsEntities(CUIRect MainView)
+{
+	CALLSTACK_ADD();
+
+	MainView.HSplitTop(10.0f, 0, &MainView);
+
+	// skin selector
+	static const sorted_array<CGameTextureManager::CGameSkin>& s_aSkinList = m_pClient->m_pGameTextureManager->GetGroup(CGameTextureManager::TEXTURE_GROUP_ENTITIES);
+	static float s_ScrollValue = 0.0f;
+
+	int OldSelected = -1;
+	static CButtonContainer s_Listbox;
+	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Entities"), "", s_aSkinList.size(), 3, OldSelected, s_ScrollValue);
+
+	for(int i = 0; i < s_aSkinList.size(); ++i)
+	{
+		const CGameTextureManager::CGameSkin *s = &s_aSkinList[i];
+		if(s == 0)
+			continue;
+
+		if(str_comp(s->m_aName, g_Config.m_TexEntities) == 0)
+			OldSelected = i;
+
+		CPointerContainer Container(s);
+		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
+		if(Item.m_Visible)
+		{
+			CUIRect Label;
+			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
+			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
+
+			int Texture = s->Texture();
+			if(Texture <= 0) if((Texture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_ENTITIES, s->m_aName)) <= 0) continue;
+			char aName[512];
+			str_copyb(aName, s->m_aName);
+			Graphics()->TextureSet(Texture);
+			Graphics()->QuadsBegin();
+			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+			UI()->DoLabel(&Label, aName, 10.0f, 0);
+		}
+	}
+
+	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+	if(OldSelected != NewSelected)
+	{
+		str_copy(g_Config.m_TexEntities, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexEntities));
+	}
+
 }

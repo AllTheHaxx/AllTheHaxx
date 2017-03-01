@@ -7,6 +7,7 @@
 #include <game/client/component.h>
 #include <game/mapitems.h>
 
+#include "gametexture.h"
 #include "mapimages.h"
 
 CMapImages::CMapImages()
@@ -95,21 +96,28 @@ int CMapImages::GetEntities()
 	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
 	{
 		// DDNet default to prevent delay in seeing entities
-		char file[64] = "ddnet";
+		const char *pFile = 0;
 		if(IsDDNet(&Info))
-			str_copy(file, "ddnet", sizeof(file));
+			pFile = "ddnet";
 		else if(IsDDRace(&Info))
-			str_copy(file, "ddrace", sizeof(file));
+			pFile = "ddrace";
 		else if(IsRace(&Info))
-			str_copy(file, "race", sizeof(file));
+			pFile = "race";
 		else if(IsFNG(&Info))
-			str_copy(file, "fng", sizeof(file));
+			pFile = "fng";
 		else if(IsVanilla(&Info))
-			str_copy(file, "vanilla", sizeof(file));
+			pFile = "vanilla";
 
-		char path[64];
-		str_format(path, sizeof(path), "editor/entities_clear/%s.png", file);
-		m_EntitiesTextures = Graphics()->LoadTexture(path, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		if(pFile)
+		{
+			char aPath[256];
+			str_format(aPath, sizeof(aPath), "textures/entities/clear/%s.png", pFile);
+			m_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		}
+		else
+		{
+			m_EntitiesTextures = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_ENTITIES, g_Config.m_TexEntities);
+		}
 
 		str_copy(m_aEntitiesGameType, Info.m_aGameType, sizeof(m_aEntitiesGameType));
 	}
