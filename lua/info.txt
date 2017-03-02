@@ -2,7 +2,7 @@
 –––––––––––––––––––––––––[ Troubleshooting ]–––––––––––––––––––––––––
 
 !!! The client will only search for lua scripts in this directory !!!
-1. If your scripts doesn't show up, make sure that the folder is called (exactly!) "lua"
+1. If your scripts don't show up, make sure that the folder is called (exactly!) "lua"
 2. The client will recurse into subdirectories of an infinite depth when searching
 3. Only scripts with the file ending ".lua" will be listed, anything else is ignored!
 
