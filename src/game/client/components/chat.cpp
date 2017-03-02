@@ -242,7 +242,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			else // handle skipping: jump to spaces and special ASCII characters
 			{
 				int SearchDirection = 0;
-				if(Event.m_Key == KEY_LEFT)
+				if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_BACKSPACE)
 					SearchDirection = -1;
 				else if(Event.m_Key == KEY_RIGHT)
 					SearchDirection = 1;
@@ -262,6 +262,19 @@ bool CChat::OnInput(IInput::CEvent Event)
 							if(SearchDirection < 0)
 								FoundAt++;
 							break;
+						}
+					}
+					if(Event.m_Key == KEY_BACKSPACE)
+					{
+						if(m_Input.GetCursorOffset() != 0)
+						{
+							char Text[512];
+							str_copy(Text, m_Input.GetString(), FoundAt + 1);
+							if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
+							{
+								str_append(Text, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
+							}
+							m_Input.Set(Text);
 						}
 					}
 					m_Input.SetCursorOffset(FoundAt);
