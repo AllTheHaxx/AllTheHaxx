@@ -244,69 +244,25 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 				"Be nice.");
 		Printed = true;
 	}
-	if (g_Config.m_SvRulesLine1[0])
+	#define _RL(n) g_Config.m_SvRulesLine ## n
+	char *pRuleLines[] = {
+		_RL(1), _RL(2), _RL(3), _RL(4), _RL(5),
+		_RL(6), _RL(7), _RL(8), _RL(9), _RL(10),
+	};
+	for(unsigned i = 0; i < sizeof(pRuleLines) / sizeof(pRuleLines[0]); i++)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine1);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine2[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine2);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine3[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine3);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine4[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine4);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine5[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine5);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine6[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine6);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine7[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine7);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine8[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine8);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine9[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine9);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine10[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine10);
-		Printed = true;
+		if(pRuleLines[i][0])
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
+				"rules", pRuleLines[i]);
+			Printed = true;
+		}
 	}
 	if (!Printed)
+	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
 				"No Rules Defined, Kill em all!!");
+	}
 }
 
 void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
@@ -1225,32 +1181,60 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 
 	const char msg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
 	char aBuf[128];
-	if(pPlayer->m_TimerType <= 2 && pPlayer->m_TimerType >= 0)
-		str_format(aBuf, sizeof(aBuf), "Timer is displayed in", msg[pPlayer->m_TimerType]);
-	else if(pPlayer->m_TimerType == 3)
+	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
+		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", msg[pPlayer->m_TimerType]);
+	else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
 		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
+
+	int OldType = pPlayer->m_TimerType;
 
 	if(pResult->NumArguments() == 0) {
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 		return;
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0) {
-		pSelf->SendBroadcast("", pResult->m_ClientID);
-		pPlayer->m_TimerType = 0;
+	else if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0)
+	{
+		if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+			pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER;
+		else
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "gametimer is not supported by your client.");
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "broadcast") == 0)
-			pPlayer->m_TimerType = 1;
+		pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
 	else if(str_comp_nocase(pResult->GetString(0), "both") == 0)
-			pPlayer->m_TimerType = 2;
-	else if(str_comp_nocase(pResult->GetString(0), "none") == 0)
-			pPlayer->m_TimerType = 3;
-	else if(str_comp_nocase(pResult->GetString(0), "cycle") == 0) {
-		if(pPlayer->m_TimerType < 3)
-			pPlayer->m_TimerType++;
-		else if(pPlayer->m_TimerType == 3)
-			pPlayer->m_TimerType = 0;
+	{
+		if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+			pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST;
+		else
+		{
+			pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "gametimer is not supported by your client.");
+		}
 	}
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
+	else if(str_comp_nocase(pResult->GetString(0), "none") == 0)
+		pPlayer->m_TimerType = CPlayer::TIMERTYPE_NONE;
+	else if(str_comp_nocase(pResult->GetString(0), "cycle") == 0)
+	{
+		if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+		{
+			if(pPlayer->m_TimerType < CPlayer::TIMERTYPE_NONE)
+				pPlayer->m_TimerType++;
+			else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
+				pPlayer->m_TimerType = CPlayer::TIMERTYPE_GAMETIMER;
+		}
+		else
+		{
+			if(pPlayer->m_TimerType < CPlayer::TIMERTYPE_NONE)
+				pPlayer->m_TimerType = CPlayer::TIMERTYPE_NONE;
+			else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
+				pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
+		}
+	}
+	
+	if((OldType == CPlayer::TIMERTYPE_BROADCAST || OldType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE))
+		pSelf->SendBroadcast("", pResult->m_ClientID);
+	
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", aBuf);
 }
 
 void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
