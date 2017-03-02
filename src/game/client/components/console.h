@@ -48,6 +48,8 @@ class CGameConsole : public CComponent
 		bool m_ReverseTAB;
 		bool m_CTRLPressed;
 
+		char m_aUser[32];
+
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
 		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
