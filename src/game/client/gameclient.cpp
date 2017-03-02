@@ -426,93 +426,93 @@ void CGameClient::OnInit()
 		Graphics()->SetVSync(false);
 
 	// setup load amount & load textures and stuff
-	int TotalLoadAmount = g_pData->m_NumImages + m_All.m_Num*2 + 1   +3;
-	g_GameClient.m_pMenus->m_LoadTotal = TotalLoadAmount + g_pData->m_NumSounds;
-#define SET_LOAD_LABEL(TEXT) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT)
-#define SET_LOAD_LABEL_V(TEXT, ...) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT, __VA_ARGS__)
-	for(int i = 0; i < TotalLoadAmount; i++)
+	g_GameClient.m_pMenus->m_LoadTotal = g_pData->m_NumImages + m_All.m_Num + 1 + m_All.m_Num + 4*1;
+	if(!g_Config.m_ClThreadsoundloading)
+		g_GameClient.m_pMenus->m_LoadTotal += g_pData->m_NumSounds;
+	int CurrentIndex = 0;
+#define SET_LOAD_LABEL(TEXT) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT); if(g_Config.m_Debug) dbg_msg("loading/debug", "[%.2f%%] %s", ((float)CurrentIndex / (float)g_GameClient.m_pMenus->m_LoadTotal)*100.0f, g_GameClient.m_pMenus->m_aLoadLabel)
+#define SET_LOAD_LABEL_V(TEXT, ...) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT, __VA_ARGS__); if(g_Config.m_Debug) dbg_msg("loading/debug", "[%.2f%%] %s", ((float)CurrentIndex / (float)g_GameClient.m_pMenus->m_LoadTotal)*100.0f, g_GameClient.m_pMenus->m_aLoadLabel)
+#define LOAD_STUFF(ITERATIONS) for(int i = 0; i < ITERATIONS; i++, CurrentIndex++, g_GameClient.m_pMenus->RenderLoading())
+
+	// load textures
+	LOAD_STUFF(g_pData->m_NumImages)
 	{
-		// init the components
-		if(i < m_All.m_Num)  // 0 <= i <= m_All.m_Num-1
-		{
-			SET_LOAD_LABEL_V("Initializing Components (%i/%i)", i+1, m_All.m_Num);
-			m_All.m_paComponents[m_All.m_Num-i-1]->OnInit();
-		}
-
-		// load the textures
-		if(m_All.m_Num <= i && i < m_All.m_Num+g_pData->m_NumImages &&
-				i-m_All.m_Num != IMAGE_GAME && i-m_All.m_Num != IMAGE_HUDCURSOR &&
-				i-m_All.m_Num != IMAGE_PARTICLES && i-m_All.m_Num != IMAGE_EMOTICONS)
-		{
-			SET_LOAD_LABEL_V("Loading Textures (%i/%i): \"%s\"", i-m_All.m_Num+1, g_pData->m_NumImages, g_pData->m_aImages[i-m_All.m_Num].m_pFilename);
-			g_pData->m_aImages[i-m_All.m_Num].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i-m_All.m_Num].m_pFilename, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-		}
-
-		// load background map when textures have finished
-		if(i == m_All.m_Num+g_pData->m_NumImages)
-		{
-			SET_LOAD_LABEL("Loading Background Map");
-			Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
-		}
-
-		g_GameClient.m_pMenus->RenderLoading();
-
-		// reset all components after loading
-		if(i >= m_All.m_Num+g_pData->m_NumImages && i < TotalLoadAmount-3-1)
-		{
-			SET_LOAD_LABEL_V("Resetting Components (%i/%i)", i-g_pData->m_NumImages-m_All.m_Num+1, m_All.m_Num);
-			m_All.m_paComponents[i-g_pData->m_NumImages-m_All.m_Num]->OnReset();
-		}
-
-		if(i == TotalLoadAmount-3-1)
-		{
-			SET_LOAD_LABEL("Finalizing Background Map");
-
-			m_Layers.Init(Kernel());
-			m_Collision.Init(Layers());
-			m_pCollision = &m_Collision; // where fck
-
-			RenderTools()->RenderTilemapGenerateSkip(Layers());
-
-			m_pMapimages->OnMapLoad();
-		}
-
-		// init irc
-		if(i == TotalLoadAmount-2-1)
-		{
-			SET_LOAD_LABEL("Starting IRC Engine");
-
-			m_pIRC->Init();
-		}
-
-		// init the editor
-		if(i == TotalLoadAmount-1-1)
-		{
-			SET_LOAD_LABEL("Initializing Editor");
-
-			if(!g_Config.m_ClEditorLazyInit)
-				m_pEditor->Init();
-		}
-
-		// last iteration
-		if(i == TotalLoadAmount-0-1)
-		{
-			SET_LOAD_LABEL("Loading done. Have Fun!");
-			str_format(aBuf, sizeof(aBuf), "version %s", NetVersion());
-			if(g_Config.m_ClPrintStartup)
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
-			else
-				dbg_msg("client", aBuf);
-
-			// never start with the editor
-			g_Config.m_ClEditor = 0;
-
-			Input()->MouseModeRelative();
-
-			// process pending commands
-			m_pConsole->StoreCommands(false);
-		}
+		SET_LOAD_LABEL_V("Loading Textures (%i/%i): \"%s\"", i+1, g_pData->m_NumImages, g_pData->m_aImages[i].m_pFilename);
+		g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	}
+
+	// init components
+	LOAD_STUFF(m_All.m_Num)
+	{
+		SET_LOAD_LABEL_V("Initializing Components (%i/%i)", i+1, m_All.m_Num);
+		m_All.m_paComponents[i]->OnInit();
+	}
+
+	// load background map
+	LOAD_STUFF(1)
+	{
+		SET_LOAD_LABEL("Loading Background Map");
+		Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
+	}
+
+	// reset all components after loading
+	LOAD_STUFF(m_All.m_Num)
+	{
+		SET_LOAD_LABEL_V("Resetting Components (%i/%i)", i+1, m_All.m_Num);
+		m_All.m_paComponents[i]->OnReset();
+	}
+
+	// initialize background map rendering
+	LOAD_STUFF(1)
+	{
+		SET_LOAD_LABEL("Finalizing Background Map");
+
+		m_Layers.Init(Kernel());
+		m_Collision.Init(Layers());
+		m_pCollision = &m_Collision; // where fck
+
+		RenderTools()->RenderTilemapGenerateSkip(Layers());
+
+		m_pMapimages->OnMapLoad();
+	}
+
+	// init irc
+	LOAD_STUFF(1)
+	{
+		SET_LOAD_LABEL("Starting IRC Engine");
+
+		m_pIRC->Init();
+	}
+
+	// init editor
+	LOAD_STUFF(1)
+	{
+		SET_LOAD_LABEL("Initializing Editor");
+
+		if(!g_Config.m_ClEditorLazyInit)
+			m_pEditor->Init();
+	}
+
+	// do the rest
+	LOAD_STUFF(1)
+	{
+		SET_LOAD_LABEL("Loading done. Have Fun!");
+		str_format(aBuf, sizeof(aBuf), "version %s", NetVersion());
+		if(g_Config.m_ClPrintStartup)
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+		else
+			dbg_msg("client", aBuf);
+
+		// never start with the editor
+		g_Config.m_ClEditor = 0;
+
+		Input()->MouseModeRelative();
+
+		// process pending commands
+		m_pConsole->StoreCommands(false);
+	}
+
+#undef LOAD_STUFF
 #undef SET_LOAD_LABEL
 #undef SET_LOAD_LABEL_V
 

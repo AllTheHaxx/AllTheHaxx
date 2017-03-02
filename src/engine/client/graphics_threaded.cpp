@@ -1,4 +1,4 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+	/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/detect.h>
@@ -334,6 +334,17 @@ int CGraphics_Threaded::UnloadTexture(int Index)
 	if(Index < 0)
 		return 0;
 
+	for(std::map<std::string, int>::iterator it = m_TextureCache.begin(); it != m_TextureCache.end(); it++)
+	{
+		if((*it).second == Index)
+		{
+			if(g_Config.m_Debug)
+				dbg_msg("graphics/texture", "unloading %i : '%s'", Index, (*it).first.c_str());
+			m_TextureCache.erase(it);
+			break;
+		}
+	}
+
 	CCommandBuffer::SCommand_Texture_Destroy Cmd;
 	Cmd.m_Slot = Index;
 	m_pCommandBuffer->AddCommand(Cmd);
@@ -429,24 +440,41 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 int CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
 {
 	int l = str_length(pFilename);
-	int ID;
-	CImageInfo Img;
+	int ID = m_InvalidTexture;
 
 	if(l < 3)
 		return -1;
-	if(LoadPNG(&Img, pFilename, StorageType))
-	{
-		if (StoreFormat == CImageInfo::FORMAT_AUTO)
-			StoreFormat = Img.m_Format;
 
-		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags);
-		mem_free(Img.m_pData);
-		if(ID != m_InvalidTexture && g_Config.m_Debug)
-			dbg_msg("graphics/texture", "loaded %s", pFilename);
-		return ID;
+	std::string FileName(pFilename);
+	try
+	{
+		ID = m_TextureCache.at(FileName);
+		if(g_Config.m_Debug)
+			dbg_msg("graphics/texture", "loading %i : '%s' from cache", ID, pFilename);
+	}
+	catch(std::out_of_range &e)
+	{
+		CImageInfo Img;
+		if(LoadPNG(&Img, pFilename, StorageType))
+		{
+			if(StoreFormat == CImageInfo::FORMAT_AUTO)
+				StoreFormat = Img.m_Format;
+
+			ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags);
+			mem_free(Img.m_pData);
+			if(g_Config.m_Debug)
+			{
+				if(ID != m_InvalidTexture)
+					dbg_msg("graphics/texture", "loaded %s", pFilename);
+				else
+					dbg_msg("graphics/texture", "failed to load %s", pFilename);
+			}
+		}
+
+		m_TextureCache.insert(std::pair<std::string, int>(FileName, ID));
 	}
 
-	return m_InvalidTexture;
+	return ID;
 }
 
 int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)

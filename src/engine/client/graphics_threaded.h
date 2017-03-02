@@ -1,6 +1,8 @@
 #ifndef ENGINE_CLIENT_GRAPHICS_THREADED_H
 #define ENGINE_CLIENT_GRAPHICS_THREADED_H
 
+#include <map>
+#include <string>
 #include <engine/graphics.h>
 
 class CCommandBuffer
@@ -392,6 +394,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	int m_aTextureIndices[MAX_TEXTURES];
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
+	std::map<std::string, int> m_TextureCache;
 
 	void FlushVertices();
 	void AddVertices(int Count);

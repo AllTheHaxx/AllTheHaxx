@@ -320,6 +320,7 @@ void CMenus::RenderSettingsEntities(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		str_copy(g_Config.m_TexEntities, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexEntities));
+		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_ENTITIES, g_Config.m_TexEntities);
 	}
 
 }

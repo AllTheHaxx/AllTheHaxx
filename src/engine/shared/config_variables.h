@@ -128,6 +128,7 @@ MACRO_CONFIG_INT(GfxVsync, gfx_vsync, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Ver
 MACRO_CONFIG_INT(GfxResizable, gfx_resizable, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enables window resizing")
 MACRO_CONFIG_INT(GfxDisplayAllModes, gfx_display_all_modes, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(GfxTextureCompression, gfx_texture_compression, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use texture compression")
+//MACRO_CONFIG_INT(GfxTextureCaching, gfx_texture_caching, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable texture caching; uses more RAM but reduces some loading times")
 #if defined(__ANDROID__)
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "High detail")
 MACRO_CONFIG_INT(GfxLowGraphics, gfx_low_graphics, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Disables various graphic effects")
@@ -200,7 +201,7 @@ MACRO_CONFIG_INT(EcBantime, ec_bantime, 0, 0, 1440, CFGFLAG_ECON, "The time a cl
 MACRO_CONFIG_INT(EcAuthTimeout, ec_auth_timeout, 30, 1, 120, CFGFLAG_ECON, "Time in seconds before the the econ authentification times out")
 MACRO_CONFIG_INT(EcOutputLevel, ec_output_level, 1, 0, 2, CFGFLAG_ECON, "Adjusts the amount of information in the external console")
 
-MACRO_CONFIG_INT(Debug, debug, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Debug mode")
+MACRO_CONFIG_INT(Debug, debug, 0, 0, 3, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Debug mode")
 MACRO_CONFIG_INT(DbgDirections, dbg_directions, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Debug player aiming directions")
 MACRO_CONFIG_INT(DbgStress, dbg_stress, 0, 0, 0, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Stress systems")
 MACRO_CONFIG_INT(DbgStressNetwork, dbg_stress_network, 0, 0, 0, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Stress network")

@@ -6,6 +6,7 @@
 #include <engine/serverbrowser.h>
 #include <game/client/component.h>
 #include <game/mapitems.h>
+#include <game/generated/client_data.h>
 
 #include "gametexture.h"
 #include "mapimages.h"
@@ -93,7 +94,7 @@ int CMapImages::GetEntities()
 	CServerInfo Info;
 	Client()->GetServerInfo(&Info);
 
-	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
+//	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
 	{
 		// DDNet default to prevent delay in seeing entities
 		const char *pFile = 0;
@@ -112,11 +113,11 @@ int CMapImages::GetEntities()
 		{
 			char aPath[256];
 			str_format(aPath, sizeof(aPath), "textures/entities/clear/%s.png", pFile);
-			m_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+			m_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0); // don't worry about leaks here, this is being cached
 		}
 		else
 		{
-			m_EntitiesTextures = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_ENTITIES, g_Config.m_TexEntities);
+			m_EntitiesTextures = g_pData->m_aImages[IMAGE_ENTITIES].m_Id;
 		}
 
 		str_copy(m_aEntitiesGameType, Info.m_aGameType, sizeof(m_aEntitiesGameType));

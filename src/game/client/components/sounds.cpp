@@ -81,14 +81,14 @@ void CSounds::OnInit()
 	ClearQueue();
 
 	// load sounds
-/*	if(g_Config.m_ClThreadsoundloading)
+	if(g_Config.m_ClThreadsoundloading)
 	{
 		g_UserData.m_pGameClient = m_pClient;
 		g_UserData.m_Render = false;
 		m_pClient->Engine()->AddJob(&m_SoundJob, LoadSoundsThread, &g_UserData);
 		m_WaitForSoundJob = true;
 	}
-	else*/
+	else
 	{
 		g_UserData.m_pGameClient = m_pClient;
 		g_UserData.m_Render = true;

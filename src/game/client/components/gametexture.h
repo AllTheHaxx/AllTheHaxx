@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_GSKINS_H
 #define GAME_CLIENT_COMPONENTS_GSKINS_H
+#include <queue>
 #include <base/vmath.h>
 #include <base/tl/sorted_array.h>
 #include <game/client/component.h>
@@ -15,6 +16,9 @@ class CGameTextureManager : public CComponent
 		int m_ScanType;
 	};
 
+	int MapImageToGroup(int Image) const;
+	int MapGroupToImage(int Group) const;
+
 public:
 	enum
 	{
@@ -26,13 +30,14 @@ public:
 		NUM_TEXTURE_GROUPS
 	};
 
-	struct CGameSkin
+	class CGameSkin
 	{
 		friend class CGameTextureManager;
-	private:
 		int m_Texture;
 
 	public:
+		CGameSkin(){}
+		CGameSkin(const class CDataImage &Image);
 		char m_aName[128];
 		int Texture() const { return m_Texture; }
 
@@ -52,4 +57,5 @@ private:
 
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };
+
 #endif

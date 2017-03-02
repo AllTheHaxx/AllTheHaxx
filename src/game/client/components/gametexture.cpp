@@ -18,6 +18,16 @@ static const char *ms_pTextureDirs[] = {
 };
 
 
+CGameTextureManager::CGameSkin::CGameSkin(const CDataImage &Image)
+{
+	m_Texture = Image.m_Id;
+	const char *pName = str_find_rev(Image.m_pFilename, "/");
+	if(!pName)
+		pName = Image.m_pFilename;
+	str_copy(m_aName, pName, max(0, min((int)sizeof(m_aName), str_length(pName)-3)));
+}
+
+
 int CGameTextureManager::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	int l = str_length(pName);
@@ -65,9 +75,10 @@ void CGameTextureManager::OnInit()
 		str_format(aBuf, sizeof(aBuf), "textures/%s/!default.png", ms_pTextureDirs[i]);
 
 		// set default skin data
-		CGameSkin DefaultSkin;
+		CGameSkin DefaultSkin(g_pData->m_aImages[MapGroupToImage(i)]);
+		/*CGameSkin DefaultSkin;
 		DefaultSkin.m_Texture = Graphics()->LoadTexture(aBuf, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-		str_format(DefaultSkin.m_aName, sizeof(DefaultSkin.m_aName), "!default");
+		str_format(DefaultSkin.m_aName, sizeof(DefaultSkin.m_aName), "!default");*/
 		m_aSkins[i].add(DefaultSkin);
 
 
@@ -95,14 +106,15 @@ void CGameTextureManager::OnReset()
 
 int CGameTextureManager::SetTexture(int Image, const char *pName)
 {
-	int Group =	 Image == IMAGE_GAME  ? TEXTURE_GROUP_GAME :
-				 Image == IMAGE_HUDCURSOR  ? TEXTURE_GROUP_CURSOR :
-				 Image == IMAGE_EMOTICONS  ? TEXTURE_GROUP_EMOTE :
-				 Image == IMAGE_PARTICLES  ? TEXTURE_GROUP_PARTICLES : -1;
-
+	int Group = MapImageToGroup(Image);
 	dbg_assert(Group >= 0 && Group < NUM_TEXTURE_GROUPS, "CGameTextureManager::SetTexture invalid group");
 
-	return g_pData->m_aImages[Image].m_Id = FindTexture(Group, pName);
+	int result = g_pData->m_aImages[Image].m_Id = FindTexture(Group, pName);
+
+	if(g_Config.m_Debug)
+		dbg_msg("gametexture/debug", "settings texture %i <- %i(%s) : %i('%s')", Image, Group, ms_pTextureDirs[Group], result, pName);
+
+	return result;
 }
 
 int CGameTextureManager::FindTexture(int Group, const char *pName)
@@ -115,10 +127,34 @@ int CGameTextureManager::FindTexture(int Group, const char *pName)
 			{
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "textures/%s/%s.png", ms_pTextureDirs[Group], pName);
-				m_aSkins[Group][i].m_Texture = Graphics()->LoadTexture(aPath, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+				if((m_aSkins[Group][i].m_Texture = Graphics()->LoadTexture(aPath, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0)) <= 0)
+					dbg_msg("gametexture/error", "failed to load '%s'", aPath);
+				else if(g_Config.m_Debug)
+					dbg_msg("gametexture/debug", "loaded texture '%s'", aPath);
+
 			}
 			return m_aSkins[Group][i].m_Texture;
 		}
 	}
 	return 0;
+}
+
+int CGameTextureManager::MapImageToGroup(int Image) const
+{
+	int Group = Image == IMAGE_GAME ? TEXTURE_GROUP_GAME :
+				Image == IMAGE_HUDCURSOR ? TEXTURE_GROUP_CURSOR :
+				Image == IMAGE_EMOTICONS ? TEXTURE_GROUP_EMOTE :
+				Image == IMAGE_PARTICLES ? TEXTURE_GROUP_PARTICLES :
+				Image == IMAGE_ENTITIES ? TEXTURE_GROUP_ENTITIES : -1;
+	return Group;
+}
+
+int CGameTextureManager::MapGroupToImage(int Group) const
+{
+	int Image = Group == TEXTURE_GROUP_GAME ? IMAGE_GAME :
+				Group == TEXTURE_GROUP_CURSOR ? IMAGE_HUDCURSOR :
+				Group == TEXTURE_GROUP_EMOTE ? IMAGE_EMOTICONS :
+				Group == TEXTURE_GROUP_PARTICLES ? IMAGE_PARTICLES :
+				Group == TEXTURE_GROUP_ENTITIES ? IMAGE_ENTITIES : IMAGE_NULL;
+	return Image;
 }
