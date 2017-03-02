@@ -352,7 +352,7 @@ void CHud::RenderTextInfo()
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
-		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,aBuf,-1), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1);
+		TextRender()->Text(0, m_Width-5-TextRender()->TextWidth(0, 9, aBuf, -1), g_Config.m_ClShowfps ? m_Height-25*UI()->Scale() : m_Height-14*UI()->Scale(), 9, aBuf, -1);
 	}
 }
 
