@@ -141,7 +141,7 @@ void CHud::RenderScoreHud()
 	{
 		int GameFlags = m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags;
 		float Whole = 300*Graphics()->ScreenAspect();
-		float StartY = 229.0f;
+		float StartY = 220.0f;
 
 		if(GameFlags&GAMEFLAG_TEAMS && m_pClient->m_Snap.m_pGameDataObj)
 		{
