@@ -247,10 +247,10 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					int PermissionFlags = L->GetPermissionFlags();
 					char aTooltip[1024] = {0};
 					if(PermissionFlags == 0)
-						str_format(aTooltip, sizeof(aTooltip), Localize("This script has no additional permissions and is thus considered safe."));
+						str_copyb(aTooltip, Localize("This script has no additional permissions and is thus considered safe."));
 					else
 					{
-						str_format(aTooltip, sizeof(aTooltip), Localize("This script has the following additional permission:"));
+						str_copyb(aTooltip, Localize("This script has the following additional permission:"));
 #define PERM_STR(TYPE, STR) if(PermissionFlags&CLuaFile::PERMISSION_##TYPE) { str_append(aTooltip, "\n\n- ", sizeof(aTooltip)); str_append(aTooltip, STR, sizeof(aTooltip)); }
 						PERM_STR(IO, Localize("IO (Write and read files)"))
 						PERM_STR(DEBUG, Localize("DEBUG (WARNING: if you are not currently debugging this script, DO NOT TO USE IT!! It may cause security and performance problems!)"))

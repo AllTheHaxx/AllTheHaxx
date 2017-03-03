@@ -542,7 +542,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		str_format(pEntry->m_aSkin, sizeof(pEntry->m_aSkin), m_apSkinList[NewSelected]->m_aName);
+		str_copyb(pEntry->m_aSkin, m_apSkinList[NewSelected]->m_aName);
 		m_NeedSendinfo = true;
 	}
 

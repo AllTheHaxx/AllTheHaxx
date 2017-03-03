@@ -95,7 +95,11 @@ public:
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false) = 0;
-	virtual void Printf(int Level, const char *pFrom, const char *fmt, ...) = 0;
+	virtual void Printf(int Level, const char *pFrom, const char *fmt, ...)
+#if defined(DO_NOT_COMPILE_THIS_CODE) && (defined(__GNUC__) || defined(__clang__)) // dunno why this gives weird errors all over the place if compiled
+	__attribute__ ((format (printf, 3, 4))) /* Warn if you specify wrong arguments in printf format string */
+#endif
+	= 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 

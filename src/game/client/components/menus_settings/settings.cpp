@@ -562,9 +562,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 				Updater()->InitiateUpdate();
 		}
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-			str_format(aBuf, sizeof(aBuf), Localize("Updating..."));
+			str_copyb(aBuf, Localize("Updating..."));
 		else if(State == IUpdater::NEED_RESTART){
-			str_format(aBuf, sizeof(aBuf), Localize("AllTheHaxx updated!"));
+			str_copyb(aBuf, Localize("AllTheHaxx updated!"));
 			m_NeedRestartUpdate = true;
 		}
 		else

@@ -7,6 +7,7 @@ add_definitions("-DCONF_DEBUG")
 add_definitions("-DCONF_SPOOFING")
 add_definitions("-DFEATURE_LUA")
 add_definitions("-DCONF_PROTECT")
+add_definitions("-DDO_NOT_COMPILE_THIS_CODE")
 
 include_directories(
         other/sdl/include

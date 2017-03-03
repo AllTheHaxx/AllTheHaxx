@@ -1529,7 +1529,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			if(ServerBrowser()->UpgradeProgression() < 100)
 				str_format(aBuf, sizeof(aBuf), "%s (%i%%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
 			else if (g_Config.m_BrAutoRefresh)
-				str_format(aBuf, sizeof(aBuf), "%s (%ds)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
+				str_format(aBuf, sizeof(aBuf), "%s (%llis)", Localize("Update"), max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
 			else
 				str_copy(aBuf, Localize("Update"), sizeof(aBuf));
 			if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button, Localize("Just update the info of the entries")) && !ServerBrowser()->IsRefreshing())
@@ -1579,7 +1579,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 			char aLabel[64];
 			if(Pressed)
-				str_format(aLabel, sizeof(aLabel), "%s (%i)", Localize("Really?"), round_to_int(Pressed+3*time_freq()-Now)/time_freq()+1);
+				str_format(aLabel, sizeof(aLabel), "%s (%i)", Localize("Really?"), (int)((int64)round_to_int(Pressed+3*time_freq()-Now)/time_freq()+1));
 			else
 				str_copy(aLabel, Localize("Clear Recent"), sizeof(aLabel));
 			static CButtonContainer s_Button;

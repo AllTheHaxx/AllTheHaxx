@@ -205,7 +205,7 @@ void CMapLayers::OnRender()
 			if(!pLayer)
 			{
 				dbg_msg("ERROR", "This is here to prevent a crash where pLayer == 0");
-				dbg_msg("ERROR", "pGroup->m_StartLayer = %i, l = %i, pGroup->m_NumLayers = ", pGroup->m_StartLayer, l, pGroup->m_NumLayers);
+				dbg_msg("ERROR", "pGroup->m_StartLayer = %i, l = %i, pGroup->m_NumLayers = %i", pGroup->m_StartLayer, l, pGroup->m_NumLayers);
 				continue;
 			}
 

@@ -535,7 +535,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	char aInputing[32] = {0};
 	if(UI()->HotItem() == pBC->GetID() && Input()->GetIMEState())
 	{
-		str_format(aInputing, sizeof(aInputing), pStr);
+		str_copyb(aInputing, pStr);
 		const char *Text = Input()->GetIMECandidate();
 		if (str_length(Text))
 		{

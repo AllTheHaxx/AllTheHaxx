@@ -207,7 +207,6 @@ MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lu
 #else
 MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "THIS VERSION OF ALLTHEHAXX WAS COMPILED WITHOUT LUA SUPPORT !!")
 #endif
-MACRO_CONFIG_INT(ClPrintStartup, cl_print_startup, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print the client startup to console") // TODO: DO!
 //
 MACRO_CONFIG_INT(TexLazyLoading, tex_lazy_loading, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Don't load gametextures until needed (WARNING: enabling this takes up a HUGE amount of ram!!)")
 MACRO_CONFIG_STR(TexGame, tex_game, 128, "!default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gameskin texture")

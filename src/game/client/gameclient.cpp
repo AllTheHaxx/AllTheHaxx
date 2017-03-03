@@ -497,11 +497,7 @@ void CGameClient::OnInit()
 	LOAD_STUFF(1)
 	{
 		SET_LOAD_LABEL("Loading done. Have Fun!");
-		str_format(aBuf, sizeof(aBuf), "version %s", NetVersion());
-		if(g_Config.m_ClPrintStartup)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
-		else
-			dbg_msg("client", aBuf);
+		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version %s", NetVersion());
 
 		// never start with the editor
 		g_Config.m_ClEditor = 0;

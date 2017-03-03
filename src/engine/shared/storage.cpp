@@ -157,7 +157,7 @@ public:
 		else
 		{
 			dbg_msg("storage/error", "couldn't get executable name! pArgv0='%s' Pos=%u", pArgv0, Pos);
-			dbg_msg("storage/error", "checking if argv[0] IS executable name...", pArgv0, Pos);
+			dbg_msg("storage/error", "checking if argv[0] IS executable name...");
 			if(str_comp_nocase_num(&pArgv0[str_length(pArgv0)-4], ".exe", 4) == 0)
 			{
 				dbg_msg("storage", "yap, that worked!");

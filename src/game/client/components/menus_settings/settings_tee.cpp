@@ -108,9 +108,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		{
 			CIdentity::CIdentEntry Entry;
 			mem_zero(&Entry, sizeof(Entry));
-			str_format(Entry.m_aName, sizeof(Entry.m_aName), str_comp(aName, "") != 0 ? aName : g_Config.m_PlayerName);
-			str_format(Entry.m_aClan, sizeof(Entry.m_aClan), g_Config.m_PlayerClan);
-			str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), g_Config.m_ClPlayerSkin);
+			str_copyb(Entry.m_aName, str_comp(aName, "") != 0 ? aName : g_Config.m_PlayerName);
+			str_copyb(Entry.m_aClan, g_Config.m_PlayerClan);
+			str_copyb(Entry.m_aSkin, g_Config.m_ClPlayerSkin);
 			Entry.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
 			Entry.m_ColorBody = g_Config.m_ClPlayerColorBody;
 			Entry.m_ColorFeet = g_Config.m_ClPlayerColorFeet;

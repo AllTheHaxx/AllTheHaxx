@@ -305,7 +305,7 @@ class CTextRender : public IEngineTextRender
 
 		if(FT_Load_Char(pFont->m_FtFace, Chr, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
 		{
-			dbg_msg("pFont", "error loading glyph %d", Chr);
+			dbg_msg("pFont", "error loading glyph %lu", Chr);
 			return -1;
 		}
 

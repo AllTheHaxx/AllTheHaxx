@@ -55,16 +55,16 @@ void CIdentity::SaveIdents()
 
 		char aTeeEntry[NUM_ENTRIES][64];
 
-		str_format(aTeeEntry[TITLE], 64, pEntry->m_aTitle);
-		str_format(aTeeEntry[NAME], 64, pEntry->m_aName);
-		str_format(aTeeEntry[CLAN], 64, pEntry->m_aClan);
+		str_copyb(aTeeEntry[TITLE], pEntry->m_aTitle);
+		str_copyb(aTeeEntry[NAME], pEntry->m_aName);
+		str_copyb(aTeeEntry[CLAN], pEntry->m_aClan);
 
-		str_format(aTeeEntry[COUNTRY], 64, "%d", pEntry->m_Country);
+		str_formatb(aTeeEntry[COUNTRY], "%d", pEntry->m_Country);
 
-		str_format(aTeeEntry[SKIN], 64, pEntry->m_aSkin);
-		str_format(aTeeEntry[USE_CUSTOM_COLOR], 64, "%d", pEntry->m_UseCustomColor);
-		str_format(aTeeEntry[COLOR_BODY], 64, "%d", pEntry->m_ColorBody);
-		str_format(aTeeEntry[COLOR_FEET], 64, "%d", pEntry->m_ColorFeet);
+		str_copyb(aTeeEntry[SKIN], pEntry->m_aSkin);
+		str_formatb(aTeeEntry[USE_CUSTOM_COLOR], "%d", pEntry->m_UseCustomColor);
+		str_formatb(aTeeEntry[COLOR_BODY], "%d", pEntry->m_ColorBody);
+		str_formatb(aTeeEntry[COLOR_FEET], "%d", pEntry->m_ColorFeet);
 
 		for(int j = 0; j < NUM_ENTRIES; j++)
 		{
@@ -95,7 +95,7 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 	char aFilePath[512];
 	char aEntryItems[NUM_ENTRIES][64] = { { 0 } };
 	str_format(aFilePath, sizeof(aFilePath), "identities/%s", pName);
-	str_format(aFileName, sizeof(aFileName), pName);
+	str_copyb(aFileName, pName);
 
 	IOHANDLE File = pSelf->Storage()->OpenFile(aFilePath, IOFLAG_READ, IStorageTW::TYPE_SAVE);
 
@@ -141,7 +141,7 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 
 	Entry.m_Country = max(0, str_toint(aEntryItems[COUNTRY]));
 
-	str_format(Entry.m_aSkin, sizeof(Entry.m_aSkin), aEntryItems[SKIN]);
+	str_copyb(Entry.m_aSkin, aEntryItems[SKIN]);
 	Entry.m_UseCustomColor = max(0, str_toint(aEntryItems[USE_CUSTOM_COLOR]));
 	Entry.m_ColorBody = max(0, str_toint(aEntryItems[COLOR_BODY]));
 	Entry.m_ColorFeet = max(0, str_toint(aEntryItems[COLOR_FEET]));

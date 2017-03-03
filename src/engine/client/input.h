@@ -27,7 +27,7 @@ class CInput : public IEngineInput
 
 	//ime support
 	bool m_IsEditingText;
-	char m_pEditingText[32];
+	char m_aEditingText[32];
 	int m_EditingCursor;
 
 	bool KeyState(int Key) const;

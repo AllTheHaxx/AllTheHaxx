@@ -159,9 +159,9 @@ public:
 		if(!Dummy)
 		{
 			// main
-			str_format(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), pIdent->m_aName);
-			str_format(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan), pIdent->m_aClan);
-			str_format(g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClPlayerSkin), pIdent->m_aSkin);
+			str_copyb(g_Config.m_PlayerName, pIdent->m_aName);
+			str_copyb(g_Config.m_PlayerClan, pIdent->m_aClan);
+			str_copyb(g_Config.m_ClPlayerSkin, pIdent->m_aSkin);
 			g_Config.m_ClPlayerUseCustomColor = pIdent->m_UseCustomColor;
 			g_Config.m_ClPlayerColorBody = pIdent->m_ColorBody;
 			g_Config.m_ClPlayerColorFeet = pIdent->m_ColorFeet;
@@ -170,9 +170,9 @@ public:
 		else
 		{
 			// dummy
-			str_format(g_Config.m_ClDummyName, sizeof(g_Config.m_ClDummyName), pIdent->m_aName);
-			str_format(g_Config.m_ClDummyClan, sizeof(g_Config.m_ClDummyClan), pIdent->m_aClan);
-			str_format(g_Config.m_ClDummySkin, sizeof(g_Config.m_ClDummySkin), pIdent->m_aSkin);
+			str_copyb(g_Config.m_ClDummyName, pIdent->m_aName);
+			str_copyb(g_Config.m_ClDummyClan, pIdent->m_aClan);
+			str_copyb(g_Config.m_ClDummySkin, pIdent->m_aSkin);
 			g_Config.m_ClDummyUseCustomColor = pIdent->m_UseCustomColor;
 			g_Config.m_ClDummyColorBody = pIdent->m_ColorBody;
 			g_Config.m_ClDummyColorFeet = pIdent->m_ColorFeet;

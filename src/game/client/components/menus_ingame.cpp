@@ -296,7 +296,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	if(str_comp(GameClient()->m_pBinds->GetKey("+irc"), ""))
 		str_format(aBuf, sizeof(aBuf), Localize("Open the IRC overlay (Key: %s)"), GameClient()->m_pBinds->GetKey("+irc"));
 	else
-		str_format(aBuf, sizeof(aBuf), Localize("Open the IRC overlay"));
+		str_copyb(aBuf, Localize("Open the IRC overlay"));
 	if(DoButton_Menu(&s_OpenChatButton, Localize("IRC Chat"), 0, &Button, aBuf))
 		ToggleIRC();
 
