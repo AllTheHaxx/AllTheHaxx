@@ -318,8 +318,8 @@ set(SOURCE_FILES
     src/engine/external/openssl/des.h
     src/engine/external/openssl/engine.h
     src/engine/external/openssl/asn1t.h
-    src/engine/external/json-parser/json.c
-    src/engine/external/json-parser/json.h
+    src/engine/external/json-parser/json.cpp
+    src/engine/external/json-parser/json.hpp
     src/engine/external/pnglite/pnglite.c
     src/engine/external/pnglite/pnglite.h
     src/engine/external/astar-jps/IndexPriorityQueue.h
