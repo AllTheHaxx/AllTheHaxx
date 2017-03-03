@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
+#include <base/system++/io.h>
 #include <engine/storage.h>
 #include "linereader.h"
 
@@ -345,6 +346,14 @@ public:
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aaStoragePaths[Type], !m_aaStoragePaths[Type][0] ? "" : "/", pDir);
 		return pBuffer;
+	}
+
+	virtual IOHANDLE_SMART OpenFileSmart(const char *pFilename, int Flags, int Type)
+	{
+		char aBuffer[MAX_PATH_LENGTH];
+		IOHANDLE f = OpenFile(pFilename, Flags, Type, aBuffer, sizeof(aBuffer));
+		IOHANDLE_SMART File(aBuffer, f);
+		return File;
 	}
 
 	virtual IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0)

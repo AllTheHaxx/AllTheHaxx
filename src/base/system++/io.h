@@ -13,10 +13,10 @@
  */
 class IOHANDLE_SMART
 {
-	const std::string m_Filename;
+	std::string m_FilePath;
 	IOHANDLE m_FileHandle;
 public:
-	IOHANDLE_SMART(const char *pFilename, int Flags) : m_Filename(std::string(pFilename))
+	IOHANDLE_SMART(const char *pFilename, int Flags) : m_FilePath(std::string(pFilename))
 	{
 		m_FileHandle = io_open(pFilename, Flags);
 	}
@@ -39,7 +39,7 @@ public:
 	{
 		if(m_FileHandle)
 			return false;
-		m_FileHandle = io_open(m_Filename.c_str(), Flags);
+		m_FileHandle = io_open(m_FilePath.c_str(), Flags);
 		return m_FileHandle != NULL;
 	}
 
@@ -185,21 +185,41 @@ public:
 
 #undef RETURN_ON_NOT_OPEN
 
+	/**
+	 * Get the path of the associated file
+	 * @return the path to the associated file
+	 * @note validity of the returned path depends on the user!
+	 */
+	const char *GetPath() const
+	{
+		return m_FilePath.c_str();
+	}
+
 	//operator IOHANDLE() const { return f; }
-	IOHANDLE operator=(const IOHANDLE& New)
+	/*IOHANDLE operator=(const IOHANDLE& New)
 	{
 		if(m_FileHandle)
 			io_close(m_FileHandle);
 		m_FileHandle = New;
 		return m_FileHandle;
-	}
+	}*/
 
 	IOHANDLE_SMART& operator=(const IOHANDLE_SMART& other)
 	{
 		if(m_FileHandle)
 			io_close(m_FileHandle);
 		m_FileHandle = other.m_FileHandle;
+		m_FilePath = other.m_FilePath;
 		return *this;
+	}
+
+
+private:
+	friend class CStorage;
+
+	IOHANDLE_SMART(const char *pFilename, IOHANDLE FileHandle) : m_FilePath(std::string(pFilename))
+	{
+		m_FileHandle = FileHandle;
 	}
 };
 
