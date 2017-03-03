@@ -20,12 +20,17 @@ public:
 		m_Detached = false;
 	}
 
-#define RETURN_ON_NOT_HANDLED(RET) if(!m_pThreadHandle) return RET;
+	~THREAD_SMART()
+	{
+		if(IsJoinable())
+			Join();
+	}
 
 	/**
 	 * Start the thread
 	 * @param pUser the userdata to pass to the thread function
 	 * @return A bool indicating success
+	 * @note IMPORTANT: When the THREAD_SMART object goes out of scope, a Joinable thread will be joined automatically!
 	 */
 	bool Start(T *pUser)
 	{
@@ -52,9 +57,9 @@ public:
 	 * @return false if the thread is not running or is detached, otherwise true
 	 * @note This function does not return until the thread has finished!
 	 */
-	bool Join()
+	bool Join() const
 	{
-		RETURN_ON_NOT_HANDLED(false)
+		if(!IsJoinable()) return false;
 		thread_wait(m_pThreadHandle);
 		return true;
 	}
@@ -63,10 +68,12 @@ public:
 	 * Detach (aka daemonize) the thread so that you don't need to Join it
 	 * @return A bool indicating success
 	 */
-	bool Detach() const
+	bool Detach()
 	{
-		RETURN_ON_NOT_HANDLED(false)
-		return thread_detach(m_pThreadHandle) == 0;
+		if(!m_pThreadHandle) return false;
+		if((m_Detached = thread_detach(m_pThreadHandle) == 0))
+			m_pThreadHandle = NULL; // invalidate the handle since further operations on it would cause undefined behavior
+		return m_Detached;
 	}
 
 	/**
@@ -86,6 +93,15 @@ public:
 	bool IsDetached() const
 	{
 		return m_Detached;
+	}
+
+	/**
+	 * Check if the thread can be joined using the Join function
+	 * @return IsRunning() && !IsDetached()
+	 */
+	bool IsJoinable() const
+	{
+		return IsRunning() && !IsDetached();
 	}
 };
 
