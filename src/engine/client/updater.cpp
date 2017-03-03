@@ -11,7 +11,7 @@
 
 #include "updater.h"
 
-#define UPDATE_MANIFEST "update22.json"
+#define UPDATE_MANIFEST "update30.json"
 
 using std::string;
 using std::map;
@@ -248,7 +248,7 @@ void CUpdater::MoveFile(const char *pFile)
 	CALLSTACK_ADD();
 
 	char aBuf[256];
-	size_t len = str_length(pFile);
+	int len = str_length(pFile);
 
 	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf"))
 	{
@@ -358,8 +358,8 @@ void CUpdater::ParseUpdate()
 										*pTreeStr = json_string_get(json_object_get(pJsonArr, "tree")),
 										*pDestStr = json_string_get(json_object_get(pJsonArr, "dest"));
 
-							if(pRepoStr && pTreeStr && pDestStr &&
-									(pJsonFiles = json_object_get(pJsonArr, "files"))->type == json_array)
+							pJsonFiles = json_object_get(pJsonArr, "files");
+							if(pRepoStr && pTreeStr && pDestStr && pJsonFiles->type == json_array)
 							{
 								// add the list of files to the entry
 								std::map<string, string> e;
@@ -390,8 +390,15 @@ void CUpdater::ParseUpdate()
 							}
 							else
 							{
-								dbg_msg("updater/ERROR", "Failed to extract json data :");
-								dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
+								if(pRepoStr && str_comp(pRepoStr, "AllTheHaxx") == 0 && pTreeStr)
+								{
+									m_DataUpdater.Init(this, pTreeStr);
+								}
+								else
+								{
+									dbg_msg("updater/ERROR", "Failed to extract json data :");
+									dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
+								}
 							}
 						}
 					}

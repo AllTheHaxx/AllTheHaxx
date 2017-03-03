@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include "data_updater.h"
 
 #define CLIENT_EXEC "AllTheHaxx"
 #define SERVER_EXEC "AllTheHaxx-Server"
@@ -43,6 +44,8 @@ class CUpdater : public IUpdater
 	class IClient *m_pClient;
 	class IStorageTW *m_pStorage;
 	class IFetcher *m_pFetcher;
+
+	CDataUpdater m_DataUpdater;
 
 	bool m_IsWinXP;
 
