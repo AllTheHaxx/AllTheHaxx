@@ -41,7 +41,6 @@ config:Add(OptString("websockets", false))
 config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
-config:Add(OptString("protect", false))
 config:Finalize("config.lua")
 
 -- data compiler
@@ -246,10 +245,6 @@ function build(settings)
 		--settings.cc.includes:Add("src/engine/external/luabridge")
 	end
 
-	if config.protect.value then
-		settings.cc.defines:Add("CONF_PROTECT")
-	end
-
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
@@ -326,7 +321,7 @@ function build(settings)
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
-	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
+	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.cpp"))
 	md5 = Compile(settings, "src/engine/external/md5/md5.c")
 	if config.websockets.value then
 		libwebsockets = Compile(settings, Collect("src/engine/external/libwebsockets/*.c"))

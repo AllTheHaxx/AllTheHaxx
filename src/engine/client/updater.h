@@ -45,7 +45,7 @@ class CUpdater : public IUpdater
 	class IStorageTW *m_pStorage;
 	class IFetcher *m_pFetcher;
 
-	CDataUpdater m_DataUpdater;
+	GitHubAPI m_GitHubAPI;
 
 	bool m_IsWinXP;
 
@@ -56,18 +56,16 @@ class CUpdater : public IUpdater
 	char m_aError[256];
 
 	bool m_ClientUpdate;
-	int m_NumericVersion;
 
 	bool m_CheckOnly;
 
-	char m_aLatestVersion[10];
+//	char m_aLatestVersion[10];
 	char m_aNews[NEWS_SIZE];
-	char m_aProtectHashFile[64];
 
 	std::vector<std::string> m_FileRemoveJobs;
 	std::map<std::string, std::map<std::string, std::string> > m_FileDownloadJobs; // source - dlpath, dest
 
-	void AddFileRemoveJob(const char *pFile, bool job);
+	void AddFileRemoveJob(const char *pFile);
 	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0); // files from repos
 	void FetchExecutable(const char *pFile, const char *pDestPath); // executables from release sections
 	void MoveFile(const char *pFile);
@@ -83,7 +81,7 @@ public:
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
-	const char *GetLatestVersion() const { return m_aLatestVersion; }
+	const char *GetLatestVersion() const { return m_GitHubAPI.GetLatestVersion(); }
 	const char *GetNews() const { return m_aNews; }
 	const char *GetFailedFile() const { return m_aError; }
 

@@ -25,6 +25,8 @@ public:
 	virtual void PerformSimplePOST(const char *pUrl, const char *pFields);
 
 
+	static size_t CurlCallback_WriteToStdString(void *ptr, size_t size, size_t count, void *stream);
+
 private:
 	static void PerformPOST_ex(void *pUser);
 };

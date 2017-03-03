@@ -19,9 +19,10 @@
 
 #include <mastersrv/mastersrv.h>
 
-#include <engine/external/json-parser/json.h>
+#include <engine/external/json-parser/json.hpp>
 
 #include <game/client/components/menus.h>
+#include <json-parser/json.hpp>
 
 #include "serverbrowser.h"
 class SortWrap
@@ -1277,19 +1278,19 @@ void CServerBrowser::LoadDDNet()
 
 
 		// parse JSON
-		json_value *pCountries = json_parse(aBuf);
+		json_value &jsonCountries = *json_parse(aBuf, (size_t)str_length(aBuf));
 
-		if (pCountries && pCountries->type == json_array)
+		if (jsonCountries.type == json_array)
 		{
-			for (int i = 0; i < json_array_length(pCountries) && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
+			for(unsigned int i = 0; i < jsonCountries.u.array.length && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
 			{
 				// pSrv - { name, flagId, servers }
-				const json_value *pSrv = json_array_get(pCountries, i);
-				const json_value *pTypes = json_object_get(pSrv, "servers");
-				const json_value *pName = json_object_get(pSrv, "name");
-				const json_value *pFlagID = json_object_get(pSrv, "flagId");
+				const json_value &jsonSrv = jsonCountries[i];
+				const json_value &jsonTypes = jsonSrv["servers"];
+				const json_value &jsonName = jsonSrv["name"];
+				const json_value &jsonFlagID = jsonSrv["flagId"];
 
-				if (pSrv->type != json_object || pTypes->type != json_object || pName->type != json_string || pFlagID->type != json_integer)
+				if (jsonSrv.type != json_object || jsonTypes.type != json_object || jsonName.type != json_string || jsonFlagID.type != json_integer)
 				{
 					dbg_msg("client_srvbrowse", "invalid attributes");
 					continue;
@@ -1300,17 +1301,17 @@ void CServerBrowser::LoadDDNet()
 
 				pCntr->Reset();
 
-				str_copy(pCntr->m_aName, json_string_get(pName), sizeof(pCntr->m_aName));
-				pCntr->m_FlagID = json_int_get(pFlagID);
+				str_copy(pCntr->m_aName, (const char *)jsonName, sizeof(pCntr->m_aName));
+				pCntr->m_FlagID = (int)(json_int_t)jsonFlagID;
 
 				// add country
-				for (unsigned int t = 0; t < pTypes->u.object.length; t++)
+				for (unsigned int t = 0; t < jsonTypes.u.object.length; t++)
 				{
-					const char *pType = pTypes->u.object.values[t].name;
-					const json_value *pAddrs = pTypes->u.object.values[t].value;
+					const char *pType = jsonTypes.u.object.values[t].name;
+					const json_value &jsonAddrs = *(jsonTypes.u.object.values[t].value);
 
 					// add type
-					if(json_array_length(pAddrs) > 0 && m_NumDDNetTypes < MAX_DDNET_TYPES)
+					if(jsonAddrs.u.array.length > 0 && m_NumDDNetTypes < MAX_DDNET_TYPES)
 					{
 						int pos;
 						for(pos = 0; pos < m_NumDDNetTypes; pos++)
@@ -1326,11 +1327,10 @@ void CServerBrowser::LoadDDNet()
 					}
 
 					// add addresses
-					for (int g = 0; g < json_array_length(pAddrs); g++, pCntr->m_NumServers++)
+					for(unsigned int g = 0; g < jsonAddrs.u.array.length; g++, pCntr->m_NumServers++)
 					{
-						const json_value *pAddr = json_array_get(pAddrs, g);
-						const char* pStr = json_string_get(pAddr);
-						net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
+						const json_value &jsonAddr = jsonAddrs[g];
+						net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], (const char *)jsonAddr);
 						str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
 					}
 				}
@@ -1339,8 +1339,7 @@ void CServerBrowser::LoadDDNet()
 			}
 		}
 
-		if (pCountries)
-			json_value_free(pCountries);
+		json_value_free(&jsonCountries);
 	}
 }
 

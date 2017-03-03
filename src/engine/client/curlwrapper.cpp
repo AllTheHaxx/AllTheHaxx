@@ -1,3 +1,4 @@
+#include <string>
 #include "curlwrapper.h"
 
 
@@ -28,4 +29,10 @@ void CCurlWrapper::PerformPOST_ex(void *pUser)
 
 	curl_easy_cleanup(pHandle);
 	delete pTask;
+}
+
+size_t CCurlWrapper::CurlCallback_WriteToStdString(void *ptr, size_t size, size_t count, void *stream)
+{
+	((std::string*)stream)->append((char*)ptr, 0, size*count);
+	return size*count;
 }

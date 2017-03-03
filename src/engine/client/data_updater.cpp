@@ -1,72 +1,239 @@
 #include <base/system.h>
 #include <openssl/sha.h>
 #include <engine/storage.h>
-#include <base/system++.h>
+#include <base/system++/io.h>
+#include <engine/shared/config.h>
+#include <json-parser/json.hpp>
+#include <game/version.h>
 #include "data_updater.h"
 #include "updater.h"
+#include "curlwrapper.h"
 
 
 using std::map;
 using std::string;
 
-void CDataUpdater::Init(CUpdater *pUpdater, const char *pTreeStr)
+
+GitHubAPI::GitHubAPI()
 {
-	m_pUpdater = pUpdater;
-	m_Tree = std::string(pTreeStr);
+	if((m_pHandle = curl_easy_init()) == NULL)
+		m_State = STATE_ERROR;
+	else
+		m_State = STATE_IDLE;
 
-	m_LocalGlob.clear();
-	m_RemoteGlob.clear();
-	m_Progress = 0;
+	mem_zerob(m_aLatestVersion);
 
-	thread_detach(thread_init(ListdirThread, this));
+	m_DownloadJobs.clear();
+	m_RemoveJobs.clear();
+	m_RenameJobs.clear();
 }
 
-void CDataUpdater::ListdirThread(void *pUser)
+GitHubAPI::~GitHubAPI()
 {
-	CDataUpdater *pSelf = (CDataUpdater *)pUser;
-
-	dbg_msg("data-updater", "Data-Updater started globbing");
-	int64 Start = time_get();
-	fs_listdir_verbose("data", ListdirCallback, 0, pUser);
-	dbg_msg("data-updater", "listdir thread finished after %lli seconds. Hashing now...", (time_get()-Start)/time_freq());
-
-	thread_detach(thread_init(HashingThread, pUser));
+	if(m_pHandle)
+		curl_easy_cleanup(m_pHandle);
 }
 
-
-int CDataUpdater::ListdirCallback(const char *pName, const char *pFullPath, int is_dir, int dir_type, void *pUser)
+void GitHubAPI::CheckVersion()
 {
-	CDataUpdater *pSelf = (CDataUpdater *)pUser;
+	m_State = STATE_REFRESHING;
 
-	if(pName[0] == '.')
-		return 0;
-
-	// only add it to our list, hashing will be done later
-	pSelf->m_LocalGlob.insert(std::pair<string, string>(string(pFullPath), string("")));
+	THREAD_SMART<GitHubAPI> Thread(GitHubAPI::UpdateCheckerThread);
+	if(!Thread.StartDetached(this))
+		m_State = STATE_ERROR;
 }
 
-void CDataUpdater::HashingThread(void *pUser)
+void GitHubAPI::DoUpdate()
 {
-	CDataUpdater *pSelf = (CDataUpdater *)pUser;
+	m_State = STATE_UPDATING;
 
-	int64 Start = time_get();
+	THREAD_SMART<GitHubAPI> Thread(GitHubAPI::CompareThread);
+	if(!Thread.StartDetached(this))
+		m_State = STATE_ERROR;
+}
 
-	for(map<string, string>::iterator it = pSelf->m_LocalGlob.begin(); it != pSelf->m_LocalGlob.end(); it++)
+//---------------------------- STEP 1: UPDATE CHECKING ----------------------------//
+
+void GitHubAPI::UpdateCheckerThread(GitHubAPI *pSelf)
+{
+	std::string Result;
+	char aUrl[512];
+	str_copyb(aUrl, GITHUB_API_URL "/releases?page=1&per_page=1");
+	Result = pSelf->SimpleGET(aUrl);
+	if(Result.empty() || Result.length() == 0)
 	{
-		char aHexdigest[SHA_DIGEST_LENGTH * 2 + 1];
-		const char *pPath = it->first.c_str();
-
-		CDataUpdater::GitHashStr(pPath, aHexdigest, sizeof(aHexdigest));
-
-		dbg_msg("data-updater", "%s for '%s'", aHexdigest, pPath);
-		it->second = string(aHexdigest);
-
+		dbg_msg("github/releases", "ERROR: result empty");
+		pSelf->m_State = STATE_ERROR;
+		return;
 	}
-	dbg_msg("data-updater", "Hashing finished after %lli seconds", (time_get()-Start)/time_freq());
 
+	// check if we have the latest version
+	{
+		const char *pLatestVersion = ParseReleases(Result.c_str()).c_str();
+		if(str_length(pLatestVersion) == 0)
+		{
+			pSelf->m_State = STATE_ERROR;
+			return;
+		}
+		else
+		{
+			if(str_comp_nocase(pLatestVersion, GAME_ATH_VERSION) == 0)
+			{
+				dbg_msg("github", "AllTheHaxx is up to date.");
+				pSelf->m_State = STATE_CLEAN;
+				return;
+			}
+			else
+			{
+				str_copyb(pSelf->m_aLatestVersion, pLatestVersion);
+				dbg_msg("github", " -- NEW VERSION: AllTheHaxx %s has been released! --", pLatestVersion);
+				pSelf->m_State = STATE_NEWVERSION;
+				return;
+			}
+		}
+	}
 }
 
-void CDataUpdater::GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize)
+const std::string GitHubAPI::ParseReleases(const char *pJsonStr)
+{
+	// gets json[0]["name"]
+
+	json_value &jsonVersions = *json_parse(pJsonStr, (size_t)str_length(pJsonStr));
+	const json_value &jsonName = jsonVersions[0]["name"];
+
+	std::string Result((const char *)jsonName);
+
+	json_value_free(&jsonVersions);
+
+	return Result;
+}
+
+//---------------------------- STEP 2: CHANGELIST CREATION ----------------------------//
+
+void GitHubAPI::CompareThread(GitHubAPI *pSelf)
+{
+	std::string Result;
+	char aUrl[512];
+	str_formatb(aUrl, GITHUB_API_URL "/compare/%s...%s", GAME_ATH_VERSION, pSelf->m_aLatestVersion);
+	Result = pSelf->SimpleGET(aUrl);
+	if(Result.empty() || Result.length() == 0)
+	{
+		dbg_msg("github/compare", "ERROR: result empty");
+		pSelf->m_State = STATE_ERROR;
+		return;
+	}
+
+	if(!pSelf->ParseCompare(Result.c_str()))
+	{
+		pSelf->m_State = STATE_ERROR;
+		dbg_msg("github/compare", "ERROR: parsing failed");
+	}
+	else
+	{
+		pSelf->m_State = STATE_DONE;
+		int NumTotal = 0;
+		int NumDownload = (NumTotal += (int)pSelf->m_DownloadJobs.size());
+		int NumRename = (NumTotal += (int)pSelf->m_RenameJobs.size());
+		int NumRemove = (NumTotal += (int)pSelf->m_RemoveJobs.size());
+		dbg_msg("github/compare", "got %i jobs; download=%i, rename=%i, delete=%i", NumTotal, NumDownload, NumRename, NumRemove);
+	}
+}
+
+
+
+bool GitHubAPI::ParseCompare(const char *pJsonStr)
+{
+	// gets json["files"][i]["filename"]
+
+	json_value &jsonCompare = *json_parse(pJsonStr, (size_t)str_length(pJsonStr));
+
+	const json_value &jsonFiles = jsonCompare["files"];
+	if(jsonFiles.type != json_array)
+		return false;
+
+	// loop through the array of changed files
+	for(unsigned int i = 0; i < jsonFiles.u.array.length; i++)
+	{
+		// we only want files in the data/ directory
+		const char *pFilename = (const char *)(jsonFiles[i]["filename"]);
+		if(str_comp_nocase_num(pFilename, "data/", str_length("data/")) != 0)
+			continue;
+
+		// find out what to do
+		const char *pStatus = (const char *)(jsonFiles[i]["status"]);
+		if(str_comp_nocase(pStatus, "modified") == 0 ||
+		   str_comp_nocase(pStatus, "added") == 0)
+		{
+			// file has been added or modified since our version? -> queue for (re-)download
+			m_DownloadJobs.push_back(std::string(pFilename));
+		}
+		else if(str_comp_nocase(pStatus, "renamed") == 0)
+		{
+			// if the file has only been renamed but not changed, we don't need to redownload it
+			const char *pPreviousFilename = (const char *)(jsonFiles[i]["previous_filename"]);
+			m_RenameJobs.push_back(std::pair<std::string, std::string>(std::string(pPreviousFilename), std::string()));
+		}
+		else if(str_comp_nocase(pStatus, "removed") == 0)
+		{
+			// files that have been removed from the repo can be deleted locally, too
+			m_RemoveJobs.push_back(std::string(pFilename));
+		}
+	}
+
+	json_value_free(&jsonCompare);
+
+	return true;
+}
+
+//---------------------------- HELPER FUNCTIONS ----------------------------//
+
+const std::string GitHubAPI::SimpleGET(const char *pUrl)
+{
+	std::string Result = "";
+
+	char aErr[CURL_ERROR_SIZE];
+	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
+
+	curl_easy_setopt(m_pHandle, CURLOPT_CONNECTTIMEOUT_MS, (long)g_Config.m_ClHTTPConnectTimeoutMs);
+	curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_LIMIT, (long)g_Config.m_ClHTTPLowSpeedLimit);
+	curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_TIME, (long)g_Config.m_ClHTTPLowSpeedTime);
+	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
+	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
+	curl_easy_setopt(m_pHandle, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(m_pHandle, CURLOPT_URL, pUrl);
+	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, &Result);
+	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CCurlWrapper::CurlCallback_WriteToStdString);
+	curl_easy_setopt(m_pHandle, CURLOPT_NOPROGRESS, 1L);
+	curl_easy_setopt(m_pHandle, CURLOPT_NOSIGNAL, 1L);
+
+	int ret = curl_easy_perform(m_pHandle);
+	if(ret != CURLE_OK)
+	{
+		dbg_msg("github/error", "'%s' failed: %s", pUrl, aErr);
+	}
+	else
+	{
+		dbg_msg("github/debug", "'%s' -> %lu bytes", pUrl, Result.length());
+	}
+	return Result;
+}
+
+/* this one is overly complicated I think... let's not use it?
+void GitHubAPI::CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *userdata)
+{
+	std::string *pResult = (std::string *)userdata;
+
+	unsigned int BufferSize = (unsigned int)(size*nmemb + 1);
+	char *pBuf = mem_allocb(char, BufferSize);
+	mem_zero(pBuf, BufferSize);
+	mem_copy(pBuf, pData, (unsigned int)(size*nmemb));
+
+	*pResult += std::string(pBuf);
+	mem_free(pBuf);
+}*/
+
+void GitHubAPI::GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize)
 {
 	unsigned char aHash[SHA_DIGEST_LENGTH];
 	mem_zerob(aHash);

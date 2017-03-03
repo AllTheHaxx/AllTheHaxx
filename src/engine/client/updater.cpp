@@ -5,7 +5,7 @@
 #include <engine/fetcher.h>
 #include <engine/storage.h>
 #include <engine/client.h>
-#include <engine/external/json-parser/json.h>
+#include <engine/external/json-parser/json.hpp>
 #include <game/version.h>
 #include <game/client/components/menus.h>
 
@@ -25,19 +25,9 @@ CUpdater::CUpdater()
 	str_copy(m_aError, "a file", sizeof(m_aError));
 	m_Percent = 0;
 	m_CheckOnly = false;
-	m_aLatestVersion[0] = '0';
-	m_aLatestVersion[1] = '\0';
-	m_NumericVersion = 0;
 	m_IsWinXP = false;
 
 	m_ClientUpdate = true; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
-
-	mem_zero(m_aProtectHashFile, sizeof(m_aProtectHashFile));
-	str_copy(m_aProtectHashFile, CLIENT_EXEC "-" ATH_VERSION, sizeof(m_aProtectHashFile));
-	char edx[] = {
-			46, 100, 101, 110, 110, 105, 115, 0
-	};
-	str_append(m_aProtectHashFile, edx, sizeof(m_aProtectHashFile));
 }
 
 void CUpdater::Init()
@@ -100,52 +90,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		fs_remove(pTask->Dest()); // delete the empty file dummy
 	}
 
-
-	if(str_comp(b, pUpdate->m_aProtectHashFile) == 0)
-	{
-#if defined(CONF_PROTECT)
-		// 0
-		unsigned char asdf[SHA256_DIGEST_LENGTH] = {0};
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "update/%s", pUpdate->m_aProtectHashFile);
-		IOHANDLE f = io_open(aBuf, IOFLAG_READ);
-		io_read(f, asdf, sizeof(asdf));
-		io_close(f);
-		// 1
-		f = io_open(pUpdate->m_pStorage->GetExecutableName(), IOFLAG_READ);
-		unsigned int len = (unsigned int)io_length(f);
-		char *aFile = new char[len];
-		io_read(f, aFile, len);
-		io_close(f);
-		unsigned char md[SHA256_DIGEST_LENGTH] = {0};
-		int ret = simpleSHA256(aFile, len, md);
-		if(ret != 0)
-		{
-			mem_free(aFile);
-		};
-		// 2
-		char ast[2][128] = {{0}};
-		for(int k = 0; k < 2; k++)
-		{
-			for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-			{
-				char h[3];
-				str_format(h, sizeof(h), "%02x", k == 0 ? md[i] : asdf[i]);
-				str_append(ast[k], h, sizeof(ast[k]));
-			}
-		}
-
-		if(str_comp(ast[0], ast[1]) != 0)
-		{
-			for(int i,x = 0; i < 0xEDB; x++, i <<=x>>0xBCD)
-				aBuf[i%x] = (char)(x << i) % 0xFF;
-			io_write(f, aBuf, sizeof(aBuf));
-			mem_free(aFile);
-		}
-		delete[] aFile;
-#endif
-	}
-	else if(str_comp(b, "ath-news.txt") == 0)
+	if(str_comp(b, "ath-news.txt") == 0)
 	{
 		// dig out whether ATH news have been updated
 
@@ -227,7 +172,7 @@ void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
 	CALLSTACK_ADD();
 
 	char aBuf[256], aDestPath[512] = {0};
-	str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/AllTheHaxx/releases/download/%s/%s", m_aLatestVersion, pFile);
+	str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/AllTheHaxx/releases/download/%s/%s", GetLatestVersion(), pFile);
 
 	//dbg_msg("updater", "fetching file from '%s'", aBuf);
 	if(!pDestPath)
@@ -282,7 +227,7 @@ void CUpdater::Update()
 	}
 }
 
-void CUpdater::AddFileRemoveJob(const char *pFile, bool job)
+void CUpdater::AddFileRemoveJob(const char *pFile)
 {
 	CALLSTACK_ADD();
 
@@ -317,6 +262,8 @@ void CUpdater::ParseUpdate()
 {
 	CALLSTACK_ADD();
 
+	// this function shall only be called when actually updating the client
+
 	char aPath[512];
 	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
 	if(File)
@@ -326,85 +273,74 @@ void CUpdater::ParseUpdate()
 		io_read(File, aBuf, sizeof(aBuf));
 		io_close(File);
 
-		json_value *pVersions = json_parse(aBuf);
-
-		if(pVersions && pVersions->type == json_array)
+		json_value &jsonVersions = *json_parse(aBuf, (size_t)str_length(aBuf)); // TODO: free this!
+		if(jsonVersions.type != json_array)
 		{
-			for(int i = 0; i < json_array_length(pVersions) ; i++)
+			dbg_msg("updater/parse", "invalid manifest contents (not an array)");
+			return;
+		}
+
+		for(unsigned int i = 0; i < jsonVersions.u.array.length ; i++)
+		{
+			const json_value &jsonCurrent = jsonVersions[i];
+
+			// downgrades no gud
+			if((json_int_t)(jsonCurrent["numeric"]) <= GAME_ATH_VERSION_NUMERIC)
+				continue;
+
+			if(jsonCurrent["remove"].type == json_array)
 			{
-				const json_value *pTemp;
-				const json_value *pCurrent = json_array_get(pVersions, i);
-				if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_ATH_VERSION))
+				for(unsigned int j = 0; j < jsonCurrent["remove"].u.array.length; j++)
+					AddFileRemoveJob(jsonCurrent["remove"][j]);
+			}
+			if(jsonCurrent["download"].type == json_array)
+			{
+				for(unsigned int j = 0; j < jsonCurrent["download"].u.array.length; j++)
 				{
-					m_NumericVersion = json_int_get(json_object_get(pCurrent, "numeric"));
-					if(!(m_NumericVersion > GAME_ATH_VERSION_NUMERIC)) // don't update to older versions
-						continue;
+					const json_value &jsonRepoBatch = jsonCurrent["download"][j];
+					const char  *pRepoStr = (const char *)jsonRepoBatch["repo"],
+								*pTreeStr = (const char *)jsonRepoBatch["tree"],
+								*pDestStr = (const char *)jsonRepoBatch["dest"];
 
-					// get the latest version if we don't have it already
-					if(m_aLatestVersion[0] == '0' && m_aLatestVersion[1] == '\0')
-						str_copy(m_aLatestVersion, json_string_get(json_object_get(pCurrent, "version")), sizeof(m_aLatestVersion));
-
-					if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
+					const json_value &jsonFilesArray = jsonRepoBatch["files"];
+					if(jsonFilesArray.type == json_array)
 					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileRemoveJob(json_string_get(json_array_get(pTemp, j)), false);
-					}
-					if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
-					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
+						// add the list of files to the entry
+						std::map<string, string> e;
+						std::string source(string(pRepoStr) + "/" + string(pTreeStr));
+						for(unsigned int k = 0; k < jsonFilesArray.u.array.length; k++)
 						{
-							const json_value *pJsonFiles, *pJsonArr = json_array_get(pTemp, j);
-							const char  *pRepoStr = json_string_get(json_object_get(pJsonArr, "repo")),
-										*pTreeStr = json_string_get(json_object_get(pJsonArr, "tree")),
-										*pDestStr = json_string_get(json_object_get(pJsonArr, "dest"));
-
-							pJsonFiles = json_object_get(pJsonArr, "files");
-							if(pRepoStr && pTreeStr && pDestStr && pJsonFiles->type == json_array)
+							const char *pFileStr = jsonFilesArray[k];
+							if(!pFileStr)
 							{
-								// add the list of files to the entry
-								std::map<string, string> e;
-								std::string source(string(pRepoStr) + "/" + string(pTreeStr));
-								for(int k = 0; k < json_array_length(pJsonFiles); k++)
-								{
-									const char *pFileStr = json_string_get(json_array_get(pJsonFiles, k));
-									if(!pFileStr)
-									{
-										dbg_msg("updater/ERROR", "Failed to extract json data :");
-										dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, pFileStr);
+								dbg_msg("updater/ERROR", "Failed to extract json data :");
+								dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, (void *)pFileStr);
+								continue;
+							}
+							try {
+								#if !defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
+									if(str_comp_nocase(pFileStr + str_length(pFileStr) - 4, ".dll") == 0) // TODO: 64 bit support when time has come
 										continue;
-									}
-									try {
-										#if !defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
-											if(str_comp_nocase(pFileStr + str_length(pFileStr) - 4, ".dll") == 0) // TODO: 64 bit support when time has come
-												continue;
-										#endif
-										std::string file(pFileStr);
-										if(std::find(m_FileRemoveJobs.begin(), m_FileRemoveJobs.end(), string(pDestStr)+file) == m_FileRemoveJobs.end()) // only add the elements that are not on the remove list
-											e[file] = string(pDestStr);
-										//dbg_msg("DEBUG|updater", "DOWNLOAD (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
-									} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
-								}
-
-								// store the entry
-								m_FileDownloadJobs[source] = e;
-							}
-							else
-							{
-								if(pRepoStr && str_comp(pRepoStr, "AllTheHaxx") == 0 && pTreeStr)
-								{
-									m_DataUpdater.Init(this, pTreeStr);
-								}
-								else
-								{
-									dbg_msg("updater/ERROR", "Failed to extract json data :");
-									dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
-								}
-							}
+								#endif
+								std::string FilePath(pFileStr);
+								// only add the elements that are not on the remove list
+								if(std::find(m_FileRemoveJobs.begin(), m_FileRemoveJobs.end(), string(pDestStr)+FilePath) == m_FileRemoveJobs.end())
+									e[FilePath] = string(pDestStr);
+								//dbg_msg("DEBUG|updater", "DOWNLOAD (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
+							} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
 						}
+
+						// store the entry
+						m_FileDownloadJobs[source] = e;
 					}
-					// get all previous updates that me missed
+					else
+					{
+						dbg_msg("updater/ERROR", "Failed to extract json data :");
+						dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
+					}
 				}
 			}
+			// get all previous updates that me missed
 		}
 	}
 }
@@ -416,17 +352,12 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 	m_CheckOnly = CheckOnly;
 
 	// get the version info if we don't have any yet
-	if((m_aLatestVersion[0] == '0' && m_aLatestVersion[1] == '\0') || ForceRefresh)
+	if((GetLatestVersion()[0] == '0' && GetLatestVersion()[1] == '\0') || ForceRefresh)
 	{
 		m_State = GETTING_MANIFEST;
 		dbg_msg("updater", "refreshing version info");
-		FetchFile("stuffility/master", UPDATE_MANIFEST);
+//		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		FetchFile("stuffility/master", "ath-news.txt");
-#if defined(CONF_PROTECT)
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "edx/%s", m_aProtectHashFile);
-		FetchFile("stuffility/master", aBuf);
-#endif
 	}
 	else
 		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step
@@ -527,7 +458,7 @@ void CUpdater::WinXpRestart()
 			return;
 		char bBuf[512];
 		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"" CLIENT_EXEC ".exe\"\r\nif exist \"" CLIENT_EXEC ".exe\" goto _R\r\n:_T\r\nmove /y \"update\\" CLIENT_EXEC ".tmp\" \"" CLIENT_EXEC ".exe\"\r\nif not exist \"" CLIENT_EXEC ".exe\" goto _T\r\nstart " CLIENT_EXEC ".exe\r\ndel \"du.bat\"\r\n");
-		io_write(bhFile, bBuf, str_length(bBuf));
+		io_write(bhFile, bBuf, (unsigned int)str_length(bBuf));
 		io_close(bhFile);
 		shell_execute(aBuf);
 		m_pClient->Quit();
