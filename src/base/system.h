@@ -306,7 +306,7 @@ unsigned io_write_newline(IOHANDLE io);
 	Returns:
 		Returns 0 on success.
 */
-int io_seek(IOHANDLE io, int offset, int origin);
+int io_seek(IOHANDLE io, long offset, int origin);
 
 /*
 	Function: io_tell
@@ -1075,7 +1075,7 @@ const char *str_find_rev(const char *haystack, const char *needle);
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 #define str_hexb(BUF, DATA) str_hex(BUF, sizeof(BUF), DATA, sizeof(DATA))
 void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data_size);
-#define str_hex_simpleb(BUF, DATA, NUM) str_hex_simple(BUF, sizeof(BUF), DATA, NUM)
+#define str_hex_simpleb(BUF, DATA, DATASIZE) str_hex_simple(BUF, sizeof(BUF), DATA, DATASIZE)
 
 /*
 	Function: str_timestamp

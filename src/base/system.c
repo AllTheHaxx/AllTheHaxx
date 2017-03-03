@@ -601,7 +601,7 @@ long io_skip(IOHANDLE io, long size)
 	return size;
 }
 
-int io_seek(IOHANDLE io, int offset, int origin)
+int io_seek(IOHANDLE io, long offset, int origin)
 {
 	int real_origin;
 
@@ -653,14 +653,12 @@ unsigned io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
-	fclose((FILE*)io);
-	return 1;
+	return fclose((FILE*)io);
 }
 
 int io_flush(IOHANDLE io)
 {
-	fflush((FILE*)io);
-	return 0;
+	return fflush((FILE*)io);
 }
 
 void *thread_init(void (*threadfunc)(void *), void *u)
