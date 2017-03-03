@@ -542,7 +542,6 @@ set(SOURCE_FILES
     src/game/client/components/menus_settings/settings_sound.cpp
     src/game/client/components/menus_settings/settings_appearance.cpp
     src/game/client/components/menus_settings/settings_hud.cpp
-    src/base/system++.cpp
-    src/base/system++.h
-)
+        src/base/system++/io.h
+        src/base/system++/threading.h)
 add_executable(AllTheHaxx ${SOURCE_FILES})

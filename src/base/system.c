@@ -665,8 +665,10 @@ void *thread_init(void (*threadfunc)(void *), void *u)
 {
 #if defined(CONF_FAMILY_UNIX)
 	pthread_t id;
-	pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u);
-	return (void*)id;
+	if(pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u) == 0)
+		return (void*)id;
+	else
+		return NULL;
 #elif defined(CONF_FAMILY_WINDOWS)
 	return CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)threadfunc, u, 0, NULL);
 #else
@@ -706,7 +708,7 @@ void thread_yield()
 #endif
 }
 
-void thread_sleep(int milliseconds)
+void thread_sleep(unsigned milliseconds)
 {
 #if defined(CONF_FAMILY_UNIX)
 	usleep(milliseconds*1000);
@@ -717,12 +719,12 @@ void thread_sleep(int milliseconds)
 #endif
 }
 
-void thread_detach(void *thread)
+int thread_detach(void *thread)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)(thread));
+	return pthread_detach((pthread_t)(thread)) == 0;
 #elif defined(CONF_FAMILY_WINDOWS)
-	CloseHandle(thread);
+	return CloseHandle(thread) != 0;
 #else
 	#error not implemented
 #endif

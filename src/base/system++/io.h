@@ -1,8 +1,8 @@
-#ifndef BASE_SYSTEM_CPP_H
-#define BASE_SYSTEM_CPP_H
+#ifndef BASE_SYSTEMPP_IO_H
+#define BASE_SYSTEMPP_IO_H
 
 #include <string>
-#include "system.h"
+#include <base/system.h>
 
 /**
  * Wrapper for IOHANDLE and all io_ functions
@@ -80,6 +80,20 @@ public:
 	{
 		RETURN_ON_NOT_OPEN(0)
 		return io_write(m_FileHandle, pBuffer, Size);
+	}
+
+	/**
+	 * Writes the text plus an appropriate newline to the file
+	 * @param pText text to write
+	 * @return number of bytes written, see Write
+	 */
+	unsigned WriteLine(const char *pText) const
+	{
+		RETURN_ON_NOT_OPEN(0)
+		unsigned Size = 0;
+		Size += Write(pText, (unsigned int)str_length(pText));
+		Size += WriteNewline();
+		return Size;
 	}
 
 	/**

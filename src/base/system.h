@@ -389,7 +389,7 @@ IOHANDLE io_stderr();
 	Parameters:
 		milliseconds - Number of milliseconds to sleep.
 */
-void thread_sleep(int milliseconds);
+void thread_sleep(unsigned milliseconds);
 
 /*
 	Function: thread_init
@@ -435,7 +435,7 @@ void thread_yield();
 	Parameters:
 		thread - Thread to detach
 */
-void thread_detach(void *thread);
+int thread_detach(void *thread);
 
 /*
 	Function: thread_get_current
