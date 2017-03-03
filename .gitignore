@@ -40,7 +40,6 @@ luacert*
 *.log
 *.exe
 *.res
-*.o
 *.s
 *.patch
 *.prefs
@@ -55,7 +54,6 @@ luacert*
 *.user
 *.cmd
 *.opensdf
-*.pyc
 *.db
 *.db-journal
 *.pdf
@@ -63,6 +61,8 @@ luacert*
 
 /*.svg
 /callgrind.out.*
+
+!CMakeLists.txt
 
 /autoexec.cfg
 /storage.cfg

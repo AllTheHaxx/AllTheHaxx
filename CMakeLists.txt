@@ -543,5 +543,5 @@ set(SOURCE_FILES
     src/game/client/components/menus_settings/settings_hud.cpp
     src/base/system++.cpp
     src/base/system++.h
- )
+)
 add_executable(AllTheHaxx ${SOURCE_FILES})
