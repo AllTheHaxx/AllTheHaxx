@@ -28,7 +28,7 @@ void CDataUpdater::ListdirThread(void *pUser)
 	dbg_msg("data-updater", "Data-Updater started globbing");
 	int64 Start = time_get();
 	fs_listdir_verbose("data", ListdirCallback, 0, pUser);
-	dbg_msg("data-updater", "listdir thread finished after %i seconds. Hashing now...", (time_get()-Start)/time_freq());
+	dbg_msg("data-updater", "listdir thread finished after %lli seconds. Hashing now...", (time_get()-Start)/time_freq());
 
 	thread_detach(thread_init(HashingThread, pUser));
 }
@@ -62,7 +62,7 @@ void CDataUpdater::HashingThread(void *pUser)
 		it->second = string(aHexdigest);
 
 	}
-		dbg_msg("data-updater", "Hashing finished after %i seconds", (time_get()-Start)/time_freq());
+	dbg_msg("data-updater", "Hashing finished after %lli seconds", (time_get()-Start)/time_freq());
 
 }
 
@@ -83,7 +83,7 @@ void CDataUpdater::GitHashStr(const char *pFile, char *pBuffer, unsigned BufferS
 		// prepend what git does
 		{
 			char aBuffer[16 * 1024];
-			str_formatb(aBuffer, "blob %d", File.Length());
+			str_formatb(aBuffer, "blob %lu", File.Length());
 			if(!SHA_Update(&context, aBuffer, (unsigned)str_length(aBuffer)+1)) // +1 because git wants the \0 to be hashed aswell!
 			{
 				dbg_msg("GitHashStr", "SHA_Update failed for the git identifier '%s'", aBuffer);
@@ -101,7 +101,7 @@ void CDataUpdater::GitHashStr(const char *pFile, char *pBuffer, unsigned BufferS
 
 					if(!SHA_Update(&context, aBuffer, BytesRead))
 					{
-						dbg_msg("GitHashStr", "SHA_Update failed for '%s' at 0x%x", pFile, File.Tell());
+						dbg_msg("GitHashStr", "SHA_Update failed for '%s' at 0x%x", pFile, (unsigned int)File.Tell());
 						continue;
 					}
 				}
