@@ -467,30 +467,6 @@ void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 	return header+1;
 }
 
-void* mem_realloc_debug(void *p, const char *filename, int line, unsigned size)
-{
-	// if nullptr is passed, this shall behave exactly like mem_alloc
-	if(!p)
-		return mem_alloc_debug(filename, line, size, 0);
-
-	MEMHEADER *header = (MEMHEADER *)p - 1;
-	MEMTAIL *tail = (MEMTAIL *)(((char*)(header+1))+header->size);
-
-	if(tail->guard != MEM_GUARD_VAL)
-		dbg_msg("mem", "!! realloc @@ %p[%i] from '%s' INVALID GUARD: 0x%08x{@%p} != 0x%08x", p, header->size, header->filename, tail->guard, tail, MEM_GUARD_VAL);
-
-	// if there is already enough memory allocated, do nothing
-	if(header->size >= size)
-		return p;
-
-	// reallocate manually
-	void *new_block = mem_alloc_debug(filename, line, size, 0); // allocate new block
-	mem_copy(new_block, p, (unsigned)header->size); // copy the old block over
-	mem_free(p); // dispose the old block
-
-	return new_block;
-}
-
 void mem_free(void *p)
 {
 	if(p)

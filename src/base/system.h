@@ -116,10 +116,8 @@ __attribute__ ((format (printf, 2, 3))) /* Warn if you specify wrong arguments i
 		<mem_free>
 */
 void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment);
-void* mem_realloc_debug(void *block, const char *filename, int line, unsigned size);
 #define mem_alloc(s,a) mem_alloc_debug(__FILE__, __LINE__, (s), (a))
 #define mem_allocb(t,n) (t*)mem_alloc_debug(__FILE__, __LINE__, (sizeof(t)*n), 0)
-#define mem_realloc(p,s) mem_realloc_debug(p,__FILE__, __LINE__, (s))
 
 /*
 	Function: mem_free
