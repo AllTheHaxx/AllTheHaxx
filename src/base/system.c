@@ -1852,6 +1852,7 @@ int fs_listdir_verbose(const char *dir, FS_LISTDIR_CALLBACK_VERBOSE cb, int type
 #if defined(CONF_FAMILY_WINDOWS)
 	WIN32_FIND_DATA finddata;
 	HANDLE handle;
+	int result;
 	char buffer[1024*2];
 	int length;
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
@@ -1863,7 +1864,7 @@ int fs_listdir_verbose(const char *dir, FS_LISTDIR_CALLBACK_VERBOSE cb, int type
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
 	length = str_length(buffer);
-	int result = 0;
+	result = 0;
 
 	/* add all the entries */
 	do
@@ -2479,8 +2480,9 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 }
 void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data_size)
 {
+	int i;
 	mem_zero(dst, sizeof(dst));
-	for(int i = 0; i < data_size; i++)
+	for(i = 0; i < data_size; i++)
 	{
 		char buf[3];
 		str_format(buf, sizeof(buf), "%02x", data[i]);
