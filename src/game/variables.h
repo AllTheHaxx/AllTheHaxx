@@ -172,7 +172,7 @@ MACRO_CONFIG_INT(ClShowhudChatMsgTime, cl_chatmsg_time, 16, 1, 30, CFGFLAG_CLIEN
 MACRO_CONFIG_INT(ClUiShowExtraBar, cl_ui_extra_bar, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show the extra bar")
 MACRO_CONFIG_INT(ClSmartZoom, cl_smart_zoom, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom in/out in a smart way (0=off, 1=race only, 2=all mods)")
 MACRO_CONFIG_INT(ClSmartZoomVal, cl_smart_zoom_val, 100, 0, 1000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Percentage to multiply the base zooming intensity with")
-MACRO_CONFIG_INT(ClCinematicCamera, cl_cinematic_camera, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth spectator cam movement")
+MACRO_CONFIG_INT(ClCinematicCamera, cl_cinematic_camera, 1, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth spectator cam movement (set to 2 to have it ingame aswell)")
 MACRO_CONFIG_INT(ClCinematicCameraDelay, cl_cinematic_camera_delay, 25, 0, 250, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How long it should take for the cinematic camera to move")
 MACRO_CONFIG_INT(ClSmoothChat, cl_smooth_chat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth chat animation")
 MACRO_CONFIG_INT(ClSmoothEmoteWheel, cl_smooth_emotewheel, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth emote wheel animation")
