@@ -984,8 +984,6 @@ void CGameConsole::OnRender()
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
 		const char *pPrompt = "> ";
-		if(m_pSearchString)
-			pPrompt = "[CTRL+F] SEARCHING» ";
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE)
@@ -1015,6 +1013,8 @@ void CGameConsole::OnRender()
 			else
 				pPrompt = "Lua disabled. Please enable Lua first. ";
 		}
+		if(m_pSearchString)
+			pPrompt = "[CTRL+F] SEARCHING» ";
 
 		//notify the user nothing can be found
 		if(m_pSearchString && (pConsole->m_NoFound || pConsole->m_AtEnd == 2))
@@ -1042,7 +1042,7 @@ void CGameConsole::OnRender()
 		// hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed())
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && !m_pSearchString)
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
@@ -1099,7 +1099,6 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 
 		// new console rendering
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
@@ -1178,18 +1177,34 @@ void CGameConsole::OnRender()
 		{
 			if(pEntry)
 			{
+				vec3 rgb(1,1,1);
 				if(pEntry->m_YOffset < 0.0f)
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
 					Cursor.m_LineWidth = Screen.w-10;
+					if(m_ConsoleType == CONSOLETYPE_LOCAL)
+					{
+						#define StartsWith(TAG) (str_comp_num(pEntry->m_aText, TAG": ", str_length(TAG)+2) == 0)
+						if (StartsWith("[serv]")) // system message
+							rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
+						else if (StartsWith("[chat]: [*Translator*]")) // translator
+							rgb = vec3(0.45f, 0.45f, 1.0f);
+						else if (StartsWith("[teamchat]: [*Lua*]")) // lua
+							rgb = vec3(1.0f, 0.45f, 0.45f);
+						else if (StartsWith("[teamchat]"))
+							rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+						else if (pEntry->m_Highlighted)
+							rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
+//						else
+//							rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
+						#undef StartsWith
+					}
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 					pEntry->m_YOffset = Cursor.m_Y+Cursor.m_FontSize+LineOffset;
 				}
 
-				if(pEntry->m_Highlighted)
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
-				else
-					TextRender()->TextColor(1,1,1,1);
+				TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 
 				OffsetY += pEntry->m_YOffset;
 
@@ -1285,7 +1300,6 @@ void CGameConsole::OnRender()
 				CUIRect TextRect;
 
 				bool Found = false;
-				bool One = true;
 
 				if(!pUrlBeginning)
 					break;
@@ -1306,7 +1320,6 @@ void CGameConsole::OnRender()
 						pUrlEnding = pUrlBeginning + str_length(pUrlBeginning);
 					else
 					{
-						One = false;
 						pUrlEnding++;
 					}
 
@@ -1322,7 +1335,7 @@ void CGameConsole::OnRender()
 					// render the first part
 					if(pUrlBeginning - pCursor > 0)
 					{
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+						TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 						TextRender()->TextEx(&Cursor, pCursor, pUrlBeginning - pCursor);
 					}
 
@@ -1330,11 +1343,11 @@ void CGameConsole::OnRender()
 					if(UI()->MouseInsideNative(mx, my, &TextRect))
 					{
 						TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
-						static float LastClicked = 0;
-						if(Input()->MouseDoubleClick() && Client()->LocalTime() > LastClicked + 1)
+						static float s_LastClicked = 0.0f;
+						if(Input()->MouseDoubleClick() && Client()->SteadyTimer() > s_LastClicked + 1.0f)
 						{
+							s_LastClicked = Client()->SteadyTimer();
 							Input()->Clear();
-							LastClicked = Client()->LocalTime();
 							//((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->Minimize();
 							open_default_browser(aUrl);
 						}
@@ -1346,16 +1359,8 @@ void CGameConsole::OnRender()
 					TextRender()->TextEx(&Cursor, pUrlBeginning, UrlSize);
 
 					// render the rest
-					if(One)
-					{
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
-					}
-					else
-					{
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
-					}
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
 
 					pCursor = pUrlEnding;
 				}
@@ -1378,7 +1383,7 @@ void CGameConsole::OnRender()
 									TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr - pText));
 									TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
 									TextRender()->TextEx(&Cursor, pFoundStr, str_length(m_pSearchString));
-									TextRender()->TextColor(1, 1, 1, 1);
+									TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 									//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
 									pText = pFoundStr + str_length(m_pSearchString);
 								}
