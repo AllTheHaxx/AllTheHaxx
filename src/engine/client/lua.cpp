@@ -335,3 +335,17 @@ int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown
 #endif
 	return 0;
 }
+
+void CLua::DbgPrintLuaStack(lua_State *L, const char *pNote)
+{
+	dbg_msg("lua/debug", "--- BEGIN LUA STACK --- %s", pNote ? pNote : "");
+	for(int i = 1; i <= lua_gettop(L); i++)
+	{
+		dbg_msg("lua/debug", "#%02i    %s    %s", i, luaL_typename(L, i),
+				lua_isstring(L, i) || lua_isnumber(L, i) ? lua_tostring(L, i) :
+				lua_isboolean(L, i) ? (lua_toboolean(L, i) ? "true" : "false") :
+				""
+		);
+	}
+	dbg_msg("lua/debug", "---- END LUA STACK ---- %s", pNote ? pNote : "");
+}

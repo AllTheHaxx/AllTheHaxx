@@ -270,22 +270,48 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 					m_pGameConsole->m_pClient->Client()->Lua()->HandleException(lua_tostring(L, -1), L);
 				else
 				{
-					int stacksize = lua_gettop(L);
-					Status = lua_pcall(L, 0, LUA_MULTRET, stacksize-1);
+					int OriginalStackSize = lua_gettop(L);
+					Status = lua_pcall(L, 0, LUA_MULTRET, OriginalStackSize-1);
 
 					if(Status == 0)
 					{
 						/*
 						 * at this point, the stack will have 1 additional function (errorfunc) and all return values on top.
 						 */
-						int nresults = lua_gettop(L) - stacksize + 1;
+						int nresults = lua_gettop(L)+1 - OriginalStackSize;
+						int FirstResult = lua_gettop(L)+1 - nresults;
 						//for(int i = 1; i <= lua_gettop(L); i++) // this one is for debugging purposes (prints the whole stack)
-						for(int i = stacksize; i < stacksize+nresults; i++)
+						for(int i = FirstResult; i < FirstResult+nresults; i++)
 						{
-							if(lua_isstring(L, i) || lua_isnumber(L, i))
-								PrintLine(lua_tostring(L, i));
+							if(lua_isstring(L, i))
+							{
+								char aBuf[512];
+								str_formatb(aBuf, "\"%s\"", lua_tostring(L, i)); // real fancy!
+								PrintLine(aBuf);
+							}
 							else
-								PrintLine(luaL_typename(L, i));
+							{
+								int StackTopBefore = lua_gettop(L);
+								lua_getglobal(L, "tostring"); // push the function we want to call
+								lua_pushvalue(L, i); // copy the current result onto the top of the stack as the argument to 'tostring'
+								if(lua_pcall(L, 1, LUA_MULTRET, 0) == 0) // multi-return to support custom tostring functions (will only use the last return; but otherwise our stack would go nuts)
+								{
+									int StackTopAfter = lua_gettop(L);
+									PrintLine(lua_tostring(L, StackTopAfter));
+									if(StackTopAfter - StackTopBefore > 0)
+										lua_pop(L, StackTopAfter - StackTopBefore); // pop the results of tostring() -> stack is back to its previous state
+								}
+								else // if calling tostring fails, fall back to the old output
+								{
+									int StackTopAfter = lua_gettop(L);
+									if(StackTopAfter - StackTopBefore > 0)
+										lua_pop(L, StackTopAfter - StackTopBefore); // remove the error message of pcall if any
+									if(lua_isstring(L, i) || lua_isnumber(L, i))
+										PrintLine(lua_tostring(L, i));
+									else
+										PrintLine(luaL_typename(L, i));
+								}
+							}
 						}
 						lua_pop(L, nresults+1); // clean up the stack
 					}
@@ -600,6 +626,9 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 {
+	if(!pLine)
+		return;
+
 	int Len = str_length(pLine);
 
 	if (Len > 255)
