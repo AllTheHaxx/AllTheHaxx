@@ -394,7 +394,6 @@ class CGraphics_Threaded : public IEngineGraphics
 	int m_aTextureIndices[MAX_TEXTURES];
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
-	std::map<std::string, int> m_TextureCache;
 
 	void FlushVertices();
 	void AddVertices(int Count);
