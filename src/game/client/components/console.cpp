@@ -377,12 +377,6 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			Handled = true;
 
-			// handle copy/cut
-			if(Event.m_Key == KEY_C || Event.m_Key == KEY_X)
-				m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
-			if(Event.m_Key == KEY_X)
-				m_Input.Clear();
-
 			// handle paste
 			if(Event.m_Key == KEY_V)
 			{
@@ -413,12 +407,59 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 					m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
 				}
 			}
+			else if(Event.m_Key == KEY_C || Event.m_Key == KEY_X) // copy/cut
+			{
+				m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
+				if(Event.m_Key == KEY_X)
+					m_Input.Clear();
+			}
 			else if(Event.m_Key == KEY_F) // handle searching
 			{
 				if(!m_pSearchString)
 					m_pSearchString = m_Input.GetString();
 				else
 					m_pSearchString = 0;
+			}
+			else // handle skipping: jump to spaces and special ASCII characters
+			{
+				int SearchDirection = 0;
+				if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_BACKSPACE)
+					SearchDirection = -1;
+				else if(Event.m_Key == KEY_RIGHT)
+					SearchDirection = 1;
+
+				if(SearchDirection != 0)
+				{
+					int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
+					for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+					{
+						int Next = i+SearchDirection;
+						if(	(m_Input.GetString()[Next] == ' ') ||
+							   (m_Input.GetString()[Next] >= 32 && m_Input.GetString()[Next] <= 47) ||
+							   (m_Input.GetString()[Next] >= 58 && m_Input.GetString()[Next] <= 64) ||
+							   (m_Input.GetString()[Next] >= 91 && m_Input.GetString()[Next] <= 96) )
+						{
+							FoundAt = i;
+							if(SearchDirection < 0)
+								FoundAt++;
+							break;
+						}
+					}
+					if(Event.m_Key == KEY_BACKSPACE)
+					{
+						if(m_Input.GetCursorOffset() != 0)
+						{
+							char aText[512];
+							str_copy(aText, m_Input.GetString(), FoundAt + 1);
+							if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
+							{
+								str_append(aText, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
+							}
+							m_Input.Set(aText);
+						}
+					}
+					m_Input.SetCursorOffset(FoundAt);
+				}
 			}
 		}
 		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
@@ -437,8 +478,12 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				{
 					if(m_Type == CONSOLETYPE_LOCAL || (m_Type == CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()))
 					{
-						char *pEntry = m_History.Allocate(m_Input.GetLength()+1);
-						mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
+						// don't clutter up our history with history entries of repeated lines (usually by using the up arrow)
+						if(m_History.Last() == NULL || str_comp(m_History.Last(), m_Input.GetString()) != 0)
+						{
+							char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
+							mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
+						}
 					}
 					else if(m_Type == CONSOLETYPE_LUA)
 					{
