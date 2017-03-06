@@ -1121,6 +1121,7 @@ void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data
 			data - String to decode
 
 		Returns:
+			2 - String doesn't exactly fit the buffer
 			1 - Invalid character in string
 			0 - Success
 
