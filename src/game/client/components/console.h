@@ -49,6 +49,7 @@ class CGameConsole : public CComponent
 		bool m_CTRLPressed;
 
 		char m_aUser[32];
+		bool m_UserGot;
 
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];

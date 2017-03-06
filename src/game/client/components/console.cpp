@@ -63,6 +63,7 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CTRLPressed = false;
 
 	m_aUser[0] = '\0';
+	m_UserGot = false;
 
 	m_IsCommand = false;
 }
@@ -156,12 +157,15 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			CServerInfo pServerInfo;
 			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
 
-			if(!m_aUser[0] && IsDDNet(&pServerInfo))
+			if(!m_UserGot && IsDDNet(&pServerInfo))
+			{
+				m_UserGot = true;
 				str_copy(m_aUser, pLine, sizeof m_aUser);
+			}
 			else
 			{
 				m_pGameConsole->Client()->RconAuth(m_aUser, pLine);
-				m_aUser[0] = '\0';
+				m_UserGot = false;
 			}
 		}
 	}
@@ -454,7 +458,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			}
 			else
 			{
-				if(m_Input.GetString()[0])
+				if(m_Input.GetString()[0] || (IsDDNet(m_pGameConsole->Client()->GetServerInfo()) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 				{
 					if(m_Type == CONSOLETYPE_LOCAL || (m_Type == CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()))
 					{
@@ -977,7 +981,7 @@ void CGameConsole::OnRender()
 				{
 					if(IsDDNet(&pServerInfo))
 					{
-						if(!pConsole->m_aUser[0])
+						if(!pConsole->m_UserGot)
 							pPrompt = "Enter Username> ";
 						else
 							pPrompt = "Enter Password> ";
@@ -1035,7 +1039,7 @@ void CGameConsole::OnRender()
 		// hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_aUser[0] || !IsDDNet(&pServerInfo)) && !m_pSearchString)
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !IsDDNet(&pServerInfo)) && !m_pSearchString)
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
