@@ -1121,12 +1121,11 @@ void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data
 			data - String to decode
 
 		Returns:
-			-1 - String length doesnt match buffer length
-			-2 - Invalid character in string
+			1 - Invalid character in string
 			0 - Success
 
 		Remarks:
-			- The contents of the buffer is only valid if the function returns 0
+			- The contents of the buffer is only valid on success
 */
 int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
 /*
