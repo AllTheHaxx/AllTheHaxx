@@ -2014,8 +2014,16 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	unsigned char aHash[MD5_BYTES];
 	unsigned char aSalt[SALT_BYTES];
 
-	str_hex_decode(aHash, sizeof aHash, pPw);
-	str_hex_decode(aSalt, sizeof aSalt, pSalt);
+	if(str_hex_decode(aHash, sizeof aHash, pPw))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in password hash");
+		return;
+	}
+	if(str_hex_decode(aSalt, sizeof aSalt, pSalt))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in salt hash");
+		return;
+	}
 
 	if(pManager->AddKeyHash(pIdent, aHash, aSalt, Level) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
@@ -2076,8 +2084,16 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 	unsigned char aHash[MD5_BYTES];
 	unsigned char aSalt[SALT_BYTES];
 
-	str_hex_decode(aHash, sizeof aHash, pPw);
-	str_hex_decode(aSalt, sizeof aSalt, pSalt);
+	if(str_hex_decode(aHash, sizeof aHash, pPw))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in password hash");
+		return;
+	}
+	if(str_hex_decode(aSalt, sizeof aSalt, pSalt))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in salt hash");
+		return;
+	}
 
 	pManager->UpdateKeyHash(KeySlot, aHash, aSalt, Level);
 	pThis->LogoutKey(KeySlot, "key update");
@@ -2409,7 +2425,7 @@ void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUser
 		int KeySlot = pManager->DefaultKey(AUTHED_ADMIN);
 		if(KeySlot == -1)
 		{
-			pManager->AddAdminKey(pResult->GetString(0));//Shouldn't happen except for the first launch
+			pManager->AddAdminKey(pResult->GetString(0));
 		}
 		else
 		{
