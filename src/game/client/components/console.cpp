@@ -286,7 +286,10 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 							if(lua_isstring(L, i))
 							{
 								char aBuf[512];
-								str_formatb(aBuf, "\"%s\"", lua_tostring(L, i)); // real fancy!
+								if(!lua_isnumber(L, i))
+									str_formatb(aBuf, "\"%s\"", lua_tostring(L, i)); // real fancy!
+								else
+									str_formatb(aBuf, "%s", lua_tostring(L, i));
 								PrintLine(aBuf);
 							}
 							else
