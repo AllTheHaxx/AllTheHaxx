@@ -49,10 +49,9 @@ extern "C" {
 	See Also:
 		<dbg_break>
 */
-void dbg_assert(int test, const char *msg);
-#define dbg_assert(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-#define dbg_assert_lua(test,msg) if(!(test)) { luaL_error(L, "%s", msg); }
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
+#define dbg_assert_legacy(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
+#define dbg_assert_lua(test,msg) if(!(test)) { luaL_error(L, "%s", msg); }
 
 
 #ifdef __clang_analyzer__
@@ -71,7 +70,8 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 	See Also:
 		<dbg_assert>
 */
-void dbg_break();
+//void dbg_break();
+void wait_log_queue();
 
 /*
 	Function: dbg_msg

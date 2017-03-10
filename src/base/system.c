@@ -99,6 +99,7 @@ void dbg_logger(DBG_LOGGER logger)
 	loggers[num_loggers++] = logger;
 }
 
+static void dbg_break();
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
@@ -124,14 +125,19 @@ static Queue log_queue;
 int queue_empty(Queue *q);
 #endif
 
-void dbg_break()
+static void dbg_break()
 {
 	//*((volatile unsigned*)0) = 0x0;
 
+	wait_log_queue();
+	abort();
+}
+
+void wait_log_queue()
+{
 	if(dbg_msg_threaded) // wait for all debug output to be flushed
 		while(!queue_empty(&log_queue))
 			thread_sleep(20);
-	abort();
 }
 
 #if !defined(CONF_PLATFORM_MACOSX)
@@ -442,7 +448,7 @@ void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 	/* TODO: add debugging */
 	MEMTAIL *tail;
 	MEMHEADER *header = (struct MEMHEADER *)malloc(size+sizeof(MEMHEADER)+sizeof(MEMTAIL));
-	dbg_assert(header != 0, "mem_alloc failure");
+	dbg_assert_legacy(header != 0, "mem_alloc failure");
 	if(!header)
 		return NULL;
 	tail = (struct MEMTAIL *)(((char*)(header+1))+size);
@@ -2895,8 +2901,8 @@ void generate_password(char *buffer, unsigned length, unsigned short *random, un
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
 	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
 	unsigned i;
-	dbg_assert(length >= random_length * 2 + 1, "too small buffer");
-	dbg_assert(NUM_VALUES * NUM_VALUES >= 2048, "need at least 2048 possibilities for 2-character sequences");
+	dbg_assert_legacy(length >= random_length * 2 + 1, "too small buffer");
+	dbg_assert_legacy(NUM_VALUES * NUM_VALUES >= 2048, "need at least 2048 possibilities for 2-character sequences");
 
 	buffer[random_length * 2] = 0;
 
@@ -2914,10 +2920,10 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 {
 	unsigned short random[MAX_PASSWORD_LENGTH / 2];
 	// With 6 characters, we get a password entropy of log(2048) * 6/2 = 33bit.
-	dbg_assert(length >= pw_length + 1, "too small buffer");
-	dbg_assert(pw_length >= 6, "too small password length");
-	dbg_assert(pw_length % 2 == 0, "need an even password length");
-	dbg_assert(pw_length <= MAX_PASSWORD_LENGTH, "too large password length");
+	dbg_assert_legacy(length >= pw_length + 1, "too small buffer");
+	dbg_assert_legacy(pw_length >= 6, "too small password length");
+	dbg_assert_legacy(pw_length % 2 == 0, "need an even password length");
+	dbg_assert_legacy(pw_length <= MAX_PASSWORD_LENGTH, "too large password length");
 
 	secure_random_fill(random, pw_length);
 

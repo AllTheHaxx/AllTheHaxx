@@ -10,6 +10,7 @@
 #include <engine/external/md5/md5.h>
 #include <engine/message.h>
 #include <engine/shared/protocol.h>
+#include <base/system++/system++.h>
 
 const int DummyMapCrc = 0x6c760ac4;
 unsigned char g_aDummyMapData[] = {

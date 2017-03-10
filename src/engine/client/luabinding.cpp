@@ -209,15 +209,13 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 // external info
 int CLuaBinding::LuaGetPlayerScore(int ClientID)
 {
+	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "invalid ClientID");
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	const CNetObj_PlayerInfo *pInfo = pGameClient->m_Snap.m_paPlayerInfos[ClientID];
+	if(pInfo)
 	{
-		const CNetObj_PlayerInfo *pInfo = pGameClient->m_Snap.m_paPlayerInfos[ClientID];
-		if(pInfo)
-		{
-			return pInfo->m_Score;
-		}
+		return pInfo->m_Score;
 	}
 
 	return -1;

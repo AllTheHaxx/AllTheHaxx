@@ -4,6 +4,7 @@
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <base/system++/system++.h>
 
 CConfiguration g_Config;
 
