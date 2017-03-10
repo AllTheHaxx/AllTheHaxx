@@ -270,22 +270,51 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 					m_pGameConsole->m_pClient->Client()->Lua()->HandleException(lua_tostring(L, -1), L);
 				else
 				{
-					int stacksize = lua_gettop(L);
-					Status = lua_pcall(L, 0, LUA_MULTRET, stacksize-1);
+					int OriginalStackSize = lua_gettop(L);
+					Status = lua_pcall(L, 0, LUA_MULTRET, OriginalStackSize-1);
 
 					if(Status == 0)
 					{
 						/*
 						 * at this point, the stack will have 1 additional function (errorfunc) and all return values on top.
 						 */
-						int nresults = lua_gettop(L) - stacksize + 1;
+						int nresults = lua_gettop(L)+1 - OriginalStackSize;
+						int FirstResult = lua_gettop(L)+1 - nresults;
 						//for(int i = 1; i <= lua_gettop(L); i++) // this one is for debugging purposes (prints the whole stack)
-						for(int i = stacksize; i < stacksize+nresults; i++)
+						for(int i = FirstResult; i < FirstResult+nresults; i++)
 						{
-							if(lua_isstring(L, i) || lua_isnumber(L, i))
-								PrintLine(lua_tostring(L, i));
+							if(lua_isstring(L, i))
+							{
+								char aBuf[512];
+								if(!lua_isnumber(L, i))
+									str_formatb(aBuf, "\"%s\"", lua_tostring(L, i)); // real fancy!
+								else
+									str_formatb(aBuf, "%s", lua_tostring(L, i));
+								PrintLine(aBuf);
+							}
 							else
-								PrintLine(luaL_typename(L, i));
+							{
+								int StackTopBefore = lua_gettop(L);
+								lua_getglobal(L, "tostring"); // push the function we want to call
+								lua_pushvalue(L, i); // copy the current result onto the top of the stack as the argument to 'tostring'
+								if(lua_pcall(L, 1, LUA_MULTRET, 0) == 0) // multi-return to support custom tostring functions (will only use the last return; but otherwise our stack would go nuts)
+								{
+									int StackTopAfter = lua_gettop(L);
+									PrintLine(lua_tostring(L, StackTopAfter));
+									if(StackTopAfter - StackTopBefore > 0)
+										lua_pop(L, StackTopAfter - StackTopBefore); // pop the results of tostring() -> stack is back to its previous state
+								}
+								else // if calling tostring fails, fall back to the old output
+								{
+									int StackTopAfter = lua_gettop(L);
+									if(StackTopAfter - StackTopBefore > 0)
+										lua_pop(L, StackTopAfter - StackTopBefore); // remove the error message of pcall if any
+									if(lua_isstring(L, i) || lua_isnumber(L, i))
+										PrintLine(lua_tostring(L, i));
+									else
+										PrintLine(luaL_typename(L, i));
+								}
+							}
 						}
 						lua_pop(L, nresults+1); // clean up the stack
 					}
@@ -351,12 +380,6 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			Handled = true;
 
-			// handle copy/cut
-			if(Event.m_Key == KEY_C || Event.m_Key == KEY_X)
-				m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
-			if(Event.m_Key == KEY_X)
-				m_Input.Clear();
-
 			// handle paste
 			if(Event.m_Key == KEY_V)
 			{
@@ -387,12 +410,59 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 					m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
 				}
 			}
+			else if(Event.m_Key == KEY_C || Event.m_Key == KEY_X) // copy/cut
+			{
+				m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
+				if(Event.m_Key == KEY_X)
+					m_Input.Clear();
+			}
 			else if(Event.m_Key == KEY_F) // handle searching
 			{
 				if(!m_pSearchString)
 					m_pSearchString = m_Input.GetString();
 				else
 					m_pSearchString = 0;
+			}
+			else // handle skipping: jump to spaces and special ASCII characters
+			{
+				int SearchDirection = 0;
+				if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_BACKSPACE)
+					SearchDirection = -1;
+				else if(Event.m_Key == KEY_RIGHT)
+					SearchDirection = 1;
+
+				if(SearchDirection != 0)
+				{
+					int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
+					for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+					{
+						int Next = i+SearchDirection;
+						if(	(m_Input.GetString()[Next] == ' ') ||
+							   (m_Input.GetString()[Next] >= 32 && m_Input.GetString()[Next] <= 47) ||
+							   (m_Input.GetString()[Next] >= 58 && m_Input.GetString()[Next] <= 64) ||
+							   (m_Input.GetString()[Next] >= 91 && m_Input.GetString()[Next] <= 96) )
+						{
+							FoundAt = i;
+							if(SearchDirection < 0)
+								FoundAt++;
+							break;
+						}
+					}
+					if(Event.m_Key == KEY_BACKSPACE)
+					{
+						if(m_Input.GetCursorOffset() != 0)
+						{
+							char aText[512];
+							str_copy(aText, m_Input.GetString(), FoundAt + 1);
+							if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
+							{
+								str_append(aText, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
+							}
+							m_Input.Set(aText);
+						}
+					}
+					m_Input.SetCursorOffset(FoundAt);
+				}
 			}
 		}
 		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
@@ -411,8 +481,12 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				{
 					if(m_Type == CONSOLETYPE_LOCAL || (m_Type == CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()))
 					{
-						char *pEntry = m_History.Allocate(m_Input.GetLength()+1);
-						mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
+						// don't clutter up our history with history entries of repeated lines (usually by using the up arrow)
+						if(m_History.Last() == NULL || str_comp(m_History.Last(), m_Input.GetString()) != 0)
+						{
+							char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
+							mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
+						}
 					}
 					else if(m_Type == CONSOLETYPE_LUA)
 					{
@@ -600,6 +674,9 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 {
+	if(!pLine)
+		return;
+
 	int Len = str_length(pLine);
 
 	if (Len > 255)
@@ -910,8 +987,6 @@ void CGameConsole::OnRender()
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
 		const char *pPrompt = "> ";
-		if(m_pSearchString)
-			pPrompt = "[CTRL+F] SEARCHING» ";
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE)
@@ -941,6 +1016,8 @@ void CGameConsole::OnRender()
 			else
 				pPrompt = "Lua disabled. Please enable Lua first. ";
 		}
+		if(m_pSearchString)
+			pPrompt = "[CTRL+F] SEARCHING» ";
 
 		//notify the user nothing can be found
 		if(m_pSearchString && (pConsole->m_NoFound || pConsole->m_AtEnd == 2))
@@ -968,7 +1045,7 @@ void CGameConsole::OnRender()
 		// hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed())
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && !m_pSearchString)
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
@@ -1025,7 +1102,6 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 
 		// new console rendering
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
@@ -1104,18 +1180,34 @@ void CGameConsole::OnRender()
 		{
 			if(pEntry)
 			{
+				vec3 rgb(1,1,1);
 				if(pEntry->m_YOffset < 0.0f)
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
 					Cursor.m_LineWidth = Screen.w-10;
+					if(m_ConsoleType == CONSOLETYPE_LOCAL)
+					{
+						#define StartsWith(TAG) (str_comp_num(pEntry->m_aText, TAG": ", str_length(TAG)+2) == 0)
+						if (StartsWith("[serv]")) // system message
+							rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
+						else if (StartsWith("[chat]: [*Translator*]")) // translator
+							rgb = vec3(0.45f, 0.45f, 1.0f);
+						else if (StartsWith("[teamchat]: [*Lua*]")) // lua
+							rgb = vec3(1.0f, 0.45f, 0.45f);
+						else if (StartsWith("[teamchat]"))
+							rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+						else if (pEntry->m_Highlighted)
+							rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
+//						else
+//							rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
+						#undef StartsWith
+					}
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 					pEntry->m_YOffset = Cursor.m_Y+Cursor.m_FontSize+LineOffset;
 				}
 
-				if(pEntry->m_Highlighted)
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
-				else
-					TextRender()->TextColor(1,1,1,1);
+				TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 
 				OffsetY += pEntry->m_YOffset;
 
@@ -1211,7 +1303,6 @@ void CGameConsole::OnRender()
 				CUIRect TextRect;
 
 				bool Found = false;
-				bool One = true;
 
 				if(!pUrlBeginning)
 					break;
@@ -1232,7 +1323,6 @@ void CGameConsole::OnRender()
 						pUrlEnding = pUrlBeginning + str_length(pUrlBeginning);
 					else
 					{
-						One = false;
 						pUrlEnding++;
 					}
 
@@ -1248,7 +1338,7 @@ void CGameConsole::OnRender()
 					// render the first part
 					if(pUrlBeginning - pCursor > 0)
 					{
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+						TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 						TextRender()->TextEx(&Cursor, pCursor, pUrlBeginning - pCursor);
 					}
 
@@ -1256,11 +1346,11 @@ void CGameConsole::OnRender()
 					if(UI()->MouseInsideNative(mx, my, &TextRect))
 					{
 						TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
-						static float LastClicked = 0;
-						if(Input()->MouseDoubleClick() && Client()->LocalTime() > LastClicked + 1)
+						static float s_LastClicked = 0.0f;
+						if(Input()->MouseDoubleClick() && Client()->SteadyTimer() > s_LastClicked + 1.0f)
 						{
+							s_LastClicked = Client()->SteadyTimer();
 							Input()->Clear();
-							LastClicked = Client()->LocalTime();
 							//((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->Minimize();
 							open_default_browser(aUrl);
 						}
@@ -1272,16 +1362,8 @@ void CGameConsole::OnRender()
 					TextRender()->TextEx(&Cursor, pUrlBeginning, UrlSize);
 
 					// render the rest
-					if(One)
-					{
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
-					}
-					else
-					{
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
-					}
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					TextRender()->TextEx(&Cursor, pUrlEnding, str_length(pUrlEnding));
 
 					pCursor = pUrlEnding;
 				}
@@ -1304,7 +1386,7 @@ void CGameConsole::OnRender()
 									TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr - pText));
 									TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
 									TextRender()->TextEx(&Cursor, pFoundStr, str_length(m_pSearchString));
-									TextRender()->TextColor(1, 1, 1, 1);
+									TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 									//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
 									pText = pFoundStr + str_length(m_pSearchString);
 								}

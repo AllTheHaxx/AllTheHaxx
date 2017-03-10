@@ -155,11 +155,15 @@ void CCamera::OnRender()
 	}
 
 	if(m_WantedCenter != vec2(0.0f, 0.0f) &&
-			((g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active) || Client()->State() == IClient::STATE_OFFLINE))
+			(((g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active) || g_Config.m_ClCinematicCamera == 2)
+			 || Client()->State() == IClient::STATE_OFFLINE))
 	{
+		vec2 Speed(0);
+		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_pLocalCharacter)
+			Speed = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX, m_pClient->m_Snap.m_pLocalCharacter->m_VelY) / 100.0f;
 		const float delay = (Client()->State() == IClient::STATE_OFFLINE ? 50.0f : g_Config.m_ClCinematicCameraDelay);
-		smooth_set(&m_Center.x, m_WantedCenter.x, delay, Client()->RenderFrameTime());
-		smooth_set(&m_Center.y, m_WantedCenter.y, delay, Client()->RenderFrameTime());
+		smooth_set(&m_Center.x, m_WantedCenter.x+Speed.x, delay, Client()->RenderFrameTime());
+		smooth_set(&m_Center.y, m_WantedCenter.y+Speed.y, delay, Client()->RenderFrameTime());
 	}
 	else
 		m_Center = m_WantedCenter;

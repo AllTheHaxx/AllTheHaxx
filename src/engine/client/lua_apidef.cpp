@@ -386,10 +386,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("MouseModeAbsolute", &IInput::MouseModeAbsolute)
 			.addFunction("MouseDoubleClick", &IInput::MouseDoubleClick)
 
-			.addFunction("SimulateKeyPressDirect", &IInput::SimulateKeyPress)
-			.addFunction("SimulateKeyPress", &IInput::SimulateKeyPressSTD)
-			.addFunction("SimulateKeyReleaseDirect", &IInput::SimulateKeyRelease)
-			.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
+		//	.addFunction("SimulateKeyPressDirect", &IInput::SimulateKeyPress)
+		//	.addFunction("SimulateKeyPress", &IInput::SimulateKeyPressSTD)
+		//	.addFunction("SimulateKeyReleaseDirect", &IInput::SimulateKeyRelease)
+		//	.addFunction("SimulateKeyRelease", &IInput::SimulateKeyReleaseSTD)
 
 			.addFunction("SetIMEState", &IInput::SetIMEState)
 			.addFunction("GetIMEState", &IInput::GetIMEState)

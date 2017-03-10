@@ -639,8 +639,14 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, float FontSize, bool Hidden, int Corners, const char *pEmptyText, const char *pTooltip)
 {
 	static char *pBuffer = NULL;
-	const int MAX_STR_LEN = max(16, (int)pBC->GetString().length()*2); // always go with
-	pBuffer = (char *)mem_realloc(pBuffer, (unsigned)MAX_STR_LEN); // make sure there is always enough space
+	static unsigned int BufferSize = 0;
+	const unsigned int MAX_STR_LEN = max(16U, (unsigned int)(pBC->GetString().length() * 2)); // always go with
+	if(!pBuffer || BufferSize < MAX_STR_LEN)
+	{
+		mem_free(pBuffer);
+		pBuffer = mem_allocb(char, MAX_STR_LEN);
+		BufferSize = MAX_STR_LEN;
+	}
 	str_copy(pBuffer, pBC->GetString().c_str(), MAX_STR_LEN);
 
 	//dbg_msg("DBG!", "pBuffer before (SIZE=%i, CAN INPUT=%x): '%s'", MAX_STR_LEN, Input()->GetIMEState(), pBuffer);

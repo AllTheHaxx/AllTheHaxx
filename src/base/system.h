@@ -49,10 +49,9 @@ extern "C" {
 	See Also:
 		<dbg_break>
 */
-void dbg_assert(int test, const char *msg);
-#define dbg_assert(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-#define dbg_assert_lua(test,msg) if(!(test)) { luaL_error(L, "%s", msg); }
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
+#define dbg_assert_legacy(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
+#define dbg_assert_lua(test,msg) if(!(test)) { luaL_error(L, "%s", msg); }
 
 
 #ifdef __clang_analyzer__
@@ -71,7 +70,8 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 	See Also:
 		<dbg_assert>
 */
-void dbg_break();
+//void dbg_break();
+void wait_log_queue();
 
 /*
 	Function: dbg_msg
@@ -116,10 +116,8 @@ __attribute__ ((format (printf, 2, 3))) /* Warn if you specify wrong arguments i
 		<mem_free>
 */
 void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment);
-void* mem_realloc_debug(void *block, const char *filename, int line, unsigned size);
 #define mem_alloc(s,a) mem_alloc_debug(__FILE__, __LINE__, (s), (a))
 #define mem_allocb(t,n) (t*)mem_alloc_debug(__FILE__, __LINE__, (sizeof(t)*n), 0)
-#define mem_realloc(p,s) mem_realloc_debug(p,__FILE__, __LINE__, (s))
 
 /*
 	Function: mem_free

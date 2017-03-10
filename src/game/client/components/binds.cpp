@@ -181,6 +181,7 @@ void CBinds::OnConsoleInit()
 	Console()->Register("find_bind", "r[command]", CFGFLAG_CLIENT, ConFindBind, this, "Find the key the command is bind to");
 	Console()->Register("dump_bind", "s[key]", CFGFLAG_CLIENT, ConDumpBind, this, "Dump a single bind");
 	Console()->Register("dump_binds", "", CFGFLAG_CLIENT, ConDumpBinds, this, "Dump all binds");
+	Console()->Register("dump_free_keys", "?i[start] ?i[num]", CFGFLAG_CLIENT, ConDumpFreeKeys, this, "Dump all keys with no bind on it");
 
 	// default bindings
 	SetDefaults();
@@ -312,6 +313,40 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_aaKeyBindings[i]);
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 	}
+}
+
+void CBinds::ConDumpFreeKeys(IConsole::IResult *pResult, void *pUserData)
+{
+	CALLSTACK_ADD();
+
+	CBinds *pBinds = (CBinds *)pUserData;
+
+	int Start = pResult->NumArguments() >= 1 ? pResult->GetInteger(0) : 1;
+	int Num = pResult->NumArguments() >= 2 ? pResult->GetInteger(1) : (int)KEY_LAST;
+	int RangeMax = KEY_LAST-Start+1;
+	if(Start < 1 || Start > KEY_LAST)
+	{
+		pBinds->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "'Start' parameter must be in range 1-%i'", KEY_LAST);
+		return;
+	}
+	if(Num < 1 || Num > RangeMax)
+	{
+		pBinds->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "'Num' parameter must be in range 1-%i'", KEY_LAST-Start+1);
+		return;
+	}
+	int End = clamp(Start + Num, 1, (int)KEY_LAST);
+	int NotShown = 0;
+	for(int i = Start; i < End; i++)
+	{
+		if(pBinds->m_aaKeyBindings[i][0] != 0 || pBinds->Input()->KeyName(i)[0] == '&')
+		{
+			NotShown++;
+			continue;
+		}
+		pBinds->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "%d: %s", i, pBinds->Input()->KeyName(i));
+	}
+	if(NotShown)
+		pBinds->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "Not shown: %i/%i keys", NotShown, RangeMax);
 }
 
 int CBinds::GetKeyID(const char *pKeyName)

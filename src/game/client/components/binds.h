@@ -18,6 +18,7 @@ class CBinds : public CComponent
 	static void ConFindBind(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpBind(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpBinds(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpFreeKeys(IConsole::IResult *pResult, void *pUserData);
 	class IConsole *GetConsole() const { return Console(); }
 
 	static void ConfigSaveCallback(class IConfig *pConfig, void *pUserData);

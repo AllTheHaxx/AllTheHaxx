@@ -92,6 +92,8 @@ set(SOURCE_FILES
     src/engine/client/luafile.h
     src/engine/client/debug.cpp
     src/engine/client/fetcher.h
+    src/engine/client/data_updater.h
+    src/engine/client/data_updater.cpp
     src/engine/masterserver.h
     src/engine/irc.h
     src/engine/editor.h
@@ -399,8 +401,8 @@ set(SOURCE_FILES
     src/game/client/components/menus.cpp
     src/game/client/components/gametexture.cpp
     src/game/client/components/luarender.cpp
-        src/game/client/components/fontmgr.h
-        src/game/client/components/ghost.h
+    src/game/client/components/fontmgr.h
+    src/game/client/components/ghost.h
     src/game/client/components/console.cpp
     src/game/client/components/drawing.cpp
     src/game/client/components/debughud.cpp
@@ -428,7 +430,7 @@ set(SOURCE_FILES
     src/game/client/components/maplayers.h
     src/game/client/components/spoofremote.cpp
     src/game/client/components/identity.h
-        src/game/client/components/menus_settings/settings_identity.cpp
+    src/game/client/components/menus_settings/settings_identity.cpp
     src/game/client/components/menus_settings/settings.cpp
     src/game/client/components/astar.h
     src/game/client/components/particles.cpp
@@ -436,7 +438,7 @@ set(SOURCE_FILES
     src/game/client/components/emoticon.h
     src/game/client/components/menus_hotbar.cpp
     src/game/client/components/scoreboard.cpp
-        src/game/client/components/fontmgr.cpp
+    src/game/client/components/fontmgr.cpp
     src/game/client/components/sounds.cpp
     src/game/client/components/menus_demo.cpp
     src/game/client/components/translator.h
@@ -543,7 +545,7 @@ set(SOURCE_FILES
     src/game/client/components/menus_settings/settings_hud.cpp
     src/base/system++/io.h
     src/base/system++/threading.h
-    src/engine/client/data_updater.h
-    src/engine/client/data_updater.cpp
+    src/base/system++/system++.h
+    src/base/system++/system++.cpp
 )
 add_executable(AllTheHaxx ${SOURCE_FILES})

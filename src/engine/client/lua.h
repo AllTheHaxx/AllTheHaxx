@@ -99,6 +99,8 @@ public:
 		const char * pString;
 	};
 
+	static void DbgPrintLuaStack(lua_State *L, const char *pNote = 0);
+
 private:
 	static int LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser);
 
