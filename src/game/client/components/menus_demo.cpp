@@ -599,9 +599,11 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(CButtonContainer *pBC, bool Sel
 
 	CListboxItem Item = UiDoListboxNextRow();
 
-	int Clicked = UI()->DoButtonLogic(pBC->GetID(), "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect);
-	if(Item.m_Visible && Clicked)
-		gs_ListBoxNewSelected = ThisItemIndex;
+	if(Item.m_Visible)
+	{
+		if(UI()->DoButtonLogic(pBC->GetID(), "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect))
+			gs_ListBoxNewSelected = ThisItemIndex;
+	}
 
 	// process input, regard selected index
 	if(gs_ListBoxSelectedIndex == ThisItemIndex)
