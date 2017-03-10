@@ -180,11 +180,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		int NumLuaFiles = Client()->Lua()->GetLuaFiles().size();
 
 		// display mode list
+		const int MAX_SCRIPTS = 512;
 		static float s_ScrollValue = 0;
-		static CButtonContainer pIDItem[256];
-		static CButtonContainer pIDButtonToggleScript[256];
-		static CButtonContainer pIDButtonPermissions[256];
-		static CButtonContainer pIDButtonAutoload[256];
+		static CButtonContainer pIDItem[MAX_SCRIPTS];
+		static CButtonContainer pIDButtonToggleScript[MAX_SCRIPTS];
+		static CButtonContainer pIDButtonPermissions[MAX_SCRIPTS];
+		static CButtonContainer pIDButtonAutoload[MAX_SCRIPTS];
 
 		static CButtonContainer s_Listbox;
 		CUIRect ListBox = ListView;
@@ -213,6 +214,17 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
 			NumListedFiles++;
+
+			if(i >= MAX_SCRIPTS-1)
+			{
+				if(Item.m_Visible)
+				{
+					char aBuf[512];
+					str_formatb(aBuf, "The internal limit of scripts that can be shown here has been hit (how have you got that many?!). There are %i more scripts that couldn't be shown.", (NumLuaFiles - 1) - i);
+					UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, 0, Item.m_Rect.w);
+				}
+				break;
+			}
 
 			if(Item.m_Visible)
 			{

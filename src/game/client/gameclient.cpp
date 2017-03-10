@@ -506,6 +506,10 @@ void CGameClient::OnInit()
 
 		// process pending commands
 		m_pConsole->StoreCommands(false);
+
+		// do the last steps of initing lua
+		Client()->Lua()->SetGameClient(this);
+		Client()->Lua()->LoadFolder();
 	}
 
 #undef LOAD_STUFF

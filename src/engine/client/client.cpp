@@ -3047,8 +3047,6 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
-	m_Lua.SetGameClient(GameClient());
-
 	if((m_pInputThread = thread_init(InputThread, this)))
 		thread_detach(m_pInputThread);
 
@@ -3350,13 +3348,6 @@ void CClient::Run()
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
 		m_SteadyTimer = (time_get()-m_TimerStartTime)/(float)time_freq();
-
-		static bool LuaFinalInitDone = false;
-		if(!LuaFinalInitDone)
-		{
-			LuaFinalInitDone = true;
-			m_Lua.LoadFolder();
-		}
 
 #if defined(CONF_DEBUG)
 		static float LastCheck = m_SteadyTimer;
