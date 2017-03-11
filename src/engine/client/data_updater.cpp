@@ -144,11 +144,21 @@ void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 	else
 	{
 		pSelf->m_State = STATE_DONE;
-		int NumTotal = 0;
-		int NumDownload = (NumTotal += (int)pSelf->m_DownloadJobs.size());
-		int NumRename = (NumTotal += (int)pSelf->m_RenameJobs.size());
-		int NumRemove = (NumTotal += (int)pSelf->m_RemoveJobs.size());
-		dbg_msg("github/compare", "got %i jobs; download=%i, rename=%i, delete=%i", NumTotal, NumDownload, NumRename, NumRemove);
+		int NumDownload = (int)pSelf->m_DownloadJobs.size();
+		int NumRename = (int)pSelf->m_RenameJobs.size();
+		int NumRemove = (int)pSelf->m_RemoveJobs.size();
+		dbg_msg("github/compare", "got %i jobs; download=%i, rename=%i, delete=%i",
+				NumDownload + NumRename + NumRemove,
+				NumDownload, NumRename, NumRemove
+		);
+
+		for(int i = 0; i < NumDownload; i++)
+			dbg_msg("github", "JOBS:DL:%03i> '%s'", i, pSelf->m_DownloadJobs[i].c_str());
+		for(int i = 0; i < NumRename; i++)
+			dbg_msg("github", "JOBS:MV:%03i> '%s' -> '%s'", i, pSelf->m_RenameJobs[i].first.c_str(), pSelf->m_RenameJobs[i].second.c_str());
+		for(int i = 0; i < NumRemove; i++)
+			dbg_msg("github", "JOBS:RM:%03i> '%s'", i, pSelf->m_RemoveJobs[i].c_str());
+
 	}
 }
 
@@ -164,8 +174,9 @@ bool CGitHubAPI::ParseCompare(const char *pJsonStr)
 	if(jsonFiles.type != json_array)
 		return false;
 
-	str_copyb(m_aLatestVersionTree, jsonCompare["commits"][0]["sha"]);
-	dbg_msg("github", "latest version tree is '%s'", m_aLatestVersionTree);
+	int NumCommits = jsonCompare["commits"].u.array.length;
+	str_copyb(m_aLatestVersionTree, jsonCompare["commits"][NumCommits-1]["sha"]); // the last commit describes the tree we want
+	dbg_msg("github", "latest version tree is '%s'; there were %i commits since our version", m_aLatestVersionTree, NumCommits);
 
 	// loop through the array of changed files
 	for(unsigned int i = 0; i < jsonFiles.u.array.length; i++)
