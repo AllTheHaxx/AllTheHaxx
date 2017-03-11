@@ -22,6 +22,7 @@ GitHubAPI::GitHubAPI()
 		m_State = STATE_IDLE;
 
 	mem_zerob(m_aLatestVersion);
+	m_aLatestVersion[0] = '0';
 
 	m_DownloadJobs.clear();
 	m_RemoveJobs.clear();
@@ -36,6 +37,7 @@ GitHubAPI::~GitHubAPI()
 
 void GitHubAPI::CheckVersion()
 {
+	dbg_msg("github", "refreshing version info");
 	m_State = STATE_REFRESHING;
 
 	THREAD_SMART<GitHubAPI> Thread(GitHubAPI::UpdateCheckerThread);
@@ -45,6 +47,7 @@ void GitHubAPI::CheckVersion()
 
 void GitHubAPI::DoUpdate()
 {
+	dbg_msg("github", "performing data update");
 	m_State = STATE_UPDATING;
 
 	THREAD_SMART<GitHubAPI> Thread(GitHubAPI::CompareThread);
@@ -194,13 +197,18 @@ const std::string GitHubAPI::SimpleGET(const char *pUrl)
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
 
+	// create the headers
+	curl_slist *list = NULL;
+	list = curl_slist_append(list, "Content-Type: application/json");
+	list = curl_slist_append(list, "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:51.0) Gecko/20100101 Firefox/51.0");
+	list = curl_slist_append(list, "Accept: application/vnd.github.v3+json");
+	curl_easy_setopt(m_pHandle, CURLOPT_HTTPHEADER, list);
+
 	curl_easy_setopt(m_pHandle, CURLOPT_CONNECTTIMEOUT_MS, (long)g_Config.m_ClHTTPConnectTimeoutMs);
 	curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_LIMIT, (long)g_Config.m_ClHTTPLowSpeedLimit);
 	curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_TIME, (long)g_Config.m_ClHTTPLowSpeedTime);
 	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
-	curl_easy_setopt(m_pHandle, CURLOPT_SSL_VERIFYPEER, 0L);
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, &Result);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CCurlWrapper::CurlCallback_WriteToStdString);
@@ -208,6 +216,10 @@ const std::string GitHubAPI::SimpleGET(const char *pUrl)
 	curl_easy_setopt(m_pHandle, CURLOPT_NOSIGNAL, 1L);
 
 	int ret = curl_easy_perform(m_pHandle);
+
+	// clean up
+	curl_slist_free_all(list);
+
 	if(ret != CURLE_OK)
 	{
 		dbg_msg("github/error", "'%s' failed: %s", pUrl, aErr);

@@ -358,6 +358,7 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 		dbg_msg("updater", "refreshing version info");
 //		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		FetchFile("stuffility/master", "ath-news.txt");
+		m_GitHubAPI.CheckVersion();
 	}
 	else
 		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step
