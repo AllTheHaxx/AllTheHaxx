@@ -45,7 +45,7 @@ class CUpdater : public IUpdater
 	class IStorageTW *m_pStorage;
 	class IFetcher *m_pFetcher;
 
-	GitHubAPI m_GitHubAPI;
+	CGitHubAPI m_GitHubAPI;
 
 	bool m_IsWinXP;
 

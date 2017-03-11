@@ -14,12 +14,12 @@ using std::map;
 using std::string;
 
 
-GitHubAPI::GitHubAPI()
+CGitHubAPI::CGitHubAPI()
 {
 	if((m_pHandle = curl_easy_init()) == NULL)
 		m_State = STATE_ERROR;
 	else
-		m_State = STATE_IDLE;
+		m_State = STATE_CLEAN;
 
 	mem_zerob(m_aLatestVersion);
 	m_aLatestVersion[0] = '0';
@@ -29,35 +29,45 @@ GitHubAPI::GitHubAPI()
 	m_RenameJobs.clear();
 }
 
-GitHubAPI::~GitHubAPI()
+CGitHubAPI::~CGitHubAPI()
 {
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
 }
 
-void GitHubAPI::CheckVersion()
+void CGitHubAPI::CheckVersion()
 {
-	dbg_msg("github", "refreshing version info");
-	m_State = STATE_REFRESHING;
+	// determine whether we may actually check again yet - because github limits us 60 requests per hour
+//	IOHANDLE_SMART f = Storage()->blabla("tmp/cache/versionrefreshtime");
+//	int64 LastSecond;
+//	int64 CurrSecond = time_timestamp();
+//	if(CurrSecond < LastSecond+60)
+//	{
+//		dbg_msg("github", "refresh version info will be available again in %u seconds", 60-CurrSecond-LastSecond);
+//		return;
+//	}
 
-	THREAD_SMART<GitHubAPI> Thread(GitHubAPI::UpdateCheckerThread);
+	dbg_msg("github", "refreshing version info");
+	m_State = STATE_GETTING_MANIFEST;
+
+	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::UpdateCheckerThread);
 	if(!Thread.StartDetached(this))
 		m_State = STATE_ERROR;
 }
 
-void GitHubAPI::DoUpdate()
+void CGitHubAPI::DoUpdate()
 {
 	dbg_msg("github", "performing data update");
-	m_State = STATE_UPDATING;
+	m_State = STATE_PARSING_UPDATE;
 
-	THREAD_SMART<GitHubAPI> Thread(GitHubAPI::CompareThread);
+	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::CompareThread);
 	if(!Thread.StartDetached(this))
 		m_State = STATE_ERROR;
 }
 
 //---------------------------- STEP 1: UPDATE CHECKING ----------------------------//
 
-void GitHubAPI::UpdateCheckerThread(GitHubAPI *pSelf)
+void CGitHubAPI::UpdateCheckerThread(CGitHubAPI *pSelf)
 {
 	std::string Result;
 	char aUrl[512];
@@ -80,24 +90,24 @@ void GitHubAPI::UpdateCheckerThread(GitHubAPI *pSelf)
 		}
 		else
 		{
+			pSelf->m_State = STATE_CLEAN;
 			if(str_comp_nocase(pLatestVersion, GAME_ATH_VERSION) == 0)
 			{
 				dbg_msg("github", "AllTheHaxx is up to date.");
-				pSelf->m_State = STATE_CLEAN;
 				return;
 			}
 			else
 			{
+				pSelf->m_State = STATE_NEW_VERSION;
 				str_copyb(pSelf->m_aLatestVersion, pLatestVersion);
 				dbg_msg("github", " -- NEW VERSION: AllTheHaxx %s has been released! --", pLatestVersion);
-				pSelf->m_State = STATE_NEWVERSION;
 				return;
 			}
 		}
 	}
 }
 
-const std::string GitHubAPI::ParseReleases(const char *pJsonStr)
+const std::string CGitHubAPI::ParseReleases(const char *pJsonStr)
 {
 	// gets json[0]["name"]
 
@@ -113,7 +123,7 @@ const std::string GitHubAPI::ParseReleases(const char *pJsonStr)
 
 //---------------------------- STEP 2: CHANGELIST CREATION ----------------------------//
 
-void GitHubAPI::CompareThread(GitHubAPI *pSelf)
+void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 {
 	std::string Result;
 	char aUrl[512];
@@ -144,7 +154,7 @@ void GitHubAPI::CompareThread(GitHubAPI *pSelf)
 
 
 
-bool GitHubAPI::ParseCompare(const char *pJsonStr)
+bool CGitHubAPI::ParseCompare(const char *pJsonStr)
 {
 	// gets json["files"][i]["filename"]
 
@@ -153,6 +163,9 @@ bool GitHubAPI::ParseCompare(const char *pJsonStr)
 	const json_value &jsonFiles = jsonCompare["files"];
 	if(jsonFiles.type != json_array)
 		return false;
+
+	str_copyb(m_aLatestVersionTree, jsonCompare["commits"][0]["sha"]);
+	dbg_msg("github", "latest version tree is '%s'", m_aLatestVersionTree);
 
 	// loop through the array of changed files
 	for(unsigned int i = 0; i < jsonFiles.u.array.length; i++)
@@ -190,7 +203,7 @@ bool GitHubAPI::ParseCompare(const char *pJsonStr)
 
 //---------------------------- HELPER FUNCTIONS ----------------------------//
 
-const std::string GitHubAPI::SimpleGET(const char *pUrl)
+const std::string CGitHubAPI::SimpleGET(const char *pUrl)
 {
 	std::string Result = "";
 
@@ -232,7 +245,7 @@ const std::string GitHubAPI::SimpleGET(const char *pUrl)
 }
 
 /* this one is overly complicated I think... let's not use it?
-void GitHubAPI::CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *userdata)
+void CGitHubAPI::CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *userdata)
 {
 	std::string *pResult = (std::string *)userdata;
 
@@ -245,7 +258,7 @@ void GitHubAPI::CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *
 	mem_free(pBuf);
 }*/
 
-void GitHubAPI::GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize)
+void CGitHubAPI::GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize)
 {
 	unsigned char aHash[SHA_DIGEST_LENGTH];
 	mem_zerob(aHash);

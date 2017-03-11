@@ -8,18 +8,24 @@
 
 #define GITHUB_API_URL "https://api.github.com/repos/AllTheHaxx/AllTheHaxx"
 
-class GitHubAPI
+class CGitHubAPI
 {
 public:
 	enum
 	{
-		STATE_IDLE,
-		STATE_REFRESHING,
-		STATE_NEWVERSION,
-		STATE_CLEAN,
-		STATE_ERROR,
-		STATE_UPDATING,
-		STATE_DONE,
+//		STATE_IDLE,
+//		STATE_REFRESHING,
+//		STATE_NEWVERSION,
+//		STATE_CLEAN,
+//		STATE_ERROR,
+//		STATE_UPDATING,
+//		STATE_DONE,
+		STATE_CLEAN = 0,
+		STATE_GETTING_MANIFEST, // is refreshing
+		STATE_NEW_VERSION, // the refresh told us: there's a new version!
+		STATE_PARSING_UPDATE, // comparing
+		STATE_DONE, // finished comparing, signalizes the updater that we're ready to apply changes
+		STATE_ERROR, // uh-oh, no gud
 	};
 
 
@@ -28,18 +34,28 @@ private:
 
 	int m_State;
 	char m_aLatestVersion[10];
+	char m_aLatestVersionTree[40+1];
 	std::vector<std::string> m_DownloadJobs; // relative path of the file (e.g. "data/somedir/somefile.txt")
 	std::vector<std::string> m_RemoveJobs;
 	std::vector< std::pair<std::string, std::string> > m_RenameJobs; // old name - new name
 
 
 public:
-	GitHubAPI();
-	~GitHubAPI();
+	CGitHubAPI();
+	~CGitHubAPI();
+
+	int State() const { return m_State; }
+	bool Done() const { return m_State == STATE_DONE; }
 
 	void CheckVersion();
 	void DoUpdate();
 	const char *GetLatestVersion() const { return m_aLatestVersion; }
+	const char *GetLatestVersionTree() const { return m_aLatestVersionTree; }
+
+	const std::vector<std::string>& GetDownloadJobs() const { return m_DownloadJobs; }
+	const std::vector<std::string>& GetRemoveJobs() const { return m_RemoveJobs; }
+	const std::vector< std::pair<std::string, std::string> >& GetRenameJobs() const { return m_RenameJobs; }
+
 
 private:
 	const std::string SimpleGET(const char *pURL);
@@ -48,12 +64,8 @@ private:
 	static const std::string ParseReleases(const char *pJsonStr);
 	bool ParseCompare(const char *pJsonStr);
 
-	const std::vector<std::string>& GetDownloadJobs() const { return m_DownloadJobs; }
-	const std::vector<std::string>& GetRemoveJobs() const { return m_RemoveJobs; }
-	const std::vector< std::pair<std::string, std::string> >& GetRenameJobs() const { return m_RenameJobs; }
-
-	static void UpdateCheckerThread(GitHubAPI *pSelf);
-	static void CompareThread(GitHubAPI *pSelf);
+	static void UpdateCheckerThread(CGitHubAPI *pSelf);
+	static void CompareThread(CGitHubAPI *pSelf);
 	static void GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize);
 };
 

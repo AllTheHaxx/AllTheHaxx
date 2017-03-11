@@ -138,9 +138,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
-		if(str_comp(b, UPDATE_MANIFEST) == 0)
-			pUpdate->m_State = GOT_MANIFEST;
-		else if(str_comp(b, pUpdate->m_aLastFile) == 0)
+		if(str_comp(b, pUpdate->m_aLastFile) == 0)
 			pUpdate->m_State = MOVE_FILES;
 	}
 	delete pTask;
@@ -214,10 +212,26 @@ void CUpdater::Update()
 {
 	CALLSTACK_ADD();
 
+	if(m_GitHubAPI.State() == CGitHubAPI::STATE_ERROR)
+	{
+		str_copyb(m_aError, "github");
+		m_State = FAIL;
+	}
+
 	switch(m_State)
 	{
+		case GETTING_MANIFEST:
+			if(m_GitHubAPI.State() == CGitHubAPI::STATE_NEW_VERSION)
+			{
+				m_State = GOT_MANIFEST;
+				m_GitHubAPI.DoUpdate();
+			}
+			else if(m_GitHubAPI.State() == CGitHubAPI::STATE_CLEAN)
+				m_State = CLEAN;
+			break;
 		case GOT_MANIFEST:
-			PerformUpdate();
+			if(m_GitHubAPI.Done())
+				PerformUpdate();
 			break;
 		case MOVE_FILES:
 			CommitUpdate();
@@ -263,6 +277,8 @@ void CUpdater::ParseUpdate()
 	CALLSTACK_ADD();
 
 	// this function shall only be called when actually updating the client
+
+	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
 
 	char aPath[512];
 	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
@@ -360,17 +376,13 @@ void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
 		FetchFile("stuffility/master", "ath-news.txt");
 		m_GitHubAPI.CheckVersion();
 	}
-	else
-		m_State = GOT_MANIFEST; // if we have the version, we can directly skip to this step
+	//else if(m_GitHubAPI.State() == CGitHubAPI::STATE_CLEAN)
+	//	m_State = CLEAN; // if we have the version and there is no update, we can directly skip the rest
 }
 
 void CUpdater::PerformUpdate()
 {
 	CALLSTACK_ADD();
-
-	m_State = PARSING_UPDATE;
-	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
-	ParseUpdate();
 
 	// do cleanups - much hack.
 #if defined(CONF_FAMILY_UNIX)
@@ -385,6 +397,35 @@ void CUpdater::PerformUpdate()
 		m_State = CLEAN;
 		return;
 	}
+
+	if(m_GitHubAPI.State() == CGitHubAPI::STATE_NEW_VERSION)
+	{
+		m_State = PARSING_UPDATE;
+		ParseUpdate();
+	}
+
+
+	// get the stuff from github
+	for(std::vector<std::string>::const_iterator it = m_GitHubAPI.GetDownloadJobs().begin(); it != m_GitHubAPI.GetDownloadJobs().end(); it++)
+	{
+		std::string source(string("AllTheHaxx") + "/" + string(m_GitHubAPI.GetLatestVersionTree()));
+		std::map<string, string> e;
+		e[*it] = string("./");
+
+		// store the entry
+		m_FileDownloadJobs[source] = e;
+	}
+
+	m_FileRemoveJobs.insert(m_FileRemoveJobs.end(), m_GitHubAPI.GetRemoveJobs().begin(), m_GitHubAPI.GetRemoveJobs().end());
+
+	// do the move jobs right now
+	for(std::vector< std::pair<std::string, std::string> >::const_iterator it = m_GitHubAPI.GetRenameJobs().begin(); it != m_GitHubAPI.GetRenameJobs().end(); it++)
+	{
+		m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
+		dbg_msg("update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
+	}
+
+
 
 	dbg_msg("updater", "Starting download, got %lu file remove jobs and download jobs from %lu repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size());
 	m_State = DOWNLOADING;
