@@ -17,7 +17,10 @@ using std::string;
 CGitHubAPI::CGitHubAPI()
 {
 	if((m_pHandle = curl_easy_init()) == NULL)
+	{
+		dbg_msg("github", "failed to create curl easy handle");
 		m_State = STATE_ERROR;
+	}
 	else
 		m_State = STATE_CLEAN;
 
@@ -51,8 +54,11 @@ void CGitHubAPI::CheckVersion()
 	m_State = STATE_REFRESHING;
 
 	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::UpdateCheckerThread);
-	if(!Thread.StartDetached(this))
+	if(!Thread.Start(this))
+	{
+		dbg_msg("github", "ERROR: failed to start UpdateChecker-thread");
 		m_State = STATE_ERROR;
+	}
 }
 
 void CGitHubAPI::DoUpdate()
@@ -61,8 +67,11 @@ void CGitHubAPI::DoUpdate()
 	m_State = STATE_COMPARING;
 
 	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::CompareThread);
-	if(!Thread.StartDetached(this))
+	if(!Thread.Start(this))
+	{
+		dbg_msg("github", "ERROR: failed to start Compare-thread");
 		m_State = STATE_ERROR;
+	}
 }
 
 //---------------------------- STEP 1: UPDATE CHECKING ----------------------------//
@@ -75,7 +84,7 @@ void CGitHubAPI::UpdateCheckerThread(CGitHubAPI *pSelf)
 	Result = pSelf->SimpleGET(aUrl);
 	if(Result.empty() || Result.length() == 0)
 	{
-		dbg_msg("github/releases", "ERROR: result empty");
+		dbg_msg("github", "ERROR: failed to download version info");
 		pSelf->m_State = STATE_ERROR;
 		return;
 	}
@@ -85,6 +94,7 @@ void CGitHubAPI::UpdateCheckerThread(CGitHubAPI *pSelf)
 		const char *pLatestVersion = ParseReleases(Result.c_str()).c_str();
 		if(str_length(pLatestVersion) == 0)
 		{
+			dbg_msg("github", "ERROR: failed to parse out the latest version");
 			pSelf->m_State = STATE_ERROR;
 			return;
 		}
@@ -125,6 +135,13 @@ const std::string CGitHubAPI::ParseReleases(const char *pJsonStr)
 
 void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 {
+	if(str_comp(pSelf->m_aLatestVersion, "0") == 0)
+	{
+		dbg_msg("github", "WTF: compare thread started but got no version info?!");
+		pSelf->m_State = STATE_ERROR;
+		return;
+	}
+
 	std::string Result;
 	char aUrl[512];
 	str_formatb(aUrl, GITHUB_API_URL "/compare/%s...%s", GAME_ATH_VERSION, pSelf->m_aLatestVersion);
@@ -219,6 +236,7 @@ const std::string CGitHubAPI::SimpleGET(const char *pUrl)
 	std::string Result = "";
 
 	char aErr[CURL_ERROR_SIZE];
+	mem_zerob(aErr);
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
 
 	// create the headers

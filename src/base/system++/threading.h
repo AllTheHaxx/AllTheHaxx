@@ -2,6 +2,10 @@
 #define BASE_SYSTEMPP_THREADING_H
 
 #include <base/system.h>
+#if defined(CONF_DEBUG)
+#include <base/system++/system++.h>
+
+#endif
 
 template <class T = void>
 class THREAD_SMART
@@ -71,8 +75,20 @@ public:
 	bool Detach()
 	{
 		if(!m_pThreadHandle) return false;
-		if((m_Detached = thread_detach(m_pThreadHandle) == 0))
+		int result = thread_detach(m_pThreadHandle);
+		if(result == 0)
+		{
+			m_Detached = true;
 			m_pThreadHandle = NULL; // invalidate the handle since further operations on it would cause undefined behavior
+		}
+#if defined(CONF_DEBUG)
+		else
+		{
+			char aErr[1024];
+			str_formatb(aErr, "failed to detach thread %p: error %i (%s)", m_pThreadHandle, result, strerror(result));
+			dbg_assert(result == 0, aErr);
+		}
+#endif
 		return m_Detached;
 	}
 

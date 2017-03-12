@@ -26,7 +26,11 @@ CUpdater::CUpdater()
 	m_Percent = 0;
 	m_IsWinXP = false;
 
-	m_ClientUpdate = true; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
+	m_ClientUpdate = false; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
+#if !defined(CONF_DEBUG)
+	m_ClientUpdate = true; // just in case I forget it once again ._.
+#endif
+
 }
 
 void CUpdater::Init()
@@ -47,7 +51,7 @@ void CUpdater::Tick()
 
 
 	// check for errors
-	if(m_GitHubAPI.State() == CGitHubAPI::STATE_ERROR)
+	if(m_GitHubAPI.State() == CGitHubAPI::STATE_ERROR && State() != STATE_FAIL)
 	{
 		str_copyb(m_aError, "<github-job>");
 		SetState(STATE_FAIL);
@@ -63,6 +67,7 @@ void CUpdater::Tick()
 			break;
 
 		case STATE_GETTING_MANIFEST: // will only be applied to actually perform the update
+		case STATE_SYNC_POSTGETTING:
 			if(m_GitHubAPI.State() == CGitHubAPI::STATE_DONE)
 			{
 				ParseUpdate();
@@ -120,13 +125,13 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	CUpdater *pSelf = (CUpdater *)pUser;
 	const bool ERROR = pTask->State() == CFetchTask::STATE_ERROR;
 
-	const char *a = 0;
+	const char *a = 0; // a is full path
 	for(const char *c = pTask->Dest(); *c; c++)
 		if(*c == '/')
 			{ a = c + 1; break; }
 	a = a ? a : pTask->Dest();
 
-		const char *b = 0;
+		const char *b = 0; // b is just the filename
 	for(const char *c = pTask->Dest(); *c; c++)
 		if(*c == '/')
 			b = c + 1;
@@ -201,12 +206,16 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
+		dbg_msg("DENNIS1", ">> a='%s'", a);
+		dbg_msg("DENNIS2", ">> b='%s'", b);
+		dbg_msg("DENNIS3", ">> last='%s'", pSelf->m_aLastFile);
+		dbg_msg("DENNIS4", ">> state=%i", pSelf->State());
 		if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST))
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);
-			dbg_msg("updater", "got manifest, waiting for github...");
+			dbg_msg("updater", "got manifest, waiting for github-compare to finish...");
 		}
-		else if(pSelf->State() == STATE_DOWNLOADING && str_comp(b, pSelf->m_aLastFile) == 0)
+		else if(pSelf->State() == STATE_DOWNLOADING && str_comp(a, pSelf->m_aLastFile) == 0)
 		{
 			dbg_msg("updater", "finished downloading, installing update");
 			pSelf->InstallUpdate(); // sets state
@@ -323,7 +332,8 @@ void CUpdater::DownloadUpdate()
 		{
 			std::string source(string("AllTheHaxx") + "/" + string(m_GitHubAPI.GetLatestVersionTree()));
 			std::map<string, string> e;
-			e[*it] = string("./");
+//			e[*it] = string("./");
+			e[*it] = string("");
 
 			// store the entry
 			m_FileDownloadJobs[source] = e;
@@ -366,7 +376,9 @@ void CUpdater::DownloadUpdate()
 
 	str_copy(m_aLastFile, pLastFile, sizeof(m_aLastFile));
 
+#if !defined(CONF_DEBUG)
 	if(g_Config.m_Debug)
+#endif
 		dbg_msg("updater/debug", "last file is '%s'", m_aLastFile);
 }
 
@@ -385,27 +397,29 @@ void CUpdater::InstallUpdate()
 				destPath = string(file->second + file->first).c_str(); // append the filename to the dest folder path
 			else
 				destPath = file->second; // the full path is already given
-			MoveFile(destPath.c_str());
+			//XXX MoveFile(destPath.c_str());
 		}
 
 	// do the move jobs from github
 	for(std::vector<std::pair<std::string, std::string> >::const_iterator it = m_GitHubAPI.GetRenameJobs().begin(); it != m_GitHubAPI.GetRenameJobs().end(); it++)
 	{
-		m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
+		//XXX m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
 		dbg_msg("update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
 	}
 
 
 	if(m_ClientUpdate)
-		ReplaceClient();
-	if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
-		SetState(STATE_NEED_RESTART);
-	else
 	{
-		if(!m_IsWinXP)
-			m_pClient->Restart();
+		ReplaceClient();
+		if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
+			SetState(STATE_NEED_RESTART);
 		else
-			WinXpRestart();
+		{
+			if(!m_IsWinXP)
+				m_pClient->Restart();
+			else
+				WinXpRestart();
+		}
 	}
 }
 

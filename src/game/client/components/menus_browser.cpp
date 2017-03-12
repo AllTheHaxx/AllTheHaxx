@@ -1452,7 +1452,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 				Client()->Restart();
 			}
 		}
-		else if(State >= IUpdater::STATE_GETTING_MANIFEST && State < IUpdater::STATE_DOWNLOADING)
+		else if(State >= IUpdater::STATE_GETTING_MANIFEST && State <= IUpdater::STATE_DOWNLOADING)
 		{
 			CUIRect ProgressBar, Percent;
 			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
