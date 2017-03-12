@@ -53,7 +53,7 @@ void CUpdater::Tick()
 	// check for errors
 	if(m_GitHubAPI.State() == CGitHubAPI::STATE_ERROR && State() != STATE_FAIL)
 	{
-		str_copyb(m_aError, "<github-job>");
+		str_copyb(m_aError, "github-job");
 		SetState(STATE_FAIL);
 	}
 
@@ -346,7 +346,7 @@ void CUpdater::DownloadUpdate()
 	}
 
 	// start downloading
-	dbg_msg("updater", "Starting download, got %lu file remove jobs and download jobs from %lu repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size());
+	dbg_msg("updater", "Starting download, got %lu file remove jobs and %lu download jobs from %lu repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size(), m_FileDownloadJobs.size());
 	SetState(STATE_DOWNLOADING);
 
 	const char *pLastFile;
@@ -409,17 +409,15 @@ void CUpdater::InstallUpdate()
 
 
 	if(m_ClientUpdate)
-	{
 		ReplaceClient();
-		if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
-			SetState(STATE_NEED_RESTART);
+	if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData() || !m_ClientUpdate)
+		SetState(STATE_NEED_RESTART);
+	else
+	{
+		if(!m_IsWinXP)
+			m_pClient->Restart();
 		else
-		{
-			if(!m_IsWinXP)
-				m_pClient->Restart();
-			else
-				WinXpRestart();
-		}
+			WinXpRestart();
 	}
 }
 

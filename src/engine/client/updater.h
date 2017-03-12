@@ -82,8 +82,13 @@ public:
 	const char *GetNews() const { return m_aNews; }
 	const char *GetFailedFile() const { return m_aError; }
 
-	char *GetCurrentFile() { return m_Status; };
-	int GetCurrentPercent() const { return m_Percent; };
+	char *GetCurrentFile() { return m_Status; }
+	int GetCurrentPercent() const
+	{
+		if(State() >= STATE_PARSING_UPDATE)
+			return m_Percent;
+		return (int)(m_GitHubAPI.GetProgress()+0.5f);
+	}
 
 	virtual void CheckForUpdates(bool ForceRefresh = false);
 	virtual void PerformUpdate();

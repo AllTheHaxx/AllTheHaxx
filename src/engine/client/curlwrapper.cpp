@@ -36,3 +36,9 @@ size_t CCurlWrapper::CurlCallback_WriteToStdString(void *ptr, size_t size, size_
 	((std::string*)stream)->append((char*)ptr, 0, size*count);
 	return size*count;
 }
+
+int CCurlWrapper::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
+{
+	*((float*)pUser) = (float)((100.0 * DlCurr) / (DlTotal ? DlTotal : 1.0));
+	return 0;
+}

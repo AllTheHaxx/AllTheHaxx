@@ -26,6 +26,7 @@ public:
 
 
 	static size_t CurlCallback_WriteToStdString(void *ptr, size_t size, size_t count, void *stream);
+	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
 
 private:
 	static void PerformPOST_ex(void *pUser);

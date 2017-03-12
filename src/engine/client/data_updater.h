@@ -31,6 +31,7 @@ private:
 	std::vector<std::string> m_DownloadJobs; // relative path of the file (e.g. "data/somedir/somefile.txt")
 	std::vector<std::string> m_RemoveJobs;
 	std::vector< std::pair<std::string, std::string> > m_RenameJobs; // old name - new name
+	float m_Progress;
 
 
 public:
@@ -39,6 +40,7 @@ public:
 
 	int State() const { return m_State; }
 	bool Done() const { return m_State == STATE_DONE; }
+	float GetProgress() const { return m_Progress; }
 
 	void CheckVersion();
 	void DoUpdate();
@@ -59,6 +61,7 @@ private:
 
 	static void UpdateCheckerThread(CGitHubAPI *pSelf);
 	static void CompareThread(CGitHubAPI *pSelf);
+
 	static void GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize);
 };
 

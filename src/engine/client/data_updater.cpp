@@ -30,6 +30,7 @@ CGitHubAPI::CGitHubAPI()
 	m_DownloadJobs.clear();
 	m_RemoveJobs.clear();
 	m_RenameJobs.clear();
+	m_Progress = 0.0f;
 }
 
 CGitHubAPI::~CGitHubAPI()
@@ -54,7 +55,7 @@ void CGitHubAPI::CheckVersion()
 	m_State = STATE_REFRESHING;
 
 	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::UpdateCheckerThread);
-	if(!Thread.Start(this))
+	if(!Thread.StartDetached(this))
 	{
 		dbg_msg("github", "ERROR: failed to start UpdateChecker-thread");
 		m_State = STATE_ERROR;
@@ -67,7 +68,7 @@ void CGitHubAPI::DoUpdate()
 	m_State = STATE_COMPARING;
 
 	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::CompareThread);
-	if(!Thread.Start(this))
+	if(!Thread.StartDetached(this))
 	{
 		dbg_msg("github", "ERROR: failed to start Compare-thread");
 		m_State = STATE_ERROR;
@@ -198,6 +199,8 @@ bool CGitHubAPI::ParseCompare(const char *pJsonStr)
 	// loop through the array of changed files
 	for(unsigned int i = 0; i < jsonFiles.u.array.length; i++)
 	{
+		m_Progress = (float)i / (float)jsonFiles.u.array.length;
+
 		// we only want files in the data/ directory
 		const char *pFilename = (const char *)(jsonFiles[i]["filename"]);
 		if(str_comp_nocase_num(pFilename, "data/", str_length("data/")) != 0)
@@ -254,7 +257,9 @@ const std::string CGitHubAPI::SimpleGET(const char *pUrl)
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, &Result);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CCurlWrapper::CurlCallback_WriteToStdString);
-	curl_easy_setopt(m_pHandle, CURLOPT_NOPROGRESS, 1L);
+	curl_easy_setopt(m_pHandle, CURLOPT_NOPROGRESS, 0);
+	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSDATA, &m_Progress);
+	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSFUNCTION, &CCurlWrapper::ProgressCallback);
 	curl_easy_setopt(m_pHandle, CURLOPT_NOSIGNAL, 1L);
 
 	int ret = curl_easy_perform(m_pHandle);
@@ -272,6 +277,7 @@ const std::string CGitHubAPI::SimpleGET(const char *pUrl)
 	}
 	return Result;
 }
+
 
 /* this one is overly complicated I think... let's not use it?
 void CGitHubAPI::CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *userdata)
