@@ -26,7 +26,7 @@ CUpdater::CUpdater()
 	m_Percent = 0;
 	m_IsWinXP = false;
 
-	m_ClientUpdate = false; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
+	m_ClientUpdate = true; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
 #if !defined(CONF_DEBUG)
 	m_ClientUpdate = true; // just in case I forget it once again ._.
 #endif
@@ -206,10 +206,6 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
-		dbg_msg("DENNIS1", ">> a='%s'", a);
-		dbg_msg("DENNIS2", ">> b='%s'", b);
-		dbg_msg("DENNIS3", ">> last='%s'", pSelf->m_aLastFile);
-		dbg_msg("DENNIS4", ">> state=%i", pSelf->State());
 		if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST))
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);

@@ -170,12 +170,17 @@ void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 				NumDownload, NumRename, NumRemove
 		);
 
-		for(int i = 0; i < NumDownload; i++)
-			dbg_msg("github", "JOBS:DL:%03i> '%s'", i, pSelf->m_DownloadJobs[i].c_str());
-		for(int i = 0; i < NumRename; i++)
-			dbg_msg("github", "JOBS:MV:%03i> '%s' -> '%s'", i, pSelf->m_RenameJobs[i].first.c_str(), pSelf->m_RenameJobs[i].second.c_str());
-		for(int i = 0; i < NumRemove; i++)
-			dbg_msg("github", "JOBS:RM:%03i> '%s'", i, pSelf->m_RemoveJobs[i].c_str());
+#if !defined(CONF_DEBUG)
+		if(g_Config.m_Debug)
+#endif
+		{
+			for(int i = 0; i < NumDownload; i++)
+				dbg_msg("github", "JOBS:DL:%03i> '%s'", i, pSelf->m_DownloadJobs[i].c_str());
+			for(int i = 0; i < NumRename; i++)
+				dbg_msg("github", "JOBS:MV:%03i> '%s' -> '%s'", i, pSelf->m_RenameJobs[i].first.c_str(), pSelf->m_RenameJobs[i].second.c_str());
+			for(int i = 0; i < NumRemove; i++)
+				dbg_msg("github", "JOBS:RM:%03i> '%s'", i, pSelf->m_RemoveJobs[i].c_str());
+		}
 
 	}
 }
