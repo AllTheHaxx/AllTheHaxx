@@ -1394,33 +1394,33 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		CUIRect Part;
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[128];
-		int State = Updater()->GetCurrentState();
+		int State = Updater()->State();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0") != 0;
 #if defined(CONF_SPOOFING)
 		NeedUpdate = false;
 #endif
-		if(State == IUpdater::CLEAN && NeedUpdate)
+		if(State == IUpdater::STATE_CLEAN && NeedUpdate)
 		{
 			str_format(aBuf, sizeof(aBuf), "New Version '%s' is out!", Client()->LatestVersion());
 			float fade = sinf(Client()->LocalTime()*3.1415f)*0.2f;
 			TextRender()->TextColor(1.0f, 0.4f+fade, 0.4f+fade, 1.0f+fade/2.0f-0.1f);
 		}
-		else if(State == IUpdater::CLEAN)
+		else if(State == IUpdater::STATE_CLEAN)
 			str_format(aBuf, sizeof(aBuf), "Client version string: tw.%s-%s-ddnet.%s", GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
-		else if(State == IUpdater::GETTING_MANIFEST)
+		else if(State == IUpdater::STATE_SYNC_REFRESH)
 			str_format(aBuf, sizeof(aBuf), "Refreshing version info...");
-		else if(State == IUpdater::GOT_MANIFEST || State == IUpdater::PARSING_UPDATE)
+		else if(State == IUpdater::STATE_GETTING_MANIFEST || State == IUpdater::STATE_SYNC_POSTGETTING)
 			str_format(aBuf, sizeof(aBuf), "Checking out files...");
-		else if(State >= IUpdater::DOWNLOADING && State < IUpdater::NEED_RESTART)
+		else if(State == IUpdater::STATE_DOWNLOADING)
 			str_format(aBuf, sizeof(aBuf), "Downloading '%s':", Updater()->GetCurrentFile());
-		else if(State == IUpdater::MOVE_FILES)
+		else if(State == IUpdater::STATE_MOVE_FILES)
 			str_format(aBuf, sizeof(aBuf), "Installing '%s'", Updater()->GetCurrentFile());
-		else if(State == IUpdater::FAIL)
+		else if(State == IUpdater::STATE_FAIL)
 		{
 			str_format(aBuf, sizeof(aBuf), "Updater: %s failed. Download manually?", Updater()->GetFailedFile());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
-		else if(State == IUpdater::NEED_RESTART)
+		else if(State == IUpdater::STATE_NEED_RESTART)
 		{
 			str_format(aBuf, sizeof(aBuf), "AllTheHaxx updated!");
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
@@ -1430,7 +1430,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Button, &Part);
 
-		if(State == IUpdater::CLEAN && NeedUpdate)
+		if(State == IUpdater::STATE_CLEAN && NeedUpdate)
 		{
 			CUIRect Update;
 			Part.VSplitLeft(100.0f, &Update, NULL);
@@ -1438,10 +1438,10 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Update))
 			{
-				Updater()->InitiateUpdate();
+				Updater()->PerformUpdate();
 			}
 		}
-		else if(State == IUpdater::NEED_RESTART)
+		else if(State == IUpdater::STATE_NEED_RESTART)
 		{
 			CUIRect Restart;
 			Part.VSplitLeft(50.0f, &Restart, &Part);
@@ -1452,7 +1452,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 				Client()->Restart();
 			}
 		}
-		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
+		else if(State >= IUpdater::STATE_GETTING_MANIFEST && State < IUpdater::STATE_DOWNLOADING)
 		{
 			CUIRect ProgressBar, Percent;
 			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);

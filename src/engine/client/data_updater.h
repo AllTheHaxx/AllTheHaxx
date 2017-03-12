@@ -13,17 +13,10 @@ class CGitHubAPI
 public:
 	enum
 	{
-//		STATE_IDLE,
-//		STATE_REFRESHING,
-//		STATE_NEWVERSION,
-//		STATE_CLEAN,
-//		STATE_ERROR,
-//		STATE_UPDATING,
-//		STATE_DONE,
-		STATE_CLEAN = 0,
-		STATE_GETTING_MANIFEST, // is refreshing
+		STATE_CLEAN = 0, // there is no update and we are currently idle
+		STATE_REFRESHING, // is refreshing
 		STATE_NEW_VERSION, // the refresh told us: there's a new version!
-		STATE_PARSING_UPDATE, // comparing
+		STATE_COMPARING, // downloading and parsing compare
 		STATE_DONE, // finished comparing, signalizes the updater that we're ready to apply changes
 		STATE_ERROR, // uh-oh, no gud
 	};

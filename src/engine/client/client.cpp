@@ -2892,7 +2892,7 @@ void CClient::CheckVersionUpdate()
 	CALLSTACK_ADD();
 
 	m_VersionInfo.m_State = CVersionInfo::STATE_START;
-	m_Updater.InitiateUpdate(true, true);
+	m_Updater.CheckForUpdates(true);
 }
 
 void CClient::RegisterInterfaces()
@@ -2941,7 +2941,7 @@ void CClient::InitInterfaces()
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();
-	m_Updater.InitiateUpdate(true); // true makes it be blocking -> safe
+	m_Updater.CheckForUpdates(); // true makes it be blocking -> safe
 #endif
 
 	m_Friends.Init();
@@ -3178,7 +3178,7 @@ void CClient::Run()
 			break;	// SDL_QUIT
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-		Updater()->Update();
+		Updater()->Tick();
 #endif
 
 		// update sound
@@ -3384,7 +3384,7 @@ void CClient::Run()
 #endif
 	}
 
-	if(m_Updater.GetCurrentState() == IUpdater::CLEAN)
+	if(m_Updater.State() == IUpdater::STATE_CLEAN)
 	{
 		// do cleanups - much hack.
 #if defined(CONF_FAMILY_UNIX)

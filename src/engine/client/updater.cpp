@@ -21,10 +21,9 @@ CUpdater::CUpdater()
 	m_pClient = NULL;
 	m_pStorage = NULL;
 	m_pFetcher = NULL;
-	m_State = CLEAN;
-	str_copy(m_aError, "a file", sizeof(m_aError));
+	SetState(STATE_CLEAN);
+	str_copy(m_aError, "something", sizeof(m_aError));
 	m_Percent = 0;
-	m_CheckOnly = false;
 	m_IsWinXP = false;
 
 	m_ClientUpdate = true; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
@@ -42,6 +41,69 @@ void CUpdater::Init()
 #endif
 }
 
+void CUpdater::Tick()
+{
+	CALLSTACK_ADD();
+
+
+	// check for errors
+	if(m_GitHubAPI.State() == CGitHubAPI::STATE_ERROR)
+	{
+		str_copyb(m_aError, "<github-job>");
+		SetState(STATE_FAIL);
+	}
+
+	switch(State())
+	{
+		case STATE_SYNC_REFRESH:
+			if(m_GitHubAPI.State() == CGitHubAPI::STATE_CLEAN || m_GitHubAPI.State() == CGitHubAPI::STATE_NEW_VERSION)
+			{
+				SetState(STATE_CLEAN);
+			}
+			break;
+
+		case STATE_GETTING_MANIFEST: // will only be applied to actually perform the update
+			if(m_GitHubAPI.State() == CGitHubAPI::STATE_DONE)
+			{
+				ParseUpdate();
+				DownloadUpdate();
+			}
+			break;
+
+		default:
+			return;
+	}
+}
+
+void CUpdater::CheckForUpdates(bool ForceRefresh)
+{
+	// get the version info if we don't have any yet
+	if((GetLatestVersion()[0] == '0' && GetLatestVersion()[1] == '\0') || ForceRefresh)
+	{
+		SetState(STATE_SYNC_REFRESH);
+		dbg_msg("updater", "refreshing version info");
+//		FetchFile("stuffility/master", UPDATE_MANIFEST);
+		FetchFile("stuffility/master", "ath-news.txt");
+		m_GitHubAPI.CheckVersion();
+	}
+	else
+		dbg_msg("updater", "skipping version check, already did it");
+}
+
+void CUpdater::PerformUpdate()
+{
+	CALLSTACK_ADD();
+
+	if(GetLatestVersion()[1] != '\0')
+	{
+		dbg_msg("updater", "Starting update to version %s!", GetLatestVersion());
+		SetState(STATE_GETTING_MANIFEST);
+		m_GitHubAPI.DoUpdate();
+	}
+	else
+		dbg_msg("updater", "can't initiate update before version check!");
+}
+
 void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
 {
 	CALLSTACK_ADD();
@@ -55,7 +117,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 {
 	CALLSTACK_ADD();
 
-	CUpdater *pUpdate = (CUpdater *)pUser;
+	CUpdater *pSelf = (CUpdater *)pUser;
 	const bool ERROR = pTask->State() == CFetchTask::STATE_ERROR;
 
 	const char *a = 0;
@@ -77,19 +139,20 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	if(ERROR)
 	{
 		if(str_comp(b, "ath-news.txt") == 0) // news are allowed to fail...
-			str_copy(pUpdate->m_aNews, pFailedNewsMsg, sizeof(pUpdate->m_aNews));
+			str_copy(pSelf->m_aNews, pFailedNewsMsg, sizeof(pSelf->m_aNews));
 		else
 		{
-			if(str_comp_nocase_num(a, "lua/", 4) != 0)
+			if(str_comp_nocase_num(a, "lua/", 4) != 0) // example scripts are allowed to fail, too
 			{
-				pUpdate->m_State = FAIL;
-				str_format(pUpdate->m_aError, sizeof(pUpdate->m_aError), "'%s'", a);
+				pSelf->SetState(STATE_FAIL);
+				str_format(pSelf->m_aError, sizeof(pSelf->m_aError), "'%s'", a);
 			}
 			dbg_msg("update", "failed to download '%s'", a);
 		}
 		fs_remove(pTask->Dest()); // delete the empty file dummy
 	}
 
+	// handle the news
 	if(str_comp(b, "ath-news.txt") == 0)
 	{
 		// dig out whether ATH news have been updated
@@ -98,7 +161,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		char aNewsBackupPath[512];
 
 		// read the old news
-		IOHANDLE f = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+		IOHANDLE f = pSelf->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
 		if(f)
 		{
 			io_read(f, aOldNews, NEWS_SIZE);
@@ -111,25 +174,25 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			f = io_open("update/ath-news.txt", IOFLAG_READ);
 			if(f)
 			{
-				io_read(f, pUpdate->m_aNews, NEWS_SIZE);
+				io_read(f, pSelf->m_aNews, NEWS_SIZE);
 				io_close(f);
 			}
 		}
 		else
-			str_append(pUpdate->m_aNews, aOldNews, NEWS_SIZE);
+			str_append(pSelf->m_aNews, aOldNews, NEWS_SIZE);
 
 		// dig out whether news have been updated
-		if(str_comp(aOldNews, pUpdate->m_aNews + (ERROR ? str_length(pFailedNewsMsg) : 0)) != 0)
+		if(str_comp(aOldNews, pSelf->m_aNews + (ERROR ? str_length(pFailedNewsMsg) : 0)) != 0)
 		{
 			g_Config.m_UiPage = CMenus::PAGE_NEWS_ATH;
 
 			// backup the new news file if we got one
 			if(!ERROR)
 			{
-				f = pUpdate->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
+				f = pSelf->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
 				if(f)
 				{
-					io_write(f, pUpdate->m_aNews, (unsigned int)str_length(pUpdate->m_aNews));
+					io_write(f, pSelf->m_aNews, (unsigned int)str_length(pSelf->m_aNews));
 					io_flush(f);
 					io_close(f);
 				}
@@ -138,10 +201,212 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
-		if(str_comp(b, pUpdate->m_aLastFile) == 0)
-			pUpdate->m_State = MOVE_FILES;
+		if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST))
+		{
+			pSelf->SetState(STATE_SYNC_POSTGETTING);
+			dbg_msg("updater", "got manifest, waiting for github...");
+		}
+		else if(pSelf->State() == STATE_DOWNLOADING && str_comp(b, pSelf->m_aLastFile) == 0)
+		{
+			dbg_msg("updater", "finished downloading, installing update");
+			pSelf->InstallUpdate(); // sets state
+		}
 	}
 	delete pTask;
+}
+
+void CUpdater::ParseUpdate()
+{
+	CALLSTACK_ADD();
+
+	// this function shall only be called when actually updating the client
+
+	SetState(STATE_PARSING_UPDATE);
+	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
+
+	char aPath[512];
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
+	if(File)
+	{
+		char aBuf[4096*4];
+		mem_zero(aBuf, sizeof (aBuf));
+		io_read(File, aBuf, sizeof(aBuf));
+		io_close(File);
+
+		json_value &jsonVersions = *json_parse(aBuf, (size_t)str_length(aBuf)); // TODO: free this!
+		if(jsonVersions.type != json_array)
+		{
+			dbg_msg("updater/parse", "invalid manifest contents (not an array)");
+			return;
+		}
+
+		for(unsigned int i = 0; i < jsonVersions.u.array.length ; i++)
+		{
+			const json_value &jsonCurrent = jsonVersions[i];
+
+			// downgrades no gud
+			if((json_int_t)(jsonCurrent["numeric"]) <= GAME_ATH_VERSION_NUMERIC)
+				continue;
+
+			if(jsonCurrent["remove"].type == json_array)
+			{
+				for(unsigned int j = 0; j < jsonCurrent["remove"].u.array.length; j++)
+					AddFileRemoveJob(jsonCurrent["remove"][j]);
+			}
+			if(jsonCurrent["download"].type == json_array)
+			{
+				for(unsigned int j = 0; j < jsonCurrent["download"].u.array.length; j++)
+				{
+					const json_value &jsonRepoBatch = jsonCurrent["download"][j];
+					const char  *pRepoStr = (const char *)jsonRepoBatch["repo"],
+							*pTreeStr = (const char *)jsonRepoBatch["tree"],
+							*pDestStr = (const char *)jsonRepoBatch["dest"];
+
+					const json_value &jsonFilesArray = jsonRepoBatch["files"];
+					if(jsonFilesArray.type == json_array)
+					{
+						// add the list of files to the entry
+						std::map<string, string> e;
+						std::string source(string(pRepoStr) + "/" + string(pTreeStr));
+						for(unsigned int k = 0; k < jsonFilesArray.u.array.length; k++)
+						{
+							const char *pFileStr = jsonFilesArray[k];
+							if(!pFileStr)
+							{
+								dbg_msg("updater/ERROR", "Failed to extract json data :");
+								dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, (void *)pFileStr);
+								continue;
+							}
+							try {
+								#if !defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
+								if(str_comp_nocase(pFileStr + str_length(pFileStr) - 4, ".dll") == 0) // TODO: 64 bit support when time has come
+									continue;
+								#endif
+								std::string FilePath(pFileStr);
+								// only add the elements that are not on the remove list
+								if(std::find(m_FileRemoveJobs.begin(), m_FileRemoveJobs.end(), string(pDestStr)+FilePath) == m_FileRemoveJobs.end())
+									e[FilePath] = string(pDestStr);
+								//dbg_msg("DEBUG|updater", "DOWNLOAD (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
+							} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
+						}
+
+						// store the entry
+						m_FileDownloadJobs[source] = e;
+					}
+					else
+					{
+						dbg_msg("updater/ERROR", "Failed to extract json data :");
+						dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
+					}
+				}
+			}
+			// get all previous updates that me missed
+		}
+	}
+}
+
+void CUpdater::DownloadUpdate()
+{
+	CALLSTACK_ADD();
+/*
+	// do cleanups - much hack.
+#if defined(CONF_FAMILY_UNIX)
+	system("rm -rf update");
+#elif defined(CONF_FAMILY_WINDOWS)
+	system("rd update /S /Q");
+#endif
+*/
+	// merge our lists with the ones from github
+	{
+		// download jobs
+		for(std::vector<std::string>::const_iterator it = m_GitHubAPI.GetDownloadJobs().begin(); it != m_GitHubAPI.GetDownloadJobs().end(); it++)
+		{
+			std::string source(string("AllTheHaxx") + "/" + string(m_GitHubAPI.GetLatestVersionTree()));
+			std::map<string, string> e;
+			e[*it] = string("./");
+
+			// store the entry
+			m_FileDownloadJobs[source] = e;
+		}
+
+		// remove jobs
+		m_FileRemoveJobs.insert(m_FileRemoveJobs.end(), m_GitHubAPI.GetRemoveJobs().begin(), m_GitHubAPI.GetRemoveJobs().end());
+
+		// move jobs - will be done later on
+	}
+
+	// start downloading
+	dbg_msg("updater", "Starting download, got %lu file remove jobs and download jobs from %lu repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size());
+	SetState(STATE_DOWNLOADING);
+
+	const char *pLastFile;
+	pLastFile = "";
+
+	// remove files
+	for(std::vector<string>::iterator it = m_FileRemoveJobs.begin(); it != m_FileRemoveJobs.end(); ++it)
+	{
+		m_pStorage->RemoveBinaryFile(it->c_str());
+	}
+
+	// fetch all download files
+	for(map<string, map<string, string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
+	{
+		for(map<string, string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
+		{
+			FetchFile(it->first.c_str(), file->first.c_str(), file->second.c_str());
+			pLastFile = file->first.c_str();
+		}
+	}
+
+	if(m_ClientUpdate)
+	{
+		FetchExecutable(PLAT_CLIENT_DOWN, "AllTheHaxx.tmp");
+		pLastFile = "AllTheHaxx.tmp";
+	}
+
+	str_copy(m_aLastFile, pLastFile, sizeof(m_aLastFile));
+
+	if(g_Config.m_Debug)
+		dbg_msg("updater/debug", "last file is '%s'", m_aLastFile);
+}
+
+void CUpdater::InstallUpdate()
+{
+	CALLSTACK_ADD();
+
+	SetState(STATE_MOVE_FILES);
+
+	for(map<std::string, map<std::string, std::string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
+		for(map<std::string, std::string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
+		{
+			string destPath;
+			if(file->second.c_str()[str_length(file->second.c_str())-1] == '/' ||
+			   file->second.c_str()[str_length(file->second.c_str())-1] == '\\')
+				destPath = string(file->second + file->first).c_str(); // append the filename to the dest folder path
+			else
+				destPath = file->second; // the full path is already given
+			MoveFile(destPath.c_str());
+		}
+
+	// do the move jobs from github
+	for(std::vector<std::pair<std::string, std::string> >::const_iterator it = m_GitHubAPI.GetRenameJobs().begin(); it != m_GitHubAPI.GetRenameJobs().end(); it++)
+	{
+		m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
+		dbg_msg("update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
+	}
+
+
+	if(m_ClientUpdate)
+		ReplaceClient();
+	if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
+		SetState(STATE_NEED_RESTART);
+	else
+	{
+		if(!m_IsWinXP)
+			m_pClient->Restart();
+		else
+			WinXpRestart();
+	}
 }
 
 void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath)
@@ -185,7 +450,7 @@ void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
 	CFetchTask *Task = new CFetchTask(false);
 	m_pFetcher->QueueAdd(Task, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
- 
+
 void CUpdater::MoveFile(const char *pFile)
 {
 	CALLSTACK_ADD();
@@ -205,39 +470,6 @@ void CUpdater::MoveFile(const char *pFile)
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
 		m_pStorage->RenameBinaryFile(aBuf, pFile);
 		//dbg_msg("updater", "moving '%s' to '%s'", aBuf, pFile);
-	}
-}
-
-void CUpdater::Update()
-{
-	CALLSTACK_ADD();
-
-	if(m_GitHubAPI.State() == CGitHubAPI::STATE_ERROR)
-	{
-		str_copyb(m_aError, "github");
-		m_State = FAIL;
-	}
-
-	switch(m_State)
-	{
-		case GETTING_MANIFEST:
-			if(m_GitHubAPI.State() == CGitHubAPI::STATE_NEW_VERSION)
-			{
-				m_State = GOT_MANIFEST;
-				m_GitHubAPI.DoUpdate();
-			}
-			else if(m_GitHubAPI.State() == CGitHubAPI::STATE_CLEAN)
-				m_State = CLEAN;
-			break;
-		case GOT_MANIFEST:
-			if(m_GitHubAPI.Done())
-				PerformUpdate();
-			break;
-		case MOVE_FILES:
-			CommitUpdate();
-			break;
-		default:
-			return;
 	}
 }
 
@@ -270,224 +502,6 @@ void CUpdater::ReplaceClient()
 	if(system(aBuf))
 		dbg_msg("updater", "ERROR: failed to set client executable bit");
 #endif
-}
-
-void CUpdater::ParseUpdate()
-{
-	CALLSTACK_ADD();
-
-	// this function shall only be called when actually updating the client
-
-	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
-
-	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
-	if(File)
-	{
-		char aBuf[4096*4];
-		mem_zero(aBuf, sizeof (aBuf));
-		io_read(File, aBuf, sizeof(aBuf));
-		io_close(File);
-
-		json_value &jsonVersions = *json_parse(aBuf, (size_t)str_length(aBuf)); // TODO: free this!
-		if(jsonVersions.type != json_array)
-		{
-			dbg_msg("updater/parse", "invalid manifest contents (not an array)");
-			return;
-		}
-
-		for(unsigned int i = 0; i < jsonVersions.u.array.length ; i++)
-		{
-			const json_value &jsonCurrent = jsonVersions[i];
-
-			// downgrades no gud
-			if((json_int_t)(jsonCurrent["numeric"]) <= GAME_ATH_VERSION_NUMERIC)
-				continue;
-
-			if(jsonCurrent["remove"].type == json_array)
-			{
-				for(unsigned int j = 0; j < jsonCurrent["remove"].u.array.length; j++)
-					AddFileRemoveJob(jsonCurrent["remove"][j]);
-			}
-			if(jsonCurrent["download"].type == json_array)
-			{
-				for(unsigned int j = 0; j < jsonCurrent["download"].u.array.length; j++)
-				{
-					const json_value &jsonRepoBatch = jsonCurrent["download"][j];
-					const char  *pRepoStr = (const char *)jsonRepoBatch["repo"],
-								*pTreeStr = (const char *)jsonRepoBatch["tree"],
-								*pDestStr = (const char *)jsonRepoBatch["dest"];
-
-					const json_value &jsonFilesArray = jsonRepoBatch["files"];
-					if(jsonFilesArray.type == json_array)
-					{
-						// add the list of files to the entry
-						std::map<string, string> e;
-						std::string source(string(pRepoStr) + "/" + string(pTreeStr));
-						for(unsigned int k = 0; k < jsonFilesArray.u.array.length; k++)
-						{
-							const char *pFileStr = jsonFilesArray[k];
-							if(!pFileStr)
-							{
-								dbg_msg("updater/ERROR", "Failed to extract json data :");
-								dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, (void *)pFileStr);
-								continue;
-							}
-							try {
-								#if !defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
-									if(str_comp_nocase(pFileStr + str_length(pFileStr) - 4, ".dll") == 0) // TODO: 64 bit support when time has come
-										continue;
-								#endif
-								std::string FilePath(pFileStr);
-								// only add the elements that are not on the remove list
-								if(std::find(m_FileRemoveJobs.begin(), m_FileRemoveJobs.end(), string(pDestStr)+FilePath) == m_FileRemoveJobs.end())
-									e[FilePath] = string(pDestStr);
-								//dbg_msg("DEBUG|updater", "DOWNLOAD (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
-							} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
-						}
-
-						// store the entry
-						m_FileDownloadJobs[source] = e;
-					}
-					else
-					{
-						dbg_msg("updater/ERROR", "Failed to extract json data :");
-						dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
-					}
-				}
-			}
-			// get all previous updates that me missed
-		}
-	}
-}
-
-void CUpdater::InitiateUpdate(bool CheckOnly, bool ForceRefresh)
-{
-	CALLSTACK_ADD();
-
-	m_CheckOnly = CheckOnly;
-
-	// get the version info if we don't have any yet
-	if((GetLatestVersion()[0] == '0' && GetLatestVersion()[1] == '\0') || ForceRefresh)
-	{
-		m_State = GETTING_MANIFEST;
-		dbg_msg("updater", "refreshing version info");
-//		FetchFile("stuffility/master", UPDATE_MANIFEST);
-		FetchFile("stuffility/master", "ath-news.txt");
-		m_GitHubAPI.CheckVersion();
-	}
-	//else if(m_GitHubAPI.State() == CGitHubAPI::STATE_CLEAN)
-	//	m_State = CLEAN; // if we have the version and there is no update, we can directly skip the rest
-}
-
-void CUpdater::PerformUpdate()
-{
-	CALLSTACK_ADD();
-
-	// do cleanups - much hack.
-#if defined(CONF_FAMILY_UNIX)
-		system("rm -rf update");
-#elif defined(CONF_FAMILY_WINDOWS)
-		system("rd update /S /Q");
-#endif
-
-	if(m_CheckOnly)
-	{
-		m_CheckOnly = false;
-		m_State = CLEAN;
-		return;
-	}
-
-	if(m_GitHubAPI.State() == CGitHubAPI::STATE_NEW_VERSION)
-	{
-		m_State = PARSING_UPDATE;
-		ParseUpdate();
-	}
-
-
-	// get the stuff from github
-	for(std::vector<std::string>::const_iterator it = m_GitHubAPI.GetDownloadJobs().begin(); it != m_GitHubAPI.GetDownloadJobs().end(); it++)
-	{
-		std::string source(string("AllTheHaxx") + "/" + string(m_GitHubAPI.GetLatestVersionTree()));
-		std::map<string, string> e;
-		e[*it] = string("./");
-
-		// store the entry
-		m_FileDownloadJobs[source] = e;
-	}
-
-	m_FileRemoveJobs.insert(m_FileRemoveJobs.end(), m_GitHubAPI.GetRemoveJobs().begin(), m_GitHubAPI.GetRemoveJobs().end());
-
-	// do the move jobs right now
-	for(std::vector< std::pair<std::string, std::string> >::const_iterator it = m_GitHubAPI.GetRenameJobs().begin(); it != m_GitHubAPI.GetRenameJobs().end(); it++)
-	{
-		m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
-		dbg_msg("update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
-	}
-
-
-
-	dbg_msg("updater", "Starting download, got %lu file remove jobs and download jobs from %lu repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size());
-	m_State = DOWNLOADING;
-
-	const char *aLastFile;
-	aLastFile = "";
-
-	// remove files
-	for(std::vector<string>::iterator it = m_FileRemoveJobs.begin(); it != m_FileRemoveJobs.end(); ++it)
-	{
-		m_pStorage->RemoveBinaryFile(it->c_str());
-	}
-
-	// fetch all download files
-	for(map<string, map<string, string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
-	{
-		for(map<string, string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
-		{
-			FetchFile(it->first.c_str(), file->first.c_str(), file->second.c_str());
-			aLastFile = file->first.c_str();
-		}
-	}
-
-	if(m_ClientUpdate)
-	{
-		FetchExecutable(PLAT_CLIENT_DOWN, "AllTheHaxx.tmp");
-		aLastFile = "AllTheHaxx.tmp";
-	}
-
-	str_copy(m_aLastFile, aLastFile, sizeof(m_aLastFile));
-
-	if(g_Config.m_Debug)
-		dbg_msg("updater/debug", "last file is '%s'", m_aLastFile);
-}
-
-void CUpdater::CommitUpdate()
-{
-	CALLSTACK_ADD();
-
-	for(map<std::string, map<std::string, std::string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
-		for(map<std::string, std::string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
-		{
-			string destPath;
-			if(file->second.c_str()[str_length(file->second.c_str())-1] == '/' ||
-					file->second.c_str()[str_length(file->second.c_str())-1] == '\\')
-				destPath = string(file->second + file->first).c_str(); // append the filename to the dest folder path
-			else
-				destPath = file->second; // the full path is already given
-			MoveFile(destPath.c_str());
-		}
-
-	if(m_ClientUpdate)
-		ReplaceClient();
-	if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
-		m_State = NEED_RESTART;
-	else
-	{
-		if(!m_IsWinXP)
-			m_pClient->Restart();
-		else
-			WinXpRestart();
-	}
 }
 
 void CUpdater::WinXpRestart()

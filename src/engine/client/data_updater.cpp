@@ -48,7 +48,7 @@ void CGitHubAPI::CheckVersion()
 //	}
 
 	dbg_msg("github", "refreshing version info");
-	m_State = STATE_GETTING_MANIFEST;
+	m_State = STATE_REFRESHING;
 
 	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::UpdateCheckerThread);
 	if(!Thread.StartDetached(this))
@@ -58,7 +58,7 @@ void CGitHubAPI::CheckVersion()
 void CGitHubAPI::DoUpdate()
 {
 	dbg_msg("github", "performing data update");
-	m_State = STATE_PARSING_UPDATE;
+	m_State = STATE_COMPARING;
 
 	THREAD_SMART<CGitHubAPI> Thread(CGitHubAPI::CompareThread);
 	if(!Thread.StartDetached(this))

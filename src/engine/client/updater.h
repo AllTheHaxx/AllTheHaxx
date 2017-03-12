@@ -49,15 +49,12 @@ class CUpdater : public IUpdater
 
 	bool m_IsWinXP;
 
-	int m_State;
 	char m_Status[256];
 	int m_Percent;
 	char m_aLastFile[256];
 	char m_aError[256];
 
 	bool m_ClientUpdate;
-
-	bool m_CheckOnly;
 
 //	char m_aLatestVersion[10];
 	char m_aNews[NEWS_SIZE];
@@ -71,8 +68,8 @@ class CUpdater : public IUpdater
 	void MoveFile(const char *pFile);
 
 	void ParseUpdate();
-	void PerformUpdate();
-	void CommitUpdate();
+	void DownloadUpdate();
+	void InstallUpdate();
 
 	void ReplaceClient();
 
@@ -85,13 +82,13 @@ public:
 	const char *GetNews() const { return m_aNews; }
 	const char *GetFailedFile() const { return m_aError; }
 
-	int GetCurrentState() const { return m_State; };
 	char *GetCurrentFile() { return m_Status; };
 	int GetCurrentPercent() const { return m_Percent; };
 
-	virtual void InitiateUpdate(bool CheckOnly = false, bool ForceRefresh = false);
+	virtual void CheckForUpdates(bool ForceRefresh = false);
+	virtual void PerformUpdate();
 	void Init();
-	virtual void Update();
+	virtual void Tick();
 	void WinXpRestart();
 };
 
