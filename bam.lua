@@ -41,7 +41,6 @@ config:Add(OptString("websockets", false))
 config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
-config:Add(OptString("protect", false))
 config:Finalize("config.lua")
 
 -- data compiler
@@ -246,10 +245,6 @@ function build(settings)
 		--settings.cc.includes:Add("src/engine/external/luabridge")
 	end
 
-	if config.protect.value then
-		settings.cc.defines:Add("CONF_PROTECT")
-	end
-
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
@@ -426,9 +421,6 @@ function build(settings)
 		server_osxlaunch = Compile(launcher_settings, "src/osxlaunch/server.m")
 	end
 
-	-- TODO: these should only be linked for the tools
-	settings.link.libs:Add("ssl")
-	settings.link.libs:Add("crypto")
 
 	tools = {}
 	for i,v in ipairs(tools_src) do

@@ -59,7 +59,6 @@ class CUpdater : public IUpdater
 
 	char m_aLatestVersion[10];
 	char m_aNews[NEWS_SIZE];
-	char m_aProtectHashFile[64];
 
 	std::vector<std::string> m_FileRemoveJobs;
 	std::map<std::string, std::map<std::string, std::string> > m_FileDownloadJobs; // source - dlpath, dest
