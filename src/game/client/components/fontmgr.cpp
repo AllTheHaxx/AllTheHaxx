@@ -66,6 +66,9 @@ bool CFontMgr::ActivateFont(int ListIndex)
 
 bool CFontMgr::InitFont(CFontFile *f)
 {
+	if(!f)
+		return false;
+
 	if(g_Config.m_Debug)
 		dbg_msg("fontmgr/debug", "loading font %p '%s' into memory", f, f->m_Name.c_str());
 
@@ -111,6 +114,9 @@ bool CFontMgr::InitFont(CFontFile *f)
 
 bool CFontMgr::InitFont_impl(CFontFile *f, int Type, const char *pTypeStr)
 {
+	if(!f)
+		return false;
+
 	char aPath[512];
 	mem_zerob(aPath);
 	if(str_length(pTypeStr) > 2 || pTypeStr[0] == '-' || pTypeStr[0] == '\0')
