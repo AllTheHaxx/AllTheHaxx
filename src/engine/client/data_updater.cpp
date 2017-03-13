@@ -278,7 +278,7 @@ const std::string CGitHubAPI::SimpleGET(const char *pUrl)
 	}
 	else
 	{
-		dbg_msg("github/debug", "'%s' -> %lu bytes", pUrl, Result.length());
+		dbg_msg("github/debug", "'%s' -> %lu bytes", pUrl, (unsigned long)Result.length());
 	}
 	return Result;
 }

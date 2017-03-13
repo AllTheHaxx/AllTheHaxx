@@ -342,7 +342,7 @@ void CUpdater::DownloadUpdate()
 	}
 
 	// start downloading
-	dbg_msg("updater", "Starting download, got %lu file remove jobs and %lu download jobs from %lu repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size(), m_FileDownloadJobs.size());
+	dbg_msg("updater", "Starting download, got %lu file remove jobs and %lu download jobs from %lu repos", (unsigned long)m_FileRemoveJobs.size(), (unsigned long)m_FileDownloadJobs.size(), (unsigned long)m_FileDownloadJobs.size());
 	SetState(STATE_DOWNLOADING);
 
 	const char *pLastFile;
