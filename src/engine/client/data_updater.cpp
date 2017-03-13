@@ -161,7 +161,6 @@ void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 	}
 	else
 	{
-		pSelf->m_State = STATE_DONE;
 		int NumDownload = (int)pSelf->m_DownloadJobs.size();
 		int NumRename = (int)pSelf->m_RenameJobs.size();
 		int NumRemove = (int)pSelf->m_RemoveJobs.size();
@@ -182,6 +181,7 @@ void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 				dbg_msg("github", "JOBS:RM:%03i> '%s'", i, pSelf->m_RemoveJobs[i].c_str());
 		}
 
+		pSelf->m_State = STATE_DONE;
 	}
 }
 

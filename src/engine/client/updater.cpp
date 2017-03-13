@@ -11,7 +11,7 @@
 
 #include "updater.h"
 
-#define UPDATE_MANIFEST "update30.json"
+#define UPDATE_MANIFEST "update22.json"
 
 using std::string;
 using std::map;
@@ -324,14 +324,19 @@ void CUpdater::DownloadUpdate()
 	// merge our lists with the ones from github
 	{
 		// download jobs
-		for(std::vector<std::string>::const_iterator it = m_GitHubAPI.GetDownloadJobs().begin(); it != m_GitHubAPI.GetDownloadJobs().end(); it++)
 		{
-			std::string source(string("AllTheHaxx") + "/" + string(m_GitHubAPI.GetLatestVersionTree()));
 			std::map<string, string> e;
-//			e[*it] = string("./");
-			e[*it] = string("");
+			std::string source(string("AllTheHaxx") + "/" + string(m_GitHubAPI.GetLatestVersionTree()));
+			for(std::vector<std::string>::const_iterator it = m_GitHubAPI.GetDownloadJobs().begin(); it != m_GitHubAPI.GetDownloadJobs().end(); it++)
+			{
+//				e[*it] = string("./");
+				e[*it] = string();
 
-			// store the entry
+				// store the entry
+
+				dbg_msg("updater/DEBUG", "merging '%s' -> '%s'", source.c_str(), it->c_str());
+			}
+			dbg_msg("updater/DEBUG", "adding map with %lu entries to the download jobs", (unsigned long)e.size());
 			m_FileDownloadJobs[source] = e;
 		}
 
@@ -359,6 +364,7 @@ void CUpdater::DownloadUpdate()
 	{
 		for(map<string, string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
+			dbg_msg("updater/DEBUG", "fetching '%s' -> '%s' -> '%s'", it->first.c_str(), file->first.c_str(), file->second.c_str());
 			FetchFile(it->first.c_str(), file->first.c_str(), file->second.c_str());
 			pLastFile = file->first.c_str();
 		}
@@ -388,19 +394,21 @@ void CUpdater::InstallUpdate()
 		for(map<std::string, std::string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
 			string destPath;
-			if(file->second.c_str()[str_length(file->second.c_str())-1] == '/' ||
-			   file->second.c_str()[str_length(file->second.c_str())-1] == '\\')
+			if(str_length(file->second.c_str()) == 0 ||
+					file->second.c_str()[str_length(file->second.c_str())-1] == '/' ||
+					file->second.c_str()[str_length(file->second.c_str())-1] == '\\')
 				destPath = string(file->second + file->first).c_str(); // append the filename to the dest folder path
 			else
 				destPath = file->second; // the full path is already given
 			MoveFile(destPath.c_str());
+			dbg_msg("updater", "installing '%s'", destPath.c_str());
 		}
 
 	// do the move jobs from github
 	for(std::vector<std::pair<std::string, std::string> >::const_iterator it = m_GitHubAPI.GetRenameJobs().begin(); it != m_GitHubAPI.GetRenameJobs().end(); it++)
 	{
 		m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
-		dbg_msg("update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
+		dbg_msg("data-update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
 	}
 
 
