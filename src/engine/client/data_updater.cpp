@@ -19,7 +19,7 @@ CGitHubAPI::CGitHubAPI()
 	if((m_pHandle = curl_easy_init()) == NULL)
 	{
 		dbg_msg("github", "failed to create curl easy handle");
-		m_State = STATE_ERROR;
+		SetError(ERROR_INIT);
 	}
 	else
 		m_State = STATE_CLEAN;
@@ -58,7 +58,7 @@ void CGitHubAPI::CheckVersion()
 	if(!Thread.StartDetached(this))
 	{
 		dbg_msg("github", "ERROR: failed to start UpdateChecker-thread");
-		m_State = STATE_ERROR;
+		SetError(ERROR_CHECK);
 	}
 }
 
@@ -71,7 +71,7 @@ void CGitHubAPI::DoUpdate()
 	if(!Thread.StartDetached(this))
 	{
 		dbg_msg("github", "ERROR: failed to start Compare-thread");
-		m_State = STATE_ERROR;
+		SetError(ERROR_UPDATE);
 	}
 }
 
@@ -86,7 +86,7 @@ void CGitHubAPI::UpdateCheckerThread(CGitHubAPI *pSelf)
 	if(Result.empty() || Result.length() == 0)
 	{
 		dbg_msg("github", "ERROR: failed to download version info");
-		pSelf->m_State = STATE_ERROR;
+		pSelf->SetError(ERROR_CHECK);
 		return;
 	}
 
@@ -96,7 +96,7 @@ void CGitHubAPI::UpdateCheckerThread(CGitHubAPI *pSelf)
 		if(str_length(pLatestVersion) == 0)
 		{
 			dbg_msg("github", "ERROR: failed to parse out the latest version");
-			pSelf->m_State = STATE_ERROR;
+			pSelf->SetError(ERROR_CHECK);
 			return;
 		}
 		else
@@ -139,7 +139,7 @@ void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 	if(str_comp(pSelf->m_aLatestVersion, "0") == 0)
 	{
 		dbg_msg("github", "WTF: compare thread started but got no version info?!");
-		pSelf->m_State = STATE_ERROR;
+		pSelf->SetError(ERROR_UPDATE);
 		return;
 	}
 
@@ -150,14 +150,14 @@ void CGitHubAPI::CompareThread(CGitHubAPI *pSelf)
 	if(Result.empty() || Result.length() == 0)
 	{
 		dbg_msg("github/compare", "ERROR: result empty");
-		pSelf->m_State = STATE_ERROR;
+		pSelf->SetError(ERROR_UPDATE);
 		return;
 	}
 
 	if(!pSelf->ParseCompare(Result.c_str()))
 	{
-		pSelf->m_State = STATE_ERROR;
 		dbg_msg("github/compare", "ERROR: parsing failed");
+		pSelf->SetError(ERROR_UPDATE);
 	}
 	else
 	{

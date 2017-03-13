@@ -1417,7 +1417,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "Installing '%s'", Updater()->GetCurrentFile());
 		else if(State == IUpdater::STATE_FAIL)
 		{
-			str_format(aBuf, sizeof(aBuf), "Updater: %s failed. Download manually?", Updater()->GetFailedFile());
+			str_format(aBuf, sizeof(aBuf), "Updater: %s failed.", Updater()->GetWhatFailed());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::STATE_NEED_RESTART)

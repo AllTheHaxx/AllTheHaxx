@@ -53,7 +53,7 @@ void CUpdater::Tick()
 	// check for errors
 	if(m_GitHubAPI.State() == CGitHubAPI::STATE_ERROR && State() != STATE_FAIL)
 	{
-		str_copyb(m_aError, "github-job");
+		str_copyb(m_aError, m_GitHubAPI.GetWhatFailed());
 		SetState(STATE_FAIL);
 	}
 
@@ -393,13 +393,13 @@ void CUpdater::InstallUpdate()
 				destPath = string(file->second + file->first).c_str(); // append the filename to the dest folder path
 			else
 				destPath = file->second; // the full path is already given
-			//XXX MoveFile(destPath.c_str());
+			MoveFile(destPath.c_str());
 		}
 
 	// do the move jobs from github
 	for(std::vector<std::pair<std::string, std::string> >::const_iterator it = m_GitHubAPI.GetRenameJobs().begin(); it != m_GitHubAPI.GetRenameJobs().end(); it++)
 	{
-		//XXX m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
+		m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
 		dbg_msg("update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
 	}
 

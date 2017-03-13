@@ -82,7 +82,7 @@ public:
 
 	const char *GetLatestVersion() const { return m_GitHubAPI.GetLatestVersion(); }
 	const char *GetNews() const { return m_aNews; }
-	const char *GetFailedFile() const { return m_aError; }
+	const char *GetWhatFailed() const { return m_aError; }
 
 	char *GetCurrentFile() { return m_Status; }
 	int GetCurrentPercent() const

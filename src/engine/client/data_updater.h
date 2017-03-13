@@ -21,11 +21,20 @@ public:
 		STATE_ERROR, // uh-oh, no gud
 	};
 
+	enum
+	{
+		ERROR_NONE = 0,
+		ERROR_INIT,
+		ERROR_CHECK,
+		ERROR_UPDATE
+	};
+
 
 private:
 	CURL *m_pHandle;
 
 	int m_State;
+	int m_Error;
 	char m_aLatestVersion[10];
 	char m_aLatestVersionTree[40+1];
 	std::vector<std::string> m_DownloadJobs; // relative path of the file (e.g. "data/somedir/somefile.txt")
@@ -39,6 +48,18 @@ public:
 	~CGitHubAPI();
 
 	int State() const { return m_State; }
+	int GetErrorCode() const { return m_Error; }
+	const char *GetWhatFailed() const
+	{
+		switch (m_Error)
+		{
+			case ERROR_NONE: return "Nothing";
+			case ERROR_INIT: return "Init";
+			case ERROR_CHECK: return "Update Check";
+			case ERROR_UPDATE: return "Data Update";
+		}
+		return "unknown GH-thing";
+	}
 	bool Done() const { return m_State == STATE_DONE; }
 	float GetProgress() const { return m_Progress; }
 
@@ -53,6 +74,12 @@ public:
 
 
 private:
+	void SetError(int Error)
+	{
+		m_State = STATE_ERROR;
+		m_Error = Error;
+	}
+
 	const std::string SimpleGET(const char *pURL);
 //	static void CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *userdata);
 
