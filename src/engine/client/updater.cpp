@@ -447,7 +447,7 @@ void CUpdater::PerformUpdate()
 		return;
 	}
 
-	dbg_msg("updater", "Starting download, got %lu file remove jobs and download jobs from %lu repos", m_FileRemoveJobs.size(), m_FileDownloadJobs.size());
+	dbg_msg("updater", "Starting download, got %i file remove jobs and download jobs from %i repos", NumFileRemoveJobs(), NumFileDownloadRepos());
 	m_State = DOWNLOADING;
 
 	const char *aLastFile;

@@ -57,7 +57,12 @@ public:
 	int GetMsgType(const char *msg);
 
 	void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
-	void SendRaw(const char *fmt, ...);
+	void SendRaw(const char *fmt, ...)
+	#if defined(DO_NOT_COMPILE_THIS_CODE) && (defined(__GNUC__) || defined(__clang__))
+	__attribute__ ((format (printf, 1, 2))) /* Warn if you specify wrong arguments in printf format string */
+	#endif
+	;
+
 	void SendGetServer(const char *to);
 	void SendVersion(const char *to);
 
