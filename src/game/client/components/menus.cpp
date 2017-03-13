@@ -2490,7 +2490,7 @@ void CMenus::OnRender()
 	else
 		UseMouseButtons(true);
 
-	if(!Client()->MapLoaded())
+	if(g_Config.m_ClMenuBackground && !Client()->MapLoaded())
 	{
 		Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
 
@@ -2638,12 +2638,15 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsEnd();
 
 	// render border fade
-	Graphics()->TextureSet(gs_TextureBlob);
-	Graphics()->QuadsBegin();
-		Graphics()->SetColor(1,1,1,1);
-		QuadItem = IGraphics::CQuadItem(-100, -100, sw+200, sh+200);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	if(gs_TextureBlob > 0)
+	{
+		Graphics()->TextureSet(gs_TextureBlob);
+		Graphics()->QuadsBegin();
+			Graphics()->SetColor(1, 1, 1, 1);
+			QuadItem = IGraphics::CQuadItem(-100, -100, sw + 200, sh + 200);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+	}
 
 	// EVENT CALL
 	LUA_FIRE_EVENT("OnRenderBackground");
