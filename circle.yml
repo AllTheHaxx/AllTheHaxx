@@ -1,7 +1,7 @@
 dependencies:
   pre:
     - |
-        sudo add-apt-repository 'deb-src http://us-east-1.ec2.archive.ubuntu.com/ubuntu precise main restricted universe multiverse'
+        sudo add-apt-repository 'deb http://us-east-1.ec2.archive.ubuntu.com/ubuntu precise main restricted universe multiverse'
         sudo add-apt-repository -y ppa:zoogie/sdl2-snapshots
         sudo apt-get update
         sudo apt-get build-dep teeworlds
@@ -58,16 +58,15 @@ test:
         fi;
         
         ~/bam/bam client_release;
-        ~/bam/bam tools_release;
-        
+        RETVAL=$?;
+        if [ ! $RETVAL -eq 0 ]; then
+          exit $RETVAL
+        fi;
         mv "./AllTheHaxx"$EXT $CIRCLE_ARTIFACTS/$DST;
-        mv "./slc_unpack"$EXT $CIRCLE_ARTIFACTS/$DST;
-        
+
         if [ ! $CIRCLE_NODE_INDEX -eq 0 ]; then
           zip -q -T -X DLLs . *.dll;
           mv DLLs.zip $CIRCLE_ARTIFACTS/$DST;
         fi
       :
         parallel: true
-
-

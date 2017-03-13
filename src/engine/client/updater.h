@@ -61,6 +61,8 @@ class CUpdater : public IUpdater
 
 	std::vector<std::string> m_FileRemoveJobs;
 	std::map<std::string, std::map<std::string, std::string> > m_FileDownloadJobs; // source - dlpath, dest
+	int NumFileRemoveJobs() const { return (int)m_FileRemoveJobs.size(); }
+	int NumFileDownloadRepos() const { return (int)m_FileDownloadJobs.size(); }
 
 	void AddFileRemoveJob(const char *pFile);
 	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0); // files from repos

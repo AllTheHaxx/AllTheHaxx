@@ -421,9 +421,6 @@ function build(settings)
 		server_osxlaunch = Compile(launcher_settings, "src/osxlaunch/server.m")
 	end
 
-	-- TODO: these should only be linked for the tools
-	settings.link.libs:Add("ssl")
-	settings.link.libs:Add("crypto")
 
 	tools = {}
 	for i,v in ipairs(tools_src) do

@@ -355,16 +355,16 @@ static void logger_win_console(const char *line)
 			if(character == 0)
 				break;
 
-			dbg_assert(len < _MAX_LENGTH_ERROR, "str too short for error");
+			dbg_assert_legacy(len < _MAX_LENGTH_ERROR, "str too short for error");
 			wline[len++] = character;
 			read++;
 		}
 	}
 
 	// Terminate the line
-	dbg_assert(len < _MAX_LENGTH_ERROR, "str too short for \\r");
+	dbg_assert_legacy(len < _MAX_LENGTH_ERROR, "str too short for \\r");
 	wline[len++] = '\r';
-	dbg_assert(len < _MAX_LENGTH_ERROR, "str too short for \\n");
+	dbg_assert_legacy(len < _MAX_LENGTH_ERROR, "str too short for \\n");
 	wline[len++] = '\n';
 
 	// Ignore any error that might occur
@@ -1740,7 +1740,7 @@ int net_init()
 #if defined(CONF_FAMILY_WINDOWS)
 	WSADATA wsaData;
 	int err = WSAStartup(MAKEWORD(1, 1), &wsaData);
-	dbg_assert(err == 0, "network initialization failed.");
+	dbg_assert_legacy(err == 0, "network initialization failed.");
 	return err==0?0:1;
 #endif
 
@@ -2942,7 +2942,7 @@ void secure_random_fill(void *bytes, unsigned length)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, bytes))
 	{
-		dbg_msg("secure", "CryptGenRandom failed, last_error=%d", GetLastError());
+		dbg_msg("secure", "CryptGenRandom failed, last_error=%lu", GetLastError());
 		dbg_break();
 	}
 #else

@@ -1261,7 +1261,7 @@ void CIRC::SendServer(const char *to, const char *Token)
 
 void CIRC::SendGetServer(const char *to)
 {
-	str_format(m_CmdToken, sizeof(m_CmdToken), "%lli", time_get());
+	str_format(m_CmdToken, sizeof(m_CmdToken), "%i", rand());
 	SendRaw("PRIVMSG %s :\1GETTWSERVER %s\1", to, m_CmdToken);
 }
 

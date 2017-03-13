@@ -337,7 +337,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 
 	CUIRect Button, Button2;
 	static array<CListboxItem> Items;
-	static char aEditBoxBuffer[256][256] = { 0 };
+	static char aEditBoxBuffer[256][256] = { {0} };
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	MainView.HSplitTop(10.0f, 0, &MainView);

@@ -24,7 +24,6 @@ set(SOURCE_FILES
     src/osxlaunch/client.h
     src/tools/map_resave.cpp
     src/tools/tileset_borderfix.cpp
-    src/tools/cdns.cpp
     src/tools/tileset_borderrem.cpp
     src/tools/fake_server.cpp
     src/tools/config_store.cpp

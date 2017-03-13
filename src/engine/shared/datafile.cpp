@@ -4,10 +4,10 @@
 #include <base/system.h>
 #include <engine/storage.h>
 #include "datafile.h"
+#include "config.h"
 #include <zlib.h>
 #include <base/system++/system++.h>
 
-static const int DEBUG=0;
 
 struct CDatafileItemType
 {
@@ -167,7 +167,7 @@ bool CDataFileReader::Open(class IStorageTW *pStorage, const char *pFilename, in
 	swap_endian(m_pDataFile->m_pData, sizeof(int), min(static_cast<unsigned>(Header.m_Swaplen), Size) / sizeof(int));
 #endif
 
-	//if(DEBUG)
+	if(g_Config.m_Debug)
 	{
 		dbg_msg("datafile", "allocsize=%d", AllocSize);
 		dbg_msg("datafile", "readsize=%d", ReadSize);
@@ -187,42 +187,6 @@ bool CDataFileReader::Open(class IStorageTW *pStorage, const char *pFilename, in
 	m_pDataFile->m_Info.m_pDataStart = m_pDataFile->m_Info.m_pItemStart + m_pDataFile->m_Header.m_ItemSize;
 
 	dbg_msg("datafile", "loading done. datafile='%s'", pFilename);
-
-	if(DEBUG)
-	{
-		/*
-		for(int i = 0; i < m_pDataFile->data.num_raw_data; i++)
-		{
-			void *p = datafile_get_data(df, i);
-			dbg_msg("datafile", "%d %d", (int)((char*)p - (char*)(&m_pDataFile->data)), size);
-		}
-
-		for(int i = 0; i < datafile_num_items(df); i++)
-		{
-			int type, id;
-			void *data = datafile_get_item(df, i, &type, &id);
-			dbg_msg("map", "\t%d: type=%x id=%x p=%p offset=%d", i, type, id, data, m_pDataFile->info.item_offsets[i]);
-			int *idata = (int*)data;
-			for(int k = 0; k < 3; k++)
-				dbg_msg("datafile", "\t\t%d=%d (%x)", k, idata[k], idata[k]);
-		}
-
-		for(int i = 0; i < m_pDataFile->data.num_m_aItemTypes; i++)
-		{
-			dbg_msg("map", "\t%d: type=%x start=%d num=%d", i,
-				m_pDataFile->info.m_aItemTypes[i].type,
-				m_pDataFile->info.m_aItemTypes[i].start,
-				m_pDataFile->info.m_aItemTypes[i].num);
-			for(int k = 0; k < m_pDataFile->info.m_aItemTypes[i].num; k++)
-			{
-				int type, id;
-				datafile_get_item(df, m_pDataFile->info.m_aItemTypes[i].start+k, &type, &id);
-				if(type != m_pDataFile->info.m_aItemTypes[i].type)
-					dbg_msg("map", "\tERROR");
-			}
-		}
-		*/
-	}
 
 	return true;
 }
@@ -300,7 +264,8 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 			unsigned long UncompressedSize = m_pDataFile->m_Info.m_pDataSizes[Index];
 			unsigned long s;
 
-			dbg_msg("datafile", "loading data index=%d size=%d uncompressed=%d", Index, DataSize, (int)UncompressedSize);
+			if(g_Config.m_Debug)
+				dbg_msg("datafile", "loading data index=%d size=%d uncompressed=%d", Index, DataSize, (int)UncompressedSize);
 			m_pDataFile->m_ppDataPtrs[Index] = (char *)mem_alloc(UncompressedSize, 1);
 
 			// read the compressed data
@@ -320,7 +285,8 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 		else
 		{
 			// load the data
-			dbg_msg("datafile", "loading data index=%d size=%d", Index, DataSize);
+			if(g_Config.m_Debug)
+				dbg_msg("datafile", "loading data index=%d size=%d", Index, DataSize);
 			m_pDataFile->m_ppDataPtrs[Index] = (char *)mem_alloc(DataSize, 1);
 			io_seek(m_pDataFile->m_File, m_pDataFile->m_DataStartOffset+m_pDataFile->m_Info.m_pDataOffsets[Index], IOSEEK_START);
 			io_read(m_pDataFile->m_File, m_pDataFile->m_ppDataPtrs[Index], DataSize);
@@ -571,14 +537,10 @@ int CDataFileWriter::Finish()
 	CDatafileHeader Header;
 
 	// we should now write this file!
-	if(DEBUG)
-		dbg_msg("datafile", "writing");
 
 	// calculate sizes
 	for(int i = 0; i < m_NumItems; i++)
 	{
-		if(DEBUG)
-			dbg_msg("datafile", "item=%d size=%d (%lu)", i, m_pItems[i].m_Size, m_pItems[i].m_Size+sizeof(CDatafileItem));
 		ItemSize += m_pItems[i].m_Size + sizeof(CDatafileItem);
 	}
 
@@ -595,8 +557,6 @@ int CDataFileWriter::Finish()
 
 	(void)SwapSize;
 
-	if(DEBUG)
-		dbg_msg("datafile", "num_m_aItemTypes=%d TypesSize=%d m_aItemsize=%d DataSize=%d", m_NumItemTypes, TypesSize, ItemSize, DataSize);
 
 	// construct Header
 	{
@@ -614,8 +574,6 @@ int CDataFileWriter::Finish()
 		Header.m_DataSize = DataSize;
 
 		// write Header
-		if(DEBUG)
-			dbg_msg("datafile", "HeaderSize=%d", (int)sizeof(Header));
 #if defined(CONF_ARCH_ENDIAN_BIG)
 		swap_endian(&Header, sizeof(int), sizeof(Header)/sizeof(int));
 #endif
@@ -632,8 +590,6 @@ int CDataFileWriter::Finish()
 			Info.m_Type = i;
 			Info.m_Start = Count;
 			Info.m_Num = m_pItemTypes[i].m_Num;
-			if(DEBUG)
-				dbg_msg("datafile", "writing type=%x start=%d num=%d", Info.m_Type, Info.m_Start, Info.m_Num);
 #if defined(CONF_ARCH_ENDIAN_BIG)
 			swap_endian(&Info, sizeof(int), sizeof(CDatafileItemType)/sizeof(int));
 #endif
@@ -651,8 +607,6 @@ int CDataFileWriter::Finish()
 			int k = m_pItemTypes[i].m_First;
 			while(k != -1)
 			{
-				if(DEBUG)
-					dbg_msg("datafile", "writing item offset num=%d offset=%d", k, Offset);
 				int Temp = Offset;
 #if defined(CONF_ARCH_ENDIAN_BIG)
 				swap_endian(&Temp, sizeof(int), sizeof(Temp)/sizeof(int));
@@ -669,8 +623,6 @@ int CDataFileWriter::Finish()
 	// write data offsets
 	for(int i = 0, Offset = 0; i < m_NumDatas; i++)
 	{
-		if(DEBUG)
-			dbg_msg("datafile", "writing data offset num=%d offset=%d", i, Offset);
 		int Temp = Offset;
 #if defined(CONF_ARCH_ENDIAN_BIG)
 		swap_endian(&Temp, sizeof(int), sizeof(Temp)/sizeof(int));
@@ -682,8 +634,6 @@ int CDataFileWriter::Finish()
 	// write data uncompressed sizes
 	for(int i = 0; i < m_NumDatas; i++)
 	{
-		if(DEBUG)
-			dbg_msg("datafile", "writing data uncompressed size num=%d size=%d", i, m_pDatas[i].m_UncompressedSize);
 		int UncompressedSize = m_pDatas[i].m_UncompressedSize;
 #if defined(CONF_ARCH_ENDIAN_BIG)
 		swap_endian(&UncompressedSize, sizeof(int), sizeof(UncompressedSize)/sizeof(int));
@@ -703,8 +653,6 @@ int CDataFileWriter::Finish()
 				CDatafileItem Item;
 				Item.m_TypeAndID = (i<<16)|m_pItems[k].m_ID;
 				Item.m_Size = m_pItems[k].m_Size;
-				if(DEBUG)
-					dbg_msg("datafile", "writing item type=%x idx=%d id=%d size=%d", i, k, m_pItems[k].m_ID, m_pItems[k].m_Size);
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 				swap_endian(&Item, sizeof(int), sizeof(Item)/sizeof(int));
@@ -722,8 +670,6 @@ int CDataFileWriter::Finish()
 	// write data
 	for(int i = 0; i < m_NumDatas; i++)
 	{
-		if(DEBUG)
-			dbg_msg("datafile", "writing data id=%d size=%d", i, m_pDatas[i].m_CompressedSize);
 		io_write(m_File, m_pDatas[i].m_pCompressedData, m_pDatas[i].m_CompressedSize);
 	}
 
@@ -736,7 +682,5 @@ int CDataFileWriter::Finish()
 	io_close(m_File);
 	m_File = 0;
 
-	if(DEBUG)
-		dbg_msg("datafile", "done");
 	return 0;
 }

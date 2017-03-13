@@ -220,8 +220,8 @@ class CTextRender : public IEngineTextRender
 			MaxW = (MaxW>>6)+2+OutlineThickness*2;
 			MaxH = (MaxH>>6)+2+OutlineThickness*2;
 
-			for(pSizeData->m_CharMaxWidth = 1; pSizeData->m_CharMaxWidth < MaxW; pSizeData->m_CharMaxWidth <<= 1);
-			for(pSizeData->m_CharMaxHeight = 1; pSizeData->m_CharMaxHeight < MaxH; pSizeData->m_CharMaxHeight <<= 1);
+			for(pSizeData->m_CharMaxWidth = 1; pSizeData->m_CharMaxWidth < (unsigned int)MaxW; pSizeData->m_CharMaxWidth <<= 1);
+			for(pSizeData->m_CharMaxHeight = 1; pSizeData->m_CharMaxHeight < (unsigned int)MaxH; pSizeData->m_CharMaxHeight <<= 1);
 		}
 
 		//dbg_msg("pFont", "init size %d, texture size %d %d", pFont->sizes[index].font_size, w, h);
@@ -299,7 +299,7 @@ class CTextRender : public IEngineTextRender
 		unsigned int SlotSize = SlotW*SlotH;
 		int x = 1;
 		int y = 1;
-		unsigned int px, py;
+		int px, py;
 
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, pSizeData->m_FontSize);
 
@@ -326,14 +326,14 @@ class CTextRender : public IEngineTextRender
 
 		if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
 		{
-			for(py = 0; py < pBitmap->rows; py++) // ignore_convention
-				for(px = 0; px < pBitmap->width; px++) // ignore_convention
+			for(py = 0; py < (int)pBitmap->rows; py++) // ignore_convention
+				for(px = 0; px < (int)pBitmap->width; px++) // ignore_convention
 					ms_aGlyphData[(py+y)*SlotW+px+x] = pBitmap->buffer[py*pBitmap->pitch+px]; // ignore_convention
 		}
 		else if(pBitmap->pixel_mode == FT_PIXEL_MODE_MONO) // ignore_convention
 		{
-			for(py = 0; py < pBitmap->rows; py++) // ignore_convention
-				for(px = 0; px < pBitmap->width; px++) // ignore_convention
+			for(py = 0; py < (int)pBitmap->rows; py++) // ignore_convention
+				for(px = 0; px < (int)pBitmap->width; px++) // ignore_convention
 				{
 					if(pBitmap->buffer[py*pBitmap->pitch+px/8]&(1<<(7-(px%8)))) // ignore_convention
 						ms_aGlyphData[(py+y)*SlotW+px+x] = 255;
