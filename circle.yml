@@ -64,13 +64,6 @@ test:
         fi;
         mv "./AllTheHaxx"$EXT $CIRCLE_ARTIFACTS/$DST;
 
-        ~/bam/bam tools_release;
-        RETVAL=$?;
-        if [ ! $RETVAL -eq 0 ]; then
-          exit $RETVAL
-        fi;
-        mv "./slc_unpack"$EXT $CIRCLE_ARTIFACTS/$DST;
-        
         if [ ! $CIRCLE_NODE_INDEX -eq 0 ]; then
           zip -q -T -X DLLs . *.dll;
           mv DLLs.zip $CIRCLE_ARTIFACTS/$DST;
