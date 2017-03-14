@@ -1389,7 +1389,11 @@ void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
 		return;
 
 	if(!m_pMap->Load(pFilename))
+	{
+		dbg_msg("client", "failed to load background map, disabling it");
+		g_Config.m_ClMenuBackground = 0;
 		return;
+	}
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);

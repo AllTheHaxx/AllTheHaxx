@@ -34,12 +34,12 @@ void CCollision::Init(class CLayers *pLayers)
 {
 	if(m_pLayers)
 		m_pLayers->Dest();
-	Dest();
 	if(!m_pLayers || !m_pLayers->GameLayer())
 	{
-		dbg_msg("collision", "init got no map data");
+		dbg_msg("collision", "init got no layer data");
 		return;
 	}
+	Dest();
 	m_NumSwitchers = 0;
 	m_pLayers = pLayers;
 	m_Width = m_pLayers->GameLayer()->m_Width;
@@ -463,6 +463,11 @@ bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos
 bool CCollision::IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1)
 {
 	int pos = GetPureMapIndex(x, y);
+	if(pos < 0)
+	{
+		dbg_msg("collision", "failed to get map index at (%i|%i), is the map correctly loaded?!", x, y);
+		return false;
+	}
 	if(m_pTiles[pos].m_Index == TILE_THROUGH_ALL || (m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_ALL))
 		return true;
 	if(m_pTiles[pos].m_Index == TILE_THROUGH_DIR && (
