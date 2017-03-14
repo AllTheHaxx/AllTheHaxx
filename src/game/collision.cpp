@@ -32,14 +32,8 @@ CCollision::CCollision()
 
 void CCollision::Init(class CLayers *pLayers)
 {
-	if(m_pLayers)
-		m_pLayers->Dest();
+	if(m_pLayers) m_pLayers->Dest();
 	Dest();
-	if(!m_pLayers || !m_pLayers->GameLayer())
-	{
-		dbg_msg("collision", "init got no map data");
-		return;
-	}
 	m_NumSwitchers = 0;
 	m_pLayers = pLayers;
 	m_Width = m_pLayers->GameLayer()->m_Width;
