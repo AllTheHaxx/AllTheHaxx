@@ -122,7 +122,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	CALLSTACK_ADD();
 
 	CUpdater *pSelf = (CUpdater *)pUser;
-	const bool ERROR = pTask->State() == (const int)CFetchTask::STATE_ERROR;
+	const bool IS_ERROR = pTask->State() == (const int)CFetchTask::STATE_ERROR;
 
 	const char *a = 0; // a is full path
 	for(const char *c = pTask->Dest(); *c; c++)
@@ -140,7 +140,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			"|<<< Failed to download news >>>|\n"
 			"News will automatically be refreshed on next client start if available\n"
 			"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
-	if(ERROR)
+	if(IS_ERROR)
 	{
 		if(str_comp(b, "ath-news.txt") == 0) // news are allowed to fail...
 			str_copy(pSelf->m_aNews, pFailedNewsMsg, sizeof(pSelf->m_aNews));
@@ -173,7 +173,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		}
 
 		// read the new news
-		if(!ERROR)
+		if(!IS_ERROR)
 		{
 			f = io_open("update/ath-news.txt", IOFLAG_READ);
 			if(f)
@@ -186,12 +186,12 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			str_append(pSelf->m_aNews, aOldNews, NEWS_SIZE);
 
 		// dig out whether news have been updated
-		if(str_comp(aOldNews, pSelf->m_aNews + (ERROR ? str_length(pFailedNewsMsg) : 0)) != 0)
+		if(str_comp(aOldNews, pSelf->m_aNews + (IS_ERROR ? str_length(pFailedNewsMsg) : 0)) != 0)
 		{
 			g_Config.m_UiPage = CMenus::PAGE_NEWS_ATH;
 
 			// backup the new news file if we got one
-			if(!ERROR)
+			if(!IS_ERROR)
 			{
 				f = pSelf->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aNewsBackupPath, sizeof(aNewsBackupPath));
 				if(f)
