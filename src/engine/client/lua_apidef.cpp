@@ -24,6 +24,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 #if defined(FEATURE_LUA)
 
 	lua_register(L, "print", CLuaBinding::LuaPrintOverride);
+	lua_register(L, "throw", CLuaBinding::LuaThrow); // adds an exception, but doesn't jump out like 'error' does
 	lua_register(L, "Import", CLuaBinding::LuaImport);
 	lua_register(L, "KillScript", CLuaBinding::LuaKillScript);
 	lua_register(L, "Listdir", CLuaBinding::LuaListdir);
