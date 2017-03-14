@@ -2887,12 +2887,12 @@ void CClient::VersionUpdate()
 	}
 }
 
-void CClient::CheckVersionUpdate()
+void CClient::CheckVersionUpdate(bool Force)
 {
 	CALLSTACK_ADD();
 
 	m_VersionInfo.m_State = CVersionInfo::STATE_START;
-	m_Updater.CheckForUpdates(true);
+	m_Updater.CheckForUpdates(Force);
 }
 
 void CClient::RegisterInterfaces()
@@ -2941,7 +2941,7 @@ void CClient::InitInterfaces()
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();
-	m_Updater.CheckForUpdates(); // true makes it be blocking -> safe
+	m_Updater.CheckForUpdates(true); // force update check at startup
 #endif
 
 	m_Friends.Init();

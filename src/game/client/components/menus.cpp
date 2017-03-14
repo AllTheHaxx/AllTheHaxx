@@ -1299,7 +1299,14 @@ static const char *s_apSayings[] = {
 		"Text formatting would be cool",
 		"Do penguins have knees?",
 		"Did you know: You can use CTRL+F in the consoles to search for text",
-		"Did you know: In the consoles, you can mark text to copy it"
+		"Did you know: In the consoles, you can mark text to copy it",
+		"\"I'm in love with my lust, burning angel wings to dust!\"",
+		"\"A square doesn't fit the circle\" ¯\\_(°-^)_/¯",
+		"The cake is a lie!",
+		"Happy tears fade fast, Sad tears tend to last"
+		"No, the cake is not a lie!",
+		"Tell me, Mechanist, is it true?",
+		"Remember: the Weighted Companion Cube cannot talk!"
 };
 
 void CMenus::RenderLoading()

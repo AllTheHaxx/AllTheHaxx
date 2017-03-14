@@ -162,7 +162,7 @@ public:
 	// server info
 	virtual class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo) = 0;
 
-	virtual void CheckVersionUpdate() = 0;
+	virtual void CheckVersionUpdate(bool Force) = 0;
 
 	virtual int GetPredictionTime() = 0;
 

@@ -66,8 +66,7 @@ void CUpdater::Tick()
 			}
 			break;
 
-		case STATE_GETTING_MANIFEST: // will only be applied to actually perform the update
-		case STATE_SYNC_POSTGETTING:
+		case STATE_SYNC_POSTGETTING: // have downloaded the update manifest
 			if(m_GitHubAPI.State() == CGitHubAPI::STATE_DONE)
 			{
 				ParseUpdate();
@@ -87,7 +86,6 @@ void CUpdater::CheckForUpdates(bool ForceRefresh)
 	{
 		SetState(STATE_SYNC_REFRESH);
 		dbg_msg("updater", "refreshing version info");
-//		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		FetchFile("stuffility/master", "ath-news.txt");
 		m_GitHubAPI.CheckVersion();
 	}
@@ -103,6 +101,7 @@ void CUpdater::PerformUpdate()
 	{
 		dbg_msg("updater", "Starting update to version %s!", GetLatestVersion());
 		SetState(STATE_GETTING_MANIFEST);
+		FetchFile("stuffility/master", UPDATE_MANIFEST);
 		m_GitHubAPI.DoUpdate();
 	}
 	else
@@ -206,7 +205,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
-		if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST))
+		if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST) == 0)
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);
 			dbg_msg("updater", "got manifest, waiting for github-compare to finish...");
@@ -230,84 +229,99 @@ void CUpdater::ParseUpdate()
 	dbg_msg("updater", "parsing " UPDATE_MANIFEST);
 
 	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath), IOFLAG_READ, IStorageTW::TYPE_ALL);
-	if(File)
+	const char *pUpdateManifestPath = m_pStorage->GetBinaryPath("update/" UPDATE_MANIFEST, aPath, sizeof aPath);
+	IOHANDLE File = m_pStorage->OpenFile(pUpdateManifestPath, IOFLAG_READ, IStorageTW::TYPE_ALL);
+	if(!File)
 	{
-		char aBuf[4096*4];
-		mem_zero(aBuf, sizeof (aBuf));
-		io_read(File, aBuf, sizeof(aBuf));
-		io_close(File);
+		dbg_msg("updater", "failed to open '%s', skipping the manifest", pUpdateManifestPath);
+		return;
+	}
 
-		json_value &jsonVersions = *json_parse(aBuf, (size_t)str_length(aBuf)); // TODO: free this!
-		if(jsonVersions.type != json_array)
+	char aBuf[4096*4];
+	mem_zero(aBuf, sizeof (aBuf));
+	io_read(File, aBuf, sizeof(aBuf));
+	io_close(File);
+
+	json_value *pJsonVersions = json_parse(aBuf, (size_t)str_length(aBuf));
+	if(!pJsonVersions) // a check here because this part could actually go wrong
+	{
+		dbg_msg("updater/parse", "failed to parse the update manifest '%s' of length %i, skipping it", pUpdateManifestPath, str_length(aBuf));
+		return;
+	}
+
+	json_value &jsonVersions = *pJsonVersions;
+	if(jsonVersions.type != json_array)
+	{
+		dbg_msg("updater/parse", "invalid manifest contents (not an array)");
+		json_value_free(pJsonVersions);
+		return;
+	}
+
+	for(unsigned int i = 0; i < jsonVersions.u.array.length ; i++)
+	{
+		const json_value &jsonCurrent = jsonVersions[i];
+
+		// downgrades no gud
+		if((json_int_t)(jsonCurrent["numeric"]) <= GAME_ATH_VERSION_NUMERIC)
+			continue;
+
+		if(jsonCurrent["remove"].type == json_array)
 		{
-			dbg_msg("updater/parse", "invalid manifest contents (not an array)");
-			return;
+			for(unsigned int j = 0; j < jsonCurrent["remove"].u.array.length; j++)
+				AddFileRemoveJob(jsonCurrent["remove"][j]);
 		}
-
-		for(unsigned int i = 0; i < jsonVersions.u.array.length ; i++)
+		if(jsonCurrent["download"].type == json_array)
 		{
-			const json_value &jsonCurrent = jsonVersions[i];
-
-			// downgrades no gud
-			if((json_int_t)(jsonCurrent["numeric"]) <= GAME_ATH_VERSION_NUMERIC)
-				continue;
-
-			if(jsonCurrent["remove"].type == json_array)
+			for(unsigned int j = 0; j < jsonCurrent["download"].u.array.length; j++)
 			{
-				for(unsigned int j = 0; j < jsonCurrent["remove"].u.array.length; j++)
-					AddFileRemoveJob(jsonCurrent["remove"][j]);
-			}
-			if(jsonCurrent["download"].type == json_array)
-			{
-				for(unsigned int j = 0; j < jsonCurrent["download"].u.array.length; j++)
+				const json_value &jsonRepoBatch = jsonCurrent["download"][j];
+				const char  *pRepoStr = (const char *)jsonRepoBatch["repo"],
+						*pTreeStr = (const char *)jsonRepoBatch["tree"],
+						*pDestStr = (const char *)jsonRepoBatch["dest"];
+
+				const json_value &jsonFilesArray = jsonRepoBatch["files"];
+				if(jsonFilesArray.type == json_array)
 				{
-					const json_value &jsonRepoBatch = jsonCurrent["download"][j];
-					const char  *pRepoStr = (const char *)jsonRepoBatch["repo"],
-							*pTreeStr = (const char *)jsonRepoBatch["tree"],
-							*pDestStr = (const char *)jsonRepoBatch["dest"];
-
-					const json_value &jsonFilesArray = jsonRepoBatch["files"];
-					if(jsonFilesArray.type == json_array)
+					// add the list of files to the entry
+					std::map<string, string> e;
+					std::string source(string(pRepoStr) + "/" + string(pTreeStr));
+					for(unsigned int k = 0; k < jsonFilesArray.u.array.length; k++)
 					{
-						// add the list of files to the entry
-						std::map<string, string> e;
-						std::string source(string(pRepoStr) + "/" + string(pTreeStr));
-						for(unsigned int k = 0; k < jsonFilesArray.u.array.length; k++)
+						const char *pFileStr = jsonFilesArray[k];
+						if(!pFileStr)
 						{
-							const char *pFileStr = jsonFilesArray[k];
-							if(!pFileStr)
-							{
-								dbg_msg("updater/ERROR", "Failed to extract json data :");
-								dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, (void *)pFileStr);
-								continue;
-							}
-							try {
-								#if !defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
-								if(str_comp_nocase(pFileStr + str_length(pFileStr) - 4, ".dll") == 0) // TODO: 64 bit support when time has come
-									continue;
-								#endif
-								std::string FilePath(pFileStr);
-								// only add the elements that are not on the remove list
-								if(std::find(m_FileRemoveJobs.begin(), m_FileRemoveJobs.end(), string(pDestStr)+FilePath) == m_FileRemoveJobs.end())
-									e[FilePath] = string(pDestStr);
-								//dbg_msg("DEBUG|updater", "DOWNLOAD (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
-							} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
+							dbg_msg("updater/ERROR", "Failed to extract json data :");
+							dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, (void *)pFileStr);
+							continue;
 						}
+						try {
+							#if !defined(CONF_FAMILY_WINDOWS) // dll files only exist on windows
+							if(str_comp_nocase(pFileStr + str_length(pFileStr) - 4, ".dll") == 0) // TODO: 64 bit support when time has come
+								continue;
+							#endif
+							std::string FilePath(pFileStr);
+							// only add the elements that are not on the remove list
+							if(std::find(m_FileRemoveJobs.begin(), m_FileRemoveJobs.end(), string(pDestStr)+FilePath) == m_FileRemoveJobs.end())
+								e[FilePath] = string(pDestStr);
+							//dbg_msg("DEBUG|updater", "DOWNLOAD (%i): src='%s', FILE='%s' TO='%s'", j, source.c_str(), file.c_str(), e.find(file)->second.c_str());
+						} catch(std::exception &e) { dbg_msg("updater/ERROR", "exception: %s", e.what()); }
+					}
 
-						// store the entry
-						m_FileDownloadJobs[source] = e;
-					}
-					else
-					{
-						dbg_msg("updater/ERROR", "Failed to extract json data :");
-						dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
-					}
+					// store the entry
+					m_FileDownloadJobs[source] = e;
+				}
+				else
+				{
+					dbg_msg("updater/ERROR", "Failed to extract json data :");
+					dbg_msg("updater/ERROR", "Repo='%s', Tree='%s', Dest='%s'", pRepoStr, pTreeStr, pDestStr);
 				}
 			}
-			// get all previous updates that me missed
 		}
+		// get all previous updates that me missed
 	}
+
+	json_value_free(pJsonVersions);
+
 }
 
 void CUpdater::DownloadUpdate()
@@ -329,13 +343,10 @@ void CUpdater::DownloadUpdate()
 			std::string source(string("AllTheHaxx") + "/" + string(m_GitHubAPI.GetLatestVersionTree()));
 			for(std::vector<std::string>::const_iterator it = m_GitHubAPI.GetDownloadJobs().begin(); it != m_GitHubAPI.GetDownloadJobs().end(); it++)
 			{
-//				e[*it] = string("./");
-				e[*it] = string();
-
-				// store the entry
-
+				e[*it] = string(""); // leaving the destination folder empty will put everything in the right place
 				dbg_msg("updater/DEBUG", "merging '%s' -> '%s'", source.c_str(), it->c_str());
 			}
+			// store the entries
 			dbg_msg("updater/DEBUG", "adding map with %lu entries to the download jobs", (unsigned long)e.size());
 			m_FileDownloadJobs[source] = e;
 		}
@@ -343,17 +354,17 @@ void CUpdater::DownloadUpdate()
 		// remove jobs
 		m_FileRemoveJobs.insert(m_FileRemoveJobs.end(), m_GitHubAPI.GetRemoveJobs().begin(), m_GitHubAPI.GetRemoveJobs().end());
 
-		// move jobs - will be done later on
+		// (move jobs are done later when installing the update)
 	}
 
 	// start downloading
-	dbg_msg("updater", "Starting download, got %lu file remove jobs and %lu download jobs from %lu repos", (unsigned long)m_FileRemoveJobs.size(), (unsigned long)m_FileDownloadJobs.size(), (unsigned long)m_FileDownloadJobs.size());
+	dbg_msg("updater", "Starting download, got %lu file remove jobs and download jobs from %lu repos", (unsigned long)m_FileRemoveJobs.size(), (unsigned long)m_FileDownloadJobs.size());
 	SetState(STATE_DOWNLOADING);
 
 	const char *pLastFile;
 	pLastFile = "";
 
-	// remove files
+	// remove files before downloading anything
 	for(std::vector<string>::iterator it = m_FileRemoveJobs.begin(); it != m_FileRemoveJobs.end(); ++it)
 	{
 		m_pStorage->RemoveBinaryFile(it->c_str());
