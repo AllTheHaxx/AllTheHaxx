@@ -122,7 +122,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	CALLSTACK_ADD();
 
 	CUpdater *pSelf = (CUpdater *)pUser;
-	const bool ERROR = pTask->State() == CFetchTask::STATE_ERROR;
+	const bool ERROR = pTask->State() == (const int)CFetchTask::STATE_ERROR;
 
 	const char *a = 0; // a is full path
 	for(const char *c = pTask->Dest(); *c; c++)
