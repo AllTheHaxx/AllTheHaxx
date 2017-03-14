@@ -219,7 +219,9 @@ int CLuaBinding::LuaThrow(lua_State *L)
 	argcheck(lua_isstring(L, nargs) || lua_isnumber(L, nargs), nargs, "string or number");
 
 	// add the exception
-	int result = CLua::m_pClient->Lua()->HandleException(lua_tostring(L, nargs), pLF);
+	char aMsg[512];
+	str_formatb(aMsg, "Custom error: %s", lua_tostring(L, nargs));
+	int result = CLua::m_pClient->Lua()->HandleException(aMsg, pLF);
 
 	// pop argument
 	lua_pop(L, nargs);

@@ -65,7 +65,7 @@ public:
 #if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName);
 #endif
-	template<class T> T CallFunc(const char *pFuncName, T def);
+	template<class T> T CallFunc(const char *pFuncName, T def, bool *err=0);
 
 	int State() const { return m_State; }
 	int GetPermissionFlags() const { return m_PermissionFlags; }
