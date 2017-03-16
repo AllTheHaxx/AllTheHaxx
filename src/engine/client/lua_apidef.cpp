@@ -229,6 +229,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		/// Game.IRC
 		.beginClass<IIRC>("IIRC")
 			.addFunction("SendMsg", &IIRC::SendMsg)
+			.addFunction("JoinTo", &IIRC::JoinTo)
 		.endClass()
 
 		/// Game.Emote
