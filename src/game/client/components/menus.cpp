@@ -1299,7 +1299,8 @@ static const char *s_apSayings[] = {
 		"Text formatting would be cool",
 		"Do penguins have knees?",
 		"Did you know: You can use CTRL+F in the consoles to search for text",
-		"Did you know: In the consoles, you can mark text to copy it"
+		"Did you know: In the consoles, you can mark text to copy it",
+		"We are here to drink your beer!"
 };
 
 void CMenus::RenderLoading()
