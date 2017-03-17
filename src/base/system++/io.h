@@ -80,9 +80,9 @@ public:
 			char c[2] = {0,0};
 			AtEnd = io_read(m_FileHandle, &c, 1U) != 1;
 			if(c[0] == '\n' || c[0] == '\r')
-				pDest->append(c);
-			else
 				break;
+			else
+				pDest->append(c);
 		}
 		return !AtEnd;
 	}
