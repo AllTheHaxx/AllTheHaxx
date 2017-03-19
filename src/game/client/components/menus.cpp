@@ -1307,6 +1307,7 @@ static const char *s_apSayings[] = {
 		"No, the cake is not a lie!",
 		"Tell me, Mechanist, is it true?",
 		"Remember: the Weighted Companion Cube cannot talk!"
+		"We are here to drink your beer!"
 };
 
 void CMenus::RenderLoading()

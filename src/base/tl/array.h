@@ -91,6 +91,14 @@ public:
 		num_elements = 0;
 	}
 
+	void clear_erase()
+	{
+		// erase everything out
+		for(int i = 0; i < size(); i++)
+			mem_zero(&list[i], sizeof(T));
+		clear();
+	}
+
 	/*
 		Function: size
 	*/

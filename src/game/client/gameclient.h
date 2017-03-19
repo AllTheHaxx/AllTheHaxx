@@ -100,7 +100,6 @@ protected:
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
 	class IUpdater *m_pUpdater;
-	class IIRC *m_pIRC;
 	class ICurlWrapper *m_pCurlWrapper;
 
 	CLayers m_Layers;
@@ -394,6 +393,9 @@ public:
 	class CFontMgr *m_pFontMgrBasic;
 	class CFontMgr *m_pFontMgrMono;
 	class CUI *m_pUi;
+
+	// fck this hack for lua
+	class IIRC *m_pIRC;
 
 	// DDRace
 

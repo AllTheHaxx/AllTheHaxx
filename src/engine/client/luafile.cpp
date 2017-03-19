@@ -9,17 +9,6 @@
 #include "lua.h"
 #include "luabinding.h"
 
-// little helper
-#if defined(FEATURE_LUA)
-#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) { try { \
-	LuaRef func = getGlobal(LUA_STATE, FUNC_NAME); \
-	if(func) \
-		RETURN = func(__VA_ARGS__).cast<TYPE>(); }\
-	catch (std::exception& e) \
-	{ Lua()->HandleException(e, LUA_STATE); } }
-#else
-#define LUA_CALL_FUNC(LUA_STATE, FUNC_NAME, TYPE, RETURN, ...) ;;
-#endif
 
 CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
 {
@@ -215,7 +204,16 @@ void CLuaFile::Init()
 	if(str_find_nocase(m_aScriptTitle, " b| ") || str_find_nocase(m_aScriptInfo, " b | ")) { Unload(false); return; }
 
 	// call the OnScriptInit function if we have one
-	if(!CallFunc<bool>("OnScriptInit", true))
+	bool Error;
+	bool Success = CallFunc<bool>("OnScriptInit", true, &Error);
+	if(Error)
+	{
+		dbg_msg("lua", "script '%s' had an error in 'OnScriptInit()'", m_Filename.c_str());
+		m_pErrorStr = Localize("Error occurred in OnScriptInit()");
+		Unload(true);
+		return;
+	}
+	if(!Success)
 	{
 		dbg_msg("lua", "script '%s' rejected being loaded, did 'OnScriptInit()' return true...?", m_Filename.c_str());
 		m_pErrorStr = Localize("OnScriptInit() didn't return true");
@@ -237,13 +235,27 @@ luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 #endif
 
 template<class T>
-T CLuaFile::CallFunc(const char *pFuncName, T def) // just for quick access
+T CLuaFile::CallFunc(const char *pFuncName, T def, bool *err) // just for quick access
 {
 	if(!m_pLuaState)
-		return (T)0;
+	{
+		*err = true;
+		return def;
+	}
 
+	*err = false;
 	T ret = def;
-	LUA_CALL_FUNC(m_pLuaState, pFuncName, T, ret);
+	try
+	{
+		LuaRef func = getGlobal(m_pLuaState, pFuncName);
+		if(func)
+			ret = func().cast<T>();
+	}
+	catch (std::exception& e)
+	{
+		Lua()->HandleException(e, m_pLuaState);
+		*err = true;
+	}
 	return ret;
 }
 

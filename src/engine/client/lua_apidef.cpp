@@ -8,11 +8,13 @@
 #include <game/client/components/emoticon.h>
 #include <game/client/components/controls.h>
 #include <game/client/components/hud.h>
+#include <game/client/components/irc.h>
 #include <game/client/components/menus.h>
 #include <game/client/components/voting.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
+#include <engine/irc.h>
 #include <engine/serverbrowser.h>
 #include <engine/curlwrapper.h>
 #include <engine/textrender.h>
@@ -24,6 +26,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 #if defined(FEATURE_LUA)
 
 	lua_register(L, "print", CLuaBinding::LuaPrintOverride);
+	lua_register(L, "throw", CLuaBinding::LuaThrow); // adds an exception, but doesn't jump out like 'error' does
 	lua_register(L, "Import", CLuaBinding::LuaImport);
 	lua_register(L, "KillScript", CLuaBinding::LuaKillScript);
 	lua_register(L, "Listdir", CLuaBinding::LuaListdir);
@@ -221,6 +224,12 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Print", &IConsole::Print)
 			.addFunction("LineIsValid", &IConsole::LineIsValid)
 		//	.addFunction("ExecuteLine", &IConsole::ExecuteLine)
+		.endClass()
+
+		/// Game.IRC
+		.beginClass<IIRC>("IIRC")
+			.addFunction("SendMsg", &IIRC::SendMsg)
+			.addFunction("JoinTo", &IIRC::JoinTo)
 		.endClass()
 
 		/// Game.Emote
@@ -515,6 +524,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("ServerInfo", &CLua::m_pCGameClient->m_CurrentServerInfo, false)
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
+			.addVariable("IRC", &CLua::m_pCGameClient->m_pIRC, false)
 			.addVariable("Menus", &CLua::m_pCGameClient->m_pMenus, false)
 			.addVariable("Voting", &CLua::m_pCGameClient->m_pVoting, false)
 			.addVariable("SpecInfo", &CLua::m_pCGameClient->m_Snap.m_SpecInfo, false)

@@ -206,6 +206,32 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 	return 0;
 }
 
+int CLuaBinding::LuaThrow(lua_State *L)
+{
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	int nargs = lua_gettop(L);
+	if(nargs != 1)
+		return luaL_error(L, "throw expects exactly 1 argument");
+
+	argcheck(lua_isstring(L, nargs) || lua_isnumber(L, nargs), nargs, "string or number");
+
+	// add the exception
+	char aMsg[512];
+	str_formatb(aMsg, "Custom error: %s", lua_tostring(L, nargs));
+	int result = CLua::m_pClient->Lua()->HandleException(aMsg, pLF);
+
+	// pop argument
+	lua_pop(L, nargs);
+
+	// push result
+	lua_pushinteger(L, (lua_Integer)result);
+
+	return 1;
+}
+
 // external info
 int CLuaBinding::LuaGetPlayerScore(int ClientID)
 {

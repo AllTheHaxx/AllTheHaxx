@@ -916,6 +916,23 @@ int str_count_char(char *str, size_t size, char c);
 char *str_skip_to_whitespace(char *str);
 
 /*
+	Function: str_strip_right
+		Skips trailing non-whitespace character of choice
+
+	Parameters:
+		str - Pointer to the string.
+
+	Returns:
+		Pointer to the first whitespace character found
+		within the string.
+
+	Remarks:
+		- The strings are treated as zero-termineted strings.
+*/
+char *str_strip_right(char *str, char strip);
+char *str_strip_right_whitespaces(char *str);
+
+/*
 	Function: str_skip_whitespaces
 		Skips leading whitespace characters(' ', '\t', '\n', '\r').
 

@@ -34,6 +34,7 @@
 #include <engine/storage.h>
 #include "ghost.h"
 #include <game/client/components/console.h>
+#include <base/system++/io.h>
 
 void CMenus::RenderGame(CUIRect MainView)
 {
@@ -331,14 +332,22 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 #undef BUTTON_WIDTH
 }
 
+struct ConfigCreatorEntry
+{
+	char m_aCommand[512];
+
+	ConfigCreatorEntry() { m_aCommand[0] = 0; }
+};
+
 void CMenus::RenderServerConfigCreator(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-	CUIRect Button, Button2;
-	static array<CListboxItem> Items;
-	static char aEditBoxBuffer[256][256] = { {0} };
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+
+	CUIRect Button, Button2;
+	static array<ConfigCreatorEntry> s_Items;
+	static bool s_HasChanged = false;
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
 	TextRender()->Text(0, MainView.x+10.0f, MainView.y, 12.0f, Localize("Server-Dependent-Configuration Manager"), -1);
@@ -362,115 +371,107 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 	static CButtonContainer s_AddEntryButton;
 	if(DoButton_Menu(&s_AddEntryButton, Localize("Add"), 0, &Button) || (UI()->MouseInside(&MainView) && Input()->KeyPress(KEY_RETURN)))
 	{
-		CListboxItem n;
-		Items.add(n);
+		ConfigCreatorEntry e;
+		s_Items.add(e);
+		s_HasChanged = true;
 	}
 
+	// do the save button (only if there are changes)
 	static CButtonContainer s_SaveButton;
 	Button2.VSplitMid(&Button, &Button2);
 	Button.VSplitRight(5.0f, &Button, 0);
 	Button2.VSplitLeft(5.0f, 0, &Button2);
-	if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button))
-	{
-		IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
-		str_replace_char(aBuf, ':', '_');
-
-		IOHANDLE f = pStorage->OpenFile(aBuf, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
-		if(!f)
-			dbg_msg("serverconfig", "failed to open '%s' for writing", aBuf);
-		else
+	if(s_HasChanged)
+		if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button))
 		{
-			for(int i = 0; i < Items.size(); i++)
-			{
-				io_write(f, aEditBoxBuffer[i], (unsigned int)str_length(aEditBoxBuffer[i]));
-				io_write(f, "\n", sizeof('\n'));
-			}
-			io_close(f);
-		}
-	}
+			IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
+			s_HasChanged = false;
+			char aFile[64];
+			str_format(aFile, sizeof(aFile), "configs/%s.cfg", g_Config.m_UiServerAddress);
+			str_replace_char(aFile, ':', '_');
 
-	static bool s_MustReload = false;
+			// only save the entries if there are any
+			if(s_Items.size() > 0)
+			{
+				IOHANDLE_SMART f = pStorage->OpenFileSmart(aFile, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+				if(!f.IsOpen())
+					dbg_msg("serverconfig", "failed to open '%s' for writing", aFile);
+				else
+				{
+					for(int i = 0; i < s_Items.size(); i++)
+					{
+						str_strip_right_whitespaces(s_Items[i].m_aCommand);
+						f.WriteLine(s_Items[i].m_aCommand);
+					}
+				}
+			}
+			else // otherwise delete the file
+				pStorage->RemoveFile(aFile, IStorageTW::TYPE_SAVE);
+		}
+
+	// reload the config when we are on a different server than before
+	bool MustReload = false;
 	static char s_LastServer[64] = {0};
 	if(str_comp_nocase(s_LastServer, g_Config.m_UiServerAddress) != 0)
 	{
-		s_MustReload = true;
+		MustReload = true;
 		str_copy(s_LastServer, g_Config.m_UiServerAddress, sizeof(s_LastServer));
 	}
-	static CButtonContainer s_LoadButton;
-	if(s_MustReload || DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Button2))
-	{
-		s_MustReload = false;
-		// load server specific config
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
-		str_replace_char(aBuf, ':', '_');
 
-		Items.clear();
-		mem_zero(aEditBoxBuffer, sizeof(aEditBoxBuffer));
-		IOHANDLE f = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL);
-		if(f)
+	// do the discard button only if there are changes
+	static CButtonContainer s_LoadButton;
+	if(s_HasChanged)
+		if(DoButton_Menu(&s_LoadButton, Localize("Discard Changes"), 0, &Button2))
+			MustReload = true;
+
+	if(MustReload)
+	{
+		s_HasChanged = false;
+		s_Items.clear_erase();
+
+		// load server specific config
+		char aFile[512];
+		str_format(aFile, sizeof(aFile), "configs/%s.cfg", g_Config.m_UiServerAddress);
+		str_replace_char(aFile, ':', '_');
+
+		IOHANDLE_SMART f = Storage()->OpenFileSmart(aFile, IOFLAG_READ, IStorageTW::TYPE_ALL);
+		if(f.IsOpen())
 		{
-			char aBuffer[1024], aIn[128];
-			io_read(f, aBuffer, sizeof(aBuffer));
-			int c = str_count_char(aBuffer, sizeof(aBuffer), '\n');
-			int index = 0;
-			for(int i = 0; i < c; i++)
+			// read all lines
+			ConfigCreatorEntry e;
+			while(f.ReadNextLine(e.m_aCommand, sizeof(e.m_aCommand)))
 			{
-				mem_zero(aIn, sizeof(aIn));
-				str_split(aIn, aBuffer, i, '\n');
-				str_format(aEditBoxBuffer[index], sizeof(aEditBoxBuffer[index]), "%s", aIn);
-				CListboxItem n;
-				Items.add(n);
-				index++;
+				s_Items.add(e);
 			}
-		/*
-			for(int i = 0, j = 0; i < str_length(aBuffer); i++, j++)
-			{
-				if(aBuffer[i] != '\n')
-					aIn[j] = aBuffer[i];
-				else
-				{
-					str_format(aEditBoxBuffer[index], sizeof(aEditBoxBuffer[index]), "%s", aIn);
-					//str_sanitize_strong(aEditBoxBuffer[index]);
-					mem_zero(aIn, sizeof(aIn)); j = 0;
-					CListboxItem n;
-					Items.add(n);
-					index++;
-				}
-			}*/
 		}
 	}
 
 	static CButtonContainer s_Listbox;
 	static float s_ScrollVal = 0.0f;
 	MainView.HSplitTop(10.0f, 0, &MainView);
-	UiDoListboxStart(&s_Listbox, &MainView, 15.0f, "", "", Items.size(), 1, -1, s_ScrollVal);
+	UiDoListboxStart(&s_Listbox, &MainView, 15.0f, "", "", s_Items.size(), 1, -1, s_ScrollVal);
 
-	for(int i = 0; i < Items.size(); i++)
+	for(int i = 0; i < s_Items.size(); i++)
 	{
-		if(i > 0xFF)
-		{
-			Items.remove_index(i);
-			continue;
-		}
-
-		CPointerContainer Container(&Items[i]);
+		CPointerContainer Container(&s_Items[i].m_aCommand[0]);
 		CListboxItem n = UiDoListboxNextItem(&Container, false);
 		if(!n.m_Visible)
 			continue;
 
-		CUIRect Box, Button;
-		n.m_HitRect.VSplitRight(n.m_HitRect.h, &Box, &Button);
+		CUIRect Box, RemoveButton;
+		n.m_HitRect.VSplitRight(n.m_HitRect.h, &Box, &RemoveButton);
 
-		static CButtonContainer s_EditBox[256];
+		CPointerContainer EditboxContainer(&s_Items[i].m_aCommand[1]);
 		static float s_Offset[256] = { 0.0f };
-		DoEditBox(&s_EditBox[i], &Box, aEditBoxBuffer[i], sizeof(aEditBoxBuffer[i]), 8.0f, &s_Offset[i], false, 0, Localize("Enter your f1 commands here..."), -1);
+		if(DoEditBox(&EditboxContainer, &Box, s_Items[i].m_aCommand, sizeof(s_Items[i].m_aCommand), 8.0f, &s_Offset[i%256], false, 0, Localize("Enter an f1 command here..."), -1))
+			s_HasChanged = true;
 
-		static CButtonContainer s_ClearButton[256];
-		if(DoButton_Menu(&s_ClearButton[i], "×", 0, &Button, "Remove", 0))
-			Items.remove_index(i);
+		CPointerContainer RemoveContainer(&s_Items[i].m_aCommand[2]);
+		if(DoButton_Menu(&RemoveContainer, "×", 0, &RemoveButton, "Remove", 0))
+		{
+			s_Items.remove_index(i);
+			s_HasChanged = true;
+		}
 	}
 
 	UiDoListboxEnd(&s_ScrollVal, 0);

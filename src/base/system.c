@@ -2314,6 +2314,23 @@ char *str_skip_to_whitespace(char *str)
 	return str;
 }
 
+char *str_strip_right(char *str, char strip)
+{
+	char *c = str + str_length(str)-1;
+	while(c-- >= str && *c == strip)
+		*c = 0;
+	return str;
+}
+
+char *str_strip_right_whitespaces(char *str)
+{
+	str_strip_right(str, ' ');
+	str_strip_right(str, '\t');
+	str_strip_right(str, '\n');
+	str_strip_right(str, '\r');
+	return str;
+}
+
 char *str_skip_whitespaces(char *str)
 {
 	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))

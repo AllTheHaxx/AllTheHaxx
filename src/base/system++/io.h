@@ -70,6 +70,44 @@ public:
 		return std::string(aHugeBuf);
 	}
 
+	bool ReadNextLine(std::string *pDest)
+	{
+		RETURN_ON_NOT_OPEN(false)
+		pDest->clear();
+		bool AtEnd = false;
+		while(!AtEnd)
+		{
+			char c[2] = {0,0};
+			AtEnd = io_read(m_FileHandle, &c, 1U) != 1;
+			if(c[0] == '\n' || c[0] == '\r')
+				break;
+			else
+				pDest->append(c);
+		}
+		return !AtEnd;
+	}
+
+	bool ReadNextLine(char *pBuffer, unsigned BufferSize)
+	{
+		RETURN_ON_NOT_OPEN(false)
+		mem_zero(pBuffer, BufferSize);
+		unsigned Index = 0;
+		bool AtEnd = false;
+		while(!AtEnd)
+		{
+			if(Index >= BufferSize)
+				break;
+
+			char c = 0;
+			AtEnd = io_read(m_FileHandle, &c, 1U) != 1;
+			if(c == '\n' || c == '\r')
+				break;
+			else
+				pBuffer[Index++] = c;
+		}
+		return !AtEnd;
+	}
+
 	/**
 	 * Writes Size bytes from pBuffer to the file, if it is open.
 	 * @param pBuffer Data to write
@@ -83,6 +121,28 @@ public:
 	}
 
 	/**
+	 * Writes the string in the buffer to the file.
+	 * @param pStr Data to write
+	 * @return 0 if file is closed, otherwise the number of bytes written
+	 */
+	unsigned WriteString(const char *pStr) const
+	{
+		RETURN_ON_NOT_OPEN(0)
+		return io_write(m_FileHandle, pStr, (unsigned int)str_length(pStr));
+	}
+
+	/**
+	 * Writes the string to the file.
+	 * @param pStr Data to write
+	 * @return 0 if file is closed, otherwise the number of bytes written
+	 */
+	unsigned WriteString(const std::string& Str) const
+	{
+		RETURN_ON_NOT_OPEN(0)
+		return io_write(m_FileHandle, Str.c_str(), (unsigned int)Str.length());
+	}
+
+	/**
 	 * Writes the text plus an appropriate newline to the file
 	 * @param pText text to write
 	 * @return number of bytes written, see Write
@@ -91,7 +151,7 @@ public:
 	{
 		RETURN_ON_NOT_OPEN(0)
 		unsigned Size = 0;
-		Size += Write(pText, (unsigned int)str_length(pText));
+		Size += WriteString(pText);
 		Size += WriteNewline();
 		return Size;
 	}
@@ -168,10 +228,12 @@ public:
 	 * @return true on success, false on error
 	 * @note this function only must be invoked if you want to use re-open in a different mode, using Open
 	 */
-	bool Close() const
+	bool Close()
 	{
 		RETURN_ON_NOT_OPEN(false)
-		return io_close(m_FileHandle) == 0;
+		int result = io_close(m_FileHandle);
+		m_FileHandle = 0;
+		return result == 0;
 	}
 
 	/**
@@ -194,6 +256,7 @@ public:
 	{
 		return m_FilePath.c_str();
 	}
+
 
 	//operator IOHANDLE() const { return f; }
 	/*IOHANDLE operator=(const IOHANDLE& New)
