@@ -3488,9 +3488,11 @@ void CClient::Con_SaveConfig(IConsole::IResult *pResult, void *pUserData)
 {
 	CALLSTACK_ADD();
 
-	((CClient *)pUserData)->Kernel()->RequestInterface<IConfig>()->Save();
-	((CClient *)pUserData)->Lua()->SaveAutoloads();
-	((CGameClient *)((CClient *)pUserData)->m_pGameClient)->m_pIdentity->SaveIdents();
+	CClient *pSelf = (CClient *)pUserData;
+	if(!pSelf->Kernel()->RequestInterface<IConfig>()->Save(true))
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", "failed to save the settings");
+	pSelf->Lua()->SaveAutoloads();
+	((CGameClient *)(pSelf->m_pGameClient))->m_pIdentity->SaveIdents();
 }
 
 void CClient::AutoScreenshot_Start()

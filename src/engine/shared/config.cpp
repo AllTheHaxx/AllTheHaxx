@@ -63,14 +63,14 @@ public:
 		#undef MACRO_CONFIG_STR
 	}
 
-	virtual void Save()
+	virtual bool Save(bool Force=false)
 	{
-		if(!m_pStorage || !g_Config.m_ClSaveSettings)
-			return;
+		if(!m_pStorage || (!Force && !g_Config.m_ClSaveSettings))
+			return false;
 		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE ".tmp", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 
 		if(!m_ConfigFile)
-			return;
+			return false;
 
 		char aLineBuf[1024*2];
 		char aEscapeBuf[1024*2];
@@ -88,7 +88,7 @@ public:
 
 		io_close(m_ConfigFile);
 		m_ConfigFile = 0;
-		m_pStorage->RenameFile(CONFIG_FILE ".tmp", CONFIG_FILE, IStorageTW::TYPE_SAVE);
+		return m_pStorage->RenameFile(CONFIG_FILE ".tmp", CONFIG_FILE, IStorageTW::TYPE_SAVE);
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
