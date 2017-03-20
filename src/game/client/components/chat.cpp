@@ -198,10 +198,12 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_pClient->m_pMenus->IsActive() && Event.m_Key != KEY_ESCAPE)
 		return false;
 
+	bool Handled = false;
 	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{
-		if(Input()->KeyIsPressed(KEY_LCTRL))
+		if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
 		{
+			Handled = true;
 			if(Event.m_Key == KEY_V) // paste
 			{
 				const char *pText = Input()->GetClipboardText();
@@ -232,6 +234,8 @@ bool CChat::OnInput(IInput::CEvent Event)
 					m_Input.Set(aLine);
 					m_Input.SetCursorOffset(str_length(aLine)-str_length(aRightPart));
 				}
+				else if(g_Config.m_Debug)
+					dbg_msg("chat", "paste failed: got no text from clipboard");
 			}
 			else if(Event.m_Key == KEY_C || Event.m_Key == KEY_X) // copy/cut
 			{
@@ -241,44 +245,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			}
 			else // handle skipping: jump to spaces and special ASCII characters
 			{
-				int SearchDirection = 0;
-				if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_BACKSPACE)
-					SearchDirection = -1;
-				else if(Event.m_Key == KEY_RIGHT)
-					SearchDirection = 1;
-
-				if(SearchDirection != 0)
-				{
-					int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
-					for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
-					{
-						int Next = i+SearchDirection;
-						if(	(m_Input.GetString()[Next] == ' ') ||
-							   (m_Input.GetString()[Next] >= 32 && m_Input.GetString()[Next] <= 47) ||
-							   (m_Input.GetString()[Next] >= 58 && m_Input.GetString()[Next] <= 64) ||
-							   (m_Input.GetString()[Next] >= 91 && m_Input.GetString()[Next] <= 96) )
-						{
-							FoundAt = i;
-							if(SearchDirection < 0)
-								FoundAt++;
-							break;
-						}
-					}
-					if(Event.m_Key == KEY_BACKSPACE)
-					{
-						if(m_Input.GetCursorOffset() != 0)
-						{
-							char aText[512];
-							str_copy(aText, m_Input.GetString(), FoundAt + 1);
-							if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
-							{
-								str_append(aText, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
-							}
-							m_Input.Set(aText);
-						}
-					}
-					m_Input.SetCursorOffset(FoundAt);
-				}
+				CLineInput::HandleSkipping(Event, &m_Input);
 			}
 		}
 		else if(Event.m_Key == KEY_ESCAPE)
@@ -321,6 +288,14 @@ bool CChat::OnInput(IInput::CEvent Event)
 				{
 					++m_PendingChatCounter;
 					AddEntry = true;
+				}
+
+				// don't add a line multiple times in a row
+				CHistoryEntry *pTest = m_History.Last();
+				if(pTest)
+				{
+					if(str_comp(pTest->m_aText, m_Input.GetString()) == 0)
+						AddEntry = false;
 				}
 
 				if(AddEntry)
@@ -468,14 +443,15 @@ bool CChat::OnInput(IInput::CEvent Event)
 	}
 
 
-	// reset name completion process
-	if(Event.m_Key != KEY_TAB && Event.m_Key != KEY_LSHIFT)
-		m_CompletionChosen = -1;
-
 	m_OldChatStringLength = m_Input.GetLength();
-	m_Input.ProcessInput(Event);
+	if(!Handled)
+	{
+		// reset name completion process
+		if(Event.m_Key != KEY_TAB && Event.m_Key != KEY_LSHIFT && Event.m_Key != KEY_LCTRL && Event.m_Key != KEY_RCTRL)
+			m_CompletionChosen = -1;
+		m_Input.ProcessInput(Event);
+	}
 	m_InputUpdate = true;
-
 
 	return true;
 }

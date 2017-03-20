@@ -376,7 +376,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{
-		if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL))
+		if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) || m_pGameConsole->Input()->KeyIsPressed(KEY_RCTRL))
 		{
 			Handled = true;
 
@@ -425,44 +425,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			}
 			else // handle skipping: jump to spaces and special ASCII characters
 			{
-				int SearchDirection = 0;
-				if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_BACKSPACE)
-					SearchDirection = -1;
-				else if(Event.m_Key == KEY_RIGHT)
-					SearchDirection = 1;
-
-				if(SearchDirection != 0)
-				{
-					int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
-					for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
-					{
-						int Next = i+SearchDirection;
-						if(	(m_Input.GetString()[Next] == ' ') ||
-							   (m_Input.GetString()[Next] >= 32 && m_Input.GetString()[Next] <= 47) ||
-							   (m_Input.GetString()[Next] >= 58 && m_Input.GetString()[Next] <= 64) ||
-							   (m_Input.GetString()[Next] >= 91 && m_Input.GetString()[Next] <= 96) )
-						{
-							FoundAt = i;
-							if(SearchDirection < 0)
-								FoundAt++;
-							break;
-						}
-					}
-					if(Event.m_Key == KEY_BACKSPACE)
-					{
-						if(m_Input.GetCursorOffset() != 0)
-						{
-							char aText[512];
-							str_copy(aText, m_Input.GetString(), FoundAt + 1);
-							if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
-							{
-								str_append(aText, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
-							}
-							m_Input.Set(aText);
-						}
-					}
-					m_Input.SetCursorOffset(FoundAt);
-				}
+				CLineInput::HandleSkipping(Event, &m_Input);
 			}
 		}
 		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
@@ -614,7 +577,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 	if(Event.m_Flags & (IInput::FLAG_PRESS|IInput::FLAG_TEXT))
 	{
-		if((Event.m_Key != KEY_TAB) && (Event.m_Key != KEY_LSHIFT))
+		if(Event.m_Key != KEY_TAB && Event.m_Key != KEY_LSHIFT && Event.m_Key != KEY_LCTRL && Event.m_Key != KEY_RCTRL)
 		{
 			m_CompletionChosen = -1;
 			str_copy(m_aCompletionBuffer, m_Input.GetString(), sizeof(m_aCompletionBuffer));

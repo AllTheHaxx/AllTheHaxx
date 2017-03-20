@@ -397,11 +397,14 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 		for(int iEvent = 0; iEvent < m_NumInputEvents; iEvent++)
 		{
 			const IInput::CEvent& Event = m_aInputEvents[iEvent];
+			bool Handled = false;
 
 			if(Event.m_Flags&IInput::FLAG_PRESS)
 			{
-				if(Input()->KeyIsPressed(KEY_LCTRL))
+				if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
 				{
+					Handled = true;
+
 					CLineInput LineInput; // working with a CLineInput here is easier
 					LineInput.Set(pStr);
 					LineInput.SetCursorOffset(s_AtIndex);
@@ -434,58 +437,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 					}
 					else // handle skipping: jump to spaces and special ASCII characters
 					{
-						int SearchDirection = 0;
-						if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_BACKSPACE)
-							SearchDirection = -1;
-						else if(Event.m_Key == KEY_RIGHT  || Event.m_Key == KEY_DELETE)
-							SearchDirection = 1;
-
-						if(SearchDirection != 0)
-						{
-							int FoundAt = SearchDirection > 0 ? LineInput.GetLength() - 1 : 0;
-							for(int i = LineInput.GetCursorOffset() + SearchDirection; SearchDirection > 0 ? i < LineInput.GetLength() - 1 : i > 0; i += SearchDirection)
-							{
-								int Next = i + SearchDirection;
-								if((LineInput.GetString()[Next] == ' ') ||
-								   (LineInput.GetString()[Next] >= 32 && LineInput.GetString()[Next] <= 47) ||
-								   (LineInput.GetString()[Next] >= 58 && LineInput.GetString()[Next] <= 64) ||
-								   (LineInput.GetString()[Next] >= 91 && LineInput.GetString()[Next] <= 96))
-								{
-									FoundAt = i;
-									if(SearchDirection < 0)
-										FoundAt++;
-									break;
-								}
-							}
-							if(Event.m_Key == KEY_BACKSPACE)
-							{
-								if(LineInput.GetCursorOffset() != 0)
-								{
-									char aText[512];
-									str_copy(aText, LineInput.GetString(), FoundAt + 1);
-									if(LineInput.GetCursorOffset() != str_length(LineInput.GetString()))
-									{
-										str_append(aText, LineInput.GetString() + LineInput.GetCursorOffset(), str_length(LineInput.GetString()));
-									}
-									LineInput.Set(aText);
-								}
-							}
-							else if(Event.m_Key == KEY_DELETE)
-							{
-								if(LineInput.GetCursorOffset() != LineInput.GetLength() && FoundAt > LineInput.GetCursorOffset())
-								{
-									char aText[512] = {0};
-									if(LineInput.GetCursorOffset() != 0)
-									{
-										str_copy(aText, LineInput.GetString(), LineInput.GetCursorOffset() + 1);
-									}
-									str_append(aText, LineInput.GetString() + FoundAt, str_length(LineInput.GetString() + FoundAt-1) + 1);
-									LineInput.Set(aText);
-								}
-								FoundAt = s_AtIndex; // store the original cursor offset as it will stay the same
-							}
-							LineInput.SetCursorOffset(FoundAt);
-						}
+						CLineInput::HandleSkipping(Event, &LineInput);
 					}
 
 					// apply the changes
@@ -493,8 +445,18 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 					s_AtIndex = LineInput.GetCursorOffset();
 				}
 			}
+
+			// process input
+			if(!Handled)
+			{
+				Len = str_length(pStr);
+				int NumChars = Len;
+				ReturnValue |= CLineInput::Manipulate(Event, pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
+			}
+
 		}
 
+		// handle scrolling
 		if(Inside && UI()->MouseButton(0) && m_pClient->m_pGameConsole->IsClosed())
 		{
 			s_DoScroll = true;
@@ -505,7 +467,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 			if(Align == 0)
 				dOffset = pRect->w/2.0f-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
 			else if(Align > 0)
-				dOffset = pRect->w-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f; // TODO: FIX THIS!!!
+				dOffset = pRect->w-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
 
 			for(int i = 1; i <= Len; i++)
 			{
@@ -536,13 +498,6 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 				s_ScrollStart = UI()->MouseX();
 				UpdateOffset = true;
 			}
-		}
-
-		for(int i = 0; i < m_NumInputEvents; i++)
-		{
-			Len = str_length(pStr);
-			int NumChars = Len;
-			ReturnValue |= CLineInput::Manipulate(m_aInputEvents[i], pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
 		}
 	}
 

@@ -22,7 +22,8 @@ class CLineInput
 	int m_FakeLen;
 	int m_FakeCursorPos;
 public:
-	static bool Manipulate(IInput::CEvent e, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr);
+	static bool Manipulate(const IInput::CEvent& e, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr);
+	static void HandleSkipping(const IInput::CEvent& e, CLineInput *pInput);
 
 	class CCallback
 	{
@@ -33,7 +34,7 @@ public:
 
 	CLineInput();
 	void Clear();
-	void ProcessInput(IInput::CEvent e);
+	void ProcessInput(const IInput::CEvent& e);
 	void Editing(const char *pString, int Cursor);
 	void Set(const char *pString);
 	void Add(const char *pString);

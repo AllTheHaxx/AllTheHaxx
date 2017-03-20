@@ -1,7 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/system.h>
 #include <engine/keys.h>
+
 #include "lineinput.h"
+
 
 CLineInput::CLineInput()
 {
@@ -60,7 +63,7 @@ void CLineInput::Add(const char *pString)
 	m_CursorPos = m_Len;
 }
 
-bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr)
+bool CLineInput::Manipulate(const IInput::CEvent& Event, char *pStr, int StrMaxSize, int StrMaxChars, int *pStrLenPtr, int *pCursorPosPtr, int *pNumCharsPtr)
 {
 	int NumChars = *pNumCharsPtr;
 	int CursorPos = *pCursorPosPtr;
@@ -142,7 +145,68 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 	return Changes;
 }
 
-void CLineInput::ProcessInput(IInput::CEvent e)
+void CLineInput::ProcessInput(const IInput::CEvent& e)
 {
 	Manipulate(e, m_aStr, MAX_SIZE, MAX_CHARS, &m_Len, &m_CursorPos, &m_NumChars);
+}
+
+void CLineInput::HandleSkipping(const IInput::CEvent& Event, CLineInput *pLineInput)
+{
+	 // handle skipping: jump to spaces and special ASCII characters
+
+	int SearchDirection = 0;
+	if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_BACKSPACE)
+		SearchDirection = -1;
+	else if(Event.m_Key == KEY_RIGHT  || Event.m_Key == KEY_DELETE)
+		SearchDirection = 1;
+
+	if(SearchDirection != 0)
+	{
+		int FoundAt = SearchDirection > 0 ? pLineInput->GetLength() : 0;
+		for(int i = pLineInput->GetCursorOffset() + SearchDirection; SearchDirection > 0 ? i < pLineInput->GetLength() - 1 : i > 0; i += SearchDirection)
+		{
+			int Next = i + SearchDirection;
+			if((pLineInput->GetString()[Next] == ' ') ||
+			   (pLineInput->GetString()[Next] >= 32 && pLineInput->GetString()[Next] <= 47) ||
+			   (pLineInput->GetString()[Next] >= 58 && pLineInput->GetString()[Next] <= 64) ||
+			   (pLineInput->GetString()[Next] >= 91 && pLineInput->GetString()[Next] <= 96))
+			{
+				//FoundAt = i;
+				FoundAt = Next;
+				if(SearchDirection < 0)
+					FoundAt++;
+				break;
+			}
+		}
+		if(Event.m_Key == KEY_BACKSPACE)
+		{
+			if(pLineInput->GetCursorOffset() != 0)
+			{
+				char aText[512];
+				str_copy(aText, pLineInput->GetString(), FoundAt + 1);
+				if(pLineInput->GetCursorOffset() != str_length(pLineInput->GetString()))
+				{
+					str_append(aText, pLineInput->GetString() + pLineInput->GetCursorOffset(), str_length(pLineInput->GetString()));
+				}
+				pLineInput->Set(aText);
+			}
+		}
+		else if(Event.m_Key == KEY_DELETE)
+		{
+			int AtIndex = pLineInput->GetCursorOffset();
+			if(AtIndex != pLineInput->GetLength() && FoundAt > AtIndex)
+			{
+				char aText[512] = {0};
+				if(AtIndex != 0)
+				{
+					str_copy(aText, pLineInput->GetString(), AtIndex + 1);
+				}
+				str_appendb(aText, pLineInput->GetString() + FoundAt);
+				pLineInput->Set(aText);
+			}
+			FoundAt = AtIndex; // store the original cursor offset as it will stay the same
+		}
+		pLineInput->SetCursorOffset(FoundAt);
+	}
+
 }
