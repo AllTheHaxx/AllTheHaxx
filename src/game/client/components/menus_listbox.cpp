@@ -64,6 +64,7 @@ void CMenus::UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float
 
 	int NumViewable = (int)(gs_ListBoxOriginalView.h/Row.h) + 1;
 	int Num = (NumItems+gs_ListBoxItemsPerRow-1)/gs_ListBoxItemsPerRow-NumViewable+1;
+	int ViewablePercent = round_to_int(100.0f * ((float)NumViewable / (float)max(1, NumItems)));
 	if(Num < 0)
 		Num = 0;
 	if(Num > 0)
@@ -84,9 +85,9 @@ void CMenus::UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float
 			for(int i = 0; i < m_NumInputEvents; i++)
 			{
 				if(m_aInputEvents[i].m_Key == KEY_MOUSE_WHEEL_UP && UI()->MouseInside(&View))
-					s_NewVal -= 3.0f/Num;
+					s_NewVal -= ((float)ViewablePercent/100.0f) * 0.85f;
 				if(m_aInputEvents[i].m_Key == KEY_MOUSE_WHEEL_DOWN && UI()->MouseInside(&View))
-					s_NewVal += 3.0f/Num;
+					s_NewVal += ((float)ViewablePercent/100.0f) * 0.85f;
 			}
 
 			if(s_NewVal < 0.0f) s_NewVal = 0.0f;
@@ -103,7 +104,6 @@ void CMenus::UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float
 	}
 
 	Scroll.HMargin(5.0f, &Scroll);
-	int ViewablePercent = round_to_int(100.0f * ((float)NumViewable / (float)max(1, NumItems)));
 	gs_ListBoxScrollValue = DoScrollbarV(pBC, &Scroll, gs_ListBoxScrollValue, 0, ~0, ViewablePercent);
 
 	// the list
