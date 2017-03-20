@@ -516,7 +516,7 @@ public:
 		TextEx(&Cursor, pText, -1);
 	}
 
-	virtual float TextWidth(CFont *pFontSetV, float Size, const char *pText, int Length, float LineWidth = -1)
+	virtual float TextWidth(CFont *pFontSetV, float Size, const char *pText, int Length = -1, float LineWidth = -1)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0, pFontSetV);

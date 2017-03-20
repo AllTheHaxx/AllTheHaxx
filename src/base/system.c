@@ -2224,7 +2224,7 @@ int str_replace_char_num(char *str_in, int max_replace, char find, char replace)
 		if(str_in[i] == find)
 		{
 			str_in[i] = replace;
-			if(++counter >= max_replace)
+			if(max_replace >= 0 && ++counter >= max_replace)
 				break;
 		}
 	}
@@ -2239,7 +2239,7 @@ int str_replace_char_rev_num(char *str_in, int max_replace, char find, char repl
 		if(str_in[i] == find)
 		{
 			str_in[i] = replace;
-			if(++counter >= max_replace)
+			if(max_replace >= 0 && ++counter >= max_replace)
 				break;
 		}
 	}
