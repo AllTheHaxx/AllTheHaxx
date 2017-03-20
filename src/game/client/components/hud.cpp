@@ -74,8 +74,7 @@ void CHud::RenderGameTimer()
 		CServerInfo Info;
 		Client()->GetServerInfo(&Info);
 
-		// TODO: show m_ServerRecord somewhere if we are in a race
-
+		// render the time in a nice format
 		if(Time >= 60*60*24) // 60sec x 60min x 24h = 1 day
 			str_format(aBuf, sizeof(aBuf), "%d %s, %02d:%02d:%02d", Time/60/60/24, Time/60/60/24 == 1 ? Localize("day") : Localize("days"), (Time%86400)/3600, (Time/60)%60, (Time)%60);
 		else if(Time >= 60*60) // 60sec x 60 min = 1 hour
@@ -90,7 +89,7 @@ void CHud::RenderGameTimer()
 			str_append(aBuf, aTmp, sizeof(aBuf));
 		}
 
-		const float FontSize = 10.0f;
+		float FontSize = 10.0f;
 		float w = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 
 		// last 60 sec red, last 10 sec blink
@@ -100,6 +99,26 @@ void CHud::RenderGameTimer()
 			TextRender()->TextColor(1.0f, 0.25f, 0.25f, Alpha);
 		}
 		TextRender()->Text(0, Half-w/2, 2.0f, FontSize, aBuf, -1);
+
+		// render the record
+		if(g_Config.m_ClShowhudServerRecord && ((IsRace(&Info) || IsDDRace(&Info)) && m_ServerRecord >= 0/*m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME*/))
+		{
+			FontSize -= 3.0f;
+			Time = round_to_int(m_ServerRecord);
+			char aRecord[128];
+			if(Time >= 60*60*24)
+				str_format(aRecord, sizeof(aRecord), "%d %s, %02d:%02d:%02d", Time/60/60/24, Time/60/60/24 == 1 ? Localize("day") : Localize("days"), (Time%86400)/3600, (Time/60)%60, (Time)%60);
+			else if(Time >= 60*60)
+				str_format(aRecord, sizeof(aRecord), "%02d:%02d:%02d", Time/60/60, (Time/60)%60, Time%60);
+			else
+				str_format(aRecord, sizeof(aRecord), "%02d:%02d", Time/60, Time%60);
+
+			str_formatb(aBuf, "%s: %s", Localize("Server Record"), aRecord);
+			w = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.65f);
+			TextRender()->Text(0, Half-w/2, FontSize+  2*3.0f, FontSize, aBuf, -1);
+		}
+
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
