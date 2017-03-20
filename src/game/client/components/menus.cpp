@@ -689,17 +689,31 @@ int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, floa
 	return result;
 }
 
-float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
+float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value, int LenPercent)
 {
 	CALLSTACK_ADD();
 
 	CUIRect Handle;
 	static float OffsetY;
+
+	{
 #if defined(__ANDROID__)
-	pRect->HSplitTop(50, &Handle, 0);
+		const float FixedLen = 50.0f;
 #else
-	pRect->HSplitTop(33, &Handle, 0);
+		const float FixedLen = 33.0f;
 #endif
+
+		// calculate the handle length
+		float Len = FixedLen;
+		if(LenPercent != ~0)
+		{
+			LenPercent = clamp(LenPercent, 0, 100);
+			Len = clamp(pRect->h * ((float)LenPercent / 100.0f),
+						FixedLen/2.0f,
+						pRect->h-1.0f);
+		}
+		pRect->HSplitTop(Len, &Handle, 0);
+	}
 
 	Handle.y += (pRect->h-Handle.h)*Current;
 
@@ -770,15 +784,31 @@ float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 	return clamp(ReturnValue, 0.0f, 1.0f);
 }
 
-
-
-float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
+float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value, int LenPercent)
 {
 	CALLSTACK_ADD();
 
 	CUIRect Handle;
 	static float OffsetX;
-	pRect->VSplitLeft(33, &Handle, 0);
+
+	{
+#if defined(__ANDROID__)
+		const float FixedLen = 50.0f;
+#else
+		const float FixedLen = 33.0f;
+#endif
+
+		// calculate the handle length
+		float Len = FixedLen;
+		if(LenPercent != ~0)
+		{
+			LenPercent = clamp(LenPercent, 0, 100);
+			Len = clamp(pRect->w * ((float)LenPercent / 100.0f),
+						FixedLen/2.0f,
+						pRect->w-1.0f);
+		}
+		pRect->VSplitLeft(Len, &Handle, 0);
+	}
 
 	Handle.x += (pRect->w-Handle.w)*Current;
 
