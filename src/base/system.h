@@ -405,6 +405,13 @@ void thread_sleep(unsigned milliseconds);
 void *thread_init(void (*threadfunc)(void *), void *user);
 
 /*
+ (see thread_init)
+
+ Note: the name can have a maximum length of 15 characters
+ */
+void *thread_init_named(void (*threadfunc)(void *), void *user, const char *name);
+
+/*
 	Function: thread_wait
 		Waits for a thread to be done or destroyed.
 

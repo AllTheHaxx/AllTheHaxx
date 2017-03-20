@@ -29,13 +29,14 @@ public:
 	/**
 	 * Start the thread
 	 * @param pUser the userdata to pass to the thread function
+	 * @param pName (optional) name of the thread (for debugging)
 	 * @return A bool indicating success
 	 * @note IMPORTANT: When the THREAD_SMART object goes out of scope, a Joinable thread will be joined automatically!
 	 */
-	bool Start(T *pUser)
+	bool Start(T *pUser, const char *pName = 0)
 	{
 		if(IsRunning()) return false;
-		m_pThreadHandle = thread_init((pFnThreadFunc)m_ThreadFunc, pUser);
+		m_pThreadHandle = thread_init_named((pFnThreadFunc)m_ThreadFunc, pUser, pName);
 		return m_pThreadHandle != NULL;
 	}
 

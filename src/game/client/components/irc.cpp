@@ -128,7 +128,7 @@ void CIRCBind::Connect()
 		return;
 
 	m_pClient->IRC()->SetNick(g_Config.m_ClIRCNick);
-	thread_init(ListenIRCThread, this);
+	thread_init_named(ListenIRCThread, this, "IRC listener");
 }
 
 void CIRCBind::OnNickChange(const char *pNewNick)

@@ -74,7 +74,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 {
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
-	m_pThread = thread_init(ThreadFunc, this);
+	m_pThread = thread_init_named(ThreadFunc, this, "gfx processor");
 	m_BufferDone.signal();
 }
 

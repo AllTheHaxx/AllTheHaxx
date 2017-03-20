@@ -87,7 +87,7 @@ void CAStar::OnRender()
 		if(activationTime && time_get() > activationTime+time_freq())
 		{
 			//FillGrid(true);
-			m_pThread = thread_init(BuildPath, this);
+			m_pThread = thread_init_named(BuildPath, this, "astar builder");
 			//thread_detach(m_pThread);
 			activationTime = 0;
 		}

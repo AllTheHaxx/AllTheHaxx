@@ -195,7 +195,7 @@ void dbg_enable_threaded()
 
 	dbg_msg_threaded = 1;
 
-	Thread = thread_init(dbg_msg_thread, 0);
+	Thread = thread_init_named(dbg_msg_thread, 0, "dbg_msg worker");
 	thread_detach(Thread);
 }
 #endif
@@ -645,10 +645,19 @@ int io_flush(IOHANDLE io)
 
 void *thread_init(void (*threadfunc)(void *), void *u)
 {
+	return thread_init_named(threadfunc, u, 0);
+}
+
+void *thread_init_named(void (*threadfunc)(void *), void *u, const char *n)
+{
 #if defined(CONF_FAMILY_UNIX)
 	pthread_t id;
 	if(pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u) == 0)
-		return (void*)id;
+	{
+		if(n && n[0])
+			pthread_setname_np(id, n);
+		return (void *)id;
+	}
 	else
 		return NULL;
 #elif defined(CONF_FAMILY_WINDOWS)

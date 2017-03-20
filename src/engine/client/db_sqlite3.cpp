@@ -111,7 +111,7 @@ CSql::CSql(const char *pFilename)
 
 	m_Lock = lock_create();
 	m_Running = true;
-	thread_init(InitWorker, this);
+	thread_init_named(InitWorker, this, "sqlite");
 }
 
 CSql::~CSql()

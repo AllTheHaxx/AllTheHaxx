@@ -3047,7 +3047,7 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
-	if((m_pInputThread = thread_init(InputThread, this)))
+	if((m_pInputThread = thread_init_named(InputThread, this, "input")))
 		thread_detach(m_pInputThread);
 
 	// connect to the server if wanted
