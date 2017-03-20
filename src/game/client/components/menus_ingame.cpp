@@ -313,12 +313,13 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	if(DoButton_Menu(&s_SnifferSettingsButton, Localize("Network Sniffer"), s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS, &Button, Localize("Packet sniffing settings")))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS ? EXTRAS_NONE : EXTRAS_SNIFFER_SETTINGS;
 
-	// TODO add this back again when it has been done
+#if defined(FEATURE_LUA)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Lua QuickAccess")), &Button, &ButtonBar);
 	static CButtonContainer s_LuaQuickAccessButton;
 	if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "Scripts can create GUIs in here as they like"))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
+#endif
 
 	if(IsDDNet(Client()->GetServerInfo(0)) || IsDDRace(Client()->GetServerInfo(0)))
 	{

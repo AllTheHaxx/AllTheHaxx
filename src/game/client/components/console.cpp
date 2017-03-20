@@ -1561,6 +1561,7 @@ void CGameConsole::PrintLine(int Type, const char *pLine)
 
 int CGameConsole::PrintLuaLine(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	int nargs = lua_gettop(L);
 	if(nargs < 1)
 		return luaL_error(L, "print expects 1 argument or more");
@@ -1586,6 +1587,7 @@ int CGameConsole::PrintLuaLine(lua_State *L)
 	dbg_msg("LUA|console", "%s", aLine);
 
 	CGameConsole::m_pStatLuaConsole->PrintLine(aLine);
+#endif
 	return 0;
 }
 
@@ -1599,8 +1601,10 @@ void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
 	m_LuaConsole.m_LuaHandler.m_FullLine = "";
 	m_LuaConsole.m_LuaHandler.m_pDebugChild = pLF->L();
 
+#if defined(FEATURE_LUA)
 	luaL_loadstring(pLF->L(), "Import(\"debug\")");
 	lua_pcall(pLF->L(), 0, LUA_MULTRET, 0);
+#endif
 
 	m_LuaConsole.PrintLine("> ---------------------------[ DEBUGGER STARTED ]---------------------------");
 	{ char aBuf[256]; str_format(aBuf, sizeof(aBuf), "> The lua debugger was attached to the script '%s'", pLF->GetFilename()); m_LuaConsole.PrintLine(aBuf);}

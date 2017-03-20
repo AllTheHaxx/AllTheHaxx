@@ -581,9 +581,13 @@ CNetObj_PlayerInput* CControls::LuaGetInputData(lua_State *L)
 {
 	CControls *pSelf = CLua::m_pCGameClient->m_pControls;
 
+#if defined(FEATURE_LUA)
 	const int NUM_VCLIENTS = sizeof(pSelf->m_InputData)/sizeof(pSelf->m_InputData[0]);
 	int vclient = (int)luaL_optinteger(L, 1+1, 1);
 	if(vclient < 0 || !(vclient < NUM_VCLIENTS))
 		luaL_error(L, "given VClient index of %d is out of range (allowed: 0-%d)", vclient, NUM_VCLIENTS);
 	return &(pSelf->m_InputData[vclient]);
+#else
+	return &(pSelf->m_InputData[0]);
+#endif
 }

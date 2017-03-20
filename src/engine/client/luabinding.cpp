@@ -10,6 +10,7 @@ int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, 
 {
 	LuaListdirCallbackParams *params = (LuaListdirCallbackParams*)user;
 	lua_State *L = params->L;
+#if defined(FEATURE_LUA)
 
 	lua_getglobal(L, params->aCallbackFunc);
 	lua_pushstring(L, name);
@@ -20,6 +21,9 @@ int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, 
 		ret = round_to_int((float)lua_tonumber(L, -1));
 	lua_pop(L, 1); // pop return
 	return ret;
+#else
+	return 0;
+#endif
 }
 
 CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
@@ -45,6 +49,7 @@ CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
 // global namespace
 int CLuaBinding::LuaImport(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	CLuaFile *pLF = GetLuaFile(L);
 	if(!pLF)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
@@ -106,10 +111,14 @@ int CLuaBinding::LuaImport(lua_State *L)
 	lua_pushboolean(L, (int)ret); // success?
 	lua_pushstring(L, (const char *)aBuf); // actual relative path of the loaded file
 	return 2;
+#else
+	return 0;
+#endif
 }
 
 int CLuaBinding::LuaListdir(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	CLuaFile *pLF = GetLuaFile(L);
 	if(!pLF)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
@@ -132,30 +141,40 @@ int CLuaBinding::LuaListdir(lua_State *L)
 	lua_pop(L, 1); // pop arg1
 	lua_pushnumber(L, ret);
 	return 1;
+#else
+	return 0;
+#endif
 }
 
 int CLuaBinding::LuaKillScript(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	CLuaFile *pLF = GetLuaFile(L);
 	if(!pLF)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
 
 	pLF->Unload();
+#endif
 	return 0;
 }
 
 int CLuaBinding::LuaScriptPath(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	CLuaFile *pLF = GetLuaFile(L);
 	if(!pLF)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
 
 	lua_pushstring(L, pLF->GetFilename());
 	return 1;
+#else
+	return 0;
+#endif
 }
 
 int CLuaBinding::LuaStrIsNetAddr(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	int nargs = lua_gettop(L);
 	if(nargs != 1)
 		return luaL_error(L, "StrIsNetAddr expects 1 argument");
@@ -168,11 +187,15 @@ int CLuaBinding::LuaStrIsNetAddr(lua_State *L)
 
 	lua_pushboolean(L, ret == 0);
 	return 1;
+#else
+	return 0;
+#endif
 }
 
 
 int CLuaBinding::LuaPrintOverride(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	CLuaFile *pLF = GetLuaFile(L);
 	if(!pLF)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
@@ -202,12 +225,14 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 		pGameClient->m_pGameConsole->m_pStatLuaConsole->PrintLine(aMsg);
 
 	dbg_msg(aSys, "%s", aMsg);
+#endif
 
 	return 0;
 }
 
 int CLuaBinding::LuaThrow(lua_State *L)
 {
+#if defined(FEATURE_LUA)
 	CLuaFile *pLF = GetLuaFile(L);
 	if(!pLF)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
@@ -230,6 +255,9 @@ int CLuaBinding::LuaThrow(lua_State *L)
 	lua_pushinteger(L, (lua_Integer)result);
 
 	return 1;
+#else
+	return 0;
+#endif
 }
 
 // external info

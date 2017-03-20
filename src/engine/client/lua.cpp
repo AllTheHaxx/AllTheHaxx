@@ -240,7 +240,9 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 		}
 		else
 		{
+			#if defined(FEATURE_LUA)
 			lua_close(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState);
+			#endif
 			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->InitLua();
 			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_FullLine = "";
 			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = 0;
@@ -292,7 +294,9 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 		//lua_close(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState);
 		//m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->InitLua();
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->LoadLuaFile("data/luabase/events.lua");
+		#if defined(FEATURE_LUA)
 		lua_gc(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState, LUA_GCCOLLECT, 0),
+		#endif
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_FullLine = "";
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = 0;
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_ScopeCount = 0;
@@ -338,6 +342,7 @@ int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown
 
 void CLua::DbgPrintLuaStack(lua_State *L, const char *pNote)
 {
+#if defined(FEATURE_LUA)
 	dbg_msg("lua/debug", "--- BEGIN LUA STACK --- %s", pNote ? pNote : "");
 	for(int i = 1; i <= lua_gettop(L); i++)
 	{
@@ -348,4 +353,5 @@ void CLua::DbgPrintLuaStack(lua_State *L, const char *pNote)
 		);
 	}
 	dbg_msg("lua/debug", "---- END LUA STACK ---- %s", pNote ? pNote : "");
+#endif
 }
