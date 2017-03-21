@@ -1976,7 +1976,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				m_RconAuthed[g_Config.m_ClDummy] = Result;
 			int Old = m_UseTempRconCommands;
 			m_UseTempRconCommands = Unpacker.GetInt();
-			if(Unpacker.Error() != 0)
+			if(Unpacker.Error())
 				m_UseTempRconCommands = 0;
 			if(Old != 0 && m_UseTempRconCommands == 0)
 				m_pConsole->DeregisterTempAll();

@@ -25,6 +25,7 @@
 #include <cstring>
 #include <cstdio>
 #include <string>
+#include <algorithm>
 
 #include <game/client/ui.h>
 
@@ -64,6 +65,7 @@ CGameConsole::CInstance::CInstance(int Type)
 
 	m_aUser[0] = '\0';
 	m_UserGot = false;
+	m_UseUser = false;
 
 	m_IsCommand = false;
 }
@@ -154,10 +156,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			m_pGameConsole->Client()->Rcon(pLine);
 		else
 		{
-			CServerInfo pServerInfo;
-			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
-
-			if(!m_UserGot && IsDDNet(&pServerInfo))
+			if(IsDDNet(m_pGameConsole->Client()->GetServerInfo()) && !m_UserGot && m_UseUser)
 			{
 				m_UserGot = true;
 				str_copy(m_aUser, pLine, sizeof m_aUser);
@@ -441,10 +440,73 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				else
 					m_pSearchString = 0;
 			}
-			else // handle skipping: jump to spaces and special ASCII characters
+			else if(Event.m_Key == KEY_LEFT || Event.m_Key == KEY_RIGHT || Event.m_Key == KEY_BACKSPACE || Event.m_Key == KEY_DELETE)
 			{
+				// handle skipping: jump to spaces and special ASCII characters
 				CLineInput::HandleSkipping(Event, &m_Input);
 			}
+			else if(Event.m_Key == KEY_T && m_Type == CONSOLETYPE_REMOTE) // toggle rcon login mode
+			{
+				m_UseUser ^= true;
+				m_Input.Clear();
+				mem_zerob(m_aUser);
+			}
+			else if(Event.m_Key == KEY_L && m_Type == CONSOLETYPE_REMOTE) // logout from rcon
+			{
+				if(m_pGameConsole->Client()->RconAuthed())
+				{
+					m_pGameConsole->Client()->Rcon("logout");
+					m_UseUser = false;
+					mem_zerob(m_aUser);
+					if(!m_pSearchString)
+						m_Input.Clear();
+				}
+				else
+					PrintLine("Not logged in!");
+			}
+			else if(Event.m_Key == KEY_O) // quick clear
+			{
+				ClearBacklog();
+				if(m_pSearchString)
+					m_Input.Clear();
+			}
+			else if(Event.m_Key == KEY_H) // handle searching
+			{
+				PrintLine("");
+				PrintLine("-------------- BEGIN KEY COMMAND HELP --------------");
+				PrintLine("These commands are in combination with CTRL.");
+				PrintLine("");
+				if(m_pGameConsole->Input()->KeyIsPressed(KEY_LSHIFT)) // verbose mode
+				{
+					PrintLine("H: Show this help text");
+					PrintLine("C: copy command line to clipboard");
+					PrintLine("X: cut commandline to clipboard");
+					PrintLine("V: paste clipboard text");
+				}
+				PrintLine("F: Toggle search mode");
+				PrintLine("O: Clear the current console");
+				if(m_Type == CONSOLETYPE_REMOTE)
+				{
+					PrintLine("L: logout from rcon");
+					PrintLine("T: toggle between user-login (new) and masterpw-login (old) mode (only available on DDNet server)");
+				}
+				if(m_Type == CONSOLETYPE_LUA)
+					PrintLine("Type '!help' to get an overview of special lua console commands");
+				else
+					PrintLine("");
+				PrintLine("--------------- END KEY COMMAND HELP ---------------");
+				PrintLine("");
+			}
+			else if(Event.m_Key != KEY_LCTRL && Event.m_Key != KEY_RCTRL && Event.m_Key != KEY_LSHIFT)
+			{
+				char aLine[256];
+				std::string KeyName(m_pGameConsole->Input()->KeyName(Event.m_Key));
+				std::transform(KeyName.begin(), KeyName.end(), KeyName.begin(), ::toupper);
+				str_format(aLine, sizeof(aLine), "*** unknown key command 'CTRL-%s'. Try CTRL-H", KeyName.c_str());
+				PrintLine(aLine);
+			}
+
+			// end CTRL-keycombos
 		}
 		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
@@ -458,7 +520,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			}
 			else
 			{
-				if(m_Input.GetString()[0] || (IsDDNet(m_pGameConsole->Client()->GetServerInfo()) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
+				if(m_Input.GetString()[0] || (m_UseUser && IsDDNet(m_pGameConsole->Client()->GetServerInfo()) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 				{
 					if(m_Type == CONSOLETYPE_LOCAL || (m_Type == CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()))
 					{
@@ -518,23 +580,25 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		}
 		else if(Event.m_Key == KEY_TAB && !m_pSearchString)
 		{
-			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
+			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || (m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()))
 			{
 				if(m_ReverseTAB)
-					 m_CompletionChosen--;
+					m_CompletionChosen--;
 				else
 					m_CompletionChosen++;
 				m_CompletionEnumerationCount = 0;
-				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_LUA &&
-					m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
+				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask,
+															 m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),
+															 PossibleCommandsCompleteCallback, this);
 
 				// handle wrapping
 				if(m_CompletionEnumerationCount && (m_CompletionChosen >= m_CompletionEnumerationCount || m_CompletionChosen <0))
 				{
 					m_CompletionChosen= (m_CompletionChosen + m_CompletionEnumerationCount) %  m_CompletionEnumerationCount;
 					m_CompletionEnumerationCount = 0;
-					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_Type != CGameConsole::CONSOLETYPE_LUA &&
-						m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
+					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask,
+																 m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),
+																 PossibleCommandsCompleteCallback, this);
 				}
 			}
 		}
@@ -631,7 +695,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			aBuf[i] = 0;
 
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
-				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
+																								m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
 			{
 				m_IsCommand = true;
@@ -705,7 +769,7 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 }
 
 CGameConsole::CGameConsole()
-: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE), m_LuaConsole(CONSOLETYPE_LUA)
+		: m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE), m_LuaConsole(CONSOLETYPE_LUA)
 {
 	m_ConsoleType = CONSOLETYPE_LOCAL;
 	m_ConsoleState = CONSOLE_CLOSED;
@@ -762,8 +826,8 @@ void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
 		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1);
 		pInfo->m_pSelf->Graphics()->TextureSet(-1);
 		pInfo->m_pSelf->Graphics()->QuadsBegin();
-			pInfo->m_pSelf->Graphics()->SetColor(229.0f/255.0f,185.0f/255.0f,4.0f/255.0f,0.85f);
-			pInfo->m_pSelf->RenderTools()->DrawRoundRect(pInfo->m_Cursor.m_X-3, pInfo->m_Cursor.m_Y, tw+5, pInfo->m_Cursor.m_FontSize+4, pInfo->m_Cursor.m_FontSize/3);
+		pInfo->m_pSelf->Graphics()->SetColor(229.0f/255.0f,185.0f/255.0f,4.0f/255.0f,0.85f);
+		pInfo->m_pSelf->RenderTools()->DrawRoundRect(pInfo->m_Cursor.m_X-3, pInfo->m_Cursor.m_Y, tw+5, pInfo->m_Cursor.m_FontSize+4, pInfo->m_Cursor.m_FontSize/3);
 		pInfo->m_pSelf->Graphics()->QuadsEnd();
 
 		// scroll when out of sight
@@ -964,34 +1028,31 @@ void CGameConsole::OnRender()
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
 		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
 
-		CServerInfo pServerInfo;
-		Client()->GetServerInfo(&pServerInfo);
-
 		// render prompt
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
-		const char *pPrompt = "> ";
+		char aPrompt[128] = { ">" };
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
 			if(Client()->State() == IClient::STATE_ONLINE)
 			{
 				if(Client()->RconAuthed())
-					pPrompt = "rcon> ";
+					str_copyb(aPrompt, "rcon>");
 				else
 				{
-					if(IsDDNet(&pServerInfo))
+					if(pConsole->m_UseUser && IsDDNet(Client()->GetServerInfo()))
 					{
 						if(!pConsole->m_UserGot)
-							pPrompt = "Enter Username> ";
+							str_copyb(aPrompt, "[CTRL-T] Enter Username>");
 						else
-							pPrompt = "Enter Password> ";
+							str_formatb(aPrompt, "[CTRL-T] Enter Password for '%s'>", pConsole->m_aUser);
 					}
 					else
-						pPrompt = "Enter Password> ";
+						str_copyb(aPrompt, "Enter Password>");
 				}
 			}
 			else
-				pPrompt = "NOT CONNECTED! ";
+				str_copyb(aPrompt, "NOT CONNECTED!");
 		}
 		else if(m_ConsoleType == CONSOLETYPE_LUA)
 		{
@@ -1000,26 +1061,26 @@ void CGameConsole::OnRender()
 				if(m_LuaConsole.m_LuaHandler.m_pDebugChild)
 				{
 					CLuaFile *pLF = CLuaBinding::GetLuaFile(m_LuaConsole.m_LuaHandler.m_pDebugChild);
-					static char s_aPrompt[128];
-					str_format(s_aPrompt, sizeof(s_aPrompt), "(%s) DEBUGGER> ", pLF->GetFilename()+4);
-					pPrompt = s_aPrompt;
+					str_format(aPrompt, sizeof(aPrompt), "(%s) DEBUGGER>", pLF->GetFilename()+4);
+					str_copyb(aPrompt, aPrompt);
 				}
 				else
-					pPrompt = "Lua> ";
+					str_copyb(aPrompt, "Lua>");
 			}
 			else
-				pPrompt = "Lua disabled. Please enable Lua first. ";
+				str_copyb(aPrompt, "Lua disabled. Please enable Lua first.");
 		}
 		if(m_pSearchString)
-			pPrompt = "[CTRL+F] SEARCHING» ";
+			str_copyb(aPrompt, "[CTRL+F] SEARCHING»");
+		str_appendb(aPrompt, " ");
 
-		//notify the user nothing can be found
+		// notify the user nothing can be found
 		if(m_pSearchString && (pConsole->m_NoFound || pConsole->m_AtEnd == 2))
 		{
 			vec3 crgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 			TextRender()->TextColor(crgb.r, crgb.g, crgb.b, 1);
 		}
-		TextRender()->TextEx(&Cursor, pPrompt, -1);
+		TextRender()->TextEx(&Cursor, aPrompt, -1);
 
 		x = Cursor.m_X;
 
@@ -1039,7 +1100,9 @@ void CGameConsole::OnRender()
 		// hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !IsDDNet(&pServerInfo)) && !m_pSearchString)
+		if(m_ConsoleType == CONSOLETYPE_REMOTE)
+			if(Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && !m_pSearchString &&
+				(IsDDNet(Client()->GetServerInfo()) && pConsole->m_UseUser ? pConsole->m_UserGot : true))
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
