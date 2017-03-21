@@ -518,6 +518,10 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			"You can't shoot others with grenade",
 			"You can shoot others with rifle",
 			"You can't shoot others with rifle",
+			"Timer isn't displayed.",
+			"Timer is displayed in game/round timer.",
+			"Timer is displayed in broadcast.",
+			"Timer is displayed in both game/round timer and broadcast.",
 	};
 
 	if(MsgType == NETMSGTYPE_SV_CHAT)
