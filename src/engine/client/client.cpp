@@ -17,6 +17,7 @@
 #include <base/math.h>
 #include <base/vmath.h>
 #include <base/system.h>
+#include <base/debug.h>
 
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
@@ -3852,10 +3853,12 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	// initialize the debugger
-	CDebugger *pDebugger = new CDebugger();
-#if defined(CONF_FAMILY_UNIX) && defined(FEATURE_DEBUGGER) && !defined(CONF_DEBUG)
-	main_thread_handle = thread_get_current();
-#endif
+//	CDebugger *pDebugger = new CDebugger();
+//#if defined(CONF_FAMILY_UNIX) && defined(FEATURE_DEBUGGER) && !defined(CONF_DEBUG)
+//	main_thread_handle = thread_get_current();
+//#endif
+	init_debugger(argv[0]);
+
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient);
@@ -3998,7 +4001,7 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pEngineMap;
 	delete pEngineMasterServer;
 */
-	mem_free(pDebugger);
+	//XXX mem_free(pDebugger);
 
 	curl_global_cleanup();
 

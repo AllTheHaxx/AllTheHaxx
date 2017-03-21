@@ -369,7 +369,6 @@ void CGameClient::OnConsoleInit()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnConsoleInit();
 
-
 	//
 	Console()->Chain("player_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("player_clan", ConchainSpecialInfoupdate, this);
