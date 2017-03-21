@@ -6,8 +6,6 @@
 
 void CIdentity::OnInit()
 {
-	CALLSTACK_ADD();
-
 	m_aIdentities.clear();
 	Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "identities", FindIDFiles, this);
 	if(!m_aIdentities.size())
@@ -18,8 +16,6 @@ void CIdentity::OnInit()
 
 void CIdentity::SaveIdents()
 {
-	CALLSTACK_ADD();
-
 	int Successful = 0;
 	for(int i = 0; i < NumIdents(); i++)
 	{
@@ -84,8 +80,6 @@ void CIdentity::OnShutdown()
 
 int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CALLSTACK_ADD();
-
 	CIdentity *pSelf = (CIdentity*)pUser;
 	if(str_length(pName) < 4 || IsDir || str_comp(pName+str_length(pName)-3, ".id") != 0)
 		return 0;
@@ -150,4 +144,12 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 	pSelf->m_aIdentities.add(Entry);
 
 	return 0;
+}
+
+void CIdentity::DeleteIdent(int Ident)
+{
+	char aFile[64];
+	str_format(aFile, sizeof(aFile), "identities/%s", m_aIdentities[Ident].m_aFilename);
+	Storage()->RemoveFile(aFile, IStorageTW::TYPE_SAVE);
+	m_aIdentities.remove_index(Ident);
 }

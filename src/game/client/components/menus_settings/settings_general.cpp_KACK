@@ -5,8 +5,6 @@
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	char aBuf[256];
 	CUIRect Label, Button, Game, Client;
 	MainView.HSplitMid(&Client, &Game);

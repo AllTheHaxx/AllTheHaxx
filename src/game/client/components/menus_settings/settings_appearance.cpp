@@ -5,8 +5,6 @@
 
 void CMenus::RenderSettingsAppearance(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	if(m_pfnAppearanceSubpage)
 	{
 		(*this.*m_pfnAppearanceSubpage)(MainView);
@@ -37,24 +35,18 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 void CMenus::RenderSettingsAppearanceHUD(CUIRect MainView) // here will be more tabs and stuff I think
 {
-	CALLSTACK_ADD();
-
 	//RenderTools()->DrawUIRect(&MainView, vec4(1,0,1,1), 0, 0); // debuggi ^^
 	RenderSettingsHUD(MainView);
 }
 
 void CMenus::RenderSettingsAppearanceTexture(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	//RenderTools()->DrawUIRect(&MainView, vec4(0,1,1,1), 0, 0);
 	RenderSettingsTexture(MainView);
 }
 
 void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	enum
 	{
 		PAGE_BASIC = 0,

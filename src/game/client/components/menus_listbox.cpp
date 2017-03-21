@@ -236,8 +236,6 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(CButtonContainer *pBC, bool Sel
 
 int CMenus::UiDoListboxEnd(float *pScrollValue, bool *pItemActivated)
 {
-	CALLSTACK_ADD();
-
 	UI()->ClipDisable();
 	if(pScrollValue)
 		*pScrollValue = gs_ListBoxScrollValue;

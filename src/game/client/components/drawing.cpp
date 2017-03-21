@@ -8,16 +8,12 @@ void CDrawing::OnReset()
 
 void CDrawing::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("draw_set", "i['0'|'1'|'2']", CFGFLAG_CLIENT, ConDrawSet, this, "Set the drawing mode (0 = off, 1 = draw, 2 = erase)");
 	Console()->Register("draw_toggle", "", CFGFLAG_CLIENT, ConDrawToggle, this, "Toggle current drawing mode on/off");
 }
 
 void CDrawing::ConDrawSet(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	if(pResult->GetInteger(0) >= MODE_OFF && pResult->GetInteger(0) <= MODE_LAST)
 		((CDrawing*)pUserData)->m_DrawingMode = pResult->GetInteger(0);
 	else
@@ -26,8 +22,6 @@ void CDrawing::ConDrawSet(IConsole::IResult *pResult, void *pUserData)
 
 void CDrawing::ConDrawToggle(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CDrawing *pSelf = (CDrawing*)pUserData;
 	if(pSelf->m_DrawingMode)
 	{

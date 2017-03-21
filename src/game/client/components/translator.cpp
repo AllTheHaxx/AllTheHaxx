@@ -43,9 +43,7 @@ void CTranslator::TranslationWorker(void *pUser)
 
 	while(pTrans->m_pHandle != NULL)
 	{
-		CALLSTACK_ADD();
-
-		if(pTrans->m_Queue.size())
+			if(pTrans->m_Queue.size())
 		{
 			CTransEntry Entry = pTrans->m_Queue.front();
 
@@ -94,8 +92,6 @@ void CTranslator::TranslationWorker(void *pUser)
 
 void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In)
 {
-	CALLSTACK_ADD();
-
 	// prepare the entry
 	CTransEntry Entry;
 	str_copy(Entry.m_Text, pText, sizeof(Entry.m_Text));

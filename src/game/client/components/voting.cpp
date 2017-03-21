@@ -9,16 +9,12 @@
 #include "hud.h"
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CVoting *pSelf = (CVoting*)pUserData;
 	pSelf->Callvote(pResult->GetString(0), pResult->GetString(1), pResult->NumArguments() > 2 ? pResult->GetString(2) : "");
 }
 
 void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CVoting *pSelf = (CVoting *)pUserData;
 	if(str_comp_nocase(pResult->GetString(0), "yes") == 0)
 		pSelf->Vote(1);
@@ -28,8 +24,6 @@ void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData)
 
 void CVoting::Callvote(const char *pType, const char *pValue, const char *pReason)
 {
-	CALLSTACK_ADD();
-
 	CNetMsg_Cl_CallVote Msg = {0};
 	Msg.m_Type = pType;
 	Msg.m_Value = pValue;
@@ -39,8 +33,6 @@ void CVoting::Callvote(const char *pType, const char *pValue, const char *pReaso
 
 void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote)
 {
-	CALLSTACK_ADD();
-
 	if(ForceVote)
 	{
 		char aBuf[128];
@@ -57,8 +49,6 @@ void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote
 
 void CVoting::CallvoteKick(int ClientID, const char *pReason, bool ForceVote)
 {
-	CALLSTACK_ADD();
-
 	if(ForceVote)
 	{
 		char aBuf[128];
@@ -75,8 +65,6 @@ void CVoting::CallvoteKick(int ClientID, const char *pReason, bool ForceVote)
 
 void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 {
-	CALLSTACK_ADD();
-
 	CVoteOptionClient *pOption = m_pFirst;
 	while(pOption && OptionID >= 0)
 	{
@@ -100,8 +88,6 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 
 void CVoting::RemovevoteOption(int OptionID)
 {
-	CALLSTACK_ADD();
-
 	CVoteOptionClient *pOption = m_pFirst;
 	while(pOption && OptionID >= 0)
 	{
@@ -120,8 +106,6 @@ void CVoting::RemovevoteOption(int OptionID)
 
 void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 {
-	CALLSTACK_ADD();
-
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "add_vote \"%s\" %s", pDescription, pCommand);
 	Client()->Rcon(aBuf);
@@ -129,8 +113,6 @@ void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 
 void CVoting::Vote(int v)
 {
-	CALLSTACK_ADD();
-
 	m_Voted = v;
 	CNetMsg_Cl_Vote Msg = {v};
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
@@ -149,8 +131,6 @@ CVoting::CVoting()
 
 void CVoting::AddOption(const char *pDescription)
 {
-	CALLSTACK_ADD();
-
 	CVoteOptionClient *pOption;
 	if(m_pRecycleFirst)
 	{
@@ -199,16 +179,12 @@ void CVoting::OnReset()
 
 void CVoting::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("callvote", "s[name] s[command] ?r[reason]", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no");
 }
 
 void CVoting::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(MsgType == NETMSGTYPE_SV_VOTESET)
 	{
 		CNetMsg_Sv_VoteSet *pMsg = (CNetMsg_Sv_VoteSet *)pRawMsg;
@@ -301,15 +277,11 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 
 void CVoting::OnRender()
 {
-	CALLSTACK_ADD();
-
 }
 
 
 void CVoting::RenderBars(CUIRect Bars, bool Text)
 {
-	CALLSTACK_ADD();
-
 	RenderTools()->DrawUIRect(&Bars, vec4(0.8f,0.8f,0.8f,0.5f), CUI::CORNER_ALL, Bars.h/3);
 
 	CUIRect Splitter = Bars;

@@ -13,8 +13,6 @@
 
 void CMenus::RenderSettingsTexture(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static int s_ControlPage = 0;
 
 	CUIRect TabBar, Button;
@@ -65,8 +63,6 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 
 void CMenus::RenderSettingsGameskin(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
@@ -117,8 +113,6 @@ void CMenus::RenderSettingsGameskin(CUIRect MainView)
 
 void CMenus::RenderSettingsParticles(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
@@ -170,8 +164,6 @@ void CMenus::RenderSettingsParticles(CUIRect MainView)
 
 void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
@@ -222,8 +214,6 @@ void CMenus::RenderSettingsEmoticons(CUIRect MainView)
 
 void CMenus::RenderSettingsCursor(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector
@@ -274,8 +264,6 @@ void CMenus::RenderSettingsCursor(CUIRect MainView)
 
 void CMenus::RenderSettingsEntities(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin selector

@@ -36,8 +36,6 @@ CLua::~CLua()
 
 void CLua::Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole)
 {
-	CALLSTACK_ADD();
-
 	m_pClient = pClient;
 	m_pCClient = (CClient*)pClient;
 	m_pStorage = pStorage;
@@ -49,8 +47,6 @@ void CLua::Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole)
 
 void CLua::Shutdown()
 {
-	CALLSTACK_ADD();
-
 	SaveAutoloads();
 
 	m_apLuaFiles.delete_all();
@@ -59,7 +55,6 @@ void CLua::Shutdown()
 
 void CLua::SaveAutoloads()
 {
-	CALLSTACK_ADD();
 #if defined(FEATURE_LUA)
 	char aFilePath[768];
 	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
@@ -74,8 +69,6 @@ void CLua::SaveAutoloads()
 
 void CLua::SortLuaFiles()
 {
-	CALLSTACK_ADD();
-
 	const int NUM = m_apLuaFiles.size();
 	if(NUM < 2)
 		return;
@@ -102,16 +95,12 @@ void CLua::SortLuaFiles()
 
 void CLua::SetGameClient(IGameClient *pGameClient)
 {
-	CALLSTACK_ADD();
-
 	CLua::m_pGameClient = pGameClient;
 	CLua::m_pCGameClient = (CGameClient*)pGameClient;
 }
 
 void CLua::AddUserscript(const char *pFilename)
 {
-	CALLSTACK_ADD();
-
 #if defined(FEATURE_LUA)
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0 || // hide config files from the list
@@ -142,15 +131,11 @@ void CLua::AddUserscript(const char *pFilename)
 
 void CLua::LoadFolder()
 {
-	CALLSTACK_ADD();
-
 	LoadFolder("lua");
 }
 
 void CLua::LoadFolder(const char *pFolder)
 {
-	CALLSTACK_ADD();
-
 #if defined(FEATURE_LUA)
 	// get the files which should be auto-loaded from file
 	{
@@ -186,8 +171,6 @@ void CLua::LoadFolder(const char *pFolder)
 
 int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CALLSTACK_ADD();
-
 	if(pName[0] == '.')
 		return 0;
 
@@ -311,8 +294,6 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 
 int CLua::Panic(lua_State *L)
 {
-	CALLSTACK_ADD();
-
 #if defined(FEATURE_LUA)
 	if(g_Config.m_Debug)
 		dbg_msg("LUA/FATAL", "[%s] error in unprotected call resulted in panic, throwing an exception:", CLuaBinding::GetLuaFile(L)->GetFilename());
@@ -324,8 +305,6 @@ int CLua::Panic(lua_State *L)
 
 int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown as an exception)
 {
-	CALLSTACK_ADD();
-
 #if defined(FEATURE_LUA)
 
 	if (!lua_isstring(L, -1))

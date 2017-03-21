@@ -80,8 +80,6 @@ void CControls::OnReset()
 
 void CControls::ResetInput(int dummy)
 {
-	CALLSTACK_ADD();
-
 	m_LastData[dummy].m_Direction = 0;
 	//m_LastData.m_Hook = 0;
 	// simulate releasing the fire button
@@ -97,15 +95,11 @@ void CControls::ResetInput(int dummy)
 
 void CControls::OnRelease()
 {
-	CALLSTACK_ADD();
-
 	//OnReset();
 }
 
 void CControls::OnPlayerDeath()
 {
-	CALLSTACK_ADD();
-
 	if (g_Config.m_ClResetWantedWeaponOnDeath)
 		m_LastData[g_Config.m_ClDummy].m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
 	for( int i = 0; i < NUM_WEAPONS; i++ )
@@ -186,8 +180,6 @@ static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserDat
 
 void CControls::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	// game commands
 	{ static CInputState s_State = {this, &m_InputDirectionLeft[0], &m_InputDirectionLeft[1]}; Console()->Register("+left", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Move left"); }
 	{ static CInputState s_State = {this, &m_InputDirectionRight[0], &m_InputDirectionRight[1]}; Console()->Register("+right", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Move right"); }
@@ -208,8 +200,6 @@ void CControls::OnConsoleInit()
 
 void CControls::OnMessage(int Msg, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(Msg == NETMSGTYPE_SV_WEAPONPICKUP)
 	{
 		CNetMsg_Sv_WeaponPickup *pMsg = (CNetMsg_Sv_WeaponPickup *)pRawMsg;
@@ -222,8 +212,6 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 
 int CControls::SnapInput(int *pData)
 {
-	CALLSTACK_ADD();
-
 	static int64 LastSendTime = 0;
 	bool Send = false;
 
@@ -384,8 +372,6 @@ int CControls::SnapInput(int *pData)
 
 void CControls::OnRender()
 {
-	CALLSTACK_ADD();
-
 	enum {
 		JOYSTICK_RUN_DISTANCE = 65536 / 8,
 		GAMEPAD_DEAD_ZONE = 65536 / 8,
@@ -532,8 +518,6 @@ void CControls::OnRender()
 
 bool CControls::OnMouseMove(float x, float y)
 {
-	CALLSTACK_ADD();
-
 	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED) ||
 		(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_pChat->IsActive()))
 		return false;
@@ -557,8 +541,6 @@ bool CControls::OnMouseMove(float x, float y)
 
 void CControls::ClampMousePos()
 {
-	CALLSTACK_ADD();
-
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
 	{
 		m_MousePos[g_Config.m_ClDummy].x = clamp(m_MousePos[g_Config.m_ClDummy].x, 200.0f, Collision()->GetWidth()*32-200.0f);

@@ -17,8 +17,6 @@
 
 void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CSpectator *pSelf = (CSpectator *)pUserData;
 
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
@@ -29,15 +27,11 @@ void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 
 void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CSpectator *)pUserData)->Spectate(pResult->GetInteger(0));
 }
 
 void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CSpectator *pSelf = (CSpectator *)pUserData;
 	int NewSpectatorID;
 	bool GotNewSpectatorID = false;
@@ -90,8 +84,6 @@ void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 
 void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CSpectator *pSelf = (CSpectator *)pUserData;
 	int NewSpectatorID;
 	bool GotNewSpectatorID = false;
@@ -151,8 +143,6 @@ CSpectator::CSpectator()
 
 void CSpectator::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector");
 	Console()->Register("spectate", "i[spectator-id]", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
 	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
@@ -161,8 +151,6 @@ void CSpectator::OnConsoleInit()
 
 bool CSpectator::OnMouseMove(float x, float y)
 {
-	CALLSTACK_ADD();
-
 	if(!m_Active)
 		return false;
 
@@ -183,15 +171,11 @@ bool CSpectator::OnMouseMove(float x, float y)
 
 void CSpectator::OnRelease()
 {
-	CALLSTACK_ADD();
-
 	OnReset();
 }
 
 void CSpectator::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(!m_Active)
 	{
 		if(m_WasActive)
@@ -479,8 +463,6 @@ void CSpectator::OnReset()
 
 void CSpectator::Spectate(int SpectatorID)
 {
-	CALLSTACK_ADD();
-
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS-1);

@@ -43,8 +43,6 @@ CGhost::CGhost()
 
 void CGhost::AddInfos(CGhostCharacter Player)
 {
-	CALLSTACK_ADD();
-
 	if(!m_Recording)
 		return;
 
@@ -62,8 +60,6 @@ void CGhost::AddInfos(CGhostCharacter Player)
 
 void CGhost::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
@@ -144,8 +140,6 @@ void CGhost::OnRender()
 
 void CGhost::RenderGhost(CGhostCharacter Player, CGhostCharacter Prev, CNetObj_ClientInfo Info)
 {
-	CALLSTACK_ADD();
-
 	char aSkinName[64];
 	IntsToStr(&Info.m_Skin0, 6, aSkinName);
 	int SkinId = m_pClient->m_pSkins->Find(aSkinName);
@@ -225,8 +219,6 @@ void CGhost::RenderGhost(CGhostCharacter Player, CGhostCharacter Prev, CNetObj_C
 
 void CGhost::RenderGhostHook(CGhostCharacter Player, CGhostCharacter Prev)
 {
-	CALLSTACK_ADD();
-
 	if (Prev.m_HookState<=0 || Player.m_HookState<=0)
 		return;
 
@@ -283,8 +275,6 @@ CGhost::CGhostCharacter CGhost::GetGhostCharacter(CNetObj_Character Char)
 
 void CGhost::StartRecord()
 {
-	CALLSTACK_ADD();
-
 	m_Recording = true;
 	m_CurGhost.m_Path.clear();
 	CNetObj_ClientInfo *pInfo = (CNetObj_ClientInfo *) Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_CLIENTINFO, m_pClient->m_Snap.m_LocalClientID);
@@ -294,15 +284,11 @@ void CGhost::StartRecord()
 
 void CGhost::StopRecord()
 {
-	CALLSTACK_ADD();
-
 	m_Recording = false;
 }
 
 void CGhost::StartRender()
 {
-	CALLSTACK_ADD();
-
 	m_CurPos = 0;
 	m_Rendering = true;
 	m_StartRenderTick = Client()->PredGameTick();
@@ -310,15 +296,11 @@ void CGhost::StartRender()
 
 void CGhost::StopRender()
 {
-	CALLSTACK_ADD();
-
 	m_Rendering = false;
 }
 
 void CGhost::Save()
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_ClRaceSaveGhost)
 		return;
 
@@ -420,8 +402,6 @@ void CGhost::Save()
 
 bool CGhost::GetHeader(IOHANDLE *pFile, CGhostHeader *pHeader)
 {
-	CALLSTACK_ADD();
-
 	if(!*pFile)
 		return 0;
 
@@ -445,8 +425,6 @@ bool CGhost::GetHeader(IOHANDLE *pFile, CGhostHeader *pHeader)
 
 bool CGhost::GetInfo(const char* pFilename, CGhostHeader *pHeader)
 {
-	CALLSTACK_ADD();
-
 	char aFilename[256];
 	str_format(aFilename, sizeof(aFilename), "ghosts/%s", pFilename);
 	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorageTW::TYPE_SAVE);
@@ -461,8 +439,6 @@ bool CGhost::GetInfo(const char* pFilename, CGhostHeader *pHeader)
 
 void CGhost::Load(const char* pFilename, int ID)
 {
-	CALLSTACK_ADD();
-
 	char aFilename[256];
 	str_format(aFilename, sizeof(aFilename), "ghosts/%s", pFilename);
 	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorageTW::TYPE_SAVE);
@@ -543,8 +519,6 @@ void CGhost::Load(const char* pFilename, int ID)
 
 void CGhost::Unload(int ID)
 {
-	CALLSTACK_ADD();
-
 	CGhostItem Item;
 	Item.m_ID = ID;
 	m_lGhosts.remove_fast(Item);
@@ -552,22 +526,16 @@ void CGhost::Unload(int ID)
 
 void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CGhost *)pUserData)->StartRender();
 }
 
 void CGhost::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "");
 }
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE || m_pClient->m_Snap.m_SpecInfo.m_Active)
 		return;
 
@@ -625,8 +593,6 @@ void CGhost::OnReset()
 
 void CGhost::OnMapLoad()
 {
-	CALLSTACK_ADD();
-
 	OnReset();
 	m_BestTime = -1;
 	m_lGhosts.clear();

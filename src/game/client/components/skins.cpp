@@ -18,8 +18,6 @@ const char* vanillaSkins[] = {"bluekitty.png", "bluestripe.png", "brownbear.png"
 
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CALLSTACK_ADD();
-
 	int l = str_length(pName);
 	if(l < 4 || IsDir || str_comp(pName+l-4, ".png") != 0)
 		return 0;
@@ -147,16 +145,12 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 void CSkins::OnInit()
 {
-	CALLSTACK_ADD();
-
 	// load skins
 	RefreshSkinList();
 }
 
 void CSkins::RefreshSkinList(bool clear)
 {
-	CALLSTACK_ADD();
-
 	if(clear)
 		Clear();
 
@@ -188,8 +182,6 @@ void CSkins::RefreshSkinList(bool clear)
 
 int CSkins::Num()
 {
-	CALLSTACK_ADD();
-
 	return m_aSkins.size();
 }
 
@@ -200,8 +192,6 @@ const CSkins::CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName)
 {
-	CALLSTACK_ADD();
-
 	for(int i = 0; i < m_aSkins.size(); i++)
 	{
 		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
@@ -212,8 +202,6 @@ int CSkins::Find(const char *pName)
 
 void CSkins::Clear()
 {
-	CALLSTACK_ADD();
-
 	while(m_aSkins.size() > 0)
 	{
 		Graphics()->UnloadTexture(m_aSkins[0].m_OrgTexture);

@@ -21,8 +21,6 @@
 
 void CMenus::ConKeyToggleHotbar(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CMenus *pSelf = (CMenus *)pUserData;
 	if(pSelf->Client()->State() == IClient::STATE_ONLINE)
 	{
@@ -39,8 +37,6 @@ void CMenus::ConKeyToggleHotbar(IConsole::IResult *pResult, void *pUserData)
 
 void CMenus::RenderIdents(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	const int NumIdentities = m_pClient->m_pIdentity->NumIdents();
 	if(NumIdentities == 0)
 		return;
@@ -121,8 +117,6 @@ void CMenus::RenderIdents(CUIRect MainView)
 
 void CMenus::RenderTrans(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button, Label, Rect;
 
 	RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.5f, 0.0f, 0.64f), CUI::CORNER_L, 10.0f);
@@ -219,8 +213,6 @@ void CMenus::RenderTrans(CUIRect MainView)
 
 int CMenus::ListdirCallback(const char *name, int is_dir, int dir_type, void *user)
 {
-	CALLSTACK_ADD();
-
 	if(is_dir || str_length(name) < 9)
 		return 0;
 
@@ -248,8 +240,6 @@ int CMenus::ListdirCallback(const char *name, int is_dir, int dir_type, void *us
 
 void CMenus::RenderCrypt(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static array<std::string> s_RSAKeyList;
 	static bool s_RSAKeyListInited = false;
 	if(!s_RSAKeyListInited)
@@ -358,8 +348,6 @@ void CMenus::RenderCrypt(CUIRect MainView)
 
 void CMenus::RenderHotbar(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	if(!m_HotbarActive)
 	{
 		m_HotbarWasActive = false;

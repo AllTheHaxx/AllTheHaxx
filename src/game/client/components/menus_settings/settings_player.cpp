@@ -4,8 +4,6 @@
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button, Label, Dummy;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 

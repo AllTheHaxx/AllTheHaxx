@@ -5,8 +5,6 @@
 
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button;
 	char aBuf[128];
 	bool CheckSettings = false;

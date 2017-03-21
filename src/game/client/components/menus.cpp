@@ -160,8 +160,6 @@ void CMenusTooltip::OnRender()
 
 void CMenus::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("+hotbar", "", CFGFLAG_CLIENT, ConKeyToggleHotbar, this, "Access the hotbar");
 	Console()->Register("+irc", "", CFGFLAG_CLIENT, ConKeyToggleIRC, this, "Toggle the IRC");
 
@@ -179,8 +177,6 @@ vec4 CMenus::ButtonColorMul(CButtonContainer *pBC)
 
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 {
-	CALLSTACK_ADD();
-
 	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
 
 	Graphics()->QuadsBegin();
@@ -194,8 +190,6 @@ int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 
 int CMenus::DoButton_Toggle(CButtonContainer *pBC, int Checked, const CUIRect *pRect, bool Active, const char *pTooltip)
 {
-	CALLSTACK_ADD();
-
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
 	Graphics()->QuadsBegin();
 	if(!Active)
@@ -219,8 +213,6 @@ int CMenus::DoButton_Toggle(CButtonContainer *pBC, int Checked, const CUIRect *p
 
 int CMenus::DoButton_Menu(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner, vec4 Color)
 {
-	CALLSTACK_ADD();
-
 	float Seconds = 0.6f; //  0.6 seconds for fade
 	float Fade = ButtonFade(pBC, Seconds, Checked);
 	float FadeVal = Fade/Seconds;
@@ -253,8 +245,6 @@ int CMenus::DoButton_Menu(CButtonContainer *pBC, const char *pText, int Checked,
 
 void CMenus::DoButton_KeySelect(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip)
 {
-	CALLSTACK_ADD();
-
 	float Seconds = 0.6f; //  0.6 seconds for fade
 	float Fade = ButtonFade(pBC, Seconds, Checked);
 	float FadeVal = Fade/Seconds;
@@ -275,8 +265,6 @@ void CMenus::DoButton_KeySelect(CButtonContainer *pBC, const char *pText, int Ch
 
 int CMenus::DoButton_MenuTab(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, int Corners, vec4 ColorActive, vec4 ColorInactive, const char *pTooltip)
 {
-	CALLSTACK_ADD();
-
 	if(Checked)
 		RenderTools()->DrawUIRect(pRect, ColorActive, Corners, 10.0f);
 	else if(UI()->MouseInside(pRect))
@@ -303,8 +291,6 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pBC, const char *pText, int Check
 
 int CMenus::DoButton_GridHeader(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, int Corners)
 {
-	CALLSTACK_ADD();
-
 	if(Checked)
 		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), Corners, 5.0f);
 	CUIRect t;
@@ -320,8 +306,6 @@ int CMenus::DoButton_GridHeader(CButtonContainer *pBC, const char *pText, int Ch
 
 int CMenus::DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip, bool Checked, int Corner)
 {
-	CALLSTACK_ADD();
-
 	RenderTools()->DrawUIRect(pRect, vec4(0.0f, 0.0f, 0.0f, 0.25f), Corner, 5.0f);
 
 	CUIRect c = *pRect;
@@ -360,16 +344,12 @@ int CMenus::DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, c
 
 int CMenus::DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner)
 {
-	CALLSTACK_ADD();
-
 	return DoButton_CheckBox_Common(pBC, pText, "", pRect, pTooltip, Checked, Corner);
 }
 
 
 int CMenus::DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner)
 {
-	CALLSTACK_ADD();
-
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d", Checked);
 	return DoButton_CheckBox_Common(pBC, pText, aBuf, pRect, pTooltip, false, Corner);
@@ -377,8 +357,6 @@ int CMenus::DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, i
 
 int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pEmptyText, int Align, const char *pTooltip)
 {
-	CALLSTACK_ADD();
-
 	int Inside = UI()->MouseInside(pRect);
 	bool ReturnValue = false;
 	bool UpdateOffset = false;
@@ -691,8 +669,6 @@ int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, floa
 
 float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value, int LenPercent)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Handle;
 	static float OffsetY;
 
@@ -786,8 +762,6 @@ float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 
 float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value, int LenPercent)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Handle;
 	static float OffsetX;
 
@@ -904,8 +878,6 @@ float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 
 int CMenus::DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, const char *pTooltip)
 {
-	CALLSTACK_ADD();
-
 	// process
 	static const void *pGrabbedID = 0;
 	static bool MouseReleased = true;
@@ -975,8 +947,6 @@ int CMenus::DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, co
 
 int CMenus::RenderMenubar(CUIRect r)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Box = r;
 	CUIRect Button;
 
@@ -1148,8 +1118,6 @@ int CMenus::RenderMenubar(CUIRect r)
 
 float CMenus::DoDropdownMenu(CButtonContainer *pBC, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, void *pArgs, const char *pTooltip)
 {
-	CALLSTACK_ADD();
-
 	CUIRect View = *pRect;
 	CUIRect Header, Label;
 
@@ -1366,8 +1334,6 @@ static const char *s_apSayings[] = {
 
 void CMenus::RenderLoading()
 {
-	CALLSTACK_ADD();
-
 	float Percent = m_LoadCurrent++/(float)m_LoadTotal;
 
 	// need up date this here to get correct
@@ -1489,8 +1455,6 @@ void CMenus::RenderLoading()
 
 void CMenus::RenderNews(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
 	// tabbar
@@ -1589,8 +1553,6 @@ void CMenus::RenderNews(CUIRect MainView)
 
 void CMenus::OnInit()
 {
-	CALLSTACK_ADD();
-
 	if(g_Config.m_ClShowWelcome)
 	{
 		m_Popup = POPUP_LANGUAGE;
@@ -1606,8 +1568,6 @@ void CMenus::OnInit()
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
 {
-	CALLSTACK_ADD();
-
 	// reset active item
 	UI()->SetActiveItem(0);
 
@@ -1620,8 +1580,6 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 
 int CMenus::Render()
 {
-	CALLSTACK_ADD();
-
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
@@ -2335,8 +2293,6 @@ int CMenus::Render()
 
 void CMenus::SetActive(bool Active)
 {
-	CALLSTACK_ADD();
-
 	Input()->SetIMEState(Active);
 	m_MenuActive = Active;
 #if defined(__ANDROID__)
@@ -2373,8 +2329,6 @@ void CMenus::OnReset()
 
 bool CMenus::OnMouseMove(float x, float y)
 {
-	CALLSTACK_ADD();
-
 	if(m_MouseUnlocked)
 		return false;
 
@@ -2409,8 +2363,6 @@ bool CMenus::OnMouseMove(float x, float y)
 
 bool CMenus::OnInput(IInput::CEvent e)
 {
-	CALLSTACK_ADD();
-
 	if(m_MouseUnlocked)
 		return false;
 
@@ -2454,8 +2406,6 @@ bool CMenus::OnInput(IInput::CEvent e)
 
 void CMenus::OnStateChange(int NewState, int OldState)
 {
-	CALLSTACK_ADD();
-
 	// reset active item
 	UI()->SetActiveItem(0);
 	if(m_IRCActive)
@@ -2498,8 +2448,6 @@ extern "C" void font_debug_render();
 
 void CMenus::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
@@ -2656,8 +2604,6 @@ static int gs_TextureBlob = -1;
 
 void CMenus::RenderBackground()
 {
-	CALLSTACK_ADD();
-
 	//Graphics()->Clear(1,1,1);
 	//render_sunrays(0,0);
 	if(gs_TextureBlob == -1)
@@ -2717,8 +2663,6 @@ void CMenus::RenderBackground()
 
 int CMenus::DoButton_CheckBox_DontCare(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect)
 {
-	CALLSTACK_ADD();
-
 	switch(Checked)
 	{
 	case 0:
@@ -2734,8 +2678,6 @@ int CMenus::DoButton_CheckBox_DontCare(CButtonContainer *pBC, const char *pText,
 
 void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 {
-	CALLSTACK_ADD();
-
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
 	static int64 LastLoadRender = 0;
@@ -2789,8 +2731,6 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 
 bool CMenus::LockInput(IInput::CEvent e)
 {
-	CALLSTACK_ADD();
-
 	if(m_HotbarActive || m_IRCActive)
 	{
 		if((e.m_Flags&IInput::FLAG_PRESS)/* && (e.m_Key == KEY_MOUSE_1 || e.m_Key == KEY_MOUSE_2)*/)
@@ -2801,15 +2741,11 @@ bool CMenus::LockInput(IInput::CEvent e)
 
 void CMenus::ToggleMouseMode()
 {
-	CALLSTACK_ADD();
-
 	SetUnlockMouseMode(!m_MouseUnlocked);
 }
 
 void CMenus::SetUnlockMouseMode(bool unlock)
 {
-	CALLSTACK_ADD();
-
 	if((m_MouseUnlocked = unlock))
 		Input()->MouseModeAbsolute();
 	else
@@ -2818,8 +2754,6 @@ void CMenus::SetUnlockMouseMode(bool unlock)
 
 void CMenus::ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CMenus *pSelf = (CMenus *)pUserData;
 
 	if(pResult->GetInteger(0) != 0)

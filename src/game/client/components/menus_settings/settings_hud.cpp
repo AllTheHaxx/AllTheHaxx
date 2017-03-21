@@ -542,8 +542,6 @@ void CMenus::RenderSettingsHUDColors(CUIRect MainView)
 
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Left, Right;
 	static int s_Page = 0;
 

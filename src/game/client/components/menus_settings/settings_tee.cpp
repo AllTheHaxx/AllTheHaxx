@@ -8,8 +8,6 @@
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
 
 	MainView.HSplitTop(10.0f, 0, &MainView);

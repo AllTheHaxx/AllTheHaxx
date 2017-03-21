@@ -2,6 +2,7 @@
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
 #include <game/client/components/console.h>
+#include <engine/storage.h>
 
 #include "luabinding.h"
 

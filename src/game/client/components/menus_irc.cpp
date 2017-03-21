@@ -14,8 +14,6 @@
 
 void CMenus::ConKeyToggleIRC(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CMenus *pSelf = (CMenus *)pUserData;
 	//if(pSelf->Client()->State() == IClient::STATE_ONLINE)
 	{
@@ -28,8 +26,6 @@ void CMenus::ConKeyToggleIRC(IConsole::IResult *pResult, void *pUserData)
 
 bool CMenus::ToggleIRC()
 {
-	CALLSTACK_ADD();
-
 	m_IRCActive ^= 1;
 	if(m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTED)
 	{
@@ -57,8 +53,6 @@ bool CMenus::ToggleIRC()
 // stolen from H-Client :3
 void CMenus::RenderIRC(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static float YOffset = -500.0f; // dunno if a constant is optimal...
 	if(!m_IRCActive)
 	{

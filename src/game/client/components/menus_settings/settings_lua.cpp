@@ -10,8 +10,6 @@
 void CMenus::RenderLoadingLua()
 {
 	return;
-	CALLSTACK_ADD();
-
 	Graphics()->Swap();
 
 	CUIRect Bar, Rect = *UI()->Screen();
@@ -77,8 +75,6 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 
 void CMenus::RenderSettingsLua(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect ListView, Button, BottomBar;
 	static int s_ActiveLuaSettings = -1;
 	static int s_ActiveLuaExceptions = -1;

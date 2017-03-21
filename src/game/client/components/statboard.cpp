@@ -26,36 +26,26 @@ void CStatboard::OnReset()
 
 void CStatboard::OnRelease()
 {
-	CALLSTACK_ADD();
-
 	m_Active = false;
 }
 
 void CStatboard::ConKeyStats(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CStatboard *)pUserData)->m_Active = pResult->GetInteger(0) != 0;
 }
 
 void CStatboard::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("+statboard", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
 }
 
 bool CStatboard::IsActive()
 {
-	CALLSTACK_ADD();
-
 	return m_Active;
 }
 
 void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
@@ -130,8 +120,6 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 
 void CStatboard::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(g_Config.m_ClAutoStatboardScreenshot && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
@@ -151,8 +139,6 @@ void CStatboard::OnRender()
 
 void CStatboard::RenderGlobalStats()
 {
-	CALLSTACK_ADD();
-
 	const float StatboardWidth = 400*3.0f*Graphics()->ScreenAspect();
 	const float StatboardHeight = 400*3.0f;
 	float StatboardContentWidth = 260.0f;
@@ -413,8 +399,6 @@ void CStatboard::RenderGlobalStats()
 
 void CStatboard::AutoStatScreenshot()
 {
-	CALLSTACK_ADD();
-
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Client()->AutoStatScreenshot_Start();
 }

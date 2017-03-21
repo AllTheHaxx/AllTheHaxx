@@ -16,7 +16,6 @@
 
 
 class IClient;
-class IStorageTW;
 class CLua;
 
 class CLuaFile

@@ -5,8 +5,6 @@
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button;
 	MainView.VSplitMid(&MainView, 0);
 	static int s_SndEnable = g_Config.m_SndEnable;

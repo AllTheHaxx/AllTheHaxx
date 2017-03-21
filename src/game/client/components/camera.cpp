@@ -28,8 +28,6 @@ CCamera::CCamera()
 
 void CCamera::OnRender()
 {
-	CALLSTACK_ADD();
-
 	// ------------------ zooming ------------------
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(Client()->GetServerInfo(0)) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
@@ -173,8 +171,6 @@ void CCamera::OnRender()
 
 void CCamera::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
 	Console()->Register("zoom", "?i", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset or set");
@@ -202,24 +198,18 @@ void CCamera::OnReset()
 
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(pSelf->Client()->GetServerInfo(0)) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*ZoomStep;
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(pSelf->Client()->GetServerInfo(0)) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*(1/ZoomStep);
 }
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CCamera *pSelf = (CCamera *)pUserData;
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
@@ -228,8 +218,6 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 
 void CCamera::ConToggleGodlikeSpec(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CCamera *pSelf = (CCamera *)pUserData;
 	pSelf->m_GodlikeSpec ^= true;
 }

@@ -13,30 +13,22 @@
 
 void CMotd::Clear()
 {
-	CALLSTACK_ADD();
-
 	m_ServerMotdTime = 0;
 }
 
 bool CMotd::IsActive()
 {
-	CALLSTACK_ADD();
-
 	return time_get() < m_ServerMotdTime;
 }
 
 void CMotd::OnStateChange(int NewState, int OldState)
 {
-	CALLSTACK_ADD();
-
 	if(OldState == IClient::STATE_ONLINE || OldState == IClient::STATE_OFFLINE)
 		Clear();
 }
 
 void CMotd::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(Client()->State() != IClient::STATE_ONLINE)
 		return;
 
@@ -65,8 +57,6 @@ void CMotd::OnRender()
 
 void CMotd::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
@@ -105,8 +95,6 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 
 bool CMotd::OnInput(IInput::CEvent Event)
 {
-	CALLSTACK_ADD();
-
 	if(IsActive() && (Event.m_Flags&IInput::FLAG_PRESS) && Event.m_Key == KEY_ESCAPE)
 	{
 		Clear();

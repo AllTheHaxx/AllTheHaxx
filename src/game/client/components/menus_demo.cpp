@@ -27,8 +27,6 @@
 
 int CMenus::DoButton_DemoPlayer(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect)
 {
-	CALLSTACK_ADD();
-
 	RenderTools()->DrawUIRect(pRect, vec4(1,1,1, Checked ? 0.10f : 0.5f)*ButtonColorMul(pBC), CUI::CORNER_ALL, 5.0f);
 	UI()->DoLabel(pRect, pText, 14.0f, 0);
 	return UI()->DoButtonLogic(pBC->GetID(), pText, Checked, pRect);
@@ -36,8 +34,6 @@ int CMenus::DoButton_DemoPlayer(CButtonContainer *pBC, const char *pText, int Ch
 
 int CMenus::DoButton_Sprite(CButtonContainer *pBC, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners, const char *pTooltip)
 {
-	CALLSTACK_ADD();
-
 	RenderTools()->DrawUIRect(pRect, Checked ? vec4(1.0f, 1.0f, 1.0f, 0.10f) : vec4(1.0f, 1.0f, 1.0f, 0.5f)*ButtonColorMul(pBC), Corners, 5.0f);
 	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
 	Graphics()->QuadsBegin();
@@ -56,8 +52,6 @@ int CMenus::DoButton_Sprite(CButtonContainer *pBC, int ImageID, int SpriteID, in
 
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 
 	const float SeekBarHeight = 15.0f;
@@ -444,8 +438,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)
 {
-	CALLSTACK_ADD();
-
 	CMenus *pSelf = (CMenus *)pUser;
 	int Length = str_length(pName);
 	if((pName[0] == '.' && (pName[1] == 0 ||
@@ -475,8 +467,6 @@ int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int
 
 void CMenus::DemolistPopulate()
 {
-	CALLSTACK_ADD();
-
 	m_lDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorageTW::TYPE_ALL;
@@ -486,8 +476,6 @@ void CMenus::DemolistPopulate()
 
 void CMenus::DemolistOnUpdate(bool Reset)
 {
-	CALLSTACK_ADD();
-
 	if (Reset)
 		g_Config.m_UiDemoSelected[0] = '\0';
 	else
@@ -517,8 +505,6 @@ void CMenus::DemolistOnUpdate(bool Reset)
 
 void CMenus::RenderDemoList(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static int s_Inited = 0;
 	if(!s_Inited)
 	{

@@ -30,8 +30,6 @@ CScoreboard::CScoreboard()
 
 void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CScoreboard *pSelf = (CScoreboard *)pUserData;
 	CServerInfo Info;
 
@@ -49,15 +47,11 @@ void CScoreboard::OnReset()
 
 void CScoreboard::OnRelease()
 {
-	CALLSTACK_ADD();
-
 	m_Active = false;
 }
 
 void CScoreboard::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(MsgType == NETMSGTYPE_SV_RECORD)
 	{
 		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
@@ -68,15 +62,11 @@ void CScoreboard::OnMessage(int MsgType, void *pRawMsg)
 
 void CScoreboard::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard");
 }
 
 void CScoreboard::RenderGoals(float x, float y, float w)
 {
-	CALLSTACK_ADD();
-
 	float h = 50.0f;
 
 	Graphics()->BlendNormal();
@@ -116,8 +106,6 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 
 void CScoreboard::RenderSpectators(float x, float y, float w)
 {
-	CALLSTACK_ADD();
-
 	float h = 140.0f;
 
 	// background
@@ -165,8 +153,6 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle)
 {
-	CALLSTACK_ADD();
-
 	if(Team == TEAM_SPECTATORS)
 		return;
 
@@ -561,8 +547,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 void CScoreboard::RenderRecordingNotification(float x)
 {
-	CALLSTACK_ADD();
-
 	if(!m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording() &&
 	   !m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording() &&
 	   !m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
@@ -618,8 +602,6 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 void CScoreboard::OnRender()
 {
-	CALLSTACK_ADD();
-
 	static bool ShouldRender = false;
 
 	if(!Active())
@@ -743,8 +725,6 @@ void CScoreboard::OnRender()
 
 bool CScoreboard::Active()
 {
-	CALLSTACK_ADD();
-
 	// if statboard is active dont show scoreboard
 	if(m_pClient->m_pStatboard->IsActive())
 		return false;
@@ -774,8 +754,6 @@ bool CScoreboard::Active()
 
 const char *CScoreboard::GetClanName(int Team)
 {
-	CALLSTACK_ADD();
-
 	int ClanPlayers = 0;
 	const char *pClanName = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)

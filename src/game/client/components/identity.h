@@ -64,13 +64,7 @@ public:
 	// getter and setter functions
 	inline int NumIdents() { return m_aIdentities.size(); }
 	inline void AddIdent(const CIdentEntry& Entry) { m_aIdentities.add_unsorted(Entry); }
-	inline void DeleteIdent(int Ident)
-	{
-		char aFile[64];
-		str_format(aFile, sizeof(aFile), "identities/%s", m_aIdentities[Ident].m_aFilename);
-		Storage()->RemoveFile(aFile, IStorageTW::TYPE_SAVE);
-		m_aIdentities.remove_index(Ident);
-	}
+	void DeleteIdent(int Ident);
 
 	inline int GetIdentID(const char *pName)
 	{

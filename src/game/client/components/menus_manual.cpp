@@ -10,8 +10,6 @@
 
 void CMenus::RenderManual(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	//static int s_SettingsPage = 0;
 
 	// render background

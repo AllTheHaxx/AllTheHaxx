@@ -20,8 +20,6 @@ void CBroadcast::OnReset()
 
 void CBroadcast::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(m_pClient->m_pScoreboard->Active() || m_pClient->m_pMotd->IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 
@@ -38,8 +36,6 @@ void CBroadcast::OnRender()
 
 void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(MsgType == NETMSGTYPE_SV_BROADCAST)
 	{
 		CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;

@@ -123,8 +123,6 @@ void LoadLanguageIndexfile(IStorageTW *pStorage, IConsole *pConsole, sorted_arra
 
 void CMenus::RenderLanguageSelection(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static CButtonContainer s_LanguageList;
 	static int s_SelectedLanguage = 0;
 	static sorted_array<CLanguage> s_Languages;
@@ -196,8 +194,6 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 void CMenus::RenderSettings(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	//static int s_SettingsPage = 0;
 
 	// render background
@@ -292,8 +288,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 void CMenus::RenderSettingsDDNet(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
 
 	bool CheckSettings = false;
@@ -624,8 +618,6 @@ int CMenus::SkinCacheListdirCallback(const char *name, int is_dir, int dir_type,
 
 void CMenus::RenderSettingsIRC(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button;
 	MainView.Margin(5.0f, &MainView);
 
@@ -783,8 +775,6 @@ struct ConfigString : public ConfigVar
 
 void CMenus::RenderSettingsAll(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static array<ConfigInt> s_IntVars;
 	static array<ConfigString> s_StringVars;
 

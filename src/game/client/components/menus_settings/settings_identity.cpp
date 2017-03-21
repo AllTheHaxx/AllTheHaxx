@@ -53,8 +53,6 @@ int CMenus::RenderSettingsIdentLegacy(CUIRect MainView)
 
 void CMenus::RenderSettingsIdent(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static int s_LegacyIsOpen = 0;
 	if(s_LegacyIsOpen)
 	{

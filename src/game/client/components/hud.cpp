@@ -48,8 +48,6 @@ void CHud::OnReset()
 
 void CHud::RenderGameTimer()
 {
-	CALLSTACK_ADD();
-
 	float Half = 300.0f*Graphics()->ScreenAspect()/2.0f;
 
 	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_SUDDENDEATH))
@@ -125,8 +123,6 @@ void CHud::RenderGameTimer()
 
 void CHud::RenderPauseNotification()
 {
-	CALLSTACK_ADD();
-
 	if((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED) &&
 		!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 	{
@@ -139,8 +135,6 @@ void CHud::RenderPauseNotification()
 
 void CHud::RenderSuddenDeath()
 {
-	CALLSTACK_ADD();
-
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_SUDDENDEATH)
 	{
 		float Half = 300.0f*Graphics()->ScreenAspect()/2.0f;
@@ -153,8 +147,6 @@ void CHud::RenderSuddenDeath()
 
 void CHud::RenderScoreHud()
 {
-	CALLSTACK_ADD();
-
 	// render small score hud
 	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 	{
@@ -324,8 +316,6 @@ void CHud::RenderScoreHud()
 
 void CHud::RenderWarmupTimer()
 {
-	CALLSTACK_ADD();
-
 	// render warmup timer
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer > 0 && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME))
 	{
@@ -346,8 +336,6 @@ void CHud::RenderWarmupTimer()
 
 void CHud::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
 {
-	CALLSTACK_ADD();
-
 	float Points[4];
 	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX/100.0f, pGroup->m_ParallaxY/100.0f,
 		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), 1.0f, Points);
@@ -356,8 +344,6 @@ void CHud::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
 
 void CHud::RenderTextInfo()
 {
-	CALLSTACK_ADD();
-
 	if(g_Config.m_ClShowfps)
 	{
 		// calculate avg. fps
@@ -377,8 +363,6 @@ void CHud::RenderTextInfo()
 
 void CHud::RenderConnectionWarning()
 {
-	CALLSTACK_ADD();
-
 	if(Client()->ConnectionProblems())
 	{
 		const char *pText = Localize("Connection Problems...");
@@ -389,8 +373,6 @@ void CHud::RenderConnectionWarning()
 
 void CHud::RenderTeambalanceWarning()
 {
-	CALLSTACK_ADD();
-
 	// render prompt about team-balance
 	if(!m_pClient->m_Snap.m_pGameInfoObj)
 	{
@@ -424,8 +406,6 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::PushNotification(const char *pMsg, vec4 Color)
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_ClNotifications)
 		return;
 
@@ -447,8 +427,6 @@ void CHud::PushNotification(const char *pMsg, vec4 Color)
 
 const char* CHud::GetNotification(int index)
 {
-	CALLSTACK_ADD();
-
 	if(index < m_Notifications.size())
 		return m_Notifications[index].m_aMsg;
 	return 0;
@@ -456,8 +434,6 @@ const char* CHud::GetNotification(int index)
 
 void CHud::RenderNotifications()
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_ClNotifications)
 		return;
 
@@ -520,8 +496,6 @@ void CHud::RenderNotifications()
 
 void CHud::RenderIRCNotifications(CUIRect Rect)
 {
-	CALLSTACK_ADD();
-
 	Rect.HMargin(Rect.h/3.0f, &Rect);
 
 /*	// hack - why?
@@ -554,8 +528,6 @@ void CHud::RenderIRCNotifications(CUIRect Rect)
 
 void CHud::RenderChatBox()
 {
-	CALLSTACK_ADD();
-
 	if (!g_Config.m_ClShowhudChatbox || !m_pClient->m_pChat->Blend())
 		return;
 
@@ -579,8 +551,6 @@ void CHud::RenderChatBox()
 
 void CHud::RenderVoting()
 {
-	CALLSTACK_ADD();
-
 	CUIRect Rect;
 	Rect.x = 0;
 	Rect.y = 60-2;
@@ -712,8 +682,6 @@ void CHud::RenderVoting()
 
 void CHud::RenderCursor()
 {
-	CALLSTACK_ADD();
-
 	if(!m_pClient->m_Snap.m_pLocalCharacter || Client()->State() == IClient::STATE_DEMOPLAYBACK || !g_Config.m_ClShowhudCursor)
 		return;
 
@@ -731,8 +699,6 @@ void CHud::RenderCursor()
 
 void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 {
-	CALLSTACK_ADD();
-
 	if(!pCharacter)
 		return;
 
@@ -914,8 +880,6 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 
 void CHud::RenderSpectatorHud()
 {
-	CALLSTACK_ADD();
-
 	// draw the box
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
@@ -932,8 +896,6 @@ void CHud::RenderSpectatorHud()
 
 void CHud::RenderLocalTime(float x)
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_pScoreboard->Active())
 		return;
 
@@ -958,8 +920,6 @@ void CHud::RenderLocalTime(float x)
 
 void CHud::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(!m_pClient->m_Snap.m_pGameInfoObj)
 		return;
 
@@ -1004,8 +964,6 @@ void CHud::OnRender()
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	if(MsgType == NETMSGTYPE_SV_DDRACETIME)
 	{
 		m_DDRaceTimeReceived = true;
@@ -1067,8 +1025,6 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 
 void CHud::RenderDDRaceEffects()
 {
-	CALLSTACK_ADD();
-
 	// check racestate
 	if(m_FinishTime && m_LastReceivedTimeTick + Client()->GameTickSpeed()*2 < Client()->GameTick())
 	{
@@ -1129,8 +1085,6 @@ void CHud::RenderDDRaceEffects()
 
 void CHud::RenderRecord()
 {
-	CALLSTACK_ADD();
-
 	if(m_ServerRecord > 0 )
 	{
 		char aBuf[64];

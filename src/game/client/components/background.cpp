@@ -36,8 +36,6 @@ CBackground::~CBackground()
 
 void CBackground::OnInit()
 {
-	CALLSTACK_ADD();
-
 	m_pImages->m_pClient = GameClient();
 	m_pLayers->m_pClient = GameClient();
 	Kernel()->ReregisterInterface(static_cast<IEngineMap*>(m_pMap));
@@ -47,8 +45,6 @@ void CBackground::OnInit()
 
 void CBackground::LoadBackground()
 {
-	CALLSTACK_ADD();
-
 	if(time_get()-m_LastLoad < 10*time_freq())
 		return;
 
@@ -84,8 +80,6 @@ void CBackground::LoadBackground()
 
 void CBackground::OnMapLoad()
 {
-	CALLSTACK_ADD();
-
 	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0 || str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();
 }
@@ -93,8 +87,6 @@ void CBackground::OnMapLoad()
 //code is from CMapLayers::OnRender()
 void CBackground::OnRender()
 {
-	CALLSTACK_ADD();
-
 	//probably not the best place for this
 	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();

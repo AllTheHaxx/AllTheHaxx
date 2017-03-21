@@ -20,8 +20,6 @@ CEmoticon::CEmoticon()
 
 void CEmoticon::ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CEmoticon *pSelf = (CEmoticon *)pUserData;
 	if(!pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->Client()->State() == IClient::STATE_ONLINE)
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
@@ -29,15 +27,11 @@ void CEmoticon::ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData)
 
 void CEmoticon::ConEmote(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CEmoticon *)pUserData)->Emote(pResult->GetInteger(0));
 }
 
 void CEmoticon::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("+emote", "", CFGFLAG_CLIENT, ConKeyEmoticon, this, "Open emote selector");
 	Console()->Register("emote", "i[emote-id]", CFGFLAG_CLIENT, ConEmote, this, "Use emote");
 }
@@ -52,15 +46,11 @@ void CEmoticon::OnReset()
 
 void CEmoticon::OnRelease()
 {
-	CALLSTACK_ADD();
-
 	m_Active = false;
 }
 
 bool CEmoticon::OnMouseMove(float x, float y)
 {
-	CALLSTACK_ADD();
-
 	if(!m_Active)
 		return false;
 
@@ -75,16 +65,12 @@ bool CEmoticon::OnMouseMove(float x, float y)
 
 void CEmoticon::DrawCircle(float x, float y, float r, int Segments)
 {
-	CALLSTACK_ADD();
-
 	RenderTools()->DrawCircle(x, y, r, Segments);
 }
 
 
 void CEmoticon::OnRender()
 {
-	CALLSTACK_ADD();
-
 	static float s_Val = 0.0;
 	static float s_aBubbleVal[NUM_EMOTICONS];
 
@@ -253,8 +239,6 @@ void CEmoticon::OnRender()
 
 void CEmoticon::Emote(int Emoticon)
 {
-	CALLSTACK_ADD();
-
 	CNetMsg_Cl_Emoticon Msg;
 	Msg.m_Emoticon = Emoticon;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
@@ -269,7 +253,6 @@ void CEmoticon::Emote(int Emoticon)
 
 void CEmoticon::EyeEmote(int Emote)
 {
-	CALLSTACK_ADD();
 	if(Emote >= NUM_EMOTES)
 		return;
 

@@ -1,6 +1,7 @@
 #include "../menus.h"
 
 #include <engine/keys.h>
+#include <engine/storage.h>
 #include <engine/textrender.h>
 #include <game/localization.h>
 
@@ -93,8 +94,6 @@ const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
 
 void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View)
 {
-	CALLSTACK_ADD();
-
 	for(int i = Start; i < Stop; i++)
 	{
 		CKeyInfo &Key = gs_aKeys[i];
@@ -122,8 +121,6 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View)
 
 void CMenus::RenderSettingsControls(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	// this is kinda slow, but whatever
 	for(int i = 0; i < g_KeyCount; i++)
 		gs_aKeys[i].m_KeyId = 0;
@@ -341,8 +338,6 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 // TODO: move this out of here and there extra key bindings out of there
 void CMenus::RenderSettingsHaxx(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Left, Right, Button;
 	MainView.VSplitMid(&Left, &Right);
 	Left.Margin(5.0f, &Left);

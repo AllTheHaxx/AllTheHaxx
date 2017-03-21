@@ -38,8 +38,6 @@
 
 void CMenus::RenderGame(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button, ButtonBar;
 #if defined(__ANDROID__)
 	MainView.HSplitTop(100.0f, &ButtonBar, &MainView);
@@ -226,8 +224,6 @@ void CMenus::RenderGame(CUIRect MainView)
 
 void CMenus::RenderGameExtra(CUIRect ButtonBar)
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_ClUiShowExtraBar)
 		return;
 
@@ -342,8 +338,6 @@ struct ConfigCreatorEntry
 
 void CMenus::RenderServerConfigCreator(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	CUIRect Button, Button2;
@@ -480,8 +474,6 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 
 void CMenus::RenderSnifferSettings(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button;
 	MainView.VSplitLeft(MainView.w/3, 0, &MainView);
 	MainView.VSplitRight(MainView.w/2, &MainView, 0);
@@ -573,8 +565,6 @@ void CMenus::RenderLuaQuickAccess(CUIRect MainView)
 
 void CMenus::RenderPlayers(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button, Button2, ButtonBar, Options, Player;
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
@@ -811,8 +801,6 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 void CMenus::RenderServerInfo(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	if(!m_pClient->m_Snap.m_pLocalInfo)
 		return;
 
@@ -944,8 +932,6 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 void CMenus::RenderServerControlServer(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static CButtonContainer s_VoteList;
 	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
@@ -993,8 +979,6 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 
 void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 {
-	CALLSTACK_ADD();
-
 	int NumOptions = 0;
 	int Selected = -1;
 	static int aPlayerIDs[MAX_CLIENTS];
@@ -1046,8 +1030,6 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 
 void CMenus::RenderServerControl(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static int s_ControlPage = 0;
 
 	// render background
@@ -1281,8 +1263,6 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Button, Box;
 
 	char aServerAddr[NETADDR_MAXSTRSIZE];
@@ -1505,8 +1485,6 @@ void CMenus::RenderSpoofingGeneral(CUIRect MainView)
 
 void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	int NumOptions = 0;
 	int Selected = -1;
 	static int aPlayerIDs[MAX_CLIENTS];
@@ -1575,8 +1553,6 @@ void CMenus::RenderSpoofingPlayers(CUIRect MainView)
 
 void CMenus::RenderSpoofing(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	static int s_ControlPage = 0;
 
 	// render background
@@ -1914,8 +1890,6 @@ void CMenus::RenderSpoofing(CUIRect MainView)
 // ghost stuff
 int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
-	CALLSTACK_ADD();
-
 	CMenus *pSelf = (CMenus *)pUser;
 	int Length = str_length(pName);
 	if((pName[0] == '.' && (pName[1] == 0 ||
@@ -1939,8 +1913,6 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 
 void CMenus::GhostlistPopulate()
 {
-	CALLSTACK_ADD();
-
 	m_OwnGhost = 0;
 	m_lGhosts.clear();
 	Storage()->ListDirectory(IStorageTW::TYPE_ALL, "ghosts", GhostlistFetchCallback, this);
@@ -1961,8 +1933,6 @@ void CMenus::GhostlistPopulate()
 
 void CMenus::RenderGhost(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	// render background
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 

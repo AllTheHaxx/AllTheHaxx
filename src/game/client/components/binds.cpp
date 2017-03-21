@@ -28,8 +28,6 @@ CBinds::CBinds()
 
 void CBinds::Bind(int KeyID, const char *pStr)
 {
-	CALLSTACK_ADD();
-
 	if(KeyID < 0 || KeyID >= KEY_LAST)
 		return;
 
@@ -45,8 +43,6 @@ void CBinds::Bind(int KeyID, const char *pStr)
 
 bool CBinds::OnInput(IInput::CEvent e)
 {
-	CALLSTACK_ADD();
-
 	// don't handle invalid events and keys that arn't set to anything
 	if(e.m_Key <= 0 || e.m_Key >= KEY_LAST || m_aaKeyBindings[e.m_Key][0] == 0)
 		return false;
@@ -60,16 +56,12 @@ bool CBinds::OnInput(IInput::CEvent e)
 
 void CBinds::UnbindAll()
 {
-	CALLSTACK_ADD();
-
 	for(int i = 0; i < KEY_LAST; i++)
 		m_aaKeyBindings[i][0] = 0;
 }
 
 const char *CBinds::Get(int KeyID)
 {
-	CALLSTACK_ADD();
-
 	if(KeyID > 0 && KeyID < KEY_LAST)
 		return m_aaKeyBindings[KeyID];
 	return "";
@@ -77,8 +69,6 @@ const char *CBinds::Get(int KeyID)
 
 const char *CBinds::GetKey(const char *pBindStr)
 {
-	CALLSTACK_ADD();
-
 	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
 	{
 		const char *pBind = Get(KeyId);
@@ -94,8 +84,6 @@ const char *CBinds::GetKey(const char *pBindStr)
 
 void CBinds::SetDefaults()
 {
-	CALLSTACK_ADD();
-
 	// set default key bindings
 	UnbindAll();
 	Bind(KEY_F1, "toggle_local_console");
@@ -167,8 +155,6 @@ void CBinds::SetDefaults()
 
 void CBinds::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	// bindings
 	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
 	if(pConfig)
@@ -189,8 +175,6 @@ void CBinds::OnConsoleInit()
 
 void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pBinds = (CBinds *)pUserData;
 	const char *pKeyName = pResult->GetString(0);
 	int id = pBinds->GetKeyID(pKeyName);
@@ -238,8 +222,6 @@ void CBinds::ConBindPrint(IConsole::IResult *pResult, void *pUserData)
 
 void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pBinds = (CBinds *)pUserData;
 	const char *pKeyName = pResult->GetString(0);
 	int id = pBinds->GetKeyID(pKeyName);
@@ -258,8 +240,6 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 
 void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pBinds = (CBinds *)pUserData;
 	pBinds->UnbindAll();
 }
@@ -267,8 +247,6 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 
 void CBinds::ConFindBind(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pBinds = (CBinds *)pUserData;
 	char aBuf[1024];
 	for(int i = 0; i < KEY_LAST; i++)
@@ -284,8 +262,6 @@ void CBinds::ConFindBind(IConsole::IResult *pResult, void *pUserData)
 
 void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pBinds = (CBinds *)pUserData;
 	char aBuf[1024];
 	for(int i = 0; i < KEY_LAST; i++)
@@ -302,8 +278,6 @@ void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
 
 void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pBinds = (CBinds *)pUserData;
 	char aBuf[1024];
 	for(int i = 0; i < KEY_LAST; i++)
@@ -317,8 +291,6 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 
 void CBinds::ConDumpFreeKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pBinds = (CBinds *)pUserData;
 
 	int Start = pResult->NumArguments() >= 1 ? pResult->GetInteger(0) : 1;
@@ -351,8 +323,6 @@ void CBinds::ConDumpFreeKeys(IConsole::IResult *pResult, void *pUserData)
 
 int CBinds::GetKeyID(const char *pKeyName)
 {
-	CALLSTACK_ADD();
-
 	// check for numeric
 	if(pKeyName[0] == '&')
 	{
@@ -373,8 +343,6 @@ int CBinds::GetKeyID(const char *pKeyName)
 
 void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CBinds *pSelf = (CBinds *)pUserData;
 
 	char aBuffer[256];
@@ -407,8 +375,6 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 
 void CBinds::SetDDRaceBinds(bool FreeOnly)
 {
-	CALLSTACK_ADD();
-
 	if(!FreeOnly)
 	{
 		Bind(KEY_KP_PLUS, "zoom+");

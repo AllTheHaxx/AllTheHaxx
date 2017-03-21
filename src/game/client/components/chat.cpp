@@ -86,15 +86,11 @@ void CChat::OnReset()
 
 void CChat::OnRelease()
 {
-	CALLSTACK_ADD();
-
 	m_Show = false;
 }
 
 void CChat::OnStateChange(int NewState, int OldState)
 {
-	CALLSTACK_ADD();
-
 	if(OldState <= IClient::STATE_CONNECTING)
 	{
 		m_Mode = MODE_NONE;
@@ -109,22 +105,16 @@ void CChat::OnStateChange(int NewState, int OldState)
 
 void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CChat*)pUserData)->Say(0, pResult->GetString(0));
 }
 
 void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CChat*)pUserData)->Say(1, pResult->GetString(0));
 }
 
 void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	const char *pMode = pResult->GetString(0);
 	if(str_comp(pMode, "all") == 0)
 		((CChat*)pUserData)->EnableMode(0);
@@ -143,15 +133,11 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CChat *)pUserData)->m_Show = pResult->GetInteger(0) != 0;
 }
 
 void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	if(pResult->GetInteger(1) % 2 == 0)
 	{
 		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "please use a odd number as exponent.");
@@ -162,22 +148,16 @@ void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConSaveKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CChat *)pUserData)->SaveKeys(((CChat *)pUserData)->m_pKeyPair, pResult->GetString(0));
 }
 
 void CChat::ConLoadKeys(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	((CChat *)pUserData)->LoadKeys(pResult->GetString(0));
 }
 
 void CChat::OnConsoleInit()
 {
-	CALLSTACK_ADD();
-
 	Console()->Register("say", "r[message]", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
 	Console()->Register("say_team", "r[message]", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
 	Console()->Register("chat", "s['all'|'team'|'hidden'|'crypt'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
@@ -190,8 +170,6 @@ void CChat::OnConsoleInit()
 
 bool CChat::OnInput(IInput::CEvent Event)
 {
-	CALLSTACK_ADD();
-
 	if(m_Mode == MODE_NONE)
 		return false;
 
@@ -459,8 +437,6 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 void CChat::EnableMode(int Team)
 {
-	CALLSTACK_ADD();
-
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
@@ -485,8 +461,6 @@ void CChat::EnableMode(int Team)
 
 void CChat::OnMessage(int MsgType, void *pRawMsg)
 {
-	CALLSTACK_ADD();
-
 	static const char *apNotificationMsgs[] = {
 			"You are now in a solo part.",
 			"You are now out of the solo part.",
@@ -618,8 +592,6 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
-	CALLSTACK_ADD();
-
 	const char *pHL = str_find_nocase(pLine, pName);
 
 	if (pHL)
@@ -636,8 +608,6 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 
 void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 {
-	CALLSTACK_ADD();
-
 	if(!pLine || pLine[0] == '\0' || ClientID >= MAX_CLIENTS)
 		return;
 
@@ -830,8 +800,6 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 
 void CChat::OnRender()
 {
-	CALLSTACK_ADD();
-
 	if(TranslatorAvailable())
 	{
 		if(m_pTranslator->GetTranslation())
@@ -1106,8 +1074,6 @@ void CChat::OnRender()
 
 bool CChat::HandleTCommands(const char *pMsg)
 {
-	CALLSTACK_ADD();
-
 	if(!TranslatorAvailable() || !g_Config.m_ClTransChatCmds || !(pMsg[0] == '$' && pMsg[1] == '$'))
 		return false;
 
@@ -1181,8 +1147,6 @@ bool CChat::HandleTCommands(const char *pMsg)
 
 void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 {
-	CALLSTACK_ADD();
-
 	if(!pLine)
 		return;
 
@@ -1243,16 +1207,12 @@ void CChat::SayLua(int Team, const char *pLine, bool NoTrans)
 
 void CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like 512 bytes and Exp = 3
 {
-	CALLSTACK_ADD();
-
 	m_pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
 	m_GotKeys = true;
 }
 
 char *CChat::ReadPubKey(RSA *pKeyPair)
 {
-	CALLSTACK_ADD();
-
 	BIO *pBio = BIO_new(BIO_s_mem());
 	PEM_write_bio_RSAPublicKey(pBio, pKeyPair);
 
@@ -1265,8 +1225,6 @@ char *CChat::ReadPubKey(RSA *pKeyPair)
 
 char *CChat::ReadPrivKey(RSA *pKeyPair)
 {
-	CALLSTACK_ADD();
-
 	BIO *pBio = BIO_new(BIO_s_mem());
 	PEM_write_bio_RSAPrivateKey(pBio, pKeyPair, NULL, NULL, 0, NULL, NULL);
 
@@ -1279,8 +1237,6 @@ char *CChat::ReadPrivKey(RSA *pKeyPair)
 
 char *CChat::EncryptMsg(const char *pMsg)
 {
-	CALLSTACK_ADD();
-
 	if(!m_GotKeys)
 	{
 		m_pClient->m_pHud->PushNotification("Generate or load keys first!");
@@ -1309,8 +1265,6 @@ char *CChat::EncryptMsg(const char *pMsg)
 
 char *CChat::DecryptMsg(const char *pMsg)
 {
-	CALLSTACK_ADD();
-
 	if(!m_GotKeys)
 		return 0;
 
@@ -1344,8 +1298,6 @@ char *CChat::DecryptMsg(const char *pMsg)
 
 void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 {
-	CALLSTACK_ADD();
-
 	if(!m_GotKeys)
 	{
 		m_pClient->m_pHud->PushNotification("No keys to save!");
@@ -1391,8 +1343,6 @@ void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
 
 void CChat::LoadKeys(const char *pKeyName)
 {
-	CALLSTACK_ADD();
-
 	m_pKeyPair = RSA_new();
 
 	char aPubKey[256];
@@ -1434,8 +1384,6 @@ void CChat::LoadKeys(const char *pKeyName)
 
 void CChat::SayChat(const char *pLine)
 {
-	CALLSTACK_ADD();
-
 	if(!pLine || str_length(pLine) < 1)
 		return;
 

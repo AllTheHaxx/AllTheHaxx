@@ -19,32 +19,24 @@ CFriends::CFriends()
 
 void CFriends::ConAddFriend(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CFriends *pSelf = (CFriends *)pUserData;
 	pSelf->AddFriend(pResult->GetString(0), pResult->GetString(1));
 }
 
 void CFriends::ConRemoveFriend(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CFriends *pSelf = (CFriends *)pUserData;
 	pSelf->RemoveFriend(pResult->GetString(0), pResult->GetString(1));
 }
 
 void CFriends::ConFriends(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CFriends *pSelf = (CFriends *)pUserData;
 	pSelf->Friends();
 }
 
 void CFriends::Init(bool Foes)
 {
-	CALLSTACK_ADD();
-
 	m_Foes = Foes;
 
 	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
@@ -76,8 +68,6 @@ const CFriendInfo *CFriends::GetFriend(int Index) const
 
 int CFriends::GetFriendState(const char *pName, const char *pClan) const
 {
-	CALLSTACK_ADD();
-
 	int Result = FRIEND_NO;
 	unsigned NameHash = str_quickhash(pName);
 	unsigned ClanHash = str_quickhash(pClan);
@@ -99,8 +89,6 @@ int CFriends::GetFriendState(const char *pName, const char *pClan) const
 
 bool CFriends::IsFriend(const char *pName, const char *pClan, bool PlayersOnly) const
 {
-	CALLSTACK_ADD();
-
 	unsigned NameHash = str_quickhash(pName);
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
@@ -114,8 +102,6 @@ bool CFriends::IsFriend(const char *pName, const char *pClan, bool PlayersOnly) 
 
 void CFriends::AddFriend(const char *pName, const char *pClan)
 {
-	CALLSTACK_ADD();
-
 	if(m_NumFriends == MAX_FRIENDS || (pName[0] == 0 && pClan[0] == 0))
 		return;
 
@@ -137,8 +123,6 @@ void CFriends::AddFriend(const char *pName, const char *pClan)
 
 void CFriends::RemoveFriend(const char *pName, const char *pClan)
 {
-	CALLSTACK_ADD();
-
 	unsigned NameHash = str_quickhash(pName);
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
@@ -153,8 +137,6 @@ void CFriends::RemoveFriend(const char *pName, const char *pClan)
 
 void CFriends::RemoveFriend(int Index)
 {
-	CALLSTACK_ADD();
-
 	if(Index >= 0 && Index < m_NumFriends)
 	{
 		mem_move(&m_aFriends[Index], &m_aFriends[Index+1], sizeof(CFriendInfo)*(m_NumFriends-(Index+1)));
@@ -164,8 +146,6 @@ void CFriends::RemoveFriend(int Index)
 
 void CFriends::Friends()
 {
-	CALLSTACK_ADD();
-
 	char aBuf[128];
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
@@ -180,8 +160,6 @@ void CFriends::Friends()
 
 void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 {
-	CALLSTACK_ADD();
-
 	CFriends *pSelf = (CFriends *)pUserData;
 	char aBuf[128];
 	const char *pEnd = aBuf+sizeof(aBuf)-4;

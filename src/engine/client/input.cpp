@@ -22,8 +22,6 @@
 
 void CInput::AddEvent(char *pText, int Key, int Flags)
 {
-	CALLSTACK_ADD();
-
 	if(m_NumEvents != INPUT_BUFFER_SIZE)
 	{
 		m_aInputEvents[m_NumEvents].m_Key = Key;
@@ -59,8 +57,6 @@ CInput::CInput()
 
 void CInput::Init()
 {
-	CALLSTACK_ADD();
-
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 
 	MouseModeRelative();
@@ -68,8 +64,6 @@ void CInput::Init()
 
 void CInput::MouseRelative(float *x, float *y)
 {
-	CALLSTACK_ADD();
-
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return;
 
@@ -91,8 +85,6 @@ void CInput::MouseRelative(float *x, float *y)
 
 void CInput::MouseModeAbsolute()
 {
-	CALLSTACK_ADD();
-
 	m_InputGrabbed = 0;
 	SDL_SetRelativeMouseMode(SDL_FALSE);
 	Graphics()->SetWindowGrab(false);
@@ -100,8 +92,6 @@ void CInput::MouseModeAbsolute()
 
 void CInput::MouseModeRelative()
 {
-	CALLSTACK_ADD();
-
 	m_InputGrabbed = 1;
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	Graphics()->SetWindowGrab(true);
@@ -125,8 +115,6 @@ bool CInput::NativeMousePressed(int index)
 
 int CInput::MouseDoubleClick()
 {
-	CALLSTACK_ADD();
-
 	if(m_ReleaseDelta >= 0 && m_ReleaseDelta < (time_freq() / 3))
 	{
 		m_LastRelease = 0;
@@ -138,8 +126,6 @@ int CInput::MouseDoubleClick()
 
 const char* CInput::GetClipboardText()
 {
-	CALLSTACK_ADD();
-
 	if(m_pClipboardText)
 	{
 		SDL_free(m_pClipboardText);
@@ -150,15 +136,11 @@ const char* CInput::GetClipboardText()
 
 void CInput::SetClipboardText(const char *Text)
 {
-	CALLSTACK_ADD();
-
 	SDL_SetClipboardText(Text);
 }
 
 void CInput::Clear()
 {
-	CALLSTACK_ADD();
-
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	m_NumEvents = 0;
@@ -166,15 +148,11 @@ void CInput::Clear()
 
 bool CInput::KeyState(int Key) const
 {
-	CALLSTACK_ADD();
-
 	return m_aInputState[Key>=KEY_MOUSE_1 ? Key : SDL_GetScancodeFromKey(KeyToKeycode(Key))];
 }
 
 void CInput::NextFrame()
 {
-	CALLSTACK_ADD();
-
 	int i;
 	const Uint8 *pState = SDL_GetKeyboardState(&i);
 	if(i >= KEY_LAST)
@@ -214,8 +192,6 @@ int CInput::GetEditingCursor()
 
 int CInput::Update()
 {
-	CALLSTACK_ADD();
-
 	// keep the counter between 1..0xFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter%0xFFFF)+1;
 
@@ -396,8 +372,6 @@ int CInput::Update()
 
 int CInput::VideoRestartNeeded()
 {
-	CALLSTACK_ADD();
-
 	if( m_VideoRestartNeeded )
 	{
 		m_VideoRestartNeeded = 0;

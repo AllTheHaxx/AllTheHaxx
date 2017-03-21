@@ -4,8 +4,6 @@
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
-	CALLSTACK_ADD();
-
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
 	MainView.HSplitTop(180.0f, &Game, &Client);
 	Client.HSplitTop(160.0f, &Client, &AutoReconnect);

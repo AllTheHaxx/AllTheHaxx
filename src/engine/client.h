@@ -21,7 +21,6 @@ enum
 	RECORDER_MAX=3,
 };
 
-extern CCallstack gDebugInfo;
 class IClient : public IInterface
 {
 	MACRO_INTERFACE("client", 0)

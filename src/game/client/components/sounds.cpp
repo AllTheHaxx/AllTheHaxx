@@ -40,8 +40,6 @@ static int LoadSoundsThread(void *pUser)
 
 int CSounds::GetSampleId(int SetId)
 {
-	CALLSTACK_ADD();
-
 	if(!g_Config.m_SndEnable || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
 		return -1;
 
@@ -65,8 +63,6 @@ int CSounds::GetSampleId(int SetId)
 
 void CSounds::OnInit()
 {
-	CALLSTACK_ADD();
-
 	// setup sound channels
 	m_MapSoundVolume = g_Config.m_SndMapSoundVolume/100.0f;
 
@@ -108,16 +104,12 @@ void CSounds::OnReset()
 
 void CSounds::OnStateChange(int NewState, int OldState)
 {
-	CALLSTACK_ADD();
-
 	if(NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
 		OnReset();
 }
 
 void CSounds::OnRender()
 {
-	CALLSTACK_ADD();
-
 	// check for sound initialisation
 	if(m_WaitForSoundJob)
 	{
@@ -154,8 +146,6 @@ void CSounds::OnRender()
 
 void CSounds::ClearQueue()
 {
-	CALLSTACK_ADD();
-
 	mem_zero(m_aQueue, sizeof(m_aQueue));
 	m_QueuePos = 0;
 	m_QueueWaitTime = time_get();
@@ -163,8 +153,6 @@ void CSounds::ClearQueue()
 
 void CSounds::Enqueue(int Channel, int SetId)
 {
-	CALLSTACK_ADD();
-
 	// add sound to the queue
 	if(m_QueuePos < QUEUE_SIZE)
 	{
@@ -178,8 +166,6 @@ void CSounds::Enqueue(int Channel, int SetId)
 
 void CSounds::PlayAndRecord(int Chn, int SetId, float Vol, vec2 Pos)
 {
-	CALLSTACK_ADD();
-
 	CNetMsg_Sv_SoundGlobal Msg;
 	Msg.m_SoundID = SetId;
 	Client()->SendPackMsg(&Msg, MSGFLAG_NOSEND|MSGFLAG_RECORD);
@@ -189,8 +175,6 @@ void CSounds::PlayAndRecord(int Chn, int SetId, float Vol, vec2 Pos)
 
 void CSounds::Play(int Chn, int SetId, float Vol)
 {
-	CALLSTACK_ADD();
-
 	if(Chn == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 
@@ -207,8 +191,6 @@ void CSounds::Play(int Chn, int SetId, float Vol)
 
 void CSounds::PlayAt(int Chn, int SetId, float Vol, vec2 Pos)
 {
-	CALLSTACK_ADD();
-
 	if(Chn == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 
@@ -225,8 +207,6 @@ void CSounds::PlayAt(int Chn, int SetId, float Vol, vec2 Pos)
 
 void CSounds::Stop(int SetId)
 {
-	CALLSTACK_ADD();
-
 	if(m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
 		return;
 
