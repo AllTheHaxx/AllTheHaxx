@@ -160,7 +160,7 @@ public:
 	virtual void Rcon(const char *pLine) = 0;
 
 	// server info
-	virtual class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo) = 0;
+	virtual class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo = 0) = 0;
 
 	virtual void CheckVersionUpdate() = 0;
 

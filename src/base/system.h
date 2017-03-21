@@ -1112,6 +1112,24 @@ void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data
 #define str_hex_simpleb(BUF, DATA, DATASIZE) str_hex_simple(BUF, sizeof(BUF), DATA, DATASIZE)
 
 /*
+	Function: str_hex_decode
+		Takes a hex string and returns a byte array.
+
+		Parameters:
+			dst - Buffer for the byte array
+			dst_size - size of the buffer
+			data - String to decode
+
+		Returns:
+			2 - String doesn't exactly fit the buffer
+			1 - Invalid character in string
+			0 - Success
+
+		Remarks:
+			- The contents of the buffer is only valid on success
+*/
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
+/*
 	Function: str_timestamp
 		Copies a time stamp in the format year-month-day_hour-minute-second to the string.
 
