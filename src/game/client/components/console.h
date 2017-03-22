@@ -48,9 +48,6 @@ class CGameConsole : public CComponent
 		bool m_ReverseTAB;
 		bool m_CTRLPressed;
 
-		char m_aUser[32];
-		bool m_UserGot;
-		bool m_UseUser;
 
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
@@ -84,6 +81,29 @@ class CGameConsole : public CComponent
 		} m_LuaHandler;
 
 		bool LoadLuaFile(const char *pFile);
+
+		bool UserAuthAvailable() const;
+		bool UserGot() const { return m_aUser[0] != '\0'; }
+//		void SetUser(const char *pName) const
+//		{
+//			if(!pName || pName[0] == '\0')
+//				m_aUser[0] = 1;
+//			else
+//				str_copyb(m_aUser, pName);
+//		}
+		const char *GetUser() const
+		{
+			if(m_aUser[0] == 1)
+				return "";
+			else
+				return m_aUser;
+		}
+		bool UsingUserAuth() const { return m_UseUser; }
+		void ResetRconLogin();
+
+	private:
+		char m_aUser[64];
+		bool m_UseUser;
 	};
 
 	class IConsole *m_pConsole;

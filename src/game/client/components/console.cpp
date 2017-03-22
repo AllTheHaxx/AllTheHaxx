@@ -64,7 +64,6 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CTRLPressed = false;
 
 	m_aUser[0] = '\0';
-	m_UserGot = false;
 	m_UseUser = false;
 
 	m_IsCommand = false;
@@ -156,15 +155,18 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			m_pGameConsole->Client()->Rcon(pLine);
 		else
 		{
-			if(IsDDNet(m_pGameConsole->Client()->GetServerInfo()) && !m_UserGot && m_UseUser)
+			// handle rcon login information
+			if(UsingUserAuth() && !UserGot())
 			{
-				m_UserGot = true;
-				str_copy(m_aUser, pLine, sizeof m_aUser);
+				if(str_length(pLine) > 0)
+					str_copyb(m_aUser, pLine);
+				else
+					m_aUser[0] = 1; // hack: set the empty-user flag
 			}
 			else
 			{
-				m_pGameConsole->Client()->RconAuth(m_aUser, pLine);
-				m_UserGot = false;
+				m_pGameConsole->Client()->RconAuth(GetUser(), pLine);
+				ResetRconLogin();
 			}
 		}
 	}
@@ -445,19 +447,26 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				// handle skipping: jump to spaces and special ASCII characters
 				CLineInput::HandleSkipping(Event, &m_Input);
 			}
-			else if(Event.m_Key == KEY_T && m_Type == CONSOLETYPE_REMOTE) // toggle rcon login mode
+			else if(Event.m_Key == KEY_T && m_Type == CONSOLETYPE_REMOTE && !m_pGameConsole->Client()->RconAuthed()) // toggle rcon login mode
 			{
-				m_UseUser ^= true;
-				m_Input.Clear();
-				mem_zerob(m_aUser);
+				if(UserAuthAvailable() || m_UseUser || (!m_UseUser && m_pGameConsole->Input()->KeyIsPressed(KEY_LSHIFT)))
+				{
+					m_UseUser ^= true;
+					m_Input.Clear();
+					mem_zerob(m_aUser);
+				}
+				else
+				{
+					m_UseUser = false;
+					PrintLine("User specific auth is only available on DDNet (use CTRL-SHIFT-T to force it)");
+				}
 			}
 			else if(Event.m_Key == KEY_L && m_Type == CONSOLETYPE_REMOTE) // logout from rcon
 			{
 				if(m_pGameConsole->Client()->RconAuthed())
 				{
 					m_pGameConsole->Client()->Rcon("logout");
-					m_UseUser = false;
-					mem_zerob(m_aUser);
+					ResetRconLogin();
 					if(!m_pSearchString)
 						m_Input.Clear();
 				}
@@ -488,7 +497,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				if(m_Type == CONSOLETYPE_REMOTE)
 				{
 					PrintLine("L: logout from rcon");
-					PrintLine("T: toggle between user-login (new) and masterpw-login (old) mode (only available on DDNet server)");
+					PrintLine("T: toggle between user-login (new) and masterpw-login (old) - only available on DDNet server");
 				}
 				if(m_Type == CONSOLETYPE_LUA)
 					PrintLine("Type '!help' to get an overview of special lua console commands");
@@ -520,7 +529,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			}
 			else
 			{
-				if(m_Input.GetString()[0] || (m_UseUser && IsDDNet(m_pGameConsole->Client()->GetServerInfo()) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
+				if(m_Input.GetString()[0] || (UsingUserAuth() && !m_pGameConsole->Client()->RconAuthed() && !UserGot())) // the second part allows for empty user names
 				{
 					if(m_Type == CONSOLETYPE_LOCAL || (m_Type == CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed()))
 					{
@@ -528,7 +537,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 						if(m_History.Last() == NULL || str_comp(m_History.Last(), m_Input.GetString()) != 0)
 						{
 							char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
-							mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
+							mem_copy(pEntry, m_Input.GetString(), (unsigned int)(m_Input.GetLength() + 1));
 						}
 					}
 					else if(m_Type == CONSOLETYPE_LUA)
@@ -540,8 +549,8 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 						Complete.append(m_Input.GetString());
 
 						//add this to the history :3
-						char *pEntry = m_History.Allocate(Complete.size()+1);
-						mem_copy(pEntry, Complete.c_str(), Complete.size()+1);
+						char *pEntry = m_History.Allocate((int)(Complete.size() + 1));
+						mem_copy(pEntry, Complete.c_str(), (unsigned int)(Complete.size() + 1));
 					}
 					ExecuteLine(m_Input.GetString());
 					m_Input.Clear();
@@ -766,6 +775,17 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 #else
 	return false;
 #endif
+}
+
+bool CGameConsole::CInstance::UserAuthAvailable() const
+{
+	return IsDDNet(m_pGameConsole->Client()->GetServerInfo());
+}
+
+void CGameConsole::CInstance::ResetRconLogin()
+{
+	mem_zerob(m_aUser);
+	m_UseUser = false;
 }
 
 CGameConsole::CGameConsole()
@@ -1040,12 +1060,12 @@ void CGameConsole::OnRender()
 					str_copyb(aPrompt, "rcon>");
 				else
 				{
-					if(pConsole->m_UseUser && IsDDNet(Client()->GetServerInfo()))
+					if(pConsole->UsingUserAuth())
 					{
-						if(!pConsole->m_UserGot)
+						if(!pConsole->UserGot())
 							str_copyb(aPrompt, "[CTRL-T] Enter Username>");
 						else
-							str_formatb(aPrompt, "[CTRL-T] Enter Password for '%s'>", pConsole->m_aUser);
+							str_formatb(aPrompt, "[CTRL-T] Enter Password for '%s'>", pConsole->GetUser());
 					}
 					else
 						str_copyb(aPrompt, "Enter Password>");
@@ -1102,7 +1122,7 @@ void CGameConsole::OnRender()
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 			if(Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && !m_pSearchString &&
-				(IsDDNet(Client()->GetServerInfo()) && pConsole->m_UseUser ? pConsole->m_UserGot : true))
+				(pConsole->UsingUserAuth() ? pConsole->UserGot() : true))
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
