@@ -160,15 +160,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle mousewheel independent of active menu
-	if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && m_pClient->m_pGameConsole->IsClosed())
+	for(int i = 0; i < m_NumInputEvents; i++)
 	{
-		DemoPlayer()->SetSpeedIndex(+1);
-		LastSpeedChange = time_get();
-	}
-	else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && m_pClient->m_pGameConsole->IsClosed())
-	{
-		DemoPlayer()->SetSpeedIndex(-1);
-		LastSpeedChange = time_get();
+		if(m_aInputEvents[i].m_Key == KEY_MOUSE_WHEEL_UP)
+		{
+			DemoPlayer()->SetSpeedIndex(+1);
+			LastSpeedChange = time_get();
+		}
+		else if(m_aInputEvents[i].m_Key == KEY_MOUSE_WHEEL_DOWN)
+		{
+			DemoPlayer()->SetSpeedIndex(-1);
+			LastSpeedChange = time_get();
+		}
 	}
 
 	TotalHeight = SeekBarHeight+ButtonbarHeight+NameBarHeight+Margins*3;
@@ -281,7 +284,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			else
 			{
 				static float PrevAmount = 0.0f;
-				float Amount = (UI()->MouseX()-SeekBar.x)/(float)SeekBar.w;
+				float Amount = (UI()->MouseX()-SeekBar.x)/SeekBar.w;
 
 				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{
@@ -365,7 +368,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SlowDownButton;
-	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 		DecreaseDemoSpeed = true;
 
 	// fastforward
@@ -378,7 +381,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// speed meter
 	ButtonBar.VSplitLeft(Margins*3, 0, &ButtonBar);
 	char aBuffer[64];
-	if(pInfo->m_Speed >= 1.0f)
+	if(pInfo->m_Speed >= 1.0f && pInfo->m_Speed != 1.5f)
 		str_format(aBuffer, sizeof(aBuffer), "×%.0f", pInfo->m_Speed);
 	else
 		str_format(aBuffer, sizeof(aBuffer), "×%.2f", pInfo->m_Speed);
