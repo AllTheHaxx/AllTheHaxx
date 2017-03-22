@@ -2412,7 +2412,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 	CALLSTACK_ADD();
 
 	if(m_MouseUnlocked)
-		return false;
+		return true;
 
 	m_LastInput = time_get();
 
