@@ -18,14 +18,13 @@ on windows: gcc -g stack_traces.c -limagehlp
 
 #ifdef _WIN32
 #include <windows.h>
-  #include <imagehlp.h>
+#include <imagehlp.h>
 #else
 #include <err.h>
 #include <execinfo.h>
-#include <game/version.h>
-
 #endif
 
+#include <game/version.h>
 #include "debug.h"
 #include "system.h"
 
@@ -36,6 +35,7 @@ extern "C" {
 static char const * icky_global_program_name;
 static char const * icky_global_error_string;
 static int icky_global_error_sig;
+static char icky_global_crashreport_file[512];
 
 
 int crashreport_prepare(const char *pFile)
@@ -127,6 +127,7 @@ void crashreport_finish(int ReportExists, const char *pFile)
 
 
 void set_signal_handler();
+void print_stack_trace(void *data);
 
 void init_debugger(const char *argv0)
 {
@@ -136,16 +137,16 @@ void init_debugger(const char *argv0)
 
 /* Resolve symbol name and source location given the path to the executable
    and an address */
-int addr2line(char const * const program_name, void const * const addr, const char *file)
+int addr2line(char const * const program_name, void const * const addr)
 {
 	char addr2line_cmd[512] = {0};
 
 	/* have addr2line map the address to the relent line in the code */
 	#ifdef __APPLE__
 	/* apple does things differently... */
-    sprintf(addr2line_cmd,"atos -o '%.256s' %p >> '%s'", program_name, addr, file);
+    sprintf(addr2line_cmd,"atos -o '%.256s' %p >> '%s'", program_name, addr, icky_global_crashreport_file);
 	#else
-	sprintf(addr2line_cmd,"addr2line -f -p -e '%.256s' %p >> '%s'", program_name, addr, file);
+	sprintf(addr2line_cmd,"addr2line -f -p -e '%.256s' %p >> '%s'", program_name, addr, icky_global_crashreport_file);
 	#endif
 
 	return system(addr2line_cmd);
@@ -185,78 +186,82 @@ void windows_print_stacktrace(CONTEXT* context)
 
   LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
   {
+  printf("EXCEPTION!\n");
     switch(ExceptionInfo->ExceptionRecord->ExceptionCode)
     {
       case EXCEPTION_ACCESS_VIOLATION:
-        fputs("Error: EXCEPTION_ACCESS_VIOLATION\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_ACCESS_VIOLATION";
         break;
       case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-        fputs("Error: EXCEPTION_ARRAY_BOUNDS_EXCEEDED\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
         break;
       case EXCEPTION_BREAKPOINT:
-        fputs("Error: EXCEPTION_BREAKPOINT\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_BREAKPOINT";
         break;
       case EXCEPTION_DATATYPE_MISALIGNMENT:
-        fputs("Error: EXCEPTION_DATATYPE_MISALIGNMENT\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_DATATYPE_MISALIGNMENT";
         break;
       case EXCEPTION_FLT_DENORMAL_OPERAND:
-        fputs("Error: EXCEPTION_FLT_DENORMAL_OPERAND\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_FLT_DENORMAL_OPERAND";
         break;
       case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-        fputs("Error: EXCEPTION_FLT_DIVIDE_BY_ZERO\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_FLT_DIVIDE_BY_ZERO";
         break;
       case EXCEPTION_FLT_INEXACT_RESULT:
-        fputs("Error: EXCEPTION_FLT_INEXACT_RESULT\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_FLT_INEXACT_RESULT";
         break;
       case EXCEPTION_FLT_INVALID_OPERATION:
-        fputs("Error: EXCEPTION_FLT_INVALID_OPERATION\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_FLT_INVALID_OPERATION";
         break;
       case EXCEPTION_FLT_OVERFLOW:
-        fputs("Error: EXCEPTION_FLT_OVERFLOW\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_FLT_OVERFLOW";
         break;
       case EXCEPTION_FLT_STACK_CHECK:
-        fputs("Error: EXCEPTION_FLT_STACK_CHECK\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_FLT_STACK_CHECK";
         break;
       case EXCEPTION_FLT_UNDERFLOW:
-        fputs("Error: EXCEPTION_FLT_UNDERFLOW\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_FLT_UNDERFLOW";
         break;
       case EXCEPTION_ILLEGAL_INSTRUCTION:
-        fputs("Error: EXCEPTION_ILLEGAL_INSTRUCTION\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_ILLEGAL_INSTRUCTION";
         break;
       case EXCEPTION_IN_PAGE_ERROR:
-        fputs("Error: EXCEPTION_IN_PAGE_ERROR\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_IN_PAGE_ERROR";
         break;
       case EXCEPTION_INT_DIVIDE_BY_ZERO:
-        fputs("Error: EXCEPTION_INT_DIVIDE_BY_ZERO\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_INT_DIVIDE_BY_ZERO";
         break;
       case EXCEPTION_INT_OVERFLOW:
-        fputs("Error: EXCEPTION_INT_OVERFLOW\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_INT_OVERFLOW";
         break;
       case EXCEPTION_INVALID_DISPOSITION:
-        fputs("Error: EXCEPTION_INVALID_DISPOSITION\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_INVALID_DISPOSITION";
         break;
       case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-        fputs("Error: EXCEPTION_NONCONTINUABLE_EXCEPTION\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_NONCONTINUABLE_EXCEPTION";
         break;
       case EXCEPTION_PRIV_INSTRUCTION:
-        fputs("Error: EXCEPTION_PRIV_INSTRUCTION\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_PRIV_INSTRUCTION";
         break;
       case EXCEPTION_SINGLE_STEP:
-        fputs("Error: EXCEPTION_SINGLE_STEP\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_SINGLE_STEP";
         break;
       case EXCEPTION_STACK_OVERFLOW:
-        fputs("Error: EXCEPTION_STACK_OVERFLOW\n", stderr);
+        icky_global_error_string = "Error: EXCEPTION_STACK_OVERFLOW";
         break;
       default:
-        fputs("Error: Unrecognized Exception\n", stderr);
+        icky_global_error_string = "Error: Unrecognized Exception";
         break;
     }
+	icky_global_error_sig = ExceptionInfo->ExceptionRecord->ExceptionCode;
+	fputs(icky_global_error_string, stderr);
+	fputs("\n", stderr);
     fflush(stderr);
     /* If this is a stack overflow then we can't walk the stack, so just show
       where the error happened */
     if (EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode)
     {
-        windows_print_stacktrace(ExceptionInfo->ContextRecord);
+        print_stack_trace((void*)(ExceptionInfo->ContextRecord));
     }
     else
     {
@@ -276,14 +281,6 @@ void windows_print_stacktrace(CONTEXT* context)
 static void *stack_traces[MAX_STACK_FRAMES];
 void posix_print_stack_trace()
 {
-	fs_makedir("./crashlogs");
-	char aFile[512];
-	time_t rawtime;
-	time(&rawtime);
-	str_timestamp_ex(rawtime, aFile, sizeof(aFile), "crashlogs/report_%Y-%m-%d_%H-%M-%S.log");
-
-	int ReportWritten = crashreport_prepare(aFile);
-
 	int i, trace_size = 0;
 	char **messages = (char **)NULL;
 
@@ -295,21 +292,18 @@ void posix_print_stack_trace()
 	// for (i = 3; i < (trace_size - 1); ++i)
 	for (i = 0; i < trace_size; ++i) // we'll use this for now so you can see what's going on
 	{
-		if (addr2line(icky_global_program_name, stack_traces[i], aFile) != 0)
+		if (addr2line(icky_global_program_name, stack_traces[i]) != 0)
 		{
 			printf("  error determining line # for: %s\n", messages[i]);
 		}
 
 	}
 	if (messages) { free(messages); }
-
-	crashreport_finish(ReportWritten, aFile);
 }
 
 void posix_signal_handler(int sig, siginfo_t *siginfo, void *context)
 {
 	(void)context;
-	icky_global_error_string = "unknown error";
 	switch(sig)
 	{
 		case SIGSEGV:
@@ -364,13 +358,15 @@ void posix_signal_handler(int sig, siginfo_t *siginfo, void *context)
 			icky_global_error_string = "Caught SIGTERM: a termination request was sent to the program"; break;
 		case SIGABRT:
 			icky_global_error_string = "Caught SIGABRT: usually caused by an abort() or assert()"; break;
+		default:
+			icky_global_error_string = "unknown error"; break;
 	}
 
 	icky_global_error_sig = sig;
 	fputs(icky_global_error_string, stderr);
 	fputs("\n", stderr);
 
-	posix_print_stack_trace();
+	print_stack_trace(0);
 	_Exit(1);
 }
 
@@ -405,7 +401,7 @@ void set_signal_handler()
 
 		if (sigaction(SIGSEGV, &sig_action, NULL) != 0) { err(1, "sigaction"); }
 		if (sigaction(SIGFPE,  &sig_action, NULL) != 0) { err(1, "sigaction"); }
-		if (sigaction(SIGINT,  &sig_action, NULL) != 0) { err(1, "sigaction"); }
+//		if (sigaction(SIGINT,  &sig_action, NULL) != 0) { err(1, "sigaction"); } // DON'T CATCH!
 		if (sigaction(SIGILL,  &sig_action, NULL) != 0) { err(1, "sigaction"); }
 		if (sigaction(SIGTERM, &sig_action, NULL) != 0) { err(1, "sigaction"); }
 		if (sigaction(SIGABRT, &sig_action, NULL) != 0) { err(1, "sigaction"); }
@@ -413,6 +409,24 @@ void set_signal_handler()
 }
 #endif
 
+void print_stack_trace(void *data)
+{
+	fs_makedir("./crashlogs");
+	time_t rawtime;
+	time(&rawtime);
+	str_timestamp_ex(rawtime, icky_global_crashreport_file, sizeof(icky_global_crashreport_file), "crashlogs/report_%Y-%m-%d_%H-%M-%S.log");
+
+	int ReportWritten = crashreport_prepare(icky_global_crashreport_file);
+
+#ifdef _WIN32
+	windows_print_stacktrace((CONTEXT*)data);
+#else
+	posix_print_stack_trace();
+#endif
+
+	crashreport_finish(ReportWritten, icky_global_crashreport_file);
+
+}
 
 #if defined(__cplusplus)
 }

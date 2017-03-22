@@ -304,6 +304,9 @@ function build(settings)
 		settings.link.libs:Add("ole32")
 		settings.link.libs:Add("shell32")
 		settings.link.libs:Add("advapi32")
+		if config.compiler.driver == "gcc" then
+            settings.link.libs:Add("imagehlp")
+    	end
 	end
 
 	-- compile zlib if needed
