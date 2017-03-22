@@ -2658,10 +2658,11 @@ void gui_messagebox(const char *title, const char *message)
 	static char cmd[1024];
 	int err;
 	/* use xmessage which is available on nearly every X11 system */
-	snprintf(cmd, sizeof(cmd), "xmessage -center -title '%s' '%s'",
+	snprintf(cmd, sizeof(cmd), "xmessage -center -title \"%s\" \"%s\"",
 		title,
 		message);
 
+	dbg_msg("", "%s", cmd);
 	err = system(cmd);
 	dbg_msg("gui/msgbox", "result = %i", err);
 #elif defined(CONF_FAMILY_WINDOWS)

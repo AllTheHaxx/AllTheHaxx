@@ -7,6 +7,7 @@ on OS X:    gcc -g -fno-pie stack_traces.c
 on windows: gcc -g stack_traces.c -limagehlp
 */
 
+
 #include <signal.h>
 #include <stdio.h>
 #include <assert.h>
@@ -32,10 +33,33 @@ on windows: gcc -g stack_traces.c -limagehlp
 extern "C" {
 #endif
 
+
+
+
+#if !defined(FEATURE_DEBUGGER) || defined(CONF_DEBUG)
+
+void init_debugger(const char *argv0)
+{
+	// no stacktracer
+}
+
+#else
+
 static char const * icky_global_program_name;
 static char const * icky_global_error_string;
 static int icky_global_error_sig;
 static char icky_global_crashreport_file[512];
+
+
+void set_signal_handler();
+void print_stack_trace(void *data);
+
+void init_debugger(const char *argv0)
+{
+	icky_global_program_name = argv0;
+	set_signal_handler();
+}
+
 
 
 int crashreport_prepare(const char *pFile)
@@ -93,28 +117,27 @@ void crashreport_finish(int ReportExists, const char *pFile)
 
 	if(ReportExists)
 	{
-		str_format(aBuf, sizeof(aBuf), "A crash report has been saved to \"%s\" If you send it to us, we can fix that."
-				"   [If your mouse is still grabbed, you can press either ENTER or ALt+F4 to close this]", pFile);
-
+		str_format(aBuf, sizeof(aBuf), "[ENTER or ALt+F4 to close this] A crash report has been saved to '%s'. If you send it to us, we can fix that (see https://allthehaxx.github.io/bugreporting)", pFile);
 	}
 	else
-		str_format(aBuf, sizeof(aBuf), "Unfortunately, we couldn\"t write to the file \"%s\" to save a report :/", pFile);
+		str_format(aBuf, sizeof(aBuf), "Unfortunately, we couldn't write to the file '%s' to save a report :/", pFile);
 
 	str_append(aMsg, aBuf, sizeof(aMsg));
 
 	const char *paFunnyMessages[] = { // these should - please - fit to a crash. Thanks in advance.
 			"I know what you think...",
 			"This was not supposed to happen!",
-			"Who is responsible for that mess?",
-			"That\\'s not my fault!",
+			"Who is responsible for this mess?",
+			"That's not my fault!",
 			"My cat ate the alien intelligence",
 			"What are we going to do now?",
-			"YOU DIDN\\'T SAW THAT! IT\\'S CONFIDENTIAL!",
-			"Please act as if nothing had happened",
+			"YOU DIDN'T SEE THAT! IT'S CONFIDENTIAL!",
+			"Please act as if nothing bad happened",
 			"Panda??",
 			"Paper > All ",
 			"Grab a pencil and a pigeon",
 			"asm()",
+			"Hang on, what was that?"
 	};
 
 	size_t n = rand()%(sizeof(paFunnyMessages)/sizeof(paFunnyMessages[0]));
@@ -125,15 +148,6 @@ void crashreport_finish(int ReportExists, const char *pFile)
 
 
 
-
-void set_signal_handler();
-void print_stack_trace(void *data);
-
-void init_debugger(const char *argv0)
-{
-	icky_global_program_name = argv0;
-	set_signal_handler();
-}
 
 /* Resolve symbol name and source location given the path to the executable
    and an address */
@@ -146,7 +160,7 @@ int addr2line(char const * const program_name, void const * const addr)
 	/* apple does things differently... */
     sprintf(addr2line_cmd,"atos -o '%.256s' %p >> '%s'", program_name, addr, icky_global_crashreport_file);
 	#else
-	sprintf(addr2line_cmd,"addr2line -f -p -e '%.256s' %p >> '%s'", program_name, addr, icky_global_crashreport_file);
+	sprintf(addr2line_cmd,"addr2line -a -p -f -C -e '%.256s' %p >> '%s'", program_name, addr, icky_global_crashreport_file);
 	#endif
 
 	return system(addr2line_cmd);
@@ -156,7 +170,8 @@ int addr2line(char const * const program_name, void const * const addr)
 #ifdef _WIN32
 void windows_print_stacktrace(CONTEXT* context)
   {
-    SymInitialize(GetCurrentProcess(), 0, true);
+           dbg_msg("DENNIS", "windows_print_stacktrace");
+SymInitialize(GetCurrentProcess(), 0, true);
 
     STACKFRAME frame = { 0 };
 
@@ -261,11 +276,13 @@ void windows_print_stacktrace(CONTEXT* context)
       where the error happened */
     if (EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode)
     {
-        print_stack_trace((void*)(ExceptionInfo->ContextRecord));
+       dbg_msg("DENNIS", "windows_exception_handler");
+   print_stack_trace((void*)(ExceptionInfo->ContextRecord));
     }
     else
     {
-        addr2line(icky_global_program_name, (void*)ExceptionInfo->ContextRecord->Eip);
+        dbg_msg("DENNIS", "STACK OVERFLOW");
+  addr2line(icky_global_program_name, (void*)ExceptionInfo->ContextRecord->Eip);
     }
 
     return EXCEPTION_EXECUTE_HANDLER;
@@ -273,6 +290,7 @@ void windows_print_stacktrace(CONTEXT* context)
 
   void set_signal_handler()
   {
+  printf("set_signal_handler\n\n\n\n\n\nASDJAOISDJIOASJDIOAJSD")
     SetUnhandledExceptionFilter(windows_exception_handler);
   }
 #else
@@ -430,4 +448,7 @@ void print_stack_trace(void *data)
 
 #if defined(__cplusplus)
 }
+#endif
+
+
 #endif
