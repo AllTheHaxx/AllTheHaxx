@@ -22,15 +22,110 @@ on windows: gcc -g stack_traces.c -limagehlp
 #else
 #include <err.h>
 #include <execinfo.h>
+#include <game/version.h>
+
 #endif
 
 #include "debug.h"
+#include "system.h"
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
 static char const * icky_global_program_name;
+static char const * icky_global_error_string;
+static int icky_global_error_sig;
+
+
+int crashreport_prepare(const char *pFile)
+{
+	char aBuf[768];
+
+	IOHANDLE f = io_open(pFile, IOFLAG_WRITE);
+	if(!f)
+	{
+		printf("<<<< FAILED TO OPEN '%s' FOR WRITING >>>>\n", pFile);
+		printf("<<<<  no crash report will be saved!  >>>>\n\n\n");
+	}
+	else
+	{
+		#define WRITE_LINE() \
+				io_write(f, aBuf, str_length(aBuf)); \
+				io_write_newline(f)
+
+		str_format(aBuf, sizeof(aBuf), "### %s", pFile);
+		WRITE_LINE();
+		io_write_newline(f);
+
+		str_format(aBuf, sizeof(aBuf), "EXECUTABLE: '%s'", icky_global_program_name);
+		WRITE_LINE();
+
+		str_format(aBuf, sizeof(aBuf), "OS: " CONF_FAMILY_STRING "/" CONF_PLATFORM_STRING);
+		WRITE_LINE();
+
+		str_format(aBuf, sizeof(aBuf), "VERSION: " ALLTHEHAXX_VERSION ".%i.%i (" GAME_VERSION "/" ATH_VERSION ")", GAME_ATH_VERSION_NUMERIC, CLIENT_VERSIONNR);
+		WRITE_LINE();
+
+		str_format(aBuf, sizeof(aBuf), "ERRSIG: %i (%s)", icky_global_error_sig, icky_global_error_string);
+		WRITE_LINE();
+
+		io_write_newline(f);
+		io_write_newline(f);
+
+		str_format(aBuf, sizeof(aBuf), "******* BEGIN CALLSTACK *******");
+		WRITE_LINE();
+		#undef WRITE_LINE
+
+		io_flush(f);
+		io_close(f);
+		return 1;
+	}
+	return 0;
+}
+
+void crashreport_finish(int ReportExists, const char *pFile)
+{
+	char aBuf[768];
+	char aMsg[512];
+
+	str_format(aMsg, sizeof(aMsg), "Whoups, the client just crashed. I am sorry... ");
+
+	if(ReportExists)
+	{
+		str_format(aBuf, sizeof(aBuf), "A crash report has been saved to \"%s\" If you send it to us, we can fix that."
+				"   [If your mouse is still grabbed, you can press either ENTER or ALt+F4 to close this]", pFile);
+
+	}
+	else
+		str_format(aBuf, sizeof(aBuf), "Unfortunately, we couldn\"t write to the file \"%s\" to save a report :/", pFile);
+
+	str_append(aMsg, aBuf, sizeof(aMsg));
+
+	const char *paFunnyMessages[] = { // these should - please - fit to a crash. Thanks in advance.
+			"I know what you think...",
+			"This was not supposed to happen!",
+			"Who is responsible for that mess?",
+			"That\\'s not my fault!",
+			"My cat ate the alien intelligence",
+			"What are we going to do now?",
+			"YOU DIDN\\'T SAW THAT! IT\\'S CONFIDENTIAL!",
+			"Please act as if nothing had happened",
+			"Panda??",
+			"Paper > All ",
+			"Grab a pencil and a pigeon",
+			"asm()",
+	};
+
+	size_t n = rand()%(sizeof(paFunnyMessages)/sizeof(paFunnyMessages[0]));
+	str_format(aBuf, sizeof(aBuf), "AllTheHaxx Crash  --  %s", paFunnyMessages[n]);
+	gui_messagebox(aBuf, aMsg);
+
+}
+
+
+
+
 void set_signal_handler();
 
 void init_debugger(const char *argv0)
@@ -41,16 +136,16 @@ void init_debugger(const char *argv0)
 
 /* Resolve symbol name and source location given the path to the executable
    and an address */
-int addr2line(char const * const program_name, void const * const addr)
+int addr2line(char const * const program_name, void const * const addr, const char *file)
 {
 	char addr2line_cmd[512] = {0};
 
 	/* have addr2line map the address to the relent line in the code */
 	#ifdef __APPLE__
 	/* apple does things differently... */
-    sprintf(addr2line_cmd,"atos -o %.256s %p", program_name, addr);
+    sprintf(addr2line_cmd,"atos -o '%.256s' %p >> '%s'", program_name, addr, file);
 	#else
-	sprintf(addr2line_cmd,"addr2line -f -p -e %.256s %p", program_name, addr);
+	sprintf(addr2line_cmd,"addr2line -f -p -e '%.256s' %p >> '%s'", program_name, addr, file);
 	#endif
 
 	return system(addr2line_cmd);
@@ -181,6 +276,14 @@ void windows_print_stacktrace(CONTEXT* context)
 static void *stack_traces[MAX_STACK_FRAMES];
 void posix_print_stack_trace()
 {
+	fs_makedir("./crashlogs");
+	char aFile[512];
+	time_t rawtime;
+	time(&rawtime);
+	str_timestamp_ex(rawtime, aFile, sizeof(aFile), "crashlogs/report_%Y-%m-%d_%H-%M-%S.log");
+
+	int ReportWritten = crashreport_prepare(aFile);
+
 	int i, trace_size = 0;
 	char **messages = (char **)NULL;
 
@@ -192,98 +295,81 @@ void posix_print_stack_trace()
 	// for (i = 3; i < (trace_size - 1); ++i)
 	for (i = 0; i < trace_size; ++i) // we'll use this for now so you can see what's going on
 	{
-		if (addr2line(icky_global_program_name, stack_traces[i]) != 0)
+		if (addr2line(icky_global_program_name, stack_traces[i], aFile) != 0)
 		{
 			printf("  error determining line # for: %s\n", messages[i]);
 		}
 
 	}
 	if (messages) { free(messages); }
+
+	crashreport_finish(ReportWritten, aFile);
 }
 
 void posix_signal_handler(int sig, siginfo_t *siginfo, void *context)
 {
 	(void)context;
+	icky_global_error_string = "unknown error";
 	switch(sig)
 	{
 		case SIGSEGV:
-			fputs("Caught SIGSEGV: Segmentation Fault\n", stderr);
-			break;
+			icky_global_error_string = "Caught SIGSEGV: Segmentation Fault"; break;
 		case SIGINT:
-			fputs("Caught SIGINT: Interactive attention signal, (usually ctrl+c)\n", stderr);
-			break;
+			icky_global_error_string = "Caught SIGINT: Interactive attention signal, (usually ctrl+c)"; break;
 		case SIGFPE:
 			switch(siginfo->si_code)
 			{
 				case FPE_INTDIV:
-					fputs("Caught SIGFPE: (integer divide by zero)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (integer divide by zero)"; break;
 				case FPE_INTOVF:
-					fputs("Caught SIGFPE: (integer overflow)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (integer overflow)"; break;
 				case FPE_FLTDIV:
-					fputs("Caught SIGFPE: (floating-point divide by zero)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (floating-point divide by zero)"; break;
 				case FPE_FLTOVF:
-					fputs("Caught SIGFPE: (floating-point overflow)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (floating-point overflow)"; break;
 				case FPE_FLTUND:
-					fputs("Caught SIGFPE: (floating-point underflow)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (floating-point underflow)"; break;
 				case FPE_FLTRES:
-					fputs("Caught SIGFPE: (floating-point inexact result)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (floating-point inexact result)"; break;
 				case FPE_FLTINV:
-					fputs("Caught SIGFPE: (floating-point invalid operation)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (floating-point invalid operation)"; break;
 				case FPE_FLTSUB:
-					fputs("Caught SIGFPE: (subscript out of range)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGFPE: (subscript out of range)"; break;
 				default:
-					fputs("Caught SIGFPE: Arithmetic Exception\n", stderr);
-					break;
-			}
+					icky_global_error_string = "Caught SIGFPE: Arithmetic Exception"; break;
+			} break;
 		case SIGILL:
 			switch(siginfo->si_code)
 			{
 				case ILL_ILLOPC:
-					fputs("Caught SIGILL: (illegal opcode)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (illegal opcode)"; break;
 				case ILL_ILLOPN:
-					fputs("Caught SIGILL: (illegal operand)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (illegal operand)"; break;
 				case ILL_ILLADR:
-					fputs("Caught SIGILL: (illegal addressing mode)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (illegal addressing mode)"; break;
 				case ILL_ILLTRP:
-					fputs("Caught SIGILL: (illegal trap)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (illegal trap)"; break;
 				case ILL_PRVOPC:
-					fputs("Caught SIGILL: (privileged opcode)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (privileged opcode)"; break;
 				case ILL_PRVREG:
-					fputs("Caught SIGILL: (privileged register)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (privileged register)"; break;
 				case ILL_COPROC:
-					fputs("Caught SIGILL: (coprocessor error)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (coprocessor error)"; break;
 				case ILL_BADSTK:
-					fputs("Caught SIGILL: (internal stack error)\n", stderr);
-					break;
+					icky_global_error_string = "Caught SIGILL: (internal stack error)"; break;
 				default:
-					fputs("Caught SIGILL: Illegal Instruction\n", stderr);
-					break;
-			}
-			break;
+					icky_global_error_string = "Caught SIGILL: Illegal Instruction"; break;
+			} break;
 		case SIGTERM:
-			fputs("Caught SIGTERM: a termination request was sent to the program\n", stderr);
-			break;
+			icky_global_error_string = "Caught SIGTERM: a termination request was sent to the program"; break;
 		case SIGABRT:
-			fputs("Caught SIGABRT: usually caused by an abort() or assert()\n", stderr);
-			break;
-		default:
-			break;
+			icky_global_error_string = "Caught SIGABRT: usually caused by an abort() or assert()"; break;
 	}
+
+	icky_global_error_sig = sig;
+	fputs(icky_global_error_string, stderr);
+	fputs("\n", stderr);
+
 	posix_print_stack_trace();
 	_Exit(1);
 }
