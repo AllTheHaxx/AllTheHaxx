@@ -10,7 +10,6 @@
 #include <versionsrv/versionsrv.h>
 #include <game/generated/protocol.h>
 #include <engine/client/lua.h>
-#include "client/debug.h"
 #include "curlwrapper.h"
 
 enum

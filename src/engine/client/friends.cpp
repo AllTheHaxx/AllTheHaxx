@@ -7,7 +7,6 @@
 #include <engine/console.h>
 #include <engine/shared/config.h>
 
-#include "debug.h"
 #include "friends.h"
 
 CFriends::CFriends()

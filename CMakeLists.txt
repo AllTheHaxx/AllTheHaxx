@@ -74,8 +74,7 @@ set(SOURCE_FILES
     src/engine/client/luafile.cpp
     src/engine/client/lua.h
     src/engine/client/graphics_threaded.cpp
-    src/engine/client/debug.h
-    src/engine/client/sound.cpp
+        src/engine/client/sound.cpp
     src/engine/client/updater.h
     src/engine/client/friends.cpp
     src/engine/client/graphics_threaded.h
@@ -90,8 +89,7 @@ set(SOURCE_FILES
     src/engine/client/sound.h
     src/engine/client/input.cpp
     src/engine/client/luafile.h
-    src/engine/client/debug.cpp
-    src/engine/client/fetcher.h
+        src/engine/client/fetcher.h
     src/engine/masterserver.h
     src/engine/irc.h
     src/engine/editor.h
