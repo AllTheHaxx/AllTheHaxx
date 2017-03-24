@@ -506,6 +506,14 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				PrintLine("--------------- END KEY COMMAND HELP ---------------");
 				PrintLine("");
 			}
+			else if(Event.m_Key == KEY_MOUSE_WHEEL_UP) // make fontsize larger
+			{
+				g_Config.m_ClMonoFontSize = clamp(g_Config.m_ClMonoFontSize + 1, 6, 16);
+			}
+			else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN) // make fontsize smaller
+			{
+				g_Config.m_ClMonoFontSize = clamp(g_Config.m_ClMonoFontSize - 1, 6, 16);
+			}
 			else if(Event.m_Key != KEY_LCTRL && Event.m_Key != KEY_RCTRL && Event.m_Key != KEY_LSHIFT)
 			{
 				char aLine[256];
