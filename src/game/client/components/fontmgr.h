@@ -12,7 +12,6 @@
 struct CFontFile
 {
 	std::string m_Name;
-	std::string m_Path;
 	CFont *m_apFonts[FONT_NUM_TYPES];
 
 	CFontFile() { clear(); }
@@ -51,7 +50,6 @@ class CFontMgr : public IFontMgr
 	bool InitFont(CFontFile *f);
 	bool InitFont_impl(CFontFile *f, int Type, const char *pTypeStr);
 	void UnloadFont(int ListIndex);
-	void RemoveFont(int ListIndex);
 
 public:
 	const int m_Type;

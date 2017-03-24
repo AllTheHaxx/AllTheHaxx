@@ -94,7 +94,7 @@ void CMenus::RenderSettingsAppearanceFont(CUIRect MainView)
 		OptionsBar.HSplitTop(10.0f, &Button, &OptionsBar);
 		OptionsBar.HSplitTop(20.0f, &Button, &OptionsBar);
 		static CButtonContainer s_ReloadButton;
-		if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button))
+		if(DoButton_Menu(&s_ReloadButton, Localize("Search for newly added fonts"), 0, &Button))
 			pFontMgr->ReloadFontlist();
 
 		// render some preview text in different sizes
