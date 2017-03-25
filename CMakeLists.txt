@@ -171,6 +171,8 @@ set(SOURCE_FILES
     src/engine/external/wavpack/unpack.c
     src/engine/external/md5/md5.h
     src/engine/external/md5/md5.c
+    src/engine/external/aes128/aes.h
+    src/engine/external/aes128/aes.c
     src/engine/external/luabridge/detail/dump.h
     src/engine/external/luabridge/detail/Userdata.h
     src/engine/external/luabridge/detail/Namespace.h
@@ -242,81 +244,6 @@ set(SOURCE_FILES
     src/engine/external/libwebsockets/private-libwebsockets.h
     src/engine/external/libwebsockets/getifaddrs.h
     src/engine/external/libwebsockets/extension-deflate-stream.h
-    src/engine/external/openssl/e_os2.h
-    src/engine/external/openssl/mdc2.h
-    src/engine/external/openssl/tls1.h
-    src/engine/external/openssl/err.h
-    src/engine/external/openssl/idea.h
-    src/engine/external/openssl/ssl.h
-    src/engine/external/openssl/rand.h
-    src/engine/external/openssl/whrlpool.h
-    src/engine/external/openssl/dsa.h
-    src/engine/external/openssl/txt_db.h
-    src/engine/external/openssl/ecdsa.h
-    src/engine/external/openssl/ui_compat.h
-    src/engine/external/openssl/pem.h
-    src/engine/external/openssl/modes.h
-    src/engine/external/openssl/ec.h
-    src/engine/external/openssl/symhacks.h
-    src/engine/external/openssl/sha.h
-    src/engine/external/openssl/evp.h
-    src/engine/external/openssl/obj_mac.h
-    src/engine/external/openssl/aes.h
-    src/engine/external/openssl/safestack.h
-    src/engine/external/openssl/opensslv.h
-    src/engine/external/openssl/pkcs7.h
-    src/engine/external/openssl/rc4.h
-    src/engine/external/openssl/cms.h
-    src/engine/external/openssl/x509_vfy.h
-    src/engine/external/openssl/hmac.h
-    src/engine/external/openssl/kssl.h
-    src/engine/external/openssl/dtls1.h
-    src/engine/external/openssl/seed.h
-    src/engine/external/openssl/stack.h
-    src/engine/external/openssl/pqueue.h
-    src/engine/external/openssl/pem2.h
-    src/engine/external/openssl/crypto.h
-    src/engine/external/openssl/x509.h
-    src/engine/external/openssl/ebcdic.h
-    src/engine/external/openssl/buffer.h
-    src/engine/external/openssl/x509v3.h
-    src/engine/external/openssl/rc2.h
-    src/engine/external/openssl/opensslconf.h
-    src/engine/external/openssl/asn1.h
-    src/engine/external/openssl/cmac.h
-    src/engine/external/openssl/ssl23.h
-    src/engine/external/openssl/ripemd.h
-    src/engine/external/openssl/srtp.h
-    src/engine/external/openssl/blowfish.h
-    src/engine/external/openssl/srp.h
-    src/engine/external/openssl/ssl2.h
-    src/engine/external/openssl/krb5_asn.h
-    src/engine/external/openssl/ts.h
-    src/engine/external/openssl/ssl3.h
-    src/engine/external/openssl/ecdh.h
-    src/engine/external/openssl/conf_api.h
-    src/engine/external/openssl/lhash.h
-    src/engine/external/openssl/pkcs12.h
-    src/engine/external/openssl/ui.h
-    src/engine/external/openssl/dso.h
-    src/engine/external/openssl/md5.h
-    src/engine/external/openssl/ocsp.h
-    src/engine/external/openssl/conf.h
-    src/engine/external/openssl/objects.h
-    src/engine/external/openssl/des_old.h
-    src/engine/external/openssl/bio.h
-    src/engine/external/openssl/cast.h
-    src/engine/external/openssl/dh.h
-    src/engine/external/openssl/rsa.h
-    src/engine/external/openssl/md4.h
-    src/engine/external/openssl/camellia.h
-    src/engine/external/openssl/bn.h
-    src/engine/external/openssl/ossl_typ.h
-    src/engine/external/openssl/asn1_mac.h
-    src/engine/external/openssl/comp.h
-    src/engine/external/openssl/des.h
-    src/engine/external/openssl/engine.h
-    src/engine/external/openssl/asn1t.h
     src/engine/external/json-parser/json.c
     src/engine/external/json-parser/json.h
     src/engine/external/pnglite/pnglite.c
@@ -543,4 +470,5 @@ set(SOURCE_FILES
     src/game/client/components/menus_settings/settings_hud.cpp
         src/base/system++/io.h
         src/base/system++/threading.h src/base/system++/system++.h src/base/system++/system++.cpp src/game/client/components/menus_listbox.cpp)
+
 add_executable(AllTheHaxx ${SOURCE_FILES})
