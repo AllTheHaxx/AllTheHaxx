@@ -51,6 +51,7 @@ bool Is64Player(const CServerInfo *pInfo)
 {
 	return str_find(pInfo->m_aGameType, "64")
 	    || str_find(pInfo->m_aName, "64")
+		|| str_comp(pInfo->m_aName, "iF|City") == 0
 	    || IsDDNet(pInfo);
 }
 

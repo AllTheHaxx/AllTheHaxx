@@ -2599,6 +2599,21 @@ void str_timestamp(char *buffer, unsigned int buffer_size)
 	str_timestamp_ex(time_data, buffer, buffer_size, "%Y-%m-%d_%H-%M-%S");
 }
 
+void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char *pLocalizeDay, const char *pLocalizeDays)
+{
+	// render the time in a nice format
+	int negative = time < 0;
+	if(negative)
+		time = -time;
+	if(time >= 60*60*24) // 60sec x 60min x 24h = 1 day
+		str_format(buffer, buffer_size, "%s%d %s, %02d:%02d:%02d", negative ? "-" : "", time/60/60/24, time/60/60/24 == 1 ? pLocalizeDay : pLocalizeDays, (time%86400)/3600, (time/60)%60, (time)%60);
+	else if(time >= 60*60) // 60sec x 60 min = 1 hour
+		str_format(buffer, buffer_size, "%s%02d:%02d:%02d", negative ? "-" : "", time/60/60, (time/60)%60, time%60);
+	else // only min:sec
+		str_format(buffer, buffer_size, "%s%02d:%02d", negative ? "-" : "", time/60, time%60);
+}
+
+
 const char *str_next_word(char *str, char delim, char *buf, int *cursor)
 {
 	int i;

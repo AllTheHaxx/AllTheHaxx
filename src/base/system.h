@@ -1144,6 +1144,10 @@ void str_timestamp(char *buffer, unsigned int buffer_size);
 void str_timestamp_ex(time_t time, char *buffer, unsigned int buffer_size, const char *format);
 #define str_timestampb(BUF) str_timestamp(BUF, sizeof(BUF))
 
+void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char *pLocalizeDay, const char *pLocalizeDays);
+#define str_clock_sec(buffer, buffer_size, time) str_clock_sec_impl(buffer, buffer_size, time, Localize("day"), Localize("days"))
+#define str_clock_secb(buffer, time) str_clock_sec_impl(buffer, sizeof(buffer), time, Localize("day"), Localize("days"))
+
 /* Group: Filesystem */
 
 /*

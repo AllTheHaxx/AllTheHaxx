@@ -105,6 +105,8 @@ public:
 	int NumSortedServers() const { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const;
 	const CServerInfo *Get(int Index) const;
+	int GetInfoAge(int Index) const;
+	const char *GetDebugString(int Index) const;
 
 	bool IsFavorite(const NETADDR &Addr) const;
 	void AddFavorite(const NETADDR &Addr);

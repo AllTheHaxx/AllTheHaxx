@@ -1599,7 +1599,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		}
 	}
 
-	//server count from master server
+	// server count from master server
 	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{
 		unsigned char *pP = (unsigned char*) pPacket->m_pData;
@@ -1713,7 +1713,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			str_copy(Info.m_aClients[i].m_aClan, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aClan));
 			Info.m_aClients[i].m_Country = str_toint(Up.GetString());
 			Info.m_aClients[i].m_Score = str_toint(Up.GetString());
-			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0 ? true : false;
+			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0;
 
 			// add the name to the database
 			if(g_Config.m_ClUsernameFetching)

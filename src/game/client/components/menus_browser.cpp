@@ -312,6 +312,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
+			// indicator for how old the server info is
+			if(g_Config.m_Debug)
+			{
+				CUIRect r = Row;
+				r.Margin(1.5f, &r);
+
+				const float MAX_AGE = 60 * 60 * 24*2;
+				int Seconds = ServerBrowser()->GetInfoAge(ItemIndex);
+				if(Seconds >= 0)
+				{
+					float red = clamp((float)Seconds / MAX_AGE, 0.0f, 1.0f);
+					float green = 1.0f - clamp((float)Seconds / MAX_AGE, 0.0f, 1.0f);
+					RenderTools()->DrawUIRect(&r, vec4(red,green,1,0.3f), CUI::CORNER_ALL, 4.0f);
+				}
+			}
+
+
 			// clip the selection
 			if(SelectHitBox.y < OriginalView.y) // top
 			{
@@ -328,6 +345,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					DoubleClicked = 1;
 				m_DoubleClickIndex = NewSelected;
 			}
+
+			if(g_Config.m_Debug && UI()->MouseInside(&SelectHitBox))
+				m_pClient->m_pTooltip->SetTooltip(ServerBrowser()->GetDebugString(ItemIndex));
 		}
 		else
 		{
