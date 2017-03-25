@@ -154,6 +154,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		/// Game.Client
 		.beginClass<IClient>("IClient")
 			.addProperty("Tick", &IClient::GameTick)
+			.addProperty("TickSpeed", &IClient::GameTickSpeed)
 			.addProperty("IntraGameTick", &IClient::IntraGameTick)
 			.addProperty("PredIntraGameTick", &IClient::PredIntraGameTick)
 			.addProperty("PredGameTick", &IClient::PredGameTick)

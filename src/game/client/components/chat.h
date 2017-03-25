@@ -6,14 +6,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
-// much crypto
-#include <engine/external/openssl/pem.h>
-#include <engine/external/openssl/ssl.h>
-#include <engine/external/openssl/rsa.h>
-#include <engine/external/openssl/evp.h>
-#include <engine/external/openssl/bio.h>
-#include <engine/external/openssl/err.h>
-// -----------
+// crypto
+#include <engine/external/aes128/aes.h>
 
 #include "translator.h"
 
