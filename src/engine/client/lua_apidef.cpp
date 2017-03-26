@@ -200,6 +200,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("MouseButton", &CUI::MouseButton)
 			.addFunction("MouseButtonClicked", &CUI::MouseButtonClicked)
 			.addFunction("MouseInside", &CUI::MouseInside)
+			.addFunction("ClipEnable", &CUI::ClipEnable)
+			.addFunction("ClipDisable", &CUI::ClipDisable)
 		.endClass()
 
 		/// Game.RenderTools
