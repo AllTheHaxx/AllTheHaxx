@@ -12,7 +12,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <engine/external/aes128/aes.h>
+#include <aes128/aes.h>
+#include <md5/md5.h>
+#include <zlib/zlib.h>
 
 #if defined(CONF_WEBSOCKETS)
 	#include "engine/shared/websockets.h"
@@ -33,8 +35,6 @@
 	#include <arpa/inet.h>
 
 	#include <dirent.h>
-#include <zlib/zlib.h>
-#include <md5/md5.h>
 
 #if defined(CONF_PLATFORM_MACOSX)
 		// some lock and pthread functions are already defined in headers
