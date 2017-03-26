@@ -11,7 +11,7 @@
 
 #include "updater.h"
 
-#define UPDATE_MANIFEST "update22.json"
+#define UPDATE_MANIFEST "update30.json"
 
 using std::string;
 using std::map;

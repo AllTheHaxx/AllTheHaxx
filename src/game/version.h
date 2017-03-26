@@ -5,11 +5,11 @@
 #include "generated/nethash.cpp"
 
 #define GAME_VERSION "0.6.3"
-#define ATH_VERSION "0.29"
+#define ATH_VERSION "0.30"
 #define DDNET_VERSION "10.4.3"
 #define BUILD_DATE __DATE__ ", " __TIME__
 
-#ifdef GIT_SHORTREV_HASH
+#if defined(GIT_SHORTREV_HASH)
 	#define ALLTHEHAXX_VERSION ATH_VERSION " #" GIT_SHORTREV_HASH
 #else
 	#define ALLTHEHAXX_VERSION ATH_VERSION " custom"
@@ -19,7 +19,7 @@
 
 // for updater
 static const char GAME_ATH_VERSION[10] = ATH_VERSION;
-#define GAME_ATH_VERSION_NUMERIC 2900
+#define GAME_ATH_VERSION_NUMERIC 3000
 
 // do not modify these, they belong to ddnet
 static const char GAME_RELEASE_VERSION[8] = DDNET_VERSION;
