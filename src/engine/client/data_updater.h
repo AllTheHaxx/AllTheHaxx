@@ -57,8 +57,8 @@ public:
 			case ERROR_INIT: return "Init";
 			case ERROR_CHECK: return "Update Check";
 			case ERROR_UPDATE: return "Data Update";
+			default: return "unknown GH-thing";
 		}
-		return "unknown GH-thing";
 	}
 	bool Done() const { return m_State == STATE_DONE; }
 	float GetProgress() const { return m_Progress; }
@@ -81,7 +81,6 @@ private:
 	}
 
 	const std::string SimpleGET(const char *pURL);
-//	static void CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *userdata);
 
 	static const std::string ParseReleases(const char *pJsonStr);
 	bool ParseCompare(const char *pJsonStr);
@@ -89,7 +88,6 @@ private:
 	static void UpdateCheckerThread(CGitHubAPI *pSelf);
 	static void CompareThread(CGitHubAPI *pSelf);
 
-	static void GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize);
 };
 
 

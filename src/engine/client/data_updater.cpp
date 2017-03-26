@@ -1,13 +1,16 @@
+
 #include <base/system.h>
-#include <openssl/sha.h>
-#include <engine/storage.h>
 #include <base/system++/io.h>
-#include <engine/shared/config.h>
+
 #include <json-parser/json.hpp>
+#include <engine/storage.h>
+#include <engine/shared/config.h>
+
 #include <game/version.h>
-#include "data_updater.h"
-#include "updater.h"
+
 #include "curlwrapper.h"
+#include "updater.h"
+#include "data_updater.h"
 
 
 using std::map;
@@ -281,71 +284,4 @@ const std::string CGitHubAPI::SimpleGET(const char *pUrl)
 		dbg_msg("github/debug", "'%s' -> %lu bytes", pUrl, (unsigned long)Result.length());
 	}
 	return Result;
-}
-
-
-/* this one is overly complicated I think... let's not use it?
-void CGitHubAPI::CurlWriteFunction(char *pData, size_t size, size_t nmemb, void *userdata)
-{
-	std::string *pResult = (std::string *)userdata;
-
-	unsigned int BufferSize = (unsigned int)(size*nmemb + 1);
-	char *pBuf = mem_allocb(char, BufferSize);
-	mem_zero(pBuf, BufferSize);
-	mem_copy(pBuf, pData, (unsigned int)(size*nmemb));
-
-	*pResult += std::string(pBuf);
-	mem_free(pBuf);
-}*/
-
-void CGitHubAPI::GitHashStr(const char *pFile, char *pBuffer, unsigned BufferSize)
-{
-	unsigned char aHash[SHA_DIGEST_LENGTH];
-	mem_zerob(aHash);
-
-	SHA_CTX context;
-	if(!SHA_Init(&context))
-	{
-		dbg_msg("GitHashStr", "SHA_Init failed for '%s'", pFile);
-	}
-	else
-	{
-		IOHANDLE_SMART File(pFile, IOFLAG_READ);
-
-		// prepend what git does
-		{
-			char aBuffer[16 * 1024];
-			str_formatb(aBuffer, "blob %lu", File.Length());
-			if(!SHA_Update(&context, aBuffer, (unsigned)str_length(aBuffer)+1)) // +1 because git wants the \0 to be hashed aswell!
-			{
-				dbg_msg("GitHashStr", "SHA_Update failed for the git identifier '%s'", aBuffer);
-			}
-			else
-			{
-				// read the data in portions of 16kb and hash it subsequently
-				while(1)
-				{
-					mem_zerob(aBuffer);
-
-					unsigned int BytesRead = File.Read(aBuffer, sizeof(aBuffer));
-					if(BytesRead == 0)
-						break;
-
-					if(!SHA_Update(&context, aBuffer, BytesRead))
-					{
-						dbg_msg("GitHashStr", "SHA_Update failed for '%s' at 0x%x", pFile, (unsigned int)File.Tell());
-						continue;
-					}
-				}
-			}
-		}
-	}
-
-	if(!SHA_Final(aHash, &context))
-	{
-		dbg_msg("GitHashStr", "SHA_Final failed for '%s'", pFile);
-		mem_zerob(aHash);
-	}
-
-	str_hex_simple(pBuffer, BufferSize, aHash, SHA_DIGEST_LENGTH);
 }
