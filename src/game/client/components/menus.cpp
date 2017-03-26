@@ -1760,7 +1760,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			pTitle = Localize("Connecting to");
-			pExtraText = g_Config.m_UiServerAddress; // TODO: query the client about the address
+			pExtraText = Client()->GetCurrentServerAddress();
 			pButtonText = Localize("Abort");
 			if(Client()->MapDownloadTotalsize() > 0)
 			{
@@ -2037,13 +2037,28 @@ int CMenus::Render()
 				str_format(aBuf, sizeof(aBuf), pTimeLeftString, TimeLeft);
 				UI()->DoLabel(&Part, aBuf, 20.f, 0, -1);
 
-				// progress bar
+				// progress bar background
 				Box.HSplitTop(20.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+				CUIRect DownloadSourceLabel = Part; // save it for later
+				DownloadSourceLabel.y += 3.0f;
+
+				// the actual progress bar
 				Part.w = max(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
+
+				// map download source in the progress bar if webdl is active
+				if(g_Config.m_ClHttpMapDownload)
+				{
+					str_formatb(aBuf, "Downloading from: %s", Client()->MapDownloadSource());
+					TextRender()->TextColor(0.7f, 0.7f, 0.7f, 0.9f);
+					UI()->DoLabelScaled(&DownloadSourceLabel, aBuf, 14.0f, 0);
+					TextRender()->TextColor(1,1,1,1);
+				}
+
+
 			}
 		}
 		else if(m_Popup == POPUP_LANGUAGE)

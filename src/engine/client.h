@@ -144,6 +144,7 @@ public:
 
 	//
 	virtual const char *MapDownloadName() = 0;
+	virtual const char *MapDownloadSource() = 0;
 	virtual int MapDownloadAmount() = 0;
 	virtual int MapDownloadTotalsize() = 0;
 

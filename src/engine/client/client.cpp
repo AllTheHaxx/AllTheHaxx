@@ -409,7 +409,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 void CClient::LoadMapDatabaseUrls()
 {
-	m_NextMapServer = 0;
 	m_MapDbUrls.clear();
 
 	int prior = 0;
@@ -1891,19 +1890,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					ResetMapDownload();
 
 					if(g_Config.m_ClHttpMapDownload)
-					{
-						if(m_MapDbUrls.size() == 0) // init if not already happened
-							LoadMapDatabaseUrls();
-						m_NextMapServer = 0;
-						char aUrl[256];
-						char aFilename[64];
-						char aEscaped[128];
-						str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
-						Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
-						str_format(aUrl, sizeof(aUrl), "%s/%s", m_MapDbUrls[m_NextMapServer++].url.c_str(), aEscaped);
-						m_pMapdownloadTask = new CFetchTask(true);
-						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
-					}
+						MapFetcherStart(pMap, MapCrc);
 					else
 						SendMapRequest();
 				}
@@ -2462,16 +2449,39 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	}
 }
 
+void CClient::MapFetcherStart(const char *pMap, int MapCrc)
+{
+	if(m_MapDbUrls.size() == 0) // init if not already done
+		LoadMapDatabaseUrls();
+
+	m_pMapdownloadSource = m_MapDbUrls[m_CurrentMapServer].url.c_str();
+	dbg_msg("webdl", "trying %i/%i: '%s'", m_CurrentMapServer+1, m_MapDbUrls.size(), m_pMapdownloadSource);
+
+	char aUrl[256];
+	char aFilename[64];
+	char aEscaped[128];
+	str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
+	Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
+	str_format(aUrl, sizeof(aUrl), "%s/%s", m_pMapdownloadSource, aEscaped);
+	if(m_pMapdownloadTask)
+		delete m_pMapdownloadTask;
+	m_pMapdownloadTask = new CFetchTask(true);
+	Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
+	m_CurrentMapServer++;
+}
+
 void CClient::ResetMapDownload()
 {
 	CALLSTACK_ADD();
 
 	if(m_pMapdownloadTask)
 		delete m_pMapdownloadTask;
-	m_NextMapServer = 0;
+	m_pMapdownloadTask = 0;
+	m_CurrentMapServer = 0;
 	m_pMapdownloadTask = 0;
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
+	m_pMapdownloadSource = "gameserver";
 }
 
 void CClient::FinishMapDownload()
@@ -2810,21 +2820,8 @@ void CClient::Update()
 			FinishMapDownload();
 		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
 		{
-			if(m_NextMapServer < m_MapDbUrls.size())
-			{
-				dbg_msg("webdl", "%s failed, trying %s (%i/%i)", m_MapDbUrls[m_NextMapServer-1].url.c_str(), m_MapDbUrls[m_NextMapServer].url.c_str(), m_NextMapServer+1, m_MapDbUrls.size());
-				char aUrl[256];
-				char aFilename[64];
-				char aEscaped[128];
-				str_format(aFilename, sizeof(aFilename), "%s_%08x.map", m_aMapdownloadName, m_MapdownloadCrc);
-				Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
-				str_format(aUrl, sizeof(aUrl), "%s/%s", m_MapDbUrls[m_NextMapServer++].url.c_str(), aEscaped);
-				if(m_pMapdownloadTask)
-					delete m_pMapdownloadTask;
-				m_pMapdownloadTask = new CFetchTask(true);
-				Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
-				m_NextMapServer++;
-			}
+			if(m_CurrentMapServer < m_MapDbUrls.size())
+				MapFetcherStart(m_aMapdownloadFilename, m_MapdownloadCrc);
 			else
 			{
 				dbg_msg("webdl", "http failed, falling back to gameserver");
