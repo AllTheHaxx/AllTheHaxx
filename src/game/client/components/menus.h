@@ -123,12 +123,12 @@ private:
 	static void ui_draw_checkbox(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_checkbox_number(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	*/
-	int DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", int Align = 0, const char *pTooltip = 0);
+	int DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", int Align = 0, const char *pTooltip = 0);
 	int DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, float FontSize, bool Hidden=false, int Corners=CUI::CORNER_ALL, const char *pEmptyText = "", const char *pTooltip = 0);
 	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
 
-	float DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0);
-	float DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0);
+	float DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0, int LenPercent = ~0);
+	float DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0, int LenPercent = ~0);
 	void DoButton_KeySelect(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 	int DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, const char *pTooltip = 0);
 

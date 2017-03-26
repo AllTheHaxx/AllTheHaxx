@@ -407,7 +407,8 @@ void CIRC::StartConnection() // call this from a thread only!
 							if(pChan)
 							{
 								pChan->m_Users.add(CComChan::CUser(aMsgFrom));
-								pChan->AddMessage("*** '%s' has joined %s", aMsgFrom.c_str(), aMsgChannel.c_str());
+								if(g_Config.m_ClIRCShowJoins)
+									pChan->AddMessage("*** '%s' has joined %s", aMsgFrom.c_str(), aMsgChannel.c_str());
 							}
 						}
 
@@ -440,10 +441,13 @@ void CIRC::StartConnection() // call this from a thread only!
 							{
 								pChan->RemoveUserFromList(aMsgFrom.c_str());
 
-								if(pReason)
-									pChan->AddMessage("*** '%s' left %s (%s)", aMsgFrom.c_str(), aChanName, pReason);
-								else
-									pChan->AddMessage("*** '%s' left %s", aMsgFrom.c_str(), aChanName);
+								if(g_Config.m_ClIRCShowJoins)
+								{
+									if(pReason)
+										pChan->AddMessage("*** '%s' left %s (%s)", aMsgFrom.c_str(), aChanName, pReason);
+									else
+										pChan->AddMessage("*** '%s' left %s", aMsgFrom.c_str(), aChanName);
+								}
 							}
 							else
 								dbg_msg("IRC", "WARNING: Got a PART message but no channel for it! { '%s' > '%s' }", aMsgFrom.c_str(), aMsgChannel.c_str());
@@ -473,7 +477,8 @@ void CIRC::StartConnection() // call this from a thread only!
 								dbg_assert(pChan != NULL, "failed casting pCom to CComChan*");
 
 								pChan->RemoveUserFromList(aMsgFrom.c_str());
-								pChan->AddMessage("*** '%s' has quit (%s)", aMsgFrom.c_str(), aMsgText.c_str());
+								if(g_Config.m_ClIRCShowJoins)
+									pChan->AddMessage("*** '%s' has quit (%s)", aMsgFrom.c_str(), aMsgText.c_str());
 
 							}
 						}
@@ -999,7 +1004,7 @@ TCOM* CIRC::OpenCom(const char *pName, bool SwitchTo, int UnreadMessages)
 
 void CIRC::CloseCom(unsigned index)
 {
-	dbg_assert(index >= 2U && index < (unsigned)m_apIRCComs.size(), "CIRC::CloseCom called with index out of range");
+	dbg_assert(index >= 1U && index < (unsigned)m_apIRCComs.size(), "CIRC::CloseCom called with index out of range");
 	dbg_assert(m_apIRCComs[index] != NULL, "invalid pointer in CIRC::m_apIRCComs");
 
 	delete m_apIRCComs[index];

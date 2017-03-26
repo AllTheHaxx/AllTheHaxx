@@ -253,9 +253,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	View.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
-#if defined(__ANDROID__)
 	int DoubleClicked = 0;
-#endif
 	int NumPlayers = 0;
 
 	m_SelectedIndex = -1;
@@ -314,6 +312,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
+			// indicator for how old the server info is
+			if(g_Config.m_Debug)
+			{
+				CUIRect r = Row;
+				r.Margin(1.5f, &r);
+
+				const float MAX_AGE = 60 * 60 * 24*2;
+				int Seconds = ServerBrowser()->GetInfoAge(ItemIndex);
+				if(Seconds >= 0)
+				{
+					float red = clamp((float)Seconds / MAX_AGE, 0.0f, 1.0f);
+					float green = 1.0f - clamp((float)Seconds / MAX_AGE, 0.0f, 1.0f);
+					RenderTools()->DrawUIRect(&r, vec4(red,green,1,0.3f), CUI::CORNER_ALL, 4.0f);
+				}
+			}
+
+
 			// clip the selection
 			if(SelectHitBox.y < OriginalView.y) // top
 			{
@@ -326,12 +341,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox) && !m_MouseUnlocked)
 			{
 				NewSelected = ItemIndex;
-#if defined(__ANDROID__)
 				if(NewSelected == m_DoubleClickIndex)
 					DoubleClicked = 1;
-#endif
 				m_DoubleClickIndex = NewSelected;
 			}
+
+			if(g_Config.m_Debug && UI()->MouseInside(&SelectHitBox))
+				m_pClient->m_pTooltip->SetTooltip(ServerBrowser()->GetDebugString(ItemIndex));
 		}
 		else
 		{
@@ -495,7 +511,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 #if defined(__ANDROID__)
 		if(DoubleClicked)
 #else
-		if(Input()->MouseDoubleClick() && !m_MouseUnlocked)
+		if(Input()->MouseDoubleClick() && !m_MouseUnlocked && DoubleClicked)
 #endif
 			Client()->Connect(g_Config.m_UiServerAddress);
 	}

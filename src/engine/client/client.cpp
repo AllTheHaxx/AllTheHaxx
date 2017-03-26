@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#define _WIN32_WINNT 0x0501
+
 #include <new>
 
 #include <time.h>
@@ -62,7 +65,6 @@
 #include <engine/client/serverbrowser.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
-	#define _WIN32_WINNT 0x0501
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
@@ -892,9 +894,9 @@ void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADD
 	md5_append(&Md5, (unsigned char *)&Addr, sizeof(Addr));
 	md5_finish(&Md5, aDigest);
 
-	unsigned short Random[8];
-	mem_copy(Random, aDigest, sizeof(Random));
-	generate_password(pBuffer, Size, Random, 8);
+	unsigned short aRandom[8];
+	mem_copy(aRandom, aDigest, sizeof(aRandom));
+	generate_password(pBuffer, Size, aRandom, 8);
 }
 
 void CClient::GenerateTimeoutSeed()
@@ -1597,7 +1599,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		}
 	}
 
-	//server count from master server
+	// server count from master server
 	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{
 		unsigned char *pP = (unsigned char*) pPacket->m_pData;
@@ -1711,7 +1713,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			str_copy(Info.m_aClients[i].m_aClan, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aClan));
 			Info.m_aClients[i].m_Country = str_toint(Up.GetString());
 			Info.m_aClients[i].m_Score = str_toint(Up.GetString());
-			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0 ? true : false;
+			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0;
 
 			// add the name to the database
 			if(g_Config.m_ClUsernameFetching)
@@ -1976,7 +1978,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				m_RconAuthed[g_Config.m_ClDummy] = Result;
 			int Old = m_UseTempRconCommands;
 			m_UseTempRconCommands = Unpacker.GetInt();
-			if(Unpacker.Error() != 0)
+			if(Unpacker.Error())
 				m_UseTempRconCommands = 0;
 			if(Old != 0 && m_UseTempRconCommands == 0)
 				m_pConsole->DeregisterTempAll();
@@ -3047,7 +3049,7 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
-	if((m_pInputThread = thread_init(InputThread, this)))
+	if((m_pInputThread = thread_init_named(InputThread, this, "input")))
 		thread_detach(m_pInputThread);
 
 	// connect to the server if wanted
@@ -3573,6 +3575,12 @@ void CClient::Con_RconAuth(IConsole::IResult *pResult, void *pUserData)
 	pSelf->RconAuth("", pResult->GetString(0));
 }
 
+void CClient::Con_RconLogin(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->RconAuth(pResult->GetString(0), pResult->GetString(1));
+}
+
 void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CALLSTACK_ADD();
@@ -3969,6 +3977,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");
 	m_pConsole->Register("rcon", "r[rcon-command]", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon");
 	m_pConsole->Register("rcon_auth", "s[password]", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon");
+	m_pConsole->Register("rcon_login", "s[username] r[password]", CFGFLAG_CLIENT, Con_RconLogin, this, "Authenticate to rcon with a username");
 	m_pConsole->Register("play", "r[file]", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Play, this, "Play the file specified");
 	m_pConsole->Register("record", "?s[file]", CFGFLAG_CLIENT, Con_Record, this, "Record to the file");
 	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording");

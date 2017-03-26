@@ -10,6 +10,7 @@
 #define lua_State int
 #endif
 
+#include <string>
 #include <base/system.h>
 #include <base/tl/array.h>
 
@@ -58,7 +59,7 @@ private:
 	bool m_ScriptAutoload;
 
 public:
-	CLuaFile(CLua *pLua, std::string Filename, bool Autoload);
+	CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload);
 	~CLuaFile();
 	void Init(); // starts the script
 	void Unload(bool error = false); // stops the script

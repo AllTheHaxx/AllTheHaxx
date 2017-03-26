@@ -11,6 +11,7 @@
 #include "detect.h"
 #include "stddef.h"
 #include <time.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +52,11 @@ extern "C" {
 */
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 #define dbg_assert_legacy(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
+#if defined(FEATURE_LUA)
 #define dbg_assert_lua(test,msg) if(!(test)) { luaL_error(L, "%s", msg); }
+#else
+#define dbg_assert_lua(test,msg) ;;
+#endif
 
 
 #ifdef __clang_analyzer__
@@ -401,6 +406,13 @@ void thread_sleep(unsigned milliseconds);
 void *thread_init(void (*threadfunc)(void *), void *user);
 
 /*
+ (see thread_init)
+
+ Note: the name can have a maximum length of 15 characters
+ */
+void *thread_init_named(void (*threadfunc)(void *), void *user, const char *name);
+
+/*
 	Function: thread_wait
 		Waits for a thread to be done or destroyed.
 
@@ -458,7 +470,8 @@ void lock_unlock(LOCK lock);
 #if !defined(CONF_PLATFORM_MACOSX)
 	#if defined(CONF_FAMILY_UNIX)
 		#include <semaphore.h>
-		typedef sem_t SEMAPHORE;
+
+typedef sem_t SEMAPHORE;
 	#elif defined(CONF_FAMILY_WINDOWS)
 		typedef void* SEMAPHORE;
 	#else
@@ -1099,7 +1112,26 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 #define str_hexb(BUF, DATA) str_hex(BUF, sizeof(BUF), DATA, sizeof(DATA))
 void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data_size);
 #define str_hex_simpleb(BUF, DATA, DATASIZE) str_hex_simple(BUF, sizeof(BUF), DATA, DATASIZE)
+#define str_hex_simplebb(BUF, DATA) str_hex_simple(BUF, sizeof(BUF), DATA, sizeof(DATA))
 
+/*
+	Function: str_hex_decode
+		Takes a hex string and returns a byte array.
+
+		Parameters:
+			dst - Buffer for the byte array
+			dst_size - size of the buffer
+			data - String to decode
+
+		Returns:
+			2 - String doesn't exactly fit the buffer
+			1 - Invalid character in string
+			0 - Success
+
+		Remarks:
+			- The contents of the buffer is only valid on success
+*/
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
 /*
 	Function: str_timestamp
 		Copies a time stamp in the format year-month-day_hour-minute-second to the string.
@@ -1114,6 +1146,10 @@ void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data
 void str_timestamp(char *buffer, unsigned int buffer_size);
 void str_timestamp_ex(time_t time, char *buffer, unsigned int buffer_size, const char *format);
 #define str_timestampb(BUF) str_timestamp(BUF, sizeof(BUF))
+
+void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char *pLocalizeDay, const char *pLocalizeDays);
+#define str_clock_sec(buffer, buffer_size, time) str_clock_sec_impl(buffer, buffer_size, time, Localize("day"), Localize("days"))
+#define str_clock_secb(buffer, time) str_clock_sec_impl(buffer, sizeof(buffer), time, Localize("day"), Localize("days"))
 
 /* Group: Filesystem */
 
@@ -1486,6 +1522,25 @@ void shell_execute(const char *file);
 */
 int os_compare_version(int major, int minor);
 
+
+/* Group: Security */
+
+typedef struct AES128_KEY
+{
+	uint8_t key[16]; // 16 * 8 bytes = 128 bit
+} AES128_KEY;
+
+typedef struct AES128_IV
+{
+	uint8_t iv[16]; // same size as the key
+} AES128_IV;
+
+typedef struct MD5_HASH
+{
+	unsigned char digest[16]; // 16 * 8 bytes = 128 bit
+} MD5_HASH;
+
+
 /*
 	Function: generate_password
 		Generates a null-terminated password of length `2 *
@@ -1544,17 +1599,31 @@ int secure_rand();
 unsigned secure_rand_u();
 
 /*
-  Usage:
+	Function: str_aes128_encrypt
+		Encrypts a string with AES-128
 
-	unsigned char md[SHA256_DIGEST_LENGTH]; // 32 bytes
-	if(simpleSHA256(<data buffer>, <data length>, md) < 0)
-	{
-		// handle error
-	}
-	Afterwards, md will contain the binary SHA-256 message digest.
- */
-int simpleSHA256(void* input, unsigned long length, unsigned char* md);
+	Parameters:
+		str - the string to encrypt
+		key - the key to use
+		output_size - will be set to the size of the returned data block
 
+	Returns:
+		A pointer to a dynamically allocated buffer, containing the encrypted data
+		You must free the buffer yourself.
+*/
+uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *output_size, AES128_IV *out_iv);
+
+/*
+	Function: aes128_encrypt
+*/
+char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *iv);
+
+/*
+	Function: md5_simple
+*/
+MD5_HASH md5_simple(unsigned char *data, unsigned data_size);
+
+/* Group: miscellaneous */
 
 void open_default_browser(const char *url);
 

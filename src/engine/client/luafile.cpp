@@ -1,6 +1,8 @@
 #include <cctype>
 #include <fstream>
 #include <algorithm>
+#include <vector>
+#include <sstream>
 
 #include <base/math.h>
 #include <game/localization.h>
@@ -10,7 +12,7 @@
 #include "luabinding.h"
 
 
-CLuaFile::CLuaFile(CLua *pLua, std::string Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
+CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
 {
 	m_pLuaState = 0;
 	m_State = STATE_IDLE;
@@ -144,6 +146,7 @@ void CLuaFile::OpenLua()
 
 void CLuaFile::ApplyPermissions(int Flags)
 {
+#if defined(FEATURE_LUA)
 	if(Flags&PERMISSION_IO)
 		luaopen_io(m_pLuaState);	// input/output of files
 	//if(Flags&PERMISSION_DEBUG) XXX
@@ -154,6 +157,7 @@ void CLuaFile::ApplyPermissions(int Flags)
 	luaopen_os(m_pLuaState);	// evil
 	if(Flags&PERMISSION_PACKAGE)
 		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
+#endif
 
 }
 
@@ -237,6 +241,7 @@ luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
 template<class T>
 T CLuaFile::CallFunc(const char *pFuncName, T def, bool *err) // just for quick access
 {
+#if defined(FEATURE_LUA)
 	if(!m_pLuaState)
 	{
 		*err = true;
@@ -257,6 +262,9 @@ T CLuaFile::CallFunc(const char *pFuncName, T def, bool *err) // just for quick 
 		*err = true;
 	}
 	return ret;
+#else
+	return def;
+#endif
 }
 
 // trim from start (in place)

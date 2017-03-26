@@ -123,6 +123,8 @@ public:
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
 	virtual const CServerInfo *Get(int Index) const = 0;
+	virtual int GetInfoAge(int Index) const = 0;
+	virtual const char *GetDebugString(int Index) const = 0;
 
 	virtual bool IsFavorite(const NETADDR &Addr) const = 0;
 	virtual void AddFavorite(const NETADDR &Addr) = 0;

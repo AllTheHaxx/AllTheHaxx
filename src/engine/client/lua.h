@@ -6,7 +6,6 @@
 #include <lua.hpp>
 #endif
 #include <base/tl/array.h>
-#include <engine/external/openssl/sha.h>
 #include <engine/external/zlib/zlib.h>
 #include "luafile.h"
 

@@ -14,7 +14,7 @@ int IRChook_join(IIRC::ReplyData* hostd, void* user, void* engine)
 {
 	CIRCBind *pData = (CIRCBind *)user;
 
-	if(str_comp(hostd->from.c_str(), pData->GameClient()->IRC()->GetNick()) == 0)
+	if(g_Config.m_ClIRCShowJoins != 2 || str_comp(hostd->from.c_str(), pData->GameClient()->IRC()->GetNick()) == 0)
 		return 0;
 
 	char aBuf[64];
@@ -26,6 +26,8 @@ int IRChook_join(IIRC::ReplyData* hostd, void* user, void* engine)
 int IRChook_leave(IIRC::ReplyData* hostd, void* user, void* engine) // serves for both QUIT and PART
 {
 	CIRCBind *pData = (CIRCBind *)user;
+	if(g_Config.m_ClIRCShowJoins != 2)
+		return 0;
 
 	char aBuf[64];
 	if(hostd->params.c_str()[0])
@@ -126,7 +128,7 @@ void CIRCBind::Connect()
 		return;
 
 	m_pClient->IRC()->SetNick(g_Config.m_ClIRCNick);
-	thread_init(ListenIRCThread, this);
+	thread_init_named(ListenIRCThread, this, "IRC listener");
 }
 
 void CIRCBind::OnNickChange(const char *pNewNick)

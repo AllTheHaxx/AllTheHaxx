@@ -154,6 +154,57 @@ const CServerInfo *CServerBrowser::Get(int Index) const
 	return &m_ppServerlist[Index]->m_Info;
 }
 
+int CServerBrowser::GetInfoAge(int Index) const
+{
+	if(Index < 0 || Index >= m_NumSortedServers)
+		return 0;
+
+	if(m_ppServerlist[Index]->m_RequestTime < 0)
+		return (int)m_ppServerlist[Index]->m_RequestTime;
+
+	return (int)((time_get() - m_ppServerlist[Index]->m_RequestTime) / time_freq());
+}
+
+const char *CServerBrowser::GetDebugString(int Index) const
+{
+	static char s_aBuffer[512] = {0};
+	if(Index < 0 || Index >= m_NumSortedServers)
+	{
+		str_formatb(s_aBuffer, "<invalid index: %i>", Index);
+		return s_aBuffer;
+	}
+
+	const CServerEntry *pInfo = m_ppServerlist[Index];
+
+	char aAddr[NETADDR_MAXSTRSIZE];
+	net_addr_str(&(m_ppServerlist[Index]->m_Addr), aAddr, sizeof(aAddr), true);
+
+	char aInfoAge[64];
+	str_clock_secb(aInfoAge, GetInfoAge(Index));
+
+	str_format(s_aBuffer, sizeof s_aBuffer,
+			   "%i/%i/%p\n"
+			   "Addr: %s\n"
+			   "Waiting for Info: %s\n"
+			   "Is64: %s\n"
+			   "GotInfo: %s\n"
+			   "\n"
+			   "NextIp = %p\n"
+			   "PrevReq = %p\n"
+			   "NextReq = %p\n",
+			   Index, m_NumSortedServers, pInfo,
+			   aAddr,
+			   aInfoAge,
+			   pInfo->m_Is64 ? "true" : "false",
+			   pInfo->m_GotInfo ? "true" : "false",
+			   pInfo->m_pNextIp,
+			   pInfo->m_pPrevReq,
+			   pInfo->m_pNextReq
+	);
+
+	return s_aBuffer;
+}
+
 bool CServerBrowser::SortCompareName(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];

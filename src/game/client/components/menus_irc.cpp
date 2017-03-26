@@ -314,9 +314,6 @@ void CMenus::RenderIRC(CUIRect MainView)
 			UI()->SetActiveItem(s_EditboxInput.GetID());
 		}
 
-		if(!UI()->HotItem())
-			UI()->SetActiveItem(s_EditboxInput.GetID());
-
 		//Channel/Query
 		CIRCCom *pCom = m_pClient->IRC()->GetActiveCom();
 		if(!pCom)

@@ -134,7 +134,7 @@ public:
 	virtual void ToggleFullscreen() = 0;
 	virtual void ToggleWindowBordered() = 0;
 	virtual void ToggleWindowVSync() = 0;
-	virtual void LuaCheckDrawingState(struct lua_State *L, const char *pFuncName, bool NoThrow=false) = 0;
+	virtual void LuaCheckDrawingState(lua_State *L, const char *pFuncName, bool NoThrow=false) = 0;
 
 	// networking
 	virtual void EnterGame() = 0;
@@ -160,7 +160,7 @@ public:
 	virtual void Rcon(const char *pLine) = 0;
 
 	// server info
-	virtual class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo) = 0;
+	virtual class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo = 0) = 0;
 
 	virtual void CheckVersionUpdate(bool Force) = 0;
 

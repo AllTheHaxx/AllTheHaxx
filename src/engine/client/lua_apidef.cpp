@@ -154,6 +154,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		/// Game.Client
 		.beginClass<IClient>("IClient")
 			.addProperty("Tick", &IClient::GameTick)
+			.addProperty("TickSpeed", &IClient::GameTickSpeed)
 			.addProperty("IntraGameTick", &IClient::IntraGameTick)
 			.addProperty("PredIntraGameTick", &IClient::PredIntraGameTick)
 			.addProperty("PredGameTick", &IClient::PredGameTick)
@@ -199,6 +200,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("MouseButton", &CUI::MouseButton)
 			.addFunction("MouseButtonClicked", &CUI::MouseButtonClicked)
 			.addFunction("MouseInside", &CUI::MouseInside)
+			.addFunction("ClipEnable", &CUI::ClipEnable)
+			.addFunction("ClipDisable", &CUI::ClipDisable)
 		.endClass()
 
 		/// Game.RenderTools
@@ -484,6 +487,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addProperty("ScreenWidth", &IGraphics::ScreenWidth)
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
+			
+			.addFunction("ClipEnable", &IGraphics::ClipEnable)
+			.addFunction("ClipDisable", &IGraphics::ClipDisable)
 		.endClass()
 
 		/// Engine.TextRender

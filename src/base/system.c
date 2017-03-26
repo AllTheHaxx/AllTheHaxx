@@ -12,9 +12,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <engine/external/openssl/sha.h>
+#include <aes128/aes.h>
+#include <md5/md5.h>
+#include <zlib/zlib.h>
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	#include "engine/shared/websockets.h"
 #endif
 
@@ -195,7 +197,7 @@ void dbg_enable_threaded()
 
 	dbg_msg_threaded = 1;
 
-	Thread = thread_init(dbg_msg_thread, 0);
+	Thread = thread_init_named(dbg_msg_thread, 0, "dbg_msg worker");
 	thread_detach(Thread);
 }
 #endif
@@ -645,10 +647,19 @@ int io_flush(IOHANDLE io)
 
 void *thread_init(void (*threadfunc)(void *), void *u)
 {
+	return thread_init_named(threadfunc, u, 0);
+}
+
+void *thread_init_named(void (*threadfunc)(void *), void *u, const char *n)
+{
 #if defined(CONF_FAMILY_UNIX)
 	pthread_t id;
 	if(pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u) == 0)
-		return (void*)id;
+	{
+		if(n && n[0])
+			pthread_setname_np(id, n);
+		return (void *)id;
+	}
 	else
 		return NULL;
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -828,35 +839,38 @@ int64 time_get()
 	if(new_tick != -1)
 		new_tick = 0;
 
+	{
 #if defined(CONF_PLATFORM_MACOSX)
-	static int got_timebase = 0;
-	mach_timebase_info_data_t timebase;
-	if(!got_timebase)
-	{
-		mach_timebase_info(&timebase);
-	}
-	uint64_t time = mach_absolute_time();
-	uint64_t q = time / timebase.denom;
-	uint64_t r = time % timebase.denom;
-	last = q * timebase.numer + r * timebase.numer / timebase.denom;
-	return last;
+		static int got_timebase = 0;
+		mach_timebase_info_data_t timebase;
+		uint64_t time;
+		uint64_t q;
+		uint64_t r;
+		if(!got_timebase)
+		{
+			mach_timebase_info(&timebase);
+		}
+		time = mach_absolute_time();
+		q = time / timebase.denom;
+		r = time % timebase.denom;
+		last = q * timebase.numer + r * timebase.numer / timebase.denom;
+		return last;
 #elif defined(CONF_FAMILY_UNIX)
-	struct timespec spec;
-	clock_gettime(CLOCK_MONOTONIC, &spec);
-	last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
-	return last;
+		struct timespec spec;
+		clock_gettime(CLOCK_MONOTONIC, &spec);
+		last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
+		return last;
 #elif defined(CONF_FAMILY_WINDOWS)
-	{
 		int64 t;
 		QueryPerformanceCounter((PLARGE_INTEGER)&t);
 		if(t<last) /* for some reason, QPC can return values in the past */
 			return last;
 		last = t;
 		return t;
-	}
 #else
-	#error not implemented
+		#error not implemented
 #endif
+	}
 }
 
 int64 time_freq()
@@ -1184,7 +1198,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 		sock.type &= ~NETTYPE_IPV4;
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	/* close down websocket_ipv4 */
 	if(sock.web_ipv4sock >= 0)
 	{
@@ -1300,7 +1314,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		int socket = -1;
@@ -1389,7 +1403,7 @@ long net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, unsigne
 			dbg_msg("net", "can't send ipv4 traffic to this socket");
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(addr->type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(sock.web_ipv4sock >= 0)
@@ -1464,7 +1478,7 @@ long net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, unsigned int maxsiz
 		bytes = recvfrom(sock.ipv6sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bytes <= 0 && sock.web_ipv4sock >= 0)
 	{
 		fromlen = sizeof(struct sockaddr);
@@ -2115,7 +2129,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 		if(sock.ipv6sock > sockid)
 			sockid = sock.ipv6sock;
 	}
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(sock.web_ipv4sock >= 0)
 	{
 		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
@@ -2224,7 +2238,7 @@ int str_replace_char_num(char *str_in, int max_replace, char find, char replace)
 		if(str_in[i] == find)
 		{
 			str_in[i] = replace;
-			if(++counter >= max_replace)
+			if(max_replace >= 0 && ++counter >= max_replace)
 				break;
 		}
 	}
@@ -2239,7 +2253,7 @@ int str_replace_char_rev_num(char *str_in, int max_replace, char find, char repl
 		if(str_in[i] == find)
 		{
 			str_in[i] = replace;
-			if(++counter >= max_replace)
+			if(max_replace >= 0 && ++counter >= max_replace)
 				break;
 		}
 	}
@@ -2513,6 +2527,64 @@ void str_hex_simple(char *dst, int dst_size, const unsigned char *data, int data
 	}
 }
 
+static int hexval(char x)
+{
+    switch(x)
+    {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    case 'a':
+    case 'A': return 10;
+    case 'b':
+    case 'B': return 11;
+    case 'c':
+    case 'C': return 12;
+    case 'd':
+    case 'D': return 13;
+    case 'e':
+    case 'E': return 14;
+    case 'f':
+    case 'F': return 15;
+    default: return -1;
+    }
+}
+
+static int byteval(const char *byte, unsigned char *dst)
+{
+	int v1 = -1, v2 = -1;
+	v1 = hexval(byte[0]);
+	v2 = hexval(byte[1]);
+
+	if(v1 < 0 || v2 < 0)
+		return 1;
+
+	*dst = v1 * 16 + v2;
+	return 0;
+}
+
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
+{
+	int len = str_length(src)/2;
+	int i;
+	if(len != dst_size)
+		return 2;
+
+	for(i = 0; i < len && dst_size; i++, dst_size--)
+	{
+		if(byteval(src + i * 2, dst++))
+			return 1;
+	}
+	return 0;
+}
+
 void str_timestamp_ex(time_t time_data, char *buffer, unsigned int buffer_size, const char *format)
 {
 	struct tm *time_info;
@@ -2528,6 +2600,21 @@ void str_timestamp(char *buffer, unsigned int buffer_size)
 	time(&time_data);
 	str_timestamp_ex(time_data, buffer, buffer_size, "%Y-%m-%d_%H-%M-%S");
 }
+
+void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char *pLocalizeDay, const char *pLocalizeDays)
+{
+	// render the time in a nice format
+	int negative = time < 0;
+	if(negative)
+		time = -time;
+	if(time >= 60*60*24) // 60sec x 60min x 24h = 1 day
+		str_format(buffer, buffer_size, "%s%d %s, %02d:%02d:%02d", negative ? "-" : "", time/60/60/24, time/60/60/24 == 1 ? pLocalizeDay : pLocalizeDays, (time%86400)/3600, (time/60)%60, (time)%60);
+	else if(time >= 60*60) // 60sec x 60 min = 1 hour
+		str_format(buffer, buffer_size, "%s%02d:%02d:%02d", negative ? "-" : "", time/60/60, (time/60)%60, time%60);
+	else // only min:sec
+		str_format(buffer, buffer_size, "%s%02d:%02d", negative ? "-" : "", time/60, time%60);
+}
+
 
 const char *str_next_word(char *str, char delim, char *buf, int *cursor)
 {
@@ -2844,10 +2931,11 @@ void shell_execute(const char *file)
 #if defined(CONF_FAMILY_WINDOWS)
 	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
 #elif defined(CONF_FAMILY_UNIX)
-	char* argv[2];
+	char *argv[2];
+	pid_t pid;
 	argv[0] = (char*) file;
 	argv[1] = NULL;
-	pid_t pid = fork();
+	pid = fork();
 	if(!pid)
 		execv(file, argv);
 #endif
@@ -2971,6 +3059,20 @@ void secure_random_fill(void *bytes, unsigned length)
 #endif
 }
 
+MD5_HASH md5_simple(unsigned char *data, unsigned data_size)
+{
+	MD5_HASH result;
+	mem_zerob(&result);
+
+	md5_state_t md;
+
+	md5_init(&md);
+	md5_append(&md, data, data_size);
+	md5_finish(&md, (md5_byte_t*)result.digest);
+
+	return result;
+}
+
 int secure_rand()
 {
 	unsigned int i;
@@ -2985,19 +3087,58 @@ unsigned secure_rand_u()
 	return (i%RAND_MAX);
 }
 
-int simpleSHA256(void* input, unsigned long length, unsigned char* md)
+uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *output_size, AES128_IV *out_iv)
 {
-	SHA256_CTX context;
-	if(!SHA256_Init(&context))
-		return 1;
+	int i;
+	int str_len = str_length(str);
+	int padded_len = str_len - str_len%16 + 16; // must be a multiple of 16
+	*output_size = (unsigned int)((padded_len / 16 + 1) * 16) - 16;
 
-	if(!SHA256_Update(&context, (unsigned char*)input, length))
-		return 2;
+	// copy the string and add padding
+	uint8_t *input_buffer = mem_allocb(uint8_t, padded_len);
+	for(i = 0; i < padded_len; i++)
+	{
+		if(i < str_len)
+			input_buffer[i] = (uint8_t)str[i];
+		else
+			input_buffer[i] = (uint8_t)' '; // pad with whitespaces; they can easily be stripped
+	}
 
-	if(!SHA256_Final(md, &context))
-		return 3;
+	// prepare the initial vector (iv)
+	for(i = 0; i < 16; i++)
+	{
+		out_iv->iv[i] = (uint8_t)(secure_rand_u() & 0xFF);
+	}
 
-	return 0;
+	// allocate the output buffer
+	uint8_t *output_buffer = mem_allocb(uint8_t, *output_size);
+
+	// set it off!
+	AES128_CBC_encrypt_buffer(output_buffer, input_buffer, (uint32_t)padded_len, key->key, out_iv->iv);
+
+	mem_free(input_buffer);
+
+	return output_buffer;
+}
+
+char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *iv)
+{
+	int i;
+
+	uint8_t *output_buffer = mem_allocb(uint8_t, buffer_size);
+	mem_zero(output_buffer, buffer_size);
+	AES128_CBC_decrypt_buffer(output_buffer, data, data_size, key->key, iv->iv);
+
+	// convert back to a string
+	mem_zero(buffer, buffer_size);
+	for(i = 0; i < data_size && i < buffer_size; i++)
+	{
+		buffer[i] = (char)output_buffer[i];
+	}
+
+	mem_free(output_buffer);
+
+	return str_strip_right_whitespaces(buffer);
 }
 
 void open_default_browser(const char *url)

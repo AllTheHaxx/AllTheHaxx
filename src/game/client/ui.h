@@ -53,6 +53,10 @@ public:
 
 	enum
 	{
+		ALIGN_LEFT   = -1,
+		ALIGN_CENTER =  0,
+		ALIGN_RIGHT  =  1,
+
 		CORNER_TL=1,
 		CORNER_TR=2,
 		CORNER_BL=4,

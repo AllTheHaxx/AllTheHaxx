@@ -327,32 +327,43 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	Button.VSplitLeft(330.0f, &Button, 0);
 	Label.x += 4.0f;
 	Button.x += 5.0f;
-	static CButtonContainer s_GenButton;
-	if(DoButton_Menu(&s_GenButton, Localize("1. Generate RSA key"), 0, &Button, Localize("Generates a new (256 b) RSA key you can then save and share")))
+	static char s_aPlainTextPassword[62] = {0};
 	{
-		m_pClient->m_pChat->GenerateKeyPair(256, 3);
+		if(m_pClient->m_pChat->GotKey())
+			RenderTools()->DrawUIRect(&Button, vec4(0.7f, 0.7f, 0, 0.5f), CUI::CORNER_ALL, 3.0f);
+
+		static float s_Offset = 0;
+		static CButtonContainer s_PasswordBox;
+		DoEditBox(&s_PasswordBox, &Button, s_aPlainTextPassword, sizeof(s_aPlainTextPassword), 12.0f, &s_Offset, true, CUI::CORNER_ALL, Localize("Enter Password"), CUI::ALIGN_LEFT, m_pClient->m_pChat->GotKey() ? Localize("This will overwrite the currently active key!") : 0);
+	}
+
+	static char s_aPlainTextPasswordRepeat[62] = {0};
+	if(str_length(s_aPlainTextPassword) > 0)
+	{
+		MainView.HSplitTop(4.0f, 0, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(330.0f, &Button, 0);
+		Button.x += 5.0f;
+		if(str_comp(s_aPlainTextPassword, s_aPlainTextPasswordRepeat) != 0)
+			RenderTools()->DrawUIRect(&Button, vec4(0.7f, 0, 0, 0.5f), CUI::CORNER_ALL, 3.0f);
+
+		static float s_Offset = 0;
+		static CButtonContainer s_PasswordRepeatBox;
+		DoEditBox(&s_PasswordRepeatBox, &Button, s_aPlainTextPasswordRepeat, sizeof(s_aPlainTextPasswordRepeat), 12.0f, &s_Offset, true, CUI::CORNER_ALL, Localize("Repeat Password"), CUI::ALIGN_LEFT);
 	}
 
 	MainView.HSplitTop(4.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(330.0f, &Button, 0);
 	Button.x += 5.0f;
-	static CButtonContainer s_SaveButton;
-	if(DoButton_Menu(&s_SaveButton, Localize("2. Save RSA key"), 0, &Button, Localize("Save key with the name you entered above")))
-	{
-		m_pClient->m_pChat->SaveKeys(m_pClient->m_pChat->m_pKeyPair, aKeyName);
-		s_RSAKeyListInited = false;
-	}
-
-	MainView.HSplitTop(4.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(330.0f, &Button, 0);
-	Button.x += 5.0f;
-	static CButtonContainer s_LoadButton;
-	if(DoButton_Menu(&s_LoadButton, Localize("Load RSA key"), 0, &Button, Localize("Load key with the name you entered above")))
-	{
-		m_pClient->m_pChat->LoadKeys(aKeyName);
-	}
+	static CButtonContainer s_ApplyButton;
+	if(str_comp(s_aPlainTextPassword, s_aPlainTextPasswordRepeat) == 0 || m_pClient->m_pChat->GotKey())
+		if(DoButton_Menu(&s_ApplyButton, str_length(s_aPlainTextPassword) > 0 ? Localize("Apply") : Localize("Clear"), 0, &Button, str_length(s_aPlainTextPassword) > 0 ? Localize("Set the key as the one used for crypt chat") : Localize("Clear the current key and disable crypt chat")))
+		{
+			m_pClient->m_pChat->SetKey(s_aPlainTextPassword);
+			mem_zerob(s_aPlainTextPassword);
+			mem_zerob(s_aPlainTextPasswordRepeat);
+		}
 
 }
 

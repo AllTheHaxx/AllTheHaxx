@@ -27,7 +27,7 @@ bool CTranslator::Init()
 {
 	if((m_pHandle = curl_easy_init()))
 	{
-		m_pThread = thread_init(TranslationWorker, this);
+		m_pThread = thread_init_named(TranslationWorker, this, "transl. worker");
 		return true;
 	}
 	return false;

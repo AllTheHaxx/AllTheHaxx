@@ -313,12 +313,13 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	if(DoButton_Menu(&s_SnifferSettingsButton, Localize("Network Sniffer"), s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS, &Button, Localize("Packet sniffing settings")))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS ? EXTRAS_NONE : EXTRAS_SNIFFER_SETTINGS;
 
-	// TODO add this back again when it has been done
+#if defined(FEATURE_LUA)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Lua QuickAccess")), &Button, &ButtonBar);
 	static CButtonContainer s_LuaQuickAccessButton;
 	if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "Scripts can create GUIs in here as they like"))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
+#endif
 
 	if(IsDDNet(Client()->GetServerInfo(0)) || IsDDRace(Client()->GetServerInfo(0)))
 	{
@@ -822,6 +823,19 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	// render background
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
+
+	/*
+
+	 |- ServerInfo -|-- MOTD -----------|
+	 |              |                   |
+	 |              |                   |
+	 |-  GameInfo  -|                   |
+	 |              |                   |
+	 |              |                   |
+	  ----------------------------------
+
+	 */
+
 	CUIRect View, ServerInfo, GameInfo, Motd;
 
 	char aBuf[1024];
@@ -830,10 +844,9 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	MainView.Margin(10.0f, &View);
 
 	// serverinfo
-	View.HSplitTop(View.h/2/UI()->Scale()-5.0f, &ServerInfo, &Motd);
-	ServerInfo.VSplitLeft(View.w/2/UI()->Scale()-5.0f, &ServerInfo, &GameInfo);
+	View.VSplitLeft(View.w*0.4f/UI()->Scale()-5.0f, &ServerInfo, &Motd);
+	ServerInfo.HSplitTop(View.h*0.55f/UI()->Scale()-5.0f, &ServerInfo, &GameInfo);
 	RenderTools()->DrawUIRect(&ServerInfo, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
-
 	ServerInfo.Margin(5.0f, &ServerInfo);
 
 	float x = 5.0f;
@@ -842,20 +855,31 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 32, Localize("Server info"), 250);
 	y += 32.0f+5.0f;
 
+	char aConnTime[128];
+	int Time = round_to_int(Client()->LocalTime());
+	if(Time >= 60*60*24) // 60sec x 60min x 24h = 1 day
+		str_format(aConnTime, sizeof(aConnTime), "%d %s, %02d:%02d:%02d", Time/60/60/24, Time/60/60/24 == 1 ? Localize("day") : Localize("days"), (Time%86400)/3600, (Time/60)%60, (Time)%60);
+	else if(Time >= 60*60) // 60sec x 60 min = 1 hour
+		str_format(aConnTime, sizeof(aConnTime), "%02d:%02d:%02d", Time/60/60, (Time/60)%60, Time%60);
+	else // only min:sec
+		str_format(aConnTime, sizeof(aConnTime), "%02d:%02d", Time/60, Time%60);
+
 	mem_zero(aBuf, sizeof(aBuf));
-	str_format(
-		aBuf,
-		sizeof(aBuf),
-		"%s\n\n"
+	str_format(aBuf, sizeof(aBuf),
+		"%s\n"
+		"\n"
 		"%s: %s\n"
 		"%s: %d\n"
 		"%s: %s\n"
-		"%s: %s\n",
+		"%s: %s\n"
+		"\n"
+		"%s: %s",
 		CurrentServerInfo.m_aName,
 		Localize("Address"), CurrentServerInfo.m_aAddress,
 		Localize("Ping"), m_pClient->m_Snap.m_pLocalInfo->m_Latency,
 		Localize("Version"), CurrentServerInfo.m_aVersion,
-		Localize("Password"), CurrentServerInfo.m_Flags &1 ? Localize("Yes") : Localize("No")
+		Localize("Password"), CurrentServerInfo.m_Flags&SERVER_FLAG_PASSWORD ? Localize("Yes") : Localize("No"),
+		Localize("Connection Time"), aConnTime
 	);
 
 	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 20, aBuf, 250);
@@ -875,16 +899,15 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	}
 
 	// gameinfo
-	GameInfo.VSplitLeft(10.0f, 0x0, &GameInfo);
+	GameInfo.HSplitTop(10.0f, 0, &GameInfo);
 	RenderTools()->DrawUIRect(&GameInfo, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 
 	GameInfo.Margin(5.0f, &GameInfo);
 
+	y = 5.0f;
 	x = 5.0f;
-	y = 0.0f;
 
 	TextRender()->Text(0, GameInfo.x+x, GameInfo.y+y, 32, Localize("Game info"), 250);
-	y += 32.0f+5.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
 	{
@@ -909,7 +932,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	}
 
 	// motd
-	Motd.HSplitTop(10.0f, 0, &Motd);
+	Motd.VSplitLeft(10.0f, 0, &Motd);
 	RenderTools()->DrawUIRect(&Motd, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 	Motd.Margin(5.0f, &Motd);
 	y = 0.0f;

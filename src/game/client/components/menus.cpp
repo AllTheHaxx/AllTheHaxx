@@ -375,7 +375,7 @@ int CMenus::DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, i
 	return DoButton_CheckBox_Common(pBC, pText, aBuf, pRect, pTooltip, false, Corner);
 }
 
-int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText, int Align, const char *pTooltip)
+int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pEmptyText, int Align, const char *pTooltip)
 {
 	CALLSTACK_ADD();
 
@@ -394,35 +394,69 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 		if(Len == 0)
 			s_AtIndex = 0;
 
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+		for(int iEvent = 0; iEvent < m_NumInputEvents; iEvent++)
 		{
-			const char *Text = Input()->GetClipboardText();
-			if(Text)
+			const IInput::CEvent& Event = m_aInputEvents[iEvent];
+			bool Handled = false;
+
+			if(Event.m_Flags&IInput::FLAG_PRESS)
 			{
-				int PasteOffset = str_length(pStr);
-				int CharsLeft = StrSize - PasteOffset - 1;
-				for(int i = 0; i < str_length(Text) && i < CharsLeft; i++)
+				if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
 				{
-					if(Text[i] == '\n')
-						pStr[i + PasteOffset] = ' ';
-					else
-						pStr[i + PasteOffset] = Text[i];
+					Handled = true;
+
+					CLineInput LineInput; // working with a CLineInput here is easier
+					LineInput.Set(pStr);
+					LineInput.SetCursorOffset(s_AtIndex);
+
+					if(Event.m_Key == KEY_V) // paste
+					{
+						const char *pText = Input()->GetClipboardText();
+						if(pText && pText[0])
+						{
+							char aLine[512];
+							str_copyb(aLine, pText);
+							str_replace_char_num(aLine, -1, '\n', ' ');
+
+							char aRightPart[256];
+							str_copy(aRightPart, LineInput.GetString() + LineInput.GetCursorOffset(), sizeof(aRightPart));
+							str_copy(aLine, LineInput.GetString(), min(LineInput.GetCursorOffset() + 1, (int)sizeof(aLine)));
+							str_append(aLine, pText, sizeof(aLine));
+							str_append(aLine, aRightPart, sizeof(aLine));
+							LineInput.Set(aLine);
+							LineInput.SetCursorOffset(str_length(aLine) - str_length(aRightPart));
+						}
+						else if(g_Config.m_Debug)
+							dbg_msg("menus", "paste failed: got no text from clipboard");
+					}
+					else if(Event.m_Key == KEY_C || Event.m_Key == KEY_X) // copy/cut
+					{
+						Input()->SetClipboardText(LineInput.GetString());
+						if(Event.m_Key == KEY_X)
+							LineInput.Clear();
+					}
+					else // handle skipping: jump to spaces and special ASCII characters
+					{
+						CLineInput::HandleSkipping(Event, &LineInput);
+					}
+
+					// apply the changes
+					str_copy(pStr, LineInput.GetString(), StrSize);
+					s_AtIndex = LineInput.GetCursorOffset();
 				}
-				s_AtIndex = str_length(pStr);
 			}
+
+			// process input
+			if(!Handled)
+			{
+				Len = str_length(pStr);
+				int NumChars = Len;
+				ReturnValue |= CLineInput::Manipulate(Event, pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
+			}
+
 		}
 
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
-		{
-			Input()->SetClipboardText(pStr);
-		}
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_X))
-		{
-			Input()->SetClipboardText(pStr);
-			pStr[0] = '\0';
-		}
-
+		// handle scrolling
 		if(Inside && UI()->MouseButton(0) && m_pClient->m_pGameConsole->IsClosed())
 		{
 			s_DoScroll = true;
@@ -433,11 +467,11 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 			if(Align == 0)
 				dOffset = pRect->w/2.0f-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
 			else if(Align > 0)
-				dOffset = pRect->w-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f; // TODO: FIX THIS!!!
+				dOffset = pRect->w-TextRender()->TextWidth(0, FontSize, pStr, -1)/2.0f;
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(dOffset + TextRender()->TextWidth(0, FontSize, pStr, i) - *Offset > MxRel)
+				if(dOffset + TextRender()->TextWidth(0, FontSize, pStr, i) - *pOffset > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -464,13 +498,6 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 				s_ScrollStart = UI()->MouseX();
 				UpdateOffset = true;
 			}
-		}
-
-		for(int i = 0; i < m_NumInputEvents; i++)
-		{
-			Len = str_length(pStr);
-			int NumChars = Len;
-			ReturnValue |= CLineInput::Manipulate(m_aInputEvents[i], pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
 		}
 	}
 
@@ -521,7 +548,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
 
-	if(Hidden)
+	if(Hidden && !(pEmptyText && *pEmptyText && str_length(pStr) == 0))
 	{
 		unsigned s = (unsigned int)str_length(pDisplayStr);
 		if(s >= sizeof(aStars))
@@ -536,24 +563,24 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	if(UI()->HotItem() == pBC->GetID() && Input()->GetIMEState())
 	{
 		str_copyb(aInputing, pStr);
-		const char *Text = Input()->GetIMECandidate();
-		if (str_length(Text))
+		const char *pText = Input()->GetIMECandidate();
+		if (str_length(pText))
 		{
-		int NewTextLen = str_length(Text);
-		int CharsLeft = StrSize - str_length(aInputing) - 1;
-		int FillCharLen = min(NewTextLen, CharsLeft);
-		//Push Char Backward
-		for(int i = str_length(aInputing); i >= s_AtIndex ; i--)
-			aInputing[i+FillCharLen] = aInputing[i];
-		for(int i = 0; i < FillCharLen; i++)
-		{
-			if(Text[i] == '\n')
-				aInputing[s_AtIndex + i] = ' ';
-			else
-				aInputing[s_AtIndex + i] = Text[i];
-		}
-		//s_AtIndex = s_AtIndex+FillCharLen;
-		pDisplayStr = aInputing;
+			int NewTextLen = str_length(pText);
+			int CharsLeft = StrSize - str_length(aInputing) - 1;
+			int FillCharLen = min(NewTextLen, CharsLeft);
+			//Push Char Backward
+			for(int i = str_length(aInputing); i >= s_AtIndex; i--)
+				aInputing[i + FillCharLen] = aInputing[i];
+			for(int i = 0; i < FillCharLen; i++)
+			{
+				if(pText[i] == '\n')
+					aInputing[s_AtIndex + i] = ' ';
+				else
+					aInputing[s_AtIndex + i] = pText[i];
+			}
+			//s_AtIndex = s_AtIndex+FillCharLen;
+			pDisplayStr = aInputing;
 		}
 	}
 
@@ -561,28 +588,28 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	if(UI()->LastActiveItem() == pBC->GetID() && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
-		if(w-*Offset > Textbox.w)
+		if(w-*pOffset > Textbox.w)
 		{
 			// move to the left
 			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1);
 			do
 			{
-				*Offset += min(wt-*Offset-Textbox.w, Textbox.w/3);
+				*pOffset += min(wt-*pOffset-Textbox.w, Textbox.w/3);
 			}
-			while(w-*Offset > Textbox.w);
+			while(w-*pOffset > Textbox.w);
 		}
-		else if(w-*Offset < 0.0f)
+		else if(w-*pOffset < 0.0f)
 		{
 			// move to the right
 			do
 			{
-				*Offset = max(0.0f, *Offset-Textbox.w/3);
+				*pOffset = max(0.0f, *pOffset-Textbox.w/3);
 			}
-			while(w-*Offset < 0.0f);
+			while(w-*pOffset < 0.0f);
 		}
 	}
 	UI()->ClipEnable(pRect);
-	Textbox.x -= *Offset;
+	Textbox.x -= *pOffset;
 
 	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, Align);
 
@@ -591,41 +618,45 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	// render the cursor
 	if(UI()->LastActiveItem() == pBC->GetID() && !JustGotActive)
 	{
-//<<<! HEAD
-//		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, Align ? s_AtIndex : -1);
-//=======
+		const float cw = TextRender()->TextWidth(0, FontSize, "|")/2;
+
+		// wtf is this good for?
 		if (str_length(aInputing))
 		{
 			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor());
 			Textbox = *pRect;
 			Textbox.VSplitLeft(2.0f, 0, &Textbox);
-			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+			Textbox.x += (w-*pOffset-cw);
 
-			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+			UI()->DoLabel(&Textbox, "|", FontSize, CUI::ALIGN_LEFT); // TODO: the alignment here might not be correct (like this entire block ._.)
 		}
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
-//>>>>>>> ddnet/master
+
+		const float tw = TextRender()->TextWidth(0, FontSize, pDisplayStr);
+		const float twTillCursor = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
 		Textbox = *pRect;
-		if(Align < 0)
+		Textbox.x += twTillCursor;
+		Textbox.x -= cw;
+		Textbox.x -= *pOffset;
+		if(Align == CUI::ALIGN_CENTER)
 		{
+			// move it into the middle
+			Textbox.x += Textbox.w/2.0f - tw/2.0f;
+		}
+		else if(Align == CUI::ALIGN_RIGHT)
+		{
+			// move it to the right and add a little margin
+			Textbox.VSplitRight(2.0f, &Textbox, 0);
+			Textbox.x += Textbox.w - tw;
+		}
+		else //if(Align == CUI::ALIGN_LEFT)
+		{
+			// a little margin from the left
 			Textbox.VSplitLeft(2.0f, 0, &Textbox);
-			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
-		}
-		else if(Align == 0)
-		{
-			Textbox.x += Textbox.w/2.0f-w/2.0f;
-			w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
-			Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
-		}
-		else if(Align > 0)
-		{
-			w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
-			Textbox.VSplitRight(2.0f, 0, &Textbox);
-			Textbox.x -= (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
 		}
 
-		if((2*time_get()/time_freq()) % 2)	// make it blink
-			UI()->DoLabel(&Textbox, "|", FontSize, -1);
+		// make it blink
+		if((2*time_get()/time_freq()) % 2)
+			UI()->DoLabel(&Textbox, "|", FontSize, CUI::ALIGN_LEFT); // the correct alignment is being calculated above
 	}
 	UI()->ClipDisable();
 
@@ -658,17 +689,31 @@ int CMenus::DoEditBoxLua(lua::CEditboxContainer *pBC, const CUIRect *pRect, floa
 	return result;
 }
 
-float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
+float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value, int LenPercent)
 {
 	CALLSTACK_ADD();
 
 	CUIRect Handle;
 	static float OffsetY;
+
+	{
 #if defined(__ANDROID__)
-	pRect->HSplitTop(50, &Handle, 0);
+		const float FixedLen = 50.0f;
 #else
-	pRect->HSplitTop(33, &Handle, 0);
+		const float FixedLen = 33.0f;
 #endif
+
+		// calculate the handle length
+		float Len = FixedLen;
+		if(LenPercent != ~0)
+		{
+			LenPercent = clamp(LenPercent, 0, 100);
+			Len = clamp(pRect->h * ((float)LenPercent / 100.0f),
+						FixedLen/2.0f,
+						pRect->h-1.0f);
+		}
+		pRect->HSplitTop(Len, &Handle, 0);
+	}
 
 	Handle.y += (pRect->h-Handle.h)*Current;
 
@@ -739,15 +784,31 @@ float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 	return clamp(ReturnValue, 0.0f, 1.0f);
 }
 
-
-
-float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value)
+float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip, int Value, int LenPercent)
 {
 	CALLSTACK_ADD();
 
 	CUIRect Handle;
 	static float OffsetX;
-	pRect->VSplitLeft(33, &Handle, 0);
+
+	{
+#if defined(__ANDROID__)
+		const float FixedLen = 50.0f;
+#else
+		const float FixedLen = 33.0f;
+#endif
+
+		// calculate the handle length
+		float Len = FixedLen;
+		if(LenPercent != ~0)
+		{
+			LenPercent = clamp(LenPercent, 0, 100);
+			Len = clamp(pRect->w * ((float)LenPercent / 100.0f),
+						FixedLen/2.0f,
+						pRect->w-1.0f);
+		}
+		pRect->VSplitLeft(Len, &Handle, 0);
+	}
 
 	Handle.x += (pRect->w-Handle.w)*Current;
 
@@ -2358,7 +2419,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 	CALLSTACK_ADD();
 
 	if(m_MouseUnlocked)
-		return false;
+		return true;
 
 	m_LastInput = time_get();
 

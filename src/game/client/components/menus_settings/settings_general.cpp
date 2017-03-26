@@ -1,5 +1,7 @@
 #include "../menus.h"
 
+#include <engine/textrender.h>
+
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
 	CALLSTACK_ADD();
@@ -174,12 +176,16 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(g_Config.m_ClCpuThrottle)
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("CPU Throttle"), g_Config.m_ClCpuThrottle);
 		else
+		{
 			str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("CPU Throttle"), Localize("none"));
+			TextRender()->TextColor(0.8f, 0.1f, 0.1f, 1.0f);
+		}
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+		TextRender()->TextColor(1,1,1,1);
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
 		static CButtonContainer s_ScrollbarCpuThrottle;
-		g_Config.m_ClCpuThrottle = round_to_int(DoScrollbarH(&s_ScrollbarCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
+		g_Config.m_ClCpuThrottle = round_to_int(DoScrollbarH(&s_ScrollbarCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f, "WARNING: Setting this to 'none' will rape your CPU like crazy! Recommended value is 1")*100.0f+0.1f);
 
 		{
 			CUIRect Checkbox;

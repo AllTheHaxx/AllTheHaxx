@@ -298,7 +298,7 @@ public:
 	int m_LastDummyConnectTime;
 	int m_Fire;
 
-	virtual CServerInfo *GetServerInfo(CServerInfo *pServerInfo);
+	virtual CServerInfo *GetServerInfo(CServerInfo *pServerInfo = 0);
 	void ServerInfoRequest();
 
 	int LoadData();
@@ -370,6 +370,7 @@ public:
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RconLogin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddFavorite(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Play(IConsole::IResult *pResult, void *pUserData);
@@ -410,7 +411,7 @@ public:
 	void ToggleFullscreen();
 	void ToggleWindowBordered();
 	void ToggleWindowVSync();
-	void LuaCheckDrawingState(struct lua_State *L, const char *pFuncName, bool NoThrow=false);
+	void LuaCheckDrawingState(lua_State *L, const char *pFuncName, bool NoThrow=false);
 
 
 	// DDRace
