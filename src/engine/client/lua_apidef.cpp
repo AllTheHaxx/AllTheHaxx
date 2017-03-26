@@ -485,6 +485,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addProperty("ScreenWidth", &IGraphics::ScreenWidth)
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
+			
+			.addFunction("ClipEnable", &IGraphics::ClipEnable)
+			.addFunction("ClipDisable", &IGraphics::ClipDisable)
 		.endClass()
 
 		/// Engine.TextRender
