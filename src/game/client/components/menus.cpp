@@ -548,7 +548,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
 
-	if(Hidden)
+	if(Hidden && !(pEmptyText && *pEmptyText && str_length(pStr) == 0))
 	{
 		unsigned s = (unsigned int)str_length(pDisplayStr);
 		if(s >= sizeof(aStars))

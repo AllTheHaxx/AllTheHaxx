@@ -9,6 +9,10 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
+#define ECB 0
+#include <engine/external/aes128/aes.h>
+#undef ECB
+
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
 
@@ -27,14 +31,18 @@
 #include "chat.h"
 #include "console.h"
 #include "menus.h"
+#include "translator.h"
 
 
 CChat::CChat()
 {
-	OnReset();
+	m_pTranslator = 0;
 
-	m_GotKeys = false;
-	//m_pKeyPair = GenerateKeyPair(512, 3);
+	m_GotKey = false;
+	mem_zero(&m_CryptKey, sizeof(m_CryptKey));
+	mem_zero(&m_CryptIV, sizeof(m_CryptIV));
+
+	OnReset();
 }
 
 
@@ -148,31 +156,105 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 	((CChat *)pUserData)->m_Show = pResult->GetInteger(0) != 0;
 }
 
-void CChat::ConGenKeys(IConsole::IResult *pResult, void *pUserData)
+void CChat::ConGenKey(IConsole::IResult *pResult, void *pUserData)
 {
-	CALLSTACK_ADD();
+	CChat *pSelf = (CChat *)pUserData;
 
-	if(pResult->GetInteger(1) % 2 == 0)
+	char aPassword[64];
+	secure_random_password(aPassword, sizeof(aPassword), 62);
+
+	// store the password as md5 (it fortunately has the same size as our AES key)
+	MD5_HASH PwHash = md5_simple((unsigned char*)aPassword, (unsigned int)str_length(aPassword));
+	mem_copy(pSelf->m_CryptKey.key, PwHash.digest, sizeof(pSelf->m_CryptKey.key));
+
+	if(g_Config.m_Debug)
 	{
-		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "please use a odd number as exponent.");
+		char aBuf[128];
+		str_hex_simplebb(aBuf, pSelf->m_CryptKey.key);
+		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "%s", aBuf);
+	}
+
+	pSelf->m_GotKey = true;
+}
+
+void CChat::ConSetKey(IConsole::IResult *pResult, void *pUserData)
+{
+	CChat *pSelf = (CChat *)pUserData;
+
+	const char *pPassword = NULL;
+	if(pResult->NumArguments() > 0)
+		pPassword = pResult->GetString(0);
+
+	pSelf->SetKey(pPassword);
+}
+
+void CChat::SetKey(const char *pPassword)
+{
+	if(!pPassword || pPassword[0] == '\0')
+	{
+		mem_zerob(m_CryptKey.key);
+		mem_zerob(m_CryptIV.iv);
+		m_GotKey = false;
+
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypt", "Key cleared!");
+		m_pClient->m_pHud->PushNotification("Crypt key cleared!");
 		return;
 	}
-	((CChat *)pUserData)->GenerateKeyPair(pResult->GetInteger(0), pResult->GetInteger(1));
+
+	// store the password as md5 (it fortunately has the same size as our AES key)
+	MD5_HASH PwHash = md5_simple((unsigned char*)pPassword, (unsigned int)str_length(pPassword));
+	mem_copy(m_CryptKey.key, PwHash.digest, sizeof(m_CryptKey.key));
+
+	if(g_Config.m_Debug)
+	{
+		char aBuf[128];
+		str_hex_simplebb(aBuf, m_CryptKey.key);
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "%s", aBuf);
+	}
+
+	// perform a test
+/*	for(int i = 0; i < 3; i++)
+	{
+		const char *pTestString;
+
+		switch(i)
+		{
+			case 0:
+				pTestString = "Who would even want to eat dead beef?!";
+				break;
+			case 1:
+				pTestString = "nix";
+				break;
+			default:
+				pTestString = "göhen 4u(|-| \\/ö|_LSö |)1€ 50’Ð€®¥€ı©Ħ€’";
+		}
+
+		unsigned int DataSize;
+		uint8_t *pData = str_aes128_encrypt(pTestString, &m_CryptKey, &DataSize, &m_CryptIV);
+
+		// decryption
+		char aDecrypted[128];
+		str_aes128_decrypt(pData, DataSize, &m_CryptKey, aDecrypted, sizeof(aDecrypted), &m_CryptIV);
+
+		char aBuf[256];
+
+		str_hex_simplebb(aBuf, m_CryptKey.key);
+		dbg_msg("crypt", "testing key '%s'; PayloadLen = %i, OutputLen = %i, DataSize = %u", aBuf, str_length(pTestString), str_length(aDecrypted), DataSize);
+		str_hex_simpleb(aBuf, pData, DataSize);
+		dbg_msg("crypt", "> encrypted: '%s'", aBuf);
+		str_hex_simpleb(aBuf, (const unsigned char *)aDecrypted, sizeof(aDecrypted));
+		dbg_msg("crypt", "> decrypted: '%s'", aBuf);
+		dbg_msg("crypt", "> decoded..: '%s'", aDecrypted);
+		str_hex_simplebb(aBuf, m_CryptIV.iv);
+		dbg_msg("crypt", "> InitalVec: '%s'", aBuf);
+
+		mem_free(pData);
+	}
+ */
+
+	m_GotKey = true;
 }
 
-void CChat::ConSaveKeys(IConsole::IResult *pResult, void *pUserData)
-{
-	CALLSTACK_ADD();
-
-	((CChat *)pUserData)->SaveKeys(((CChat *)pUserData)->m_pKeyPair, pResult->GetString(0));
-}
-
-void CChat::ConLoadKeys(IConsole::IResult *pResult, void *pUserData)
-{
-	CALLSTACK_ADD();
-
-	((CChat *)pUserData)->LoadKeys(pResult->GetString(0));
-}
 
 void CChat::OnConsoleInit()
 {
@@ -183,9 +265,10 @@ void CChat::OnConsoleInit()
 	Console()->Register("chat", "s['all'|'team'|'hidden'|'crypt'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 
-	Console()->Register("generate_rsa_keys", "i[Bytes] i[Exponent]", CFGFLAG_CLIENT, ConGenKeys, this, "Usually bytes = 256 and exponent = 3");
-	Console()->Register("save_rsa_keys", "s[keyname]", CFGFLAG_CLIENT, ConSaveKeys, this, "Save RSA keys for chat crypt");
-	Console()->Register("load_rsa_keys", "s[keyname]", CFGFLAG_CLIENT, ConLoadKeys, this, "Load RSA keys for chat crypt");
+#if defined(CONF_DEBUG)
+	Console()->Register("chat_crypt_gen_key", "", CFGFLAG_CLIENT, ConGenKey, this, "Generate a random key"); // there is actually no use from this...
+#endif
+	Console()->Register("chat_crypt_set_key", "?r", CFGFLAG_CLIENT, ConSetKey, this, "Set or clear the key for encrypted chat messages");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
@@ -272,11 +355,11 @@ bool CChat::OnInput(IInput::CEvent Event)
 						m_CryptSendQueue = std::string(m_Input.GetString());
 					else if(m_Mode == MODE_CRYPT)
 					{
-						char *pEncrypted = EncryptMsg(m_Input.GetString());
+						char aBuf[512];
+						char *pEncrypted = EncryptMsg(aBuf, sizeof(aBuf), m_Input.GetString());
 						if(pEncrypted)
 						{
 							Say(0, pEncrypted);
-							delete[] pEncrypted;
 						}
 
 					}
@@ -600,11 +683,11 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		// try to decrypt everything we can
 		if(pMsg->m_ClientID != -1)
 		{
-			char *pDecrypted = DecryptMsg(pMsg->m_pMessage);
+			char aBuf[512];
+			char *pDecrypted = DecryptMsg(aBuf, sizeof(aBuf), pMsg->m_pMessage);
 			if(pDecrypted)
 			{
 				AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
-				delete[] pDecrypted;
 			}
 		}
 
@@ -1237,200 +1320,51 @@ void CChat::SayLua(int Team, const char *pLine, bool NoTrans)
 	Say(Team, pLine, NoTrans, true);
 }
 
+
 ////////////////////////////
 // chat crypt stuff below //
 ////////////////////////////
 
-void CChat::GenerateKeyPair(int Bytes, int Exp) // let's dont go ham and do like 512 bytes and Exp = 3
+char *CChat::EncryptMsg(char *pBuffer, unsigned int BufferSize, const char *pMsg)
 {
 	CALLSTACK_ADD();
 
-	m_pKeyPair = RSA_generate_key(Bytes, Exp, NULL, NULL);
-	m_GotKeys = true;
-}
-
-char *CChat::ReadPubKey(RSA *pKeyPair)
-{
-	CALLSTACK_ADD();
-
-	BIO *pBio = BIO_new(BIO_s_mem());
-	PEM_write_bio_RSAPublicKey(pBio, pKeyPair);
-
-	char *PEMKey = new char[512];
-	int KeyLen = BIO_pending(pBio);
-	BIO_read(pBio, PEMKey, KeyLen);
-
-	return PEMKey;
-}
-
-char *CChat::ReadPrivKey(RSA *pKeyPair)
-{
-	CALLSTACK_ADD();
-
-	BIO *pBio = BIO_new(BIO_s_mem());
-	PEM_write_bio_RSAPrivateKey(pBio, pKeyPair, NULL, NULL, 0, NULL, NULL);
-
-	char *PEMKey = new char[512];
-	int KeyLen = BIO_pending(pBio);
-	BIO_read(pBio, PEMKey, KeyLen);
-
-	return PEMKey;
-}
-
-char *CChat::EncryptMsg(const char *pMsg)
-{
-	CALLSTACK_ADD();
-
-	if(!m_GotKeys)
+	if(!m_GotKey)
 	{
-		m_pClient->m_pHud->PushNotification("Generate or load keys first!");
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "generate or load keys first");
+		m_pClient->m_pHud->PushNotification("Set a key before using crypt chat!");
 		return 0;
 	}
 
-	char *pHex = new char[512];
+	unsigned int OutputSize;
+	uint8_t *pEncrypted = str_aes128_encrypt(pMsg, &m_CryptKey, &OutputSize, &m_CryptIV);
 
-	unsigned char aEncrypted[512] = {};
-	if(RSA_public_encrypt(str_length(pMsg)+1, (unsigned char*)pMsg, (unsigned char*)aEncrypted, m_pKeyPair, RSA_PKCS1_PADDING) == -1)
-	{
-		dbg_msg("chatcrypt", "failed to public encrypt message");
-	}
+	str_hex_simple(pBuffer, BufferSize, pEncrypted, OutputSize);
 
-	mem_zero(pHex, sizeof(pHex));
-	for(int i = 0; aEncrypted[i]; i++)
-	{
-		char aBuf[3];
-		str_format(aBuf, sizeof(aBuf), "%02x", aEncrypted[i]);
-		str_append(pHex, aBuf, 512);
-	}
+	mem_free(pEncrypted);
 
-	return pHex;
+	return pBuffer;
 }
 
-char *CChat::DecryptMsg(const char *pMsg)
+char *CChat::DecryptMsg(char *pBuffer, unsigned int BufferSize, const char *pMsg)
 {
 	CALLSTACK_ADD();
 
-	if(!m_GotKeys)
+	if(!m_GotKey)
 		return 0;
 
-	char *pHex = new char[512];
-	char *pClear = new char[512];
-
+	unsigned DataSize = 0;
 	unsigned char aEncrypted[1024] = {0};
-	unsigned char aDecrypted[1024] = {};
 	for(int i = 0, j = 0; pMsg[j]; i++, j+=2)
 	{
 		char aBuf[3];
 		str_copy(aBuf, &pMsg[j], sizeof(aBuf));
-		aEncrypted[i] = strtol(aBuf, 0, 16);
+		aEncrypted[i] = (unsigned char)strtol(aBuf, 0, 16);
+		DataSize++;
 	}
 
-	for(int i = 0; aEncrypted[i]; i++)
-	{
-		char aBuf[3];
-		str_format(aBuf, sizeof(aBuf), "%02x", aEncrypted[i]);
-		str_append(pHex, aBuf, 512);
-	}
-
-	if(RSA_private_decrypt(str_length((char*)aEncrypted), aEncrypted, aDecrypted, m_pKeyPair, RSA_PKCS1_PADDING) != -1)
-	{
-		str_copy(pClear, (char *)aDecrypted, 512);
-		return pClear;
-	}
-	else
-		return 0;
+	return str_aes128_decrypt(aEncrypted, DataSize, &m_CryptKey, pBuffer, BufferSize, &m_CryptIV);
 }
 
-void CChat::SaveKeys(RSA *pKeyPair, const char *pKeyName)
-{
-	CALLSTACK_ADD();
-
-	if(!m_GotKeys)
-	{
-		m_pClient->m_pHud->PushNotification("No keys to save!");
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "no keys to save");
-		return;
-	}
-
-	char aPubKey[256];
-	char aPrivKey[256];
-	str_format(aPubKey, sizeof(aPubKey), "rsa/%s_pub.key", pKeyName);
-	str_format(aPrivKey, sizeof(aPrivKey), "rsa/%s_priv.key", pKeyName);
-
-	FILE *pPubFile;
-	pPubFile = fopen(aPubKey, "w");
-	if(pPubFile != NULL)
-	{
-		char *pPupKey = ReadPubKey(pKeyPair);
-		fputs(pPupKey, pPubFile);
-		fclose(pPubFile);
-		delete[] pPupKey;
-	}
-	else
-	{
-		m_pClient->m_pHud->PushNotification("Couldn't save public key!");
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't save public key");
-	}
-
-	FILE *pPrivFile;
-	pPrivFile = fopen(aPrivKey, "w");
-	if(pPrivFile != NULL)
-	{
-		char *pPrivKey = ReadPrivKey(pKeyPair);
-		fputs(pPrivKey, pPrivFile);
-		fclose(pPrivFile);
-		delete[] pPrivKey;
-	}
-	else
-	{
-		m_pClient->m_pHud->PushNotification("Couldn't save private key!");
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't save private key");
-	}
-}
-
-void CChat::LoadKeys(const char *pKeyName)
-{
-	CALLSTACK_ADD();
-
-	m_pKeyPair = RSA_new();
-
-	char aPubKey[256];
-	char aPrivKey[256];
-	str_format(aPubKey, sizeof(aPubKey), "rsa/%s_pub.key", pKeyName);
-	str_format(aPrivKey, sizeof(aPrivKey), "rsa/%s_priv.key", pKeyName);
-
-	FILE *pPubFile = fopen(aPubKey, "rb");
-	if(pPubFile)
-		PEM_read_RSAPublicKey(pPubFile, &m_pKeyPair, NULL, NULL);
-	else
-	{
-		m_pClient->m_pHud->PushNotification("Couldn't load public key!");
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't load public key");
-		m_GotKeys = false;
-		return;
-	}
-
-	FILE *pPrivFile = fopen(aPrivKey, "rb");
-	if(pPrivFile)
-		PEM_read_RSAPrivateKey(pPrivFile, &m_pKeyPair, NULL, NULL);
-	else
-	{
-		m_pClient->m_pHud->PushNotification("Couldn't load private key!");
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "crypto", "couldn't load private key");
-		m_GotKeys = false;
-		return;
-	}
-
-	m_GotKeys = true;
-}
-
-/*  ++++ PADDINGS ++++
-	RSA_PKCS1_PADDING - most commonly used
-	RSA_PKCS1_OAEP_PADDING
-	RSA_SSLV23_PADDING
-	RSA_NO_PADDING - raw RSA crypto
-*/
 
 void CChat::SayChat(const char *pLine)
 {

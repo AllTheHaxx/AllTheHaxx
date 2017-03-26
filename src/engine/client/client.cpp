@@ -894,9 +894,9 @@ void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADD
 	md5_append(&Md5, (unsigned char *)&Addr, sizeof(Addr));
 	md5_finish(&Md5, aDigest);
 
-	unsigned short Random[8];
-	mem_copy(Random, aDigest, sizeof(Random));
-	generate_password(pBuffer, Size, Random, 8);
+	unsigned short aRandom[8];
+	mem_copy(aRandom, aDigest, sizeof(aRandom));
+	generate_password(pBuffer, Size, aRandom, 8);
 }
 
 void CClient::GenerateTimeoutSeed()

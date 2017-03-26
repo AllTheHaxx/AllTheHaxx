@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <engine/external/openssl/sha.h>
+#include <engine/external/aes128/aes.h>
 
 #if defined(CONF_WEBSOCKETS)
 	#include "engine/shared/websockets.h"
@@ -33,6 +33,8 @@
 	#include <arpa/inet.h>
 
 	#include <dirent.h>
+#include <zlib/zlib.h>
+#include <md5/md5.h>
 
 #if defined(CONF_PLATFORM_MACOSX)
 		// some lock and pthread functions are already defined in headers
@@ -3057,6 +3059,20 @@ void secure_random_fill(void *bytes, unsigned length)
 #endif
 }
 
+MD5_HASH md5_simple(unsigned char *data, unsigned data_size)
+{
+	MD5_HASH result;
+	mem_zerob(&result);
+
+	md5_state_t md;
+
+	md5_init(&md);
+	md5_append(&md, data, data_size);
+	md5_finish(&md, (md5_byte_t*)result.digest);
+
+	return result;
+}
+
 int secure_rand()
 {
 	unsigned int i;
@@ -3071,19 +3087,58 @@ unsigned secure_rand_u()
 	return (i%RAND_MAX);
 }
 
-int simpleSHA256(void* input, unsigned long length, unsigned char* md)
+uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *output_size, AES128_IV *out_iv)
 {
-	SHA256_CTX context;
-	if(!SHA256_Init(&context))
-		return 1;
+	int i;
+	int str_len = str_length(str);
+	int padded_len = str_len - str_len%16 + 16; // must be a multiple of 16
+	*output_size = (unsigned int)((padded_len / 16 + 1) * 16) - 16;
 
-	if(!SHA256_Update(&context, (unsigned char*)input, length))
-		return 2;
+	// copy the string and add padding
+	uint8_t *input_buffer = mem_allocb(uint8_t, padded_len);
+	for(i = 0; i < padded_len; i++)
+	{
+		if(i < str_len)
+			input_buffer[i] = (uint8_t)str[i];
+		else
+			input_buffer[i] = (uint8_t)' '; // pad with whitespaces; they can easily be stripped
+	}
 
-	if(!SHA256_Final(md, &context))
-		return 3;
+	// prepare the initial vector (iv)
+	for(i = 0; i < 16; i++)
+	{
+		out_iv->iv[i] = (uint8_t)(secure_rand_u() & 0xFF);
+	}
 
-	return 0;
+	// allocate the output buffer
+	uint8_t *output_buffer = mem_allocb(uint8_t, *output_size);
+
+	// set it off!
+	AES128_CBC_encrypt_buffer(output_buffer, input_buffer, (uint32_t)padded_len, key->key, out_iv->iv);
+
+	mem_free(input_buffer);
+
+	return output_buffer;
+}
+
+char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *iv)
+{
+	int i;
+
+	uint8_t *output_buffer = mem_allocb(uint8_t, buffer_size);
+	mem_zero(output_buffer, buffer_size);
+	AES128_CBC_decrypt_buffer(output_buffer, data, data_size, key->key, iv->iv);
+
+	// convert back to a string
+	mem_zero(buffer, buffer_size);
+	for(i = 0; i < data_size && i < buffer_size; i++)
+	{
+		buffer[i] = (char)output_buffer[i];
+	}
+
+	mem_free(output_buffer);
+
+	return str_strip_right_whitespaces(buffer);
 }
 
 void open_default_browser(const char *url)
