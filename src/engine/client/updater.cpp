@@ -11,6 +11,7 @@
 
 #include "updater.h"
 
+#define LATEST_VERSION_FILE "latest"
 #define UPDATE_MANIFEST "update30.json"
 
 using std::string;
@@ -85,9 +86,9 @@ void CUpdater::CheckForUpdates(bool ForceRefresh)
 	if((GetLatestVersion()[0] == '0' && GetLatestVersion()[1] == '\0') || ForceRefresh)
 	{
 		SetState(STATE_SYNC_REFRESH);
-		dbg_msg("updater", "refreshing version info");
+		dbg_msg("updater", "refreshing version info and news");
 		FetchFile("stuffility/master", "ath-news.txt");
-		m_GitHubAPI.CheckVersion();
+		FetchFile("stuffility/master", LATEST_VERSION_FILE);
 	}
 	else
 		dbg_msg("updater", "skipping version check, already did it");
@@ -144,6 +145,8 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	{
 		if(str_comp(b, "ath-news.txt") == 0) // news are allowed to fail...
 			str_copy(pSelf->m_aNews, pFailedNewsMsg, sizeof(pSelf->m_aNews));
+		else if(str_comp(b, LATEST_VERSION_FILE) == 0) // version check is definitely allowed to fail
+			dbg_msg("updater", "version check failed: couldn't download '%s'", b);
 		else
 		{
 			if(str_comp_nocase_num(a, "lua/", 4) != 0) // example scripts are allowed to fail, too
@@ -205,7 +208,28 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
-		if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST) == 0)
+		if(pSelf->State() == STATE_SYNC_REFRESH && str_comp(b, LATEST_VERSION_FILE) == 0)
+		{
+			bool NeedCheck = false;
+			IOHANDLE f = io_open("update/"LATEST_VERSION_FILE, IOFLAG_READ);
+			if(f)
+			{
+				char aBuf[16];
+				mem_zerob(aBuf);
+				io_read(f, aBuf, sizeof(aBuf));
+				io_close(f);
+				str_strip_right_whitespaces(aBuf);
+				int VersionID = str_toint(aBuf);
+				dbg_msg("updater/debug", "latest version id: %i ('%s')", VersionID, aBuf);
+				if(VersionID > GAME_ATH_VERSION_NUMERIC)
+					NeedCheck = true;
+			}
+			else
+				NeedCheck = true;
+			if(NeedCheck)
+				pSelf->m_GitHubAPI.CheckVersion();
+		}
+		else if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST) == 0)
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);
 			dbg_msg("updater", "got manifest, waiting for github-compare to finish...");
