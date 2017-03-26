@@ -114,9 +114,9 @@ bool CFontMgr::InitFont_impl(CFontFile *f, int Type, const char *pTypeStr)
 	char aPath[512];
 	mem_zerob(aPath);
 	if(str_length(pTypeStr) > 2 || pTypeStr[0] == '-' || pTypeStr[0] == '\0')
-		str_formatb(aPath, "fonts/%s/%s/%s%s.ttf", s_apFontFolders[m_Type], f->m_Path.c_str(), f->m_Name.c_str(), pTypeStr);
+		str_formatb(aPath, "fonts/%s/%s/%s%s.ttf", s_apFontFolders[m_Type], f->m_Name.c_str(), f->m_Name.c_str(), pTypeStr);
 	else
-		str_formatb(aPath, "fonts/%s/%s/%s.ttf", s_apFontFolders[m_Type], f->m_Path.c_str(), pTypeStr);
+		str_formatb(aPath, "fonts/%s/%s/%s.ttf", s_apFontFolders[m_Type], f->m_Name.c_str(), pTypeStr);
 
 	char aFullPath[512];
 	mem_zerob(aFullPath);
@@ -148,12 +148,6 @@ void CFontMgr::UnloadFont(int ListIndex)
 	}
 	mem_zerob(pFontFile->m_apFonts);
 	dbg_msg("fontmgr", "unloaded font '%s'", pFontFile->m_Name.c_str());
-}
-
-void CFontMgr::RemoveFont(int ListIndex)
-{
-	UnloadFont(ListIndex);
-	m_lFontFiles.remove_index(ListIndex);
 }
 
 void CFontMgr::LoadFolder()
@@ -195,14 +189,5 @@ int CFontMgr::LoadFolderCallback(const char *pName, int IsDir, int DirType, void
 
 void CFontMgr::ReloadFontlist()
 {
-	// delete all but the active
-	for(int i = 0; i < m_lFontFiles.size(); i++)
-	{
-		if(i != m_ActiveFontIndex)
-			RemoveFont(i);
-	}
-
 	LoadFolder();
-	for(int i = 0; i < m_lFontFiles.size(); i++)
-		m_lFontFiles[i].m_Path = m_lFontFiles[i].m_Name;
 }
