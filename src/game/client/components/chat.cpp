@@ -1335,8 +1335,12 @@ char *CChat::EncryptMsg(char *pBuffer, unsigned int BufferSize, const char *pMsg
 		return 0;
 	}
 
+	// with this we can later check the message
+	char aMsg[512] = { (char)m_CryptKey.key[0], (char)m_CryptKey.key[3], '\0' };
+	str_appendb(aMsg, pMsg);
+
 	unsigned int OutputSize;
-	uint8_t *pEncrypted = str_aes128_encrypt(pMsg, &m_CryptKey, &OutputSize, &m_CryptIV);
+	uint8_t *pEncrypted = str_aes128_encrypt(aMsg, &m_CryptKey, &OutputSize, &m_CryptIV);
 
 	str_hex_simple(pBuffer, BufferSize, pEncrypted, OutputSize);
 
@@ -1362,7 +1366,18 @@ char *CChat::DecryptMsg(char *pBuffer, unsigned int BufferSize, const char *pMsg
 		DataSize++;
 	}
 
-	return str_aes128_decrypt(aEncrypted, DataSize, &m_CryptKey, pBuffer, BufferSize, &m_CryptIV);
+	char *pDecrypted = str_aes128_decrypt(aEncrypted, DataSize, &m_CryptKey, pBuffer, BufferSize, &m_CryptIV);
+
+	// verify the message
+	if((unsigned char)pDecrypted[0] == (unsigned char)m_CryptKey.key[0] && (unsigned char)pDecrypted[1] == (unsigned char)m_CryptKey.key[3])
+		return pDecrypted + 2;
+
+	if(g_Config.m_Debug)
+		dbg_msg("crypt", "%02x,%02x != %02x,%02x",
+				(unsigned char)pDecrypted[0], (unsigned char)pDecrypted[1],
+				(unsigned char)m_CryptKey.key[0], (unsigned char)m_CryptKey.key[3]
+		);
+	return 0;
 }
 
 
