@@ -1,6 +1,5 @@
 #include <fstream>
 
-#include <openssl/sha.h>
 #include <base/system.h>
 #include <engine/storage.h>
 #include <engine/client.h>
