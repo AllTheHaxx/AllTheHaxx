@@ -11,6 +11,7 @@
 #include "detect.h"
 #include "stddef.h"
 #include <time.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -469,7 +470,6 @@ void lock_unlock(LOCK lock);
 #if !defined(CONF_PLATFORM_MACOSX)
 	#if defined(CONF_FAMILY_UNIX)
 		#include <semaphore.h>
-#include <stdint.h>
 
 typedef sem_t SEMAPHORE;
 	#elif defined(CONF_FAMILY_WINDOWS)
