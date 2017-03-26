@@ -930,10 +930,11 @@ char *str_skip_to_whitespace(char *str);
 
 /*
 	Function: str_strip_right
-		Skips trailing non-whitespace character of choice
+		Skips trailing non-whitespace characters of choice
 
 	Parameters:
 		str - Pointer to the string.
+		strip - a zero-terminated string serving as an 'or'-list of characters to strip
 
 	Returns:
 		Pointer to the first whitespace character found
@@ -942,7 +943,7 @@ char *str_skip_to_whitespace(char *str);
 	Remarks:
 		- The strings are treated as zero-termineted strings.
 */
-char *str_strip_right(char *str, char strip);
+char *str_strip_right(char *str, const char *strip);
 char *str_strip_right_whitespaces(char *str);
 
 /*

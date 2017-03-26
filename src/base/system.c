@@ -2328,20 +2328,27 @@ char *str_skip_to_whitespace(char *str)
 	return str;
 }
 
-char *str_strip_right(char *str, char strip)
+char *str_strip_right(char *str, const char *strip)
 {
+	int i;
 	char *c = str + str_length(str)-1;
-	while(c-- >= str && *c == strip)
-		*c = 0;
+	while(c >= str)
+	{
+		for(i = 0; i < str_length(strip); i++)
+			if(*c == strip[i])
+			{
+				*c = 0;
+				break; // ...the for loop
+			}
+		if(*(c--) != '\0') // if the current letter hasn't been changed, there is no need to proceed further
+			break;
+	}
 	return str;
 }
 
 char *str_strip_right_whitespaces(char *str)
 {
-	str_strip_right(str, ' ');
-	str_strip_right(str, '\t');
-	str_strip_right(str, '\n');
-	str_strip_right(str, '\r');
+	str_strip_right(str, " \t\n\r");
 	return str;
 }
 
