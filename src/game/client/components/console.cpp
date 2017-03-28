@@ -1063,7 +1063,7 @@ void CGameConsole::OnRender()
 		char aPrompt[128] = { ">" };
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
-			if(Client()->State() == IClient::STATE_ONLINE)
+			if(Client()->State() == IClient::STATE_LOADING || Client()->State() == IClient::STATE_ONLINE)
 			{
 				if(Client()->RconAuthed())
 					str_copyb(aPrompt, "rcon>");
@@ -1786,5 +1786,8 @@ void CGameConsole::OnConsoleInit()
 void CGameConsole::OnStateChange(int NewState, int OldState)
 {
 	if(OldState == IClient::STATE_ONLINE && NewState < IClient::STATE_LOADING)
+	{
 		m_RemoteConsole.ResetRconLogin();
+		m_RemoteConsole.m_Input.Clear();
+	}
 }
