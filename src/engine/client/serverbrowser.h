@@ -28,8 +28,9 @@ public:
 	public:
 		NETADDR m_Addr;
 		int64 m_RequestTime;
-		bool m_Is64;
 		int m_GotInfo;
+		bool m_Request64Legacy;
+		int m_ExtraToken;
 		CServerInfo m_Info;
 
 		CServerEntry *m_pNextIp; // ip hashed list
@@ -134,7 +135,7 @@ public:
 	void Update(bool ForceResort);
 	void Upgrade(); // only re-request all the infos
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
-	void Request(const NETADDR &Addr) const;
+	void RequestCurrentServer(const NETADDR &Addr) const;
 
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
 
@@ -198,6 +199,7 @@ private:
 
 	int m_ServerlistType;
 	int64 m_BroadcastTime;
+	int m_BroadcastExtraToken;
 
 	bool m_ServerdataLocked;
 
