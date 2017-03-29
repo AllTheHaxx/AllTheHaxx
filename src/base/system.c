@@ -3105,29 +3105,40 @@ uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *ou
 	}
 
 	// prepare the initial vector (iv)
+	uint8_t iv_start = (uint8_t)((secure_rand_u() % (0xFF - 0x11)) + 0x10);
 	for(i = 0; i < 16; i++)
 	{
-		out_iv->iv[i] = (uint8_t)(secure_rand_u() & 0xFF);
+		out_iv->iv[i] = (uint8_t)(iv_start+i);
 	}
 
 	// allocate the output buffer
+	*output_size += 1;
 	uint8_t *output_buffer = mem_allocb(uint8_t, *output_size);
 
+	output_buffer[0] = iv_start;
+
 	// set it off!
-	AES128_CBC_encrypt_buffer(output_buffer, input_buffer, (uint32_t)padded_len, key->key, out_iv->iv);
+	AES128_CBC_encrypt_buffer(output_buffer+1, input_buffer, (uint32_t)padded_len, key->key, out_iv->iv);
 
 	mem_free(input_buffer);
 
 	return output_buffer;
 }
 
-char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *iv)
+char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *out_iv)
 {
 	int i;
 
+	// reconstruct the iv
+	uint8_t iv_start = data[0];
+	for(i = 0; i < 16; i++)
+	{
+		out_iv->iv[i] = (uint8_t)(iv_start+i);
+	}
+
 	uint8_t *output_buffer = mem_allocb(uint8_t, buffer_size);
 	mem_zero(output_buffer, buffer_size);
-	AES128_CBC_decrypt_buffer(output_buffer, data, data_size, key->key, iv->iv);
+	AES128_CBC_decrypt_buffer(output_buffer, data+1, data_size-1, key->key, out_iv->iv);
 
 	// convert back to a string
 	mem_zero(buffer, buffer_size);

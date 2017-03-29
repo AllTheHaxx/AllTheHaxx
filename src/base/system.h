@@ -1616,7 +1616,7 @@ uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *ou
 /*
 	Function: aes128_encrypt
 */
-char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *iv);
+char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *out_iv);
 
 /*
 	Function: md5_simple
