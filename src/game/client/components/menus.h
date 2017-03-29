@@ -415,7 +415,6 @@ public:	int m_LoadTotal;
 	bool LockInput(IInput::CEvent Event);
 
 	static void ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData);
-	static int ListdirCallback(const char *name, int is_dir, int dir_type, void *user);
 
 public:
 	void ToggleMouseMode();
