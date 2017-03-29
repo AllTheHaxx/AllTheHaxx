@@ -50,6 +50,7 @@ MACRO_CONFIG_INT(ClShowRecord, cl_showrecord, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SA
 MACRO_CONFIG_INT(ClChat, cl_chat, 2, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable ingame chat (0=off, 1=server only, 2=all)")
 MACRO_CONFIG_INT(ClShowChat, cl_showchat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show chat")
 MACRO_CONFIG_INT(ClShowChatFriends, cl_show_chat_friends, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show only chat messages from friends")
+MACRO_CONFIG_INT(ClShowChatCryptData, cl_show_chat_cryptdata, 3, 0, 3, CFGFLAG_CLIENT|CFGFLAG_SAVE, "0=show none | 1=show theirs | 2=show ours | 3=show both")
 MACRO_CONFIG_INT(ClShowKillMessages, cl_showkillmessages, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show kill messages")
 MACRO_CONFIG_INT(ClShowVotesAfterVoting, cl_show_votes_after_voting, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show votes window after voting")
 MACRO_CONFIG_INT(ClShowLocalTimeAlways, cl_show_local_time_always, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Always show local time")

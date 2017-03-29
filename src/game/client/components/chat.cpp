@@ -359,7 +359,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 						char *pEncrypted = EncryptMsg(aBuf, sizeof(aBuf), m_Input.GetString());
 						if(pEncrypted)
 						{
-							Say(0, pEncrypted);
+							Say(0, pEncrypted, true);
 						}
 
 					}
@@ -677,25 +677,34 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 				HideChat = true;
 		}
 
-		if(!HideChat)
-			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
-
 		// try to decrypt everything we can
+		char *pDecrypted = 0;
 		if(pMsg->m_ClientID != -1)
 		{
 			char aBuf[512];
-			char *pDecrypted = DecryptMsg(aBuf, sizeof(aBuf), pMsg->m_pMessage);
-			if(pDecrypted)
+			pDecrypted = DecryptMsg(aBuf, sizeof(aBuf), pMsg->m_pMessage);
+			if(pDecrypted) // determine whether to hide the raw hexadecimal data
 			{
-				AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
+				if((pMsg->m_ClientID != m_pClient->m_Snap.m_LocalClientID && !(g_Config.m_ClShowChatCryptData & 1)) // show theirs?
+				   || (pMsg->m_ClientID == m_pClient->m_Snap.m_LocalClientID && !(g_Config.m_ClShowChatCryptData & 2))) // show our?
+					HideChat = true;
 			}
 		}
 
+		// add the original line first
+		if(!HideChat)
+			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+
+		// add the decrypted message if we got one
+		if(pDecrypted)
+			AddLine(pMsg->m_ClientID, 0, pDecrypted, true);
+
+		// request translations, even for decrypted chat!
 		if(TranslatorAvailable() && g_Config.m_ClTransIn &&
-			str_length(pMsg->m_pMessage) > 4 &&
+			str_length(pMsg->m_pMessage) > 1 &&
 			pMsg->m_ClientID != m_pClient->m_Snap.m_LocalClientID &&
 			pMsg->m_ClientID != -1)
-			m_pTranslator->RequestTranslation(g_Config.m_ClTransInSrc, g_Config.m_ClTransInDst, pMsg->m_pMessage, true);
+			m_pTranslator->RequestTranslation(g_Config.m_ClTransInSrc, g_Config.m_ClTransInDst, pDecrypted ? pDecrypted : pMsg->m_pMessage, true);
 	}
 }
 
@@ -1283,7 +1292,7 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 		return;
 	}
 
-	bool DiscardChat = false;
+	int DiscardChat = false;
 #if defined(FEATURE_LUA)
 	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
 	if(!CalledByLua)
