@@ -927,13 +927,24 @@ void CClient::Connect(const char *pAddress)
 {
 	CALLSTACK_ADD();
 
+	if (str_comp_nocase_num(pAddress, "tw://", 5) == 0)
+		str_copy(m_aCmdConnect, pAddress + 5, sizeof(m_aCmdConnect));
+	else
+		str_copy(m_aCmdConnect, pAddress, sizeof(m_aCmdConnect));
+}
+
+void CClient::ConnectImpl()
+{
+	CALLSTACK_ADD();
+
 	char aBuf[512];
 	int Port = 8303;
 
 	Disconnect();
 
-	str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
-	str_copy(g_Config.m_UiServerAddress, pAddress, sizeof(g_Config.m_UiServerAddress));
+	str_copy(m_aServerAddressStr, m_aCmdConnect, sizeof(m_aServerAddressStr));
+	str_copy(g_Config.m_UiServerAddress, m_aCmdConnect, sizeof(g_Config.m_UiServerAddress));
+	m_aCmdConnect[0] = 0;
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
@@ -3142,8 +3153,7 @@ void CClient::Run()
 		if(m_aCmdConnect[0])
 		{
 			str_copy(g_Config.m_UiServerAddress, m_aCmdConnect, sizeof(g_Config.m_UiServerAddress));
-			Connect(m_aCmdConnect);
-			m_aCmdConnect[0] = 0;
+			ConnectImpl();
 		}
 
 		// progress on dummy connect if security token handshake skipped/passed
@@ -3417,12 +3427,7 @@ void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CClient *pSelf = (CClient *)pUserData;
-	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0), sizeof(pSelf->m_aCmdConnect));
-	if (str_comp_nocase_num(pSelf->m_aCmdConnect, "tw://", 5) == 0)
-	{
-		str_copy(pSelf->m_aCmdConnect, pResult->GetString(0) + 5, sizeof(pSelf->m_aCmdConnect));
-		pSelf->m_aCmdConnect[str_length(pSelf->m_aCmdConnect) - 1] = 0;
-	}
+	pSelf->Connect(pResult->GetString(0));
 }
 
 void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)

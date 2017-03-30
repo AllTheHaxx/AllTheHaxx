@@ -286,7 +286,8 @@ public:
 	void OnEnterGame();
 	virtual void EnterGame();
 
-	virtual void Connect(const char *pAddress);
+	virtual void Connect(const char *pAddress); // synchron
+	void ConnectImpl(); // hide this
 	void DisconnectWithReason(const char *pReason);
 	virtual void Disconnect();
 
