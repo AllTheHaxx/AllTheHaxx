@@ -185,7 +185,11 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
 		static CButtonContainer s_ScrollbarCpuThrottle;
-		g_Config.m_ClCpuThrottle = round_to_int(DoScrollbarH(&s_ScrollbarCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f, "WARNING: Setting this to 'none' will rape your CPU like crazy! Recommended value is 1")*100.0f+0.1f);
+		g_Config.m_ClCpuThrottle = round_to_int(
+				DoScrollbarH(&s_ScrollbarCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f,
+							 "Makes the client use less CPU; too high values result in stuttering\n\n"
+									 "WARNING: Setting this to 'none' will rape your CPU like crazy! Recommended value is 1"
+				)*100.0f+0.1f);
 
 		{
 			CUIRect Checkbox;
