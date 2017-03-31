@@ -89,11 +89,17 @@ int CLuaBinding::LuaImport(lua_State *L)
 	str_append(aBuf, aFilename, sizeof(aBuf)); // append the wanted file's path
 	bool ret = pLF->LoadFile(aBuf, true);
 
+	// try libraries after that
+	char aFullPath[512];
 	if(!ret)
 	{
-		// try libraries after that
+		// search everywhere
 		str_format(aBuf, sizeof(aBuf), "lua/.library/%s", aFilename);
-		ret = pLF->LoadFile(aBuf, true);
+		if(IOHANDLE tmp = CLua::m_pCGameClient->Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath)))
+			io_close(tmp);
+		else
+			str_copy(aFullPath, aBuf, sizeof(aFullPath)); // fall back to lua folder if it fails
+		ret = pLF->LoadFile(aFullPath, true);
 
 		if(!ret)
 		{
@@ -109,7 +115,7 @@ int CLuaBinding::LuaImport(lua_State *L)
 
 	// return some stuff to the script
 	lua_pushboolean(L, (int)ret); // success?
-	lua_pushstring(L, (const char *)aBuf); // actual relative path of the loaded file
+	lua_pushstring(L, (const char *)aFullPath); // actual relative path of the loaded file
 	return 2;
 #else
 	return 0;
