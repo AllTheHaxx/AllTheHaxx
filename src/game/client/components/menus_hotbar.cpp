@@ -217,133 +217,45 @@ void CMenus::RenderTrans(CUIRect MainView)
 	}
 }
 
-int CMenus::ListdirCallback(const char *name, int is_dir, int dir_type, void *user)
-{
-	CALLSTACK_ADD();
-
-	if(is_dir || str_length(name) < 9)
-		return 0;
-
-	// only count pubkeys and check for the corrosponding privkey afterwards
-	if(str_comp_nocase_num(name+str_length(name)-8, "_pub.key", 8))
-		return 0;
-
-	char aKeyName[64], aPrivKeyPath[128];
-	str_copy(aKeyName, name, sizeof(aKeyName));
-	aKeyName[str_length(aKeyName)-8] = '\0';
-
-	str_format(aPrivKeyPath, sizeof(aPrivKeyPath), "rsa/%s_priv.key", aKeyName);
-	IOHANDLE f = io_open(aPrivKeyPath, IOFLAG_READ);
-	if(!f)
-	{
-		dbg_msg("rsa", "missing private key of keypair '%s'", aKeyName);
-		return 0;
-	}
-	io_close(f);
-
-	array<std::string> *pRSAKeyList = (array<std::string>*)user;
-	pRSAKeyList->add(std::string(aKeyName));
-	return 0;
-}
-
 void CMenus::RenderCrypt(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-	static array<std::string> s_RSAKeyList;
-	static bool s_RSAKeyListInited = false;
-	if(!s_RSAKeyListInited)
-	{
-		s_RSAKeyList.clear();
-		Storage()->ListDirectory(IStorageTW::TYPE_ALL, "rsa", ListdirCallback, &s_RSAKeyList);
-		s_RSAKeyListInited = true;
-	}
-
-	CUIRect Button, Label, Rect;
-
+	CUIRect Button;
 	RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.5f, 0.0f, 0.64f), CUI::CORNER_R, 10.0f);
 
 	MainView.Margin(5.0f, &MainView);
 
-	MainView.HSplitTop(15.0f, &Button, &MainView);
+	// flagchat enable checkbox
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	static CButtonContainer s_FlagChat;
 	if(DoButton_CheckBox(&s_FlagChat, Localize("Receive hidden chat"), g_Config.m_ClFlagChat, &Button))
 		g_Config.m_ClFlagChat ^= 1;
 
+	// label
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	UI()->DoLabelScaled(&Button, Localize("Crypted Chat:"), 13.0f, CUI::ALIGN_LEFT);
+
+	// 'enter password' box
 	MainView.HSplitTop(4.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(60.0f, &Label, &Button);
-	Button.VSplitLeft(264.0f, &Button, 0);
-	Label.x += 4.0f;
-	Button.x += 10.0f;
-	UI()->DoLabelScaled(&Label, "RSA key:", 14.0, -1);
-	static float s_OffsetKeyName = 0.0f;
-	static char aKeyName[64] = {0};
-	Button.VSplitRight(Button.h, &Button, &Label);
-	static int s_ListboxActive = false;
-	static CButtonContainer s_ListboxActiveButton;
-	if(DoButton_Menu(&s_ListboxActiveButton, ">", s_ListboxActive, &Label, 0, CUI::CORNER_R))
-		s_ListboxActive ^= 1;
-
-	static CButtonContainer s_Editbox;
-	DoEditBox(&s_Editbox, &Button, aKeyName, 32, 14.0f, &s_OffsetKeyName, false, CUI::CORNER_ALL, Localize("RSA Key name"));
-	// do the key selector
-	if(s_ListboxActive)
-	{
-		CUIRect KeyList = MainView;
-		KeyList.x += KeyList.w + 25.0f;
-		KeyList.w *= 0.83f;
-		KeyList.HMargin(-80.0f, &KeyList);
-		KeyList.Margin(-7.0f, &KeyList);
-		RenderTools()->DrawUIRect(&KeyList, vec4(0.0f, 0.5f, 0.0f, 0.64f), CUI::CORNER_ALL, 6.0f);
-		KeyList.Margin(7.0f, &KeyList);
-
-		static CButtonContainer s_Listbox;
-		static float s_ListboxScrollVal = 0.0f;
-		UiDoListboxStart(&s_Listbox, &KeyList, 15.0f, Localize("List of your RSA keys"), "", s_RSAKeyList.size(), 1, -1, s_ListboxScrollVal);
-		for(int i = 0; i < s_RSAKeyList.size(); i++)
-		{
-			CPointerContainer Container(&s_RSAKeyList[i]);
-			CListboxItem Item = UiDoListboxNextItem(&Container);
-			if(!Item.m_Visible)
-				continue;
-
-			if(UI()->MouseInside(&Item.m_Rect))
-				RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1, 1, 1, 0.3f), 0, 0);
-
-			UI()->DoLabelScaled(&Item.m_Rect, s_RSAKeyList[i].c_str(), 12.0f, -1, -1, 0);
-		}
-
-		int SelectedItem = UiDoListboxEnd(&s_ListboxScrollVal, 0);
-		if(SelectedItem > -1)
-		{
-			str_copy(aKeyName, s_RSAKeyList[SelectedItem].c_str(), sizeof(aKeyName));
-			s_ListboxActive = false;
-		}
-	}
-
-	MainView.HSplitTop(4.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(330.0f, &Button, 0);
-	Label.x += 4.0f;
-	Button.x += 5.0f;
 	static char s_aPlainTextPassword[62] = {0};
 	{
 		if(m_pClient->m_pChat->GotKey())
-			RenderTools()->DrawUIRect(&Button, vec4(0.7f, 0.7f, 0, 0.5f), CUI::CORNER_ALL, 3.0f);
+			RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.0f, 0.7f, 0.5f), CUI::CORNER_ALL, 3.0f);
 
 		static float s_Offset = 0;
 		static CButtonContainer s_PasswordBox;
-		DoEditBox(&s_PasswordBox, &Button, s_aPlainTextPassword, sizeof(s_aPlainTextPassword), 12.0f, &s_Offset, true, CUI::CORNER_ALL, Localize("Enter Password"), CUI::ALIGN_LEFT, m_pClient->m_pChat->GotKey() ? Localize("This will overwrite the currently active key!") : 0);
+		DoEditBox(&s_PasswordBox, &Button, s_aPlainTextPassword, sizeof(s_aPlainTextPassword), 12.0f, &s_Offset, true, CUI::CORNER_ALL, !m_pClient->m_pChat->GotKey() ? Localize("Enter Password") : Localize("Enter new Password"), CUI::ALIGN_LEFT, m_pClient->m_pChat->GotKey() ? Localize("This will overwrite the currently active key!") : 0);
 	}
 
+	// 'password repeat' box if 'enter password' box has been filled in
 	static char s_aPlainTextPasswordRepeat[62] = {0};
 	if(str_length(s_aPlainTextPassword) > 0)
 	{
 		MainView.HSplitTop(4.0f, 0, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(330.0f, &Button, 0);
-		Button.x += 5.0f;
 		if(str_comp(s_aPlainTextPassword, s_aPlainTextPasswordRepeat) != 0)
 			RenderTools()->DrawUIRect(&Button, vec4(0.7f, 0, 0, 0.5f), CUI::CORNER_ALL, 3.0f);
 
@@ -352,18 +264,27 @@ void CMenus::RenderCrypt(CUIRect MainView)
 		DoEditBox(&s_PasswordRepeatBox, &Button, s_aPlainTextPasswordRepeat, sizeof(s_aPlainTextPasswordRepeat), 12.0f, &s_Offset, true, CUI::CORNER_ALL, Localize("Repeat Password"), CUI::ALIGN_LEFT);
 	}
 
+	// apply/clear button
 	MainView.HSplitTop(4.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(330.0f, &Button, 0);
-	Button.x += 5.0f;
 	static CButtonContainer s_ApplyButton;
-	if(str_comp(s_aPlainTextPassword, s_aPlainTextPasswordRepeat) == 0 || m_pClient->m_pChat->GotKey())
+	if((str_length(s_aPlainTextPassword) > 0 && str_comp(s_aPlainTextPassword, s_aPlainTextPasswordRepeat) == 0)
+	   || (str_length(s_aPlainTextPassword) == 0 && m_pClient->m_pChat->GotKey()))
+	{
 		if(DoButton_Menu(&s_ApplyButton, str_length(s_aPlainTextPassword) > 0 ? Localize("Apply") : Localize("Clear"), 0, &Button, str_length(s_aPlainTextPassword) > 0 ? Localize("Set the key as the one used for crypt chat") : Localize("Clear the current key and disable crypt chat")))
 		{
 			m_pClient->m_pChat->SetKey(s_aPlainTextPassword);
+
 			mem_zerob(s_aPlainTextPassword);
 			mem_zerob(s_aPlainTextPasswordRepeat);
 		}
+	}
+	else if(str_length(s_aPlainTextPassword) > 0)
+	{
+		TextRender()->TextColor(0.7f, 0.1f, 0.1f, 1.0f);
+		UI()->DoLabelScaled(&Button, Localize("Passwords to not match!"), 12.0f, CUI::ALIGN_CENTER);
+		TextRender()->TextColor(1,1,1,1);
+	}
 
 }
 

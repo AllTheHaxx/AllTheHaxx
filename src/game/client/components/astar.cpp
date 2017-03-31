@@ -21,7 +21,6 @@
 CAStar::CAStar()
 {
 	m_pField = NULL;
-	m_PathFound = false;
 	m_MapReloaded = false;
 	m_ThreadShouldExit = false;
 	m_pThread = 0;
@@ -37,37 +36,16 @@ CAStar::~CAStar()
 void CAStar::OnReset() // is being called right after OnMapLoad()
 {
 	m_Path.clear();
-	m_PathFound = false;
 	m_LastClosestNode = -1;
 	m_LastPos = vec2(0);
 }
 
-void CAStar::OnPlayerDeath() // TODO!! FIX THIS!!
+void CAStar::OnPlayerDeath()
 {
-	if(!m_PathFound || !g_Config.m_ClPathFinding || m_LastPos == vec2(0))
+	if(!PathFound() || !g_Config.m_ClPathFinding || m_LastPos == vec2(0))
 		return;
 
-	// fitness calculation
-	float ClosestNodeDist = -1.0f;
-	int ClosestID = -1;
-	for(int i = 1; i < m_Path.size(); i++)
-	{
-		//dbg_msg("debug", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].x, m_Path[i].y);
-		if(((ClosestNodeDist < 0.0f || distance(m_LastPos, m_Path[i].m_Pos) < ClosestNodeDist)) && !Collision()->IntersectLine(m_LastPos, m_Path[i].m_Pos, 0x0, 0x0))
-		{
-			ClosestNodeDist = distance(m_LastPos, m_Path[i].m_Pos);
-			ClosestID = i;
-			//dbg_msg("FOUND NEW CLOSEST NODE", "i=%i with dist=%.2f", ClosestID, ClosestNodeDist);
-		}
-	}
-
-	m_LastClosestNode = ClosestID;
-	if(g_Config.m_ClNotifications && ClosestID > 0)
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", m_Path.size()-ClosestID, m_Path.size(), (((float)m_Path.size()-ClosestID)/(float)m_Path.size())*100.0f);
-		m_pClient->m_pHud->PushNotification(aBuf);
-	}
+	thread_init(CAStar::StartCalcScoreThread, this);
 }
 
 void CAStar::OnRender()
@@ -108,8 +86,18 @@ void CAStar::OnRender()
 
 	for(int i = 0; i < m_Path.size(); i++)
 	{
-		if(i == m_LastClosestNode)
-			Graphics()->SetColor(0.6f, 0.6f, 0.6f, 0.4f);
+		if(i == m_LastClosestNode && g_Config.m_ClPathFindingColor)
+		{
+			Graphics()->QuadsEnd();
+			Graphics()->BlendNormal();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(
+					(float)g_Config.m_ClPathFindingColorR/100.0f,
+					(float)g_Config.m_ClPathFindingColorG/100.0f,
+					(float)g_Config.m_ClPathFindingColorB/100.0f,
+					(float)g_Config.m_ClPathFindingColorA/100.0f
+			);
+		}
 
 		// don't render out of view
 		vec2 Pos = GameClient()->m_Snap.m_SpecInfo.m_Active ? vec2(GameClient()->m_Snap.m_pSpectatorInfo->m_X, GameClient()->m_Snap.m_pSpectatorInfo->m_X) : m_LastPos;
@@ -195,27 +183,22 @@ void CAStar::BuildPath(void *pUser)
 		dbg_msg("path", "ignored freeze: start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
 	}
 
-	if(g_Config.m_ClNotifications)
+	if(SolutionLength != -1)
 	{
-		if(SolutionLength != -1)
-		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Found path. Length: %i", SolutionLength);
-			pSelf->m_pClient->m_pHud->PushNotification(aBuf);
-		}
-		else
-			pSelf->m_pClient->m_pHud->PushNotification("No possible path found.");
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Found path. Length: %i", SolutionLength);
+		pSelf->m_pClient->m_pHud->PushNotification(aBuf);
 	}
+	else
+		pSelf->m_pClient->m_pHud->PushNotification("No possible path found.");
 
 	if(pSolution)
 	{
 		if(SolutionLength > 0)
 		{
-			pSelf->m_PathFound = true;
 			for(int i = SolutionLength; i >= 0 ; i--)
 			{
 				pSelf->m_Path.add_unsorted(Node(i-SolutionLength, pSelf->Collision()->GetPos(pSolution[i])));
-				thread_sleep(10);
 				if(pSelf->m_ThreadShouldExit)
 				{
 					free(pSolution);
@@ -241,7 +224,7 @@ void CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
 		{
 			m_pField[y*Collision()->GetWidth()+x] = (NoFreeze && Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE) || // treat freeze as air if allowed
 					!(
-							Collision()->CheckPoint(x * 32, y * 32) || // the following assures that the path isn't going through edge-passages
+							Collision()->CheckPoint(x * 32, y * 32) || // the following makes sure that the path isn't going through edge-passages
 									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
 									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
 									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
@@ -266,4 +249,45 @@ void CAStar::OnStateChange(int NewState, int OldState)
 void CAStar::OnMapLoad()
 {
 	m_MapReloaded = true;
+}
+
+void CAStar::StartCalcScoreThread(void *pUser)
+{
+	CAStar *pSelf = (CAStar*)pUser;
+	pSelf->CalcScoreThread();
+}
+
+void CAStar::CalcScoreThread()
+{
+	// fitness calculation
+	float ClosestNodeDist = -1.0f;
+	int ClosestID = -1;
+	for(int i = m_Path.size()-1; i >= 0; i--)
+	{
+		if(m_ThreadShouldExit)
+			return;
+
+//		dbg_msg("debug", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].m_Pos.x, m_Path[i].m_Pos.y);
+		float d = distance(m_LastPos, m_Path[i].m_Pos);
+		if(ClosestNodeDist >= 0.0f && d > ClosestNodeDist)
+		{
+//			dbg_msg("debug", "abort condition met; %.2f > %.2f", d, ClosestNodeDist);
+			break;
+		}
+
+		if((ClosestNodeDist < 0.0f || d < ClosestNodeDist) && !Collision()->IntersectLine(m_LastPos, m_Path[i].m_Pos, 0x0, 0x0))
+		{
+			ClosestNodeDist = d;
+			ClosestID = i;
+//			dbg_msg("FOUND NEW CLOSEST NODE", "i=%i with dist=%.2f", ClosestID, ClosestNodeDist);
+		}
+	}
+
+	m_LastClosestNode = ClosestID;
+	if(ClosestID > 0)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", m_Path.size()-ClosestID, m_Path.size(), (((float)m_Path.size()-ClosestID)/(float)m_Path.size())*100.0f);
+		m_pClient->m_pHud->PushNotification(aBuf);
+	}
 }

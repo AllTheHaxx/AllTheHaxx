@@ -1767,7 +1767,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			pTitle = Localize("Connecting to");
-			pExtraText = g_Config.m_UiServerAddress; // TODO: query the client about the address
+			pExtraText = Client()->GetCurrentServerAddress();
 			pButtonText = Localize("Abort");
 			if(Client()->MapDownloadTotalsize() > 0)
 			{
@@ -2044,13 +2044,41 @@ int CMenus::Render()
 				str_format(aBuf, sizeof(aBuf), pTimeLeftString, TimeLeft);
 				UI()->DoLabel(&Part, aBuf, 20.f, 0, -1);
 
-				// progress bar
+				// progress bar background
 				Box.HSplitTop(20.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-				Part.w = max(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
-				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
+				CUIRect DownloadSourceLabel = Part; // save it for later
+				DownloadSourceLabel.y += 3.0f;
+
+				// the actual progress bar
+//				Part.w = max(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
+				static float s_SmoothCutPercentage = 1.0f;
+				float CutPercentage = (float)Client()->MapDownloadAmount()/(float)Client()->MapDownloadTotalsize();
+				if(s_SmoothCutPercentage > CutPercentage) // reset
+					s_SmoothCutPercentage = CutPercentage;
+				smooth_set(&s_SmoothCutPercentage, CutPercentage, 70.0f * max((1.0f - CutPercentage+0.5f), 1.0f - (CutPercentage+0.3f-s_SmoothCutPercentage)) * (1.0f - CutPercentage+0.5f), Client()->RenderFrameTime());
+				CUIRect DebugRect = Part;
+				Part.VMargin((Part.w/2.0f)*(1.0f-s_SmoothCutPercentage), &Part);
+				if(g_Config.m_Debug)
+				{
+					DebugRect.VMargin((DebugRect.w/2.0f)*(1.0f-CutPercentage), &DebugRect);
+					RenderTools()->DrawUIRect(&DebugRect, vec4(1.0f, 0.0f, 0.0f, 0.5f), CUI::CORNER_ALL, 5.0f * min(1.0f, DebugRect.w / 20.0f));
+					RenderTools()->DrawUIRect(&Part, vec4(0.0f, 1.0f, 0.0f, 0.5f), CUI::CORNER_ALL, 5.0f * min(1.0f, Part.w / 20.0f));
+				}
+				else
+					RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f * min(1.0f, Part.w / 20.0f));
+
+				// map download source in the progress bar if webdl is active
+				if(g_Config.m_ClHttpMapDownload)
+				{
+					str_formatb(aBuf, "Downloading from: %s", Client()->MapDownloadSource());
+					TextRender()->TextColor(0.7f, 0.7f, 0.7f, 0.9f);
+					UI()->DoLabelScaled(&DownloadSourceLabel, aBuf, 14.0f, 0);
+					TextRender()->TextColor(1,1,1,1);
+				}
+
 			}
 		}
 		else if(m_Popup == POPUP_LANGUAGE)

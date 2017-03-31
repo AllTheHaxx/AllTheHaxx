@@ -148,10 +148,11 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	};
 	sorted_array<MapDbUrl> m_MapDbUrls;
 	CFetchTask *m_pMapdownloadTask;
-	int m_NextMapServer;
+	int m_CurrentMapServer;
 
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadName[256];
+	const char *m_pMapdownloadSource;
 	IOHANDLE m_MapdownloadFile;
 	int m_MapdownloadChunk;
 	int m_MapdownloadCrc;
@@ -217,6 +218,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	vec3 GetColorV3(int v);
 
 	int64 TickStartTime(int Tick);
+
+	void ConnectImpl(); // hide this
 
 	char m_aDDNetSrvListToken[4];
 	bool m_DDNetSrvListTokenSet;
@@ -285,7 +288,7 @@ public:
 	void OnEnterGame();
 	virtual void EnterGame();
 
-	virtual void Connect(const char *pAddress);
+	virtual void Connect(const char *pAddress); // synchron
 	void DisconnectWithReason(const char *pReason);
 	virtual void Disconnect();
 
@@ -332,11 +335,12 @@ public:
 	void ProcessServerPacket(CNetChunk *pPacket);
 	void ProcessServerPacketDummy(CNetChunk *pPacket);
 
+	void MapFetcherStart(const char *pMap, int MapCrc);
 	void ResetMapDownload();
 	void FinishMapDownload();
 
-	virtual CFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
 	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
+	virtual const char *MapDownloadSource() { return m_pMapdownloadSource; }
 	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
 	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
 

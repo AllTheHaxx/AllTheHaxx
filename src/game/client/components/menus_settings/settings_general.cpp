@@ -60,63 +60,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&s_CheckboxResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
 			g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
 
-		// chat messages
-		Right.HSplitTop(5.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		static CButtonContainer s_CheckboxShowChatFriends;
-		if(DoButton_CheckBox(&s_CheckboxShowChatFriends, Localize("Show only chat messages from friends"), g_Config.m_ClShowChatFriends, &Button))
-			g_Config.m_ClShowChatFriends ^= 1;
-
-		// name plates
-		Right.HSplitTop(5.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		static CButtonContainer s_CheckboxNameplates;
-		if(DoButton_CheckBox(&s_CheckboxNameplates, Localize("Show name above Tees"), g_Config.m_ClNameplates, &Button))
-			g_Config.m_ClNameplates ^= 1;
-
-		if(g_Config.m_ClNameplates)
-		{
-			Right.HSplitTop(2.5f, 0, &Right);
-			Right.HSplitTop(20.0f, &Label, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			UI()->DoLabelScaled(&Label, Localize("Name plates size"), 13.0f, -1);
-			Button.HMargin(2.0f, &Button);
-			static CButtonContainer s_Scrollbar;
-			g_Config.m_ClNameplatesSize = (int)(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_ClNameplatesSize/100.0f, 0, g_Config.m_ClNameplatesSize)*100.0f+0.1f);
-
-			Right.HSplitTop(20.0f, &Button, &Right);
-			static CButtonContainer s_CheckboxNameplatesTeamcolors;
-			if(DoButton_CheckBox(&s_CheckboxNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
-				g_Config.m_ClNameplatesTeamcolors ^= 1;
-		}
-
-		Right.HSplitTop(5.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		static CButtonContainer s_CheckboxNameplatesClan;
-		if(DoButton_CheckBox(&s_CheckboxNameplatesClan, Localize("Show clan above Tees"), g_Config.m_ClNameplatesClan, &Button))
-			g_Config.m_ClNameplatesClan ^= 1;
-
-		if(g_Config.m_ClNameplatesClan)
-		{
-			Right.HSplitTop(2.5f, 0, &Right);
-			Right.HSplitTop(20.0f, &Label, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			UI()->DoLabelScaled(&Label, Localize("Clan plates size"), 13.0f, -1);
-			Button.HMargin(2.0f, &Button);
-			CButtonContainer s_Scrollbar;
-			g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_ClNameplatesClanSize/100.0f, 0, g_Config.m_ClNameplatesClanSize)*100.0f+0.1f);
-
-			Right.HSplitTop(20.0f, &Button, &Right);
-			static CButtonContainer s_CheckboxNameplatesClancolors;
-			if(DoButton_CheckBox(&s_CheckboxNameplatesClancolors, Localize("Highlight your clan"), g_Config.m_ClNameplatesClancolors, &Button))
-				g_Config.m_ClNameplatesClancolors ^= 1;
-		}
-
-		Right.HSplitTop(5.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		static CButtonContainer s_CheckboxNamePlatesATH;
-		if(DoButton_CheckBox(&s_CheckboxNamePlatesATH, Localize("Show other ATH user"), g_Config.m_ClNamePlatesATH, &Button))
-			g_Config.m_ClNamePlatesATH ^= 1;
 	}
 
 	// client
@@ -185,7 +128,11 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
 		static CButtonContainer s_ScrollbarCpuThrottle;
-		g_Config.m_ClCpuThrottle = round_to_int(DoScrollbarH(&s_ScrollbarCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f, "WARNING: Setting this to 'none' will rape your CPU like crazy! Recommended value is 1")*100.0f+0.1f);
+		g_Config.m_ClCpuThrottle = round_to_int(
+				DoScrollbarH(&s_ScrollbarCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f,
+							 "Makes the client use less CPU; too high values result in stuttering\n\n"
+									 "WARNING: Setting this to 'none' will rape your CPU like crazy! Recommended value is 1"
+				)*100.0f+0.1f);
 
 		{
 			CUIRect Checkbox;

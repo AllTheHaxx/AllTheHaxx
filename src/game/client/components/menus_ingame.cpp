@@ -83,8 +83,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	static CButtonContainer s_ReconnectButton;
 	if(DoButton_Menu(&s_ReconnectButton, Localize("Reconnect"), 0, &Button, Localize("Rejoin the current server")))
 	{
-		Client()->Disconnect();
-		Client()->Connect(g_Config.m_UiServerAddress);
+		Client()->Connect(Client()->GetCurrentServerAddress());
 	}
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
@@ -388,7 +387,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 			IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 			s_HasChanged = false;
 			char aFile[64];
-			str_format(aFile, sizeof(aFile), "configs/%s.cfg", g_Config.m_UiServerAddress);
+			str_format(aFile, sizeof(aFile), "configs/%s.cfg", Client()->GetCurrentServerAddress());
 			str_replace_char(aFile, ':', '_');
 
 			// only save the entries if there are any
@@ -413,10 +412,10 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 	// reload the config when we are on a different server than before
 	bool MustReload = false;
 	static char s_LastServer[64] = {0};
-	if(str_comp_nocase(s_LastServer, g_Config.m_UiServerAddress) != 0)
+	if(str_comp_nocase(s_LastServer, Client()->GetCurrentServerAddress()) != 0)
 	{
 		MustReload = true;
-		str_copy(s_LastServer, g_Config.m_UiServerAddress, sizeof(s_LastServer));
+		str_copy(s_LastServer, Client()->GetCurrentServerAddress(), sizeof(s_LastServer));
 	}
 
 	// do the discard button only if there are changes
@@ -432,7 +431,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 
 		// load server specific config
 		char aFile[512];
-		str_format(aFile, sizeof(aFile), "configs/%s.cfg", g_Config.m_UiServerAddress);
+		str_format(aFile, sizeof(aFile), "configs/%s.cfg", Client()->GetCurrentServerAddress());
 		str_replace_char(aFile, ':', '_');
 
 		IOHANDLE_SMART f = Storage()->OpenFileSmart(aFile, IOFLAG_READ, IStorageTW::TYPE_ALL);

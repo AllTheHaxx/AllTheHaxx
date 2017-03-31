@@ -41,7 +41,7 @@ inline float frandom() { return rand()/(float)(RAND_MAX); }
 inline float smooth_set(float* val, float target, float delay, float RenderFrameTime)
 {
 	if(delay <= 0.0f)
-		delay = 0.00001f;
+		delay = 0.01f;
 
 	delay *= (0.005f/RenderFrameTime);
 

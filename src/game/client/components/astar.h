@@ -27,18 +27,20 @@ class CAStar : public CComponent
 
 	int m_LastClosestNode; // death position
 
-protected:
 	int GetTileAreaCenter(int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
 	int GetStart() { return GetTileAreaCenter(TILE_BEGIN); }
 	int GetFinish() { return GetTileAreaCenter(TILE_END); }
 	void FillGrid(bool NoFreeze);
 	static void BuildPath(void *pUser);
+	bool PathFound() const { return m_Path.size() > 0; }
 
 	char *m_pField;
 	sorted_array<Node> m_Path;
-	bool m_PathFound;
 
 	vec2 m_LastPos;
+
+	static void StartCalcScoreThread(void *pUser);
+	void CalcScoreThread();
 
 public:
 	CAStar();

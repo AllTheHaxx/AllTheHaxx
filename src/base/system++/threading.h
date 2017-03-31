@@ -2,10 +2,7 @@
 #define BASE_SYSTEMPP_THREADING_H
 
 #include <base/system.h>
-#if defined(CONF_DEBUG)
-#include <base/system++/system++.h>
-
-#endif
+#include "system++.h"
 
 template <class T = void>
 class THREAD_SMART
@@ -119,6 +116,64 @@ public:
 	bool IsJoinable() const
 	{
 		return IsRunning() && !IsDetached();
+	}
+};
+
+
+#define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(LOCKVAR, false, __FILE__, __LINE__); __SectionLock.WaitAndLock();
+
+class LOCK_SECTION_SMART
+{
+	LOCK m_Lock;
+	bool m_IsLocked;
+
+	const char *m_pFile;
+	int m_Line;
+
+public:
+	LOCK_SECTION_SMART(LOCK Lock, bool IsLocked = false, const char *pFile = 0, int Line = -1) : m_Lock(Lock), m_IsLocked(IsLocked), m_pFile(pFile), m_Line(Line)
+	{
+	}
+
+	~LOCK_SECTION_SMART()
+	{
+		if(m_IsLocked)
+			lock_unlock(m_Lock);
+//		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
+	}
+
+	void WaitAndLock()
+	{
+#if defined(CONF_DEBUG)
+		dbg_assert(!m_IsLocked, "Tried to lock the locked lock");
+//		dbg_msg("lock/dbg", "%s:%i grabbed lock %p", m_pFile, m_Line, m_Lock);
+#else
+		if(m_IsLocked)
+			return;
+#endif
+		m_IsLocked = true;
+		lock_wait(m_Lock);
+	}
+
+	bool TryToLock()
+	{
+		if(m_IsLocked)
+			return false;
+//		dbg_msg("lock/dbg", "%s:%i grabbed lock %p", m_pFile, m_Line, m_Lock);
+		return lock_trylock(m_Lock) == 0;
+	}
+
+	void Unlock()
+	{
+#if defined(CONF_DEBUG)
+		dbg_assert(m_IsLocked, "Tried to lock the locked lock");
+//		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
+#else
+		if(!m_IsLocked)
+			return;
+#endif
+		m_IsLocked = false;
+		lock_unlock(m_Lock);
 	}
 };
 
