@@ -107,6 +107,7 @@ public:
 	}
 };
 
+
 #define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(LOCKVAR, false, __FILE__, __LINE__); __SectionLock.WaitAndLock();
 
 class LOCK_SECTION_SMART
@@ -126,14 +127,14 @@ public:
 	{
 		if(m_IsLocked)
 			lock_unlock(m_Lock);
-		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
+//		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
 	}
 
 	void WaitAndLock()
 	{
 #if defined(CONF_DEBUG)
 		dbg_assert(!m_IsLocked, "Tried to lock the locked lock");
-		dbg_msg("lock/dbg", "%s:%i grabbed lock %p", m_pFile, m_Line, m_Lock);
+//		dbg_msg("lock/dbg", "%s:%i grabbed lock %p", m_pFile, m_Line, m_Lock);
 #else
 		if(m_IsLocked)
 			return;
@@ -146,7 +147,7 @@ public:
 	{
 		if(m_IsLocked)
 			return false;
-		dbg_msg("lock/dbg", "%s:%i grabbed lock %p", m_pFile, m_Line, m_Lock);
+//		dbg_msg("lock/dbg", "%s:%i grabbed lock %p", m_pFile, m_Line, m_Lock);
 		return lock_trylock(m_Lock) == 0;
 	}
 
@@ -154,7 +155,7 @@ public:
 	{
 #if defined(CONF_DEBUG)
 		dbg_assert(m_IsLocked, "Tried to lock the locked lock");
-		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
+//		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
 #else
 		if(!m_IsLocked)
 			return;
