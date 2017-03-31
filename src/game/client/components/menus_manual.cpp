@@ -88,13 +88,10 @@ void CMenus::RenderManual(CUIRect MainView)
 			static CButtonContainer s_Scrollbar; \
 			s_WantedScrollOffset = DoScrollbarV(&s_Scrollbar, &Scrollbar, s_WantedScrollOffset); \
 			\
-			if(m_pClient->m_pGameConsole->IsClosed()) \
-			{ \
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)) \
-					s_WantedScrollOffset += 0.1f; \
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP)) \
-					s_WantedScrollOffset -= 0.1f; \
-			} \
+			if(KeyEvent(KEY_MOUSE_WHEEL_DOWN)) \
+				s_WantedScrollOffset += 0.1f; \
+			else if(KeyEvent(KEY_MOUSE_WHEEL_UP)) \
+				s_WantedScrollOffset -= 0.1f; \
 			s_WantedScrollOffset = clamp(s_WantedScrollOffset, 0.0f, 1.0f); \
 			\
 			smooth_set(&s_ScrollOffset, s_WantedScrollOffset, 27.0f, Client()->RenderFrameTime()); \

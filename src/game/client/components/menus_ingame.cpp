@@ -369,7 +369,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 	Button.VSplitMid(&Button, &Button2);
 	Button.VSplitRight(10.0f, &Button, 0); Button2.VSplitLeft(10.0f, 0, &Button2);
 	static CButtonContainer s_AddEntryButton;
-	if(DoButton_Menu(&s_AddEntryButton, Localize("Add"), 0, &Button) || (UI()->MouseInside(&MainView) && Input()->KeyPress(KEY_RETURN)))
+	if(DoButton_Menu(&s_AddEntryButton, Localize("Add"), 0, &Button) || (UI()->MouseInside(&MainView) && KeyEvent(KEY_RETURN)))
 	{
 		ConfigCreatorEntry e;
 		s_Items.add(e);
@@ -2036,11 +2036,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
 
 	int ScrollNum = NumGhosts-Num+1;
-	if(ScrollNum > 0 && m_pClient->m_pGameConsole->IsClosed())
+	if(ScrollNum > 0)
 	{
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+		if(KeyEvent(KEY_MOUSE_WHEEL_UP))
 			s_ScrollValue -= 1.0f/ScrollNum;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+		else if(KeyEvent(KEY_MOUSE_WHEEL_DOWN))
 			s_ScrollValue += 1.0f/ScrollNum;
 	}
 	else

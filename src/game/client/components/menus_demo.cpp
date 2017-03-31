@@ -286,7 +286,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				static float PrevAmount = 0.0f;
 				float Amount = (UI()->MouseX()-SeekBar.x)/SeekBar.w;
 
-				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				if(KeyMods(KEYMOD_SHIFT))
 				{
 					Amount = PrevAmount + (Amount-PrevAmount) * 0.05f;
 
@@ -752,9 +752,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = 0;
 		}
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&ListBox) && m_pClient->m_pGameConsole->IsClosed())
+		if(KeyEvent(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&ListBox))
 			s_ScrollValue -= 3.0f/ScrollNum;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&ListBox) && m_pClient->m_pGameConsole->IsClosed())
+		else if(KeyEvent(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&ListBox))
 			s_ScrollValue += 3.0f/ScrollNum;
 	}
 	else

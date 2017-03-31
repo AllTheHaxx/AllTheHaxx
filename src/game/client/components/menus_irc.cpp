@@ -91,11 +91,6 @@ void CMenus::RenderIRC(CUIRect MainView)
 	CUIRect MainIRC, EntryBox, Button;
 	MainView.Margin(10.0f, &MainIRC);
 
-	/*if (m_GamePagePanel != PANEL_CHAT && UI()->MouseInside(&MainView) && Input()->KeyPressed(KEY_MOUSE_1))
-	 {
-	 m_GamePagePanel = PANEL_CHAT;
-	 }*/
-
 	if(m_pClient->IRC()->GetState() == IIRC::STATE_DISCONNECTED)
 	{
 		EntryBox.x = MainIRC.x + (MainIRC.w / 2.0f - 300.0f / 2.0f);

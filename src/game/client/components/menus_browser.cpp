@@ -182,20 +182,20 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			s_WantedScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = -1;
 		}
-		if(UI()->MouseInside(&View) && m_pClient->m_pGameConsole->IsClosed())
+		if(UI()->MouseInside(&View))
 		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			if(KeyEvent(KEY_MOUSE_WHEEL_UP))
 				s_WantedScrollValue -= Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f / ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f / ScrollNum : 3.0f / ScrollNum;
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+			else if(KeyEvent(KEY_MOUSE_WHEEL_DOWN))
 				s_WantedScrollValue += Input()->KeyIsPressed(KEY_LSHIFT) ? 1.5f / ScrollNum : Input()->KeyIsPressed(KEY_LCTRL) ? 6.0f / ScrollNum : 3.0f / ScrollNum;
 		}
 	}
 	else
 		ScrollNum = 0;
 
-	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
+	if(KeyEvent(KEY_TAB))
 	{
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(KeyMods(KEYMOD_SHIFT))
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
 		else
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
@@ -1517,7 +1517,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
 		static CButtonContainer s_RefreshButton;
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely"), ServerBrowser()->IsRefreshing() ? CUI::CORNER_L : CUI::CORNER_ALL) || Input()->KeyPress(KEY_F5) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely"), ServerBrowser()->IsRefreshing() ? CUI::CORNER_L : CUI::CORNER_ALL) || (KeyMods(KEYMOD_CTRL) && KeyEvent(KEY_R)))
 		{
 			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

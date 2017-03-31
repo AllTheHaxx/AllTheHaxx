@@ -177,6 +177,27 @@ vec4 CMenus::ButtonColorMul(CButtonContainer *pBC)
 	return vec4(1,1,1,1);
 }
 
+bool CMenus::KeyEvent(int Key, int FlagMask)
+{
+	for(int i = 0; i < m_NumInputEvents; i++)
+		if(m_aInputEvents[i].m_Key == Key && (m_aInputEvents[i].m_Flags & FlagMask))
+			return true;
+	return false;
+}
+
+bool CMenus::KeyMods(int Keymod)
+{
+	switch(Keymod)
+	{
+		case KEYMOD_CTRL:
+			return Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+		case KEYMOD_SHIFT:
+			return Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+		default:
+			return false;
+	}
+}
+
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 {
 	CALLSTACK_ADD();
@@ -401,7 +422,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 
 			if(Event.m_Flags&IInput::FLAG_PRESS)
 			{
-				if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
+				if(KeyMods(KEYMOD_CTRL))
 				{
 					Handled = true;
 
@@ -726,7 +747,7 @@ float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 		if(!UI()->MouseButton(0))
 			UI()->SetActiveItem(0);
 
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(KeyMods(KEYMOD_SHIFT))
 			m_MouseSlow = true;
 
 		float Min = pRect->y;
@@ -772,13 +793,10 @@ float CMenus::DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 
 	if(UI()->MouseInside(&Rail) || Inside)
 	{
-		if(m_pClient->m_pGameConsole->IsClosed())
-		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-				ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
-			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-				ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
-		}
+		if(KeyEvent(KEY_MOUSE_WHEEL_UP))
+			ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		else if(KeyEvent(KEY_MOUSE_WHEEL_DOWN))
+			ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
 	}
 
 	return clamp(ReturnValue, 0.0f, 1.0f);
@@ -821,7 +839,7 @@ float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 		if(!UI()->MouseButton(0))
 			UI()->SetActiveItem(0);
 
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(KeyMods(KEYMOD_SHIFT))
 			m_MouseSlow = true;
 
 		float Min = pRect->x;
@@ -890,13 +908,10 @@ float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 
 	if(UI()->MouseInside(&Rail) || Inside)
 	{
-		if(m_pClient->m_pGameConsole->IsClosed())
-		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-				ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
-			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-				ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
-		}
+		if(KeyEvent(KEY_MOUSE_WHEEL_UP))
+			ReturnValue += Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
+		else if(KeyEvent(KEY_MOUSE_WHEEL_DOWN))
+			ReturnValue -= Input()->KeyPress(KEY_LSHIFT) ? 0.01f : 0.05f;
 	}
 
 	return clamp(ReturnValue, 0.0f, 1.0f);
@@ -1554,9 +1569,9 @@ void CMenus::RenderNews(CUIRect MainView)
 		// scroll with the mousewheel
 		if(m_pClient->m_pGameConsole->IsClosed())
 		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+			if(KeyEvent(KEY_MOUSE_WHEEL_DOWN))
 				s_WantedScrollOffset[CURRENT_NEWS_PAGE] += 0.1f;
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			else if(KeyEvent(KEY_MOUSE_WHEEL_UP))
 				s_WantedScrollOffset[CURRENT_NEWS_PAGE] -= 0.1f;
 		}
 		s_WantedScrollOffset[CURRENT_NEWS_PAGE] = clamp(s_WantedScrollOffset[CURRENT_NEWS_PAGE], 0.0f, 1.0f);
@@ -2630,9 +2645,12 @@ void CMenus::OnRender()
 	{
 		if(m_UseMouseButtons)
 		{
-			if(Input()->KeyIsPressed(KEY_MOUSE_1)) Buttons |= 1;
-			if(Input()->KeyIsPressed(KEY_MOUSE_2)) Buttons |= 2;
-			if(Input()->KeyIsPressed(KEY_MOUSE_3)) Buttons |= 4;
+			for(int i = 0; i < m_NumInputEvents; i++)
+			{
+				if(m_aInputEvents[i].m_Key == KEY_MOUSE_1) Buttons |= 1;
+				if(m_aInputEvents[i].m_Key == KEY_MOUSE_2) Buttons |= 2;
+				if(m_aInputEvents[i].m_Key == KEY_MOUSE_3) Buttons |= 4;
+			}
 		}
 #if defined(__ANDROID__)
 		static int ButtonsOneFrameDelay = 0; // For Android touch input
@@ -2706,40 +2724,40 @@ void CMenus::RenderBackground()
 	// render background color
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-		//vec4 bottom(gui_color.r*0.3f, gui_color.g*0.3f, gui_color.b*0.3f, 1.0f);
-		//vec4 bottom(0, 0, 0, 1.0f);
-		vec4 Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
-		vec4 Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
-		IGraphics::CColorVertex Array[4] = {
+	//vec4 bottom(gui_color.r*0.3f, gui_color.g*0.3f, gui_color.b*0.3f, 1.0f);
+	//vec4 bottom(0, 0, 0, 1.0f);
+	vec4 Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
+	vec4 Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
+	IGraphics::CColorVertex Array[4] = {
 			IGraphics::CColorVertex(0, Top.r, Top.g, Top.b, Top.a),
 			IGraphics::CColorVertex(1, Top.r, Top.g, Top.b, Top.a),
 			IGraphics::CColorVertex(2, Bottom.r, Bottom.g, Bottom.b, Bottom.a),
 			IGraphics::CColorVertex(3, Bottom.r, Bottom.g, Bottom.b, Bottom.a)};
-		Graphics()->SetColorVertex(Array, 4);
-		IGraphics::CQuadItem QuadItem(0, 0, sw, sh);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->SetColorVertex(Array, 4);
+	IGraphics::CQuadItem QuadItem(0, 0, sw, sh);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
 	// render the tiles
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-		float Size = 15.0f;
-		float OffsetTime = (float)fmod(Client()->LocalTime() * 0.15f, 2.0f);
-		for(int y = -2; y < (int)(sw/Size); y++)
-			for(int x = -2; x < (int)(sh/Size); x++)
-			{
-				Graphics()->SetColor(0,0,0,0.045f);
-				IGraphics::CQuadItem QuadItem((x-OffsetTime)*Size*2+(y&1)*Size, (y+OffsetTime)*Size, Size, Size);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-			}
+	float Size = 15.0f;
+	float OffsetTime = (float)fmod(Client()->LocalTime() * 0.15f, 2.0f);
+	for(int y = -2; y < (int)(sw/Size); y++)
+		for(int x = -2; x < (int)(sh/Size); x++)
+		{
+			Graphics()->SetColor(0,0,0,0.045f);
+			IGraphics::CQuadItem QuadItem((x-OffsetTime)*Size*2+(y&1)*Size, (y+OffsetTime)*Size, Size, Size);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+		}
 	Graphics()->QuadsEnd();
 
 	// render border fade
 	Graphics()->TextureSet(gs_TextureBlob);
 	Graphics()->QuadsBegin();
-		Graphics()->SetColor(1,1,1,1);
-		QuadItem = IGraphics::CQuadItem(-100, -100, sw+200, sh+200);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->SetColor(1,1,1,1);
+	QuadItem = IGraphics::CQuadItem(-100, -100, sw+200, sh+200);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
 	// EVENT CALL
@@ -2747,7 +2765,7 @@ void CMenus::RenderBackground()
 
 	// restore screen
 	{CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}
+		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}
 }
 
 int CMenus::DoButton_CheckBox_DontCare(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect)
@@ -2756,14 +2774,14 @@ int CMenus::DoButton_CheckBox_DontCare(CButtonContainer *pBC, const char *pText,
 
 	switch(Checked)
 	{
-	case 0:
-		return DoButton_CheckBox_Common(pBC, pText, "", pRect);
-	case 1:
-		return DoButton_CheckBox_Common(pBC, pText, "X", pRect);
-	case 2:
-		return DoButton_CheckBox_Common(pBC, pText, "O", pRect);
-	default:
-		return DoButton_CheckBox_Common(pBC, pText, "", pRect);
+		case 0:
+			return DoButton_CheckBox_Common(pBC, pText, "", pRect);
+		case 1:
+			return DoButton_CheckBox_Common(pBC, pText, "X", pRect);
+		case 2:
+			return DoButton_CheckBox_Common(pBC, pText, "O", pRect);
+		default:
+			return DoButton_CheckBox_Common(pBC, pText, "", pRect);
 	}
 }
 

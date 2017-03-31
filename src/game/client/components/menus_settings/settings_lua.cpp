@@ -235,7 +235,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 				if(Item.m_Rect.y+Item.m_Rect.h > Item.m_HitRect.y)
 				{
-					if(UI()->MouseInside(&Item.m_Rect) && Input()->KeyPress(KEY_MOUSE_1))
+					if(UI()->MouseInside(&Item.m_Rect) && KeyEvent(KEY_MOUSE_1))
 						s_SelectedScript = i;
 
 					// activate button

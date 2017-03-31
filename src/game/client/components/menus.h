@@ -95,6 +95,13 @@ private:
 
 	vec4 ButtonColorMul(CButtonContainer *pBC);
 
+	enum
+	{
+		KEYMOD_CTRL,
+		KEYMOD_SHIFT
+	};
+	bool KeyEvent(int Key, int FlagMask = IInput::FLAG_PRESS);
+	bool KeyMods(int Keymod);
 
 	int DoButton_DemoPlayer(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect);
 
