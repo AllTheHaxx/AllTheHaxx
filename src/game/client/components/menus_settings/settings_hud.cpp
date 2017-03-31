@@ -52,6 +52,46 @@ void CMenus::RenderSettingsHUDGeneral(CUIRect MainView)
 		}
 	}
 
+	// chat messages
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_CheckboxShowChat;
+	if (DoButton_CheckBox(&s_CheckboxShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
+	{
+		g_Config.m_ClShowChat ^= 1;
+	}
+
+	if(g_Config.m_ClShowChat)
+	{
+		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		static CButtonContainer s_CheckboxChatTeamColors;
+		if(DoButton_CheckBox(&s_CheckboxChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
+		{
+			g_Config.m_ClChatTeamColors ^= 1;
+		}
+
+		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		static CButtonContainer s_CheckboxShowChatFriends;
+		if(DoButton_CheckBox(&s_CheckboxShowChatFriends, Localize("Show only chat messages from friends"), g_Config.m_ClShowChatFriends, &Button))
+			g_Config.m_ClShowChatFriends ^= 1;
+
+	}
+
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_CheckboxShowKillMessages;
+	if (DoButton_CheckBox(&s_CheckboxShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
+	{
+		g_Config.m_ClShowKillMessages ^= 1;
+	}
+
+
+	// ---- RIGHT ---- //
+
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxShowhudScore;
@@ -92,34 +132,6 @@ void CMenus::RenderSettingsHUDGeneral(CUIRect MainView)
 		}
 	}
 
-	Left.HSplitTop(3.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	static CButtonContainer s_CheckboxShowChat;
-	if (DoButton_CheckBox(&s_CheckboxShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
-	{
-		g_Config.m_ClShowChat ^= 1;
-	}
-
-	if(g_Config.m_ClShowChat)
-	{
-		Left.HSplitTop(3.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		Button.VSplitLeft(10.0f, 0, &Button);
-		static CButtonContainer s_CheckboxChatTeamColors;
-		if(DoButton_CheckBox(&s_CheckboxChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
-		{
-			g_Config.m_ClChatTeamColors ^= 1;
-		}
-	}
-
-	Left.HSplitTop(3.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	static CButtonContainer s_CheckboxShowKillMessages;
-	if (DoButton_CheckBox(&s_CheckboxShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
-	{
-		g_Config.m_ClShowKillMessages ^= 1;
-	}
-
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxShowVotesAfterVoting;
@@ -139,19 +151,80 @@ void CMenus::RenderSettingsHUDGeneral(CUIRect MainView)
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxChatbox;
-	if (DoButton_CheckBox(&s_CheckboxChatbox, Localize("Show chatbox"), g_Config.m_ClShowhudChatbox > 0, &Button))
+	if (DoButton_CheckBox(&s_CheckboxChatbox, Localize("Show chatbox"), g_Config.m_ClShowhudChatbox > 0, &Button, 0, g_Config.m_ClShowhudChatbox ? CUI::CORNER_T : CUI::CORNER_ALL))
 	{
 		g_Config.m_ClShowhudChatbox = g_Config.m_ClShowhudChatbox ? 0 : 34;
 	}
 
 	if(g_Config.m_ClShowhudChatbox)
 	{
-		Right.HSplitTop(3.0f, 0, &Right);
-		Right.HSplitTop(15.0f, &Button, &Right);
-		Button.VSplitLeft(10.0f, 0, &Button);
+		Right.HSplitTop(21.0f, &Button, &Right);
+		RenderTools()->DrawUIRect(&Button, vec4(0,0,0,0.25f), CUI::CORNER_B, 5.0f);
+		Button.Margin(3.0f, &Button);
+		char aBuf[64];
+		str_formatb(aBuf, "%s: ", Localize("Chatbox Alpha"));
+		Button.VSplitLeft(TextRender()->TextWidth(0, 11.0f, aBuf)+5.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, aBuf, 11.0f, CUI::ALIGN_LEFT);
 		static CButtonContainer s_Scrollbar;
-		g_Config.m_ClShowhudChatbox = round_to_int(DoScrollbarH(&s_Scrollbar, &Button, ((float)g_Config.m_ClShowhudChatbox-1.0f)/99.0f, Localize("Chatbox Alpha"), g_Config.m_ClShowhudChatbox)*99+1);
+		g_Config.m_ClShowhudChatbox = round_to_int(DoScrollbarH(&s_Scrollbar, &Button, ((float)g_Config.m_ClShowhudChatbox-1.0f)/99.0f, 0, g_Config.m_ClShowhudChatbox)*99+1);
 	}
+
+
+	// name plates
+	Right.HSplitTop(5.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxNameplates;
+	if(DoButton_CheckBox(&s_CheckboxNameplates, Localize("Show name above Tees"), g_Config.m_ClNameplates, &Button, 0, g_Config.m_ClNameplates ? CUI::CORNER_T : CUI::CORNER_ALL))
+		g_Config.m_ClNameplates ^= 1;
+
+	if(g_Config.m_ClNameplates)
+	{
+		Right.HSplitTop(21.0f, &Button, &Right);
+		RenderTools()->DrawUIRect(&Button, vec4(0,0,0,0.25f), CUI::CORNER_NONE, 5.0f);
+		Button.Margin(3.0f, &Button);
+		char aBuf[64];
+		str_formatb(aBuf, "%s: ", Localize("Name plates size"));
+		Button.VSplitLeft(TextRender()->TextWidth(0, 11.0f, aBuf)+5.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, aBuf, 11.0f, CUI::ALIGN_LEFT);
+		static CButtonContainer s_Scrollbar;
+		g_Config.m_ClNameplatesSize = (int)(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_ClNameplatesSize/100.0f, 0, g_Config.m_ClNameplatesSize)*100.0f+0.1f);
+
+		Right.HSplitTop(20.0f, &Button, &Right);
+		static CButtonContainer s_CheckboxNameplatesTeamcolors;
+		if(DoButton_CheckBox(&s_CheckboxNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button, 0, CUI::CORNER_B))
+			g_Config.m_ClNameplatesTeamcolors ^= 1;
+	}
+
+	// clan plates
+	Right.HSplitTop(5.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxNameplatesClan;
+	if(DoButton_CheckBox(&s_CheckboxNameplatesClan, Localize("Show clan above Tees"), g_Config.m_ClNameplatesClan, &Button, 0, g_Config.m_ClNameplatesClan ? CUI::CORNER_T : CUI::CORNER_ALL))
+		g_Config.m_ClNameplatesClan ^= 1;
+
+	if(g_Config.m_ClNameplatesClan)
+	{
+		Right.HSplitTop(21.0f, &Button, &Right);
+		RenderTools()->DrawUIRect(&Button, vec4(0,0,0,0.25f), CUI::CORNER_NONE, 5.0f);
+		Button.Margin(3.0f, &Button);
+		char aBuf[64];
+		str_formatb(aBuf, "%s: ", Localize("Clan plates size"));
+		Button.VSplitLeft(TextRender()->TextWidth(0, 11.0f, aBuf)+5.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, aBuf, 11.0f, CUI::ALIGN_LEFT);
+		CButtonContainer s_Scrollbar;
+		g_Config.m_ClNameplatesClanSize = (int)(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_ClNameplatesClanSize/100.0f, 0, g_Config.m_ClNameplatesClanSize)*100.0f+0.1f);
+
+		Right.HSplitTop(20.0f, &Button, &Right);
+		static CButtonContainer s_CheckboxNameplatesClancolors;
+		if(DoButton_CheckBox(&s_CheckboxNameplatesClancolors, Localize("Highlight your clan"), g_Config.m_ClNameplatesClancolors, &Button, 0, CUI::CORNER_B))
+			g_Config.m_ClNameplatesClancolors ^= 1;
+	}
+
+	Right.HSplitTop(5.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxNamePlatesATH;
+	if(DoButton_CheckBox(&s_CheckboxNamePlatesATH, Localize("Show other ATH users"), g_Config.m_ClNamePlatesATH, &Button))
+		g_Config.m_ClNamePlatesATH ^= 1;
 
 
 }

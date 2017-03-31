@@ -392,13 +392,19 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&s_ButtonChatbubble, Localize("Chatbubble"), g_Config.m_ClChatbubble, &Button, Localize("Send the chatbubble when you are typing")))
 		g_Config.m_ClChatbubble ^= 1;
 
+	Left.HSplitTop(5.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_ButtonBroadcastATH;
+	if(DoButton_CheckBox(&s_ButtonBroadcastATH, Localize("Send the ATH above your head to others"), g_Config.m_ClNamePlatesBroadcastATH, &Button, Localize("Disabling it has only an effect if no lua scripts are active!")))
+		g_Config.m_ClNamePlatesBroadcastATH ^= 1;
+
 	{
 		CUIRect ClearCacheButton;
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitRight(220.0f, &Button, &ClearCacheButton);
 		static CButtonContainer s_ButtonSkinFetcher;
-		if(DoButton_CheckBox(&s_ButtonSkinFetcher, Localize("Skin Fetcher"), g_Config.m_ClSkinFetcher, &Button, Localize("[EXPERIMENTAL!] Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server")))
+		if(DoButton_CheckBox(&s_ButtonSkinFetcher, Localize("Skin Fetcher"), g_Config.m_ClSkinFetcher, &Button, Localize("Download skins from certain public skin databases automatically\nif a missing skin is used by somebody else on your server")))
 			g_Config.m_ClSkinFetcher ^= 1;
 
 		static CButtonContainer s_ClearCacheButton;
