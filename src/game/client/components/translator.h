@@ -43,7 +43,6 @@ public:
 private:
 	void *m_pThread;
 	CURL *m_pHandle;
-	static size_t write_to_string(void *ptr, size_t size, size_t count, void *stream);
 
 	static void TranslationWorker(void *pUser);
 

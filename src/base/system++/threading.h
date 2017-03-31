@@ -73,8 +73,20 @@ public:
 	bool Detach()
 	{
 		if(!m_pThreadHandle) return false;
-		if((m_Detached = thread_detach(m_pThreadHandle) == 0))
-			m_pThreadHandle = NULL; // invalidate the handle since further operations on it would cause undefined behavior
+		int result = thread_detach(m_pThreadHandle);
+		m_pThreadHandle = NULL; // invalidate the handle since further operations on it would cause undefined behavior
+		m_Detached = true;
+		if(result == 0)
+		{
+		}
+/*#if defined(CONF_DEBUG)
+		else
+		{
+			char aErr[1024];
+			str_formatb(aErr, "failed to detach thread %p: error %i (%s)", m_pThreadHandle, result, strerror(result));
+			dbg_assert(result == 0, aErr);
+		}
+#endif*/
 		return m_Detached;
 	}
 

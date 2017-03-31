@@ -65,6 +65,7 @@ set(SOURCE_FILES
         src/engine/client/serverbrowser.h
         src/engine/client/fetcher.cpp
         src/engine/client/updater.cpp
+        src/engine/client/data_updater.cpp
         src/engine/client/backend_sdl.h
         src/engine/client/db_sqlite3.h
         src/engine/client/db_sqlite3.cpp
@@ -81,6 +82,7 @@ set(SOURCE_FILES
         src/engine/client/debug.h
         src/engine/client/sound.cpp
         src/engine/client/updater.h
+        src/engine/client/data_updater.h
         src/engine/client/friends.cpp
         src/engine/client/graphics_threaded.h
         src/engine/client/curlwrapper.cpp
@@ -155,8 +157,10 @@ set(SOURCE_FILES
         src/engine/shared/netban.h
         src/engine/shared/netban.cpp
         src/engine/server/register.cpp
+        src/engine/server/authmanager.cpp
         src/engine/server/sql_connector.h
         src/engine/server/register.h
+        src/engine/server/authmanager.h
         src/engine/server/sql_server.cpp
         src/engine/server/sql_server.h
         src/engine/server/sql_connector.cpp
@@ -248,8 +252,8 @@ set(SOURCE_FILES
         src/engine/external/libwebsockets/private-libwebsockets.h
         src/engine/external/libwebsockets/getifaddrs.h
         src/engine/external/libwebsockets/extension-deflate-stream.h
-        src/engine/external/json-parser/json.c
-        src/engine/external/json-parser/json.h
+        src/engine/external/json-parser/json.cpp
+        src/engine/external/json-parser/json.hpp
         src/engine/external/pnglite/pnglite.c
         src/engine/external/pnglite/pnglite.h
         src/engine/external/astar-jps/IndexPriorityQueue.h

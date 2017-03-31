@@ -1,15 +1,11 @@
 #include <string>
 #include <base/system.h>
 #include <engine/shared/config.h>
-#include <engine/external/json-parser/json.h>
+#include <engine/external/json-parser/json.hpp>
+#include <engine/client/curlwrapper.h>
 
 #include "translator.h"
 
-size_t CTranslator::write_to_string(void *ptr, size_t size, size_t count, void *stream)
-{
-	((std::string*)stream)->append((char*)ptr, 0, size*count);
-	return size*count;
-}
 
 CTranslator::CTranslator()
 {
@@ -45,32 +41,29 @@ void CTranslator::TranslationWorker(void *pUser)
 	{
 		CALLSTACK_ADD();
 
-		if(pTrans->m_Queue.size())
+		if(pTrans->m_Queue.size() > 0)
 		{
 			CTransEntry Entry = pTrans->m_Queue.front();
 
 			char aPost[2048*8];
-			char aResponse[2048*8];
 			char aTranslated[1024*8];
-			std::string response;
+			std::string Response;
 
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_URL, "http://api.mymemory.translated.net/get");
 			str_format(aPost, sizeof(aPost), "q=%s&langpair=%s|%s&de=associatingblog@gmail.com", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang);
 			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_POSTFIELDS, aPost);
 
-			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEFUNCTION, &CTranslator::write_to_string);
-			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEDATA, &response);
+			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEFUNCTION, &CCurlWrapper::CurlCallback_WriteToStdString);
+			curl_easy_setopt(pTrans->m_pHandle, CURLOPT_WRITEDATA, &Response);
 			curl_easy_perform(pTrans->m_pHandle);
 
-			str_copy(aResponse, response.c_str(), sizeof(aResponse));
-
 			// parse response
-			json_value *pValue = json_parse(aResponse);
-			const char *pResult = json_string_get(json_object_get(json_object_get(pValue,"responseData"),"translatedText"));
-			if(!pResult)
+			json_value &jsonValue = *json_parse(Response.c_str(), Response.length());
+			const char *pResult = jsonValue["responseData"]["translatedText"];
+			if(str_length(pResult) == 0)
 			{
 				dbg_msg("trans", "got not text");
-				return;
+				continue;
 			}
 			str_copy(aTranslated, pResult, sizeof(aTranslated));
 			if(str_comp_nocase(Entry.m_Text, aTranslated) != 0)
@@ -95,6 +88,12 @@ void CTranslator::TranslationWorker(void *pUser)
 void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In)
 {
 	CALLSTACK_ADD();
+
+	if(!str_utf8_check(pText))
+	{
+		dbg_msg("trans", "Invalid UTF-8 string");
+		return;
+	}
 
 	// prepare the entry
 	CTransEntry Entry;

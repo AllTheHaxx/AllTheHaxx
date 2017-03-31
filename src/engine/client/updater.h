@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include "data_updater.h"
 
 #define CLIENT_EXEC "AllTheHaxx"
 #define SERVER_EXEC "AllTheHaxx-Server"
@@ -44,20 +45,18 @@ class CUpdater : public IUpdater
 	class IStorageTW *m_pStorage;
 	class IFetcher *m_pFetcher;
 
+	CGitHubAPI m_GitHubAPI;
+
 	bool m_IsWinXP;
 
-	int m_State;
 	char m_Status[256];
 	int m_Percent;
 	char m_aLastFile[256];
 	char m_aError[256];
 
 	bool m_ClientUpdate;
-	int m_NumericVersion;
 
-	bool m_CheckOnly;
-
-	char m_aLatestVersion[10];
+//	char m_aLatestVersion[10];
 	char m_aNews[NEWS_SIZE];
 
 	std::vector<std::string> m_FileRemoveJobs;
@@ -65,14 +64,14 @@ class CUpdater : public IUpdater
 	int NumFileRemoveJobs() const { return (int)m_FileRemoveJobs.size(); }
 	int NumFileDownloadRepos() const { return (int)m_FileDownloadJobs.size(); }
 
-	void AddFileRemoveJob(const char *pFile, bool job);
+	void AddFileRemoveJob(const char *pFile);
 	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0); // files from repos
 	void FetchExecutable(const char *pFile, const char *pDestPath); // executables from release sections
 	void MoveFile(const char *pFile);
 
 	void ParseUpdate();
-	void PerformUpdate();
-	void CommitUpdate();
+	void DownloadUpdate();
+	void InstallUpdate();
 
 	void ReplaceClient();
 
@@ -81,17 +80,22 @@ public:
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
-	const char *GetLatestVersion() const { return m_aLatestVersion; }
+	const char *GetLatestVersion() const { return m_GitHubAPI.GetLatestVersion(); }
 	const char *GetNews() const { return m_aNews; }
-	const char *GetFailedFile() const { return m_aError; }
+	const char *GetWhatFailed() const { return m_aError; }
 
-	int GetCurrentState() const { return m_State; };
-	char *GetCurrentFile() { return m_Status; };
-	int GetCurrentPercent() const { return m_Percent; };
+	char *GetCurrentFile() { return m_Status; }
+	int GetCurrentPercent() const
+	{
+		if(State() >= STATE_PARSING_UPDATE)
+			return m_Percent;
+		return (int)(m_GitHubAPI.GetProgress()+0.5f);
+	}
 
-	virtual void InitiateUpdate(bool CheckOnly = false, bool ForceRefresh = false);
+	virtual void CheckForUpdates(bool ForceRefresh = false);
+	virtual void PerformUpdate();
 	void Init();
-	virtual void Update();
+	virtual void Tick();
 	void WinXpRestart();
 };
 

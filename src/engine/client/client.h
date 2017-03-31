@@ -279,7 +279,7 @@ public:
 	const char *News() { return m_Updater.GetNews(); }
 	const char *LatestVersion();
 	void VersionUpdate();
-	void CheckVersionUpdate();
+	void CheckVersionUpdate(bool Force);
 
 	// ------ state handling -----
 	void SetState(int s);

@@ -549,21 +549,23 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		bool NeedUpdate = Client()->LatestVersion()[2] && str_comp(Client()->LatestVersion(), GAME_ATH_VERSION) != 0;
-		int State = Updater()->GetCurrentState();
+		int State = Updater()->State();
 
 		// update button
-		if(NeedUpdate && State <= IUpdater::CLEAN)
+		if(NeedUpdate && State <= IUpdater::STATE_CLEAN)
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("New Client Version '%s' is available!"), Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(TextRender()->TextWidth(0, Button.h*ms_FontmodHeight, Localize("Update now"), -1), &Button, 0);
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
-				Updater()->InitiateUpdate();
+				Updater()->PerformUpdate();
 		}
-		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-			str_copyb(aBuf, Localize("Updating..."));
-		else if(State == IUpdater::NEED_RESTART){
+		else if(State >= IUpdater::STATE_GETTING_MANIFEST && State <= IUpdater::STATE_DOWNLOADING)
+			str_copyb(aBuf, Localize("Downloading update..."));
+		else if(State == IUpdater::STATE_MOVE_FILES)
+			str_copyb(aBuf, Localize("Installing update..."));
+		else if(State == IUpdater::STATE_NEED_RESTART){
 			str_copyb(aBuf, Localize("AllTheHaxx updated!"));
 			m_NeedRestartUpdate = true;
 		}
@@ -575,7 +577,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
-				Client()->CheckVersionUpdate();
+				Client()->CheckVersionUpdate(false);
 			}
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
