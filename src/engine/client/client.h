@@ -219,6 +219,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	int64 TickStartTime(int Tick);
 
+	void ConnectImpl(); // hide this
+
 	char m_aDDNetSrvListToken[4];
 	bool m_DDNetSrvListTokenSet;
 
@@ -287,7 +289,6 @@ public:
 	virtual void EnterGame();
 
 	virtual void Connect(const char *pAddress); // synchron
-	void ConnectImpl(); // hide this
 	void DisconnectWithReason(const char *pReason);
 	virtual void Disconnect();
 
