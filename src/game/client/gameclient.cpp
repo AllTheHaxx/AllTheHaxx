@@ -1066,7 +1066,7 @@ void CGameClient::OnEnterGame()
 
 	// load server specific config
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", g_Config.m_UiServerAddress);
+	str_format(aBuf, sizeof(aBuf), "configs/%s.cfg", Client()->GetCurrentServerAddress());
 	str_replace_char(aBuf, ':', '_');
 
 	IOHANDLE file = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL);
