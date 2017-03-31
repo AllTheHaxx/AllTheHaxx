@@ -39,6 +39,7 @@ bool CMenus::ToggleIRC()
 			// hack: set active com to @status in order to receive the unread-message-notification
 			s_pActiveCom = m_pClient->IRC()->GetActiveCom();
 			m_pClient->IRC()->SetActiveCom(0U);
+			UI()->SetActiveItem(0);
 		}
 		else
 		{
