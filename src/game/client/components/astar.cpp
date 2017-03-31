@@ -86,8 +86,18 @@ void CAStar::OnRender()
 
 	for(int i = 0; i < m_Path.size(); i++)
 	{
-		if(i == m_LastClosestNode)
-			Graphics()->SetColor(0.0f, 0.0f, 1.0f, 1.0f);
+		if(i == m_LastClosestNode && g_Config.m_ClPathFindingColor)
+		{
+			Graphics()->QuadsEnd();
+			Graphics()->BlendNormal();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(
+					(float)g_Config.m_ClPathFindingColorR/100.0f,
+					(float)g_Config.m_ClPathFindingColorG/100.0f,
+					(float)g_Config.m_ClPathFindingColorB/100.0f,
+					(float)g_Config.m_ClPathFindingColorA/100.0f
+			);
+		}
 
 		// don't render out of view
 		vec2 Pos = GameClient()->m_Snap.m_SpecInfo.m_Active ? vec2(GameClient()->m_Snap.m_pSpectatorInfo->m_X, GameClient()->m_Snap.m_pSpectatorInfo->m_X) : m_LastPos;
