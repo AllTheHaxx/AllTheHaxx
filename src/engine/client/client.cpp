@@ -4374,17 +4374,17 @@ void CClient::InputThread(void *pUser)
 		#if defined(CONF_FAMILY_WINDOWS)
 			if(!str_utf8_check(pInput))
 			{
-				char Temp[4];
+				char aTemp[4] = {0};
 				int Length = 0;
 
 				while(*pInput)
 				{
-					//dbg_msg("Client", "%s", Temp);
-					int Size = str_utf8_encode(Temp, static_cast<const unsigned char>(*pInput++));
+					//dbg_msg("Client", "%s", aTemp);
+					int Size = str_utf8_encode(aTemp, static_cast<const unsigned char>(*pInput++));
 
 					if((unsigned int)(Length+Size) < sizeof(aData))
 					{
-						mem_copy(aData+Length, &Temp, Size);
+						mem_copy(aData+Length, aTemp, Size);
 						Length += Size;
 					}
 					else
