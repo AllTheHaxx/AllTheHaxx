@@ -1687,9 +1687,9 @@ int CMenus::Render()
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 	}
 
-	if(	!g_Config.m_ClMenuBackground || !Client()->MapLoaded() ||
-		Client()->State() == IClient::STATE_CONNECTING ||
-		Client()->State() == IClient::STATE_LOADING)// && Client()->State() != IClient::STATE_ONLINE)
+	if(((g_Config.m_ClMenuBackground && !Client()->MapLoaded()) || (!g_Config.m_ClMenuBackground && Client()->State() == IClient::STATE_OFFLINE)) ||
+			Client()->State() == IClient::STATE_CONNECTING ||
+			Client()->State() == IClient::STATE_LOADING)
 		RenderBackground();
 
 	CUIRect TabBar;
@@ -2601,7 +2601,7 @@ void CMenus::OnRender()
 	else
 		UseMouseButtons(true);
 
-	if(!Client()->MapLoaded())
+	if(g_Config.m_ClMenuBackground && !Client()->MapLoaded())
 	{
 		Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
 

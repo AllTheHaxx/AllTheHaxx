@@ -467,13 +467,16 @@ void CGameClient::OnInit()
 	{
 		SET_LOAD_LABEL("Finalizing Background Map");
 
-		m_Layers.Init(Kernel());
-		m_Collision.Init(Layers());
-		m_pCollision = &m_Collision; // where fck
+		if(g_Config.m_ClMenuBackground)
+		{
+			m_Layers.Init(Kernel());
+			m_Collision.Init(Layers());
+			m_pCollision = &m_Collision; // where fck
 
-		RenderTools()->RenderTilemapGenerateSkip(Layers());
+			RenderTools()->RenderTilemapGenerateSkip(Layers());
 
-		m_pMapimages->OnMapLoad();
+			m_pMapimages->OnMapLoad();
+		}
 	}
 
 	// init irc
