@@ -187,8 +187,8 @@ const char *CServerBrowser::GetDebugString(int Index) const
 			   "%i/%i/%p\n"
 			   "Addr: %s\n"
 			   "Waiting for Info: %s\n"
-			   "Is64: %s\n"
 			   "GotInfo: %s\n"
+			   "64-legacy: %s\n"
 			   "\n"
 			   "NextIp = %p\n"
 			   "PrevReq = %p\n"
@@ -196,8 +196,8 @@ const char *CServerBrowser::GetDebugString(int Index) const
 			   Index, m_NumSortedServers, pInfo,
 			   aAddr,
 			   aInfoAge,
-			   pInfo->m_Is64 ? "true" : "false",
 			   pInfo->m_GotInfo ? "true" : "false",
+			   pInfo->m_Request64Legacy ? "true" : "false",
 			   pInfo->m_pNextIp,
 			   pInfo->m_pPrevReq,
 			   pInfo->m_pNextReq
@@ -399,8 +399,10 @@ void CServerBrowser::Filter()
 			m_ppServerlist[i]->m_Info.m_FriendState = IFriends::FRIEND_NO;
 			for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
 			{
-				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,
-					m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan);
+				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(
+						m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,
+						m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan
+				);
 				m_ppServerlist[i]->m_Info.m_FriendState = max(m_ppServerlist[i]->m_Info.m_FriendState, m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState);
 			}
 
@@ -860,7 +862,12 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 		if(g_Config.m_Debug)
 			dbg_msg("browser", "loading serverlist from cache...");
 		if(v != CACHE_VERSION)
-			dbg_msg("cache", "file version doesn't match, we may fail! (%i != %i)", v, CACHE_VERSION);
+		{
+			dbg_msg("browser", "couldn't load cache: file version doesn't match! (%i != %i)", v, CACHE_VERSION);
+			pSelf->m_CacheExists = false;
+			pSelf->m_ServerdataLocked = false;
+			return;
+		}
 	}
 
 	// get number of servers
@@ -1178,10 +1185,7 @@ void CServerBrowser::Upgrade()
 			if(!m_ppServerlist[i]) continue;
 			m_ppServerlist[i]->m_RequestTime = Now;
 			m_ppServerlist[i]->m_GotInfo = 0;
-			if(m_ppServerlist[i]->m_Is64)
-				RequestImpl64(m_ppServerlist[i]->m_Addr, 0);
-			else
-				RequestImpl(m_ppServerlist[i]->m_Addr, 0);
+			RequestImpl(m_ppServerlist[i]->m_Addr, 0);
 		}
 		CurrPart++;
 	}
