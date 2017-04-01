@@ -2647,9 +2647,12 @@ void CMenus::OnRender()
 		{
 			for(int i = 0; i < m_NumInputEvents; i++)
 			{
-				if(m_aInputEvents[i].m_Key == KEY_MOUSE_1) Buttons |= 1;
-				if(m_aInputEvents[i].m_Key == KEY_MOUSE_2) Buttons |= 2;
-				if(m_aInputEvents[i].m_Key == KEY_MOUSE_3) Buttons |= 4;
+				if(m_aInputEvents[i].m_Flags == IInput::FLAG_PRESS)
+				{
+					if(m_aInputEvents[i].m_Key == KEY_MOUSE_1) Buttons |= 1;
+					if(m_aInputEvents[i].m_Key == KEY_MOUSE_2) Buttons |= 2;
+					if(m_aInputEvents[i].m_Key == KEY_MOUSE_3) Buttons |= 4;
+				}
 			}
 		}
 #if defined(__ANDROID__)
