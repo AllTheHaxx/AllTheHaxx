@@ -2919,7 +2919,7 @@ int str_utf8_check(const char *str)
 unsigned str_quickhash(const char *str)
 {
 	unsigned hash = 5381;
-	for(; *str; str++)
+	for(; str && *str; str++)
 		hash = ((hash << 5) + hash) + (*str); /* hash * 33 + c */
 	return hash;
 }

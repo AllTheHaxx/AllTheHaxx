@@ -105,6 +105,7 @@ CServerBrowser::CServerBrowser()
 
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
+	m_BroadcastExtraToken = -1;
 
 	m_pRecentDB = new CSql("ath_recent.db");
 
@@ -186,8 +187,8 @@ const char *CServerBrowser::GetDebugString(int Index) const
 			   "%i/%i/%p\n"
 			   "Addr: %s\n"
 			   "Waiting for Info: %s\n"
-			   "Is64: %s\n"
 			   "GotInfo: %s\n"
+			   "64-legacy: %s\n"
 			   "\n"
 			   "NextIp = %p\n"
 			   "PrevReq = %p\n"
@@ -195,8 +196,8 @@ const char *CServerBrowser::GetDebugString(int Index) const
 			   Index, m_NumSortedServers, pInfo,
 			   aAddr,
 			   aInfoAge,
-			   pInfo->m_Is64 ? "true" : "false",
 			   pInfo->m_GotInfo ? "true" : "false",
+			   pInfo->m_Request64Legacy ? "true" : "false",
 			   pInfo->m_pNextIp,
 			   pInfo->m_pPrevReq,
 			   pInfo->m_pNextReq
@@ -398,8 +399,10 @@ void CServerBrowser::Filter()
 			m_ppServerlist[i]->m_Info.m_FriendState = IFriends::FRIEND_NO;
 			for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
 			{
-				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,
-					m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan);
+				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(
+						m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,
+						m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan
+				);
 				m_ppServerlist[i]->m_Info.m_FriendState = max(m_ppServerlist[i]->m_Info.m_FriendState, m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState);
 			}
 
@@ -546,6 +549,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 
 	// set the info
 	pEntry->m_Addr = Addr;
+	pEntry->m_ExtraToken = secure_rand() & 0xffff;
 	pEntry->m_Info.m_NetAddr = Addr;
 
 	pEntry->m_Info.m_Latency = 999;
@@ -583,14 +587,12 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 
 void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo)
 {
-	static int temp = 0;
 	CServerEntry *pEntry = 0;
 	if(Type == IServerBrowser::SET_MASTER_ADD)
 	{
 		if(m_ServerlistType != IServerBrowser::TYPE_INTERNET)
 			return;
 		m_LastPacketTick = 0;
-		++temp;
 		if(!Find(Addr))
 		{
 			pEntry = Add(Addr);
@@ -632,14 +634,34 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 	}
 	else if(Type == IServerBrowser::SET_TOKEN)
 	{
-		if(Token != m_CurrentToken)
+		int CheckToken = Token;
+		if(pInfo->m_Type == SERVERINFO_EXTENDED)
+		{
+			CheckToken = Token & 0xff;
+		}
+
+		if(CheckToken != m_CurrentToken)
 			return;
 
 		pEntry = Find(Addr);
+		if(pEntry && pInfo->m_Type == SERVERINFO_EXTENDED)
+		{
+			if(((Token & 0xffff00) >> 8) != pEntry->m_ExtraToken)
+			{
+				return;
+			}
+		}
 		if(!pEntry)
 			pEntry = Add(Addr);
 		if(pEntry)
 		{
+			if(m_ServerlistType == IServerBrowser::TYPE_LAN && pInfo->m_Type == SERVERINFO_EXTENDED)
+			{
+				if(((Token & 0xffff00) >> 8) != m_BroadcastExtraToken)
+				{
+					return;
+				}
+			}
 			SetInfo(pEntry, *pInfo);
 			if (m_ServerlistType == IServerBrowser::TYPE_LAN)
 				pEntry->m_Info.m_Latency = min(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
@@ -696,9 +718,13 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 		Packet.m_ClientID = -1;
 		mem_zero(&Packet, sizeof(Packet));
 		Packet.m_Address.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
-		Packet.m_Flags = NETSENDFLAG_CONNLESS;
+		Packet.m_Flags = NETSENDFLAG_CONNLESS|NETSENDFLAG_EXTENDED;
 		Packet.m_DataSize = sizeof(Buffer);
 		Packet.m_pData = Buffer;
+		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
+		m_BroadcastExtraToken = rand() & 0xffff;
+		Packet.m_aExtraData[0] = m_BroadcastExtraToken >> 8;
+		Packet.m_aExtraData[1] = m_BroadcastExtraToken & 0xff;
 		m_BroadcastTime = time_get();
 
 		for(unsigned short i = 8303; i <= 8310; i++)
@@ -836,7 +862,12 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 		if(g_Config.m_Debug)
 			dbg_msg("browser", "loading serverlist from cache...");
 		if(v != CACHE_VERSION)
-			dbg_msg("cache", "file version doesn't match, we may fail! (%i != %i)", v, CACHE_VERSION);
+		{
+			dbg_msg("browser", "couldn't load cache: file version doesn't match! (%i != %i)", v, CACHE_VERSION);
+			pSelf->m_CacheExists = false;
+			pSelf->m_ServerdataLocked = false;
+			return;
+		}
 	}
 
 	// get number of servers
@@ -894,9 +925,15 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS|NETSENDFLAG_EXTENDED;
 	Packet.m_DataSize = sizeof(Buffer);
 	Packet.m_pData = Buffer;
+	mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
+	if(pEntry)
+	{
+		Packet.m_aExtraData[0] = pEntry->m_ExtraToken >> 8;
+		Packet.m_aExtraData[1] = pEntry->m_ExtraToken & 0xff;
+	}
 
 	m_pNetClient->Send(&Packet);
 
@@ -906,7 +943,7 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 
 void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const
 {
-	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO64)+1];
+	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO_64_LEGACY)+1];
 	CNetChunk Packet;
 
 	if(g_Config.m_Debug)
@@ -918,8 +955,8 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
 	}
 
-	mem_copy(Buffer, SERVERBROWSE_GETINFO64, sizeof(SERVERBROWSE_GETINFO64));
-	Buffer[sizeof(SERVERBROWSE_GETINFO64)] = m_CurrentToken;
+	mem_copy(Buffer, SERVERBROWSE_GETINFO_64_LEGACY, sizeof(SERVERBROWSE_GETINFO_64_LEGACY));
+	Buffer[sizeof(SERVERBROWSE_GETINFO_64_LEGACY)] = m_CurrentToken;
 
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
@@ -933,12 +970,11 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 		pEntry->m_RequestTime = time_get();
 }
 
-void CServerBrowser::Request(const NETADDR &Addr) const
+void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
 {
 	if(m_ServerdataLocked)
 		return;
-	// call both because we can't know what kind the server is
-	RequestImpl64(Addr, 0);
+
 	RequestImpl(Addr, 0);
 }
 
@@ -1077,7 +1113,7 @@ void CServerBrowser::Update(bool ForceResort)
 
 		if(pEntry->m_RequestTime == 0)
 		{
-			if (pEntry->m_Is64)
+			if (pEntry->m_Request64Legacy)
 				RequestImpl64(pEntry->m_Addr, pEntry);
 			else
 				RequestImpl(pEntry->m_Addr, pEntry);
@@ -1149,10 +1185,7 @@ void CServerBrowser::Upgrade()
 			if(!m_ppServerlist[i]) continue;
 			m_ppServerlist[i]->m_RequestTime = Now;
 			m_ppServerlist[i]->m_GotInfo = 0;
-			if(m_ppServerlist[i]->m_Is64)
-				RequestImpl64(m_ppServerlist[i]->m_Addr, 0);
-			else
-				RequestImpl(m_ppServerlist[i]->m_Addr, 0);
+			RequestImpl(m_ppServerlist[i]->m_Addr, 0);
 		}
 		CurrPart++;
 	}
