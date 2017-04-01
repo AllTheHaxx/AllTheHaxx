@@ -89,6 +89,7 @@ public:
 	virtual void NativeMousePos(int *x, int *y) = 0;
 	virtual bool NativeMousePressed(int index) = 0;
 	virtual int MouseDoubleClick() = 0;
+	virtual int MouseDoubleClickNative() = 0;
 
 	virtual const char* GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *Text) = 0;

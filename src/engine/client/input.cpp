@@ -48,6 +48,9 @@ CInput::CInput()
 	m_LastRelease = 0;
 	m_ReleaseDelta = -1;
 
+	m_LastReleaseNative = 0;
+	m_ReleaseDeltaNative = -1;
+
 	m_NumEvents = 0;
 	m_MouseFocus = true;
 
@@ -131,6 +134,19 @@ int CInput::MouseDoubleClick()
 	{
 		m_LastRelease = 0;
 		m_ReleaseDelta = -1;
+		return 1;
+	}
+	return 0;
+}
+
+int CInput::MouseDoubleClickNative()
+{
+	CALLSTACK_ADD();
+
+	if(m_ReleaseDeltaNative >= 0 && m_ReleaseDeltaNative < (time_freq() / 3))
+	{
+		m_LastReleaseNative = 0;
+		m_ReleaseDeltaNative = -1;
 		return 1;
 	}
 	return 0;
@@ -294,11 +310,21 @@ int CInput::Update()
 					if(Event.button.button == 1) // ignore_convention
 					{
 						int64 Now = time_get();
-						m_ReleaseDelta = Now - m_LastRelease;
-						m_LastRelease = Now;
+						if(m_InputGrabbed)
+						{
+							// relative mouse
+							m_ReleaseDelta = Now - m_LastRelease;
+							m_LastRelease = Now;
+						}
+						else
+						{
+							// absolute (native) mouse
+							m_ReleaseDeltaNative = Now - m_LastReleaseNative;
+							m_LastReleaseNative = Now;
+						}
 					}
 
-					// fall through
+				// fall through
 				case SDL_MOUSEBUTTONDOWN:
 					if(Event.button.button == SDL_BUTTON_LEFT) Key = KEY_MOUSE_1; // ignore_convention
 					if(Event.button.button == SDL_BUTTON_RIGHT) Key = KEY_MOUSE_2; // ignore_convention
@@ -358,7 +384,7 @@ int CInput::Update()
 					}
 					break;
 
-				// other messages
+					// other messages
 				case SDL_QUIT:
 					return 1;
 			}

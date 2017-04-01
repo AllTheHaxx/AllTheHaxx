@@ -1035,6 +1035,7 @@ void CGameConsole::OnRender()
 		float RowHeight = FontSize*1.25f;
 		float x = 3;
 		float y = ConsoleHeight - RowHeight - 5.0f;
+		CFont * const pConFont = m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR);
 
 		// clipboard selection
 		static bool mousePress = false;
@@ -1054,11 +1055,11 @@ void CGameConsole::OnRender()
 		Info.m_Offset = pConsole->m_CompletionRenderOffset;
 		Info.m_Width = Screen.w;
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
-		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
+		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER, pConFont);
 
 		// render prompt
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
+		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, pConFont);
 		char aPrompt[128] = { ">" };
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
@@ -1145,18 +1146,18 @@ void CGameConsole::OnRender()
 		}
 
 		// render console input (wrap line)
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, 0,  m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
+		TextRender()->SetCursor(&Cursor, x, y, FontSize, 0, pConFont);
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
 		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(Editing), -1);
 		int Lines = Cursor.m_LineCount;
 
 		y -= (Lines - 1) * FontSize;
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER,  m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
+		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER, pConFont);
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 
 		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
-		static float MarkerOffset = TextRender()->TextWidth(0, FontSize, "|", -1)/3;
+		static float MarkerOffset = TextRender()->TextWidth(pConFont, FontSize, "|", -1)/3;
 		CTextCursor Marker = Cursor;
 		Marker.m_X -= MarkerOffset;
 		Marker.m_LineWidth = -1;
@@ -1289,7 +1290,7 @@ void CGameConsole::OnRender()
 				// get y offset (calculate it if we haven't yet)
 				if(pEntry->m_YOffset < 0.0f)
 				{
-					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
+					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0, pConFont);
 					Cursor.m_LineWidth = Screen.w-10;
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
@@ -1325,7 +1326,7 @@ void CGameConsole::OnRender()
 					for(i = 0; i < sText.length(); i++)
 					{
 						char toAn[2] = {sText.at(i), '\0'};
-						charwi = TextRender()->TextWidth(0, FontSize, toAn, 1);
+						charwi = TextRender()->TextWidth(pConFont, FontSize, toAn, 1);
 						if(mx >= offacumx && mx <= offacumx + charwi)
 							break;
 
@@ -1379,7 +1380,7 @@ void CGameConsole::OnRender()
 				// -------------------- end clipboard selection code -------------------
 
 				//url highlighting
-				TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER, m_pClient->m_pFontMgrMono->GetFont(FONT_REGULAR));
+				TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER, pConFont);
 				Cursor.m_LineWidth = Screen.w-10.0f;
 
 				const char *pCursor = pEntry->m_aText;
@@ -1419,9 +1420,9 @@ void CGameConsole::OnRender()
 					str_copy(aUrl, pUrlBeginning, UrlSize + 1);
 
 					// url rect
-					TextRect.x = TextRender()->TextWidth(0, FontSize, pEntry->m_aText, pUrlBeginning - pEntry->m_aText);
-					TextRect.y = y - OffsetY;
-					TextRect.w = TextRender()->TextWidth(0, FontSize, pUrlBeginning, UrlSize);
+					TextRect.x = TextRender()->TextWidth(pConFont, FontSize, pEntry->m_aText, pUrlBeginning - pEntry->m_aText);
+					TextRect.y = y - OffsetY+3.0f;
+					TextRect.w = TextRender()->TextWidth(pConFont, FontSize, pUrlBeginning, UrlSize);
 					TextRect.h = FontSize;
 
 					// render the first part
@@ -1432,12 +1433,15 @@ void CGameConsole::OnRender()
 					}
 
 					// set the color and check if pressed
+					if(g_Config.m_Debug)
+						RenderTools()->DrawUIRect(&TextRect, vec4(1,0,1,0.4f), 0, 0);
 					if(UI()->MouseInsideNative(mx, my, &TextRect))
 					{
 						TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
 						static float s_LastClicked = 0.0f;
-						if(Input()->MouseDoubleClick() && Client()->SteadyTimer() > s_LastClicked + 1.0f)
+						if(Input()->MouseDoubleClickNative() && Client()->SteadyTimer() > s_LastClicked + 1.0f)
 						{
+							TextRender()->TextColor(1.0f, 0.0f, 0.39f, 1.0f);
 							s_LastClicked = Client()->SteadyTimer();
 							Input()->Clear();
 							//((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>())->Minimize();
@@ -1445,7 +1449,7 @@ void CGameConsole::OnRender()
 						}
 					}
 					else
-						TextRender()->TextColor(1.0f, 0.39f, 0.0f, 1.0f);
+						TextRender()->TextColor(0.15f, 0.48f, 0.87f, 1.0f);
 
 					// render the link
 					TextRender()->TextEx(&Cursor, pUrlBeginning, UrlSize);

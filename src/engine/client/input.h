@@ -12,6 +12,8 @@ class CInput : public IEngineInput
 
 	int64 m_LastRelease;
 	int64 m_ReleaseDelta;
+	int64 m_LastReleaseNative;
+	int64 m_ReleaseDeltaNative;
 
 	bool m_MouseFocus;
 	int m_VideoRestartNeeded;
@@ -48,6 +50,7 @@ public:
 	virtual void NativeMousePos(int *x, int *y);
 	virtual bool NativeMousePressed(int index);
 	virtual int MouseDoubleClick();
+	virtual int MouseDoubleClickNative();
 	virtual const char* GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
 
