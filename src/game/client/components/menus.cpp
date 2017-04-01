@@ -2644,15 +2644,16 @@ void CMenus::OnRender()
 	{
 		if(m_UseMouseButtons)
 		{
-			for(int i = 0; i < m_NumInputEvents; i++)
-			{
-				if(m_aInputEvents[i].m_Flags == IInput::FLAG_PRESS)
-				{
-					if(m_aInputEvents[i].m_Key == KEY_MOUSE_1) Buttons |= 1;
-					if(m_aInputEvents[i].m_Key == KEY_MOUSE_2) Buttons |= 2;
-					if(m_aInputEvents[i].m_Key == KEY_MOUSE_3) Buttons |= 4;
-				}
-			}
+			if(Input()->KeyIsPressed(KEY_MOUSE_1)) Buttons |= 1;
+			if(Input()->KeyIsPressed(KEY_MOUSE_2)) Buttons |= 2;
+			if(Input()->KeyIsPressed(KEY_MOUSE_3)) Buttons |= 4;
+
+		/*	dbg_msg("dbg", "mouse buttons: %s%s%s",
+					Buttons&1 ? "x" : ".",
+					Buttons&4 ? "x" : ".",
+					Buttons&2 ? "x" : "."
+			);	*/
+
 		}
 #if defined(__ANDROID__)
 		static int ButtonsOneFrameDelay = 0; // For Android touch input
