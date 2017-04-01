@@ -75,8 +75,6 @@ public:
 
 				fs_makedir(GetPath(TYPE_SAVE, "tmp", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "tmp/cache", aPath, sizeof(aPath)));
-
-				fs_makedir("rsa");
 			}
 			fs_makedir(GetPath(TYPE_SAVE, "dumps", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "dumps/console_local", aPath, sizeof(aPath)));
