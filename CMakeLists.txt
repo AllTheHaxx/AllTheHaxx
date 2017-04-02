@@ -5,7 +5,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
-option(MYSQL "Enable lua" ON)
+option(LUA "Enable lua" ON)
 option(CLIENT "Compile client" ON)
 
 # Set the default build type to Release
@@ -58,7 +58,6 @@ find_package(PythonInterp)
 find_package(SDL2)
 find_package(LuaJIT)
 find_package(Threads)
-find_package(ZLIB)
 find_package(ZLIB)
 
 message(STATUS "******** AllTheHaxx ********")
@@ -174,14 +173,24 @@ list(APPEND TARGETS_DEP png)
 
 if(CLIENT)
   # Static dependencies
-  file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
+  file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.cpp" "src/engine/external/json-parser/*.hpp")
   file(GLOB DEP_WAV_SRC "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
+  file(GLOB DEP_AES_SRC "src/engine/external/aes128/*.c" "src/engine/external/aes128/*.h")
+  file(GLOB DEP_ASTAR_SRC "src/engine/external/astar-jps/*.cpp" "src/engine/external/astar-jps/*.c" "src/engine/external/astar-jps/*.h")
+  file(GLOB DEP_SQLITE3_SRC "src/engine/external/sqlite3/*.c" "src/engine/external/sqlite3/*.h")
+
   add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
   add_library(wav EXCLUDE_FROM_ALL OBJECT ${DEP_WAV_SRC})
+  add_library(aes EXCLUDE_FROM_ALL OBJECT ${DEP_AES_SRC})
+  add_library(astar EXCLUDE_FROM_ALL OBJECT ${DEP_ASTAR_SRC})
+  add_library(sqlite3 EXCLUDE_FROM_ALL OBJECT ${DEP_SQLITE3_SRC})
 
-  list(APPEND TARGETS_DEP json wav)
+  list(APPEND TARGETS_DEP json wav aes)
   set(DEP_JSON $<TARGET_OBJECTS:json>)
   set(DEP_WAV $<TARGET_OBJECTS:wav>)
+  set(DEP_AES $<TARGET_OBJECTS:aes>)
+  set(DEP_ASTAR $<TARGET_OBJECTS:astar>)
+  set(DEP_SQLITE3 $<TARGET_OBJECTS:sqlite3>)
 endif()
 
 ########################################################################
@@ -282,7 +291,7 @@ if(CLIENT)
   set(GAME_GENERATED_CLIENT "src/game/generated/client_data.cpp" "src/game/generated/client_data.h")
   set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
-  set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
+  set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV} ${DEP_AES} ${DEP_ASTAR} ${DEP_SQLITE3})
 
   # Libraries
   set(LIBS_CLIENT
@@ -291,6 +300,7 @@ if(CLIENT)
     ${FREETYPE_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${LUAJIT_LIBRARIES}
+    dl # sqlite3 needs that
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}

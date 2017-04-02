@@ -22,7 +22,6 @@
 #include <engine/external/json-parser/json.hpp>
 
 #include <game/client/components/menus.h>
-#include <json-parser/json.hpp>
 
 #include "serverbrowser.h"
 class SortWrap

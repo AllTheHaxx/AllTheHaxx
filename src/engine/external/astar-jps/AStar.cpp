@@ -1,5 +1,3 @@
-#include <base/system.h>
-//#if defined(CONF_FAMILY_UNIX)
 #include "AStar.h"
 #include "IndexPriorityQueue.h"
 #include <stdlib.h>
