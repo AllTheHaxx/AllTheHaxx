@@ -211,7 +211,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(pSelf->State() == STATE_SYNC_REFRESH && str_comp(b, LATEST_VERSION_FILE) == 0)
 		{
 			bool NeedCheck = false;
-			IOHANDLE f = io_open("update/"LATEST_VERSION_FILE, IOFLAG_READ);
+			IOHANDLE f = io_open("update/" LATEST_VERSION_FILE, IOFLAG_READ);
 			if(f)
 			{
 				char aBuf[16];

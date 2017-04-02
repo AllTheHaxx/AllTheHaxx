@@ -2,14 +2,26 @@ target_family = os.getenv("TARGET_FAMILY")
 if target_family then
 	family = target_family
 end
+target_family = family
+
 target_platform = os.getenv("TARGET_PLATFORM")
 if target_platform then
 	platform = target_platform
 end
+target_platform = platform
+
 target_arch = os.getenv("TARGET_ARCH")
 if target_arch then
 	arch = target_arch
 end
+target_arch = arch
+
+if target_family == "windows" then
+	sysconf = target_platform
+else
+	sysconf = target_platform .. "-" .. target_arch  --family .. "-" .. platform .. "-" .. arch
+end
+
 
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
@@ -41,7 +53,9 @@ config:Add(OptString("websockets", false))
 config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
-config:Finalize("config.lua")
+config:Finalize(".bam/config_" .. sysconf .. ".lua")
+
+print("System Configurations: " .. sysconf)
 
 -- data compiler
 function Script(name)
@@ -91,10 +105,10 @@ function ResCompile(scriptfile)
 
 	scriptfile = Path(scriptfile)
 	if config.compiler.driver == "cl" then
-		output = PathBase(scriptfile) .. ".res"
+		output = PathJoin("objs/" .. sysconf, PathBase(scriptfile) .. ".res")
 		AddJob(output, "rc " .. scriptfile, "rc /fo " .. output .. " " .. scriptfile)
 	elseif config.compiler.driver == "gcc" then
-		output = PathBase(scriptfile) .. ".coff"
+		output = PathJoin("objs/" .. sysconf, PathBase(scriptfile) .. ".coff")
 		AddJob(output, windres .. " " .. scriptfile, windres .. " -i " .. scriptfile .. " -o " .. output)
 	end
 
@@ -199,14 +213,13 @@ if family == "windows" then
 end
 
 function Intermediate_Output(settings, input)
-	return "objs/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
+	return "objs/" .. sysconf .. "/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
 end
 
 function build(settings)
 	-- apply compiler settings
 	config.compiler:Apply(settings)
 
-	--settings.objdir = Path("objs")
 	settings.cc.Output = Intermediate_Output
 
 	cc = os.getenv("CC")
