@@ -419,7 +419,6 @@ void CGameClient::OnInit()
 	m_pFontMgrMono->Init();
 
 	// init all components
-	char aBuf[256];
 
 	// disable vsync temporarily for not to waste time with rendering
 	if(g_Config.m_GfxVsync)
