@@ -3459,12 +3459,15 @@ void CClient::Run()
 
 	if(m_Updater.State() == IUpdater::STATE_CLEAN)
 	{
+		int ret;
 		// do cleanups - much hack.
 #if defined(CONF_FAMILY_UNIX)
-		system("rm -rf update");
+		ret = system("rm -rf update");
 #elif defined(CONF_FAMILY_WINDOWS)
-		system("if exist update rd update /S /Q");
+		ret = system("if exist update rd update /S /Q");
 #endif
+		if(ret != 0)
+			dbg_msg("updater", "cleanups failed");
 	}
 }
 
@@ -4411,7 +4414,7 @@ void CClient::InputThread(void *pUser)
 	CALLSTACK_ADD();
 
 	CClient *pSelf = (CClient *)pUser;
-	char aInput[64];
+	char aInput[256];
 	char *pInput = aInput;
 
 	char aData[128];
@@ -4433,7 +4436,8 @@ void CClient::InputThread(void *pUser)
 			break;
 
 		thread_sleep(100);
-		fgets(pInput, 200, stdin);
+		if(fgets(pInput, sizeof(aInput), stdin) == NULL)
+			continue;
 		aInput[str_length(aInput)-1] = '\0';
 
 		#if defined(CONF_FAMILY_WINDOWS)
