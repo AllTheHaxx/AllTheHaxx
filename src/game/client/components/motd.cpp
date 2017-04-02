@@ -79,18 +79,15 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 		str_copy(m_aServerMotd, pMsg->m_pMessage, sizeof(m_aServerMotd));
 		for(int i = 0; m_aServerMotd[i]; i++)
 		{
-			if(m_aServerMotd[i] == '\\')
+			if((m_aServerMotd[i] == '\\' && m_aServerMotd[i+1] == 'n') || m_aServerMotd[i] == '\n')
 			{
-				if(m_aServerMotd[i+1] == 'n')
-				{
-					m_aServerMotd[i] = '\0';
-					if(g_Config.m_ClPrintMotd)
-						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
-					m_aServerMotd[i] = ' ';
-					m_aServerMotd[i+1] = '\n';
-					i++;
-					pLast = m_aServerMotd+i+1;
-				}
+				m_aServerMotd[i] = '\0';
+				if(g_Config.m_ClPrintMotd)
+					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
+				m_aServerMotd[i] = ' ';
+				m_aServerMotd[i+1] = '\n';
+				i++;
+				pLast = m_aServerMotd+i+1;
 			}
 		}
 		if(*pLast && g_Config.m_ClPrintMotd)
