@@ -133,7 +133,7 @@ if(TARGET_OS STREQUAL "windows")
 else()
   set(PLATFORM_CLIENT_LIBS GL GLU X11)
   if(TARGET_OS STREQUAL "linux")
-    set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
+    set(PLATFORM_LIBS rt dl) # clock_gettime for glibc < 2.17
   else()
     set(PLATFORM_LIBS)
   endif()
@@ -306,7 +306,6 @@ if(CLIENT)
     ${FREETYPE_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${LUAJIT_LIBRARIES}
-    dl # sqlite3 needs that
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
