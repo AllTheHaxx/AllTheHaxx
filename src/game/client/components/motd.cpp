@@ -79,7 +79,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 		const char *pMsgStr = pMsg->m_pMessage;
 		int MotdLen = str_length(pMsgStr);
 		const char *pLast = m_aServerMotd; // for console printing
-		for(int i = 0, k = 0; i < MotdLen && k < (int)sizeof(m_aServerMotd); i++, k++)
+		for(int i = 0, k = 0; i < MotdLen && k < (int)sizeof(m_aServerMotd)-1; i++, k++)
 		{
 			// handle incoming "\\n"
 			if(pMsgStr[i] == '\\' && pMsgStr[i+1] == 'n')
