@@ -3,6 +3,7 @@
 #ifndef BASE_VMATH_H
 #define BASE_VMATH_H
 
+#include <string>
 #include <math.h>
 
 // ------------------------------------
@@ -48,6 +49,13 @@ public:
 	bool operator !=(const vector2_base &v) const { return x != v.x || y != v.y; }
 
 	operator const T* () { return &x; }
+
+	std::string tostring() const
+	{
+		char aBuf[64];
+		str_formatb(aBuf, "(%.4f|%.4f)", x,y);
+		return std::string(aBuf);
+	}
 };
 
 template<typename T>
@@ -161,6 +169,13 @@ public:
 
 	operator const T* () { return &x; }
 	operator const vector2_base<T>* () { return vector2_base<T>(x,y); }
+
+	std::string tostring() const
+	{
+		char aBuf[64];
+		str_formatb(aBuf, "(%.4f|%.4f|%.4f)", x,y,z);
+		return std::string(aBuf);
+	}
 };
 
 template<typename T>
@@ -269,10 +284,13 @@ public:
 	vector4_base operator +(const vector4_base &v) const { return vector4_base(x+v.x, y+v.y, z+v.z, w+v.w); }
 	vector4_base operator -(const vector4_base &v) const { return vector4_base(x-v.x, y-v.y, z-v.z, w-v.w); }
 	vector4_base operator -() const { return vector4_base(-x, -y, -z, -w); }
+	vector4_base sub(vector4_base &v) const { return operator-(v); }
 	vector4_base operator *(const vector4_base &v) const { return vector4_base(x*v.x, y*v.y, z*v.z, w*v.w); }
+	vector4_base mul(const vector4_base &v) const { return operator*(v); }
 	vector4_base operator *(const T v) const { return vector4_base(x*v, y*v, z*v, w*v); }
 	vector4_base operator /(const vector4_base &v) const { return vector4_base(x/v.x, y/v.y, z/v.z, w/v.w); }
 	vector4_base operator /(const T v) const { return vector4_base(x/v, y/v, z/v, w/v); }
+	vector4_base div(const T v) const { return operator/(v); }
 
 	const vector4_base &operator =(const vector4_base &v) { x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
 
@@ -288,6 +306,14 @@ public:
 	operator const T* () { return &x; }
 	operator const vector3_base<T> () { return vector3_base<T>(r,g,b); }
 	operator const vector2_base<T> () { return vector2_base<T>(r,g); }
+
+	std::string tostring() const
+	{
+		char aBuf[64];
+		str_formatb(aBuf, "(%.4f|%.4f|%.4f|%.4f)", r,g,b,a);
+		return std::string(aBuf);
+//		return std::string("(") + std::string(r) + std::string("|") + std::string(g) + std::string("|") + std::string(b) + std::string("|") + std::string(a) + std::string(")");
+	}
 };
 
 typedef vector4_base<float> vec4;
