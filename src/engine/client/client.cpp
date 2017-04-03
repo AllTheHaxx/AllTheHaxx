@@ -1121,7 +1121,7 @@ void CClient::DummyInfo()
 	SendMsgExY(&Packer, MSGFLAG_VITAL);
 }
 
-CServerInfo *CClient::GetServerInfo(CServerInfo *pServerInfo)
+const CServerInfo *CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
 	if(pServerInfo)
 	{

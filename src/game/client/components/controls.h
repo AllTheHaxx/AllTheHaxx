@@ -9,6 +9,7 @@
 
 class CControls : public CComponent
 {
+	bool m_DiscardMouseMove;
 public:
 	vec2 m_MousePos[2];
 	vec2 m_TargetPos[2];

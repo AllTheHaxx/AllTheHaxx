@@ -76,6 +76,7 @@ void CControls::OnReset()
 	for( int i = 0; i < NUM_WEAPONS; i++ )
 		m_AmmoCount[i] = 0;
 	m_OldMouseX = m_OldMouseY = 0.0f;
+	m_DiscardMouseMove = false;
 }
 
 void CControls::ResetInput(int dummy)
@@ -99,7 +100,9 @@ void CControls::OnRelease()
 {
 	CALLSTACK_ADD();
 
-	//OnReset();
+	// prevent mouse jumping
+	if(!m_pClient->m_pGameConsole->IsClosed())
+		m_DiscardMouseMove = true;
 }
 
 void CControls::OnPlayerDeath()
@@ -533,6 +536,12 @@ void CControls::OnRender()
 bool CControls::OnMouseMove(float x, float y)
 {
 	CALLSTACK_ADD();
+
+	if(m_DiscardMouseMove)
+	{
+		m_DiscardMouseMove = false;
+		return true;
+	}
 
 	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED) ||
 		(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_pChat->IsActive()))

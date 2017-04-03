@@ -281,7 +281,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent)
 	Graphics()->QuadsEnd();
 
 	// laser trail
-	CServerInfo *pServerInfo = Client()->GetServerInfo(0);
+	const CServerInfo *pServerInfo = Client()->GetServerInfo(0);
 	if(	(g_Config.m_GfxLaserTrail == 1 && IsVanilla(pServerInfo)) ||
 		(g_Config.m_GfxLaserTrail == 2 && !IsDDNet(pServerInfo) && !IsRace(pServerInfo)) ||
 		(g_Config.m_GfxLaserTrail == 3))

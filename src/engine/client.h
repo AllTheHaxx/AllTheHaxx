@@ -161,7 +161,7 @@ public:
 	virtual void Rcon(const char *pLine) = 0;
 
 	// server info
-	virtual class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo = 0) = 0;
+	virtual const class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo = 0) const = 0;
 
 	virtual void CheckVersionUpdate(bool Force) = 0;
 
