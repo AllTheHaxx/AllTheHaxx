@@ -30,9 +30,9 @@ luajit = {
                 settings.link.libs:Add("lua51")
             elseif option.value == true then
 		        if arch == "amd64" then
-		            settings.link.libpath:Add(luajit.basepath .. "/unix/lib64")
+		            settings.link.libpath:Add(luajit.basepath .. "/linux/lib64")
 		        else
-		        	settings.link.libpath:Add(luajit.basepath .. "/unix/lib32")
+		        	settings.link.libpath:Add(luajit.basepath .. "/linux/lib32")
 		        end
 				settings.link.libs:Add("luajit")
 			end

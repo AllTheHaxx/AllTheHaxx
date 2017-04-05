@@ -12,9 +12,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <aes128/aes.h>
-#include <md5/md5.h>
-#include <zlib/zlib.h>
+#include <engine/external/aes128/aes.h>
+#include <engine/external/md5/md5.h>
+#include <zlib.h>
 
 #if defined(CONF_WEBSOCKETS)
 	#include "engine/shared/websockets.h"
@@ -1901,6 +1901,7 @@ int fs_listdir_verbose(const char *dir, FS_LISTDIR_CALLBACK_VERBOSE cb, int type
 	struct dirent *entry;
 	char buffer[1024*2];
 	int length;
+	int result = 0;
 	DIR *d = opendir(dir);
 
 	if(!d)
@@ -1908,7 +1909,6 @@ int fs_listdir_verbose(const char *dir, FS_LISTDIR_CALLBACK_VERBOSE cb, int type
 
 	str_format(buffer, sizeof(buffer), "%s/", dir);
 	length = str_length(buffer);
-	int result = 0;
 
 	while((entry = readdir(d)) != NULL)
 	{
@@ -3069,9 +3069,9 @@ void secure_random_fill(void *bytes, unsigned length)
 MD5_HASH md5_simple(unsigned char *data, unsigned data_size)
 {
 	MD5_HASH result;
-	mem_zerob(&result);
-
 	md5_state_t md;
+
+	mem_zerob(&result);
 
 	md5_init(&md);
 	md5_append(&md, data, data_size);
@@ -3097,12 +3097,16 @@ unsigned secure_rand_u()
 uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *output_size, AES128_IV *out_iv)
 {
 	int i;
+	uint8_t *input_buffer;
+	uint8_t iv_start;
+	uint8_t *output_buffer;
+
 	int str_len = str_length(str);
 	int padded_len = str_len - str_len%16 + 16; // must be a multiple of 16
 	*output_size = (unsigned int)((padded_len / 16 + 1) * 16) - 16;
 
 	// copy the string and add padding
-	uint8_t *input_buffer = mem_allocb(uint8_t, padded_len);
+	input_buffer = mem_allocb(uint8_t, padded_len);
 	for(i = 0; i < padded_len; i++)
 	{
 		if(i < str_len)
@@ -3112,7 +3116,7 @@ uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *ou
 	}
 
 	// prepare the initial vector (iv)
-	uint8_t iv_start = (uint8_t)((secure_rand_u() % (0xFF - 0x11)) + 0x10);
+	iv_start = (uint8_t)((secure_rand_u() % (0xFF - 0x11)) + 0x10);
 	for(i = 0; i < 16; i++)
 	{
 		out_iv->iv[i] = (uint8_t)(iv_start+i);
@@ -3120,7 +3124,7 @@ uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *ou
 
 	// allocate the output buffer
 	*output_size += 1;
-	uint8_t *output_buffer = mem_allocb(uint8_t, *output_size);
+	output_buffer = mem_allocb(uint8_t, *output_size);
 
 	output_buffer[0] = iv_start;
 
@@ -3135,15 +3139,17 @@ uint8_t *str_aes128_encrypt(const char *str, const AES128_KEY *key, unsigned *ou
 char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *key, char *buffer, unsigned buffer_size, AES128_IV *out_iv)
 {
 	int i;
+	uint8_t *output_buffer;
 
 	// reconstruct the iv
-	uint8_t iv_start = data[0];
+	uint8_t iv_start;
+	iv_start = data[0];
 	for(i = 0; i < 16; i++)
 	{
 		out_iv->iv[i] = (uint8_t)(iv_start+i);
 	}
 
-	uint8_t *output_buffer = mem_allocb(uint8_t, buffer_size);
+	output_buffer = mem_allocb(uint8_t, buffer_size);
 	mem_zero(output_buffer, buffer_size);
 	AES128_CBC_decrypt_buffer(output_buffer, data+1, data_size-1, key->key, out_iv->iv);
 

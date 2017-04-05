@@ -34,7 +34,9 @@
 # include <hash_map>
 #else
 # include <stdint.h>
+# define _GLIBCXX_PERMIT_BACKWARD_HASH
 # include <ext/hash_map>
+# undef _GLIBCXX_PERMIT_BACKWARD_HASH
 #endif
 
 //==============================================================================

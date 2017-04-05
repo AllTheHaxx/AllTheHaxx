@@ -2,7 +2,7 @@
 #include <base/system.h>
 #include <base/system++/io.h>
 
-#include <json-parser/json.hpp>
+#include <engine/external/json-parser/json.hpp>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 

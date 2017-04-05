@@ -3,6 +3,7 @@
 datasrc/__pycache__
 datasrc/*.pyc
 /objs
+/build
 /lua/
 /rsa
 /src/game/generated
