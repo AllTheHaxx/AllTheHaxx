@@ -56,7 +56,7 @@ config:Add(OptString("websockets", false))
 config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
-config:Finalize(".bam/config_" .. sysconf .. ".lua")
+config:Finalize("config_" .. sysconf .. ".lua")
 
 print("System Configurations: " .. sysconf)
 
