@@ -1,25 +1,28 @@
 target_family = os.getenv("TARGET_FAMILY")
 if target_family then
 	family = target_family
+else
+--	print("Auto family: " .. family)
 end
-target_family = family
 
 target_platform = os.getenv("TARGET_PLATFORM")
 if target_platform then
 	platform = target_platform
+else
+--	print("Auto platform: " .. platform)
 end
-target_platform = platform
 
 target_arch = os.getenv("TARGET_ARCH")
 if target_arch then
 	arch = target_arch
-end
-target_arch = arch
-
-if target_family == "windows" then
-	sysconf = target_platform
 else
-	sysconf = target_platform .. "-" .. target_arch  --family .. "-" .. platform .. "-" .. arch
+--	print("Auto arch: " .. arch)
+end
+
+if family == "windows" then
+	sysconf = target_platform or platform
+else
+	sysconf = (target_platform or platform) .. "-" .. (target_arch or arch)  --family .. "-" .. platform .. "-" .. arch
 end
 
 
