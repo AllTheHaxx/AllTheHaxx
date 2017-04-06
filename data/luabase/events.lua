@@ -205,6 +205,16 @@ function OnRenderLevel(level)
 	end
 end
 
+function OnInputLevel(level, KeyName, EventTable)
+	if __CTRL.Events["OnInputLevel" .. level] ~= nil then
+		for script, event in pairs(__CTRL.Events["OnInputLevel" .. level]) do
+			if event ~= nil then
+				return event(KeyName, EventTable)
+			end
+		end
+	end
+end
+
 function OnRenderScoreboard(FadeVal)
 	if __CTRL.Events["OnRenderScoreboard"] ~= nil then
 		for script, event in pairs(__CTRL.Events["OnRenderScoreboard"]) do

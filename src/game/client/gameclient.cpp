@@ -77,36 +77,36 @@
 
 CGameClient g_GameClient;
 
-// instantiate the lua render levels
+// instantiate the lua components
 #if defined(FEATURE_LUA)
-static CLuaRender gs_LuaRender0(0);
-static CLuaRender gs_LuaRender1(1);
-static CLuaRender gs_LuaRender2(2);
-static CLuaRender gs_LuaRender3(3);
-static CLuaRender gs_LuaRender4(4);
-static CLuaRender gs_LuaRender5(5);
-static CLuaRender gs_LuaRender6(6);
-static CLuaRender gs_LuaRender7(7);
-static CLuaRender gs_LuaRender8(8);
-static CLuaRender gs_LuaRender9(9);
-static CLuaRender gs_LuaRender10(10);
-static CLuaRender gs_LuaRender11(11);
-static CLuaRender gs_LuaRender12(12);
-static CLuaRender gs_LuaRender13(13);
-static CLuaRender gs_LuaRender14(14);
-static CLuaRender gs_LuaRender15(15);
-static CLuaRender gs_LuaRender16(16);
-static CLuaRender gs_LuaRender17(17);
-static CLuaRender gs_LuaRender18(18);
-static CLuaRender gs_LuaRender19(19);
-static CLuaRender gs_LuaRender20(20);
-static CLuaRender gs_LuaRender21(20);
-static CLuaRender gs_LuaRender22(22);
-static CLuaRender gs_LuaRender23(23);
-static CLuaRender gs_LuaRender24(24);
-static CLuaRender gs_LuaRender25(25);
-static CLuaRender gs_LuaRender26(26);
-static CLuaRender gs_LuaRender27(27);
+static CLuaComponent gs_LuaComponent0(0);
+static CLuaComponent gs_LuaComponent1(1);
+static CLuaComponent gs_LuaComponent2(2);
+static CLuaComponent gs_LuaComponent3(3);
+static CLuaComponent gs_LuaComponent4(4);
+static CLuaComponent gs_LuaComponent5(5);
+static CLuaComponent gs_LuaComponent6(6);
+static CLuaComponent gs_LuaComponent7(7);
+static CLuaComponent gs_LuaComponent8(8);
+static CLuaComponent gs_LuaComponent9(9);
+static CLuaComponent gs_LuaComponent10(10);
+static CLuaComponent gs_LuaComponent11(11);
+static CLuaComponent gs_LuaComponent12(12);
+static CLuaComponent gs_LuaComponent13(13);
+static CLuaComponent gs_LuaComponent14(14);
+static CLuaComponent gs_LuaComponent15(15);
+static CLuaComponent gs_LuaComponent16(16);
+static CLuaComponent gs_LuaComponent17(17);
+static CLuaComponent gs_LuaComponent18(18);
+static CLuaComponent gs_LuaComponent19(19);
+static CLuaComponent gs_LuaComponent20(20);
+static CLuaComponent gs_LuaComponent21(20);
+static CLuaComponent gs_LuaComponent22(22);
+static CLuaComponent gs_LuaComponent23(23);
+static CLuaComponent gs_LuaComponent24(24);
+static CLuaComponent gs_LuaComponent25(25);
+static CLuaComponent gs_LuaComponent26(26);
+static CLuaComponent gs_LuaComponent27(27);
 #endif
 
 // instantiate all systems
@@ -261,7 +261,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pGameTextureManager);
 
 #if defined(FEATURE_LUA)
-#define ADD_LUARENDER(I) m_All.Add(&gs_LuaRender##I) // lua
+#define ADD_LUARENDER(I) m_All.Add(&gs_LuaComponent##I) // lua
 #else
 #define ADD_LUARENDER(I) ;
 #endif
@@ -323,19 +323,38 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pFontMgrBasic);
 	m_All.Add(m_pFontMgrMono);
 
-#undef ADD_LUARENDER
+#undef ADD_LUAINPUT
+
+#if defined(FEATURE_LUA)
+#define ADD_LUAINPUT(I) m_Input.Add(&gs_LuaComponent##I) // lua
+#else
+#define ADD_LUAINPUT(I) ;
+#endif
 
 	// build the input stack
+	ADD_LUAINPUT(0);
 	m_Input.Add(&m_pMenus->m_Binder); // this will take over all input when we want to bind a key
+	ADD_LUAINPUT(1);
 	m_Input.Add(&m_pBinds->m_SpecialBinds);
+	ADD_LUAINPUT(2);
 	m_Input.Add(m_pGameConsole);
+	ADD_LUAINPUT(3);
 	m_Input.Add(m_pChat); // chat has higher prio due to tha you can quit it by pressing esc
+	ADD_LUAINPUT(4);
 	m_Input.Add(m_pMotd); // for pressing esc to remove it
+	ADD_LUAINPUT(5);
 	m_Input.Add(m_pMenus);
+	ADD_LUAINPUT(6);
 	m_Input.Add(&gs_Spectator);
+	ADD_LUAINPUT(7);
 	m_Input.Add(&gs_Emoticon);
+	ADD_LUAINPUT(8);
 	m_Input.Add(m_pControls);
+	ADD_LUAINPUT(9);
 	m_Input.Add(m_pBinds);
+	ADD_LUAINPUT(10);
+
+#undef ADD_LUAINPUT
 
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
