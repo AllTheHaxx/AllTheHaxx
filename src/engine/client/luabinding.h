@@ -20,17 +20,8 @@ class CLuaBinding
 {
 public:
 	static CLuaFile *GetLuaFile(lua_State *l);
-	static int LuaListdirCallback(const char *name, int is_dir, int dir_type, void *user);
-	struct LuaListdirCallbackParams
-	{
-		lua_State *L;
-		char aCallbackFunc[128];
+	static int LuaListdirCallback(const char *name, const char *full_path, int is_dir, int dir_type, void *user);
 
-		LuaListdirCallbackParams(lua_State *l, const char *pCB) : L(l)
-		{
-			str_copy(aCallbackFunc, pCB, sizeof(aCallbackFunc));
-		}
-	};
 	// global namespace
 	static int LuaPrintOverride(lua_State *L);
 	static int LuaThrow(lua_State *L);

@@ -6,16 +6,15 @@
 #include "luabinding.h"
 
 
-int CLuaBinding::LuaListdirCallback(const char *name, int is_dir, int dir_type, void *user)
+int CLuaBinding::LuaListdirCallback(const char *name, const char *full_path, int is_dir, int dir_type, void *user)
 {
-	LuaListdirCallbackParams *params = (LuaListdirCallbackParams*)user;
-	lua_State *L = params->L;
 #if defined(FEATURE_LUA)
-
-	lua_getglobal(L, params->aCallbackFunc);
-	lua_pushstring(L, name);
-	lua_pushboolean(L, is_dir);
-	lua_pcall(L, 2, 1, 0);
+	lua_State *L = (lua_State*)user;
+	lua_pushvalue(L, lua_gettop(L)); // duplicate the callback function which is on top of the stack
+	lua_pushstring(L, name); // push arg 1 (element name)
+	lua_pushstring(L, full_path); // push arg 2 (element path)
+	lua_pushboolean(L, is_dir); // push arg 3 (bool indicating whether element is a folder)
+	lua_pcall(L, 3, 1, 0);
 	int ret = 0;
 	if(lua_isnumber(L, -1))
 		ret = round_to_int((float)lua_tonumber(L, -1));
@@ -122,6 +121,7 @@ int CLuaBinding::LuaImport(lua_State *L)
 #endif
 }
 
+/* lua call: Listdir(<string> foldername, <string/function> callback) */
 int CLuaBinding::LuaListdir(lua_State *L)
 {
 #if defined(FEATURE_LUA)
@@ -134,17 +134,17 @@ int CLuaBinding::LuaListdir(lua_State *L)
 		return luaL_error(L, "Listdir expects 2 arguments");
 
 	argcheck(lua_isstring(L, 1), 1, "string"); // path
-	argcheck(lua_isstring(L, 2), 2, "function name (as a string)"); // function callback
+	argcheck(lua_isstring(L, 2) || lua_isfunction(L, 2), 2, "string (function name) or function"); // callback function
 
-	lua_getglobal(L, lua_tostring(L, 2)); // check if the given callback function actually exists
-	argcheck(lua_isfunction(L, -1), 2, "function name (as a string)");
-	lua_pop(L, 1); // pop temporary lua function
+	// convert the function name into the actual function
+	if(lua_isstring(L, 2))
+	{
+		lua_getglobal(L, lua_tostring(L, 2)); // check if the given callback function actually exists / retrieve the function
+		argcheck(lua_isfunction(L, -1), 2, "function name (as a string)");
+	}
 
 	const char *pDir = lua_tostring(L, 1); // arg1
-	LuaListdirCallbackParams params(L, lua_tostring(L, 2)); // arg2
-	lua_pop(L, 1); // pop arg2
-	lua_Number ret = (lua_Number)fs_listdir(pDir, LuaListdirCallback, IStorageTW::TYPE_ALL, &params);
-	lua_pop(L, 1); // pop arg1
+	lua_Number ret = (lua_Number)fs_listdir_verbose(pDir, LuaListdirCallback, IStorageTW::TYPE_ALL, L);
 	lua_pushnumber(L, ret);
 	return 1;
 #else
@@ -191,7 +191,7 @@ int CLuaBinding::LuaStrIsNetAddr(lua_State *L)
 	int ret = net_addr_from_str(&temp, lua_tostring(L, 1)); // arg1
 	lua_pop(L, 1), // pop arg1
 
-	lua_pushboolean(L, ret == 0);
+			lua_pushboolean(L, ret == 0);
 	return 1;
 #else
 	return 0;
@@ -224,7 +224,7 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 	aMsg[str_length(aMsg)-1] = '\0'; // remove the last tab character
 
 	// pop all to clean up the stack
-    lua_pop(L, nargs);
+	lua_pop(L, nargs);
 
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	if(pGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == L)
