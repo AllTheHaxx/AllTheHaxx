@@ -4,7 +4,7 @@ project(AllTheHaxx)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions("-DCONF_FAMILY_UNIX")
 add_definitions("-DCONF_DEBUG")
-add_definitions("-DCONF_SPOOFING")
+#add_definitions("-DCONF_SPOOFING")
 add_definitions("-DFEATURE_LUA")
 add_definitions("-DDO_NOT_COMPILE_THIS_CODE")
 add_definitions("-D_GNU_SOURCE")
@@ -477,6 +477,6 @@ set(SOURCE_FILES
         src/game/client/components/menus_settings/settings_appearance.cpp
         src/game/client/components/menus_settings/settings_hud.cpp
         src/game/client/components/menus_listbox.cpp
-)
+        src/game/client/components/menus_popups.cpp)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})

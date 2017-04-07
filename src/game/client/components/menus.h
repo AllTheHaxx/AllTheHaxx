@@ -418,6 +418,10 @@ public:	int m_LoadTotal;
 	void RenderCredits(CUIRect MainView);
 	void RenderManual_General(CUIRect MainView);
 
+	// found in menus_popups.cpp
+	void RenderPopups();
+	void RenderCurrentPopup(const char *pTitle, const char *pExtraText, const char *pButtonText, int ExtraAlign);
+
 	void SetActive(bool Active);
 	bool LockInput(IInput::CEvent Event);
 
@@ -542,6 +546,8 @@ public:
 		POPUP_PASSWORD,
 		POPUP_QUIT,
 		POPUP_DISCONNECT,
+		POPUP_UPDATE,
+		NUM_POPUPS,
 
 		// demo player states
 		DEMOPLAYER_NONE=0,

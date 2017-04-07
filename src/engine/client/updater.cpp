@@ -146,7 +146,12 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(str_comp(b, "ath-news.txt") == 0) // news are allowed to fail...
 			str_copy(pSelf->m_aNews, pFailedNewsMsg, sizeof(pSelf->m_aNews));
 		else if(str_comp(b, LATEST_VERSION_FILE) == 0) // version check is definitely allowed to fail
-			dbg_msg("updater", "version check failed: couldn't download '%s'", b);
+			dbg_msg("updater/warning", "version check failed: couldn't download '%s'", b);
+		else if(str_comp(b, UPDATE_MANIFEST) == 0) // update manifest is optional, thus allowewd to fail
+		{
+			pSelf->SetState(STATE_SYNC_POSTGETTING);
+			dbg_msg("updater/warning", "getting manifest failed! waiting for github-compare to finish...");
+		}
 		else
 		{
 			if(str_comp_nocase_num(a, "lua/", 4) != 0) // example scripts are allowed to fail, too
@@ -220,6 +225,9 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 				io_close(f);
 				str_strip_right_whitespaces(aBuf);
 				int VersionID = str_toint(aBuf);
+				#ifdef DBG_FAKE_LATEST_VERSION
+				VersionID = FAKED_LATEST_VERSION_NUM;
+				#endif
 				dbg_msg("updater/debug", "latest version id: %i ('%s')", VersionID, aBuf);
 				if(VersionID > GAME_ATH_VERSION_NUMERIC)
 					NeedCheck = true;

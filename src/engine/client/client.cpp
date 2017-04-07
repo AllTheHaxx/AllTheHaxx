@@ -4411,7 +4411,7 @@ void CClient::InputThread(void *pUser)
 	CALLSTACK_ADD();
 
 	CClient *pSelf = (CClient *)pUser;
-	char aInput[64];
+	char aInput[512];
 	char *pInput = aInput;
 
 	char aData[128];
@@ -4429,11 +4429,12 @@ void CClient::InputThread(void *pUser)
 
 	while(1)
 	{
+		thread_sleep(100);
 		if(pSelf->m_State == IClient::STATE_QUITING)
 			break;
 
-		thread_sleep(100);
-		fgets(pInput, 200, stdin);
+		mem_zerob(aInput);
+		fgets(aInput, sizeof(aInput), stdin);
 		aInput[str_length(aInput)-1] = '\0';
 
 		#if defined(CONF_FAMILY_WINDOWS)
@@ -4463,7 +4464,6 @@ void CClient::InputThread(void *pUser)
 				pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
 		#else
 			pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
-			mem_zero(aInput, sizeof(aInput));
 		#endif
 
 	}
