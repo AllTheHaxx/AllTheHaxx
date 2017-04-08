@@ -25,6 +25,8 @@ CUpdater::CUpdater()
 	SetState(STATE_CLEAN);
 	str_copy(m_aError, "something", sizeof(m_aError));
 	m_Percent = 0;
+	m_TotalNumJobs = 0;
+	m_TotalProgress = 0;
 	m_IsWinXP = false;
 
 	m_ClientUpdate = true; //XXX this is for debugging purposes MUST BE TRUE AT RELEASE!!!11ELF
@@ -123,6 +125,8 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	CALLSTACK_ADD();
 
 	CUpdater *pSelf = (CUpdater *)pUser;
+	pSelf->m_TotalProgress++;
+
 	const bool IS_ERROR = pTask->State() == (const int)CFetchTask::STATE_ERROR;
 
 	const char *a = 0; // a is full path
@@ -403,12 +407,15 @@ void CUpdater::DownloadUpdate()
 	}
 
 	// fetch all download files
+	m_TotalNumJobs = 0;
+	m_TotalProgress = 0; // this is updated in the CompletionCallback
 	for(map<string, map<string, string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
 	{
 		for(map<string, string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
-			dbg_msg("updater/DEBUG", "fetching '%s' -> '%s' -> '%s'", it->first.c_str(), file->first.c_str(), file->second.c_str());
+			dbg_msg("updater/DEBUG", "fetching '%s:%s' -> '%s'", it->first.c_str(), file->first.c_str(), file->second.c_str());
 			FetchFile(it->first.c_str(), file->first.c_str(), file->second.c_str());
+			m_TotalNumJobs++; // count
 			pLastFile = file->first.c_str();
 		}
 	}
@@ -416,6 +423,7 @@ void CUpdater::DownloadUpdate()
 	if(m_ClientUpdate)
 	{
 		FetchExecutable(PLAT_CLIENT_DOWN, "AllTheHaxx.tmp");
+		m_TotalNumJobs++;
 		pLastFile = "AllTheHaxx.tmp";
 	}
 
@@ -424,7 +432,7 @@ void CUpdater::DownloadUpdate()
 #if !defined(CONF_DEBUG)
 	if(g_Config.m_Debug)
 #endif
-		dbg_msg("updater/debug", "last file is '%s'", m_aLastFile);
+		dbg_msg("updater/debug", "got %i jobs in total; last file is '%s'", m_TotalNumJobs, m_aLastFile);
 }
 
 void CUpdater::InstallUpdate()
@@ -433,6 +441,16 @@ void CUpdater::InstallUpdate()
 
 	SetState(STATE_MOVE_FILES);
 
+	m_TotalNumJobs = 0;
+	m_TotalProgress = 0;
+
+	// count the jobs
+	for(map<std::string, map<std::string, std::string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
+		m_TotalNumJobs += it->second.size();
+	m_TotalNumJobs += m_GitHubAPI.GetRenameJobs().size();
+	dbg_msg("updater/installer", "got %i jobs to do", m_TotalNumJobs);
+
+	// carry em out
 	for(map<std::string, map<std::string, std::string> >::iterator it = m_FileDownloadJobs.begin(); it != m_FileDownloadJobs.end(); ++it)
 		for(map<std::string, std::string>::iterator file = it->second.begin(); file != it->second.end(); ++file)
 		{
@@ -443,15 +461,16 @@ void CUpdater::InstallUpdate()
 				destPath = string(file->second + file->first).c_str(); // append the filename to the dest folder path
 			else
 				destPath = file->second; // the full path is already given
-			MoveFile(destPath.c_str());
-			dbg_msg("updater", "installing '%s'", destPath.c_str());
+			InstallFile(destPath.c_str());
+			m_TotalProgress++;
 		}
 
 	// do the move jobs from github
 	for(std::vector<std::pair<std::string, std::string> >::const_iterator it = m_GitHubAPI.GetRenameJobs().begin(); it != m_GitHubAPI.GetRenameJobs().end(); it++)
 	{
 		m_pStorage->RenameBinaryFile(it->first.c_str(), it->second.c_str());
-		dbg_msg("data-update", "moving file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
+		m_TotalProgress++;
+		dbg_msg("data-update", "renaming file '%s' -> '%s'", it->first.c_str(), it->second.c_str());
 	}
 
 
@@ -468,7 +487,7 @@ void CUpdater::InstallUpdate()
 	}
 }
 
-void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath)
+void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath) // if pDestPath is an empty string (""), the file will go to "./*"
 {
 	CALLSTACK_ADD();
 
@@ -510,7 +529,7 @@ void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
 	m_pFetcher->QueueAdd(Task, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
-void CUpdater::MoveFile(const char *pFile)
+void CUpdater::InstallFile(const char *pFile)
 {
 	CALLSTACK_ADD();
 
@@ -528,7 +547,7 @@ void CUpdater::MoveFile(const char *pFile)
 	{
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
 		m_pStorage->RenameBinaryFile(aBuf, pFile);
-		//dbg_msg("updater", "moving '%s' to '%s'", aBuf, pFile);
+		dbg_msg("updater", "installing '%s' to '%s'", aBuf, pFile);
 	}
 }
 

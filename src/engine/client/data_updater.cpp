@@ -229,7 +229,8 @@ bool CGitHubAPI::ParseCompare(const char *pJsonStr)
 		{
 			// if the file has only been renamed but not changed, we don't need to redownload it
 			const char *pPreviousFilename = (const char *)(jsonFiles[i]["previous_filename"]);
-			m_RenameJobs.push_back(std::pair<std::string, std::string>(std::string(pPreviousFilename), std::string()));
+			const char *pNewFilename = (const char *)(jsonFiles[i]["filename"]);
+			m_RenameJobs.push_back(std::pair<std::string, std::string>(std::string(pPreviousFilename), std::string(pNewFilename)));
 		}
 		else if(str_comp_nocase(pStatus, "removed") == 0)
 		{

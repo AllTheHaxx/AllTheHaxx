@@ -118,23 +118,28 @@ void CMenus::RenderPopups()
 				case IUpdater::STATE_DOWNLOADING:
 					pTitle = Localize("Downloading Update...");
 					pExtraText = Updater()->GetCurrentFile();
-					ExtraAlign = -1;
+					ExtraAlign = CUI::ALIGN_LEFT;
 				break;
 				case IUpdater::STATE_MOVE_FILES:
 					pTitle = Localize("Installing Update...");
 					pExtraText = Updater()->GetCurrentFile();
-					ExtraAlign = -1;
+					ExtraAlign = CUI::ALIGN_LEFT;
 				break;
 				case IUpdater::STATE_FAIL:
 					pTitle = Localize("Update Failed!");
-					str_formatb(aBuf, "What failed: %s", Updater()->GetWhatFailed());
+					str_formatb(aBuf, "%s: %s", Localize("What failed"), Updater()->GetWhatFailed());
 					pExtraText = aBuf;
-					ExtraAlign = -1;
+					ExtraAlign = CUI::ALIGN_LEFT;
+				break;
+				case IUpdater::STATE_NEED_RESTART:
+					pTitle = Localize("Update finished!");
+					pExtraText = Localize("AllTheHaxx needs to be restarted");
+					ExtraAlign = CUI::ALIGN_CENTER;
 				break;
 				default:
 					pTitle = Localize("Performing Update");
 					pExtraText = Localize("Please wait");
-					ExtraAlign = 0;
+					ExtraAlign = CUI::ALIGN_CENTER;
 			}
 		}
 	}
@@ -269,24 +274,48 @@ void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, cons
 		}
 		else if(Updater()->State() == IUpdater::STATE_DOWNLOADING || Updater()->State() == IUpdater::STATE_MOVE_FILES)
 		{
-			CUIRect Label;
 			Box = Screen;
 			Box.VMargin(150.0f, &Box);
 			Box.HMargin(150.0f, &Box);
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(24.f, &Box, &Part);
-			Part.VMargin(120.0f, &Part);
-			Part.HSplitTop(3.0f, 0, &Label);
+			Box.HSplitBottom(2*20.0f+5.0f, &Box, 0);
 
-			// render bar background
-			RenderTools()->DrawUIRect(&Part, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 5.0f);
+			// bottom progress bar (relative progress)
+			{
+				CUIRect Label;
+				Box.HSplitBottom(24.0f, &Box, &Part);
+				Part.VMargin(120.0f, &Part);
+				Part.HSplitTop(3.0f, 0, &Label);
 
-			// render progress bar
-			Part.VSplitLeft(Part.w * ((float)Updater()->GetCurrentPercent()/100.0f), &Part, 0);
-			RenderTools()->DrawUIRect(&Part, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 5.0f * min(1.0f, Part.w / 20.0f));
+				// render bar background
+				RenderTools()->DrawUIRect(&Part, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 5.0f);
 
-			str_formatb(aBuf, "%i%%", Updater()->GetCurrentPercent());
-			UI()->DoLabelScaled(&Label, aBuf, 12.0f, CUI::ALIGN_CENTER);
+				// render progress bar
+				Part.VSplitLeft(Part.w * ((float)Updater()->GetCurrentPercent()/100.0f), &Part, 0);
+				RenderTools()->DrawUIRect(&Part, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 5.0f * min(1.0f, Part.w / 20.0f));
+
+				str_formatb(aBuf, "%i%%", Updater()->GetCurrentPercent());
+				UI()->DoLabelScaled(&Label, aBuf, 12.0f, CUI::ALIGN_CENTER);
+			}
+
+			// top progress bar (absolute progress)
+			{
+				CUIRect Label;
+				Box.HSplitBottom(5.0f, &Box, 0);
+				Box.HSplitBottom(24.0f, &Box, &Part);
+				Part.VMargin(120.0f, &Part);
+				Part.HSplitTop(3.0f, 0, &Label);
+
+				// render bar background
+				RenderTools()->DrawUIRect(&Part, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 5.0f);
+
+				// render progress bar
+				float Progress = (float)Updater()->GetTotalProgress() / (float)Updater()->GetTotalNumJobs();
+				Part.VSplitLeft(Part.w * Progress, &Part, 0);
+				RenderTools()->DrawUIRect(&Part, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 5.0f * min(1.0f, Part.w / 20.0f));
+
+				str_formatb(aBuf, "%i%%", round_to_int(Progress * 100.0f));
+				UI()->DoLabelScaled(&Label, aBuf, 12.0f, CUI::ALIGN_CENTER);
+			}
 		}
 		else if(Updater()->State() == IUpdater::STATE_FAIL)
 		{
@@ -301,6 +330,20 @@ void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, cons
 			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, Localize("Damn"), 0, &Part) || m_EscapePressed || m_EnterPressed)
 				m_Popup = POPUP_NONE;
+		}
+		else if(Updater()->State() == IUpdater::STATE_NEED_RESTART)
+		{
+			Box = Screen;
+			Box.VMargin(150.0f, &Box);
+			Box.HMargin(150.0f, &Box);
+			Box.HSplitTop(20.f, &Part, &Box);
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			Part.VMargin(120.0f, &Part);
+
+			static CButtonContainer s_Button;
+			if(DoButton_Menu(&s_Button, Localize("Restart to use the new version"), 0, &Part) || m_EnterPressed)
+				Client()->Restart();
 		}
 	}
 	else if(m_Popup == POPUP_PASSWORD)

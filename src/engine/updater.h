@@ -36,6 +36,8 @@ public:
 	int State() const { return m_State; };
 	virtual char *GetCurrentFile() = 0;
 	virtual int GetCurrentPercent() const = 0;
+	virtual int GetTotalNumJobs() const = 0;
+	virtual int GetTotalProgress() const = 0;
 };
 
 #endif

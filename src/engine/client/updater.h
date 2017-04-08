@@ -66,6 +66,8 @@ class CUpdater : public IUpdater
 
 	char m_Status[256];
 	int m_Percent;
+	int m_TotalNumJobs;
+	int m_TotalProgress;
 	char m_aLastFile[256];
 	char m_aError[256];
 
@@ -82,7 +84,7 @@ class CUpdater : public IUpdater
 	void AddFileRemoveJob(const char *pFile);
 	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0); // files from repos
 	void FetchExecutable(const char *pFile, const char *pDestPath); // executables from release sections
-	void MoveFile(const char *pFile);
+	void InstallFile(const char *pFile);
 
 	void ParseUpdate();
 	void DownloadUpdate();
@@ -105,6 +107,14 @@ public:
 		if(State() >= STATE_PARSING_UPDATE)
 			return m_Percent;
 		return (int)(m_GitHubAPI.GetProgress()+0.5f);
+	}
+	int GetTotalNumJobs() const
+	{
+		return m_TotalNumJobs;
+	}
+	int GetTotalProgress() const
+	{
+		return m_TotalProgress;
 	}
 
 	virtual void CheckForUpdates(bool ForceRefresh = false);
