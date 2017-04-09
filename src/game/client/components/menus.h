@@ -50,6 +50,10 @@ public:
 
 	struct CPointerContainer : public CButtonContainer
 	{
+		/**
+		 * WARNING: do not feed volatile addresses into this pointer container!!
+		 * It will cause the most annoying bugs and rape your ass harder than you'd like!
+		 */
 		CPointerContainer(const void *pID) : CButtonContainer(), m_pID(pID) { }
 		const void *GetID() const { return m_pID; }
 	private:

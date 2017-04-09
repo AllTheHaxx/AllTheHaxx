@@ -85,6 +85,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	static CButtonContainer s_aUpIDs[512];
 	static CButtonContainer s_aDownIDs[512];
 	static CButtonContainer s_aPageIDs[512];
+	static CButtonContainer s_aItemIDs[512];
 	static CButtonContainer s_LeftListbox;
 	static float s_LeftListboxScrollVal = 0.0f;
 	UiDoListboxStart(&s_LeftListbox, &TabBar, 24.0f, "", "", numID+1, 1, -1, s_LeftListboxScrollVal, 0);
@@ -94,8 +95,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			break;
 
 		CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(i);
-		CPointerContainer Container(pEntry);
-		CListboxItem Item = UiDoListboxNextItem(&Container, false/*Page == i*/);
+		CListboxItem Item = UiDoListboxNextItem(&s_aItemIDs[i], false/*Page == i*/);
 
 		if(!Item.m_Visible)
 			continue;

@@ -50,10 +50,17 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 	str_format(aBottomText, sizeof(aBottomText), "%i/100", L->m_Exceptions.size());
 	UiDoListboxStart(&s_BCListbox, &MainView, 20.0f, aTitle, aBottomText, L->m_Exceptions.size(), 1, -1, s_ScrollVal);
 
+	CButtonContainer s_aButtonIDs[100];
 	for(int i = 0; i < L->m_Exceptions.size(); i++)
 	{
-		CPointerContainer Container(&(L->m_Exceptions[i]));
-		CListboxItem Item = UiDoListboxNextItem(&Container);
+#if defined(CONF_DEBUG)
+		dbg_assert(i < 100, "Increased the max number of exceptions? Increase it here too, please!");
+#else
+		if(i >= 100)
+			break;
+#endif
+
+		CListboxItem Item = UiDoListboxNextItem(&s_aButtonIDs[i]);
 		if(!Item.m_Visible)
 			continue;
 

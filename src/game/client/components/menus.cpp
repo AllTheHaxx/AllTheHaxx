@@ -2097,7 +2097,13 @@ void CMenus::OnRender()
 		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
+		str_format(aBuf, sizeof(aBuf), "h=%p a=%p l=%p bt=%x:%c%c%c",
+				   UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem(),
+				   m_UseMouseButtons,
+				   UI()->MouseButton(0) ? 'X' : 'x',
+				   UI()->MouseButton(2) ? 'X' : 'x',
+				   UI()->MouseButton(1) ? 'X' : 'x'
+		);
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);

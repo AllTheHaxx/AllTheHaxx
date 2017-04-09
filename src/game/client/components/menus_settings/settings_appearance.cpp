@@ -17,16 +17,13 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	//MainView.VSplitMid(&Left, &Right);
 	MainView.VMargin(MainView.w/3, &Left);
 
-	static int s_Buttons[16] = {0};
-	unsigned int index = 0;
-
 #define DO_NEXT_BUTTON(BASERECT, TITLE, CALLBACK) \
 	Left.HSplitTop(10.0f, 0, &BASERECT); \
 	Left.HSplitTop(50.0f, &Button, &BASERECT); \
 	TextRender()->Text(0, Button.x+Button.w-TextRender()->TextWidth(0, Button.h, ">", 1)-10.0f, Button.y-Button.h/3.6f, Button.h, ">", 9999); \
-	{CPointerContainer Container(&s_Buttons[index++]); \
+	{ static CButtonContainer Container;\
 	if(DoButton_MenuTab(&Container, TITLE, 0, &Button, CUI::CORNER_ALL)) \
-		m_pfnAppearanceSubpage = &CMenus::CALLBACK;}
+		m_pfnAppearanceSubpage = &CMenus::CALLBACK; }
 
 	DO_NEXT_BUTTON(Left, "HUD", RenderSettingsAppearanceHUD);
 	DO_NEXT_BUTTON(Left, Localize("Textures"), RenderSettingsAppearanceTexture);

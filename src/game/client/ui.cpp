@@ -423,14 +423,14 @@ int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CU
 	// logic
 	int ReturnValue = 0;
 	int Inside = MouseInside(pRect);
-	static int ButtonUsed = 0;
+	static int s_ButtonUsed = 0;
 
 	if(ActiveItem() == pID)
 	{
-		if(!MouseButton(ButtonUsed))
+		if(!MouseButton(s_ButtonUsed))
 		{
 			if(Inside && Checked >= 0)
-				ReturnValue = 1+ButtonUsed;
+				ReturnValue = 1+s_ButtonUsed;
 			SetActiveItem(0);
 		}
 	}
@@ -439,19 +439,19 @@ int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CU
 		if(MouseButton(0))
 		{
 			SetActiveItem(pID);
-			ButtonUsed = 0;
+			s_ButtonUsed = 0;
 		}
 
 		if(MouseButton(1))
 		{
 			SetActiveItem(pID);
-			ButtonUsed = 1;
+			s_ButtonUsed = 1;
 		}
 
 		if(MouseButton(3))
 		{
 			SetActiveItem(pID);
-			ButtonUsed = 3;
+			s_ButtonUsed = 3;
 		}
 	}
 
