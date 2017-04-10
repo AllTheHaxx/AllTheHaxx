@@ -36,6 +36,7 @@
 #include <game/localization.h>
 #include <mastersrv/mastersrv.h>
 #include <versionsrv/versionsrv.h>
+#include <base/color.h>
 
 #include "countryflags.h"
 #include "console.h"
@@ -987,6 +988,119 @@ int CMenus::DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, co
 	}
 	return NewKey;
 }
+
+int CMenus::DoColorPicker(const CButtonContainer *pBC1, const CButtonContainer *pBC2, const CUIRect *pView, vec3 *pColorHSV)
+{
+	CUIRect SVPicker, HuePicker;
+
+	RenderTools()->DrawUIRect(pView, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 5.0f);
+
+	{
+		CUIRect View = *pView;
+		View.Margin(5.0f, &View);
+		View.VSplitRight(20.0f, &SVPicker, &HuePicker);
+		HuePicker.VSplitLeft(4.0f, 0x0, &HuePicker);
+	}
+
+
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
+
+	// base: white - hue
+	vec3 hsv = *pColorHSV;
+	IGraphics::CColorVertex ColorArray[4];
+
+	vec3 c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
+	ColorArray[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f);
+	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
+	ColorArray[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f);
+	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
+	ColorArray[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f);
+	c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
+	ColorArray[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f);
+
+	Graphics()->SetColorVertex(ColorArray, 4);
+
+	IGraphics::CQuadItem QuadItem(SVPicker.x, SVPicker.y, SVPicker.w, SVPicker.h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+
+	// base: transparent - black
+	ColorArray[0] = IGraphics::CColorVertex(0, 0.0f, 0.0f, 0.0f, 0.0f);
+	ColorArray[1] = IGraphics::CColorVertex(1, 0.0f, 0.0f, 0.0f, 0.0f);
+	ColorArray[2] = IGraphics::CColorVertex(2, 0.0f, 0.0f, 0.0f, 1.0f);
+	ColorArray[3] = IGraphics::CColorVertex(3, 0.0f, 0.0f, 0.0f, 1.0f);
+
+	Graphics()->SetColorVertex(ColorArray, 4);
+
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+
+	Graphics()->QuadsEnd();
+
+	// marker
+	vec2 Marker = vec2(vec2(hsv.y*UI()->Scale(), (1.0f - hsv.z)*UI()->Scale()).x * vec2(SVPicker.w, SVPicker.h).x,
+					   vec2(hsv.y*UI()->Scale(), (1.0f - hsv.z)*UI()->Scale()).y * vec2(SVPicker.w, SVPicker.h).y);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
+	IGraphics::CQuadItem aMarker[2];
+	aMarker[0] = IGraphics::CQuadItem(SVPicker.x+Marker.x, SVPicker.y+Marker.y - 5.0f*UI()->PixelSize(), UI()->PixelSize(), 11.0f*UI()->PixelSize());
+	aMarker[1] = IGraphics::CQuadItem(SVPicker.x+Marker.x - 5.0f*UI()->PixelSize(), SVPicker.y+Marker.y, 11.0f*UI()->PixelSize(), UI()->PixelSize());
+	Graphics()->QuadsDrawTL(aMarker, 2);
+	Graphics()->QuadsEnd();
+
+	// logic
+	float X, Y;
+	if(UI()->DoPickerLogic(pBC1->GetID(), &SVPicker, &X, &Y))
+	{
+		hsv.y = X/SVPicker.w;
+		hsv.z = 1.0f - Y/SVPicker.h;
+	}
+
+	// hue slider
+	static const float s_aColorIndices[7][3] = {
+			{1.0f, 0.0f, 0.0f}, // red
+			{1.0f, 0.0f, 1.0f},	// magenta
+			{0.0f, 0.0f, 1.0f}, // blue
+			{0.0f, 1.0f, 1.0f}, // cyan
+			{0.0f, 1.0f, 0.0f}, // green
+			{1.0f, 1.0f, 0.0f}, // yellow
+			{1.0f, 0.0f, 0.0f}  // red
+	};
+
+	Graphics()->QuadsBegin();
+	vec4 ColorTop, ColorBottom;
+	float Offset = HuePicker.h/6.0f;
+	for(int j = 0; j < 6; j++)
+	{
+		ColorTop = vec4(s_aColorIndices[j][0], s_aColorIndices[j][1], s_aColorIndices[j][2], 1.0f);
+		ColorBottom = vec4(s_aColorIndices[j+1][0], s_aColorIndices[j+1][1], s_aColorIndices[j+1][2], 1.0f);
+
+		ColorArray[0] = IGraphics::CColorVertex(0, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
+		ColorArray[1] = IGraphics::CColorVertex(1, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
+		ColorArray[2] = IGraphics::CColorVertex(2, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
+		ColorArray[3] = IGraphics::CColorVertex(3, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
+		Graphics()->SetColorVertex(ColorArray, 4);
+		IGraphics::CQuadItem QuadItem(HuePicker.x, HuePicker.y+Offset*j, HuePicker.w, Offset);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	}
+
+	// marker
+	Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
+	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - hsv.x) * HuePicker.h * UI()->Scale(), HuePicker.w, UI()->PixelSize());
+	Graphics()->QuadsDrawTL(&QuadItemMarker, 1);
+
+	Graphics()->QuadsEnd();
+
+	if(UI()->DoPickerLogic(pBC2->GetID(), &HuePicker, &X, &Y))
+	{
+		hsv.x = 1.0f - Y/HuePicker.h;
+	}
+
+	int Changed = hsv != *pColorHSV;
+	*pColorHSV = hsv;
+
+	return Changed;
+}
+
 
 
 int CMenus::RenderMenubar(CUIRect r)

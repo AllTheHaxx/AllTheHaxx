@@ -144,6 +144,7 @@ private:
 	int DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, const char *pTooltip = 0);
 
 	float DoDropdownMenu(CButtonContainer *pBC, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, void *pArgs, const char *pTooltip = "");
+	int DoColorPicker(const CButtonContainer *pBC1, const CButtonContainer *pBC2, const CUIRect *pView, vec3 *pColorHSV);
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View);

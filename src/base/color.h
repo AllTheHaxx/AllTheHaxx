@@ -23,7 +23,7 @@ inline float HueToRgb(float v1, float v2, float h)
 	return v1;
 }
 
-inline float RgbToHue(vec3 rgb)
+inline float RgbToHue(const vec3& rgb)
 {
 	float h_min = min(min(rgb.r, rgb.g), rgb.b);
 	float h_max = max(max(rgb.r, rgb.g), rgb.b);
@@ -49,7 +49,7 @@ inline float RgbToHue(vec3 rgb)
 	Function: HslToRgb
 		Converts HSL to RGB
 */
-inline vec3 HslToRgb(vec3 HSL)
+inline vec3 HslToRgb(const vec3& HSL)
 {
 	if(HSL.s == 0.0f)
 		return vec3(HSL.l, HSL.l, HSL.l);
@@ -62,7 +62,7 @@ inline vec3 HslToRgb(vec3 HSL)
 	}
 }
 
-inline vec3 HsvToRgb(vec3 hsv)
+inline vec3 HsvToRgb(const vec3& hsv)
 {
 	int h = int(hsv.x * 6.0f);
 	float f = hsv.x * 6.0f - h;
@@ -114,7 +114,7 @@ inline vec3 HsvToRgb(vec3 hsv)
 	return rgb;
 }
 
-inline vec3 RgbToHsv(vec3 rgb)
+inline vec3 RgbToHsv(const vec3& rgb)
 {
 	float h_min = min(min(rgb.r, rgb.g), rgb.b);
 	float h_max = max(max(rgb.r, rgb.g), rgb.b);
@@ -163,5 +163,39 @@ inline vec4 HexToRgba(int hex)
 
 	return c;
 }
+
+inline vec3 RgbToHsl(const vec3& RGB)
+{
+	vec3 HSL;
+	float maxColor = MAX3(RGB.r, RGB.g, RGB.b);
+	float minColor = MIN3(RGB.r, RGB.g, RGB.b);
+	if (minColor == maxColor)
+		return vec3(0.0f, 0.0f, RGB.g * 255.0f);
+	else
+	{
+		HSL.l = (minColor + maxColor) / 2;
+
+		if (HSL.l < 0.5f)
+			HSL.s = (maxColor - minColor) / (maxColor + minColor);
+		else
+			HSL.s = (maxColor - minColor) / (2.0f - maxColor - minColor);
+
+		if (RGB.r == maxColor)
+			HSL.h = (RGB.g - RGB.b) / (maxColor - minColor);
+		else if (RGB.g == maxColor)
+			HSL.h = 2.0f + (RGB.b - RGB.r) / (maxColor - minColor);
+		else
+			HSL.h = 4.0f + (RGB.r - RGB.g) / (maxColor - minColor);
+
+		HSL.h /= 6; //to bring it to a number between 0 and 1
+		if (HSL.h < 0) HSL.h++;
+	}
+	HSL.h = int(HSL.h * 255.0f);
+	HSL.s = int(HSL.s * 255.0f);
+	HSL.l = int(HSL.l * 255.0f);
+
+	return HSL;
+}
+
 
 #endif

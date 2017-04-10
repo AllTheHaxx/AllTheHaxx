@@ -166,6 +166,7 @@ public:
 	const vector3_base &operator /=(const vector3_base &v) { x /= v.x; y /= v.y; z /= v.z; return *this; }
 
 	bool operator ==(const vector3_base &v) const { return x == v.x && y == v.y && z == v.z; } //TODO: do this with an eps instead
+	bool operator !=(const vector3_base &v) const { return x != v.x || y != v.y || z != v.z; }
 
 	operator const T* () { return &x; }
 	operator const vector2_base<T>* () { return vector2_base<T>(x,y); }

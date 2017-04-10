@@ -4,6 +4,7 @@
 #define GAME_CLIENT_GAMECLIENT_H
 
 #include <base/vmath.h>
+#include <base/color.h> // this doesn't really belong here; it's for all the components
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/serverbrowser.h>
@@ -12,16 +13,6 @@
 #include "render.h"
 
 #include <game/teamscore.h>
-
-#define MIN3(x,y,z)  ((y) <= (z) ? \
-	((x) <= (y) ? (x) : (y)) \
-	: \
-	((x) <= (z) ? (x) : (z)))
-
-#define MAX3(x,y,z)  ((y) >= (z) ? \
-	((x) >= (y) ? (x) : (y)) \
-	: \
-	((x) >= (z) ? (x) : (z)))
 
 class CGameClient;
 
@@ -431,63 +422,6 @@ private:
 	
 	std::string m_HiddenMessages[MAX_CLIENTS];
 };
-
-
-inline float HueToRgb(float v1, float v2, float h)
-{
-	if(h < 0.0f) h += 1;
-	if(h > 1.0f) h -= 1;
-	if((6.0f * h) < 1.0f) return v1 + (v2 - v1) * 6.0f * h;
-	if((2.0f * h) < 1.0f) return v2;
-	if((3.0f * h) < 2.0f) return v1 + (v2 - v1) * ((2.0f/3.0f) - h) * 6.0f;
-	return v1;
-}
-
-inline vec3 HslToRgb(vec3 HSL)
-{
-	if(HSL.s == 0.0f)
-		return vec3(HSL.l, HSL.l, HSL.l);
-	else
-	{
-		float v2 = HSL.l < 0.5f ? HSL.l * (1.0f + HSL.s) : (HSL.l+HSL.s) - (HSL.s*HSL.l);
-		float v1 = 2.0f * HSL.l - v2;
-
-		return vec3(HueToRgb(v1, v2, HSL.h + (1.0f/3.0f)), HueToRgb(v1, v2, HSL.h), HueToRgb(v1, v2, HSL.h - (1.0f/3.0f)));
-	}
-}
-
-inline vec3 RgbToHsl(vec3 RGB)
-{
-	vec3 HSL;
-	float maxColor = MAX3(RGB.r, RGB.g, RGB.b);
-	float minColor = MIN3(RGB.r, RGB.g, RGB.b);
-	if (minColor == maxColor)
-		return vec3(0.0f, 0.0f, RGB.g * 255.0f);
-	else
-	{
-		HSL.l = (minColor + maxColor) / 2;
-
-		if (HSL.l < 0.5)
-			HSL.s = (maxColor - minColor) / (maxColor + minColor);
-		else
-			HSL.s = (maxColor - minColor) / (2.0 - maxColor - minColor);
-
-		if (RGB.r == maxColor)
-			HSL.h = (RGB.g - RGB.b) / (maxColor - minColor);
-		else if (RGB.g == maxColor)
-			HSL.h = 2.0 + (RGB.b - RGB.r) / (maxColor - minColor);
-		else
-			HSL.h = 4.0 + (RGB.r - RGB.g) / (maxColor - minColor);
-
-		HSL.h /= 6; //to bring it to a number between 0 and 1
-		if (HSL.h < 0) HSL.h++;
-	}
-	HSL.h = int(HSL.h * 255.0);
-	HSL.s = int(HSL.s * 255.0);
-	HSL.l = int(HSL.l * 255.0);
-	return HSL;
-
-}
 
 
 extern const char *Localize(const char *Str);
