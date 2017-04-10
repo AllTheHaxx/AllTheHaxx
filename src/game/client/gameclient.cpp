@@ -819,17 +819,6 @@ void CGameClient::OnRender()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnRender();
 
-	// sanity check against UI locking - TODO THIS IS ONLY A HACK TO FIND (and circumvent) THE ACTUAL BUGS!
-	if(!(UI()->MouseButton(0) || UI()->MouseButton(1)) && UI()->ActiveItem() != NULL)
-	{
-		#if !defined(CONF_DEBUG)
-		if(g_Config.m_Debug)
-		#endif
-			dbg_msg("ui/warning", "resetting ui due to bug");
-		UI()->SetActiveItem(0);
-		UI()->SetHotItem(0);
-	}
-
 	// clear all events/input for this frame
 	Input()->Clear();
 
