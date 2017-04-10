@@ -352,16 +352,18 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 
 	// kill everything malicious
 	static const char s_aBlacklist[][64] = {
-			"os.exit",
-			"os.execute",
-			"os.rename",
-			"os.remove",
-			"os.setlocal",
-			"dofile",
-			"require",
-			"load",
-			"loadfile",
-			"loadstring",
+			"dofile"
+			,"os.exit"
+			,"os.execute"
+			,"os.rename"
+			,"os.remove"
+			,"os.setlocal"
+			,"require"
+			,"module"
+			,"load"
+			,"loadfile"
+			,"loadstring"
+			,"collectgarbage"
 	};
 	for(unsigned i = 0; i < sizeof(s_aBlacklist)/sizeof(s_aBlacklist[0]); i++)
 	{
