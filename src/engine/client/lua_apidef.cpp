@@ -185,6 +185,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<CUI>("CUI")
 			.addFunction("DoLabel", &CUI::DoLabelLua)
 			.addFunction("DoLabelScaled", &CUI::DoLabelScaledLua)
+			.addFunction("DoButtonLogic", &CUI::DoButtonLogic)
 			.addFunction("Scale", &CUI::Scale)
 			.addFunction("Screen", &CUI::Screen)
 			.addFunction("MouseX", &CUI::MouseX)
