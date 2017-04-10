@@ -2051,7 +2051,7 @@ void CMenus::OnRender()
 {
 	CALLSTACK_ADD();
 
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if((Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK) || Client()->Lua()->GetFullscreenedScript() != NULL)
 		SetActive(true);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
