@@ -105,6 +105,9 @@ void CLuaFile::Unload(bool error)
 	// point, and if it is, something went wrong that we need to debug!
 	dbg_assert(m_pLuaState != 0, "Something went fatally wrong! Active luafile has no state?!");
 
+	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
+		Lua()->ExitFullscreen();
+
 	try
 	{
 		LuaRef func = GetFunc("OnScriptUnload");
@@ -232,7 +235,7 @@ void CLuaFile::Init()
 
 
 #if defined(FEATURE_LUA)
-luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName)
+luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName) const
 {
 	return luabridge::getGlobal(m_pLuaState, pFuncName);
 }

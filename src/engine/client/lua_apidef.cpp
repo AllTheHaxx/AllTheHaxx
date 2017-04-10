@@ -30,6 +30,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	lua_register(L, "Import", CLuaBinding::LuaImport);
 	lua_register(L, "KillScript", CLuaBinding::LuaKillScript);
 	lua_register(L, "Listdir", CLuaBinding::LuaListdir);
+	lua_register(L, "EnterFullscreen", CLuaBinding::LuaEnterFullscreen);
+	lua_register(L, "ExitFullscreen", CLuaBinding::LuaExitFullscreen);
 	lua_register(L, "ScriptPath", CLuaBinding::LuaScriptPath);
 	lua_register(L, "StrIsNetAddr", CLuaBinding::LuaStrIsNetAddr);
 

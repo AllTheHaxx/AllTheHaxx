@@ -7,11 +7,11 @@
 
 void CMenus::RenderPopups()
 {
-	char aBuf[128];
+	char aBuf[256];
 	const char *pTitle = "";
 	const char *pExtraText = "";
 	const char *pButtonText = "";
-	int ExtraAlign = 0;
+	int ExtraAlign = CUI::ALIGN_CENTER;
 
 	if(m_Popup == POPUP_MESSAGE)
 	{
@@ -43,20 +43,20 @@ void CMenus::RenderPopups()
 			pExtraText = aBuf;
 			pButtonText = Localize("Abort");
 		}
-		ExtraAlign = 0;
+		ExtraAlign = CUI::ALIGN_CENTER;
 	}
 	else if(m_Popup == POPUP_PURE)
 	{
 		pTitle = Localize("Disconnected");
 		pExtraText = Localize("The server is running a non-standard tuning on a pure game type.");
 		pButtonText = Localize("Ok");
-		ExtraAlign = -1;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_DELETE_DEMO)
 	{
 		pTitle = Localize("Delete demo");
 		pExtraText = Localize("Are you sure that you want to delete the demo?");
-		ExtraAlign = -1;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_RENAME_DEMO)
 	{
@@ -68,14 +68,14 @@ void CMenus::RenderPopups()
 	{
 		pTitle = Localize("Remove friend");
 		pExtraText = Localize("Are you sure that you want to remove the player from your friends list?");
-		ExtraAlign = -1;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_SOUNDERROR)
 	{
 		pTitle = Localize("Sound error");
 		pExtraText = Localize("The audio device couldn't be initialised.");
 		pButtonText = Localize("I don't care");
-		ExtraAlign = -1;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_PASSWORD)
 	{
@@ -87,20 +87,27 @@ void CMenus::RenderPopups()
 	{
 		pTitle = Localize("Quit");
 		pExtraText = Localize("Are you handsome?");
-		ExtraAlign = -1;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_DISCONNECT)
 	{
 		pTitle = Localize("Disconnect");
 		pExtraText = Localize("Are you sure that you want to disconnect?");
-		ExtraAlign = -1;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_FIRST_LAUNCH)
 	{
 		pTitle = Localize("Welcome to Teeworlds");
 		pExtraText = Localize("As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.");
 		pButtonText = Localize("Ok");
-		ExtraAlign = -1;
+		ExtraAlign = CUI::ALIGN_LEFT;
+	}
+	else if(m_Popup == POPUP_LUA_REQUEST_FULLSCREEN)
+	{
+		pTitle = Localize("Lua Script wants to got fullscreen");
+		str_formatb(aBuf, "The script '%s' (%s) wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", m_pLuaFSModeRequester->GetScriptTitle(), m_pLuaFSModeRequester->GetFilename());
+		pExtraText = aBuf;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_UPDATE)
 	{
@@ -109,7 +116,7 @@ void CMenus::RenderPopups()
 			pTitle = Localize("Update available!");
 			str_formatb(aBuf, "AllTheHaxx version %s has been released! Do you want to update your client now?", Updater()->GetLatestVersion());
 			pExtraText = aBuf;
-			ExtraAlign = -1;
+			ExtraAlign = CUI::ALIGN_LEFT;
 		}
 		else
 		{
@@ -238,13 +245,49 @@ void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, cons
 		Yes.VMargin(20.0f, &Yes);
 		No.VMargin(20.0f, &No);
 
-		static CButtonContainer s_ButtonAbort;
-		if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+		static CButtonContainer s_ButtonNo;
+		if(DoButton_Menu(&s_ButtonNo, Localize("No"), 0, &No) || m_EscapePressed)
 			m_Popup = POPUP_NONE;
 
-		static CButtonContainer s_ButtonTryAgain;
-		if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+		static CButtonContainer s_ButtonYes;
+		if(DoButton_Menu(&s_ButtonYes, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 			Client()->Disconnect();
+	}
+	else if(m_Popup == POPUP_LUA_REQUEST_FULLSCREEN)
+	{
+		CUIRect Yes, No;
+		Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+		Box.HSplitBottom(60.f, &Box, &Part);
+#else
+		Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+
+		// buttons
+		Part.VMargin(80.0f, &Part);
+		Part.VSplitMid(&No, &Yes);
+		Yes.VMargin(20.0f, &Yes);
+		No.VMargin(20.0f, &No);
+
+		bool Handled = false;
+
+		static CButtonContainer s_ButtonDeny;
+		if(DoButton_Menu(&s_ButtonDeny, Localize("Deny"), 0, &No) || m_EscapePressed)
+			Handled = true;
+
+		static CButtonContainer s_ButtonAllow;
+		if(DoButton_Menu(&s_ButtonAllow, Localize("Allow"), 0, &Yes))
+		{
+			Client()->Lua()->ScriptEnterFullscreen(m_pLuaFSModeRequester);
+			Handled = true;
+		}
+
+		if(Handled)
+		{
+			m_pLuaFSModeRequester = 0;
+			m_Popup = POPUP_NONE;
+		}
+
 	}
 	else if(m_Popup == POPUP_UPDATE)
 	{

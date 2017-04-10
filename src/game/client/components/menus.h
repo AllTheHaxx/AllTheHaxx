@@ -379,6 +379,9 @@ public:	int m_LoadTotal;
 	void RenderSettingsLua(CUIRect MainView);
 	void RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L);
 	void RenderLoadingLua();
+
+	CLuaFile *m_pLuaFSModeRequester;
+	void LuaRequestFullscreen(class CLuaFile *pLF);
 #else
 	void RenderSettingsLua(CUIRect MainView){};
 #endif
@@ -551,6 +554,7 @@ public:
 		POPUP_QUIT,
 		POPUP_DISCONNECT,
 		POPUP_UPDATE,
+		POPUP_LUA_REQUEST_FULLSCREEN,
 		NUM_POPUPS,
 
 		// demo player states

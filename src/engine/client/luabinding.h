@@ -37,6 +37,9 @@ public:
 	 */
 	static int LuaListdir(lua_State *L);
 
+	static int LuaEnterFullscreen(lua_State *L);
+	static int LuaExitFullscreen(lua_State *L);
+
 	// some getters
 	static int LuaScriptPath(lua_State *L);
 

@@ -64,7 +64,7 @@ public:
 	void Init(); // starts the script
 	void Unload(bool error = false); // stops the script
 #if defined(FEATURE_LUA)
-	luabridge::LuaRef GetFunc(const char *pFuncName);
+	luabridge::LuaRef GetFunc(const char *pFuncName) const;
 #endif
 	template<class T> T CallFunc(const char *pFuncName, T def, bool *err=0);
 

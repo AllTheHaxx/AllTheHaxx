@@ -45,10 +45,12 @@ using namespace luabridge;
 
 class CLua
 {
-	array<CLuaFile*> m_apLuaFiles;
-	array<std::string> m_aAutoloadFiles;
 	IStorageTW *m_pStorage;
 	class IConsole *m_pConsole;
+
+	array<CLuaFile*> m_apLuaFiles;
+	array<std::string> m_aAutoloadFiles;
+	CLuaFile *m_pFullscreenedScript;
 
 public:
 	CLua();
@@ -87,6 +89,10 @@ public:
 				num++;
 		return num;
 	}
+
+	void ScriptEnterFullscreen(CLuaFile *pLF);
+	void ExitFullscreen();
+	CLuaFile *GetFullscreenedScript() const { return m_pFullscreenedScript; }
 
 	IStorageTW *Storage() const { return m_pStorage; }
 

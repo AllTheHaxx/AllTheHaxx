@@ -2,6 +2,7 @@
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
 #include <game/client/components/console.h>
+#include <game/client/components/menus.h>
 
 #include "luabinding.h"
 
@@ -160,6 +161,33 @@ int CLuaBinding::LuaKillScript(lua_State *L)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
 
 	pLF->Unload();
+#endif
+	return 0;
+}
+
+int CLuaBinding::LuaEnterFullscreen(lua_State *L)
+{
+#if defined(FEATURE_LUA)
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	CLua::m_pCGameClient->m_pMenus->LuaRequestFullscreen(pLF);
+#endif
+	return 0;
+}
+
+int CLuaBinding::LuaExitFullscreen(lua_State *L)
+{
+#if defined(FEATURE_LUA)
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	if(pLF != CLua::m_pClient->Lua()->GetFullscreenedScript())
+		return luaL_error(L, "This script is not currently in fullscreen mode");
+
+	CLua::m_pClient->Lua()->ExitFullscreen();
 #endif
 	return 0;
 }

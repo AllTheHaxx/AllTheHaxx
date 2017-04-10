@@ -2180,17 +2180,36 @@ void CMenus::OnRender()
 #endif
 	}
 
-	// render
-	if(m_IRCActive)
+	// lua fullscreen
+	if(Client()->Lua()->GetFullscreenedScript() != NULL)
 	{
-		if(Client()->State() != IClient::STATE_ONLINE)
-			RenderBackground();
-		RenderIRC(*UI()->Screen());
+		CUIRect Screen = *UI()->Screen();
+		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+
+		CUIRect Button;
+		UI()->Screen()->VSplitRight(15.0f, 0, &Button);
+		Button.HSplitTop(15.0f, &Button, 0);
+
+		static CButtonContainer s_ButtonExitFS;
+		if(DoButton_Menu(&s_ButtonExitFS, "X", 0, &Button, Localize("Kill the currently fullscreened script"), CUI::CORNER_BL, vec4(1,0,0,0.5f)))
+		{
+			Client()->Lua()->GetFullscreenedScript()->Unload();
+		}
 	}
-	else if(m_HotbarActive)
-		RenderHotbar(*UI()->Screen());
-	else if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		Render();
+	else
+	{
+		// render
+		if(m_IRCActive)
+		{
+			if(Client()->State() != IClient::STATE_ONLINE)
+				RenderBackground();
+			RenderIRC(*UI()->Screen());
+		}
+		else if(m_HotbarActive)
+			RenderHotbar(*UI()->Screen());
+		else if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+			Render();
+	}
 
 	// render cursor
 	if(m_pClient->m_pGameConsole->IsClosed())
@@ -2308,6 +2327,13 @@ int CMenus::DoButton_CheckBox_DontCare(CButtonContainer *pBC, const char *pText,
 			return DoButton_CheckBox_Common(pBC, pText, "", pRect);
 	}
 }
+
+void CMenus::LuaRequestFullscreen(CLuaFile *pLF)
+{
+	m_pLuaFSModeRequester = pLF;
+	m_Popup = POPUP_LUA_REQUEST_FULLSCREEN;
+}
+
 
 void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 {

@@ -26,6 +26,7 @@ CLua::CLua()
 {
 	m_pStorage = 0;
 	m_pConsole = 0;
+	m_pFullscreenedScript = 0;
 }
 
 CLua::~CLua()
@@ -51,6 +52,8 @@ void CLua::Shutdown()
 	CALLSTACK_ADD();
 
 	SaveAutoloads();
+
+	m_pFullscreenedScript = 0;
 
 	m_apLuaFiles.delete_all();
 	m_apLuaFiles.clear();
@@ -225,6 +228,7 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 {
 	if(!pLF)
 		return -1;
+
 	bool Console = str_comp(pLF->GetFilename(), "[console]") == 0;
 
 	if(!pError)
@@ -305,6 +309,40 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 	}
 
 	return 0;
+}
+
+void CLua::ScriptEnterFullscreen(CLuaFile *pLF)
+{
+	m_pFullscreenedScript = pLF;
+
+	try
+	{
+		LuaRef func = pLF->GetFunc("OnEnterFullscreen");
+		if(func.cast<bool>())
+			func();
+	}
+	catch(std::exception &e)
+	{
+		HandleException(e, pLF);
+	}
+}
+
+void CLua::ExitFullscreen()
+{
+	dbg_assert(m_pFullscreenedScript, "CLua::ExitFullscreen called with no fullscreened script");
+
+	try
+	{
+		LuaRef func = m_pFullscreenedScript->GetFunc("OnExitFullscreen");
+		if(func.cast<bool>())
+			func();
+	}
+	catch(std::exception &e)
+	{
+		HandleException(e, m_pFullscreenedScript);
+	}
+
+	m_pFullscreenedScript = 0;
 }
 
 
