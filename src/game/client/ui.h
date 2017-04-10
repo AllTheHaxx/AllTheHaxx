@@ -103,7 +103,9 @@ public:
 	float Scale();
 
 	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);
+	int DoButtonLogicLua(const class CButtonContainer *pBC, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
+	int DoPickerLogicLua(const class CButtonContainer *pBC, const CUIRect *pRect, float *pX, float *pY);
 
 	// TODO: Refactor: Remove this?
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0);

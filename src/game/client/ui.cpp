@@ -7,6 +7,7 @@
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 #include <game/client/components/fontmgr.h>
+#include <game/client/components/menus.h>
 #include "ui.h"
 
 #if defined(__ANDROID__)
@@ -418,6 +419,11 @@ void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 	pOtherRect->h = r.h - 2*Cut;
 }
 
+int CUI::DoButtonLogicLua(const CButtonContainer *pBC, int Checked, const CUIRect *pRect)
+{
+	return DoButtonLogic(pBC->GetID(), 0 /* unused */, Checked, pRect);
+}
+
 int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	// logic
@@ -459,6 +465,11 @@ int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CU
 		SetHotItem(pID);
 
 	return ReturnValue;
+}
+
+int CUI::DoPickerLogicLua(const CButtonContainer *pBC, const CUIRect *pRect, float *pX, float *pY)
+{
+	return DoPickerLogic(pBC->GetID(), pRect, pX, pY);
 }
 
 int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)

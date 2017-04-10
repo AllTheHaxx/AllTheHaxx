@@ -38,29 +38,28 @@ public:
 	virtual void OnRender();
 };
 
+
+struct CButtonContainer
+{
+	CButtonContainer() { m_FadeStartTime = 0.0f; }
+	float m_FadeStartTime;
+	virtual const void *GetID() const { return &m_FadeStartTime; }
+};
+
+struct CPointerContainer : public CButtonContainer
+{
+	/**
+	 * WARNING: do not feed volatile addresses into this pointer container!!
+	 * It will cause the most annoying bugs and rape your ass harder than you'd like!
+	 */
+	CPointerContainer(const void *pID) : CButtonContainer(), m_pID(pID) { }
+	const void *GetID() const { return m_pID; }
+private:
+	const void *m_pID;
+};
+
 class CMenus : public CComponent
 {
-public:
-	struct CButtonContainer
-	{
-		CButtonContainer() { m_FadeStartTime = 0.0f; }
-		float m_FadeStartTime;
-		virtual const void *GetID() const { return &m_FadeStartTime; }
-	};
-
-	struct CPointerContainer : public CButtonContainer
-	{
-		/**
-		 * WARNING: do not feed volatile addresses into this pointer container!!
-		 * It will cause the most annoying bugs and rape your ass harder than you'd like!
-		 */
-		CPointerContainer(const void *pID) : CButtonContainer(), m_pID(pID) { }
-		const void *GetID() const { return m_pID; }
-	private:
-		const void *m_pID;
-	};
-
-private:
 	struct lua // container to keep the scope clean
 	{
 		struct CEditboxContainer : public CButtonContainer

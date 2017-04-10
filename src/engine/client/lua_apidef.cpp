@@ -132,9 +132,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addConstructor <void (*) (float, float, float, float)> ()
 		.endClass()
 
-		.beginClass< CMenus::CButtonContainer >("ButtonContainer")
+		.beginClass< CButtonContainer >("ButtonContainer")
 			.addConstructor <void (*) ()> ()
-            .addFunction("GetID", &CMenus::CButtonContainer::GetID)
+            .addFunction("GetID", &CButtonContainer::GetID)
 		.endClass()
 
 		.beginClass< CMenus::lua::CEditboxContainer >("EditboxContainer")
@@ -186,7 +186,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<CUI>("CUI")
 			.addFunction("DoLabel", &CUI::DoLabelLua)
 			.addFunction("DoLabelScaled", &CUI::DoLabelScaledLua)
-			.addFunction("DoButtonLogic", &CUI::DoButtonLogic)
+			.addFunction("DoButtonLogic", &CUI::DoButtonLogicLua)
+			.addFunction("DoPickerLogic", &CUI::DoPickerLogicLua)
 			.addFunction("Scale", &CUI::Scale)
 			.addFunction("Screen", &CUI::Screen)
 			.addFunction("MouseX", &CUI::MouseX)
@@ -277,6 +278,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DoScrollbarV", &CMenus::DoScrollbarV)
 			.addFunction("DoScrollbarH", &CMenus::DoScrollbarH)
 			.addFunction("DoEditbox", &CMenus::DoEditBoxLua)
+			.addFunction("DoColorPicker", &CMenus::DoColorPicker)
 		.endClass()
 
 		/// Game.Voting
