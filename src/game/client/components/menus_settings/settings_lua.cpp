@@ -65,7 +65,10 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 			continue;
 
 		if(UI()->MouseInside(&Item.m_Rect))
-			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 8.0f);
+		{
+			float gb = Input()->KeyIsPressed(KEY_MOUSE_1) ? 0.7f : 1.0f;
+			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1,gb,gb,0.25f), CUI::CORNER_ALL, 8.0f);
+		}
 
 		CUIRect Button;
 		str_format(aBuf, sizeof(aBuf), "#%i", i+1);
@@ -78,7 +81,9 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 		UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 	}
 
-	UiDoListboxEnd(&s_ScrollVal, 0);
+	int Clicked = UiDoListboxEnd(&s_ScrollVal, 0);
+	if(Clicked >= 0)
+		Input()->SetClipboardText(L->m_Exceptions[Clicked].c_str());
 }
 
 
