@@ -524,7 +524,7 @@ public:
 			pPath++;
 
 		#if defined(CONF_FAMILY_WINDOWS)
-		const char *pFoundAt = str_find(aPath, ":")
+		const char *pFoundAt = str_find(aBuf, ":");
 		if(pFoundAt)
 			pPath = pFoundAt+1;
 		#endif
