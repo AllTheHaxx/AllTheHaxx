@@ -2169,29 +2169,31 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 		}
 	}
+	UI()->ClipDisable();
 
 	if(NewSelected != -1)
 		s_SelectedIndex = NewSelected;
 
-	CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
-
-	UI()->ClipDisable();
-
 	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
+
 
 	CUIRect Button;
 	Status.VSplitRight(120.0f, &Status, &Button);
 
-	static CButtonContainer s_GhostButton;
-	const char *pText = pGhost->m_Active ? "Deactivate" : "Activate";
-
-	if(DoButton_Menu(&s_GhostButton, Localize(pText), 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClick()))
+	if(s_SelectedIndex >= 0 && s_SelectedIndex < m_lGhosts.size())
 	{
-		if(pGhost->m_Active)
-			m_pClient->m_pGhost->Unload(pGhost->m_ID);
-		else
-			m_pClient->m_pGhost->Load(pGhost->m_aFilename, pGhost->m_ID);
-		pGhost->m_Active ^= 1;
+		CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
+		const char *pText = pGhost->m_Active ? "Deactivate" : "Activate";
+
+		static CButtonContainer s_GhostButton;
+		if(DoButton_Menu(&s_GhostButton, Localize(pText), 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClick()))
+		{
+			if(pGhost->m_Active)
+				m_pClient->m_pGhost->Unload(pGhost->m_ID);
+			else
+				m_pClient->m_pGhost->Load(pGhost->m_aFilename, pGhost->m_ID);
+			pGhost->m_Active ^= 1;
+		}
 	}
 }
