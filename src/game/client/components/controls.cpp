@@ -198,6 +198,7 @@ void CControls::OnConsoleInit()
 	{ static CInputState s_State = {this, &m_InputData[0].m_Hook, &m_InputData[1].m_Hook}; Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Hook"); }
 	{ static CInputState s_State = {this, &m_InputData[0].m_Fire, &m_InputData[1].m_Fire}; Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, (void *)&s_State, "Fire"); }
 	{ static CInputState s_State = {this, &m_ShowHookColl[0], &m_ShowHookColl[1]}; Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Show Hook Collision"); }
+	{ static CInputState s_State = {this, &m_SuperDyncam[0], &m_SuperDyncam[1]}; Console()->Register("+super_dyncam", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Super Dynamic Camera (unlock the view)"); }
 
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 1}; Console()->Register("+weapon1", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to hammer"); }
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 2}; Console()->Register("+weapon2", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to gun"); }
@@ -525,6 +526,7 @@ void CControls::OnRender()
 	}
 
 	// update target pos
+	ClampMousePos();
 	if(m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 		m_TargetPos[g_Config.m_ClDummy] = m_pClient->m_LocalCharacterPos + m_MousePos[g_Config.m_ClDummy];
 	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
@@ -568,7 +570,7 @@ void CControls::ClampMousePos()
 {
 	CALLSTACK_ADD();
 
-	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
+	if((m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0))
 	{
 		m_MousePos[g_Config.m_ClDummy].x = clamp(m_MousePos[g_Config.m_ClDummy].x, 200.0f, Collision()->GetWidth()*32-200.0f);
 		m_MousePos[g_Config.m_ClDummy].y = clamp(m_MousePos[g_Config.m_ClDummy].y, 200.0f, Collision()->GetHeight()*32-200.0f);
@@ -581,7 +583,7 @@ void CControls::ClampMousePos()
 		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		float MouseMax = min(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
 
-		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
+		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax && !m_SuperDyncam[g_Config.m_ClDummy])
 			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;
 	}
 }
@@ -594,7 +596,7 @@ CNetObj_PlayerInput* CControls::LuaGetInputData(lua_State *L)
 	const int NUM_VCLIENTS = sizeof(pSelf->m_InputData)/sizeof(pSelf->m_InputData[0]);
 	int vclient = (int)luaL_optinteger(L, 1+1, 1);
 	if(vclient < 0 || !(vclient < NUM_VCLIENTS))
-		luaL_error(L, "given VClient index of %d is out of range (allowed: 0-%d)", vclient, NUM_VCLIENTS);
+		luaL_error(L, "given VClient index of %d is out of range (valid: 0-%d)", vclient, NUM_VCLIENTS);
 	return &(pSelf->m_InputData[vclient]);
 #else
 	return &(pSelf->m_InputData[0]);

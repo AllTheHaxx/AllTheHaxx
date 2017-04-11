@@ -142,10 +142,18 @@ void CCamera::OnRender()
 		if(l > 0.0001f) // make sure that this isn't 0
 		{
 			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-			float OffsetAmount = max(l-DeadZone, 0.0f) * FollowFactor;
+			if(!m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy])
+			{
+				float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
+				float OffsetAmount = max(l-DeadZone, 0.0f) * FollowFactor;
 
-			CameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy])*OffsetAmount;
+				CameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy])*OffsetAmount;
+			}
+			else
+			{
+				if(length(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]) - DeadZone > 0)
+					CameraOffset = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+			}
 		}
 
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
@@ -154,9 +162,32 @@ void CCamera::OnRender()
 			m_WantedCenter = m_pClient->m_LocalCharacterPos + CameraOffset;
 	}
 
+	float MouseMax;
+	{
+		float CameraMaxDistance = g_Config.m_ClCameraMaxDistance;
+		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
+		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
+		MouseMax = min(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
+	}
+
 	if(m_WantedCenter != vec2(0.0f, 0.0f) &&
-			(((g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active) || g_Config.m_ClCinematicCamera == 2)
-			 || Client()->State() == IClient::STATE_OFFLINE))
+			(
+					((g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active) || g_Config.m_ClCinematicCamera == 2 ||
+							(m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy] &&
+									(
+											distance(m_pClient->m_LocalCharacterPos, m_Center) < MouseMax
+//											|| distance(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]+m_pClient->m_LocalCharacterPos, m_WantedCenter) > 5.0f
+									)
+							) ||
+							(
+									!m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy] &&
+									distance(m_Center, m_WantedCenter) > MouseMax
+							)
+					) ||
+							Client()->State() == IClient::STATE_OFFLINE
+			)
+		)
 	{
 		vec2 Speed(0);
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_pLocalCharacter)
