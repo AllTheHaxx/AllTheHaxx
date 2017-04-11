@@ -462,6 +462,7 @@ public:
 	virtual void QuadsDraw(CQuadItem *pArray, int Num);
 	virtual int QuadsDrawLua(lua_State *L);
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num);
+	virtual int QuadsDrawTLLua(lua_State *L);
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
 

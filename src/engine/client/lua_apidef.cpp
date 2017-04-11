@@ -463,6 +463,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("QuadsBegin", &IGraphics::QuadsBeginLua)
 			.addFunction("QuadsEnd", &IGraphics::QuadsEndLua)
 			.addFunction("QuadsDraw", &IGraphics::QuadsDrawLua)
+			.addFunction("QuadsDrawTL", &IGraphics::QuadsDrawTLLua)
 			.addFunction("LinesBegin", &IGraphics::LinesBeginLua)
 			.addFunction("LinesEnd", &IGraphics::LinesEndLua)
 			.addFunction("LinesDraw", &IGraphics::LinesDrawLua)

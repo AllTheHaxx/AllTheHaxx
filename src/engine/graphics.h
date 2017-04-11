@@ -134,6 +134,7 @@ public:
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual int QuadsDrawLua(lua_State *L) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
+	virtual int QuadsDrawTLLua(lua_State *L) = 0;
 
 	struct CFreeformItem
 	{

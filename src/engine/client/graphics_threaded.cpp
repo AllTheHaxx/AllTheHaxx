@@ -711,6 +711,40 @@ int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
 	return 0;
 }
 
+int CGraphics_Threaded::QuadsDrawTLLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
+
+#if defined(FEATURE_LUA)
+	int n = lua_gettop(L)-1; // REMEMBER THE 'self'!!
+	if(n != 1 && n != 2)
+		return luaL_error(L, "Engine.Graphics:QuadsDrawTL expects 1 or 2 arguments, got %d", n);
+
+	argcheck(lua_istable(L, 2), 2, "table");
+	int MaxNum = (int)luaL_optinteger(L, 3, (MAX_VERTICES-m_NumVertices)/(3*2));
+
+	size_t len = lua_objlen(L, 2);
+	if(len == 0)
+		return 0;//luaL_error(L, "the given table doesn't contain any elements!");
+
+	const int NUM = min((int)len, MaxNum);
+
+	LuaRef v = LuaRef::fromStack(L, 2);
+	if(!v.isTable()) // this case should never actually happen
+		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
+
+	CQuadItem *aQuadItems = (CQuadItem *)mem_alloc(NUM*sizeof(CQuadItem), 0);
+	for(int i = 1; i <= NUM; i++)
+	{
+		aQuadItems[i-1] = v[i].cast<CQuadItem>();
+	}
+	QuadsDrawTL(aQuadItems, NUM);
+	mem_free(aQuadItems);
+
+#endif
+	return 0;
+}
+
 void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 {
 	CCommandBuffer::SPoint Center;
