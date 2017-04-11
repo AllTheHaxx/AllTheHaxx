@@ -2430,3 +2430,19 @@ void CMenus::ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData)
 		pSelf->ToggleMouseMode();
 	}
 }
+
+vec2 CMenus::GetMousePosRel() const
+{
+	CUIRect *pScreen = UI()->Screen();
+	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
+	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
+
+	return vec2(mx, my);
+}
+
+void CMenus::SetMousePosRel(const vec2& p)
+{
+	CUIRect *pScreen = UI()->Screen();
+	m_MousePos.x = (p.x/pScreen->w)*(float)Graphics()->ScreenWidth();
+	m_MousePos.y = (p.y/pScreen->h)*(float)Graphics()->ScreenHeight();
+}

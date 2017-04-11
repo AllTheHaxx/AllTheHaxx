@@ -25,6 +25,7 @@ public:
 	void VMargin(float Cut, CUIRect *pOtherRect) const;
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 
+	CUIRect LuaCopy() const { return CUIRect(x,y,w,h); };
 };
 
 

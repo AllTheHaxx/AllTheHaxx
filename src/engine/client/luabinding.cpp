@@ -141,7 +141,7 @@ int CLuaBinding::LuaListdir(lua_State *L)
 	if(lua_isstring(L, 2))
 	{
 		lua_getglobal(L, lua_tostring(L, 2)); // check if the given callback function actually exists / retrieve the function
-		argcheck(lua_isfunction(L, -1), 2, "function name (as a string)");
+		argcheck(lua_isfunction(L, -1), 2, "function name (does the given function exist?)");
 	}
 
 	const char *pDir = lua_tostring(L, 1); // arg1

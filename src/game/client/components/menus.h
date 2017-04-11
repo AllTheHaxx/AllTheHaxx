@@ -455,6 +455,8 @@ public:
 
 	vec2 GetMousePos() const { return m_MousePos; }
 	void SetMousePos(vec2 p) { m_MousePos = p; }
+	vec2 GetMousePosRel() const;
+	void SetMousePosRel(const vec2& p);
 
 	virtual void OnInit();
 	virtual void OnConsoleInit();

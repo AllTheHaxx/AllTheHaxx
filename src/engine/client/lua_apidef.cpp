@@ -51,7 +51,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		// global types
 		.beginClass< vector2_base<float> >("vec2f")
-			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float)> ()
 			.addFunction("__add", &vector2_base<float>::operator+)
 			.addFunction("__sub", &vector2_base<float>::operator-)
@@ -65,7 +64,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("v", &vector2_base<float>::v)
 		.endClass()
 		.beginClass< vector3_base<float> >("vec3f")
-			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float, float)> ()
 			.addFunction("__add", &vector3_base<float>::operator+)
 			.addFunction("__sub", &vector3_base<float>::operator-)
@@ -85,7 +83,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("v", &vector3_base<float>::v)
 		.endClass()
 		.beginClass< vector4_base<float> >("vec4f")
-			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
 			.addFunction("__add", &vector4_base<float>::operator+)
 			.addFunction("__sub", &vector4_base<float>::sub)
@@ -106,10 +103,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass< CUIRect >("UIRect")
-			.addConstructor <void (*) ()> ()
-			.addConstructor <void (*) (float)> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
-			.addConstructor <void (*) (const CUIRect&)> ()
+			.addFunction("copy", &CUIRect::LuaCopy)
 			.addData("x", &CUIRect::x)
 			.addData("y", &CUIRect::y)
 			.addData("w", &CUIRect::w)
@@ -126,12 +121,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass< IGraphics::CQuadItem >("QuadItem")
-			.addConstructor <void (*) ()> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
 		.endClass()
 
 		.beginClass< IGraphics::CLineItem >("LineItem")
-			.addConstructor <void (*) ()> ()
 			.addConstructor <void (*) (float, float, float, float)> ()
 		.endClass()
 
@@ -270,7 +263,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<CMenus>("CMenus")
 			.addProperty("Active", &CMenus::IsActive)
 			.addProperty("ActivePage", &CMenus::GetActivePage, &CMenus::SetActivePage)
-			.addProperty("MousePos", &CMenus::GetMousePos, &CMenus::SetMousePos)
+			.addProperty("MousePos", &CMenus::GetMousePosRel, &CMenus::SetMousePosRel)
 			.addFunction("ButtonColorMul", &CMenus::ButtonColorMul)
 			.addFunction("DoButton_Menu", &CMenus::DoButton_Menu)
 			.addFunction("DoButton_MenuTab", &CMenus::DoButton_MenuTab)
