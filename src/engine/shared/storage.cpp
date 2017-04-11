@@ -3,6 +3,8 @@
 #include <base/system.h>
 #include <base/system++/io.h>
 #include <engine/storage.h>
+#include <lua.h>
+#include <engine/client/luabinding.h>
 #include "linereader.h"
 
 // compiled-in data-dir path
@@ -509,6 +511,34 @@ public:
 
 		char aBuffer[MAX_PATH_LENGTH];
 		return !fs_makedir(GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer)));
+	}
+
+	virtual bool CreateFolderLua(const char *pFoldername)
+	{
+		char aBuf[MAX_PATH_LENGTH];
+		str_copyb(aBuf, pFoldername);
+
+		str_replace_char(aBuf, '\\', '/');
+		const char *pPath = aBuf;
+		if(pPath[0] == '/')
+			pPath++;
+
+		#if defined(CONF_FAMILY_WINDOWS)
+		const char *pFoundAt = str_find(aPath, ":")
+		if(pFoundAt)
+			pPath = pFoundAt+1;
+		#endif
+
+		while(str_comp_nocase_num(pPath, "..", 2) == 0)
+			pPath += 2;
+
+		char aPath[MAX_PATH_LENGTH] = {0};
+		if(str_comp_num(aBuf, "lua/", 4) != 0)
+			str_copyb(aPath, "lua/");
+		str_appendb(aPath, pPath);
+
+		str_appendb(aPath, "/file"); // dummy file to satisfy fs_makedir_rec_for
+		return fs_makedir_rec_for(aPath) == 0;
 	}
 
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)

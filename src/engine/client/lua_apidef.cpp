@@ -496,6 +496,12 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("TextOutlineColor", &ITextRender::TextOutlineColor)
 		.endClass()
 
+		/// Engine.Storage
+		.beginClass<IStorageTW>("IStorageTW")
+			.addFunction("CreateFolder", &IStorageTW::CreateFolderLua)
+			.addFunction("CreateDir", &IStorageTW::CreateFolderLua) // alias
+		.endClass()
+
 		// XXX: cleanup!
 		.beginClass<CGameClient>("CGameClient")   //this class is kinda outdated due to "Game"
 		/*	.addData("Chat", &CGameClient::m_pChat)
@@ -550,6 +556,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Graphics", &CLua::m_pCGameClient->m_pGraphics)
 			.addVariable("TextRender", &CLua::m_pCGameClient->m_pTextRender)
 			.addVariable("Input", &CLua::m_pCGameClient->m_pInput)
+			.addVariable("Storage", &CLua::m_pCGameClient->m_pStorage)
 			.addVariable("Curl", &CLua::m_pCGameClient->m_pCurlWrapper)
 		.endNamespace()
 
