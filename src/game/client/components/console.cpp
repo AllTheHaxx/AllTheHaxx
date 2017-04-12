@@ -1270,7 +1270,9 @@ void CGameConsole::OnRender()
 				if(m_ConsoleType == CONSOLETYPE_LOCAL)
 				{
 					#define StartsWith(TAG) (str_comp_num(pEntry->m_aText, TAG": ", str_length(TAG)+2) == 0)
-					if (StartsWith("[serv]")) // system message
+					if (pEntry->m_Highlighted)
+						rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
+					else if (StartsWith("[serv]")) // system message
 						rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
 					else if (StartsWith("[chat]")) // translator
 						rgb = vec3(1.0f, 1.0f, 1.0f);
@@ -1280,8 +1282,6 @@ void CGameConsole::OnRender()
 						rgb = vec3(1.0f, 0.45f, 0.45f);
 					else if (StartsWith("[teamchat]"))
 						rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
-					else if (pEntry->m_Highlighted)
-						rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 //					else
 //						rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 					#undef StartsWith
