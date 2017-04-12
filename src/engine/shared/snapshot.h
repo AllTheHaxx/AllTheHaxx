@@ -99,6 +99,7 @@ public:
 		CSnapshot *m_pAltSnap;
 	};
 
+	~CSnapshotStorage();
 
 	CHolder *m_pFirst;
 	CHolder *m_pLast;

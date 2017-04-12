@@ -7,6 +7,13 @@
 #define ConfigFtFont (m_Type == TYPE_BASIC ? g_Config.m_FtFont : g_Config.m_FtMonoFont)
 static const char *s_apFontFolders[] = { "basic", "mono" };
 
+void CFontMgr::OnShutdown()
+{
+	for(int i = 0; i < m_lFontFiles.size(); i++)
+		UnloadFont(i);
+	m_lFontFiles.clear();
+}
+
 void CFontMgr::Init()
 {
 	m_lFontFiles.clear();

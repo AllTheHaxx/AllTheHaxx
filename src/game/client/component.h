@@ -13,7 +13,7 @@ protected:
 
 	CGameClient *m_pClient;
 
-	// perhaps propagte pointers for these as well
+	// perhaps propagate pointers for these as well
 	class IKernel *Kernel() const { return m_pClient->Kernel(); }
 	class IGraphics *Graphics() const { return m_pClient->Graphics(); }
 	class ITextRender *TextRender() const { return m_pClient->TextRender(); }

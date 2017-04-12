@@ -44,21 +44,21 @@ class CSql
 {
 	MACRO_ALLOC_HEAP()
 private:
-	void WorkerThread();
-	static void InitWorker(void *pSelf);
-	LOCK m_Lock;
-
-	std::queue<CQuery *>m_lpQueries;
-
-	bool m_Running;
-
 	sqlite3 *m_pDB;
+	LOCK m_Lock;
+	bool m_Running;
+	void *m_pThread;
+	std::queue<CQuery *>m_lpQueries;
 
 public:
 	CSql(const char *pFilename = "ath_data.db");
 	~CSql();
+
 	CQuery *Query(CQuery *pQuery, std::string QueryString);
 
+private:
+	void WorkerThread();
+	static void InitWorker(void *pSelf);
 };
 
 

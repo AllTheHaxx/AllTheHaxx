@@ -58,6 +58,8 @@ class CQueryNames : public CQuery
 
 class CClient : public IClient, public CDemoPlayer::IListener
 {
+	MACRO_ALLOC_HEAP()
+
 	// needed interfaces
 	IEngine *m_pEngine;
 	IEditor *m_pEditor;
@@ -245,6 +247,7 @@ public:
 	IIRC *IRC() { return m_pIRC; }
 
 	CClient();
+	~CClient();
 
 	// ----- send functions -----
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags);

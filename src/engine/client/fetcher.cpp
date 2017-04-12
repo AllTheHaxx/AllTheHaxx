@@ -17,27 +17,58 @@ CFetcher::CFetcher()
 	m_Lock = lock_create();
 	m_pFirst = NULL;
 	m_pLast = NULL;
-	m_pThHandle = NULL;
-}
-
-bool CFetcher::Init()
-{
-	CALLSTACK_ADD();
-
-	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
-	return (m_pHandle = curl_easy_init()) != NULL;
+	m_pThread = NULL;
+	m_Shutdown = false;
 }
 
 CFetcher::~CFetcher()
 {
+	m_Shutdown = true;
+	if(m_pThread)
+	{
+		dbg_msg("fetcher", "waiting for thread to finish...");
+		thread_wait(m_pThread);
+		m_pThread = NULL;
+
+		// clear the queue
+		lock_wait(m_Lock);
+		while(m_pFirst)
+		{
+			CFetchTask *pNext = m_pFirst->m_pNext;
+			delete m_pFirst;
+			m_pFirst = pNext;
+		}
+		lock_unlock(m_Lock);
+		lock_destroy(m_Lock);
+		m_Lock = NULL;
+	}
+
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
 }
 
-void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
+bool CFetcher::Init(IStorageTW *pStorage)
 {
 	CALLSTACK_ADD();
 
+	if(pStorage)
+		m_pStorage = pStorage;
+	else
+		m_pStorage = Kernel()->RequestInterface<IStorageTW>();
+	return (m_pHandle = curl_easy_init()) != NULL;
+}
+
+CFetchTask* CFetcher::QueueAdd(bool CanTimeout, const char *pUrl, const char *pDest, int StorageType, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
+{
+	CALLSTACK_ADD();
+
+	if(m_Shutdown)
+	{
+		dbg_msg("fetcher/warning", "rejecting task '%s' due to shutdown!", pUrl);
+		return 0;
+	}
+
+	CFetchTask *pTask = new CFetchTask(CanTimeout);
 	str_copy(pTask->m_aUrl, pUrl, sizeof(pTask->m_aUrl));
 	str_copy(pTask->m_aDest, pDest, sizeof(pTask->m_aDest));
 	pTask->m_StorageType = StorageType;
@@ -48,11 +79,8 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	pTask->m_Abort = false;
 
 	lock_wait(m_Lock);
-	if(!m_pThHandle)
-	{
-		m_pThHandle = thread_init_named(&FetcherThread, this, "fetcher");
-		thread_detach(m_pThHandle);
-	}
+	if(!m_pThread)
+		m_pThread = thread_init_named(&FetcherThread, this, "fetcher");
 
 	if(!m_pFirst)
 	{
@@ -66,6 +94,8 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	}
 	pTask->m_State = CFetchTask::STATE_QUEUED;
 	lock_unlock(m_Lock);
+
+	return pTask;
 }
 
 void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
@@ -92,14 +122,25 @@ void CFetcher::FetcherThread(void *pUser)
 		lock_unlock(pFetcher->m_Lock);
 		if(pTask)
 		{
-			dbg_msg("fetcher", "task got '%s' -> '%s'", pTask->m_aUrl, pTask->m_aDest);
-			pFetcher->FetchFile(pTask);
-			if(pTask->m_pfnCompCallback)
-				pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
+			if(!pFetcher->m_Shutdown)
+			{
+				dbg_msg("fetcher", "task got '%s' -> '%s'", pTask->m_aUrl, pTask->m_aDest);
+				pFetcher->FetchFile(pTask);
+				if(pTask->m_pfnCompCallback)
+					pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
+				delete pTask;
+			}
+			else
+				pTask->Abort(); // tasks will be deleted in the CFetcher dtor
 		}
 		else
+		{
+			if(pFetcher->m_Shutdown)
+				break;
 			thread_sleep(10);
+		}
 	}
+	dbg_msg("fetcher", "thread stopped");
 }
 
 void CFetcher::FetchFile(CFetchTask *pTask)

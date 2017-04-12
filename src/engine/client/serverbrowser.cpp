@@ -129,6 +129,16 @@ CServerBrowser::CServerBrowser()
 	}
 }
 
+CServerBrowser::~CServerBrowser()
+{
+	if(m_ppServerlist)
+		mem_free(m_ppServerlist);
+	if(m_pSortedServerlist)
+		mem_free(m_pSortedServerlist);
+	if(m_pRecentDB)
+		delete m_pRecentDB;
+}
+
 void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
 {
 	m_pNetClient = pClient;

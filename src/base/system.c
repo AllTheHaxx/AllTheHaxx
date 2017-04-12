@@ -449,7 +449,7 @@ void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 	/* TODO: fix alignment */
 	/* TODO: add debugging */
 	MEMTAIL *tail;
-	MEMHEADER *header = (struct MEMHEADER *)malloc(size+sizeof(MEMHEADER)+sizeof(MEMTAIL));
+	MEMHEADER *header = (struct MEMHEADER *)malloc(sizeof(MEMHEADER)+size+sizeof(MEMTAIL));
 	dbg_assert_legacy(header != 0, "mem_alloc failure");
 	if(!header)
 		return NULL;
@@ -457,6 +457,7 @@ void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 	header->size = size;
 	header->filename = filename;
 	header->line = line;
+	header->checksum = size+line+(int)filename[0];
 
 	memory_stats.allocated += header->size;
 	memory_stats.total_allocations++;
@@ -484,6 +485,9 @@ void mem_free(void *p)
 
 		if(tail->guard != MEM_GUARD_VAL)
 			dbg_msg("mem", "!! dealloc @@ %p[%i] from '%s' INVALID GUARD: 0x%08x{@%p} != 0x%08x", p, header->size, header->filename, tail->guard, tail, MEM_GUARD_VAL);
+		if(header->checksum != header->size+header->line+(int)header->filename[0])
+			dbg_msg("mem", "!! dealloc INVALID HEADER @@ %p[%i] from '%s' (%i != %i)", p, header->size, header->filename, header->checksum, header->size+header->line+(int)header->filename[0]);
+
 		memory_stats.allocated -= header->size;
 		memory_stats.active_allocations--;
 
@@ -551,6 +555,12 @@ int mem_check_imp()
 			dbg_msg("mem", "memory check failed at %s(%d): %d", header->filename, header->line, header->size);
 			return 0;
 		}
+		if(header->checksum != header->size+header->line+(int)header->filename[0])
+		{
+			dbg_msg("mem", "memory check failed: INVALID HEADER @@ %p[%i] from '%s' (%i != %i)", header, header->size, header->filename, header->checksum, header->size+header->line+(int)header->filename[0]);
+			return 0;
+		}
+
 		header = header->next;
 	}
 

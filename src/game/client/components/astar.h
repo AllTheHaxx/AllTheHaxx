@@ -22,34 +22,36 @@ class CAStar : public CComponent
 
 	bool m_MapReloaded;
 
-	void* m_pThread;
-	bool m_ThreadShouldExit;
+	void *m_pBuilderThread;
+	void *m_pScoreThread;
+	bool m_ThreadsShouldExit;
 
 	int m_LastClosestNode; // death position
 
 	int GetTileAreaCenter(int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
 	int GetStart() { return GetTileAreaCenter(TILE_BEGIN); }
 	int GetFinish() { return GetTileAreaCenter(TILE_END); }
-	void FillGrid(bool NoFreeze);
+	char *FillGrid(bool NoFreeze);
 	static void BuildPath(void *pUser);
 	bool PathFound() const { return m_Path.size() > 0; }
 
-	char *m_pField;
 	sorted_array<Node> m_Path;
 
 	vec2 m_LastPos;
+
+	void StopThreads();
 
 	static void StartCalcScoreThread(void *pUser);
 	void CalcScoreThread();
 
 public:
 	CAStar();
-	~CAStar();
 
 	virtual void OnReset();
 	virtual void OnRender();
 	virtual void OnMapLoad();
 	virtual void OnStateChange(int NewState, int OldState);
+	virtual void OnShutdown();
 
 	void OnPlayerDeath();
 };

@@ -15,45 +15,24 @@ public:
 	{
 	MACRO_ALLOC_HEAP();
 
-		CFetchTask* m_pCurlTask;
 		std::string m_SkinName;
-		//int *m_pDestID;
 		int m_Url;
 		int m_Progress;
 		int m_State;
 		int64 m_FinishTime;
 
 	public:
-		/*CSkinFetchTask()
-		{
-			m_pCurlTask = 0;
-			m_SkinName = "";
-			m_Url = 0;
-			m_FinishTime = -1;
-		}*/
-
 		CSkinFetchTask(const char *pSkin) : m_SkinName(std::string(pSkin))
 		{
-			m_pCurlTask = new CFetchTask(false);
+			m_pCurlTask = 0;
 			m_Url = 0;
 			m_Progress = 0;
 			m_FinishTime = -1;
 		}
 
-		~CSkinFetchTask()
-		{
-			//dbg_assert(m_pCurlTask != NULL, "SkinFetchTask::pCurlTask has been modified externally");
-			if(m_pCurlTask)
-				delete m_pCurlTask;
-			else
-				dbg_msg("skinfetcher/debug", "!! WARNING !! > Taskhandler for '%s' had no more curltask at destruction!", m_SkinName.c_str());
-		}
-
 		void Next()
 		{
-			dbg_assert(m_pCurlTask != NULL, "SkinFetchTask::pCurlTask == NULL");
-			delete m_pCurlTask;
-			m_pCurlTask = new CFetchTask(false);
+			m_pCurlTask = 0;
 			m_Url++;
 			m_FinishTime = -1;
 		}
@@ -64,6 +43,8 @@ public:
 			m_FinishTime = time_get();
 			m_Progress = 100;
 		}
+
+		CFetchTask* m_pCurlTask;
 
 		// getters
 		CFetchTask *Task() const { return m_pCurlTask; }
@@ -92,15 +73,15 @@ private:
 		MAX_FETCHTASKS = 4,
 	};
 
-	static array<std::string> m_aSkinDbUrls;
+	static array<std::string> ms_aSkinDbUrls;
 	static const char *GetURL(int i)
 	{
-		dbg_assert(i >= 0 && i < m_aSkinDbUrls.size(), "GetURL called with index out of range");
-		return m_aSkinDbUrls[i].c_str();
+		dbg_assert(i >= 0 && i < ms_aSkinDbUrls.size(), "GetURL called with index out of range");
+		return ms_aSkinDbUrls[i].c_str();
 	}
-	static int NumURLs() { return m_aSkinDbUrls.size(); }
-	static CSkinFetchTask *m_apFetchTasks[MAX_FETCHTASKS];
-	static array<std::string> m_FailedTasks;
+	static int NumURLs() { return ms_aSkinDbUrls.size(); }
+	static CSkinFetchTask *ms_apFetchTasks[MAX_FETCHTASKS];
+	static array<std::string> ms_FailedTasks;
 
 
 	/**
@@ -111,32 +92,32 @@ private:
 	{
 		int ret = 0;
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(m_apFetchTasks[i] != NULL)
-				if(!ActiveOnly || m_apFetchTasks[i]->FinishTime() < 0)
+			if(ms_apFetchTasks[i] != NULL)
+				if(!ActiveOnly || ms_apFetchTasks[i]->FinishTime() < 0)
 					ret++;
 		return ret;
 	}
 
-	static CSkinFetchTask *FindTask(CFetchTask* pTask)
+	static CSkinFetchTask *FindTask(const CFetchTask* pTask)
 	{
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(m_apFetchTasks[i] != NULL)
-				if(m_apFetchTasks[i]->Task() == pTask)
-					return m_apFetchTasks[i];
+			if(ms_apFetchTasks[i] != NULL)
+				if(ms_apFetchTasks[i]->Task() == pTask)
+					return ms_apFetchTasks[i];
 		return NULL;
 	}
 
 	static CSkinFetchTask **FindFreeSlot()
 	{
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(m_apFetchTasks[i] == NULL)
-				return &(m_apFetchTasks[i]);
+			if(ms_apFetchTasks[i] == NULL)
+				return &(ms_apFetchTasks[i]);
 		return NULL;
 	}
 
 	void LoadUrls();
 
-	void Fail(const char *pSkinName) { m_FailedTasks.add(std::string(pSkinName)); }
+	void Fail(const char *pSkinName) { ms_FailedTasks.add(std::string(pSkinName)); }
 	bool FetchNext(CSkinFetchTask *pTaskHandler);
 	void FetchSkin(CSkinFetchTask *pTaskHandler);
 
@@ -144,8 +125,8 @@ public:
 	~CSkinDownload()
 	{
 		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(m_apFetchTasks[i])
-				delete m_apFetchTasks[i];
+			if(ms_apFetchTasks[i])
+				delete ms_apFetchTasks[i];
 	}
 
 	void OnConsoleInit();

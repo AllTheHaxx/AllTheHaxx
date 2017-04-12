@@ -11,7 +11,8 @@ class CFetcher : public IFetcher
 private:
 	CURL *m_pHandle;
 
-	void *m_pThHandle;
+	void *m_pThread;
+	bool m_Shutdown;
 
 	LOCK m_Lock;
 	CFetchTask *m_pFirst;
@@ -19,10 +20,10 @@ private:
 	class IStorageTW *m_pStorage;
 public:
 	CFetcher();
-	virtual bool Init();
 	~CFetcher();
+	virtual bool Init(class IStorageTW *pStorage = 0);
 
-	virtual void QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
+	virtual CFetchTask* QueueAdd(bool CanTimeout, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
 	virtual void Escape(char *pBud, size_t size, const char *pStr);
 	static void FetcherThread(void *pUser);
 	void FetchFile(CFetchTask *pTask);

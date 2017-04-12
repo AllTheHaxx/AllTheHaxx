@@ -2,7 +2,6 @@
 #include <algorithm>
 
 #include <base/system.h>
-#include <engine/fetcher.h>
 #include <engine/storage.h>
 #include <engine/client.h>
 #include <engine/external/json-parser/json.hpp>
@@ -10,6 +9,7 @@
 #include <game/client/components/menus.h>
 
 #include "updater.h"
+#include "fetcher.h"
 
 #define LATEST_VERSION_FILE "latest"
 #define UPDATE_MANIFEST "update30.json"
@@ -33,7 +33,12 @@ CUpdater::CUpdater()
 #if !defined(CONF_DEBUG)
 	m_ClientUpdate = true; // just in case I forget it once again ._.
 #endif
+}
 
+CUpdater::~CUpdater()
+{
+	if(m_pFetcher)
+		delete m_pFetcher;
 }
 
 void CUpdater::Init()
@@ -42,7 +47,8 @@ void CUpdater::Init()
 
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
-	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+	m_pFetcher = new CFetcher;
+	m_pFetcher->Init(m_pStorage);
 #if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5, 1) <= 0;
 #endif
@@ -251,7 +257,6 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			pSelf->InstallUpdate(); // sets state
 		}
 	}
-	delete pTask;
 }
 
 void CUpdater::ParseUpdate()
@@ -503,8 +508,7 @@ void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDe
 		str_append(aDestPath, pFile, sizeof(aDestPath));
 	}
 
-	CFetchTask *Task = new CFetchTask(false);
-	m_pFetcher->QueueAdd(Task, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->QueueAdd(false, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
@@ -524,8 +528,7 @@ void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
 		str_append(aDestPath, pFile, sizeof(aDestPath));
 	}
 
-	CFetchTask *Task = new CFetchTask(false);
-	m_pFetcher->QueueAdd(Task, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->QueueAdd(false, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::InstallFile(const char *pFile)

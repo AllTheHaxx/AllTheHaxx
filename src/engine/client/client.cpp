@@ -355,6 +355,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_MapdownloadCrc = 0;
 	m_MapdownloadAmount = -1;
 	m_MapdownloadTotalsize = -1;
+	m_pMapdownloadSource = "gameserver";
 
 	m_CurrentServerInfoRequestTime = -1;
 
@@ -405,6 +406,14 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	CQueryNames *pQuery = new CQueryNames();
 	pQuery->Query(m_pDatabase, pQueryBuf);
 	sqlite3_free(pQueryBuf);
+}
+
+CClient::~CClient()
+{
+	if(m_pDatabase)
+		delete m_pDatabase;
+	if(m_pMapdownloadTask)
+		m_pMapdownloadTask->Abort();
 }
 
 void CClient::LoadMapDatabaseUrls()
@@ -2539,10 +2548,7 @@ void CClient::MapFetcherStart(const char *pMap, int MapCrc)
 	str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
 	Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
 	str_format(aUrl, sizeof(aUrl), "%s/%s", m_pMapdownloadSource, aEscaped);
-	if(m_pMapdownloadTask)
-		delete m_pMapdownloadTask;
-	m_pMapdownloadTask = new CFetchTask(true);
-	Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
+	m_pMapdownloadTask = Fetcher()->QueueAdd(true, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
 	m_CurrentMapServer++;
 }
 
@@ -2554,7 +2560,6 @@ void CClient::ResetMapDownload()
 		m_pMapdownloadTask->Abort();
 	m_pMapdownloadTask = NULL;
 	m_CurrentMapServer = 0;
-	m_pMapdownloadTask = NULL;
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
 	m_pMapdownloadSource = "gameserver";
@@ -2584,7 +2589,8 @@ void CClient::FinishMapDownload()
 		m_MapdownloadTotalsize = prev;
 		SendMapRequest();
 	}
-	else{
+	else
+	{
 		if(m_MapdownloadFile)
 			io_close(m_MapdownloadFile);
 		ResetMapDownload();
@@ -4078,9 +4084,7 @@ void CClient::RegisterCommands()
 
 static CClient *CreateClient()
 {
-	CClient *pClient = static_cast<CClient *>(mem_alloc(sizeof(CClient), 1));
-	mem_zero(pClient, sizeof(CClient));
-	return new(pClient) CClient;
+	return new CClient;
 }
 
 
@@ -4275,9 +4279,11 @@ int main(int argc, const char **argv) // ignore_convention
 	// write down the config and quit
 	pConfig->Save();
 
+	bool Restart = pClient->m_Restarting;
+
 	// cleanup
-/*	delete pEngine;
-	delete pConsole;
+	delete pClient;
+	delete pEngine;
 	delete pStorage;
 	delete pConfig;
 	delete pEngineSound;
@@ -4285,12 +4291,12 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pEngineTextRender;
 	delete pEngineMap;
 	delete pEngineMasterServer;
-*/
-	mem_free(pDebugger);
+	//delete pConsole;
+	delete pDebugger;
 
 	curl_global_cleanup();
 
-	if(pClient->m_Restarting)
+	if(Restart)
 		shell_execute(argv[0]);
 
 
@@ -4307,6 +4313,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// print memory leak report
 	if(WantReport)
 	{
+		mem_check();
+
 		dbg_msg("leakreport", "Total of %i bytes (%d kb) not freed upon exit. Backtrace:", mem_stats()->allocated, mem_stats()->allocated>>10);
 		MEMHEADER *conductor = mem_stats()->first;
 		int CurrSize = 0, CurrNum = 0;

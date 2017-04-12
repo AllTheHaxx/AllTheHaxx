@@ -1359,6 +1359,7 @@ typedef struct MEMHEADER
 	const char *filename;
 	int line;
 	int size;
+	int checksum;
 	struct MEMHEADER *prev;
 	struct MEMHEADER *next;
 } MEMHEADER;

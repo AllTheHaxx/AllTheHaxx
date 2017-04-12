@@ -378,6 +378,11 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 
 // CSnapshotStorage
 
+CSnapshotStorage::~CSnapshotStorage()
+{
+	PurgeAll();
+}
+
 void CSnapshotStorage::Init()
 {
 	m_pFirst = 0;

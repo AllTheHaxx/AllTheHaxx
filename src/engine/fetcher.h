@@ -31,8 +31,8 @@ class CFetchTask
 	bool m_CanTimeout;
 	int m_StorageType;
 
-public:
 	CFetchTask(bool canTimeout);
+public:
 	~CFetchTask()
 	{
 		#if defined(CONF_DEBUG)
@@ -49,11 +49,11 @@ public:
 		STATE_ABORTED,
 	};
 
-	const double Current() const { return m_Current; };
-	const double Size() const { return m_Size; };
-	const int Progress() const { return m_Progress; };
-	const int State() const { return m_State; };
-	const char *Dest() const { return m_aDest; };
+	const double Current() const { return m_Current; }
+	const double Size() const { return m_Size; }
+	const int Progress() const { return m_Progress; }
+	const int State() const { return m_State; }
+	const char *Dest() const { return m_aDest; }
 
 	void Abort() { m_Abort = true; };
 };
@@ -62,8 +62,8 @@ class IFetcher : public IInterface
 {
 	MACRO_INTERFACE("fetcher", 0)
 public:
-	virtual bool Init() = 0;
-	virtual void QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
+	virtual bool Init(class IStorageTW *pStorage = 0) = 0;
+	virtual CFetchTask* QueueAdd(bool CanTimeout, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
 	virtual void Escape(char *pBud, size_t size, const char *pStr) = 0;
 };
 

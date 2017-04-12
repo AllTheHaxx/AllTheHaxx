@@ -20,17 +20,17 @@
 
 CAStar::CAStar()
 {
-	m_pField = NULL;
 	m_MapReloaded = false;
-	m_ThreadShouldExit = false;
-	m_pThread = 0;
+	m_ThreadsShouldExit = false;
+	m_pBuilderThread = NULL;
+	m_pScoreThread = NULL;
 	OnReset();
 }
 
-CAStar::~CAStar()
+void CAStar::OnShutdown()
 {
-	if(m_pField)
-		mem_free(m_pField);
+	dbg_msg("astar", "waiting for threads to finish...");
+	StopThreads();
 }
 
 void CAStar::OnReset() // is being called right after OnMapLoad()
@@ -45,7 +45,7 @@ void CAStar::OnPlayerDeath()
 	if(!PathFound() || !g_Config.m_ClPathFinding || m_LastPos == vec2(0))
 		return;
 
-	thread_init(CAStar::StartCalcScoreThread, this);
+	m_pScoreThread = thread_init(StartCalcScoreThread, this);
 }
 
 void CAStar::OnRender()
@@ -55,19 +55,17 @@ void CAStar::OnRender()
 
 	// find the path one second after joining to be buffered
 	{
-		static int64 activationTime = 0;
+		static int64 s_ActivationTime = 0;
 		if(m_MapReloaded)
 		{
-			activationTime = time_get();
+			s_ActivationTime = time_get();
 			m_MapReloaded = false;
 		}
 
-		if(activationTime && time_get() > activationTime+time_freq())
+		if(s_ActivationTime && time_get() > s_ActivationTime+time_freq())
 		{
-			//FillGrid(true);
-			m_pThread = thread_init_named(BuildPath, this, "astar builder");
-			//thread_detach(m_pThread);
-			activationTime = 0;
+			m_pBuilderThread = thread_init_named(BuildPath, this, "astar builder");
+			s_ActivationTime = 0;
 		}
 	}
 
@@ -149,6 +147,60 @@ int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
 }
 
 
+char *CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
+{
+	// feed the grid with data from the map
+	char *pField = (char *)mem_alloc(Collision()->GetWidth() * Collision()->GetHeight() * sizeof(char), 1);
+	for(int y = 0; y < Collision()->GetHeight()-1; y++)
+	{
+		for(int x = 0; x < Collision()->GetWidth()-1; x++)
+		{
+			if(m_ThreadsShouldExit)
+				return pField;
+
+			pField[y*Collision()->GetWidth()+x] = (NoFreeze && Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE) || // treat freeze as air if allowed
+					!(
+							Collision()->CheckPoint(x * 32, y * 32) || // the following makes sure that the path isn't going through edge-passages
+									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
+									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
+									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
+									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32))
+					);
+		}
+	}
+
+	return pField;
+}
+
+void CAStar::OnStateChange(int NewState, int OldState)
+{
+	StopThreads();
+	m_Path.clear();
+}
+
+void CAStar::OnMapLoad()
+{
+	m_MapReloaded = true;
+}
+
+void CAStar::StopThreads()
+{
+	m_ThreadsShouldExit = true;
+	if(m_pScoreThread)
+	{
+		thread_destroy(m_pScoreThread);
+		m_pScoreThread = 0;
+	}
+	if(m_pBuilderThread)
+	{
+		thread_destroy(m_pBuilderThread);
+		m_pBuilderThread = 0;
+	}
+	m_ThreadsShouldExit = false;
+}
+
+// THREADS
+
 void CAStar::BuildPath(void *pUser)
 {
 	CAStar* pSelf = (CAStar*)pUser;
@@ -171,16 +223,32 @@ void CAStar::BuildPath(void *pUser)
 */
 	if(Start >= 0 && Finish >= 0)
 	{
-		pSelf->FillGrid(true);
-		pSolution = astar_compute((const char *)pSelf->m_pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
+		char *pField = pSelf->FillGrid(false);
+		pSolution = astar_compute((const char *)pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
+		mem_free(pField);
 		dbg_msg("path", "start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
+	}
+
+	if(pSelf->m_ThreadsShouldExit)
+	{
+		if(pSolution)
+			free(pSolution);
+		return;
 	}
 
 	if(SolutionLength == -1) // try again, ignoring freeze
 	{
-		pSelf->FillGrid(false);
-		pSolution = astar_compute((const char *)pSelf->m_pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
+		char *pField = pSelf->FillGrid(false);
+		pSolution = astar_compute((const char*)pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
+		mem_free(pField);
 		dbg_msg("path", "ignored freeze: start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
+	}
+
+	if(pSelf->m_ThreadsShouldExit)
+	{
+		if(pSolution)
+			free(pSolution);
+		return;
 	}
 
 	if(SolutionLength != -1)
@@ -199,7 +267,7 @@ void CAStar::BuildPath(void *pUser)
 			for(int i = SolutionLength; i >= 0 ; i--)
 			{
 				pSelf->m_Path.add_unsorted(Node(i-SolutionLength, pSelf->Collision()->GetPos(pSolution[i])));
-				if(pSelf->m_ThreadShouldExit)
+				if(pSelf->m_ThreadsShouldExit)
 				{
 					free(pSolution);
 					return;
@@ -209,46 +277,6 @@ void CAStar::BuildPath(void *pUser)
 		}
 		free(pSolution);
 	}
-}
-
-void CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
-{
-	if(m_pField)
-		mem_free(m_pField);
-
-	// feed the grid with data from the map
-	m_pField = (char *)mem_alloc(Collision()->GetWidth() * Collision()->GetHeight() * sizeof(char), 1);
-	for(int y = 0; y < Collision()->GetHeight()-1; y++)
-	{
-		for(int x = 0; x < Collision()->GetWidth()-1; x++)
-		{
-			m_pField[y*Collision()->GetWidth()+x] = (NoFreeze && Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE) || // treat freeze as air if allowed
-					!(
-							Collision()->CheckPoint(x * 32, y * 32) || // the following makes sure that the path isn't going through edge-passages
-									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
-									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
-									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
-									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32))
-					);
-		}
-	}
-}
-
-void CAStar::OnStateChange(int NewState, int OldState)
-{
-	if(m_pThread)
-	{
-		m_ThreadShouldExit = true;
-		thread_destroy(m_pThread);
-		m_pThread = 0;
-		m_ThreadShouldExit = false;
-	}
-	m_Path.clear();
-}
-
-void CAStar::OnMapLoad()
-{
-	m_MapReloaded = true;
 }
 
 void CAStar::StartCalcScoreThread(void *pUser)
@@ -264,7 +292,7 @@ void CAStar::CalcScoreThread()
 	int ClosestID = -1;
 	for(int i = m_Path.size()-1; i >= 0; i--)
 	{
-		if(m_ThreadShouldExit)
+		if(m_ThreadsShouldExit)
 			return;
 
 //		dbg_msg("debug", "LAST=(%.2f %.2f) ITER(%i)=(%.2f %.2f)", m_LastPos.x, m_LastPos.y, i, m_Path[i].m_Pos.x, m_Path[i].m_Pos.y);

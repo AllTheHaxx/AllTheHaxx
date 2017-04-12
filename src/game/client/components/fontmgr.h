@@ -58,6 +58,8 @@ public:
 	{
 	}
 
+	virtual void OnShutdown();
+
 	void Init();
 	void ReloadFontlist();
 	bool ActivateFont(int ListIndex);

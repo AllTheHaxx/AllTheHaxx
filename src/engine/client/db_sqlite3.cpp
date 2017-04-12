@@ -32,65 +32,6 @@ int CQuery::GetID(const char *pName)
 	return -1;
 }
 
-void CSql::WorkerThread()
-{
-	/*CALL_STACK_ADD();*/
-
-	while(m_Running)
-	{
-		lock_wait(m_Lock); // lock queue
-		if (m_lpQueries.size() > 0)
-		{
-			CQuery *pQuery = m_lpQueries.front();
-			m_lpQueries.pop();
-			lock_unlock(m_Lock); // unlock queue
-
-			int Ret;
-			Ret = sqlite3_prepare_v2(m_pDB, pQuery->m_Query.c_str(), -1, &pQuery->m_pStatement, 0);
-			if (Ret == SQLITE_OK)
-			{
-				if (!m_Running) // last check
-					break;
-				pQuery->OnData();
-
-				sqlite3_finalize(pQuery->m_pStatement);
-			}
-			else
-				dbg_msg("SQLite", "%s", sqlite3_errmsg(m_pDB));
-
-			delete pQuery;
-		}
-		else
-		{
-			thread_sleep(100);
-			lock_unlock(m_Lock); //unlock queue
-		}
-
-		thread_sleep(10);
-	}
-}
-
-void CSql::InitWorker(void *pUser)
-{
-	/*CALL_STACK_ADD();*/
-
-	CSql *pSelf = (CSql *)pUser;
-	pSelf->WorkerThread();
-}
-
-CQuery *CSql::Query(CQuery *pQuery, std::string QueryString)
-{
-	/*CALL_STACK_ADD();*/
-
-	pQuery->m_Query = QueryString;
-
-
-	lock_wait(m_Lock);
-	m_lpQueries.push(pQuery);
-	lock_unlock(m_Lock);
-
-	return pQuery;
-}
 
 CSql::CSql(const char *pFilename)
 {
@@ -111,7 +52,7 @@ CSql::CSql(const char *pFilename)
 
 	m_Lock = lock_create();
 	m_Running = true;
-	thread_init_named(InitWorker, this, "sqlite");
+	m_pThread = thread_init_named(InitWorker, this, "sqlite");
 }
 
 CSql::~CSql()
@@ -119,13 +60,71 @@ CSql::~CSql()
 	/*CALL_STACK_ADD();*/
 
 	m_Running = false;
-	lock_wait(m_Lock);
-	while (m_lpQueries.size())
+	if(m_pThread)
 	{
-		CQuery *pQuery = m_lpQueries.front();
-		m_lpQueries.pop();
-		delete pQuery;
+		dbg_msg("sqlite", "[%s] waiting for worker thread to finish...", sqlite3_db_filename(m_pDB, "main"));
+		thread_wait(m_pThread);
 	}
-	lock_unlock(m_Lock);
 	lock_destroy(m_Lock);
+}
+
+CQuery *CSql::Query(CQuery *pQuery, std::string QueryString)
+{
+	/*CALL_STACK_ADD();*/
+
+	pQuery->m_Query = QueryString;
+
+
+	lock_wait(m_Lock);
+	m_lpQueries.push(pQuery);
+	lock_unlock(m_Lock);
+
+	return pQuery;
+}
+
+void CSql::InitWorker(void *pUser)
+{
+	/*CALL_STACK_ADD();*/
+
+	CSql *pSelf = (CSql *)pUser;
+	pSelf->WorkerThread();
+}
+
+void CSql::WorkerThread()
+{
+	/*CALL_STACK_ADD();*/
+
+	while(1)
+	{
+		lock_wait(m_Lock); // lock queue
+		if (m_lpQueries.size() > 0)
+		{
+			CQuery *pQuery = m_lpQueries.front();
+			m_lpQueries.pop();
+			lock_unlock(m_Lock); // unlock queue
+
+			int Ret;
+			Ret = sqlite3_prepare_v2(m_pDB, pQuery->m_Query.c_str(), -1, &pQuery->m_pStatement, 0);
+			if (Ret == SQLITE_OK)
+			{
+				pQuery->OnData();
+
+				sqlite3_finalize(pQuery->m_pStatement);
+			}
+			else
+				dbg_msg("SQLite", "%s", sqlite3_errmsg(m_pDB));
+
+			delete pQuery;
+		}
+		else
+		{
+			lock_unlock(m_Lock); //unlock queue
+			if(!m_Running)
+				return;
+			thread_sleep(100);
+		}
+
+		if(m_Running)
+			thread_sleep(10);
+	}
 }
