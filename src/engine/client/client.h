@@ -342,8 +342,10 @@ public:
 
 	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
 	virtual const char *MapDownloadSource() { return m_pMapdownloadSource; }
+	virtual int MapDownloadSourceID() { return m_CurrentMapServer; }
 	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
 	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
+	virtual int NumMapDBServers() { return m_MapDbUrls.size(); }
 
 	void PumpNetwork();
 

@@ -1,6 +1,7 @@
 #ifndef ENGINE_FETCHER_H
 #define ENGINE_FETCHER_H
 
+#include <base/system++/system++.h>
 #include "kernel.h"
 #include "stddef.h"
 
@@ -32,6 +33,12 @@ class CFetchTask
 
 public:
 	CFetchTask(bool canTimeout);
+	~CFetchTask()
+	{
+		#if defined(CONF_DEBUG)
+		dbg_assert(m_State != STATE_RUNNING && m_State != STATE_QUEUED, "deleted an active fetch task!");
+		#endif
+	}
 
 	enum
 	{

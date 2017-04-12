@@ -7,7 +7,8 @@
 
 void CMenus::RenderPopups()
 {
-	char aBuf[256];
+	char aTitle[256];
+	char aExtraText[256];
 	const char *pTitle = "";
 	const char *pExtraText = "";
 	const char *pButtonText = "";
@@ -26,9 +27,27 @@ void CMenus::RenderPopups()
 		pButtonText = Localize("Abort");
 		if(Client()->MapDownloadTotalsize() > 0)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
-			pTitle = aBuf;
+			str_format(aTitle, sizeof(aTitle), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
+			pTitle = aTitle;
 			pExtraText = "";
+		}
+		else if(str_comp(Client()->MapDownloadSource(), "gameserver") != 0)
+		{
+			str_format(aTitle, sizeof(aTitle), "%s %s", Localize("Connecting to"), Client()->GetCurrentServerAddress());
+			pTitle = aTitle;
+
+			const int IntTime = round_to_int(Client()->LocalTime());
+			static const char *s_apCoolChars[] = { "–", "\\", "|", "/"};
+			const char *c = s_apCoolChars[IntTime%(sizeof(s_apCoolChars)/sizeof(s_apCoolChars[0]))];
+			str_format(aExtraText, sizeof(aExtraText),
+						"{%s} Waiting for map DB %i/%i:\n\n"
+						"%s",
+					   c,
+					   Client()->MapDownloadSourceID(),
+					   Client()->NumMapDBServers(),
+					   Client()->MapDownloadSource());
+			pExtraText = aExtraText;
+			ExtraAlign = CUI::ALIGN_LEFT;
 		}
 	}
 	else if (m_Popup == POPUP_DISCONNECTED)
@@ -38,9 +57,9 @@ void CMenus::RenderPopups()
 		pButtonText = Localize("Ok");
 		if(Client()->m_ReconnectTime > 0)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), (Client()->m_ReconnectTime - time_get()) / time_freq());
+			str_format(aExtraText, sizeof(aExtraText), Localize("\n\nReconnect in %d sec"), (Client()->m_ReconnectTime - time_get()) / time_freq());
 			pTitle = Client()->ErrorString();
-			pExtraText = aBuf;
+			pExtraText = aExtraText;
 			pButtonText = Localize("Abort");
 		}
 		ExtraAlign = CUI::ALIGN_CENTER;
@@ -110,8 +129,8 @@ void CMenus::RenderPopups()
 			str_formatb(aScriptName, "'%s' (\"%s\")", m_pLuaFSModeRequester->GetFilename(), m_pLuaFSModeRequester->GetScriptTitle());
 		else
 			str_formatb(aScriptName, "'%s'", m_pLuaFSModeRequester->GetFilename());
-		str_formatb(aBuf, "The script %s wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", aScriptName);
-		pExtraText = aBuf;
+		str_formatb(aExtraText, "The script %s wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", aScriptName);
+		pExtraText = aExtraText;
 		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_UPDATE)
@@ -119,8 +138,8 @@ void CMenus::RenderPopups()
 		if(Updater()->State() == IUpdater::STATE_CLEAN)
 		{
 			pTitle = Localize("Update available!");
-			str_formatb(aBuf, "AllTheHaxx version %s has been released! Do you want to update your client now?", Updater()->GetLatestVersion());
-			pExtraText = aBuf;
+			str_formatb(aExtraText, "AllTheHaxx version %s has been released! Do you want to update your client now?", Updater()->GetLatestVersion());
+			pExtraText = aExtraText;
 			ExtraAlign = CUI::ALIGN_LEFT;
 		}
 		else
@@ -139,8 +158,8 @@ void CMenus::RenderPopups()
 				break;
 				case IUpdater::STATE_FAIL:
 					pTitle = Localize("Update Failed!");
-					str_formatb(aBuf, "%s: %s", Localize("What failed"), Updater()->GetWhatFailed());
-					pExtraText = aBuf;
+					str_formatb(aExtraText, "%s: %s", Localize("What failed"), Updater()->GetWhatFailed());
+					pExtraText = aExtraText;
 					ExtraAlign = CUI::ALIGN_LEFT;
 				break;
 				case IUpdater::STATE_NEED_RESTART:

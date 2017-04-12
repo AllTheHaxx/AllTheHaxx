@@ -2551,10 +2551,10 @@ void CClient::ResetMapDownload()
 	CALLSTACK_ADD();
 
 	if(m_pMapdownloadTask)
-		delete m_pMapdownloadTask;
-	m_pMapdownloadTask = 0;
+		m_pMapdownloadTask->Abort();
+	m_pMapdownloadTask = NULL;
 	m_CurrentMapServer = 0;
-	m_pMapdownloadTask = 0;
+	m_pMapdownloadTask = NULL;
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
 	m_pMapdownloadSource = "gameserver";

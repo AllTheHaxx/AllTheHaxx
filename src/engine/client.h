@@ -145,8 +145,10 @@ public:
 	//
 	virtual const char *MapDownloadName() = 0;
 	virtual const char *MapDownloadSource() = 0;
+	virtual int MapDownloadSourceID() = 0;
 	virtual int MapDownloadAmount() = 0;
 	virtual int MapDownloadTotalsize() = 0;
+	virtual int NumMapDBServers() = 0;
 
 	// input
 	virtual int *GetInput(int Tick) = 0;
