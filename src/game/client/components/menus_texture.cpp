@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
+#include <engine/keys.h>
 
 #include "menus.h"
 #include "gametexture.h"
@@ -283,6 +284,7 @@ void CMenus::RenderSettingsEntities(CUIRect MainView)
 	static float s_ScrollValue = 0.0f;
 
 	int OldSelected = -1;
+	int QuickLoad = -1;
 	static CButtonContainer s_Listbox;
 	UiDoListboxStart(&s_Listbox, &MainView, 160.0f, Localize("Entities"), "", s_aSkinList.size(), 3, OldSelected, s_ScrollValue);
 
@@ -305,22 +307,29 @@ void CMenus::RenderSettingsEntities(CUIRect MainView)
 
 			int Texture = s->Texture();
 			if(Texture <= 0) if((Texture = m_pClient->m_pGameTextureManager->FindTexture(CGameTextureManager::TEXTURE_GROUP_ENTITIES, s->m_aName)) <= 0) continue;
-			char aName[512];
-			str_copyb(aName, s->m_aName);
+			if(OldSelected != i && s->Texture() == g_pData->m_aImages[IMAGE_ENTITIES].m_Id)
+				RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0.2f, 0.7f, 0.1f, 0.3f), CUI::CORNER_ALL, 5.0f);
+			if(UI()->MouseInside(&Item.m_HitRect) && Input()->KeyPress(KEY_MOUSE_3))
+				QuickLoad = i;
 			Graphics()->TextureSet(Texture);
 			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem QuadItem(Item.m_Rect.x+Item.m_Rect.w/2 - 60.0f, Item.m_Rect.y+Item.m_Rect.h/2 - 60.0f, 120.0f, 120.0f);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
-			UI()->DoLabel(&Label, aName, 10.0f, 0);
+			UI()->DoLabel(&Label, s->m_aName, 10.0f, 0);
 		}
 	}
 
+	const char *pSetNew = 0;
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
 		str_copy(g_Config.m_TexEntities, s_aSkinList[NewSelected].m_aName, sizeof(g_Config.m_TexEntities));
-		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_ENTITIES, g_Config.m_TexEntities);
+		pSetNew = g_Config.m_TexEntities;
 	}
+	else if(QuickLoad != -1)
+		pSetNew = s_aSkinList[QuickLoad].m_aName;
 
+	if(pSetNew)
+		m_pClient->m_pGameTextureManager->SetTexture(IMAGE_ENTITIES, pSetNew);
 }

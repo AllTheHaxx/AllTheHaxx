@@ -90,42 +90,27 @@ void CMapImages::LoadBackground(class IMap *pMap)
 
 int CMapImages::GetEntities()
 {
-	static int s_EntitiesTextures = -1;
 	static char s_aEntitiesGameType[32] = {0};
 
-	CServerInfo Info;
-	Client()->GetServerInfo(&Info);
-
-	if(s_EntitiesTextures == -1 || str_comp(s_aEntitiesGameType, Info.m_aGameType))
+	const CServerInfo *pInfo = Client()->GetServerInfo();
+	if(str_comp(s_aEntitiesGameType, pInfo->m_aGameType) != 0)
 	{
-		// DDNet default to prevent delay in seeing entities
 		const char *pFile = 0;
-		if(IsDDNet(&Info))
+		if(IsDDNet(pInfo))
 			pFile = "ddnet";
-		else if(IsDDRace(&Info))
+		else if(IsDDRace(pInfo))
 			pFile = "ddrace";
-		else if(IsRace(&Info))
+		else if(IsRace(pInfo))
 			pFile = "race";
-		else if(IsFNG(&Info))
+		else if(IsFNG(pInfo))
 			pFile = "fng";
-		else if(IsVanilla(&Info))
+		else if(IsVanilla(pInfo))
 			pFile = "vanilla";
 
-		str_copy(s_aEntitiesGameType, Info.m_aGameType, sizeof(s_aEntitiesGameType));
+		str_copy(s_aEntitiesGameType, pInfo->m_aGameType, sizeof(s_aEntitiesGameType));
 
 		if(pFile)
-		{
-			char aPath[256];
-			str_format(aPath, sizeof(aPath), "textures/entities/clear/%s.png", pFile);
-			if(s_EntitiesTextures > 0)
-				Graphics()->UnloadTexture(s_EntitiesTextures);
-			s_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0); // don't worry about leaks here, this is being cached
-		}
-		else
-		{
-			s_EntitiesTextures = -1;
-			return g_pData->m_aImages[IMAGE_ENTITIES].m_Id;
-		}
+			GameClient()->m_pGameTextureManager->SetTexture(IMAGE_ENTITIES, pFile);
 	}
-	return s_EntitiesTextures;
+	return g_pData->m_aImages[IMAGE_ENTITIES].m_Id;
 }
