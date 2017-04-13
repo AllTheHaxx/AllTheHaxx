@@ -58,7 +58,7 @@ CSql::~CSql()
 	{
 		lock_wait(m_Lock);
 		if(m_lpQueries.size())
-			dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", sqlite3_db_filename(m_pDB, "main"), m_lpQueries.size());
+			dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", sqlite3_db_filename(m_pDB, "main"), (unsigned long)m_lpQueries.size());
 		lock_unlock(m_Lock);
 		thread_wait(m_pThread);
 	}
