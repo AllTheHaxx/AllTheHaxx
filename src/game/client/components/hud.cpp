@@ -495,7 +495,7 @@ void CHud::RenderNotifications()
 		if(n->m_xOffset > 0.08f)
 		{
 			float x = (10.0f-n->m_xOffset)/10.0f;
-			float val = -1.0*(float)pow((double)x,7.0)+1.0f; // <-- nice formula
+			float val = -1.0f*powf(x,7.0f)+1.0f; // <-- nice formula
 			vec4 Color = mix(n->m_Color, vec4(1,0,0,1), val);
 			TextRender()->TextColor(Color.r, Color.g, Color.b, 1);
 			//TextRender()->TextColor(1,n->m_Color.g-n->m_xOffset/0.8,n->m_Color.b-n->m_xOffset/0.8,1); // <-- that's the old one

@@ -83,7 +83,7 @@ void CIRCBind::OnMessageIRC(const char *pChan, const char *pUser, const char *pT
 		GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "IRC", aBuf, false);
 
 		// ...to notifications
-		if(g_Config.m_ClNotifications)
+		if(false && g_Config.m_ClNotifications)
 		{
 			if(str_comp(pChan, GameClient()->IRC()->GetNick()) == 0) // private chat
 				str_format(aBuf, sizeof(aBuf), "[%s]: %s", pUser, pText);
