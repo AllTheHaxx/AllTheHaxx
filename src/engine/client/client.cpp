@@ -1689,7 +1689,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			}
 			Addr.port = (pAddrs[i].m_aPort[0]<<8) | pAddrs[i].m_aPort[1];
 
-			m_ServerBrowser.Set(Addr, IServerBrowser::SET_MASTER_ADD, -1, 0x0);
+			m_ServerBrowser.Set(Addr, IServerBrowser::SET_MASTER_ADD, -1, 0x0, false);
 		}
 	}
 
@@ -1889,7 +1889,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 
 		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
-			m_ServerBrowser.Set(*pFrom, IServerBrowser::SET_TOKEN, Token, &Info);
+			m_ServerBrowser.Set(*pFrom, IServerBrowser::SET_TOKEN, Token, &Info, false);
 			pEntry = m_ServerBrowser.Find(*pFrom);
 
 			if(SavedType == SERVERINFO_VANILLA && Is64Player(&Info) && pEntry)

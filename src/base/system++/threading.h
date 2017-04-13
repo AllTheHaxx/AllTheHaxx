@@ -120,25 +120,65 @@ public:
 };
 
 
-#define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(LOCKVAR, false, __FILE__, __LINE__); __SectionLock.WaitAndLock();
+#define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&LOCKVAR, false, __FILE__, __LINE__); __SectionLock.WaitAndLock()
+#define LOCK_SECTION_LAZY_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&LOCKVAR, false, __FILE__, __LINE__)
 
-class LOCK_SECTION_SMART
+class LOCK_SMART
 {
 	LOCK m_Lock;
-	bool m_IsLocked;
 
 	const char *m_pFile;
 	int m_Line;
 
+	const char *m_pFilePrev;
+	int m_LinePrev;
+
 public:
-	LOCK_SECTION_SMART(LOCK Lock, bool IsLocked = false, const char *pFile = 0, int Line = -1) : m_Lock(Lock), m_IsLocked(IsLocked), m_pFile(pFile), m_Line(Line)
+	LOCK_SMART()
+	{
+		mem_zero(this, sizeof(LOCK_SMART));
+
+		m_Lock = lock_create();
+	}
+
+	~LOCK_SMART()
+	{
+		lock_wait(m_Lock);
+		lock_unlock(m_Lock);
+		lock_destroy(m_Lock);
+	}
+
+	LOCK Get(const char *pFile, int Line)
+	{
+		m_pFilePrev = m_pFile;
+		m_LinePrev = m_Line;
+
+		m_pFile = pFile;
+		m_Line = Line;
+
+		return m_Lock;
+	}
+};
+
+class LOCK_SECTION_SMART
+{
+	LOCK_SMART *m_pLockWrapper;
+	bool m_IsLocked;
+
+	const char * const m_pFile;
+	const int m_Line;
+
+public:
+	LOCK_SECTION_SMART(LOCK_SMART *pLockWrapper, bool IsLocked = false, const char *pFile = 0, int Line = -1)
+			: m_pLockWrapper(pLockWrapper), m_IsLocked(IsLocked),
+			  m_pFile(pFile), m_Line(Line)
 	{
 	}
 
 	~LOCK_SECTION_SMART()
 	{
 		if(m_IsLocked)
-			lock_unlock(m_Lock);
+			lock_unlock(m_pLockWrapper->Get(m_pFile, m_Line));
 //		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
 	}
 
@@ -151,8 +191,8 @@ public:
 		if(m_IsLocked)
 			return;
 #endif
+		lock_wait(m_pLockWrapper->Get(m_pFile, m_Line));
 		m_IsLocked = true;
-		lock_wait(m_Lock);
 	}
 
 	bool TryToLock()
@@ -160,7 +200,8 @@ public:
 		if(m_IsLocked)
 			return false;
 //		dbg_msg("lock/dbg", "%s:%i grabbed lock %p", m_pFile, m_Line, m_Lock);
-		return lock_trylock(m_Lock) == 0;
+		m_IsLocked = lock_trylock(m_pLockWrapper->Get(m_pFile, m_Line)) == 0;
+		return m_IsLocked;
 	}
 
 	void Unlock()
@@ -173,7 +214,7 @@ public:
 			return;
 #endif
 		m_IsLocked = false;
-		lock_unlock(m_Lock);
+		lock_unlock(m_pLockWrapper->Get(m_pFile, m_Line));
 	}
 };
 

@@ -88,7 +88,7 @@ public:
 		SORT_NUMPLAYERS - Sort after how many players there are on the server.
 	*/
 	enum{
-		CACHE_VERSION = 2,
+		CACHE_VERSION = 3,
 
 		SORT_NAME = 0,
 		SORT_PING,
@@ -127,8 +127,8 @@ public:
 	virtual int NumServers() const = 0;
 
 	virtual int NumSortedServers() const = 0;
-	virtual const CServerInfo *SortedGet(int Index) const = 0;
-	virtual const CServerInfo *Get(int Index) const = 0;
+	virtual const CServerInfo *SortedGet(int Index) = 0;
+	virtual const CServerInfo *Get(int Index) = 0;
 	virtual int GetInfoAge(int Index) const = 0;
 	virtual const char *GetDebugString(int Index) const = 0;
 

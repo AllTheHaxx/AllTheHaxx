@@ -23,6 +23,7 @@
 
 #include <game/client/components/menus.h>
 #include <json-parser/json.hpp>
+#include <base/system++/threading.h>
 
 #include "serverbrowser.h"
 class SortWrap
@@ -77,7 +78,6 @@ CServerBrowser::CServerBrowser()
 	m_NumRequests = 0;
 	m_MasterServerCount = 0;
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-	m_ServerdataLocked = false;
 
 	m_NeedRefresh = 0;
 	m_NeedUpgrade = 0;
@@ -149,15 +149,23 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
 }
 
-const CServerInfo *CServerBrowser::SortedGet(int Index) const
+const CServerInfo *CServerBrowser::SortedGet(int Index)// const
 {
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
+		return 0;
+
 	if(Index < 0 || Index >= m_NumSortedServers)
 		return 0;
 	return &m_ppServerlist[m_pSortedServerlist[Index]]->m_Info;
 }
 
-const CServerInfo *CServerBrowser::Get(int Index) const
+const CServerInfo *CServerBrowser::Get(int Index)// const
 {
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
+		return 0;
+
 	if(Index < 0 || Index >= m_NumSortedServers)
 		return 0;
 	return &m_ppServerlist[Index]->m_Info;
@@ -259,8 +267,10 @@ bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 
 void CServerBrowser::Filter()
 {
-	if(m_ServerdataLocked)
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
 		return;
+
 	int i = 0, p = 0;
 	m_NumSortedServers = 0;
 
@@ -472,8 +482,6 @@ void CServerBrowser::Sort()
 
 void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
 {
-	if(m_ServerdataLocked)
-		return;
 	if(pEntry->m_pPrevReq || pEntry->m_pNextReq || m_pFirstReqServer == pEntry)
 	{
 		if(pEntry->m_pPrevReq)
@@ -494,8 +502,10 @@ void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
 
 CServerBrowser::CServerEntry *CServerBrowser::Find(const NETADDR &Addr)
 {
-	if(m_ServerdataLocked)
-		return 0;
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
+		return (CServerEntry*)0;
+
 	CServerEntry *pEntry = m_aServerlistIp[Addr.ip[0]];
 
 	for(; pEntry; pEntry = pEntry->m_pNextIp)
@@ -508,8 +518,6 @@ CServerBrowser::CServerEntry *CServerBrowser::Find(const NETADDR &Addr)
 
 void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 {
-	if(m_ServerdataLocked)
-		return;
 	// add it to the list of servers that we should request info from
 	pEntry->m_pPrevReq = m_pLastReqServer;
 	if(m_pLastReqServer)
@@ -593,7 +601,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	return pEntry;
 }
 
-void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo)
+void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo, bool NoSort)
 {
 	CServerEntry *pEntry = 0;
 	if(Type == IServerBrowser::SET_MASTER_ADD)
@@ -682,13 +690,12 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		}
 	}
 
-	Sort();
+	if(!NoSort)
+		Sort();
 }
 
 void CServerBrowser::Refresh(int Type, int NoReload)
 {
-	if(m_ServerdataLocked)
-		return;
 	if(NoReload || Type < 0)
 	{
 		if(NoReload == 1 && !IsRefreshing())
@@ -698,21 +705,29 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 		return;
 	}
 
-	// clear out everything
-	m_ServerlistHeap.Reset();
-	m_NumServers = 0;
-	m_NumSortedServers = 0;
-	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
-	m_pFirstReqServer = 0;
-	m_pLastReqServer = 0;
-	m_NumRequests = 0;
-	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-	// next token
-	m_CurrentToken = (m_CurrentToken+1)&0xff;
+	{ // BEGIN LOCKED SECTION
+		LOCK_SECTION_LAZY_DBG(m_Lock);
 
-	//
-	m_ServerlistType = Type;
-	m_NeedUpgrade = false;
+		if(!__SectionLock.TryToLock())
+			return;
+
+		// clear out everything
+		m_ServerlistHeap.Reset();
+		m_NumServers = 0;
+		m_NumSortedServers = 0;
+		mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
+		m_pFirstReqServer = 0;
+		m_pLastReqServer = 0;
+		m_NumRequests = 0;
+		m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+		// next token
+		m_CurrentToken = (m_CurrentToken+1)&0xff;
+
+		//
+		m_ServerlistType = Type;
+		m_NeedUpgrade = false;
+
+	} // END LOCKED SECTION
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
@@ -720,19 +735,19 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 		CNetChunk Packet;
 
 		mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-		Buffer[sizeof(SERVERBROWSE_GETINFO)] = m_CurrentToken;
+		Buffer[sizeof(SERVERBROWSE_GETINFO)] = (unsigned char)m_CurrentToken;
 
 		/* do the broadcast version */
 		Packet.m_ClientID = -1;
 		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_Address.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
+		Packet.m_Address.type = (unsigned int)(m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST);
 		Packet.m_Flags = NETSENDFLAG_CONNLESS|NETSENDFLAG_EXTENDED;
 		Packet.m_DataSize = sizeof(Buffer);
 		Packet.m_pData = Buffer;
 		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
 		m_BroadcastExtraToken = rand() & 0xffff;
-		Packet.m_aExtraData[0] = m_BroadcastExtraToken >> 8;
-		Packet.m_aExtraData[1] = m_BroadcastExtraToken & 0xff;
+		Packet.m_aExtraData[0] = (unsigned char)(m_BroadcastExtraToken >> 8);
+		Packet.m_aExtraData[1] = (unsigned char)(m_BroadcastExtraToken & 0xff);
 		m_BroadcastTime = time_get();
 
 		for(unsigned short i = 8303; i <= 8310; i++)
@@ -751,12 +766,14 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 	else if(Type == IServerBrowser::TYPE_FAVORITES)
 	{
 		for(int i = 0; i < m_NumFavoriteServers; i++)
-			Set(m_aFavoriteServers[i], IServerBrowser::SET_FAV_ADD, -1, 0);
+			Set(m_aFavoriteServers[i], IServerBrowser::SET_FAV_ADD, -1, 0, true);
+		Sort();
 	}
 	else if(Type == IServerBrowser::TYPE_RECENT)
 	{
 		for(int i = 0; i < m_aRecentServers.size(); i++)
-			Set(m_aRecentServers[i].m_Addr, IServerBrowser::SET_RECENT, -1, 0);
+			Set(m_aRecentServers[i].m_Addr, IServerBrowser::SET_RECENT, -1, 0, true);
+		Sort();
 	}
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
@@ -775,10 +792,9 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 				continue;
 
 			for(int g = 0; g < pCntr->m_NumServers; g++)
-			{
 				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pCntr->m_aTypes[g]))
-					Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0);
-			}
+					Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0, true);
+			Sort();
 		}
 	}
 }
@@ -810,15 +826,25 @@ void CServerBrowser::SaveCache()
 	io_write(File, &m_NumServerCapacity, sizeof(m_NumServerCapacity)); // save length of array
 
 	// save all the infos
+	CServerInfo *aAllInfos = mem_allocb(CServerInfo, m_NumServers);
 	for(int i = 0; i < m_NumServers; i++)
-	{
-		const CServerInfo Info = m_ppServerlist[i]->m_Info;
+		aAllInfos[i] = m_ppServerlist[i]->m_Info;
 
-		//dbg_msg("browser", "saving entry %i %s %s", i, pInfo->m_aAddress, pInfo->m_aName);
-		io_write(File, &Info, sizeof(CServerInfo));
-	}
+	const unsigned int SIZE = sizeof(CServerInfo)*m_NumServers;
+	unsigned char *pCompressed = (unsigned char *)mem_alloc(SIZE, 0);
+	int CompressedSize = CNetBase::Compress(aAllInfos, SIZE, pCompressed, SIZE);
+	io_write(File, &CompressedSize, sizeof(CompressedSize));
 
-	io_close(File); // TODO: check if saving actually succeeded
+	dbg_msg("browser/cache", "compressed %lu -> %i", (unsigned long)(sizeof(CServerInfo)*m_NumServers), CompressedSize);
+
+	if(CompressedSize == -1)
+		io_write(File, aAllInfos, SIZE);
+	else
+		io_write(File, pCompressed, (unsigned int)CompressedSize);
+
+	io_close(File);
+	mem_free(pCompressed);
+	mem_free(aAllInfos);
 
 	if(g_Config.m_Debug)
 		dbg_msg("browser", "successfully saved serverlist with %i entries", m_NumServers);
@@ -827,10 +853,7 @@ void CServerBrowser::SaveCache()
 
 void CServerBrowser::LoadCache()
 {
-	if(m_ServerdataLocked)
-		return;
 	m_ServerlistType = TYPE_INTERNET;
-	m_ServerdataLocked = true;
 	void *pThread = thread_init(LoadCacheThread, this);
 	thread_detach(pThread);
 }
@@ -842,6 +865,8 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 
 	int64 StartTime = time_get();
 
+	LOCK_SECTION_DBG(pSelf->m_Lock);
+
 	// clear out everything
 	pSelf->m_ServerlistHeap.Reset();
 	pSelf->m_NumServers = 0;
@@ -851,7 +876,7 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 	pSelf->m_pLastReqServer = 0;
 	pSelf->m_NumRequests = 0;
 	pSelf->m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-	pSelf->m_CurrentToken = (pSelf->m_CurrentToken+1)&0xff;
+	pSelf->m_CurrentToken = 0;
 	pSelf->m_ServerlistType = IServerBrowser::TYPE_INTERNET;
 
 	// open file
@@ -860,7 +885,6 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 	{
 		dbg_msg("browser", "opening cache file failed.");
 		pSelf->m_CacheExists = false;
-		pSelf->m_ServerdataLocked = false;
 		return;// false;
 	}
 
@@ -873,17 +897,14 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 		{
 			dbg_msg("browser", "couldn't load cache: file version doesn't match! (%i != %i)", v, CACHE_VERSION);
 			pSelf->m_CacheExists = false;
-			pSelf->m_ServerdataLocked = false;
 			return;
 		}
 	}
 
 	// get number of servers
-	int NumServers = 0;
+	int NumServers;
 	io_read(File, &NumServers, sizeof(NumServers));
 	//dbg_msg("browser", "serverlist cache entries: %i", NumServers);
-
-	mem_zero(pSelf->m_ppServerlist, (unsigned int)pSelf->m_NumServerCapacity);
 
 	// get length of array
 	io_read(File, &pSelf->m_NumServerCapacity, sizeof(pSelf->m_NumServerCapacity));
@@ -892,24 +913,71 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 	mem_free(pSelf->m_ppServerlist);
 	pSelf->m_ppServerlist = (CServerEntry **)mem_alloc(pSelf->m_NumServerCapacity*sizeof(CServerEntry*), 1);
 
+	// read the compressed size data
+	int CompressedSize;
+	io_read(File, &CompressedSize, sizeof(CompressedSize));
+
 	// read the data from the file into the serverlist
-	CServerInfo *pServerInfos = (CServerInfo*)mem_alloc(sizeof(CServerInfo)*NumServers, 0);
-	io_read(File, pServerInfos, sizeof(CServerInfo)*NumServers);
+	if(CompressedSize == -1)
+	{
+		// if the data is not compressed, read the entries as they are
+		for(int i = 0; i < NumServers; i++)
+		{
+			CServerInfo Info;
+			io_read(File, &Info, sizeof(CServerInfo));
+
+			NETADDR Addr;
+			net_addr_from_str(&Addr, Info.m_aAddress);
+			//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
+			pSelf->Set(Addr, IServerBrowser::SET_TOKEN, pSelf->m_CurrentToken, &Info, true);
+		}
+	}
+	else
+	{
+		// allocate some memory
+		const unsigned int SIZE = sizeof(CServerInfo)*NumServers;
+		CServerInfo *aAllInfos = mem_allocb(CServerInfo, NumServers);
+		unsigned char *pCompressed = (unsigned char *)mem_alloc((unsigned int)CompressedSize, 0);
+
+		// read the data from the file and try to decompress it
+		io_read(File, pCompressed, (unsigned int)CompressedSize);
+		int DecompressedSize = CNetBase::Decompress(pCompressed, CompressedSize, aAllInfos, SIZE);
+		mem_free(pCompressed);
+
+		// process the data
+		if(DecompressedSize == -1)
+		{
+			// if decompression failed, return with no serverlist
+			dbg_msg("browser", "failed to decompress the serverlist cache");
+			io_close(File);
+			mem_free(aAllInfos);
+			pSelf->m_CacheExists = false;
+			return;
+		}
+		else
+		{
+			// process all the entries
+			dbg_msg("browser", "decompressed serverlist cache %i -> %i", CompressedSize, DecompressedSize);
+			for(int i = 0; i < NumServers; i++)
+			{
+				CServerInfo Info;
+				mem_copy(&Info, &aAllInfos[i], sizeof(CServerInfo));
+				NETADDR Addr;
+				net_addr_from_str(&Addr, Info.m_aAddress);
+				//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
+				pSelf->Set(Addr, IServerBrowser::SET_TOKEN, pSelf->m_CurrentToken, &Info, true);
+			}
+		}
+		mem_free(aAllInfos);
+	}
+
 	io_close(File);
 
-	for(int i = 0; i < NumServers; i++)
-	{
-		NETADDR Addr;
-		net_addr_from_str(&Addr, pServerInfos[i].m_aAddress);
-		//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
-		pSelf->Set(Addr, IServerBrowser::SET_TOKEN, pSelf->m_CurrentToken, &pServerInfos[i]);
-	}
-	mem_free(pServerInfos);
+	__SectionLock.Unlock(); // Sort() wants the lock too, so release it manually here
 
 	if(g_Config.m_Debug)
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i), took %.2fms", pSelf->m_NumServers, NumServers, ((time_get()-StartTime)*1000)/(float)time_freq()); // TODO: check if saving actually succeeded
 	//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
-	pSelf->m_ServerdataLocked = false;
 	pSelf->Sort();
 	return;// true;
 }
@@ -980,17 +1048,12 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 
 void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
 {
-	if(m_ServerdataLocked)
-		return;
-
 	RequestImpl(Addr, 0);
 }
 
 
 void CServerBrowser::Update(bool ForceResort)
 {
-	if(m_ServerdataLocked)
-		return;
 	int64 Timeout = time_freq();
 	int64 Now = time_get();
 	int Count;
@@ -1038,11 +1101,11 @@ void CServerBrowser::Update(bool ForceResort)
 			int Count = m_pMasterServer->GetCount(i);
 			if(Count == -1)
 			{
-			/* ignore Server
-				m_MasterServerCount = -1;
-				return;
-				// we don't have the required server information
-				*/
+				/* ignore Server
+					m_MasterServerCount = -1;
+					return;
+					// we don't have the required server information
+					*/
 			}
 			else
 				m_MasterServerCount += Count;
@@ -1076,31 +1139,36 @@ void CServerBrowser::Update(bool ForceResort)
 	{
 		m_MasterServerCount = 0;
 		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
+		{
+			if(!m_pMasterServer->IsValid(i))
+				continue;
+			int Count = m_pMasterServer->GetCount(i);
+			if(Count == -1)
 			{
-				if(!m_pMasterServer->IsValid(i))
-					continue;
-				int Count = m_pMasterServer->GetCount(i);
-				if(Count == -1)
-				{
 				/* ignore Server
 					m_MasterServerCount = -1;
 					return;
 					// we don't have the required server information
 					*/
-				}
-				else
-					m_MasterServerCount += Count;
 			}
-			//if(g_Config.m_Debug)
-			//{
-			//	dbg_msg("client_srvbrowse", "ServerCount2: %d", m_MasterServerCount);
-			//}
+			else
+				m_MasterServerCount += Count;
+		}
+		//if(g_Config.m_Debug)
+		//{
+		//	dbg_msg("client_srvbrowse", "ServerCount2: %d", m_MasterServerCount);
+		//}
 	}
 	if(m_MasterServerCount > m_NumRequests + m_LastPacketTick)
 	{
 		++m_LastPacketTick;
 		return; // wait for more packets
 	}
+
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
+		return;
+
 	pEntry = m_pFirstReqServer;
 	Count = 0;
 	while(1) // go through all entries that we currently have and request the infos
@@ -1166,6 +1234,8 @@ void CServerBrowser::Update(bool ForceResort)
 		}
 	}
 
+	__SectionLock.Unlock();
+
 	// check if we need to resort
 	if(!(g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90))
 		if(m_Sorthash != SortHash() || ForceResort)
@@ -1174,6 +1244,10 @@ void CServerBrowser::Update(bool ForceResort)
 
 void CServerBrowser::Upgrade()
 {
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
+		return;
+
 	if(IsRefreshing())
 		return;
 

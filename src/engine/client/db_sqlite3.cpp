@@ -46,7 +46,6 @@ CSql::CSql(const char *pFilename)
 		sqlite3_close(m_pDB);
 	}
 
-	m_Lock = lock_create();
 	m_Running = true;
 	m_pThread = thread_init_named(InitWorker, this, "sqlite");
 }
@@ -56,20 +55,18 @@ CSql::~CSql()
 	m_Running = false;
 	if(m_pThread)
 	{
-		lock_wait(m_Lock);
+		LOCK_SECTION_DBG(m_Lock);
 		if(m_lpQueries.size())
 			dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", sqlite3_db_filename(m_pDB, "main"), (unsigned long)m_lpQueries.size());
-		lock_unlock(m_Lock);
+		__SectionLock.Unlock();
 		thread_wait(m_pThread);
 	}
-	lock_destroy(m_Lock);
 }
 
 void CSql::InsertQuery(CQuery *pQuery)
 {
-	lock_wait(m_Lock);
+	LOCK_SECTION_DBG(m_Lock);
 	m_lpQueries.push(pQuery);
-	lock_unlock(m_Lock);
 }
 
 void CSql::InitWorker(void *pUser)

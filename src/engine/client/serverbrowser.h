@@ -105,8 +105,8 @@ public:
 	int NumServers() const { return m_NumServers; }
 
 	int NumSortedServers() const { return m_NumSortedServers; }
-	const CServerInfo *SortedGet(int Index) const;
-	const CServerInfo *Get(int Index) const;
+	const CServerInfo *SortedGet(int Index);
+	const CServerInfo *Get(int Index);
 	int GetInfoAge(int Index) const;
 	const char *GetDebugString(int Index) const;
 
@@ -135,7 +135,7 @@ public:
 	//
 	void Update(bool ForceResort);
 	void Upgrade(); // only re-request all the infos
-	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
+	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo, bool NoSort);
 	void RequestCurrentServer(const NETADDR &Addr) const;
 
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
@@ -202,7 +202,7 @@ private:
 	int64 m_BroadcastTime;
 	int m_BroadcastExtraToken;
 
-	bool m_ServerdataLocked;
+	LOCK_SMART m_Lock;
 
 	// sorting criteria
 	bool SortCompareName(int Index1, int Index2) const;
