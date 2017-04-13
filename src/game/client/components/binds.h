@@ -7,7 +7,7 @@
 
 class CBinds : public CComponent
 {
-	char m_aaKeyBindings[KEY_LAST][128];
+	char *m_apKeyBindings[KEY_LAST];
 
 	int GetKeyID(const char *pKeyName);
 
@@ -25,6 +25,7 @@ class CBinds : public CComponent
 
 public:
 	CBinds();
+	~CBinds();
 
 	class CBindsSpecial : public CComponent
 	{
