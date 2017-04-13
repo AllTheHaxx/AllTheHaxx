@@ -19,11 +19,11 @@ public:
 	void SendCommand(const char *pCmd);
 	void OnNickChange(const char *pNewNick);
 
-	const char *CurrentNick() { return m_pClient->IRC()->GetNick(); } // XXX this is depreciated and only for compatibility
 	bool IsConnected() { return (m_pClient->IRC()->GetState() != IIRC::STATE_DISCONNECTED); }
 
+	virtual void OnMessageIRC(const char *pChan, const char *pUser, const char *pText);
+
 	virtual void OnConsoleInit();
-	virtual void OnReset();
 	virtual void OnRender();
 	virtual void OnShutdown();
 

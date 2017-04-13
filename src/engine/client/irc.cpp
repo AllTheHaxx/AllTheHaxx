@@ -677,8 +677,8 @@ void CIRC::StartConnection() // call this from a thread only!
 									aMsgFrom.insert(0, "<");
 									aMsgFrom.append("> ");
 									//aMsgFrom.insert(0, aTime);
-									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 								}
+								m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 							}
 						}
 					}
@@ -777,8 +777,8 @@ void CIRC::StartConnection() // call this from a thread only!
 									aMsgFrom.insert(0, "<");
 									aMsgFrom.append("> ");
 									//aMsgFrom.insert(0, aTime);
-									m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 								}
+								m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
 							}
 						}
 					}

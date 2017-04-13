@@ -154,7 +154,8 @@ void CFontMgr::UnloadFont(int ListIndex)
 		}
 	}
 	mem_zerob(pFontFile->m_apFonts);
-	dbg_msg("fontmgr", "unloaded font '%s'", pFontFile->m_Name.c_str());
+	if(g_Config.m_Debug)
+		dbg_msg("fontmgr", "unloaded font '%s'", pFontFile->m_Name.c_str());
 }
 
 void CFontMgr::LoadFolder()

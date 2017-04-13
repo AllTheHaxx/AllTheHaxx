@@ -640,11 +640,11 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 	if(DoButton_CheckBox(&s_ButtonIRCAutoconnect, Localize("Connect automatically"), g_Config.m_ClIRCAutoconnect, &Button, Localize("Connect to the Chat automatically on startup ... yeah, be social!")))
 		g_Config.m_ClIRCAutoconnect ^= 1;
 
-	MainView.HSplitTop(5.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_ButtonIRCPrintChat;
-	if(DoButton_CheckBox(&s_ButtonIRCPrintChat, Localize("Print to console"), g_Config.m_ClIRCPrintChat, &Button))
-		g_Config.m_ClIRCPrintChat ^= 1;
+//	MainView.HSplitTop(5.0f, 0, &MainView);
+//	MainView.HSplitTop(20.0f, &Button, &MainView);
+//	static CButtonContainer s_ButtonIRCPrintChat;
+//	if(DoButton_CheckBox(&s_ButtonIRCPrintChat, Localize("Print to console"), g_Config.m_ClIRCPrintChat, &Button))
+//		g_Config.m_ClIRCPrintChat ^= 1;
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
