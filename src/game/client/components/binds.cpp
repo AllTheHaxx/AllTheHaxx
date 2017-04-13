@@ -310,9 +310,9 @@ void CBinds::ConFindBind(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[1024];
 	for(int i = 0; i < KEY_LAST; i++)
 	{
-		if(pBinds->m_aaKeyBindings[i][0] == 0 || str_comp_nocase(pResult->GetString(0), pBinds->m_aaKeyBindings[i]))
+		if(pBinds->m_apKeyBindings[i][0] == 0 || str_comp_nocase(pResult->GetString(0), pBinds->m_apKeyBindings[i]))
 			continue;
-		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_aaKeyBindings[i]);
+		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_apKeyBindings[i]);
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		return;
 	}
@@ -327,9 +327,9 @@ void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[1024];
 	for(int i = 0; i < KEY_LAST; i++)
 	{
-		if(pBinds->m_aaKeyBindings[i][0] == 0 || str_comp_nocase(pResult->GetString(0), pBinds->Input()->KeyName(i)))
+		if(pBinds->m_apKeyBindings[i][0] == 0 || str_comp_nocase(pResult->GetString(0), pBinds->Input()->KeyName(i)))
 			continue;
-		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_aaKeyBindings[i]);
+		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_apKeyBindings[i]);
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		return;
 	}
@@ -345,9 +345,9 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[1024];
 	for(int i = 0; i < KEY_LAST; i++)
 	{
-		if(pBinds->m_aaKeyBindings[i][0] == 0)
+		if(pBinds->m_apKeyBindings[i][0] == 0)
 			continue;
-		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_aaKeyBindings[i]);
+		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_apKeyBindings[i]);
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 	}
 }
@@ -375,7 +375,7 @@ void CBinds::ConDumpFreeKeys(IConsole::IResult *pResult, void *pUserData)
 	int NotShown = 0;
 	for(int i = Start; i < End; i++)
 	{
-		if(pBinds->m_aaKeyBindings[i][0] != 0 || pBinds->Input()->KeyName(i)[0] == '&')
+		if(pBinds->m_apKeyBindings[i][0] != 0 || pBinds->Input()->KeyName(i)[0] == '&')
 		{
 			NotShown++;
 			continue;
