@@ -15,16 +15,19 @@ class CQuery
 {
 	MACRO_ALLOC_HEAP()
 	friend class CSql;
-
 private:
-	std::string m_Query;
+	char *m_pQueryStr;
+
 	sqlite3_stmt *m_pStatement;
+
+protected:
 	virtual void OnData();
+	bool Next();
 
 public:
-	virtual ~CQuery() {}
+	CQuery(char *pQueryBuf) : m_pQueryStr(pQueryBuf) {}
+	virtual ~CQuery();
 
-	bool Next();
 	int GetColumnCount() { return sqlite3_column_count(m_pStatement); }
 	const char *GetName(int i) { return sqlite3_column_name(m_pStatement, i); }
 	int GetType(int i) { return sqlite3_column_type(m_pStatement, i); }
@@ -35,9 +38,6 @@ public:
 	const char *GetText(int i) { return (const char *)sqlite3_column_text(m_pStatement, i); }
 	const void *GetBlob(int i) { return sqlite3_column_blob(m_pStatement, i); }
 	int GetSize(int i) { return sqlite3_column_bytes(m_pStatement, i); }
-
-	class CSql *m_pDatabase;
-	void Query(class CSql *pDatabase, char *pQuery);
 };
 
 class CSql
@@ -54,9 +54,10 @@ public:
 	CSql(const char *pFilename = "ath_data.db");
 	~CSql();
 
-	CQuery *Query(CQuery *pQuery, std::string QueryString);
+	void InsertQuery(CQuery *pQuery);
 
 private:
+	void ExecuteQuery(CQuery *pQuery);
 	void WorkerThread();
 	static void InitWorker(void *pSelf);
 };

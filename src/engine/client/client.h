@@ -51,10 +51,6 @@ public:
 	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
 };
 
-class CQueryNames : public CQuery
-{
-};
-
 
 class CClient : public IClient, public CDemoPlayer::IListener
 {

@@ -233,9 +233,17 @@ class CQueryRecent : public CQuery
 	sorted_array<CServerBrowser::RecentServer> *m_paRecentList;
 
 public:
-	CQueryRecent() { m_paRecentList = 0; }
-	CQueryRecent(sorted_array<CServerBrowser::RecentServer> *paRecentList) : m_paRecentList(paRecentList) { }
-	void OnData();
+	CQueryRecent(char *pQueryBuf) : CQuery(pQueryBuf),
+			m_paRecentList(0)
+	{
+	}
+
+	CQueryRecent(char *pQueryBuf, sorted_array<CServerBrowser::RecentServer> *paRecentList) : CQuery(pQueryBuf),
+			m_paRecentList(paRecentList)
+	{
+	}
+
+	virtual void OnData();
 };
 
 #endif

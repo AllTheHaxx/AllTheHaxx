@@ -26,7 +26,8 @@ CFetcher::~CFetcher()
 	m_Shutdown = true;
 	if(m_pThread)
 	{
-		dbg_msg("fetcher", "waiting for thread to finish...");
+		if(m_pFirst)
+			dbg_msg("fetcher", "waiting for thread %p to finish...", m_pThread);
 		thread_wait(m_pThread);
 		m_pThread = NULL;
 
@@ -112,7 +113,7 @@ void CFetcher::FetcherThread(void *pUser)
 	CALLSTACK_ADD();
 
 	CFetcher *pFetcher = (CFetcher *)pUser;
-	dbg_msg("fetcher", "thread started...");
+	dbg_msg("fetcher", "thread %p started...", pFetcher->m_pThread);
 	while(1)
 	{
 		lock_wait(pFetcher->m_Lock);
@@ -140,7 +141,7 @@ void CFetcher::FetcherThread(void *pUser)
 			thread_sleep(10);
 		}
 	}
-	dbg_msg("fetcher", "thread stopped");
+	dbg_msg("fetcher", "thread %p stopped", pFetcher->m_pThread);
 }
 
 void CFetcher::FetchFile(CFetchTask *pTask)

@@ -398,14 +398,18 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	m_pDatabase = new CSql();
 
-	char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS names (" \
+	char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS names_v2 (" \
 		"id INTEGER PRIMARY KEY AUTOINCREMENT, " \
 		"name TEXT NOT NULL UNIQUE, " \
 		"clan TEXT NOT NULL, " \
+		"server TEXT NOT NULL, " \
+		"gametype TEXT NOT NULL, " \
+		"num_clients TEXT NOT NULL, " \
+		"state TEXT NOT NULL, " \
+		"score INTEGER, " \
 		"last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
-	CQueryNames *pQuery = new CQueryNames();
-	pQuery->Query(m_pDatabase, pQueryBuf);
-	sqlite3_free(pQueryBuf);
+	CQuery *pQuery = new CQuery(pQueryBuf);
+	m_pDatabase->InsertQuery(pQuery);
 }
 
 CClient::~CClient()
@@ -1860,6 +1864,22 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				Info.m_NumReceivedClients++;
 			}
+		}
+
+		// add the name to the database
+		if(g_Config.m_ClUsernameFetching)
+		{
+			char *pQueryBuf = sqlite3_mprintf("INSERT OR REPLACE INTO names_v2 (name, clan, server, gametype, num_clients, state, score) VALUES ('%q', '%q', '%q', '%q', '%d', '%q', '%d');",
+											  pClient->m_aName,
+											  pClient->m_aClan,
+											  Info.m_aAddress,
+											  Info.m_aGameType,
+											  Info.m_NumClients,
+											  pClient->m_Player ? "player" : "spec",
+											  pClient->m_Score
+			);
+			CQuery *pQuery = new CQuery(pQueryBuf);
+			m_pDatabase->InsertQuery(pQuery);
 		}
 	}
 

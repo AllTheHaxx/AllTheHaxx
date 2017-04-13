@@ -29,7 +29,8 @@ CAStar::CAStar()
 
 void CAStar::OnShutdown()
 {
-	dbg_msg("astar", "waiting for threads to finish...");
+	if(m_pBuilderThread || m_pScoreThread)
+		dbg_msg("astar", "waiting for threads to finish...");
 	StopThreads();
 }
 

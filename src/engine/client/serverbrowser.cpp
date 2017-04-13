@@ -115,17 +115,15 @@ CServerBrowser::CServerBrowser()
 			"id INTEGER PRIMARY KEY, " \
 			"addr TEXT NOT NULL UNIQUE, " \
 			"last_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
-		CQueryRecent *pQuery = new CQueryRecent();
-		pQuery->Query(m_pRecentDB, pQueryBuf);
-		sqlite3_free(pQueryBuf);
+		CQueryRecent *pQuery = new CQueryRecent(pQueryBuf);
+		m_pRecentDB->InsertQuery(pQuery);
 	}
 
 	// read the entries from it
 	{
 		char *pQueryBuf = sqlite3_mprintf("SELECT * FROM 'recent' ORDER BY 'last_joined' DESC;");
-		CQueryRecent *pQuery = new CQueryRecent(&m_aRecentServers);
-		pQuery->Query(m_pRecentDB, pQueryBuf);
-		sqlite3_free(pQueryBuf);
+		CQueryRecent *pQuery = new CQueryRecent(pQueryBuf, &m_aRecentServers);
+		m_pRecentDB->InsertQuery(pQuery);
 	}
 }
 
@@ -1288,10 +1286,10 @@ void CServerBrowser::AddRecent(const NETADDR& Addr)
 	{
 		char aNetAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&Addr, aNetAddrStr, sizeof(aNetAddrStr), Addr.port);
+
 		char *pQueryBuf = sqlite3_mprintf("INSERT OR REPLACE INTO recent (addr) VALUES ('%q');", aNetAddrStr);
-		CQueryRecent *pQuery = new CQueryRecent();
-		pQuery->Query(m_pRecentDB, pQueryBuf);
-		sqlite3_free(pQueryBuf);
+		CQueryRecent *pQuery = new CQueryRecent(pQueryBuf);
+		m_pRecentDB->InsertQuery(pQuery);
 
 		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG, "srvbrowse", "added recent '%s'", aNetAddrStr);
 	}
@@ -1313,10 +1311,10 @@ void CServerBrowser::RemoveRecent(const NETADDR& Addr)
 	{
 		char aNetAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&Addr, aNetAddrStr, sizeof(aNetAddrStr), Addr.port);
+
 		char *pQueryBuf = sqlite3_mprintf("DELETE FROM recent WHERE addr = '%q';", aNetAddrStr);
-		CQueryRecent *pQuery = new CQueryRecent();
-		pQuery->Query(m_pRecentDB, pQueryBuf);
-		sqlite3_free(pQueryBuf);
+		CQueryRecent *pQuery = new CQueryRecent(pQueryBuf);
+		m_pRecentDB->InsertQuery(pQuery);
 
 		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG, "srvbrowse", "removed recent '%s'", aNetAddrStr);
 	}
@@ -1333,13 +1331,11 @@ void CServerBrowser::RemoveRecent(const NETADDR& Addr)
 
 void CServerBrowser::ClearRecent()
 {
-	// remove the address into the database
+	// remove the addresses from the database
 	{
 		char *pQueryBuf = sqlite3_mprintf("DROP TABLE IF EXISTS recent;");
-		CQueryRecent *pQuery = new CQueryRecent();
-		pQuery->Query(m_pRecentDB, pQueryBuf);
-		sqlite3_free(pQueryBuf);
-
+		CQueryRecent *pQuery = new CQueryRecent(pQueryBuf);
+		m_pRecentDB->InsertQuery(pQuery);
 	}
 
 	// remove it from our current session recent cache

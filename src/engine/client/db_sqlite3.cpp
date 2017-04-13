@@ -1,29 +1,27 @@
+
+#include <base/system++/threading.h>
 #include "db_sqlite3.h"
+
+
+CQuery::~CQuery()
+{
+	if(m_pQueryStr)
+		sqlite3_free(m_pQueryStr);
+}
 
 bool CQuery::Next()
 {
-	/*CALL_STACK_ADD();*/
-
 	int Ret = sqlite3_step(m_pStatement);
 	return Ret == SQLITE_ROW;
 }
-void CQuery::Query(CSql *pDatabase, char *pQuery)
-{
-	/*CALL_STACK_ADD();*/
 
-	m_pDatabase = pDatabase;
-	m_pDatabase->Query(this, pQuery);
-}
 void CQuery::OnData()
 {
-	/*CALL_STACK_ADD();*/
-
 	Next();
 }
+
 int CQuery::GetID(const char *pName)
 {
-	/*CALL_STACK_ADD();*/
-
 	for (int i = 0; i < GetColumnCount(); i++)
 	{
 		if (str_comp(GetName(i), pName) == 0)
@@ -35,8 +33,6 @@ int CQuery::GetID(const char *pName)
 
 CSql::CSql(const char *pFilename)
 {
-	/*CALL_STACK_ADD();*/
-
 	char aFilePath[768], aFullPath[1024];
 	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
 	str_format(aFullPath, sizeof(aFullPath), "%s/%s", aFilePath, pFilename);
@@ -57,74 +53,88 @@ CSql::CSql(const char *pFilename)
 
 CSql::~CSql()
 {
-	/*CALL_STACK_ADD();*/
-
 	m_Running = false;
 	if(m_pThread)
 	{
-		dbg_msg("sqlite", "[%s] waiting for worker thread to finish...", sqlite3_db_filename(m_pDB, "main"));
+		lock_wait(m_Lock);
+		if(m_lpQueries.size())
+			dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", sqlite3_db_filename(m_pDB, "main"), m_lpQueries.size());
+		lock_unlock(m_Lock);
 		thread_wait(m_pThread);
 	}
 	lock_destroy(m_Lock);
 }
 
-CQuery *CSql::Query(CQuery *pQuery, std::string QueryString)
+void CSql::InsertQuery(CQuery *pQuery)
 {
-	/*CALL_STACK_ADD();*/
-
-	pQuery->m_Query = QueryString;
-
-
 	lock_wait(m_Lock);
 	m_lpQueries.push(pQuery);
 	lock_unlock(m_Lock);
-
-	return pQuery;
 }
 
 void CSql::InitWorker(void *pUser)
 {
-	/*CALL_STACK_ADD();*/
-
 	CSql *pSelf = (CSql *)pUser;
 	pSelf->WorkerThread();
 }
 
 void CSql::WorkerThread()
 {
-	/*CALL_STACK_ADD();*/
-
 	while(1)
 	{
-		lock_wait(m_Lock); // lock queue
+		if(m_Running);
+			thread_sleep(500);
+
+		LOCK_SECTION_DBG(m_Lock);
 		if (m_lpQueries.size() > 0)
 		{
-			CQuery *pQuery = m_lpQueries.front();
-			m_lpQueries.pop();
-			lock_unlock(m_Lock); // unlock queue
-
-			int Ret;
-			Ret = sqlite3_prepare_v2(m_pDB, pQuery->m_Query.c_str(), -1, &pQuery->m_pStatement, 0);
-			if (Ret == SQLITE_OK)
+			// do 250 queries per transaction - cache them so we can release the lock as early as possible
+			enum { QUERIES_PER_TRANSACTION = 250 };
+			CQuery *apQueries[QUERIES_PER_TRANSACTION];
+			int NumQueries = 0;
+			for(int i = 0; i < QUERIES_PER_TRANSACTION && m_lpQueries.size() > 0; i++)
 			{
-				pQuery->OnData();
-
-				sqlite3_finalize(pQuery->m_pStatement);
+				apQueries[NumQueries++] = m_lpQueries.front();
+				m_lpQueries.pop();
 			}
-			else
-				dbg_msg("SQLite", "%s", sqlite3_errmsg(m_pDB));
+			__SectionLock.Unlock();
 
-			delete pQuery;
-		}
-		else
-		{
-			lock_unlock(m_Lock); //unlock queue
-			if(!m_Running)
-				return;
-			thread_sleep(100);
-		}
+			// begin transaction
+			{
+				char *pQueryStr = sqlite3_mprintf("BEGIN");
+				CQuery Begin(pQueryStr);
+				ExecuteQuery(&Begin);
+			}
 
-		if(m_Running)
-			thread_sleep(10);
+			// perform queries
+			for(int i = 0; i < NumQueries; i++)
+			{
+				CQuery *pQuery = apQueries[i];
+				ExecuteQuery(pQuery);
+				delete pQuery;
+			}
+
+			// end transaction
+			{
+				char *pQueryStr = sqlite3_mprintf("END");
+				CQuery End(pQueryStr);
+				ExecuteQuery(&End);
+			}
+		}
+		else if(!m_Running)
+			return;
 	}
+}
+
+void CSql::ExecuteQuery(CQuery *pQuery)
+{
+	int Ret = sqlite3_prepare_v2(m_pDB, pQuery->m_pQueryStr, -1, &pQuery->m_pStatement, 0);
+	if (Ret == SQLITE_OK)
+	{
+		pQuery->OnData();
+
+		sqlite3_finalize(pQuery->m_pStatement);
+	}
+	else
+		dbg_msg("SQLite/error", "%s", sqlite3_errmsg(m_pDB));
 }
