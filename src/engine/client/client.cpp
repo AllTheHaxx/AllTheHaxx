@@ -3148,8 +3148,10 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
-	if((m_pInputThread = thread_init_named(InputThread, this, "input")))
+#if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
+	if((m_pInputThread = thread_init_named(InputThread, this, "inputthread")))
 		thread_detach(m_pInputThread);
+#endif
 
 	// connect to the server if wanted
 	/*
