@@ -22,6 +22,7 @@ public:
 	bool m_GodlikeSpec;
 	vec2 m_Center;
 	vec2 m_WantedCenter;
+	vec2 m_SuperDynStartPos;
 	vec2 m_RotationCenter;
 	bool m_ZoomSet;
 	float m_Zoom;

@@ -19,6 +19,7 @@
 
 #include "console.h"
 #include "controls.h"
+#include "camera.h"
 
 enum { LEFT_JOYSTICK_X = 0, LEFT_JOYSTICK_Y = 1,
 	RIGHT_JOYSTICK_X = 2, RIGHT_JOYSTICK_Y = 3,
@@ -527,7 +528,9 @@ void CControls::OnRender()
 
 	// update target pos
 	ClampMousePos();
-	if(m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if(m_SuperDyncam[g_Config.m_ClDummy] && !g_Config.m_ClSuperDynRelative)
+		m_TargetPos[g_Config.m_ClDummy] = m_pClient->m_pCamera->m_SuperDynStartPos + m_MousePos[g_Config.m_ClDummy];
+	else if(m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 		m_TargetPos[g_Config.m_ClDummy] = m_pClient->m_LocalCharacterPos + m_MousePos[g_Config.m_ClDummy];
 	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
 		m_TargetPos[g_Config.m_ClDummy] = m_pClient->m_Snap.m_SpecInfo.m_Position + m_MousePos[g_Config.m_ClDummy];
@@ -570,7 +573,7 @@ void CControls::ClampMousePos()
 {
 	CALLSTACK_ADD();
 
-	if((m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0))
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
 	{
 		m_MousePos[g_Config.m_ClDummy].x = clamp(m_MousePos[g_Config.m_ClDummy].x, 200.0f, Collision()->GetWidth()*32-200.0f);
 		m_MousePos[g_Config.m_ClDummy].y = clamp(m_MousePos[g_Config.m_ClDummy].y, 200.0f, Collision()->GetHeight()*32-200.0f);

@@ -158,36 +158,39 @@ void CCamera::OnRender()
 
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 			m_WantedCenter = m_pClient->m_Snap.m_SpecInfo.m_Position + CameraOffset;
+		else if(!g_Config.m_ClSuperDynRelative && m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy])
+			m_WantedCenter = m_SuperDynStartPos + CameraOffset;
 		else
 			m_WantedCenter = m_pClient->m_LocalCharacterPos + CameraOffset;
 	}
 
-	float MouseMax;
+
+	static int64 s_SuperDynStartTime = 0;
+	if(s_SuperDynStartTime == 0 && m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy])
 	{
-		float CameraMaxDistance = g_Config.m_ClCameraMaxDistance;
-		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		MouseMax = min(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
+		s_SuperDynStartTime = time_get();
+		m_SuperDynStartPos = m_Center;
+	}
+	if(!m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy])
+	{
+		s_SuperDynStartTime = 0;
+		m_SuperDynStartPos = m_Center;
 	}
 
-	if(m_WantedCenter != vec2(0.0f, 0.0f) &&
-			(
-					((g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active) || g_Config.m_ClCinematicCamera == 2 ||
-							(m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy] &&
-									(
-											distance(m_pClient->m_LocalCharacterPos, m_Center) < MouseMax
-//											|| distance(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]+m_pClient->m_LocalCharacterPos, m_WantedCenter) > 5.0f
-									)
-							) ||
-							(
-									!m_pClient->m_pControls->m_SuperDyncam[g_Config.m_ClDummy] &&
-									distance(m_Center, m_WantedCenter) > MouseMax
-							)
-					) ||
-							Client()->State() == IClient::STATE_OFFLINE
-			)
-		)
+	const float TRANSITON_TIME = 0.3f;
+	float TransitionEnd = (float)s_SuperDynStartTime + TRANSITON_TIME * (float)time_freq();
+
+	if(s_SuperDynStartTime && time_get() < TransitionEnd)
+	{
+		float TransitionMargin = (TransitionEnd-time_get())/(TRANSITON_TIME*time_freq());
+		const vec2& PointOfReference = g_Config.m_ClSuperDynRelative ? m_pClient->m_LocalCharacterPos : m_SuperDynStartPos;
+		vec2 Pos = PointOfReference + (m_WantedCenter-PointOfReference);
+		smooth_set(&m_Center.x, Pos.x, 25.0f - 20.0f * (1.0f-TransitionMargin), Client()->RenderFrameTime());
+		smooth_set(&m_Center.y, Pos.y, 25.0f - 20.0f * (1.0f-TransitionMargin), Client()->RenderFrameTime());
+	}
+	else if(m_WantedCenter != vec2(0.0f, 0.0f) &&
+			(Client()->State() == IClient::STATE_OFFLINE ||
+			(g_Config.m_ClCinematicCamera == 2 || (g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active))))
 	{
 		vec2 Speed(0);
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_pLocalCharacter)

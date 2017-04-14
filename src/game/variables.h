@@ -81,6 +81,7 @@ MACRO_CONFIG_INT(ClDyncamMaxDistance, cl_dyncam_max_distance, 1000, 0, 2000, CFG
 MACRO_CONFIG_INT(ClDyncamMousesens, cl_dyncam_mousesens, 0, 0, 100000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Mouse sens used when dyncam is toggled on")
 MACRO_CONFIG_INT(ClDyncamDeadzone, cl_dyncam_deadzone, 300, 1, 1300, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dynamic camera dead zone")
 MACRO_CONFIG_INT(ClDyncamFollowFactor, cl_dyncam_follow_factor, 60, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dynamic camera follow factor")
+MACRO_CONFIG_INT(ClSuperDynRelative, cl_superdyncam_relative, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Make superdyn position relative to your tee (to match server's position)")
 MACRO_CONFIG_INT(ClCameraMaxDistance, cl_camera_max_distance, 200, 0, 99999, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Super dynamic camera")
 
 MACRO_CONFIG_INT(EdZoomTarget, ed_zoom_target, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom to the current mouse target")
