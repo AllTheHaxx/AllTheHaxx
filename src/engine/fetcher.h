@@ -36,7 +36,7 @@ public:
 	~CFetchTask()
 	{
 		#if defined(CONF_DEBUG)
-		dbg_assert(m_State != STATE_RUNNING && m_State != STATE_QUEUED, "deleted an active fetch task!");
+		dbg_assert_legacy(m_State != STATE_RUNNING && m_State != STATE_QUEUED, "deleted an active fetch task!");
 		#endif
 	}
 
