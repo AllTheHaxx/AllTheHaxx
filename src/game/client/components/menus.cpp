@@ -1530,17 +1530,17 @@ void CMenus::RenderLoading()
 
 #define MAGIC_NUMBER 51
 #define X(N) ((N)^(MAGIC_NUMBER))
-	const char pProtCaption[] = {
+	const char aProtCaption[] = {
 			X(76), X(111), X(97), X(100), X(105), X(110), X(103), X(32),
 			X(65), X(108), X(108), X(84), X(104), X(101), X(72), X(97), X(120), X(120),
 			0
 	};
 #undef X
 
-	static char aCaption[sizeof(pProtCaption)] = {0};
+	static char aCaption[sizeof(aProtCaption)] = {0};
 	if(aCaption[0] == 0)
 	{
-		mem_copy(aCaption, pProtCaption, sizeof(aCaption));
+		mem_copy(aCaption, aProtCaption, sizeof(aCaption));
 		for(int i = 0; aCaption[i] != 0; i++)
 		{
 			aCaption[i] ^= MAGIC_NUMBER;
@@ -1555,38 +1555,42 @@ void CMenus::RenderLoading()
 	r.h = h;
 	UI()->DoLabel(&r, aCaption, 48.0f, 0, -1);
 
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.50f);
-	RenderTools()->DrawRoundRect(x+40, y+h-75, w-80, 25, 5.0f);
-	Graphics()->SetColor(1,1,1,0.50f);
-	RenderTools()->DrawRoundRect(x+40, y+h-75, (w-80)*Percent, 25, 5.0f);
-	Graphics()->QuadsEnd();
+	if(!g_Config.m_ClSimpleLoadingScreen)
+	{
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.50f);
+		RenderTools()->DrawRoundRect(x + 40, y + h - 75, w - 80, 25, 5.0f);
+		Graphics()->SetColor(1, 1, 1, 0.50f);
+		RenderTools()->DrawRoundRect(x + 40, y + h - 75, (w - 80) * Percent, 25, 5.0f);
+		Graphics()->QuadsEnd();
 
-	CUIRect l;
-	l.x = x;
-	l.y = y+97;
-	l.w = w;
-	l.h = h;
 
-	UI()->DoLabel(&l, m_aLoadLabel, 12.0f, 0, -1);
+		CUIRect l;
+		l.x = x;
+		l.y = y + 97;
+		l.w = w;
+		l.h = h;
 
-	char aBuf[16];
+		UI()->DoLabel(&l, m_aLoadLabel, 12.0f, 0, -1);
 
-	str_format(aBuf, sizeof(aBuf), "%.2f%%", (float)(Percent*100.0f));
+		char aBuf[16];
 
-	CUIRect p;
+		str_format(aBuf, sizeof(aBuf), "%.2f%%", Percent * 100.0f);
 
-	p.x = x;
-	p.y = y+125;
-	p.w = w;
-	p.h = h;
+		CUIRect p;
 
-	UI()->DoLabel(&p, aBuf, 16.0f, 0, -1);
+		p.x = x;
+		p.y = y + 125;
+		p.w = w;
+		p.h = h;
+
+		UI()->DoLabel(&p, aBuf, 16.0f, 0, -1);
+	}
 
 	CUIRect c;
 	c.x = x;
-	c.y = y+160;
+	c.y = y + (g_Config.m_ClSimpleLoadingScreen ? 130 : 160);
 	c.w = w;
 	c.h = h;
 
@@ -1620,7 +1624,17 @@ void CMenus::RenderLoading()
 
 	UI()->DoLabel(&c, pSaying, 22.0f, 0, -1);
 
+	// swap only twice if we are using the simple loading screen
+	if(g_Config.m_ClSimpleLoadingScreen)
+	{
+		static int s_NumIterations = 0;
+		if(s_NumIterations > 2)
+			return;
+		s_NumIterations++;
+	}
+
 	Graphics()->Swap();
+
 }
 
 void CMenus::RenderNews(CUIRect MainView)

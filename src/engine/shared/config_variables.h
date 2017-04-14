@@ -45,6 +45,7 @@ MACRO_CONFIG_INT(ClPrintBroadcasts, cl_print_broadcasts, 0, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClPrintMotd, cl_print_motd, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Print motd to console")
 MACRO_CONFIG_INT(ClFriendsIgnoreClan, cl_friends_ignore_clan, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Ignore clan tag when searching for friends")
 
+MACRO_CONFIG_INT(ClSimpleLoadingScreen, cl_simple_loading_screen, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use a static loading screen (can speed up client start a lot on certain machines)")
 MACRO_CONFIG_INT(ClEventthread, cl_eventthread, 0, 0, 1, CFGFLAG_CLIENT, "Enables the usage of a thread to pump the events")
 
 #if !defined(CONF_PLATFORM_MACOSX)
