@@ -1685,7 +1685,7 @@ void CMenus::RenderBrowser(CUIRect MainView, bool Ingame)
 	{
 		PREPARE_BUTTON(Localize("LAN"))
 		static CButtonContainer s_LanButton;
-		if(DoButton_MenuTab(&s_LanButton, pLabelText, Page == PAGE_BROWSER_LAN, &Button, 0))
+		if(DoButton_MenuTab(&s_LanButton, pLabelText, Page == PAGE_BROWSER_LAN, &Button, 0) && !ServerBrowser()->IsLocked())
 		{
 			if(Page != PAGE_BROWSER_LAN)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
@@ -1697,7 +1697,7 @@ void CMenus::RenderBrowser(CUIRect MainView, bool Ingame)
 	{
 		PREPARE_BUTTON(Localize("Favorites"))
 		static CButtonContainer s_FavoritesButton;
-		if(DoButton_MenuTab(&s_FavoritesButton, pLabelText, Page == PAGE_BROWSER_FAVORITES, &Button, 0))
+		if(DoButton_MenuTab(&s_FavoritesButton, pLabelText, Page == PAGE_BROWSER_FAVORITES, &Button, 0) && !ServerBrowser()->IsLocked())
 		{
 			if(Page != PAGE_BROWSER_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
@@ -1709,7 +1709,7 @@ void CMenus::RenderBrowser(CUIRect MainView, bool Ingame)
 	{
 		PREPARE_BUTTON(Localize("Recent"))
 		static CButtonContainer s_RecentButton;
-		if(DoButton_MenuTab(&s_RecentButton, pLabelText, Page == PAGE_BROWSER_RECENT, &Button, 0))
+		if(DoButton_MenuTab(&s_RecentButton, pLabelText, Page == PAGE_BROWSER_RECENT, &Button, 0) && !ServerBrowser()->IsLocked())
 		{
 			if(Page != PAGE_BROWSER_RECENT)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
@@ -1722,7 +1722,7 @@ void CMenus::RenderBrowser(CUIRect MainView, bool Ingame)
 	{
 		PREPARE_BUTTON(Localize("DDNet"))
 		static CButtonContainer s_DDNetButton;
-		if(DoButton_MenuTab(&s_DDNetButton, pLabelText, Page==PAGE_BROWSER_DDNET, &Button, 0))
+		if(DoButton_MenuTab(&s_DDNetButton, pLabelText, Page==PAGE_BROWSER_DDNET, &Button, 0) && !ServerBrowser()->IsLocked())
 		{
 			if (Page != PAGE_BROWSER_DDNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);

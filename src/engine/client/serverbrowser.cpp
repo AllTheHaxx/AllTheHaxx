@@ -1056,7 +1056,6 @@ void CServerBrowser::Update(bool ForceResort)
 {
 	int64 Timeout = time_freq();
 	int64 Now = time_get();
-	int Count;
 	CServerEntry *pEntry, *pNext;
 
 	// do server list requests
@@ -1170,7 +1169,7 @@ void CServerBrowser::Update(bool ForceResort)
 		return;
 
 	pEntry = m_pFirstReqServer;
-	Count = 0;
+	int Count = 0;
 	while(1) // go through all entries that we currently have and request the infos
 	{
 		if(!pEntry) // no more entries
@@ -1644,4 +1643,11 @@ void CServerBrowser::DDNetTypeFilterClean()
 	}
 
 	str_copy(g_Config.m_BrFilterExcludeTypes, aNewList, sizeof(g_Config.m_BrFilterExcludeTypes));
+}
+
+bool CServerBrowser::IsLocked()
+{
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	bool WasLocked = !__SectionLock.TryToLock();
+	return WasLocked;
 }

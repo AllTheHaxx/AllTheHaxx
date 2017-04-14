@@ -125,6 +125,7 @@ public:
 	virtual bool CacheExists() const = 0;
 
 	virtual int NumServers() const = 0;
+	virtual bool IsLocked() = 0;
 
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) = 0;

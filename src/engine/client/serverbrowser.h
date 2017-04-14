@@ -103,6 +103,7 @@ public:
 	int UpgradeProgression() const;
 
 	int NumServers() const { return m_NumServers; }
+	bool IsLocked();
 
 	int NumSortedServers() const { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index);
