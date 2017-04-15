@@ -465,7 +465,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 
 					// apply the changes
 					str_copy(pStr, LineInput.GetString(), StrSize);
-					s_AtIndex = LineInput.GetCursorOffset();
+					s_AtIndex = min((int)StrSize, LineInput.GetCursorOffset());
 				}
 			}
 
@@ -614,10 +614,10 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 		if(w-*pOffset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1);
+			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr);
 			do
 			{
-				*pOffset += min(wt-*pOffset-Textbox.w, Textbox.w/3);
+				*pOffset += min(wt-*pOffset-Textbox.w, Textbox.w/3.0f);
 			}
 			while(w-*pOffset > Textbox.w);
 		}
@@ -626,7 +626,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 			// move to the right
 			do
 			{
-				*pOffset = max(0.0f, *pOffset-Textbox.w/3);
+				*pOffset = max(0.0f, *pOffset-Textbox.w/3.0f);
 			}
 			while(w-*pOffset < 0.0f);
 		}
@@ -1498,6 +1498,7 @@ static const char *s_apSayings[] = {
 		,"Tell me, Mechanist, is it true?"
 		,"Remember: the Weighted Companion Cube cannot talk!"
 		,"We are here to drink your beer!"
+		,"If it ain't broken, break it!"
 };
 
 void CMenus::RenderLoading()
