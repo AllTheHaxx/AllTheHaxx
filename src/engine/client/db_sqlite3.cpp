@@ -79,7 +79,7 @@ void CSql::WorkerThread()
 {
 	while(1)
 	{
-		if(m_Running);
+		if(m_Running)
 			thread_sleep(500);
 
 		LOCK_SECTION_DBG(m_Lock);
