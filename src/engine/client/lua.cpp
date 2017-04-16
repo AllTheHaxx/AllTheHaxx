@@ -313,8 +313,8 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 
 void CLua::ScriptEnterFullscreen(CLuaFile *pLF)
 {
+#if defined(FEATURE_LUA)
 	m_pFullscreenedScript = pLF;
-
 	try
 	{
 		LuaRef func = pLF->GetFunc("OnEnterFullscreen");
@@ -325,10 +325,12 @@ void CLua::ScriptEnterFullscreen(CLuaFile *pLF)
 	{
 		HandleException(e, pLF);
 	}
+#endif
 }
 
 void CLua::ExitFullscreen()
 {
+#if defined(FEATURE_LUA)
 	dbg_assert(m_pFullscreenedScript, "CLua::ExitFullscreen called with no fullscreened script");
 
 	try
@@ -343,6 +345,7 @@ void CLua::ExitFullscreen()
 	}
 
 	m_pFullscreenedScript = 0;
+#endif
 }
 
 

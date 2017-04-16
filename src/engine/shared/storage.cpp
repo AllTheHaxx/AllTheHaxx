@@ -3,8 +3,7 @@
 #include <base/system.h>
 #include <base/system++/io.h>
 #include <engine/storage.h>
-#include <lua.h>
-#include <engine/client/luabinding.h>
+//#include <engine/client/luabinding.h>
 #include "linereader.h"
 
 // compiled-in data-dir path
