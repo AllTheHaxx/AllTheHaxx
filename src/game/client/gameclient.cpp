@@ -557,6 +557,29 @@ void CGameClient::OnInit()
 
 	m_ResetConfig = false;
 
+	// auto-update the config
+	if(g_Config.m_ClConfigVersion < 3013)
+	{
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3013", g_Config.m_ClConfigVersion);
+
+		#define UPDATE_BIND(OLD, NEW) \
+		{ const char *pBindKey = m_pBinds->GetKey(OLD); \
+			if(pBindKey && *pBindKey) \
+            { \
+				Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "binds", "rebinding %s: %s -> %s", pBindKey, OLD, NEW); \
+                m_pBinds->Bind(Input()->GetKeyID(std::string(pBindKey)), NEW); \
+			} \
+		}
+
+		UPDATE_BIND("+hotbar", "toggle_hotbar")
+		UPDATE_BIND("+irc", "toggle_irc")
+		UPDATE_BIND("+unlock_mouse", "unlock_mouse")
+
+		#undef UPDATE_BIND
+	}
+	g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
+
+
 	// Set free binds to DDRace binds if it's active
 	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
 		gs_Binds.SetDDRaceBinds(true);
@@ -1177,7 +1200,7 @@ void CGameClient::ProcessEvents()
 		{
 			CNetEvent_SoundWorld *ev = (CNetEvent_SoundWorld *)pData;
 			if(g_Config.m_SndGame &&
-					(ev->m_SoundID != SOUND_HAMMER_FIRE || g_Config.m_SndHammer) &&
+					(ev->m_SoundID != SOUND_HAMMER_FIRE || g_Config.m_SndHammer) && (ev->m_SoundID != SOUND_HAMMER_HIT || g_Config.m_SndHammer) &&
 					(ev->m_SoundID != SOUND_GUN_FIRE || g_Config.m_SndGun) &&
 					(ev->m_SoundID != SOUND_SHOTGUN_FIRE || g_Config.m_SndShotgun) &&
 					(ev->m_SoundID != SOUND_GRENADE_FIRE || g_Config.m_SndGrenade) && (ev->m_SoundID != SOUND_GRENADE_EXPLODE || g_Config.m_SndGrenade) &&

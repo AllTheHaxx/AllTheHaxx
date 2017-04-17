@@ -26,14 +26,10 @@ void CMenus::ConKeyToggleHotbar(IConsole::IResult *pResult, void *pUserData)
 	CMenus *pSelf = (CMenus *)pUserData;
 	if(pSelf->Client()->State() == IClient::STATE_ONLINE)
 	{
-		if(pResult->GetInteger(0) != 0)
-		{
-			if(pSelf->m_HotbarActive ^= 1)
-				pSelf->Input()->SetIMEState(true);
-			else
-				pSelf->Input()->SetIMEState(false);
-		}
-
+		if(pSelf->m_HotbarActive ^= 1)
+			pSelf->Input()->SetIMEState(true);
+		else
+			pSelf->Input()->SetIMEState(false);
 	}
 }
 

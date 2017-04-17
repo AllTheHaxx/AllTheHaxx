@@ -2443,11 +2443,7 @@ void CMenus::ConKeyShortcutRelMouse(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CMenus *pSelf = (CMenus *)pUserData;
-
-	if(pResult->GetInteger(0) != 0)
-	{
-		pSelf->ToggleMouseMode();
-	}
+	pSelf->ToggleMouseMode();
 }
 
 vec2 CMenus::GetMousePosRel() const

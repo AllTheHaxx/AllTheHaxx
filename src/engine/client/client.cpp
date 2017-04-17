@@ -2936,7 +2936,6 @@ void CClient::Update()
 		}
 		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
 		{
-			delete m_pMapdownloadTask;
 			m_pMapdownloadTask = 0;
 		}
 	}
@@ -4271,7 +4270,6 @@ int main(int argc, const char **argv) // ignore_convention
 			g_Config.m_ClAntiPingWeapons = 1;
 		}
 	}
-	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention

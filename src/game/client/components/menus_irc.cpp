@@ -17,13 +17,7 @@ void CMenus::ConKeyToggleIRC(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CMenus *pSelf = (CMenus *)pUserData;
-	//if(pSelf->Client()->State() == IClient::STATE_ONLINE)
-	{
-		if(pResult->GetInteger(0) != 0)
-		{
-			pSelf->ToggleIRC();
-		}
-	}
+	pSelf->ToggleIRC();
 }
 
 bool CMenus::ToggleIRC()
