@@ -190,7 +190,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 			TextRender()->SetDefaultFont(pDefaultFont);
 		}
 		if(!pDefaultFont)
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
+			Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
 	}
 }
 

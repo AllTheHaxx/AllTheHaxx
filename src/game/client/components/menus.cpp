@@ -1794,7 +1794,10 @@ int CMenus::Render()
 			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 			{
 				if(m_pClient->ServerBrowser()->CacheExists())
+				{
 					m_pClient->ServerBrowser()->LoadCache();
+					ServerBrowser()->Refresh(-1, true);
+				}
 				else
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			} else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_LAN)
