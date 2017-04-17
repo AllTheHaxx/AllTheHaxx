@@ -3277,7 +3277,7 @@ void CClient::Run()
 		}
 
 		// update input
-		if(Input()->Update())
+		if(Input()->Update()) // -- TODO: this should maybe behave different in console mode, right now it gets stuck
 			break;	// SDL_QUIT
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)

@@ -327,7 +327,7 @@ void CBinds::ConDumpBind(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[1024];
 	for(int i = 0; i < KEY_LAST; i++)
 	{
-		if(pBinds->m_apKeyBindings[i][0] == 0 || str_comp_nocase(pResult->GetString(0), pBinds->Input()->KeyName(i)))
+		if(pBinds->m_apKeyBindings[i] == NULL || str_comp_nocase(pResult->GetString(0), pBinds->Input()->KeyName(i)))
 			continue;
 		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_apKeyBindings[i]);
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
