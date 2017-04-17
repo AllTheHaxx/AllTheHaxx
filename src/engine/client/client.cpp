@@ -1368,6 +1368,9 @@ void CClient::Render()
 {
 	CALLSTACK_ADD();
 
+	if(State() != IClient::STATE_ONLINE)
+		g_Config.m_ClOverlayEntities = 0; // uhm rather hacky but... too lazy right now
+
 	if(g_Config.m_ClOverlayEntities)
 	{
 		vec3 bg = HslToRgb(vec3(g_Config.m_ClBackgroundEntitiesHue/255.0f, g_Config.m_ClBackgroundEntitiesSat/255.0f, g_Config.m_ClBackgroundEntitiesLht/255.0f));
