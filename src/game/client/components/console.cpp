@@ -929,7 +929,7 @@ void CGameConsole::OnRender()
 			const float SIZE = 17.0f;
 
 			char aBuf[256];
-			const char *pBoundKey = m_pClient->m_pBinds->GetKey("+unlock_mouse");
+			const char *pBoundKey = m_pClient->m_pBinds->GetKey("unlock_mouse");
 			if(pBoundKey && pBoundKey[0] != '\0')
 				str_format(aBuf, sizeof(aBuf), Localize("Press %s to switch back to ingame mouse"), pBoundKey);
 			else

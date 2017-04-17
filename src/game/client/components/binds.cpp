@@ -181,12 +181,12 @@ void CBinds::SetDefaults()
 	Bind('q', "say /pause");
 	Bind('p', "say /pause");
 
-	Bind(KEY_F5, "+irc");
+	Bind(KEY_F5, "toggle_irc");
 	Bind(KEY_F6, "toggle_lua_console");
-	Bind(KEY_F7, "+hotbar");
+	Bind(KEY_F7, "toggle_hotbar");
 
 	Bind(KEY_F11, "toggle gfx_fullscreen 0 1");
-	Bind(KEY_F12, "+unlock_mouse");
+	Bind(KEY_F12, "unlock_mouse");
 
 	// DDRace
 

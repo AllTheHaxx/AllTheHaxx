@@ -83,10 +83,10 @@ static CKeyInfo gs_aKeys[] =
 	{ "Toggle X-Ray", "toggle cl_overlay_entities 0 90", 0 },
 	{ "Zoom in", "zoom+", 0 },
 	{ "Zoom out", "zoom-", 0 },
-	{ "Toggle IRC", "+irc", 0 },
+	{ "Toggle IRC", "toggle_irc", 0 },
 	{ "Toggle Lua Console", "toggle_lua_console", 0 },
-	{ "Toggle Hotbar", "+hotbar", 0 },
-	{ "Unlock Mouse", "+unlock_mouse", 0 },
+	{ "Toggle Hotbar", "toggle_hotbar", 0 },
+	{ "Unlock Mouse", "unlock_mouse", 0 },
 };
 
 const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);

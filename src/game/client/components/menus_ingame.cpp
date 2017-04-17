@@ -293,8 +293,8 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("IRC Chat")), &Button, &ButtonBar);
 	static CButtonContainer s_OpenChatButton;
 	char aBuf[64];
-	if(str_comp(GameClient()->m_pBinds->GetKey("+irc"), ""))
-		str_format(aBuf, sizeof(aBuf), Localize("Open the IRC overlay (Key: %s)"), GameClient()->m_pBinds->GetKey("+irc"));
+	if(str_comp(GameClient()->m_pBinds->GetKey("toggle_irc"), ""))
+		str_format(aBuf, sizeof(aBuf), Localize("Open the IRC overlay (Key: %s)"), GameClient()->m_pBinds->GetKey("toggle_irc"));
 	else
 		str_copyb(aBuf, Localize("Open the IRC overlay"));
 	if(DoButton_Menu(&s_OpenChatButton, Localize("IRC Chat"), 0, &Button, aBuf))

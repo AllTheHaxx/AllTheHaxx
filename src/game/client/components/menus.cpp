@@ -164,10 +164,10 @@ void CMenus::OnConsoleInit()
 {
 	CALLSTACK_ADD();
 
-	Console()->Register("+hotbar", "", CFGFLAG_CLIENT, ConKeyToggleHotbar, this, "Access the hotbar");
-	Console()->Register("+irc", "", CFGFLAG_CLIENT, ConKeyToggleIRC, this, "Toggle the IRC");
+	Console()->Register("toggle_hotbar", "", CFGFLAG_CLIENT, ConKeyToggleHotbar, this, "Access the hotbar");
+	Console()->Register("toggle_irc", "", CFGFLAG_CLIENT, ConKeyToggleIRC, this, "Toggle the IRC");
 
-	Console()->Register("+unlock_mouse", "", CFGFLAG_CLIENT, ConKeyShortcutRelMouse, this, "Release the mouse");
+	Console()->Register("unlock_mouse", "", CFGFLAG_CLIENT, ConKeyShortcutRelMouse, this, "Release the mouse");
 }
 
 vec4 CMenus::ButtonColorMul(CButtonContainer *pBC)
@@ -1372,8 +1372,8 @@ static const char *s_apSayings[] = {
 		,"Blue is the color of life...!"
 		,"Melons can be green, yellow or a hat!"
 		,"Sublime!"
-		,"Try +hotbar!"
-		,"Try +irc"
+		,"Try toggle_hotbar!"
+		,"Try toggle_irc!"
 		,"- allthehaxx.github.io -"
 		,"beta no more!"
 		,"The crasher got removed :c"
