@@ -193,8 +193,9 @@ void CCamera::OnRender()
 			(g_Config.m_ClCinematicCamera == 2 || (g_Config.m_ClCinematicCamera && m_pClient->m_Snap.m_SpecInfo.m_Active))))
 	{
 		vec2 Speed(0);
+		const vec2& v = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Predicted.m_Vel;
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_pLocalCharacter)
-			Speed = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX, m_pClient->m_Snap.m_pLocalCharacter->m_VelY) / 100.0f;
+			Speed = vec2(v.x, v.y) / 100.0f;
 		const float delay = (Client()->State() == IClient::STATE_OFFLINE ? 50.0f : g_Config.m_ClCinematicCameraDelay);
 		smooth_set(&m_Center.x, m_WantedCenter.x+Speed.x, delay, Client()->RenderFrameTime());
 		smooth_set(&m_Center.y, m_WantedCenter.y+Speed.y, delay, Client()->RenderFrameTime());
