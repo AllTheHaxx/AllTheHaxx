@@ -166,6 +166,9 @@ char *CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tile
 									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
 									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
 									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32))
+					) || (
+							Collision()->GetTileRaw(x * 32, y * 32) == TILE_STOP // I have no clue how we could handle one-way stop tiles :o
+							// TODO: have a clue how to handle one-way stop tiles + implement it.
 					);
 		}
 	}
