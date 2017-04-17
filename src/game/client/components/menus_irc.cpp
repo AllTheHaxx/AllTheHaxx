@@ -106,20 +106,22 @@ void CMenus::RenderIRC(CUIRect MainView)
 		Button.VSplitLeft(40.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Nick:"), 14.0f, -1);
 		static float OffsetNick;
-		if(g_Config.m_ClIRCNick[0] == 0)
-		{
-			str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
-			str_irc_sanitize(g_Config.m_ClIRCNick);
-		} //TODO_ here?
 		static CButtonContainer s_EditboxIRCNick;
-		DoEditBox(&s_EditboxIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &OffsetNick,
-				false, CUI::CORNER_ALL);
+		DoEditBox(&s_EditboxIRCNick, &Button, g_Config.m_ClIRCNick, sizeof(g_Config.m_ClIRCNick), 12.0f, &OffsetNick);
 
 		EntryBox.HSplitTop(5.0f, 0x0, &EntryBox);
 		EntryBox.HSplitTop(20.0f, &Button, &EntryBox);
 		static CButtonContainer s_ButtonConnect;
 		if(DoButton_Menu(&s_ButtonConnect, Localize("Connect"), 0, &Button))
+		{
+			if(g_Config.m_ClIRCNick[0] == '\0')
+			{
+				str_copy(g_Config.m_ClIRCNick, g_Config.m_PlayerName, sizeof(g_Config.m_ClIRCNick));
+				str_irc_sanitize(g_Config.m_ClIRCNick);
+			}
 			m_pClient->m_pIRCBind->Connect();
+			UI()->SetActiveItem(&m_IRCActive);
+		}
 	}
 	else if(m_pClient->IRC()->GetState() == IIRC::STATE_CONNECTING)
 	{
@@ -191,14 +193,20 @@ void CMenus::RenderIRC(CUIRect MainView)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pChan->Channel(), pCom->m_NumUnreadMsg);
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+					{
 						m_pClient->IRC()->SetActiveCom(i);
+						UI()->SetActiveItem(&m_IRCActive);
+					}
 				}
 				else
 				{
 					FadeVal[i] = 0.0f; Add[i] = true;
 					str_copy(aTab, pChan->Channel(), sizeof(aTab));
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->IRC()->GetActiveCom(), &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0))
+					{
 						m_pClient->IRC()->SetActiveCom(i);
+						UI()->SetActiveItem(&m_IRCActive);
+					}
 				}
 			}
 			else if(pCom->GetType() == CIRCCom::TYPE_QUERY)
@@ -219,14 +227,20 @@ void CMenus::RenderIRC(CUIRect MainView)
 				{
 					str_format(aTab, sizeof(aTab), "%s [%d]", pQuery->User(), pCom->m_NumUnreadMsg);
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom->m_NumUnreadMsg, &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0, vec4(0.0f, FadeVal[i], 0.0f, 1.0f)))
+					{
 						m_pClient->IRC()->SetActiveCom(i);
+						UI()->SetActiveItem(&m_IRCActive);
+					}
 				}
 				else
 				{
 					FadeVal[i] = 0.0f; Add[i] = true;
 					str_copy(aTab, pQuery->User(), sizeof(aTab));
 					if(DoButton_MenuTab(&s_ButsID[i], aTab, pCom == m_pClient->IRC()->GetActiveCom(), &Button, i==m_pClient->IRC()->GetNumComs()-1?CUI::CORNER_R:0))
+					{
 						m_pClient->IRC()->SetActiveCom(i);
+						UI()->SetActiveItem(&m_IRCActive);
+					}
 				}
 			}
 
@@ -370,7 +384,10 @@ void CMenus::RenderIRC(CUIRect MainView)
 					if(UI()->DoButtonLogic(&Item.m_Selected, "", Selected, &Label))
 					{
 						if(str_comp_nocase(Name.c_str()+1, m_pClient->IRC()->GetNick()) != 0)
+						{
 							m_pClient->IRC()->OpenQuery(Name.c_str());
+							UI()->SetActiveItem(&m_IRCActive);
+						}
 					}
 				}
 
@@ -385,6 +402,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 					//if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
 					{
 						m_pClient->IRC()->SendGetServer(Name.c_str());
+						UI()->SetActiveItem(&m_IRCActive);
 					}
 
 				// colors for admin and voice
