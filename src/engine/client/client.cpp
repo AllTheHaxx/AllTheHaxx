@@ -1034,6 +1034,16 @@ void CClient::Disconnect()
 		DisconnectWithReason(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0);
 }
 
+void CClient::TimeMeOut()
+{
+	CALLSTACK_ADD();
+
+	if(m_DummyConnected)
+		DummyDisconnect("timemeout");
+	if(m_State != IClient::STATE_OFFLINE)
+		DisconnectWithReason("timemeout");
+}
+
 bool CClient::DummyConnected()
 {
 	CALLSTACK_ADD();
@@ -3532,6 +3542,14 @@ void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Disconnect();
 }
 
+void CClient::Con_Timeout(IConsole::IResult *pResult, void *pUserData)
+{
+	CALLSTACK_ADD();
+
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->TimeMeOut();
+}
+
 void CClient::Con_DummyConnect(IConsole::IResult *pResult, void *pUserData)
 {
 	CALLSTACK_ADD();
@@ -4068,6 +4086,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Minimize, this, "Minimize Teeworlds");
 	m_pConsole->Register("connect", "s[host|ip]", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
+	m_pConsole->Register("timeout", "", CFGFLAG_CLIENT, Con_Timeout, this, "Dirty disconnect from the server; will create a timeout-dummy on ddnet servers");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
 	m_pConsole->Register("config_save", "", CFGFLAG_CLIENT, Con_SaveConfig, this, "Write down the config");
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");

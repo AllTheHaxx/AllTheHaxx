@@ -290,6 +290,7 @@ public:
 	virtual void Connect(const char *pAddress); // synchron
 	void DisconnectWithReason(const char *pReason);
 	virtual void Disconnect();
+	virtual void TimeMeOut();
 
 	virtual void DummyDisconnect(const char *pReason);
 	virtual void DummyConnect();
@@ -362,6 +363,7 @@ public:
 
 	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Disconnect(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Timeout(IConsole::IResult *pResult, void *pUserData);
 
 	static void Con_DummyConnect(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DummyDisconnect(IConsole::IResult *pResult, void *pUserData);
