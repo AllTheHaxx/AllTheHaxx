@@ -636,12 +636,12 @@ void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Ali
 	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight, pFont);
 }
 
-void CUI::DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, int FontFace)
+void CUI::DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
 {
-	DoLabel(pRect, pText, Size, Align, MaxWidth, pHighlight, CLua::m_pCGameClient->m_pFontMgrBasic->GetFont(FontFace));
+	DoLabel(pRect, pText, Size, Align, MaxWidth, pHighlight);
 }
 
-void CUI::DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, int FontFace)
+void CUI::DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
 {
-	DoLabelScaled(pRect, pText, Size, Align, MaxWidth, pHighlight, CLua::m_pCGameClient->m_pFontMgrBasic->GetFont(FontFace));
+	DoLabelScaled(pRect, pText, Size, Align, MaxWidth, pHighlight);
 }

@@ -111,8 +111,8 @@ public:
 	// TODO: Refactor: Remove this?
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0);
 	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0);
-	void DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, int FontFace = 0);
-	void DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, int FontFace = 0);
+	void DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
+	void DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
 
 	void AndroidShowScreenKeys(bool shown);
 	void AndroidShowTextInput(const char *text, const char *hintText);
