@@ -49,7 +49,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Fire", "+fire", 0 },
 	{ "Hook", "+hook", 0 },
 	{ "Hook Collisions", "+showhookcoll", 0 },
-	{ "Toggle DynCam", "toggle cl_dyncam 0 1", 0 },
+	{ "Super-DynCam", "+super_dyncam", 0 },
 	{ "Hammer", "+weapon1", 0 },
 	{ "Pistol", "+weapon2", 0 },
 	{ "Shotgun", "+weapon3", 0 },
