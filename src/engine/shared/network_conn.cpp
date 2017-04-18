@@ -206,7 +206,7 @@ void CNetConnection::Disconnect(const char *pReason)
 		return;
 	}
 
-	if(m_RemoteClosed == 0 && str_comp(pReason, "timemeout") != 0)
+	if(m_RemoteClosed == 0 && (!pReason || str_comp(pReason, "timemeout") != 0))
 	{
 		if(!m_TimeoutSituation)
 		{
