@@ -10,6 +10,7 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 #include <game/layers.h>
+#include <base/system++/system++.h>
 #include "animstate.h"
 #include "render.h"
 
@@ -156,6 +157,8 @@ void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
 
 void CRenderTools::DrawUIRect(const CUIRect *r, vec4 Color, int Corners, float Rounding)
 {
+	dbg_assert(r != NULL, "given CUIRect* is NULL");
+
 	Graphics()->TextureSet(-1);
 
 	// TODO: FIX US
