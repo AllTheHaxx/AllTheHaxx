@@ -801,6 +801,10 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 
 void CServerBrowser::SaveCache()
 {
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
+		return;
+
 	// nothing to save
 	if(m_NumServers < 1)
 		return;
