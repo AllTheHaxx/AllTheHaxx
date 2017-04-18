@@ -49,13 +49,13 @@ function _ConfigSave() -- call this in OnScriptUnload()
 end
 
 function OnScriptRenderSettings(MainView) -- some default page to inform the user
-	Game.Ui:DoLabelScaled(MainView, "To implement a custom settings page, put a function 'OnScriptRenderSettings(x, y, w, h)' into your script.", 13.0, 0, -1, "OnScriptRenderSettings(x, y, w, h)")
+	Game.Ui:DoLabelScaled(MainView, "To implement a custom settings page, put a function `OnScriptRenderSettings(<UIRect> MainView)` into your script.", 13.0, 0, -1, "OnScriptRenderSettings(<UIRect> MainView)", 0)
 	MainView:HSplitTop(25.0, nil, MainView)
-	Game.Ui:DoLabelScaled(MainView, "To remove this default page, write 'OnScriptRenderSettings=nil' after 'Import(\"config\")'", 12.0, 0, -1, "OnScriptRenderSettings=nil")
+	Game.Ui:DoLabelScaled(MainView, "To remove this default page, write `OnScriptRenderSettings=nil` after `Import(\"config\")`", 12.0, 0, -1, "OnScriptRenderSettings=nil", 0)
 
 	MainView:HSplitTop(45.0, nil, MainView)
 	Engine.TextRender:TextColor(0.8, 0.8, 0.8, 0.9)
-	Game.Ui:DoLabelScaled(MainView, "Note from the developer: Maybe this page will even be auto-generated one day, who knows... ;)", 9.0, 0, -1, "")
+	Game.Ui:DoLabelScaled(MainView, "Note from the developer: Maybe this page will even be auto-generated one day, who knows... ;)", 9.0, 0, -1, "", 0)
 	Engine.TextRender:TextColor(1,1,1,1)
 end
 
