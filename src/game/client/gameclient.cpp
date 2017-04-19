@@ -1272,122 +1272,136 @@ void CGameClient::OnNewSnapshot()
 			{
 				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)pData;
 				int ClientID = Item.m_ID;
-				IntsToStr(&pInfo->m_Name0, 4, m_aClients[ClientID].m_aName);
-				IntsToStr(&pInfo->m_Clan0, 3, m_aClients[ClientID].m_aClan);
-				m_aClients[ClientID].m_Country = pInfo->m_Country;
-				IntsToStr(&pInfo->m_Skin0, 6, m_aClients[ClientID].m_aSkinName);
-
-				m_aClients[ClientID].m_UseCustomColor = pInfo->m_UseCustomColor;
-				m_aClients[ClientID].m_ColorBody = pInfo->m_ColorBody;
-				m_aClients[ClientID].m_ColorFeet = pInfo->m_ColorFeet;
-
-				// prepare the info
-				if(m_aClients[ClientID].m_aSkinName[0] == 'x' || m_aClients[ClientID].m_aSkinName[1] == '_')
-					str_copy(m_aClients[ClientID].m_aSkinName, "default", 64);
-
-				m_aClients[ClientID].m_SkinInfo.m_ColorBody = m_pSkins->GetColorV4(m_aClients[ClientID].m_ColorBody);
-				m_aClients[ClientID].m_SkinInfo.m_ColorFeet = m_pSkins->GetColorV4(m_aClients[ClientID].m_ColorFeet);
-				m_aClients[ClientID].m_SkinInfo.m_Size = 64;
-
-				// find new skin
-				m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find(m_aClients[ClientID].m_aSkinName);
-				if(m_aClients[ClientID].m_SkinID < 0)
+				if(ClientID >= 0 && ClientID < MAX_CLIENTS)
 				{
-					m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find("default");
-					g_GameClient.m_pSkinDownload->RequestSkin(&m_aClients[ClientID].m_SkinID, m_aClients[ClientID].m_aSkinName);
+					IntsToStr(&pInfo->m_Name0, 4, m_aClients[ClientID].m_aName);
+					IntsToStr(&pInfo->m_Clan0, 3, m_aClients[ClientID].m_aClan);
+					m_aClients[ClientID].m_Country = pInfo->m_Country;
+					IntsToStr(&pInfo->m_Skin0, 6, m_aClients[ClientID].m_aSkinName);
+
+					m_aClients[ClientID].m_UseCustomColor = pInfo->m_UseCustomColor;
+					m_aClients[ClientID].m_ColorBody = pInfo->m_ColorBody;
+					m_aClients[ClientID].m_ColorFeet = pInfo->m_ColorFeet;
+
+					// prepare the info
+					if(m_aClients[ClientID].m_aSkinName[0] == 'x' || m_aClients[ClientID].m_aSkinName[1] == '_')
+						str_copy(m_aClients[ClientID].m_aSkinName, "default", 64);
+
+					m_aClients[ClientID].m_SkinInfo.m_ColorBody = m_pSkins->GetColorV4(m_aClients[ClientID].m_ColorBody);
+					m_aClients[ClientID].m_SkinInfo.m_ColorFeet = m_pSkins->GetColorV4(m_aClients[ClientID].m_ColorFeet);
+					m_aClients[ClientID].m_SkinInfo.m_Size = 64;
+
+					// find new skin
+					m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find(m_aClients[ClientID].m_aSkinName);
 					if(m_aClients[ClientID].m_SkinID < 0)
-						m_aClients[ClientID].m_SkinID = 0;
+					{
+						m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find("default");
+						g_GameClient.m_pSkinDownload->RequestSkin(&m_aClients[ClientID].m_SkinID, m_aClients[ClientID].m_aSkinName);
+						if(m_aClients[ClientID].m_SkinID < 0)
+							m_aClients[ClientID].m_SkinID = 0;
+					}
+
+					if(m_aClients[ClientID].m_UseCustomColor)
+						m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_ColorTexture;
+					else
+					{
+						m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_OrgTexture;
+						m_aClients[ClientID].m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
+						m_aClients[ClientID].m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
+					}
+
+					m_aClients[ClientID].UpdateRenderInfo();
 				}
-
-				if(m_aClients[ClientID].m_UseCustomColor)
-					m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_ColorTexture;
-				else
-				{
-					m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_OrgTexture;
-					m_aClients[ClientID].m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
-					m_aClients[ClientID].m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
-				}
-
-				m_aClients[ClientID].UpdateRenderInfo();
-
+				else if(g_Config.m_Debug)
+					dbg_msg("snap", "got an invalid NETOBJTYPE_CLIENTINFO for CID %i", Item.m_ID);
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
 			{
 				const CNetObj_PlayerInfo *pInfo = (const CNetObj_PlayerInfo *)pData;
 
-				m_aClients[pInfo->m_ClientID].m_Team = pInfo->m_Team;
-				m_aClients[pInfo->m_ClientID].m_Active = true;
-				m_Snap.m_paPlayerInfos[pInfo->m_ClientID] = pInfo;
-				m_Snap.m_NumPlayers++;
-
-				if(pInfo->m_Local)
+				if(pInfo->m_ClientID >= 0 && pInfo->m_ClientID < MAX_CLIENTS && Item.m_ID >= 0 && Item.m_ID < MAX_CLIENTS)
 				{
-					m_Snap.m_LocalClientID = Item.m_ID;
-					m_Snap.m_pLocalInfo = pInfo;
+					m_aClients[pInfo->m_ClientID].m_Team = pInfo->m_Team;
+					m_aClients[pInfo->m_ClientID].m_Active = true;
+					m_Snap.m_paPlayerInfos[pInfo->m_ClientID] = pInfo;
+					m_Snap.m_NumPlayers++;
 
-					if(pInfo->m_Team == TEAM_SPECTATORS)
+					if(pInfo->m_Local)
 					{
-						m_Snap.m_SpecInfo.m_Active = true;
-						m_Snap.m_SpecInfo.m_SpectatorID = SPEC_FREEVIEW;
-					}
-				}
+						m_Snap.m_LocalClientID = Item.m_ID;
+						m_Snap.m_pLocalInfo = pInfo;
 
-				// calculate team-balance
-				if(pInfo->m_Team != TEAM_SPECTATORS)
-				{
-					m_Snap.m_aTeamSize[pInfo->m_Team]++;
-					if(!m_aStats[pInfo->m_ClientID].IsActive())
-						m_aStats[pInfo->m_ClientID].JoinGame(Client()->GameTick());
+						if(pInfo->m_Team == TEAM_SPECTATORS)
+						{
+							m_Snap.m_SpecInfo.m_Active = true;
+							m_Snap.m_SpecInfo.m_SpectatorID = SPEC_FREEVIEW;
+						}
+					}
+
+					// calculate team-balance
+					if(pInfo->m_Team != TEAM_SPECTATORS)
+					{
+						m_Snap.m_aTeamSize[pInfo->m_Team]++;
+						if(!m_aStats[pInfo->m_ClientID].IsActive())
+							m_aStats[pInfo->m_ClientID].JoinGame(Client()->GameTick());
+					}
+					else if(m_aStats[pInfo->m_ClientID].IsActive())
+						m_aStats[pInfo->m_ClientID].JoinSpec(Client()->GameTick());
 				}
-				else if(m_aStats[pInfo->m_ClientID].IsActive())
-					m_aStats[pInfo->m_ClientID].JoinSpec(Client()->GameTick());
+				else if(g_Config.m_Debug)
+					dbg_msg("snap", "got an invalid NETOBJTYPE_PLAYERINFO for CID %i / IID %i", pInfo->m_ClientID, Item.m_ID);
 
 			}
 			else if(Item.m_Type == NETOBJTYPE_CHARACTER)
 			{
-				const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_ID);
-				m_Snap.m_aCharacters[Item.m_ID].m_Cur = *((const CNetObj_Character *)pData);
-
-				//m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags;
-				if(pOld)
+				if(Item.m_ID >= 0 && Item.m_ID < MAX_CLIENTS)
 				{
-					m_Snap.m_aCharacters[Item.m_ID].m_Active = true;
-					m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
+					const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_ID);
+					m_Snap.m_aCharacters[Item.m_ID].m_Cur = *((const CNetObj_Character *)pData);
 
-					if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
-						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
-					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
-						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
-				}
-
-				if(g_Config.m_ClFlagChat && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
-				{
-					int serial = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 24;
-
-					char msg = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 16;
-					msg -= serial << 8;
-
-					//dbg_msg("Dennis", "Num = %d Serial = %d Char = %c Size = %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags, serial, msg, m_HiddenMessages[Item.m_ID].size());
-					if((int)m_HiddenMessages[Item.m_ID].size() == serial)
-						m_HiddenMessages[Item.m_ID] += msg;
-					else if(serial > (int)m_HiddenMessages[Item.m_ID].size())
-					{// correct errors D:
-						for(int i = 0; i < serial - (int)m_HiddenMessages[Item.m_ID].size(); i++)
-						{
-							m_HiddenMessages[Item.m_ID] += '_';
-						}
-						m_HiddenMessages[Item.m_ID] += msg;
-					}
-				}
-				else if(g_Config.m_ClFlagChat)
-				{
-					if(m_HiddenMessages[Item.m_ID].size())
+					//m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags;
+					if(pOld)
 					{
-						//dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
-						m_pChat->AddLine(Item.m_ID, 0, m_HiddenMessages[Item.m_ID].c_str(), true);
-						m_HiddenMessages[Item.m_ID].clear();
+						m_Snap.m_aCharacters[Item.m_ID].m_Active = true;
+						m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
+
+						if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
+						if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
+					}
+
+					if(g_Config.m_ClFlagChat && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
+					{
+						int serial = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 24;
+
+						char msg = m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags >> 16;
+						msg -= serial << 8;
+
+						//dbg_msg("Dennis", "Num = %d Serial = %d Char = %c Size = %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags, serial, msg, m_HiddenMessages[Item.m_ID].size());
+						if((int)m_HiddenMessages[Item.m_ID].size() == serial)
+							m_HiddenMessages[Item.m_ID] += msg;
+						else if(serial > (int)m_HiddenMessages[Item.m_ID].size())
+						{// correct errors D:
+							for(int s = 0; s < serial - (int)m_HiddenMessages[Item.m_ID].size(); s++)
+							{
+								m_HiddenMessages[Item.m_ID] += '_';
+							}
+							m_HiddenMessages[Item.m_ID] += msg;
+						}
+					}
+					else if(g_Config.m_ClFlagChat)
+					{
+						if(m_HiddenMessages[Item.m_ID].size())
+						{
+							//dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
+							m_pChat->AddLine(Item.m_ID, 0, m_HiddenMessages[Item.m_ID].c_str(), true);
+							m_HiddenMessages[Item.m_ID].clear();
+						}
 					}
 				}
+				else if(g_Config.m_Debug)
+					dbg_msg("snap", "got an invalid NETOBJTYPE_CHARACTER for ID %i", Item.m_ID);
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
@@ -1409,10 +1423,10 @@ void CGameClient::OnNewSnapshot()
 				// Reset statboard when new round is started (RoundStartTick changed)
 				// New round is usually started after `restart` on server
 				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick
-						// In GamePaused or GameOver state RoundStartTick is updated on each tick
-						// hence no need to reset stats until player leaves GameOver
-						// and it would be a mistake to reset stats after or during the pause
-						&& !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED || s_GamePaused))
+				   // In GamePaused or GameOver state RoundStartTick is updated on each tick
+				   // hence no need to reset stats until player leaves GameOver
+				   // and it would be a mistake to reset stats after or during the pause
+				   && !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED || s_GamePaused))
 					m_pStatboard->OnReset();
 				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_GameOver = CurrentTickGameOver;
@@ -1428,14 +1442,14 @@ void CGameClient::OnNewSnapshot()
 						m_FlagDropTick[TEAM_RED] = Client()->GameTick();
 				}
 				else if(m_FlagDropTick[TEAM_RED] != 0)
-						m_FlagDropTick[TEAM_RED] = 0;
+					m_FlagDropTick[TEAM_RED] = 0;
 				if(m_Snap.m_pGameDataObj->m_FlagCarrierBlue == FLAG_TAKEN)
 				{
 					if(m_FlagDropTick[TEAM_BLUE] == 0)
 						m_FlagDropTick[TEAM_BLUE] = Client()->GameTick();
 				}
 				else if(m_FlagDropTick[TEAM_BLUE] != 0)
-						m_FlagDropTick[TEAM_BLUE] = 0;
+					m_FlagDropTick[TEAM_BLUE] = 0;
 				if(m_LastFlagCarrierRed == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierRed >= 0)
 					OnFlagGrab(TEAM_RED);
 				else if(m_LastFlagCarrierBlue == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierBlue >= 0)
@@ -1840,73 +1854,73 @@ void CGameClient::OnPredict()
 					case WEAPON_RIFLE:
 					case WEAPON_SHOTGUN:
 					case WEAPON_GUN:
+					{
+						WeaponFired = true;
+					} break; // case WEAPON_RIFLE | WEAPON_SHOTGUN | WEAPON_GUN
+					case WEAPON_GRENADE:
+					{
+						if(NumProjectiles >= MaxProjectiles)
+							break;
+						PredictedProjectiles[NumProjectiles].Init(
+								this, &World, Collision(),
+								Direction, //StartDir
+								ProjStartPos, //StartPos
+								ExpectedStartTick, //StartTick
+								WEAPON_GRENADE, //Type
+								m_Snap.m_LocalClientID, //Owner
+								WEAPON_GRENADE, //Weapon
+								1, 0, 0, 1); //Explosive, Bouncing, Freeze, ExtraInfo
+						NumProjectiles++;
+						WeaponFired = true;
+					} break; // case WEAPON_GRENADE
+					case WEAPON_HAMMER:
+					{
+						vec2 ProjPos = ProjStartPos;
+						float Radius = ProximityRadius*0.5f;
+
+						int Hits = 0;
+						bool OwnerCanProbablyHitOthers = (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+						if(!OwnerCanProbablyHitOthers)
+							break;
+						for(int i = 0; i < MAX_CLIENTS; i++)
 						{
+							if(!World.m_apCharacters[i])
+								continue;
+							if(i == m_Snap.m_LocalClientID)
+								continue;
+							if(!(distance(World.m_apCharacters[i]->m_Pos, ProjPos) < Radius+ProximityRadius))
+								continue;
+
+							CCharacterCore *pTarget = World.m_apCharacters[i];
+
+							if(m_aClients[i].m_Active && !m_Teams.CanCollide(i, m_Snap.m_LocalClientID))
+								continue;
+
+							vec2 Dir;
+							if (length(pTarget->m_Pos - Pos) > 0.0f)
+								Dir = normalize(pTarget->m_Pos - Pos);
+							else
+								Dir = vec2(0.f, -1.f);
+
+							float Strength;
+							Strength = World.m_Tuning[g_Config.m_ClDummy].m_HammerStrength;
+
+							vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+
+							pTarget->LimitForce(&Temp);
+
+							Temp -= pTarget->m_Vel;
+							pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
+							Hits++;
+
+							LUA_FIRE_EVENT("OnPredHammerHit", i);
+						}
+						// if we Hit anything, we have to wait for the reload
+						if(Hits)
+						{
+							ReloadTimer = SERVER_TICK_SPEED/3;
 							WeaponFired = true;
-						} break; // case WEAPON_RIFLE | WEAPON_SHOTGUN | WEAPON_GUN
-						case WEAPON_GRENADE:
-						{
-							if(NumProjectiles >= MaxProjectiles)
-								break;
-							PredictedProjectiles[NumProjectiles].Init(
-									this, &World, Collision(),
-									Direction, //StartDir
-									ProjStartPos, //StartPos
-									ExpectedStartTick, //StartTick
-									WEAPON_GRENADE, //Type
-									m_Snap.m_LocalClientID, //Owner
-									WEAPON_GRENADE, //Weapon
-									1, 0, 0, 1); //Explosive, Bouncing, Freeze, ExtraInfo
-							NumProjectiles++;
-							WeaponFired = true;
-						} break; // case WEAPON_GRENADE
-						case WEAPON_HAMMER:
-						{
-							vec2 ProjPos = ProjStartPos;
-							float Radius = ProximityRadius*0.5f;
-
-							int Hits = 0;
-							bool OwnerCanProbablyHitOthers = (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
-							if(!OwnerCanProbablyHitOthers)
-								break;
-							for(int i = 0; i < MAX_CLIENTS; i++)
-							{
-								if(!World.m_apCharacters[i])
-									continue;
-								if(i == m_Snap.m_LocalClientID)
-									continue;
-								if(!(distance(World.m_apCharacters[i]->m_Pos, ProjPos) < Radius+ProximityRadius))
-									continue;
-
-								CCharacterCore *pTarget = World.m_apCharacters[i];
-
-								if(m_aClients[i].m_Active && !m_Teams.CanCollide(i, m_Snap.m_LocalClientID))
-									continue;
-
-								vec2 Dir;
-								if (length(pTarget->m_Pos - Pos) > 0.0f)
-									Dir = normalize(pTarget->m_Pos - Pos);
-								else
-									Dir = vec2(0.f, -1.f);
-
-								float Strength;
-								Strength = World.m_Tuning[g_Config.m_ClDummy].m_HammerStrength;
-
-								vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-
-								pTarget->LimitForce(&Temp);
-
-								Temp -= pTarget->m_Vel;
-								pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
-								Hits++;
-
-								LUA_FIRE_EVENT("OnPredHammerHit", i);
-							}
-							// if we Hit anything, we have to wait for the reload
-							if(Hits)
-							{
-								ReloadTimer = SERVER_TICK_SPEED/3;
-								WeaponFired = true;
-							}
+						}
 					} break; // case WEAPON_HAMMER
 				}
 				if(!ReloadTimer)
@@ -2319,7 +2333,7 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 				str_format(aBuf, sizeof(aBuf), "Script '%s' failed to load", pResult->GetString(1));
 			else
 				str_format(aBuf, sizeof(aBuf), "Toggled script '%s' %s", pResult->GetString(1),
-						pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED ? "on" : "off");
+						   pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED ? "on" : "off");
 			pSelf->m_pHud->PushNotification(aBuf);
 		}
 		else
@@ -2504,7 +2518,7 @@ vec2 CLocalProjectile::GetPos(float Time)
 bool CLocalProjectile::GameLayerClipped(vec2 CheckPos)
 {
 	return round_to_int(CheckPos.x)/32 < -200 || round_to_int(CheckPos.x)/32 > m_pCollision->GetWidth()+200 ||
-		round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > m_pCollision->GetHeight()+200 ? true : false;
+		   round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > m_pCollision->GetHeight()+200 ? true : false;
 }
 
 void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientID)

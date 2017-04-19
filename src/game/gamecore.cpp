@@ -683,6 +683,14 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_Jumped = pObjCore->m_Jumped;
 	m_Direction = pObjCore->m_Direction;
 	m_Angle = pObjCore->m_Angle;
+
+	// do corrections
+	if(m_HookedPlayer < -1 || m_HookedPlayer >= MAX_CLIENTS)
+	{
+		if(g_Config.m_Debug)
+			dbg_msg("CCharacterCore/warn", "got an invalid CNetObj_CharacterCore::m_HookedPlayer %i", m_HookedPlayer);
+		m_HookedPlayer = -1;
+	}
 }
 
 void CCharacterCore::Quantize()

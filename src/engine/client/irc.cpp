@@ -1209,7 +1209,7 @@ void CIRC::SendRaw(const char *fmt, ...)
 	va_end(args);
 
 	str_append(msg, "\r\n", sizeof(msg));
-	net_tcp_send(m_Socket, msg, str_length(msg));
+	net_tcp_send(m_Socket, msg, str_length(msg)); // HERE MIGHT APPEAR A SIGPIPE >.<
 }
 
 void CIRC::SetNick(const char *nick)

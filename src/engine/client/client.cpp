@@ -1208,6 +1208,9 @@ void *CClient::SnapFindItem(int SnapID, int Type, int ID)
 {
 	CALLSTACK_ADD();
 
+	if(SnapID < 0 || SnapID >= NUM_SNAPSHOT_TYPES)
+		return 0x0;
+
 	// TODO: linear search. should be fixed.
 	int i;
 
@@ -3161,8 +3164,7 @@ void CClient::Run()
 	GameClient()->OnInit();
 
 #if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
-	if((m_pInputThread = thread_init_named(InputThread, this, "inputthread")))
-		thread_detach(m_pInputThread);
+	m_pInputThread = thread_init_named(InputThread, this, "inputthread");
 #endif
 
 	// connect to the server if wanted
@@ -3490,8 +3492,10 @@ void CClient::Run()
 
 	if(m_pInputThread)
 	{
+		thread_wait(m_pInputThread);
+		m_pInputThread = 0;
 #if defined(CONF_FAMILY_WINDOWS)
-		FreeConsole();
+		//FreeConsole();
 #else
 		//thread_destroy(m_pInputThread); // this tends to cause segfaults sometimes, dunno why :o
 #endif
@@ -3918,7 +3922,21 @@ void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoRecorder_Stop(RECORDER_MANUAL);
+	int Recorder = RECORDER_MANUAL;
+	if(pResult->NumArguments() > 0)
+		Recorder = pResult->GetInteger(0);
+	if(Recorder < RECORDER_MANUAL || Recorder >= RECORDER_MAX)
+		pSelf->m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "demo", "There is no demorecorder with ID %i. The given ID must be in range %i-%i.", Recorder, RECORDER_MANUAL, RECORDER_MAX-1);
+	else
+	{
+		if(pSelf->DemoRecorder(Recorder)->IsRecording())
+		{
+			pSelf->DemoRecorder_Stop(Recorder);
+			pSelf->m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "demo", "Stopped demorecorder %i", Recorder);
+		}
+		else
+			pSelf->m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "demo", "Demorecorder %i is not currently recording.", Recorder);
+	}
 }
 
 void CClient::Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData)
@@ -4095,7 +4113,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("rcon_login", "s[username] r[password]", CFGFLAG_CLIENT, Con_RconLogin, this, "Authenticate to rcon with a username");
 	m_pConsole->Register("play", "r[file]", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Play, this, "Play the file specified");
 	m_pConsole->Register("record", "?s[file]", CFGFLAG_CLIENT, Con_Record, this, "Record to the file");
-	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording");
+	m_pConsole->Register("stoprecord", "?i[recorder]", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording (0=standard, 1=auto, 2=race)");
 	m_pConsole->Register("add_demomarker", "", CFGFLAG_CLIENT, Con_AddDemoMarker, this, "Add demo timeline marker");
 	m_pConsole->Register("add_favorite", "s[host|ip]", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite");
 	m_pConsole->Register("remove_favorite", "s[host|ip]", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites");
@@ -4121,8 +4139,8 @@ void CClient::RegisterCommands()
 	// DDRace
 
 
-	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, 0, 0, help);
-	#include <game/ddracecommands.h>
+#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, 0, 0, help);
+#include <game/ddracecommands.h>
 }
 
 static CClient *CreateClient()
@@ -4488,7 +4506,7 @@ void CClient::InputThread(void *pUser)
 		aInput[str_length(aInput)-1] = '\0';
 
 		#if defined(CONF_FAMILY_WINDOWS)
-			if(!str_utf8_check(pInput))
+		if(!str_utf8_check(pInput))
 			{
 				char aTemp[4] = {0};
 				int Length = 0;
@@ -4513,7 +4531,7 @@ void CClient::InputThread(void *pUser)
 			else
 				pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
 		#else
-			pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
+		pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
 		#endif
 
 	}

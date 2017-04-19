@@ -21,6 +21,11 @@ include_directories(
 )
 
 set(SOURCE_FILES
+        src/game/generated/protocol.cpp
+        src/game/generated/protocol.h
+        src/game/generated/client_data.cpp
+        src/game/generated/client_data.h
+        src/game/generated/nethash.cpp
         src/twping/twping.cpp
         src/osxlaunch/client.h
         src/tools/map_resave.cpp
