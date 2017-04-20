@@ -558,9 +558,9 @@ void CGameClient::OnInit()
 	m_ResetConfig = false;
 
 	// auto-update the config
-	if(g_Config.m_ClConfigVersion < 3013)
+	if(g_Config.m_ClConfigVersion < 3020)
 	{
-		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3013", g_Config.m_ClConfigVersion);
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3020", g_Config.m_ClConfigVersion);
 
 		#define UPDATE_BIND(OLD, NEW) \
 		{ const char *pBindKey = m_pBinds->GetKey(OLD); \
