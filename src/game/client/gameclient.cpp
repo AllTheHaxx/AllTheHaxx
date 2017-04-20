@@ -667,7 +667,8 @@ void CGameClient::OnConnected()
 	// we should keep this in for now, because otherwise you can't spectate
 	// people at start as the other info 64 packet is only sent after the first
 	// snap
-	Client()->Rcon("crashmeplx");
+	Client()->Rcon("crashmeplx"); // for legacy 64p
+	//Client()->Rcon("crashmeharder"); // for newer >64p TODO: implement 256!
 }
 
 void CGameClient::OnReset()

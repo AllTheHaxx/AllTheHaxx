@@ -6,6 +6,8 @@
 
 #include <base/math.h>
 #include <game/localization.h>
+#include <game/client/gameclient.h>
+#include <game/client/components/console.h>
 
 #include "luafile.h"
 #include "lua.h"
@@ -107,6 +109,9 @@ void CLuaFile::Unload(bool error)
 
 	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
 		Lua()->ExitFullscreen();
+
+	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
+		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
 
 	try
 	{
