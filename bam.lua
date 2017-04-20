@@ -58,6 +58,7 @@ config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
 config:Finalize("config_" .. sysconf .. ".lua")
 
+if config.lua.value == false then sysconf = sysconf .. "NL" end
 print("System Configurations: " .. sysconf)
 
 -- data compiler
