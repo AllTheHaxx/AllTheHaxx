@@ -320,6 +320,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_SnapCrcErrors = 0;
 	m_AutoScreenshotRecycle = false;
 	m_AutoStatScreenshotRecycle = false;
+	m_AutoCSVRecycle = false;
 	m_EditorActive = false;
 
 	m_AckGameTick[0] = -1;
@@ -3488,6 +3489,7 @@ void CClient::Run()
 		}
 
 		AutoScreenshot_Cleanup();
+		AutoCSV_Cleanup();
 
 		// check conditions
 		if(State() == IClient::STATE_QUITING)
@@ -3731,6 +3733,26 @@ void CClient::AutoStatScreenshot_Cleanup()
 			AutoScreens.Init(Storage(), "screenshots/auto/stats", "autoscreen", ".png", g_Config.m_ClAutoStatboardScreenshotMax);
 		}
 		m_AutoStatScreenshotRecycle = false;
+	}
+}
+
+void CClient::AutoCSV_Start()
+{
+	if (g_Config.m_ClAutoCSV)
+		m_AutoCSVRecycle = true;
+}
+
+void CClient::AutoCSV_Cleanup()
+{
+	if (m_AutoCSVRecycle)
+	{
+		if (g_Config.m_ClAutoCSVMax)
+		{
+			// clean up auto csvs
+			CFileCollection AutoRecord;
+			AutoRecord.Init(Storage(), "record/csv", "autorecord", ".csv", g_Config.m_ClAutoCSVMax);
+		}
+		m_AutoCSVRecycle = false;
 	}
 }
 
