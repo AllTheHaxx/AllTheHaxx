@@ -60,7 +60,8 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 				{
 					aBuf[ii] = '\0';
 					ii = 0;
-					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
+					if (aBuf[0])
+						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
 				}
 				else
 				{
@@ -69,7 +70,8 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 				}
 			}
 			aBuf[ii] = '\0';
-			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
+			if (aBuf[0])
+				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, true);
 		}
 	}
 }
