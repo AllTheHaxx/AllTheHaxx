@@ -21,6 +21,7 @@ datasrc/*.pyc
 /serverlaunch*
 /tileset_border*
 /twping*
+/uuid*
 /versionsrv*
 /dummy_map*
 /slc_unpack*
