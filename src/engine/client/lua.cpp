@@ -11,10 +11,10 @@
 
 #include "lua.h"
 #include "luabinding.h"
+#include "db_sqlite3.h"
 
 
 IClient * CLua::m_pClient = 0;
-CClient * CLua::m_pCClient = 0;
 IGameClient * CLua::m_pGameClient = 0;
 CGameClient * CLua::m_pCGameClient = 0;
 
@@ -27,6 +27,12 @@ CLua::CLua()
 	m_pStorage = 0;
 	m_pConsole = 0;
 	m_pFullscreenedScript = 0;
+
+	m_pDatabase = new CSql();
+
+	char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS lua_autoloads (path TEXT NOT NULL UNIQUE);");
+	CQuery *pQuery = new CQuery(pQueryBuf);
+	m_pDatabase->InsertQuery(pQuery);
 }
 
 CLua::~CLua()
@@ -39,7 +45,6 @@ void CLua::Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole)
 	CALLSTACK_ADD();
 
 	m_pClient = pClient;
-	m_pCClient = (CClient*)pClient;
 	m_pStorage = pStorage;
 	m_pConsole = pConsole;
 	m_aAutoloadFiles.clear();
@@ -51,27 +56,10 @@ void CLua::Shutdown()
 {
 	CALLSTACK_ADD();
 
-	SaveAutoloads();
-
 	m_pFullscreenedScript = 0;
 
 	m_apLuaFiles.delete_all();
 	m_apLuaFiles.clear();
-}
-
-void CLua::SaveAutoloads()
-{
-	CALLSTACK_ADD();
-#if defined(FEATURE_LUA)
-	char aFilePath[768];
-	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
-	str_append(aFilePath, "/luafiles.cfg", sizeof(aFilePath));
-	std::ofstream f(aFilePath, std::ios::out | std::ios::trunc);
-	for(int i = 0; i < m_apLuaFiles.size(); i++)
-		if(m_apLuaFiles[i]->GetScriptIsAutoload())
-			f << m_apLuaFiles[i]->GetFilename() << std::endl;
-	f.close();
-#endif
 }
 
 void CLua::SortLuaFiles()
@@ -146,6 +134,18 @@ void CLua::LoadFolder()
 {
 	CALLSTACK_ADD();
 
+	// get the files which should be auto-loaded
+	{
+		m_aAutoloadFiles.clear();
+		m_pDatabase->InsertQuery(
+				new CQueryAutoloads(
+						sqlite3_mprintf("SELECT * FROM lua_autoloads;"),
+						&m_aAutoloadFiles
+				)
+		);
+	}
+	m_pDatabase->Flush();
+
 	LoadFolder("lua");
 }
 
@@ -154,22 +154,6 @@ void CLua::LoadFolder(const char *pFolder)
 	CALLSTACK_ADD();
 
 #if defined(FEATURE_LUA)
-	// get the files which should be auto-loaded from file
-	{
-		m_aAutoloadFiles.clear();
-		char aFilePath[768];
-		fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
-		str_append(aFilePath, "/luafiles.cfg", sizeof(aFilePath));
-		std::ifstream f(aFilePath);
-		if(f.is_open())
-		{
-			std::string line;
-			while(std::getline(f, line))
-				m_aAutoloadFiles.add(line);
-			f.close();
-		}
-	}
-
 	//char FullDir[256];
 	//str_format(FullDir, sizeof(FullDir), "lua");
 
@@ -349,6 +333,26 @@ void CLua::ExitFullscreen()
 }
 
 
+void CLua::AddAutoload(const CLuaFile *pLF)
+{
+	m_aAutoloadFiles.add(std::string(pLF->GetFilename()));
+	m_pDatabase->InsertQuery(
+			new CQuery(
+					sqlite3_mprintf("INSERT OR IGNORE INTO lua_autoloads ('path') VALUES ('%q');", pLF->GetFilename())
+			)
+	);
+}
+
+void CLua::RemoveAutoload(const CLuaFile *pLF)
+{
+	m_aAutoloadFiles.remove_fast(std::string(pLF->GetFilename()));
+	m_pDatabase->InsertQuery(
+			new CQuery(
+					sqlite3_mprintf("DELETE FROM lua_autoloads WHERE path = '%q';", pLF->GetFilename())
+			)
+	);
+}
+
 int CLua::Panic(lua_State *L)
 {
 	CALLSTACK_ADD();
@@ -394,4 +398,21 @@ void CLua::DbgPrintLuaStack(lua_State *L, const char *pNote)
 	}
 	dbg_msg("lua/debug", "---- END LUA STACK ---- %s", pNote ? pNote : "");
 #endif
+}
+
+
+void CQueryAutoloads::OnData()
+{
+	while(Next()) // process everything
+	{
+		const char *pPath = GetText(GetID("path"));
+
+#if defined(CONF_DEBUG)
+		dbg_assert(pPath != NULL, "query returned invalid string");
+#else
+		if(pPath)
+#endif
+		if(m_paAutoloadFiles->find(std::string(pPath)) == NULL)
+			m_paAutoloadFiles->add(std::string(pPath));
+	}
 }

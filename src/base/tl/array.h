@@ -228,6 +228,21 @@ public:
 		return num_elements-1;
 	}
 
+	T* find(const T& item, int *index = 0)
+	{
+		for(int i = 0; i < num_elements; i++)
+		{
+			if(list[i] == item)
+			{
+				if(index)
+					*index = i;
+				return &(list[i]);
+			}
+		}
+
+		return NULL;
+	}
+
 	/*
 		Function: operator[]
 	*/

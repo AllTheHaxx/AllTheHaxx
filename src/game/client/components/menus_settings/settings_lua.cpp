@@ -176,7 +176,6 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		s_SelectedScript = -1;
 		if(!(g_Config.m_ClLua ^= 1))
 		{
-			Client()->Lua()->SaveAutoloads();
 			Client()->Lua()->GetLuaFiles().delete_all();
 			Client()->Lua()->GetLuaFiles().clear();
 		}
@@ -290,7 +289,12 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					// autoload button
 					if(DoButton_CheckBox(&pIDButtonAutoload[i], "", L->GetScriptIsAutoload(), &Button, Localize("Autoload"), 0))
 					{
-						L->SetScriptIsAutoload(!L->GetScriptIsAutoload());
+						bool NewVal = !L->GetScriptIsAutoload();
+						L->SetScriptIsAutoload(NewVal);
+						if(NewVal)
+							Client()->Lua()->AddAutoload(L);
+						else
+							Client()->Lua()->RemoveAutoload(L);
 					}
 
 

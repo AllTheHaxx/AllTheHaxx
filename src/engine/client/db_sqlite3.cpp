@@ -47,6 +47,7 @@ CSql::CSql(const char *pFilename)
 	}
 
 	m_Running = true;
+	m_Flush = false;
 	m_pThread = thread_init_named(InitWorker, this, "sqlite");
 }
 
@@ -82,43 +83,7 @@ void CSql::WorkerThread()
 		if(m_Running)
 			thread_sleep(500);
 
-		LOCK_SECTION_DBG(m_Lock);
-		if (m_lpQueries.size() > 0)
-		{
-			// do 250 queries per transaction - cache them so we can release the lock as early as possible
-			enum { QUERIES_PER_TRANSACTION = 250 };
-			CQuery *apQueries[QUERIES_PER_TRANSACTION];
-			int NumQueries = 0;
-			for(int i = 0; i < QUERIES_PER_TRANSACTION && m_lpQueries.size() > 0; i++)
-			{
-				apQueries[NumQueries++] = m_lpQueries.front();
-				m_lpQueries.pop();
-			}
-			__SectionLock.Unlock();
-
-			// begin transaction
-			{
-				char *pQueryStr = sqlite3_mprintf("BEGIN");
-				CQuery Begin(pQueryStr);
-				ExecuteQuery(&Begin);
-			}
-
-			// perform queries
-			for(int i = 0; i < NumQueries; i++)
-			{
-				CQuery *pQuery = apQueries[i];
-				ExecuteQuery(pQuery);
-				delete pQuery;
-			}
-
-			// end transaction
-			{
-				char *pQueryStr = sqlite3_mprintf("END");
-				CQuery End(pQueryStr);
-				ExecuteQuery(&End);
-			}
-		}
-		else if(!m_Running)
+		if(Work() == 0 && !m_Running)
 			return;
 	}
 }
@@ -133,5 +98,55 @@ void CSql::ExecuteQuery(CQuery *pQuery)
 		sqlite3_finalize(pQuery->m_pStatement);
 	}
 	else
+	{
+		dbg_msg("SQLite/error", "@@ %s", pQuery->m_pQueryStr);
 		dbg_msg("SQLite/error", "%s", sqlite3_errmsg(m_pDB));
+	}
+}
+
+unsigned int CSql::Work()
+{
+	LOCK_SECTION_DBG(m_Lock);
+	if (m_lpQueries.size() > 0)
+	{
+		// do 250 queries per transaction - cache them so we can release the lock as early as possible
+		enum { QUERIES_PER_TRANSACTION = 250 };
+		CQuery *apQueries[QUERIES_PER_TRANSACTION];
+		int NumQueries = 0;
+		for(int i = 0; i < QUERIES_PER_TRANSACTION && m_lpQueries.size() > 0; i++)
+		{
+			apQueries[NumQueries++] = m_lpQueries.front();
+			m_lpQueries.pop();
+		}
+		__SectionLock.Unlock();
+
+		// begin transaction
+		{
+			char *pQueryStr = sqlite3_mprintf("BEGIN");
+			CQuery Begin(pQueryStr);
+			ExecuteQuery(&Begin);
+		}
+
+		// perform queries
+		for(int i = 0; i < NumQueries; i++)
+		{
+			CQuery *pQuery = apQueries[i];
+			ExecuteQuery(pQuery);
+			delete pQuery;
+		}
+
+		// end transaction
+		{
+			char *pQueryStr = sqlite3_mprintf("END");
+			CQuery End(pQueryStr);
+			ExecuteQuery(&End);
+		}
+	}
+
+	return (unsigned int)m_lpQueries.size();
+}
+
+void CSql::Flush()
+{
+	while(Work());;
 }

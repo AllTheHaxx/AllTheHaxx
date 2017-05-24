@@ -3644,7 +3644,6 @@ void CClient::Con_SaveConfig(IConsole::IResult *pResult, void *pUserData)
 	CClient *pSelf = (CClient *)pUserData;
 	if(!pSelf->Kernel()->RequestInterface<IConfig>()->Save(true))
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", "failed to save the settings");
-	pSelf->Lua()->SaveAutoloads();
 	((CGameClient *)(pSelf->m_pGameClient))->m_pIdentity->SaveIdents();
 }
 

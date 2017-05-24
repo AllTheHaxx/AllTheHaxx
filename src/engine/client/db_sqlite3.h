@@ -50,16 +50,28 @@ private:
 	bool m_Running;
 	void *m_pThread;
 	std::queue<CQuery *>m_lpQueries;
+	bool m_Flush;
 
 public:
 	CSql(const char *pFilename = "ath_data.db");
 	~CSql();
 
+	/**
+	 * Inserts a new query into the threaded execution queue
+	 * @param pQuery pointer to the query object
+	 */
 	void InsertQuery(CQuery *pQuery);
+
+	/**
+	 * Synchronously flushes the query queue.
+	 * This forces immediate execution of all remaining queries and waits for their completion.
+	 */
+	void Flush();
 
 private:
 	void ExecuteQuery(CQuery *pQuery);
 	void WorkerThread();
+	unsigned int Work();
 	static void InitWorker(void *pSelf);
 };
 

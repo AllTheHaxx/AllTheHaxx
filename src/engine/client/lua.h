@@ -8,6 +8,7 @@
 #include <base/tl/array.h>
 #include <engine/external/zlib/zlib.h>
 #include "luafile.h"
+#include "db_sqlite3.h"
 
 #if defined(FEATURE_LUA)
 #define LUA_FIRE_EVENT(EVENTNAME, ...) \
@@ -47,6 +48,7 @@ class CLua
 {
 	IStorageTW *m_pStorage;
 	class IConsole *m_pConsole;
+	class CSql *m_pDatabase;
 
 	array<CLuaFile*> m_apLuaFiles;
 	array<std::string> m_aAutoloadFiles;
@@ -58,12 +60,10 @@ public:
 
 	void Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole);
 	void Shutdown();
-	void SaveAutoloads();
 	void AddUserscript(const char *pFilename);
 	void LoadFolder();
 	void LoadFolder(const char *pFolder);
 	void SortLuaFiles();
-
 
 	static int ErrorFunc(lua_State *L);
 	static int Panic(lua_State *L);
@@ -72,7 +72,6 @@ public:
 	int HandleException(const char *pError, lua_State *L);
 	int HandleException(const char *pError, CLuaFile *pLF);
 
-	static CClient * m_pCClient;
 	static IClient *m_pClient;
 	static IGameClient *m_pGameClient;
 	static IClient *Client() { return m_pClient; }
@@ -90,6 +89,8 @@ public:
 		return num;
 	}
 
+	void AddAutoload(const CLuaFile *pLF);
+	void RemoveAutoload(const CLuaFile *pLF);
 	void ScriptEnterFullscreen(CLuaFile *pLF);
 	void ExitFullscreen();
 	CLuaFile *GetFullscreenedScript() const { return m_pFullscreenedScript; }
@@ -110,5 +111,19 @@ private:
 	static int LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser);
 
 };
+
+
+class CQueryAutoloads : public CQuery
+{
+	array<std::string> *m_paAutoloadFiles;
+
+public:
+	CQueryAutoloads(char *pQueryBuf, array<std::string> *paAutoloadFiles) : CQuery(pQueryBuf), m_paAutoloadFiles(paAutoloadFiles)
+	{
+	}
+
+	virtual void OnData();
+};
+
 
 #endif
