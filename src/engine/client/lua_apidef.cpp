@@ -284,9 +284,16 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("CallvoteOption", &CVoting::CallvoteOption)
 			.addFunction("Vote", &CVoting::Vote)
 
+			.addProperty("VoteDescription", &CVoting::VoteDescription)
+			.addProperty("VoteReason", &CVoting::VoteReason)
 			.addProperty("SecondsLeft", &CVoting::SecondsLeft)
 			.addProperty("IsVoting", &CVoting::IsVoting)
 			.addProperty("TakenChoice", &CVoting::TakenChoice)
+
+			.addData("Yes", &CVoting::m_Yes)
+			.addData("No", &CVoting::m_No)
+			.addData("Pass", &CVoting::m_Pass)
+			.addData("Total", &CVoting::m_Total)
 		.endClass()
 
 		// local playerinfo

@@ -20,13 +20,14 @@ class CVoting : public CComponent
 	char m_aDescription[VOTE_DESC_LENGTH];
 	char m_aReason[VOTE_REASON_LENGTH];
 	int m_Voted;
-	int m_Yes, m_No, m_Pass, m_Total;
 
 	void AddOption(const char *pDescription);
 	void ClearOptions();
 	void Callvote(const char *pType, const char *pValue, const char *pReason);
 
 public:
+	int m_Yes, m_No, m_Pass, m_Total; // lua hack lol
+
 	int m_NumVoteOptions;
 	CVoteOptionClient *m_pFirst;
 	CVoteOptionClient *m_pLast;
@@ -55,6 +56,8 @@ public:
 	int TakenChoice() const { return m_Voted; }
 	const char *VoteDescription() const { return m_aDescription; }
 	const char *VoteReason() const { return m_aReason; }
+	std::string VoteDescriptionSTD() const { return std::string(VoteDescription()); }
+	std::string VoteReasonSTD() const { return std::string(VoteReason()); }
 };
 
 #endif
