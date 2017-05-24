@@ -8,6 +8,7 @@
 #include <game/localization.h>
 #include <game/client/gameclient.h>
 #include <game/client/components/console.h>
+#include <game/client/components/menus.h>
 
 #include "luafile.h"
 #include "lua.h"
@@ -31,8 +32,15 @@ void CLuaFile::Reset(bool error)
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 
+	CLua::m_pCGameClient->m_pMenus->LuaRequestFullscreenAbort(this);
+	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
+		Lua()->ExitFullscreen();
+
+	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
+		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
+
 	if(!error)
-		m_pErrorStr = 0;
+		m_pErrorStr = NULL;
 
 	m_PermissionFlags = 0;
 	LoadPermissionFlags(m_Filename.c_str());
@@ -106,12 +114,6 @@ void CLuaFile::Unload(bool error)
 	// assertion right here because m_pLuaState just CANNOT be 0 at this
 	// point, and if it is, something went wrong that we need to debug!
 	dbg_assert(m_pLuaState != 0, "Something went fatally wrong! Active luafile has no state?!");
-
-	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
-		Lua()->ExitFullscreen();
-
-	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
-		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
 
 	try
 	{

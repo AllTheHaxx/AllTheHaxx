@@ -2352,6 +2352,15 @@ void CMenus::LuaRequestFullscreen(CLuaFile *pLF)
 	m_pLuaFSModeRequester = pLF;
 	m_Popup = POPUP_LUA_REQUEST_FULLSCREEN;
 }
+
+void CMenus::LuaRequestFullscreenAbort(CLuaFile *pLF)
+{
+	if(m_pLuaFSModeRequester == pLF)
+	{
+		m_pLuaFSModeRequester = NULL;
+		m_Popup = POPUP_NONE;
+	}
+}
 #endif
 
 void CMenus::RenderUpdating(const char *pCaption, int current, int total)

@@ -382,6 +382,7 @@ public:	int m_LoadTotal;
 
 	CLuaFile *m_pLuaFSModeRequester;
 	void LuaRequestFullscreen(class CLuaFile *pLF);
+	void LuaRequestFullscreenAbort(class CLuaFile *pLF);
 #else
 	void RenderSettingsLua(CUIRect MainView){};
 #endif
