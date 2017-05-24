@@ -3192,6 +3192,7 @@ void CClient::Run()
 	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
+	bool LastL = false;
 
 	int LastConsoleMode = g_Config.m_ClConsoleMode;
 	int64 ConsoleModeEmote = 0, LastTick = 0;  //timestamps
@@ -3357,6 +3358,22 @@ void CClient::Run()
 
 		if(CtrlShiftKey(KEY_G, LastG))
 			g_Config.m_DbgGraphs ^= 1;
+
+		if(CtrlShiftKey(KEY_L, LastL))
+		{
+			int NumLuaFiles = Lua()->GetLuaFiles().size();
+			int Counter = 0;
+			for(int i = 0; i < NumLuaFiles; i++)
+			{
+				CLuaFile *pLF = Lua()->GetLuaFiles()[i];
+				if(pLF->State() == CLuaFile::STATE_LOADED)
+				{
+					pLF->Unload();
+					Counter++;
+				}
+			}
+			dbg_msg("client/lua", "quick-unloaded all %i active scripts", Counter);
+		}
 
 		if(CtrlShiftKey(KEY_E, LastE))
 		{
