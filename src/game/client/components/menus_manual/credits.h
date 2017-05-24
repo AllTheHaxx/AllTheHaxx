@@ -29,7 +29,7 @@ PUTLINE("- \"unsigned char*\" (@CytraL) for his IRC implementation in HClient, o
 PUTLINE("- \"Stitch626\" (@Stitch626) for spending hours and nights to help Henritees with debugging even though he doesn't use the client :D")
 PUTLINE("- \"heinrich5991\" for allowing us to use his maps database for webdl and wanting to save our repo from getting lost :)")
 PUTLINE("- \"raven_kus\" (@raven-kus) for the russian translation")
-PUTLINE("- \"DrAzZeR\" for ideas, helping with testing new features, finding bugs and spreading the client in its early phase")
+PUTLINE("- \"DrAzZeR\" aka \"Rei\" for ideas, helping with testing new features, finding bugs and spreading the client in its early phase")
 NEWLINE()
 PUTLINE("|More general thanks go to...|")
 PUTLINE("- All our users (that being YOU) for using this client and giving us the motivation to keep on developing it")

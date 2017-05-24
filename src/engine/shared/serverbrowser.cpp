@@ -12,7 +12,7 @@ bool IsVanilla(const CServerInfo *pInfo)
 
 bool IsCatch(const CServerInfo *pInfo)
 {
-	return str_find_nocase(pInfo->m_aGameType, "catch");
+	return str_find_nocase(pInfo->m_aGameType, "catch") != 0;
 }
 
 bool IsInsta(const CServerInfo *pInfo)
@@ -24,7 +24,7 @@ bool IsInsta(const CServerInfo *pInfo)
 
 bool IsFNG(const CServerInfo *pInfo)
 {
-	return str_find_nocase(pInfo->m_aGameType, "fng");
+	return str_find_nocase(pInfo->m_aGameType, "fng") != 0;
 }
 
 bool IsRace(const CServerInfo *pInfo)
@@ -57,5 +57,5 @@ bool Is64Player(const CServerInfo *pInfo)
 
 bool IsPlus(const CServerInfo *pInfo)
 {
-	return str_find(pInfo->m_aGameType, "+");
+	return str_find(pInfo->m_aGameType, "+") != 0;
 }

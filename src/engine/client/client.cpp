@@ -3163,10 +3163,10 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
-#if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
-	if((m_pInputThread = thread_init_named(InputThread, this, "inputthread")))
-		thread_detach(m_pInputThread);
-#endif
+//#if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
+//	if((m_pInputThread = thread_init_named(InputThread, this, "inputthread")))
+//		thread_detach(m_pInputThread);
+//#endif
 
 	// connect to the server if wanted
 	/*
@@ -3203,19 +3203,20 @@ void CClient::Run()
 
 		if(g_Config.m_ClConsoleMode != LastConsoleMode)
 		{
-			CServerInfo Info;
-			GetServerInfo(&Info);
-
-			//m_pGrahpics is IEngineGraphics, the base class of CGraphics_Threaded which we need here
-			CGraphics_Threaded * pGraph = dynamic_cast<CGraphics_Threaded*> (m_pGraphics);
+			const CServerInfo *pInfo = GetServerInfo();
 
 			if(g_Config.m_ClConsoleMode) // hide
 			{
-				pGraph->HideWindow();
+				// input thread doesn't go well together with debugging on windows
+#if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
+				if((m_pInputThread = thread_init_named(InputThread, this, "inputthread")))
+					thread_detach(m_pInputThread);
+#endif
+				m_pGraphics->HideWindow();
 
-				if(IsDDNet(&Info) || IsDDRace(&Info))
+				if(IsDDNet(pInfo) || IsDDRace(pInfo))
 				{
-					//eye emote
+					// eye emote
 					CNetMsg_Cl_Say Msg;
 					Msg.m_Team = 0;
 					Msg.m_pMessage = "/emote blink 999999";
@@ -3224,11 +3225,19 @@ void CClient::Run()
 			}
 			else // show
 			{
-				pGraph->UnhideWindow();
+#if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
+				if(m_pInputThread)
+					thread_destroy(m_pInputThread);
+				else
+					dbg_msg("client/warn", "m_pInputThread == NULL");
+				m_pInputThread = NULL;
+#endif
 
-				if(str_comp_num(Info.m_aGameType, "DD", 2) == 0)
+				m_pGraphics->UnhideWindow();
+
+				if(IsDDNet(pInfo) || IsDDRace(pInfo))
 				{
-					//eye emote
+					// reset eye emote
 					CNetMsg_Cl_Say Msg;
 					Msg.m_Team = 0;
 					Msg.m_pMessage = "/emote normal 1";
@@ -3239,15 +3248,18 @@ void CClient::Run()
 			LastConsoleMode = g_Config.m_ClConsoleMode;
 		}
 
-		if(g_Config.m_ClConsoleMode && g_Config.m_ClConsoleModeEmotes && time_get() - ConsoleModeEmote > time_freq())
+		if(g_Config.m_ClConsoleMode)
 		{
-			ConsoleModeEmote = time_get();
-			CNetMsg_Cl_Emoticon Msg;
-			Msg.m_Emoticon = 12;
-			SendPackMsg(&Msg, MSGFLAG_VITAL);
+			if(g_Config.m_ClConsoleModeEmotes != 0 && time_get() - ConsoleModeEmote > time_freq())
+			{
+				ConsoleModeEmote = time_get();
+				CNetMsg_Cl_Emoticon Msg;
+				Msg.m_Emoticon = EMOTICON_ZZZ;
+				SendPackMsg(&Msg, MSGFLAG_VITAL);
+			}
 		}
 
-		if(time_get() > LastTick+time_freq()*(1/50))
+		if(time_get() > LastTick+time_freq()*(1.0f/50.0f))
 		{
 			LastTick = time_get();
 			LUA_FIRE_EVENT("OnTick");
@@ -3290,8 +3302,11 @@ void CClient::Run()
 		}
 
 		// update input
-		if(Input()->Update()) // -- TODO: this should maybe behave different in console mode, right now it gets stuck
-			break;	// SDL_QUIT
+		if(!g_Config.m_ClConsoleMode)
+		{
+			if(Input()->Update())
+				break;	// SDL_QUIT
+		}
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		Updater()->Tick();
@@ -3302,34 +3317,34 @@ void CClient::Run()
 			Sound()->Update();
 
 		// release focus TODO::XXX::REIMPLEMENT (if this is needed)
-	/*	if(!m_pGraphics->WindowActive())
-		{
-			if(m_WindowMustRefocus == 0)
-				Input()->MouseModeAbsolute();
-			m_WindowMustRefocus = 1;
-		}
-		else if (g_Config.m_DbgFocus && Input()->KeyPress(KEY_ESCAPE))
-		{
-			Input()->MouseModeAbsolute();
-			m_WindowMustRefocus = 1;
-		}
-
-		// refocus
-		if(m_WindowMustRefocus && m_pGraphics->WindowActive() && !g_Config.m_ClConsoleMode)
-		{
-			if(m_WindowMustRefocus < 3)
+		/*	if(!m_pGraphics->WindowActive())
+			{
+				if(m_WindowMustRefocus == 0)
+					Input()->MouseModeAbsolute();
+				m_WindowMustRefocus = 1;
+			}
+			else if (g_Config.m_DbgFocus && Input()->KeyPress(KEY_ESCAPE))
 			{
 				Input()->MouseModeAbsolute();
-				m_WindowMustRefocus++;
+				m_WindowMustRefocus = 1;
 			}
 
-			if(m_WindowMustRefocus >= 3 || Input()->KeyPress(KEY_MOUSE_1))
+			// refocus
+			if(m_WindowMustRefocus && m_pGraphics->WindowActive() && !g_Config.m_ClConsoleMode)
 			{
-				Input()->MouseModeRelative();
-				m_WindowMustRefocus = 0;
+				if(m_WindowMustRefocus < 3)
+				{
+					Input()->MouseModeAbsolute();
+					m_WindowMustRefocus++;
+				}
+
+				if(m_WindowMustRefocus >= 3 || Input()->KeyPress(KEY_MOUSE_1))
+				{
+					Input()->MouseModeRelative();
+					m_WindowMustRefocus = 0;
+				}
 			}
-		}
-*/
+	*/
 		// panic quit button and restart
 		if(CtrlShiftKey(KEY_Q, LastQ))
 		{
@@ -3780,9 +3795,9 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 
 	// load map
 	Crc = (m_DemoPlayer.Info()->m_Header.m_aMapCrc[0]<<24)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[1]<<16)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[2]<<8)|
-		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[3]);
+		  (m_DemoPlayer.Info()->m_Header.m_aMapCrc[1]<<16)|
+		  (m_DemoPlayer.Info()->m_Header.m_aMapCrc[2]<<8)|
+		  (m_DemoPlayer.Info()->m_Header.m_aMapCrc[3]);
 	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Crc);
 	if(pError)
 	{
@@ -4475,9 +4490,21 @@ void CClient::RequestDDNetSrvList()
 	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 }
 
+int CClient::GetPredictionTime()
+{
+	CALLSTACK_ADD();
+
+	int64 Now = time_get();
+	return (int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq());
+}
+
 void CClient::InputThread(void *pUser)
 {
 	CALLSTACK_ADD();
+
+	//if(g_Config.m_Debug)
+	dbg_msg("client/dbg", "input thread started");
+	printf("\n");
 
 	CClient *pSelf = (CClient *)pUser;
 	char aInput[512];
@@ -4499,14 +4526,18 @@ void CClient::InputThread(void *pUser)
 	while(1)
 	{
 		thread_sleep(100);
-		if(pSelf->m_State == IClient::STATE_QUITING)
+		if(pSelf->m_State == IClient::STATE_QUITING || !g_Config.m_ClConsoleMode)
+		{
+			//if(g_Config.m_Debug)
+			dbg_msg("client/dbg", "input thread stopped");
 			break;
+		}
 
 		mem_zerob(aInput);
 		fgets(aInput, sizeof(aInput), stdin);
 		aInput[str_length(aInput)-1] = '\0';
 
-		#if defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS)
 		if(!str_utf8_check(pInput))
 			{
 				char aTemp[4] = {0};
@@ -4531,19 +4562,11 @@ void CClient::InputThread(void *pUser)
 			}
 			else
 				pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
-		#else
+#else
 		pSelf->m_pConsole->ExecuteLineFlag(pInput, CFGFLAG_CLIENT);
-		#endif
+#endif
 
 	}
-}
-
-int CClient::GetPredictionTime()
-{
-	CALLSTACK_ADD();
-
-	int64 Now = time_get();
-	return (int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq());
 }
 
 void CClient::LuaCheckDrawingState(lua_State *L, const char *pFuncName, bool NoThrow)

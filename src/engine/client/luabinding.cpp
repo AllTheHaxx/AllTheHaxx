@@ -122,6 +122,53 @@ int CLuaBinding::LuaImport(lua_State *L)
 #endif
 }
 
+int CLuaBinding::LuaExec(lua_State *L)
+{
+#if defined(FEATURE_LUA)
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	int n = lua_gettop(L);
+	if(n != 1)
+		return luaL_argerror(L, 1, "expected a string value, got nil");
+
+	char aFilename[512];
+	{
+		const char *pFilename = luaL_checklstring(L, 1, 0);
+		if(!pFilename)
+			return false;
+
+		// replace all backslashes with forward slashes
+		char aTmp[512];
+		{
+			str_copy(aTmp, pFilename, sizeof(aTmp));
+			for(char *p = aTmp; *p; p++)
+				if(*p == '\\')
+					*p = '/';
+			pFilename = aTmp;
+		}
+		// sandbox it
+		for(; *pFilename && ((*pFilename == '.' && pFilename[1] == '/') || *pFilename == '/'); pFilename++);
+		str_copy(aFilename, pFilename, sizeof(aFilename));
+		// auto-append the file ending if omitted
+		if(str_comp_nocase(aFilename+str_length(aFilename)-4, ".lua") != 0 && str_comp_nocase(aFilename+str_length(aFilename)-4, ".clc") != 0)
+			str_append(aFilename, ".lua", sizeof(aFilename)); // assume plain lua files as default
+	}
+
+	bool ret = pLF->LoadFile(aFilename, true);
+
+	if(g_Config.m_Debug)
+		dbg_msg("Lua/debug", "script '%s' %s '%s'", pLF->GetFilename()+4, ret ? "successfully exec()uted" : "failed to exec()ute", aFilename);
+
+	// return some stuff to the script
+	lua_pushboolean(L, (int)ret); // success?
+	return 1;
+#else
+	return 0;
+#endif
+}
+
 /* lua call: Listdir(<string> foldername, <string/function> callback) */
 int CLuaBinding::LuaListdir(lua_State *L)
 {

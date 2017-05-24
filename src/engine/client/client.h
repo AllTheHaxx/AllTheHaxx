@@ -443,8 +443,8 @@ public:
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	static void InputThread(void *pUser);
-	void * m_pInputThread;
+	void *m_pInputThread;
 
-	virtual IFriends* Foes() {return &m_Foes; }
+	virtual IFriends* Foes() { return &m_Foes; }
 };
 #endif

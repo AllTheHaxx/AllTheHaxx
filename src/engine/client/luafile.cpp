@@ -344,10 +344,8 @@ bool CLuaFile::CheckFile(const char *pFilename)
 bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 {
 #if defined(FEATURE_LUA)
-	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
-			(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") &&
-			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".clc") /*&&
-			str_comp_nocase(&pFilename[str_length(pFilename)]-7, ".config")*/) || !m_pLuaState)
+	if(!pFilename || !m_pLuaState || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
+			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
 		return false;
 
 	// some security steps right here...
@@ -355,28 +353,31 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	LoadPermissionFlags(pFilename);
 	ApplyPermissions(m_PermissionFlags & ~BeforePermissions); // only apply those that are new
 
-	// kill everything malicious
-	static const char s_aBlacklist[][64] = {
-			"dofile"
-			,"os.exit"
-			,"os.execute"
-			,"os.rename"
-			,"os.remove"
-			,"os.setlocal"
-			,"require"
-			,"module"
-			,"load"
-			,"loadfile"
-			,"loadstring"
-			,"collectgarbage"
-	};
-	for(unsigned i = 0; i < sizeof(s_aBlacklist)/sizeof(s_aBlacklist[0]); i++)
+	if(!Import)
 	{
-		char aCmd[128];
-		str_format(aCmd, sizeof(aCmd), "%s=nil", s_aBlacklist[i]);
-		luaL_dostring(m_pLuaState, aCmd);
-		if(g_Config.m_Debug)
-			dbg_msg("lua", "disable: '%s'", aCmd);
+		// kill everything malicious
+		const char *const s_apBlacklist[] = {
+				"dofile"
+				,"os.exit"
+				,"os.execute"
+				,"os.rename"
+				,"os.remove"
+				,"os.setlocal"
+				,"require"
+				,"module"
+				,"load"
+				,"loadfile"
+				,"loadstring"
+				,"collectgarbage"
+		};
+		for(unsigned i = 0; i < sizeof(s_apBlacklist)/sizeof(s_apBlacklist[0]); i++)
+		{
+			char aCmd[128];
+			str_format(aCmd, sizeof(aCmd), "%s=nil", s_apBlacklist[i]);
+			luaL_dostring(m_pLuaState, aCmd);
+			if(g_Config.m_Debug)
+				dbg_msg("lua", "disable: '%s'", aCmd);
+		}
 	}
 
 

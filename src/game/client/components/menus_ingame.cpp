@@ -276,7 +276,12 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Console Mode")), &Button, &ButtonBar);
 	static CButtonContainer s_ConModeButton;
-	if(DoButton_Menu(&s_ConModeButton, Localize("Console Mode"), 0, &Button, "Enter console mode (very low CPU usage, no graphics)"))
+	if(DoButton_Menu(&s_ConModeButton, Localize("Console Mode"), 0, &Button,
+					 "Enter console mode (very low CPU usage, no graphics)"
+#if defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG)
+						"\nWARNING: you won't be able to get out of it again due to debugging on windows!!"
+#endif
+	))
 	{
 		g_Config.m_ClConsoleMode ^= 1;
 		dbg_msg("", "+++++++++++++++++++ CONSOLE MODE ON +++++++++++++++++++");

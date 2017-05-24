@@ -30,6 +30,7 @@ public:
 	// low level lua callbacks
 	/** @LuaFunc @code bool Import(const char *pFilename) */
 	static int LuaImport(lua_State *L);
+	static int LuaExec(lua_State *L);
 	/** @LuaFunc none */
 	static int LuaKillScript(lua_State *L);
 	/** @LuaFunc @code int Listdir(const char *pDir, LUA_FS_LISTDIR_CALLBACK *pFCallback)@endcode
