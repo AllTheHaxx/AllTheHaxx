@@ -66,6 +66,7 @@ public:
 	{
 		TEXLOAD_NORESAMPLE = 1,
 		TEXLOAD_NOMIPMAPS = 2,
+		TEXLOAD_FILTER_NEAREST = 4,
 	};
 
 	int ScreenWidth() const { return m_ScreenWidth; }

@@ -415,6 +415,8 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 	Cmd.m_Flags = 0;
 	if(Flags&IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
+	if(Flags&IGraphics::TEXLOAD_FILTER_NEAREST)
+		Cmd.m_Flags |= CCommandBuffer::TEXLOAD_FILTER_NEAREST;
 	if(g_Config.m_GfxTextureCompression)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
 	if(g_Config.m_GfxTextureQuality || Flags&TEXLOAD_NORESAMPLE)
