@@ -147,8 +147,8 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(g_Config.m_Debug)
 			dbg_msg("skinfetcher/debug", "download failed: '%s'", pDest);
 
-		if(!pSelf->FetchNext(pTaskHandler))
-			pSelf->m_pStorage->RemoveBinaryFile(pDest); // delete the empty file dummy
+		//if(!pSelf->FetchNext(pTaskHandler))
+		//	pSelf->m_pStorage->RemoveBinaryFile(pDest); // delete the empty file dummy
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
