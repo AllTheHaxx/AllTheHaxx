@@ -91,6 +91,19 @@ public:
 		num_elements = 0;
 	}
 
+	/*
+	Function: dispose
+
+	 like clear, but keeps the acquired memory
+
+	Remarks:
+		- Invalidates ranges
+	*/
+	void dispose()
+	{
+		num_elements = 0;
+	}
+
 	void clear_erase()
 	{
 		// erase everything out

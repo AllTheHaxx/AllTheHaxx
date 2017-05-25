@@ -37,10 +37,10 @@ int CSnapshot::GetItemType(int Index)
 	CUuid Uuid;
 	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
 	{
-		Uuid.m_aData[i * 4 + 0] = pTypeItem->Data()[i] >> 24;
-		Uuid.m_aData[i * 4 + 1] = pTypeItem->Data()[i] >> 16;
-		Uuid.m_aData[i * 4 + 2] = pTypeItem->Data()[i] >> 8;
-		Uuid.m_aData[i * 4 + 3] = pTypeItem->Data()[i];
+		Uuid.m_aData[i * 4 + 0] = (unsigned char)(pTypeItem->Data()[i] >> 24);
+		Uuid.m_aData[i * 4 + 1] = (unsigned char)(pTypeItem->Data()[i] >> 16);
+		Uuid.m_aData[i * 4 + 2] = (unsigned char)(pTypeItem->Data()[i] >> 8);
+		Uuid.m_aData[i * 4 + 3] = (unsigned char)pTypeItem->Data()[i];
 	}
 
 	return g_UuidManager.LookupUuid(Uuid);
