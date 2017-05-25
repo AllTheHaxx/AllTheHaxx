@@ -24,6 +24,8 @@ dependencies:
         mkdir $CIRCLE_ARTIFACTS/win64
 
   cache_directories:
+    - "./objs/"
+    - "./.bam/"
     - "~/bam/"
 
 
