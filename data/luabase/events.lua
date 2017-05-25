@@ -20,9 +20,17 @@ function RegisterEvent(EventName, ...)
 	end
 
 	for i, FuncName in next, FuncNames do
-		local Func = getfenv()[FuncName]
+		local Func
+		if type(FuncName) == "function" then
+			Func = FuncName
+		elseif type(FuncName) == "string" then
+			Func = getfenv()[FuncName]
+			FuncName = #__CTRL.Events[EventName] + 1
+		else
+			error("RegisterEvent expects only strings and/or functions as variadic arguments (got " .. type(FuncName) .. ")", 2)
+		end
 
-		if Func ~= nil then
+		if Func ~= nil then  -- Func can only be nil when given as a string
 			__CTRL.Events[EventName][FuncName] = Func
 		else
 			error("Cannot register global '" .. FuncName .. "' (a nil value) for event " .. EventName, 2)
@@ -37,17 +45,31 @@ function RemoveEvent(EventName, ...)
 	end
 
 	for i, FuncName in next, FuncNames do
-		__CTRL.Events[EventName][FuncName] = nil
+--[[	if type(FuncName) == "function" then
+			for i,func in ipairs(__CTRL.Events[EventName]) do
+				if func == FuncName then
+					table.remove(__CTRL.Events[EventName], i)
+					break
+				end
+			end
+		else]]if type(FuncName) == "string" then
+			__CTRL.Events[EventName][FuncName] = nil
+		else
+			error("RemoveEvent expects only strings as variadic arguments (got " .. type(FuncName) .. ")", 2)
+		end
 	end
 end
 
 function EventList(EventName)
+	if type(EventName) ~= "string" then
+		error("RemoveEvent expects a string as its argument (got " .. type(FuncName) .. ")", 2)
+	end
 	if __CTRL.Events[EventName] ~= nil then
 		for name, func in pairs(__CTRL.Events[EventName]) do
 			print(" -> " .. name)
 		end
 	else
-		print("No Functions found under this Eventname.")
+		print("No Functions registered for event '" .. EventName .. "'")
 	end
 end
 
