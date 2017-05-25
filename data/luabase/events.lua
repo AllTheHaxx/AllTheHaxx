@@ -45,7 +45,7 @@ function RemoveEvent(EventName, ...)
 	end
 
 	for i, FuncName in next, FuncNames do
---[[	if type(FuncName) == "function" then
+--[[		if type(FuncName) == "function" then
 			for i,func in ipairs(__CTRL.Events[EventName]) do
 				if func == FuncName then
 					table.remove(__CTRL.Events[EventName], i)
@@ -62,7 +62,7 @@ end
 
 function EventList(EventName)
 	if type(EventName) ~= "string" then
-		error("RemoveEvent expects a string as its argument (got " .. type(FuncName) .. ")", 2)
+		error("EventList expects a string as its argument (got " .. type(FuncName) .. ")", 2)
 	end
 	if __CTRL.Events[EventName] ~= nil then
 		for name, func in pairs(__CTRL.Events[EventName]) do
