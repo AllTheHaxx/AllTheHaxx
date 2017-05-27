@@ -63,3 +63,31 @@ function GetAngleDeg(DirVec)
 	if Angle < 0 then Angle = Angle + 360 end
 	return Angle
 end
+
+
+function IsFreezeTile(x, y)
+	local TILE_FREEZE = -1
+	local gm = string.lower(Game.ServerInfo.GameMode)
+	if(gm == "idd32+" or gm == "ddnet" or string.find(gm, "race") ~= nil) then
+		TILE_FREEZE = 9
+	end
+	if(gm == "if|city") then
+		TILE_FREEZE = 191
+	end
+	if(gm == "dm" or gm == "tdm" or gm == "ctf") then
+		TILE_FREEZE = 2 -- kill
+	end	
+	return Game.Collision:GetTile(x, y) == TILE_FREEZE
+end
+
+function IsFreezed(Id)
+	if Game.CharSnap(Id or Game.LocalCID).Cur.Weapon == 5 then
+		if IsFreezeTile(Game.Players(Id or Game.LocalCID).Tee.Pos.x,Game.Players(Id or Game.LocalCID).Tee.Pos.y) then
+			return 2
+		elseif not (IsFreezeTile(Game.Players(Id or Game.LocalCID).Tee.Pos.x,Game.Players(Id or Game.LocalCID).Tee.Pos.y)) then
+			return 1
+		end
+	else
+		return 0
+	end
+end
