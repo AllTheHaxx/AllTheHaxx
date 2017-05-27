@@ -14,12 +14,21 @@ class CPool
 {
 	struct CChunk
 	{
+		MACRO_ALLOC_HEAP()
+	public:
 		CChunk *m_pNext;
-		T m_Data;
+		T *m_pData;
 
 		CChunk()
 		{
 			m_pNext = NULL;
+			m_pData = mem_allocb(T, 1);
+		}
+
+		~CChunk()
+		{
+			if(m_pData)
+				mem_free(m_pData);
 		}
 	};
 
@@ -46,8 +55,8 @@ class CPool
 	 */
 	static T* Alloc()
 	{
-		CChunk *pChunk = mem_allocb(CChunk, 1);
-		return &(pChunk->m_Data);
+		CChunk *pChunk = new CChunk();
+		return pChunk->m_pData;
 	}
 
 	inline CChunk *DataToChunk(T* pData) const
@@ -84,8 +93,8 @@ public:
 		m_pFirst = pChunk->m_pNext;
 
 		// invoke the ctor and return a pointer to the object
-		pChunk->m_Data.T();
-		return &(pChunk->m_Data);
+		pChunk->m_pData->T();
+		return pChunk->m_pData;
 	}
 
 
@@ -96,9 +105,9 @@ public:
 	 */
 	void Free(T *pData)
 	{
-		// add the chunk back to the reserved pool
-		CChunk *pChunk = DataToChunk(pData);
-		AddToPool(pChunk);
+		// call the destructor
+		pData->~T();
+		AddToPool(DataToChunk(pData));
 	}
 
 	/**
@@ -107,13 +116,14 @@ public:
 	 */
 	void HintSize(unsigned int SizeHint)
 	{
+		// never shrink the pool
 		if(m_Size >= SizeHint)
 			return;
 
 		// allocate as many chunks as needed and add them to the reserved pool
 		unsigned int AllocSize = m_Size - SizeHint;
 		for(unsigned int i = 0; i < AllocSize; i++)
-			Free(Alloc());
+			AddToPool(DataToChunk(Alloc()));
 	}
 
 	/**
@@ -126,7 +136,7 @@ public:
 		while(pChunk)
 		{
 			CChunk *pNext = pChunk->m_pNext;
-			mem_free(pChunk);
+			delete pChunk;
 			pChunk = pNext;
 		}
 		m_pFirst = NULL;
