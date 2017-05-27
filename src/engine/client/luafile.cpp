@@ -126,7 +126,10 @@ void CLuaFile::Unload(bool error)
 		m_pLua->HandleException(e, this);
 	}
 
+	Lua()->OnScriptUnload(this);
+
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
+	lua_close(m_pLuaState);
 	Reset(error);
 #endif
 }
@@ -234,6 +237,8 @@ void CLuaFile::Init()
 		Unload(true);
 		return;
 	}
+
+	Lua()->OnScriptLoad(this);
 
 	m_ScriptHasSettingsPage |= ScriptHasSettingsPage();
 

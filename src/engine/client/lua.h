@@ -14,9 +14,9 @@
 #define LUA_FIRE_EVENT(EVENTNAME, ...) \
 	if(g_Config.m_ClLua) \
 	{ \
-		for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++) \
+		for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetActiveLuaFiles().size(); ijdfg++) \
 		{ \
-			CLuaFile *pLF = CLua::Client()->Lua()->GetLuaFiles()[ijdfg]; \
+			CLuaFile *pLF = CLua::Client()->Lua()->GetActiveLuaFiles()[ijdfg]; \
 			if(pLF->State() != CLuaFile::STATE_LOADED) \
 				continue; \
 			LuaRef lfunc = pLF->GetFunc(EVENTNAME); \
@@ -51,6 +51,7 @@ class CLua
 	class CSql *m_pDatabase;
 
 	array<CLuaFile*> m_apLuaFiles;
+	array<CLuaFile*> m_apActiveScripts;
 	array<std::string> m_aAutoloadFiles;
 	CLuaFile *m_pFullscreenedScript;
 
@@ -64,6 +65,9 @@ public:
 	void LoadFolder();
 	void LoadFolder(const char *pFolder);
 	void SortLuaFiles();
+
+	void OnScriptLoad(CLuaFile *pLF);
+	void OnScriptUnload(CLuaFile *pLF);
 
 	static int ErrorFunc(lua_State *L);
 	static int Panic(lua_State *L);
@@ -80,6 +84,7 @@ public:
 
 	void SetGameClient(IGameClient *pGameClient);
 	array<CLuaFile*> &GetLuaFiles() { return m_apLuaFiles; }
+	const array<CLuaFile*> &GetActiveLuaFiles() const { return m_apActiveScripts; }
 	int NumActiveScripts() const
 	{
 		int num = 0;

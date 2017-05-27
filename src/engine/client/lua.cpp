@@ -193,6 +193,22 @@ int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pU
 	return 0;
 }
 
+void CLua::OnScriptLoad(CLuaFile *pLF)
+{
+#if defined(CONF_DEBUG)
+	dbg_assert(m_apActiveScripts.find(pLF, NULL) == NULL, "loaded a script twice!");
+#endif
+	m_apActiveScripts.add(pLF);
+}
+
+void CLua::OnScriptUnload(CLuaFile *pLF)
+{
+	bool Success = m_apActiveScripts.remove_fast(pLF);
+#if defined(CONF_DEBUG)
+	dbg_assert(Success, "unloaded a script that wasn't even loaded...?");
+#endif
+}
+
 int CLua::HandleException(std::exception &e, lua_State *L)
 {
 	return HandleException(e.what(), L);
@@ -222,11 +238,13 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 	{
 		if(!Console)
 		{
+			// unload the script
 			dbg_msg("lua/FATAL", "script %s hit OOM condition, killing it!", pLF->GetFilename());
 			pLF->Unload(true);
 		}
 		else
 		{
+			// restart the lua console
 			#if defined(FEATURE_LUA)
 			lua_close(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState);
 			#endif
@@ -241,7 +259,7 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 
 	Client()->LuaCheckDrawingState(pLF->L(), "exception", true); // clean up the rendering pipeline if necessary
 
-	// error messages come as "filename:line: message" - we don't need the 'filename' part if it's the current scriptfile's name
+	// error messages come as "filename:line: message" - we don't need the 'filename' part if it's the current script's filename
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%s:", pLF->GetFilename());
@@ -312,6 +330,7 @@ void CLua::ScriptEnterFullscreen(CLuaFile *pLF)
 #endif
 }
 
+
 void CLua::ExitFullscreen()
 {
 #if defined(FEATURE_LUA)
@@ -331,7 +350,6 @@ void CLua::ExitFullscreen()
 	m_pFullscreenedScript = 0;
 #endif
 }
-
 
 void CLua::AddAutoload(const CLuaFile *pLF)
 {

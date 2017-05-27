@@ -125,6 +125,7 @@ public:
 	{
 		if(index < 0)
 			index += num_elements;
+		dbg_assert_legacy(index >= 0 && index < num_elements, "index out of range");
 		if(index != num_elements-1)
 			list[index] = list[num_elements-1];
 		set_size(size()-1);
@@ -136,14 +137,15 @@ public:
 		Remarks:
 			- Invalidates ranges
 	*/
-	void remove_fast(const T& item)
+	bool remove_fast(const T& item)
 	{
 		for(int i = 0; i < size(); i++)
 			if(list[i] == item)
 			{
 				remove_index_fast(i);
-				return;
+				return true;
 			}
+		return false;
 	}
 
 	/*
@@ -156,6 +158,7 @@ public:
 	{
 		if(index < 0)
 			index += num_elements;
+		dbg_assert_legacy(index >= 0 && index < num_elements, "index out of range");
 		for(int i = index+1; i < num_elements; i++)
 			list[i-1] = list[i];
 
