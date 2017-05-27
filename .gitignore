@@ -1,5 +1,5 @@
 /.bam
-/config_*.lua
+/config*.lua
 datasrc/__pycache__
 datasrc/*.pyc
 /objs
