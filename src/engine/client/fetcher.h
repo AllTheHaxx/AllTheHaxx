@@ -4,6 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include "curl/curl.h"
 #include "curl/easy.h"
+#include <base/system++/threading.h>
 #include <engine/fetcher.h>
 
 class CFetcher : public IFetcher
@@ -14,7 +15,7 @@ private:
 	void *m_pThread;
 	bool m_Shutdown;
 
-	LOCK m_Lock;
+	LOCK_SMART m_Lock;
 	CFetchTask *m_pFirst;
 	CFetchTask *m_pLast;
 	class IStorageTW *m_pStorage;

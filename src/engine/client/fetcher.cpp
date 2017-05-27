@@ -14,7 +14,6 @@ CFetcher::CFetcher()
 {
 	m_pStorage = NULL;
 	m_pHandle = NULL;
-	m_Lock = lock_create();
 	m_pFirst = NULL;
 	m_pLast = NULL;
 	m_pThread = NULL;
@@ -32,16 +31,13 @@ CFetcher::~CFetcher()
 		m_pThread = NULL;
 
 		// clear the queue
-		lock_wait(m_Lock);
+		LOCK_SECTION_DBG(m_Lock);
 		while(m_pFirst)
 		{
 			CFetchTask *pNext = m_pFirst->m_pNext;
 			delete m_pFirst;
 			m_pFirst = pNext;
 		}
-		lock_unlock(m_Lock);
-		lock_destroy(m_Lock);
-		m_Lock = NULL;
 	}
 
 	if(m_pHandle)
@@ -79,7 +75,7 @@ CFetchTask* CFetcher::QueueAdd(bool CanTimeout, const char *pUrl, const char *pD
 	pTask->m_Size = pTask->m_Progress = 0;
 	pTask->m_Abort = false;
 
-	lock_wait(m_Lock);
+	LOCK_SECTION_DBG(m_Lock);
 	if(!m_pThread)
 		m_pThread = thread_init_named(&FetcherThread, this, "fetcher");
 
@@ -94,7 +90,7 @@ CFetchTask* CFetcher::QueueAdd(bool CanTimeout, const char *pUrl, const char *pD
 		m_pLast = pTask;
 	}
 	pTask->m_State = CFetchTask::STATE_QUEUED;
-	lock_unlock(m_Lock);
+	UNLOCK_SECTION();
 
 	return pTask;
 }
@@ -113,14 +109,18 @@ void CFetcher::FetcherThread(void *pUser)
 	CALLSTACK_ADD();
 
 	CFetcher *pFetcher = (CFetcher *)pUser;
-	dbg_msg("fetcher", "thread %p started...", pFetcher->m_pThread);
+	{
+		LOCK_SECTION_DBG(pFetcher->m_Lock);
+		dbg_msg("fetcher", "thread %p started...", pFetcher->m_pThread);
+	}
+
 	while(1)
 	{
-		lock_wait(pFetcher->m_Lock);
+		LOCK_SECTION_DBG(pFetcher->m_Lock);
 		CFetchTask *pTask = pFetcher->m_pFirst;
 		if(pTask)
 			pFetcher->m_pFirst = pTask->m_pNext;
-		lock_unlock(pFetcher->m_Lock);
+		UNLOCK_SECTION();
 		if(pTask)
 		{
 			if(!pFetcher->m_Shutdown)

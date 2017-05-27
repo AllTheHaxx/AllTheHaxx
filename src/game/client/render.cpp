@@ -352,20 +352,20 @@ void CRenderTools::RenderTilemapGenerateSkip(class CLayers *pLayers)
 
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				CMapItemLayerTilemap *pTmap = (CMapItemLayerTilemap *)pLayer;
+				CMapItemLayerTilemap *pTmap = reinterpret_cast<CMapItemLayerTilemap*>(pLayer);
 				CTile *pTiles = (CTile *)pLayers->Map()->GetData(pTmap->m_Data);
 				for(int y = 0; y < pTmap->m_Height; y++)
 				{
 					for(int x = 1; x < pTmap->m_Width;)
 					{
-						int sx;
-						for(sx = 1; x+sx < pTmap->m_Width && sx < 255; sx++)
+						unsigned char sx;
+						for(sx = 1; x+sx < pTmap->m_Width && sx < 255U; sx++)
 						{
 							if(pTiles[y*pTmap->m_Width+x+sx].m_Index)
 								break;
 						}
 
-						pTiles[y*pTmap->m_Width+x].m_Skip = sx-1;
+						pTiles[y*pTmap->m_Width+x].m_Skip = (sx - (unsigned char)1U);
 						x += sx;
 					}
 				}

@@ -803,32 +803,48 @@ bool CClient::InputExists(int Tick)
 }
 
 // ------ state handling -----
-void CClient::SetState(int s)
+void CClient::SetState(int NewState)
 {
 	CALLSTACK_ADD();
 
 	if(m_State == IClient::STATE_QUITING)
 		return;
 
-	int Old = m_State;
+	int OldState = m_State;
 	if(g_Config.m_Debug)
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "state change. last=%d current=%d", m_State, s);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
-	}
-	m_State = s;
-	if(Old != s)
-	{
-		GameClient()->OnStateChange(m_State, Old);
+		const char * const aStateNames[] = {
+				 "STATE_OFFLINE"
+				,"STATE_CONNECTING"
+				,"STATE_LOADING"
+				,"STATE_ONLINE"
+				,"STATE_DEMOPLAYBACK"
+				,"STATE_QUITING"
+		};
 
-		if(s == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
+		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG,
+						   "client", "state change. last=%s(%d) current=%s(%d)",
+						   aStateNames[m_State], m_State, aStateNames[NewState], NewState);
+	}
+
+	m_State = NewState;
+
+	if(OldState != NewState)
+	{
+		GameClient()->OnStateChange(m_State, OldState);
+
+		if(NewState == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
 		{
 			if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
 				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
 			else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
 				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
 		}
+	}
+
+	if(OldState == STATE_ONLINE && NewState == STATE_OFFLINE)
+	{
+		UnloadCurrentMap();
 	}
 }
 
@@ -1001,7 +1017,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_pConsole->DeregisterTempAll();
 	m_NetClient[0].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
-	m_pMap->Unload();
+	UnloadCurrentMap();
 
 	// disable all downloads
 	m_MapdownloadChunk = 0;
@@ -1417,6 +1433,18 @@ bool CClient::MapLoaded()
 	return m_pMap->IsLoaded();
 }
 
+bool CClient::UnloadCurrentMap()
+{
+	bool WasLoaded = MapLoaded();
+	m_pMap->Unload();
+
+	m_aCurrentMap[0] = '\0';
+	m_aCurrentMapPath[0] = '\0';
+	m_CurrentMapCrc = 0;
+
+	return WasLoaded;
+}
+
 void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
 {
 	CALLSTACK_ADD();
@@ -1425,13 +1453,16 @@ void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
 		return;
 
 	if(!m_pMap->Load(pFilename))
+	{
+		dbg_msg("client/error", "failed to load background map, disabling it!");
+		g_Config.m_ClMenuBackground = 0;
 		return;
+	}
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+	m_pConsole->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "loaded background map '%s'", pFilename);
 
-	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
+	str_formatb(m_aCurrentMap, "~bgmap-%s", pName);
+	str_copyb(m_aCurrentMapPath, pFilename);
 	m_CurrentMapCrc = m_pMap->Crc();
 }
 
@@ -1440,6 +1471,13 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 	CALLSTACK_ADD();
 
 	static char aErrorMsg[128];
+
+	// unload the background map if present
+	if(UnloadCurrentMap())
+#if !defined(CONF_DEBUG)
+		if(g_Config.m_Debug)
+#endif
+			dbg_msg("client/debug", "unloaded background map");
 
 	SetState(IClient::STATE_LOADING);
 
@@ -1454,7 +1492,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 	{
 		str_format(aErrorMsg, sizeof(aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aErrorMsg);
-		m_pMap->Unload();
+		UnloadCurrentMap();
 		return aErrorMsg;
 	}
 

@@ -2134,9 +2134,10 @@ void CMenus::OnRender()
 	else
 		UseMouseButtons(true);
 
-	if(g_Config.m_ClMenuBackground && !Client()->MapLoaded())
+	if(Client()->State() == IClient::STATE_OFFLINE &&
+			g_Config.m_ClMenuBackground && !Client()->MapLoaded())
 	{
-		Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
+		Client()->LoadBackgroundMap("menu_day", "ui/menu_day.map");
 
 		m_pClient->Layers()->Init(Kernel());
 		m_pClient->Collision()->Init(Layers());

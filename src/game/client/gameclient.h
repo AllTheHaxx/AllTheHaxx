@@ -379,7 +379,7 @@ public:
 	class CAStar *m_pAStar;
 	class CIRCBind *m_pIRCBind;
 	class CIdentity *m_pIdentity;
-	class CCollision *m_pCollision;
+	class CCollision *m_pCollision; // for lua
 	class CGameTextureManager *m_pGameTextureManager;
 	class CFontMgr *m_pFontMgrBasic;
 	class CFontMgr *m_pFontMgrMono;

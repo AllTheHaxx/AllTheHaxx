@@ -252,7 +252,11 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 	if(!m_pDataFile->m_ppDataPtrs[Index])
 	{
 		// fetch the data size
-		int DataSize = GetDataSize(Index);
+#if defined(CONF_DEBUG)
+		dbg_assert(GetDataSize(Index) > 0, "invalid data size");
+#endif
+		unsigned int DataSize = (unsigned int)GetDataSize(Index);
+
 #if defined(CONF_ARCH_ENDIAN_BIG)
 		int SwapSize = DataSize;
 #endif
@@ -261,11 +265,11 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 		{
 			// v4 has compressed data
 			void *pTemp = (char *)mem_alloc(DataSize, 1);
-			unsigned long UncompressedSize = m_pDataFile->m_Info.m_pDataSizes[Index];
+			unsigned int UncompressedSize = (unsigned int)m_pDataFile->m_Info.m_pDataSizes[Index];
 			unsigned long s;
 
 			if(g_Config.m_Debug)
-				dbg_msg("datafile", "loading data index=%d size=%d uncompressed=%d", Index, DataSize, (int)UncompressedSize);
+				dbg_msg("datafile", "loading data index=%d size=%d uncompressed=%d", Index, DataSize, UncompressedSize);
 			m_pDataFile->m_ppDataPtrs[Index] = (char *)mem_alloc(UncompressedSize, 1);
 
 			// read the compressed data

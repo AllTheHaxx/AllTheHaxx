@@ -121,6 +121,7 @@ public:
 
 
 #define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&LOCKVAR, false, __FILE__, __LINE__); __SectionLock.WaitAndLock()
+#define UNLOCK_SECTION() __SectionLock.Unlock()
 #define LOCK_SECTION_LAZY_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&LOCKVAR, false, __FILE__, __LINE__)
 
 class LOCK_SMART
@@ -207,7 +208,7 @@ public:
 	void Unlock()
 	{
 #if defined(CONF_DEBUG)
-		dbg_assert(m_IsLocked, "Tried to lock the locked lock");
+		dbg_assert(m_IsLocked, "Tried to unlock the unlocked lock");
 //		dbg_msg("lock/dbg", "%s:%i released lock %p", m_pFile, m_Line, m_Lock);
 #else
 		if(!m_IsLocked)

@@ -250,6 +250,7 @@ public:
 	{
 		if(index < 0)
 			index += num_elements;
+		dbg_assert_legacy(index >= 0 && index < num_elements, "index out of range");
 		return list[index];
 	}
 
@@ -260,6 +261,7 @@ public:
 	{
 		if(index < 0)
 			index += num_elements;
+		dbg_assert_legacy(index >= 0 && index < num_elements, "index out of range");
 		return list[index];
 	}
 
