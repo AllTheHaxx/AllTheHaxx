@@ -2212,7 +2212,7 @@ void CMenus::OnRender()
 		static CButtonContainer s_ButtonExitFS;
 		if(DoButton_Menu(&s_ButtonExitFS, "X", 0, &Button, Localize("Kill the currently fullscreened script"), CUI::CORNER_BL, vec4(1,0,0,0.5f)))
 		{
-			Client()->Lua()->GetFullscreenedScript()->Unload();
+			Client()->Lua()->GetFullscreenedScript()->Deactivate();
 		}
 	}
 	else

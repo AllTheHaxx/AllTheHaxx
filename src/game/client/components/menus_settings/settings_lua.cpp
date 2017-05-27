@@ -254,11 +254,11 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					if (DoButton_Menu(&pIDButtonToggleScript[i], L->State() == CLuaFile::STATE_LOADED ? "×" : "→", 0, &Button, L->State() == CLuaFile::STATE_LOADED ? Localize("Deactivate") : Localize("Activate"), CUI::CORNER_R))
 					{
 						if(L->State() == CLuaFile::STATE_LOADED)
-							L->Unload();
+							L->Deactivate();
 						else
 						{
 							RenderLoadingLua();
-							L->Init();
+							L->Activate();
 						}
 					}
 
@@ -361,7 +361,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			static CButtonContainer s_DeactivateButton;
 			if (DoButton_Menu(&s_DeactivateButton, Localize("Deactivate"), 0, &Button))
 			{
-				L->Unload();
+				L->Deactivate();
 			}
 
 			static float s_ButtonReloadColorFade = 0.0f;
@@ -374,7 +374,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			{
 				s_ButtonReloadColorFade = 1.0f;
 				RenderLoadingLua();
-				L->Init();
+				L->Activate();
 			}
 
 
@@ -396,7 +396,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			if (DoButton_Menu(&s_ButtonActivate, Localize("Activate"), 0, &Button))
 			{
 				RenderLoadingLua();
-				L->Init();
+				L->Activate();
 			}
 		}
 

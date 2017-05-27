@@ -3406,7 +3406,7 @@ void CClient::Run()
 				CLuaFile *pLF = Lua()->GetLuaFiles()[i];
 				if(pLF->State() == CLuaFile::STATE_LOADED)
 				{
-					pLF->Unload();
+					pLF->Deactivate();
 					Counter++;
 				}
 			}

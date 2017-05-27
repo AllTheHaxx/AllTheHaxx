@@ -2315,19 +2315,19 @@ void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
 		if(str_comp_nocase(pResult->GetString(0), "activate") == 0)
 		{
 			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::STATE_LOADED)
-				pSelf->Client()->Lua()->GetLuaFiles()[id]->Init();
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Activate();
 		}
 		else if(str_comp_nocase(pResult->GetString(0), "deactivate") == 0)
 		{
 			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED)
-				pSelf->Client()->Lua()->GetLuaFiles()[id]->Unload();
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Deactivate();
 		}
 		else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
 		{
 			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() != CLuaFile::STATE_LOADED)
-				pSelf->Client()->Lua()->GetLuaFiles()[id]->Init();
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Activate();
 			else if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_LOADED)
-				pSelf->Client()->Lua()->GetLuaFiles()[id]->Unload();
+				pSelf->Client()->Lua()->GetLuaFiles()[id]->Deactivate();
 
 			char aBuf[64];
 			if(pSelf->Client()->Lua()->GetLuaFiles()[id]->State() == CLuaFile::STATE_ERROR)

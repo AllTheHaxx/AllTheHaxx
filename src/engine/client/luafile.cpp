@@ -29,6 +29,10 @@ CLuaFile::~CLuaFile()
 
 void CLuaFile::Reset(bool error)
 {
+	if(m_pLuaState)
+		lua_close(m_pLuaState);
+	m_pLuaState = NULL;
+
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 
@@ -126,10 +130,7 @@ void CLuaFile::Unload(bool error)
 		m_pLua->HandleException(e, this);
 	}
 
-	Lua()->OnScriptUnload(this);
-
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
-	lua_close(m_pLuaState);
 	Reset(error);
 #endif
 }
@@ -172,6 +173,18 @@ void CLuaFile::ApplyPermissions(int Flags)
 		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
 #endif
 
+}
+
+void CLuaFile::Activate()
+{
+	Init();
+	Lua()->StartReceiveEvents(this);
+}
+
+void CLuaFile::Deactivate()
+{
+	Unload();
+	Lua()->StopReceiveEvents(this);
 }
 
 void CLuaFile::Init()
@@ -237,8 +250,6 @@ void CLuaFile::Init()
 		Unload(true);
 		return;
 	}
-
-	Lua()->OnScriptLoad(this);
 
 	m_ScriptHasSettingsPage |= ScriptHasSettingsPage();
 

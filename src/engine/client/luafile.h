@@ -23,6 +23,7 @@ class CLuaFile
 {
 	MACRO_ALLOC_HEAP()
 
+	friend class CLua;
 	friend class CLuaBinding;
 public:
 	enum
@@ -58,11 +59,16 @@ private:
 	bool m_ScriptHasSettingsPage;
 	bool m_ScriptAutoload;
 
+	void Init(); // starts the script
+	void Unload(bool error = false); // stops the script
+
 public:
 	CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload);
 	~CLuaFile();
-	void Init(); // starts the script
-	void Unload(bool error = false); // stops the script
+
+	void Activate();
+	void Deactivate();
+
 #if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName) const;
 #endif

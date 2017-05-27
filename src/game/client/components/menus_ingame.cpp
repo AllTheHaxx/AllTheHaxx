@@ -556,7 +556,7 @@ void CMenus::RenderLuaQuickAccess(CUIRect MainView)
 
 		Item.m_Rect.VSplitRight(Item.m_Rect.h, &Item.m_Rect, &Button);
 		if(DoButton_Menu(&pBCs[i], "x", 0, &Button, Localize("Deactivate"), CUI::CORNER_R, vec4(1,0,0,0.5f)))
-			L->Unload(false);
+			L->Deactivate();
 
 		//ButtonBar.VSplitRight(ButtonBar.h, &ButtonBar, &Button);
 		str_format(aBuf, sizeof(aBuf), "[%s] '%s'", L->GetFilename(), L->GetScriptTitle());

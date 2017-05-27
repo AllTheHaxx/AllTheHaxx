@@ -66,8 +66,8 @@ public:
 	void LoadFolder(const char *pFolder);
 	void SortLuaFiles();
 
-	void OnScriptLoad(CLuaFile *pLF);
-	void OnScriptUnload(CLuaFile *pLF);
+	void StartReceiveEvents(CLuaFile *pLF);
+	void StopReceiveEvents(CLuaFile *pLF);
 
 	static int ErrorFunc(lua_State *L);
 	static int Panic(lua_State *L);

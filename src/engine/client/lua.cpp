@@ -126,7 +126,7 @@ void CLua::AddUserscript(const char *pFilename)
 
 	int index = m_apLuaFiles.add(new CLuaFile(this, file, Autoload));
 	if(Autoload)
-		m_apLuaFiles[index]->Init();
+		m_apLuaFiles[index]->Activate();
 #endif
 }
 
@@ -193,19 +193,19 @@ int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pU
 	return 0;
 }
 
-void CLua::OnScriptLoad(CLuaFile *pLF)
+void CLua::StartReceiveEvents(CLuaFile *pLF)
 {
 #if defined(CONF_DEBUG)
-	dbg_assert(m_apActiveScripts.find(pLF, NULL) == NULL, "loaded a script twice!");
+	dbg_assert(m_apActiveScripts.find(pLF, NULL) == NULL, "loaded a script twice!?");
 #endif
 	m_apActiveScripts.add(pLF);
 }
 
-void CLua::OnScriptUnload(CLuaFile *pLF)
+void CLua::StopReceiveEvents(CLuaFile *pLF)
 {
 	bool Success = m_apActiveScripts.remove_fast(pLF);
 #if defined(CONF_DEBUG)
-	dbg_assert(Success, "unloaded a script that wasn't even loaded...?");
+	dbg_assert(Success, "unloaded a script that wasn't even loaded!");
 #endif
 }
 
