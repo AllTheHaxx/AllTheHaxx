@@ -483,6 +483,6 @@ set(SOURCE_FILES
         src/game/client/components/menus_settings/settings_appearance.cpp
         src/game/client/components/menus_settings/settings_hud.cpp
         src/game/client/components/menus_listbox.cpp
-        src/game/client/components/menus_popups.cpp)
+        src/game/client/components/menus_popups.cpp src/base/system++/linked_list.h)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})

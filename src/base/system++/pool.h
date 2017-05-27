@@ -80,23 +80,32 @@ public:
 	/**
 	 * Allocates a new object bound to this bool
 	 * @return the new object
-	 * @remark This object must be 'freed' by using Free(); no automatic memory management is being performed!
-	 * @remark This function invokes T's default constructor
+	 * @remark This object must be 'freed' by using Free() or Delete(); no automatic memory management is being performed!
 	 */
 	T* Allocate()
 	{
+		// pool is empty? create a new object and return it
 		if(!m_pFirst)
 			return CPool<T>::Alloc();
 
-		// take a chunk from the allocated pool
+		// take a chunk from the allocated pool and return it
 		CChunk *pChunk = m_pFirst;
 		m_pFirst = pChunk->m_pNext;
 
-		// invoke the ctor and return a pointer to the object
-		pChunk->m_pData->T();
 		return pChunk->m_pData;
 	}
 
+	/**
+	 * Like Allocate(), but also calls the constructor
+	 */
+	T* New()
+	{
+		T* pData = Allocate();
+
+		// invoke the ctor and return a pointer to the object
+		pData->T();
+		return pData;
+	}
 
 	/**
 	 * Returns the data back to the pool. After this operation, the data must obviously be considered invalid.
@@ -105,9 +114,18 @@ public:
 	 */
 	void Free(T *pData)
 	{
+		// add the chunk back to the pool
+		AddToPool(DataToChunk(pData));
+	}
+
+	/**
+	 * Like Free(), but also calls the destructor
+	 */
+	void Delete(T *pData)
+	{
 		// call the destructor
 		pData->~T();
-		AddToPool(DataToChunk(pData));
+		Free(pData);
 	}
 
 	/**
