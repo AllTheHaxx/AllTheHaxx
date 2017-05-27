@@ -306,7 +306,7 @@ void CVoting::OnRender()
 }
 
 
-void CVoting::RenderBars(CUIRect Bars, bool Text)
+void CVoting::RenderBars(const CUIRect& Bars, bool Text) const
 {
 	CALLSTACK_ADD();
 
@@ -352,7 +352,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 
 			if(Text)
 			{
-				char Buf[256];
+				char Buf[8];
 				str_format(Buf, sizeof(Buf), "%d", m_No);
 				UI()->DoLabel(&NoArea, Buf, Bars.h*0.75f, 0);
 			}
@@ -364,9 +364,9 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 
 		if(Text && m_Pass)
 		{
-			char Buf[256];
-			str_format(Buf, sizeof(Buf), "%d", m_Pass);
-			UI()->DoLabel(&PassArea, Buf, Bars.h*0.75f, 0);
+			char aBuf[8];
+			str_format(aBuf, sizeof(aBuf), "%d", m_Pass);
+			UI()->DoLabel(&PassArea, aBuf, Bars.h*0.75f, 0);
 		}
 	}
 }

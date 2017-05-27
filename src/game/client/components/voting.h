@@ -20,14 +20,13 @@ class CVoting : public CComponent
 	char m_aDescription[VOTE_DESC_LENGTH];
 	char m_aReason[VOTE_REASON_LENGTH];
 	int m_Voted;
+	int m_Yes, m_No, m_Pass, m_Total;
 
 	void AddOption(const char *pDescription);
 	void ClearOptions();
 	void Callvote(const char *pType, const char *pValue, const char *pReason);
 
 public:
-	int m_Yes, m_No, m_Pass, m_Total; // lua hack lol
-
 	int m_NumVoteOptions;
 	CVoteOptionClient *m_pFirst;
 	CVoteOptionClient *m_pLast;
@@ -41,7 +40,7 @@ public:
 	virtual void OnMessage(int Msgtype, void *pRawMsg);
 	virtual void OnRender();
 
-	void RenderBars(CUIRect Bars, bool Text);
+	void RenderBars(const CUIRect& Bars, bool Text) const;
 
 	void CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote = false);
 	void CallvoteKick(int ClientID, const char *pReason, bool ForceVote = false);
@@ -51,13 +50,21 @@ public:
 
 	void Vote(int v); // -1 = no, 1 = yes
 
-	int SecondsLeft() const { return (m_Closetime - time_get())/time_freq(); }
+	int SecondsLeft() const { return (int)((m_Closetime - time_get())/time_freq()); }
 	bool IsVoting() const { return m_Closetime != 0; }
 	int TakenChoice() const { return m_Voted; }
 	const char *VoteDescription() const { return m_aDescription; }
 	const char *VoteReason() const { return m_aReason; }
-	std::string VoteDescriptionSTD() const { return std::string(VoteDescription()); }
-	std::string VoteReasonSTD() const { return std::string(VoteReason()); }
+
+	// for lua
+	void VoteYes() { Vote(1); }
+	void VoteNo() { Vote(-1); }
+	int GetYes() const { return m_Yes; }
+	int GetNo() const { return m_No; }
+	int GetPass() const { return m_Pass; }
+	int GetTotal() const { return m_Total; }
+	std::string VoteDescriptionSTD() const { return std::string(m_aDescription); }
+	std::string VoteReasonSTD() const { return std::string(m_aReason); }
 };
 
 #endif
