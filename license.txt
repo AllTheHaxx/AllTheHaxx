@@ -1,7 +1,7 @@
 Teeworlds  Copyright (C) 2007-2014 Magnus Auvinen
 DDRace     Copyright (C) 2010-2011 Shereef Marzouk
 DDNet      Copyright (C) 2013-2015 Dennis Felsing
-AllTheHaxx Copyright (C) 2016 xush' / Henritees / FuroS
+AllTheHaxx Copyright (C) 2016-2017 The AllTheHaxx Team
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -24,17 +24,9 @@ freely, subject to the following restrictions:
 License additions for AllTheHaxx:
 
 - You are allowed to modify the client and redistribute these executables,
-  but you MUST give the sourcecode from which this exectuable was made to
-  anyone who asks you for it. Anyway, if you have coded additional features
-  or fixes, you are highly encouraged to create a pull request at our repo.
-
-- IT IS FORBIDDEN TO SELL ANY PART OF THE CLIENT (source or binary) FOR MONEY!!
-  No matter if it is a modified version or not!
-  This also counts for any lua scripts made by The AllTheHaxx Team!
-  
-  NOTE: The Teeworlds license (above) states that "premission is granted for the
-  prupose of commercial applications". This excludes every file (sourcecode or
-  binary) that has been modified for the AllTheHaxx client.
+  but you MUST give the sourcecode of which the respective exectuable was made
+  to anyone who asks for it. (Anyway, if you have created additional features
+  or fixes, you are highly encouraged to create a pull request at our repo)
   
 ------------------------------------------------------------------------
 
@@ -50,10 +42,12 @@ check the individual libraries.
 The lua scripts from https://github.com/AllTheHaxx/Lua-Scripts (distributed
 with any every pre-compiled version of the client) come with absolutely no
 warranty to be correct, useful, complete or not harmful in any way.
-We are neither encouraging you to use them; in case you get banned
-from a server nobody except yourself is responsible!
+We are neither encouraging you to use them nor are we responsilbe for possible
+damages cause by them (in case you get banned from a server, nobody except
+yourself is responsible!
 You may not redistribute any of these scripts unless they were significantly
-modified by you. You must credit "The AllTheHaxx Team" anyways!
+modified by you. You must credit "The AllTheHaxx Team" anyway!
+For further information, see the license in the Lua-Scripts repository.
 
 ------------------------------------------------------------------------
 
