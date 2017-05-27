@@ -11,7 +11,7 @@ function RegisterEvent(EventName, ...)
     end
 
 	if #FuncNames < 1 then
-		error("RegisterEvent(\"" .. EventName .. ") expects two or more arguments", 2)
+		error("RegisterEvent expects two or more arguments", 2)
 		return
 	end
 
