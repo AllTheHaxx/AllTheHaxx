@@ -1,7 +1,8 @@
-#AllTheHaxx ~ [0x539]
-CI Status: [![Circle CI](https://circleci.com/gh/AllTheHaxx/AllTheHaxx.svg?style=svg)](https://circleci.com/gh/AllTheHaxx/AllTheHaxx)
-###AllTheHaxx. Guaranteed to be 420% verkeckt!
-================================
+# AllTheHaxx ~ [0x539]
+### [![Circle CI](https://circleci.com/gh/AllTheHaxx/AllTheHaxx.svg?style=svg)](https://circleci.com/gh/AllTheHaxx/AllTheHaxx) AllTheHaxx. Guaranteed to be 420% verkeckt!
+
+---------------------------------------------
+
 Our own flavor of the popular [DDNet](https://github.com/ddnet/ddnet) client modification for the 2D shooter [teeworlds](http://teeworlds.com). Take a look at our [homepage](https://AllTheHaxx.github.io/) for more information.
 
 Development discussions happen on #AllTheHaxx on Quakenet ([»Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4)).
