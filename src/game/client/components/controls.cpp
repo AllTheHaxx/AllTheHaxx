@@ -331,6 +331,7 @@ int CControls::SnapInput(int *pData)
 		}
 
 		// stress testing
+#ifdef CONF_DEBUG
 		if(g_Config.m_DbgStress)
 		{
 			float t = Client()->LocalTime();
@@ -344,6 +345,7 @@ int CControls::SnapInput(int *pData)
 			m_InputData[g_Config.m_ClDummy].m_TargetX = (int)(sinf(t*3)*100.0f);
 			m_InputData[g_Config.m_ClDummy].m_TargetY = (int)(cosf(t*3)*100.0f);
 		}
+#endif
 
 		LUA_FIRE_EVENT("OnSnapInput");
 
