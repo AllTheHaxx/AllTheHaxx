@@ -1423,7 +1423,12 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			TextRender()->TextColor(1.0f, 0.4f+fade, 0.4f+fade, 1.0f+fade/2.0f-0.1f);
 		}
 		else if(State == IUpdater::STATE_CLEAN)
-			str_format(aBuf, sizeof(aBuf), "Client version string: tw.%s-%s-ddnet.%s", GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
+		{
+			if(g_Config.m_Debug)
+				str_format(aBuf, sizeof(aBuf), "Client version string: tw:%s-%s-ddnet:%s", GAME_VERSION, GAME_ATH_VERSION, GAME_RELEASE_VERSION);
+			else
+				aBuf[0] = '\0';
+		}
 		else if(State == IUpdater::STATE_SYNC_REFRESH)
 			str_format(aBuf, sizeof(aBuf), "Refreshing version info...");
 		else if(State == IUpdater::STATE_GETTING_MANIFEST || State == IUpdater::STATE_SYNC_POSTGETTING)
@@ -1629,14 +1634,19 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}*/
 
-		// address info
-		StatusBox.VSplitLeft(20.0f, 0, &StatusBox);
-		StatusBox.HSplitTop(20.0f, &Button, &StatusBox);
-		UI()->DoLabelScaled(&Button, Localize("Host address"), 14.0f, -1);
-		StatusBox.HSplitTop(20.0f, &Button, 0);
-		static float Offset = 0.0f;
+		// box at the bottom left - currently only the address bar + connect button
+		StatusBox.HSplitTop(20.0f, &StatusBox, 0);
+
+		// connect button
+		StatusBox.VSplitRight(10.0f + TextRender()->TextWidth(0, 14.0f, Localize("Connect")), &StatusBox, &Button);
+		static CButtonContainer s_ConnectButton;
+		if(DoButton_Menu(&s_ConnectButton, Localize("Connect"), 0, &Button, 0, CUI::CORNER_R))
+			Client()->Connect(g_Config.m_UiServerAddress); // is that how we do it?
+
+		// address box
+		static float s_Offset = 0.0f;
 		static CButtonContainer s_ServerAdressEditbox;
-		DoEditBox(&s_ServerAdressEditbox, &Button, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 14.0f, &Offset);
+		DoEditBox(&s_ServerAdressEditbox, &StatusBox, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 14.0f, &s_Offset, false, CUI::CORNER_L);
 	}
 }
 

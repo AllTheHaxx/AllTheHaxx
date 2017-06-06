@@ -1281,8 +1281,8 @@ Disable this if you get blurry textures
 AllTheHaxx %s is out! Download it at allthehaxx.tk!
 == AllTheHaxx %s ist draußen! Hol es dir auf AllTheHaxx.tk!
 
-Client version string: tw.%s-%s-ddnet.%s
-== Client Version: tw.%s-%s-ddnet.%s
+Client version string: tw:%s-%s-ddnet:%s
+== Client Version: tw:%s-%s-ddnet:%s
 
 Reconnect when server is full
 == Neu verbinden wenn der Server voll ist
