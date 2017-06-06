@@ -203,7 +203,10 @@ void CLua::StartReceiveEvents(CLuaFile *pLF)
 
 void CLua::StopReceiveEvents(CLuaFile *pLF)
 {
-	bool Success = m_apActiveScripts.remove_fast(pLF);
+#if defined(CONF_DEBUG)
+	bool Success = 
+#endif
+	m_apActiveScripts.remove_fast(pLF);
 #if defined(CONF_DEBUG)
 	dbg_assert(Success, "unloaded a script that wasn't even loaded!");
 #endif

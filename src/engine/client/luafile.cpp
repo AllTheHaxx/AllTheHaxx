@@ -29,14 +29,16 @@ CLuaFile::~CLuaFile()
 
 void CLuaFile::Reset(bool error)
 {
+#if defined(FEATURE_LUA)
 	if(m_pLuaState)
 		lua_close(m_pLuaState);
+	CLua::m_pCGameClient->m_pMenus->LuaRequestFullscreenAbort(this);
+#endif
 	m_pLuaState = NULL;
 
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 
-	CLua::m_pCGameClient->m_pMenus->LuaRequestFullscreenAbort(this);
 	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
 		Lua()->ExitFullscreen();
 
