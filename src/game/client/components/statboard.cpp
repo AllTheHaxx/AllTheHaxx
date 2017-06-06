@@ -428,32 +428,35 @@ void CStatboard::AutoStatCSV()
 {
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		char aDate[20], aFilename[128];
+		char aDate[20];
+		char aFilename[128];
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "screenshots/auto/stats_%s.csv", aDate);
-		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_ALL);
+		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_ALL);
+		if(!File)
+		{
+			dbg_msg("statboard", "failed to save statboard csv: cannot open '%s'", aFilename);
+			return;
+		}
 
 		FormatStats();
 
-		unsigned int len = str_length(m_pCSVstr);
-		char* buf = (char*)mem_alloc(len, 0);
-		mem_copy(buf, m_pCSVstr, len);
-
+		unsigned int Len = (unsigned int)str_length(m_pCSVstr);
+		char *pBuf = (char*)mem_alloc(Len, 0);
+		mem_copy(pBuf, m_pCSVstr, Len);
 		mem_free(m_pCSVstr);
+		m_pCSVstr = NULL;
 
-		if(File)
-		{
-			io_write(File, buf, sizeof(char)*len);
-			io_close(File);
-		}
+		io_write(File, pBuf, sizeof(char)*Len);
+		io_close(File);
 
-		mem_free(buf);
+		mem_free(pBuf);
 
 		Client()->AutoCSV_Start();
 	}
 }
 
-char* CStatboard::ReplaceCommata(char* pStr)
+char* CStatboard::ReplaceCommata(char *pStr)
 {
 	if(!str_find(pStr, ","))
 		return pStr;
@@ -576,8 +579,7 @@ void CStatboard::FormatStats()
 	char aStats[1024*(VANILLA_MAX_CLIENTS+1)];
 	str_format(aStats, sizeof(aStats), "%s\n\n%s", aServerStats, aPlayerStats);
 
-	unsigned int len = str_length(aStats);
+	unsigned int len = (unsigned int)str_length(aStats);
 	m_pCSVstr = (char*)mem_alloc(len, 0);
-	mem_zero(m_pCSVstr, len);
 	str_copy(m_pCSVstr, aStats, len);
 }
