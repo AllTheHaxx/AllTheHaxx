@@ -89,7 +89,7 @@ void CBinds::UnbindAll()
 
 	for(int i = 0; i < KEY_LAST; i++)
 	{
-		if(m_apKeyBindings)
+		if(m_apKeyBindings[i])
 			mem_free(m_apKeyBindings[i]);
 		m_apKeyBindings[i] = 0;
 	}

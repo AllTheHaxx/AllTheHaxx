@@ -12,6 +12,11 @@ class CStatboard: public CComponent
 		static void ConKeyStats(IConsole::IResult *pResult, void *pUserData);
 		void RenderGlobalStats();
 		void AutoStatScreenshot();
+		void AutoStatCSV();
+
+		char* m_pCSVstr;
+		char* ReplaceCommata(char* pStr);
+		void FormatStats();
 
 	public:
 		CStatboard();

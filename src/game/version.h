@@ -6,7 +6,7 @@
 
 #define GAME_VERSION "0.6.3"
 #define ATH_VERSION "0.30.2"
-#define DDNET_VERSION "10.5"
+#define DDNET_VERSION "10.6.2"
 #define BUILD_DATE __DATE__ ", " __TIME__
 
 #if defined(FEATURE_LUA)
@@ -28,6 +28,6 @@ static const char GAME_ATH_VERSION[10] = ATH_VERSION;
 
 // do not modify these, they belong to ddnet
 static const char GAME_RELEASE_VERSION[8] = DDNET_VERSION;
-#define CLIENT_VERSIONNR 10050
+#define CLIENT_VERSIONNR 10062
 
 #endif

@@ -49,9 +49,11 @@
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/protocol_ex.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/fifo.h>
+#include <engine/shared/uuid_manager.h>
 
 #include <engine/client/irc.h>
 
@@ -320,6 +322,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_SnapCrcErrors = 0;
 	m_AutoScreenshotRecycle = false;
 	m_AutoStatScreenshotRecycle = false;
+	m_AutoCSVRecycle = false;
 	m_EditorActive = false;
 
 	m_AckGameTick[0] = -1;
@@ -588,7 +591,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	if(RconAuthed())
 		return;
 
-	str_copy(m_RconPassword, pPassword, sizeof(m_RconPassword));
+	if(pPassword != m_RconPassword)
+		str_copy(m_RconPassword, pPassword, sizeof(m_RconPassword));
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH);
 	Msg.AddString(pName, 32);
@@ -1198,7 +1202,7 @@ void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem)
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
 	i = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
 	pItem->m_DataSize = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
-	pItem->m_Type = i->Type();
+	pItem->m_Type = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(Index);
 	pItem->m_ID = i->ID();
 	return (void *)i->Data();
 }
@@ -1236,7 +1240,7 @@ void *CClient::SnapFindItem(int SnapID, int Type, int ID)
 	for(i = 0; i < m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap->NumItems(); i++)
 	{
 		CSnapshotItem *pItem = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(i);
-		if(pItem->Type() == Type && pItem->ID() == ID)
+		if(m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(i) == Type && pItem->ID() == ID)
 			return (void *)pItem->Data();
 	}
 	return 0x0;
@@ -1977,14 +1981,22 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
+	CMsgPacker Packer(NETMSG_EX);
 
 	// unpack msgid and system flag
-	int Msg = Unpacker.GetInt();
-	int Sys = Msg&1;
-	Msg >>= 1;
+	int Msg;
+	bool Sys;
+	CUuid Uuid;
 
-	if(Unpacker.Error())
+	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	if(Result == UNPACKMESSAGE_ERROR)
+	{
 		return;
+	}
+	else if(Result == UNPACKMESSAGE_ANSWER)
+	{
+		SendMsgEx(&Packer, MSGFLAG_VITAL, true);
+	}
 
 	if(Sys)
 	{
@@ -2266,7 +2278,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
-						m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "delta unpack failed!");
+						dbg_msg("client", "delta unpack failed!=%d", SnapSize);
 						return;
 					}
 
@@ -2939,6 +2951,7 @@ void CClient::Update()
 	}
 
 	// STRESS TEST: join the server again
+#ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 	{
 		static int64 ActionTaken = 0;
@@ -2962,6 +2975,7 @@ void CClient::Update()
 			}
 		}
 	}
+#endif
 
 	// pump the network
 	PumpNetwork();
@@ -3120,6 +3134,11 @@ void CClient::Run()
 	unsigned int Seed;
 	secure_random_fill(&Seed, sizeof(Seed));
 	srand(Seed);
+
+	if(g_Config.m_Debug)
+	{
+		g_UuidManager.DebugDump();
+	}
 
 	// init SDL
 	{
@@ -3452,6 +3471,7 @@ void CClient::Run()
 
 				m_LastRenderTime = Now;
 
+#ifdef CONF_DEBUG
 				if(g_Config.m_DbgStress)
 				{
 					if((m_RenderFrames%10) == 0)
@@ -3467,6 +3487,7 @@ void CClient::Run()
 					}
 				}
 				else
+#endif
 				{
 					if(!m_EditorActive)
 						Render();
@@ -3488,6 +3509,7 @@ void CClient::Run()
 		}
 
 		AutoScreenshot_Cleanup();
+		AutoCSV_Cleanup();
 
 		// check conditions
 		if(State() == IClient::STATE_QUITING)
@@ -3511,7 +3533,11 @@ void CClient::Run()
 #endif
 
 		// beNice
-		if(g_Config.m_DbgStress || (g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive()))
+#ifdef CONF_DEBUG
+		if(g_Config.m_DbgStress)
+			thread_sleep(g_Config.m_ClCpuThrottleInactive);
+#endif
+		if(g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive())
 			thread_sleep(g_Config.m_ClCpuThrottleInactive);
 		else if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);
@@ -3731,6 +3757,26 @@ void CClient::AutoStatScreenshot_Cleanup()
 			AutoScreens.Init(Storage(), "screenshots/auto/stats", "autoscreen", ".png", g_Config.m_ClAutoStatboardScreenshotMax);
 		}
 		m_AutoStatScreenshotRecycle = false;
+	}
+}
+
+void CClient::AutoCSV_Start()
+{
+	if (g_Config.m_ClAutoCSV)
+		m_AutoCSVRecycle = true;
+}
+
+void CClient::AutoCSV_Cleanup()
+{
+	if (m_AutoCSVRecycle)
+	{
+		if (g_Config.m_ClAutoCSVMax)
+		{
+			// clean up auto csvs
+			CFileCollection AutoRecord;
+			AutoRecord.Init(Storage(), "record/csv", "autorecord", ".csv", g_Config.m_ClAutoCSVMax);
+		}
+		m_AutoCSVRecycle = false;
 	}
 }
 

@@ -96,11 +96,6 @@ static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
-void dbg_logger(DBG_LOGGER logger)
-{
-	loggers[num_loggers++] = logger;
-}
-
 static void dbg_break();
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
@@ -158,6 +153,7 @@ void dbg_msg_thread(void *v)
 	char str[1024*4];
 	int i;
 	int f;
+	int num;
 	while(1)
 	{
 		semaphore_wait(&log_queue.notempty);
@@ -174,9 +170,10 @@ void dbg_msg_thread(void *v)
 		if(!queue_empty(&log_queue))
 			semaphore_signal(&log_queue.notempty);
 
+		num = num_loggers;
 		semaphore_signal(&log_queue.mutex);
 
-		for(i = 0; i < num_loggers; i++)
+		for(i = 0; i < num; i++)
 			loggers[i](str);
 	}
 }
@@ -401,6 +398,20 @@ static void logger_file(const char *line)
 	io_write(logfile, line, strlen(line));
 	io_write_newline(logfile);
 	io_flush(logfile);
+}
+
+void dbg_logger(DBG_LOGGER logger)
+{
+#if !defined(CONF_PLATFORM_MACOSX)
+	if(dbg_msg_threaded)
+		semaphore_wait(&log_queue.mutex);
+#endif
+	loggers[num_loggers] = logger;
+	num_loggers++;
+#if !defined(CONF_PLATFORM_MACOSX)
+	if(dbg_msg_threaded)
+		semaphore_signal(&log_queue.mutex);
+#endif
 }
 
 void dbg_logger_stdout()
