@@ -108,6 +108,7 @@ MACRO_CONFIG_INT(SndGrenade, snd_grenade, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, 
 MACRO_CONFIG_INT(SndRifle, snd_rifle, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable rifle sound")
 MACRO_CONFIG_INT(SndJump, snd_jump, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable jump sounds")
 MACRO_CONFIG_INT(SndSpawn, snd_spawn, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable spawn sounds")
+MACRO_CONFIG_INT(SndLongPain, snd_long_pain, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable long pain sound (used when shooting in freeze)")
 MACRO_CONFIG_INT(SndChat, snd_chat, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable regular chat sound")
 MACRO_CONFIG_INT(SndTeamChat, snd_team_chat, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable team chat sound")
 MACRO_CONFIG_INT(SndServerMessage, snd_servermessage, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable server message sound")

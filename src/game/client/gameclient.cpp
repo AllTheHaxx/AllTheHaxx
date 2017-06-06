@@ -1205,8 +1205,9 @@ void CGameClient::ProcessEvents()
 					(ev->m_SoundID != SOUND_GUN_FIRE || g_Config.m_SndGun) &&
 					(ev->m_SoundID != SOUND_SHOTGUN_FIRE || g_Config.m_SndShotgun) &&
 					(ev->m_SoundID != SOUND_GRENADE_FIRE || g_Config.m_SndGrenade) && (ev->m_SoundID != SOUND_GRENADE_EXPLODE || g_Config.m_SndGrenade) &&
-					(ev->m_SoundID != SOUND_RIFLE_FIRE || g_Config.m_SndRifle) && (ev->m_SoundID != SOUND_RIFLE_BOUNCE || g_Config.m_SndRifle)
-				)
+					(ev->m_SoundID != SOUND_RIFLE_FIRE || g_Config.m_SndRifle) && (ev->m_SoundID != SOUND_RIFLE_BOUNCE || g_Config.m_SndRifle) &&
+					(ev->m_SoundID != SOUND_PLAYER_PAIN_LONG || g_Config.m_SndLongPain)
+			)
 				g_GameClient.m_pSounds->PlayAt(CSounds::CHN_WORLD, ev->m_SoundID, 1.0f, vec2(ev->m_X, ev->m_Y));
 		}
 	}
