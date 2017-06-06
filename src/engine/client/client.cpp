@@ -1421,11 +1421,6 @@ void CClient::Render()
 	}
 }
 
-vec3 CClient::GetColorV3(int v)
-{
-	return HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
-}
-
 bool CClient::MapLoaded()
 {
 	CALLSTACK_ADD();

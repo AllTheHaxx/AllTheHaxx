@@ -256,7 +256,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 			case 11: AddOption(pMsg->m_pDescription11); break;
 			case 12: AddOption(pMsg->m_pDescription12); break;
 			case 13: AddOption(pMsg->m_pDescription13); break;
-			case 14: AddOption(pMsg->m_pDescription14);
+			case 14: AddOption(pMsg->m_pDescription14); break;
 			}
 		}
 	}
@@ -321,12 +321,12 @@ void CVoting::RenderBars(const CUIRect& Bars, bool Text) const
 	if(m_Total)
 	{
 		CUIRect PassArea = Bars;
-		static float YesVal = 1.0f, NoVal = 1.0f;
+		static float s_YesVal = 1.0f, s_NoVal = 1.0f;
 		if(m_Yes)
 		{
 			CUIRect YesArea = Bars;
-			smooth_set(&YesVal, m_Yes, 100.0f, Client()->RenderFrameTime());
-			YesArea.w *= YesVal/(float)m_Total;
+			smooth_set(&s_YesVal, m_Yes, 100.0f, Client()->RenderFrameTime());
+			YesArea.w *= s_YesVal/(float)m_Total;
 			RenderTools()->DrawUIRect(&YesArea, vec4(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
 
 			if(Text)
@@ -340,13 +340,13 @@ void CVoting::RenderBars(const CUIRect& Bars, bool Text) const
 			PassArea.w -= YesArea.w;
 		}
 		else
-			YesVal = 0.0f;
+			s_YesVal = 0.0f;
 
 		if(m_No)
 		{
 			CUIRect NoArea = Bars;
-			smooth_set(&NoVal, m_No, 100.0f, Client()->RenderFrameTime());
-			NoArea.w *= NoVal/(float)m_Total;
+			smooth_set(&s_NoVal, m_No, 100.0f, Client()->RenderFrameTime());
+			NoArea.w *= s_NoVal/(float)m_Total;
 			NoArea.x = (Bars.x + Bars.w)-NoArea.w;
 			RenderTools()->DrawUIRect(&NoArea, vec4(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
 
@@ -360,7 +360,7 @@ void CVoting::RenderBars(const CUIRect& Bars, bool Text) const
 			PassArea.w -= NoArea.w;
 		}
 		else
-			NoVal = 1.0f;
+			s_NoVal = 1.0f;
 
 		if(Text && m_Pass)
 		{

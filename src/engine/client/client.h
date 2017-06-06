@@ -210,11 +210,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		class CHostLookup m_VersionServeraddr;
 	} m_VersionInfo; // NEEDED FOR DDNET SERVER LIST, DON'T REMOVE!
 
-	volatile int m_GfxState;
-	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }
-	void GraphicsThread();
-	vec3 GetColorV3(int v);
-
 	int64 TickStartTime(int Tick);
 
 	void ConnectImpl(); // hide this
