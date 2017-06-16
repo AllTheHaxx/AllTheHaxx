@@ -5,6 +5,7 @@
 #include <engine/storage.h>
 //#include <engine/client/luabinding.h>
 #include "linereader.h"
+#include <string.h>
 
 // compiled-in data-dir path
 #define DATA_DIR "data"
@@ -365,7 +366,11 @@ public:
 			BufferSize = sizeof(aBuffer);
 		}
 
-		if(Flags&IOFLAG_WRITE)
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || strstr(pFilename, "../") != NULL || strstr(pFilename, "..\\") != NULL)
+		{
+			// don't escape base directory
+		}
+		else if(Flags&IOFLAG_WRITE)
 		{
 			return io_open(GetPath(TYPE_SAVE, pFilename, pBuffer, BufferSize), Flags);
 		}
