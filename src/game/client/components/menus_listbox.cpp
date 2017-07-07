@@ -14,6 +14,15 @@ static int gs_ListBoxItemsPerRow;
 static float gs_ListBoxScrollValue;
 static bool gs_ListBoxItemActivated;
 
+static inline int ItemsPerPage()
+{
+	float PageHeight = gs_ListBoxOriginalView.h;
+	int NumRows = round_to_int(PageHeight / gs_ListBoxRowHeight);
+	int ItemsPerPage = NumRows * gs_ListBoxItemsPerRow;
+
+	return ItemsPerPage;
+}
+
 void CMenus::UiDoListboxStart(CButtonContainer *pBC, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
 							  int ItemsPerRow, int SelectedIndex, float ScrollValue, int CornerTop, int CornerBottom)
 {
@@ -193,6 +202,11 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(CButtonContainer *pBC, bool Sel
 						if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = clamp(gs_ListBoxNewSelected - gs_ListBoxItemsPerRow, 0, gs_ListBoxNumItems);
 						if(m_aInputEvents[i].m_Key == KEY_RIGHT && gs_ListBoxItemsPerRow > 1) NewIndex = clamp(gs_ListBoxNewSelected + 1, 0, gs_ListBoxNumItems);
 						if(m_aInputEvents[i].m_Key == KEY_LEFT && gs_ListBoxItemsPerRow > 1) NewIndex = clamp(gs_ListBoxNewSelected - 1, 0, gs_ListBoxNumItems);
+						if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = max(gs_ListBoxNewSelected - ItemsPerPage(), 0);
+						if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = min(gs_ListBoxNewSelected + ItemsPerPage(), gs_ListBoxNumItems - 1);
+						if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
+						if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = gs_ListBoxNumItems - 1;
+
 					}
 					if(NewIndex > -1 && NewIndex < gs_ListBoxNumItems)
 					{
