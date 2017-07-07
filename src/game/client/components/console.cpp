@@ -8,6 +8,7 @@
 #include <base/tl/sorted_array.h>
 
 #include <math.h>
+#include <limits.h>
 
 #include <game/generated/client_data.h>
 
@@ -643,6 +644,14 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			if(m_BacklogActLine < 0)
 				m_BacklogActLine = 0;
 			Handled = true;
+		}
+		else if(Event.m_Key == KEY_HOME)
+		{
+			m_BacklogActLine = INT_MAX;
+		}
+		else if(Event.m_Key == KEY_END)
+		{
+			m_BacklogActLine = 0;
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
 		{

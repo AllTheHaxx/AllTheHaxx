@@ -113,6 +113,15 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 				g_Config.m_SndSpawn ^= 1;
 		}
 
+		{
+			MainView.HSplitTop(3.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable pain sound"), g_Config.m_SndLongPain, &Button))
+				g_Config.m_SndLongPain ^= 1;
+		}
+
 		// TODO: Add more game sounds here!
 	}
 

@@ -365,7 +365,15 @@ public:
 			BufferSize = sizeof(aBuffer);
 		}
 
-		if(Flags&IOFLAG_WRITE)
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
+		#ifdef CONF_FAMILY_WINDOWS
+			|| (pFilename[0] && pFilename[1] == ':')
+		#endif
+		)
+		{
+			// don't escape base directory
+		}
+		else if(Flags&IOFLAG_WRITE)
 		{
 			return io_open(GetPath(TYPE_SAVE, pFilename, pBuffer, BufferSize), Flags);
 		}

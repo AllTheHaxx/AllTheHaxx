@@ -3203,8 +3203,12 @@ void CClient::Run()
 	// start refreshing addresses while we load
 	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
 
-	// init the editor ... XXX this is done again in GameClient()->OnInit() ??
+	// init the editor... XXX this is done again in GameClient()->OnInit() ??
 	//m_pEditor->Init();
+// load and save a map to fix it
+	/*if(m_pEditor->Load(arg, IStorage::TYPE_ALL))
+		m_pEditor->Save(arg);
+	return;*/
 
 	// load data
 	if(!LoadData())
