@@ -29,6 +29,13 @@ CLuaFile::~CLuaFile()
 
 void CLuaFile::Reset(bool error)
 {
+	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
+		Lua()->ExitFullscreen();
+
+	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
+		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
+
+	// close the lua state
 #if defined(FEATURE_LUA)
 	if(m_pLuaState)
 		lua_close(m_pLuaState);
@@ -38,12 +45,6 @@ void CLuaFile::Reset(bool error)
 
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
-
-	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
-		Lua()->ExitFullscreen();
-
-	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
-		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
 
 	if(!error)
 		m_pErrorStr = NULL;
