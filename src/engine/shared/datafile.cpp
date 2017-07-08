@@ -408,6 +408,12 @@ unsigned CDataFileReader::Crc()
 	return m_pDataFile->m_Crc;
 }
 
+int CDataFileReader::MapSize()
+{
+	if(!m_pDataFile) return 0;
+	return m_pDataFile->m_Header.m_Size + 16;
+}
+
 
 CDataFileWriter::CDataFileWriter()
 {

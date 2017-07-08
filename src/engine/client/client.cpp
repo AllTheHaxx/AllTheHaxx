@@ -344,7 +344,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	//
 	m_aCurrentMap[0] = 0;
-	m_CurrentMapCrc = 0;
 
 	//
 	m_aCmdConnect[0] = 0;
@@ -1506,7 +1505,6 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 
 	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
 	str_copy(m_aCurrentMapPath, pFilename, sizeof(m_aCurrentMapPath));
-	m_CurrentMapCrc = m_pMap->Crc();
 
 	return 0x0;
 }
@@ -1598,13 +1596,13 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
 		{
-			if (mem_comp(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
+			if(mem_comp(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
 				g_Config.m_UiPage = CMenus::PAGE_NEWS_DDNET;
 
 			mem_copy(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
 
 			IOHANDLE newsFile = m_pStorage->OpenFile("tmp/cache/ddnet-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
-			if (newsFile)
+			if(newsFile)
 			{
 				io_write(newsFile, m_aNewsDDNet, sizeof(m_aNewsDDNet));
 				io_close(newsFile);
@@ -1629,13 +1627,13 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				const char *pComp = (char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST)+8;
 
 				// do decompression of serverlist
-				if (uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
+				if(uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
 				{
 					aBuf[DstLen] = '\0';
 					bool ListChanged = true;
 
 					IOHANDLE File = m_pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_SAVE);
-					if (File)
+					if(File)
 					{
 						char aBuf2[16384];
 						io_read(File, aBuf2, sizeof(aBuf2));
@@ -1645,10 +1643,10 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 					}
 
 					// decompression successful, write plain file
-					if (ListChanged)
+					if(ListChanged)
 					{
 						IOHANDLE File = m_pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
-						if (File)
+						if(File)
 						{
 							io_write(File, aBuf, PlainLength);
 							io_close(File);
@@ -2081,7 +2079,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Last)
 			{
 				if(m_MapdownloadFile)
+				{
 					io_close(m_MapdownloadFile);
+					m_MapdownloadFile = 0;
+				}
 				FinishMapDownload();
 			}
 			else
@@ -2673,7 +2674,10 @@ void CClient::FinishMapDownload()
 	else
 	{
 		if(m_MapdownloadFile)
+		{
 			io_close(m_MapdownloadFile);
+			m_MapdownloadFile = 0;
+		}
 		ResetMapDownload();
 		DisconnectWithReason(pError);
 	}
@@ -3982,7 +3986,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		}
 		else
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
-		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client");
+		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), NULL);
 	}
 }
 
@@ -4528,9 +4532,7 @@ const char* CClient::GetCurrentMap()
 
 int CClient::GetCurrentMapCrc()
 {
-	CALLSTACK_ADD();
-
-	return m_CurrentMapCrc;
+	return m_pMap->Crc();
 }
 
 const char* CClient::GetCurrentMapPath()
@@ -4548,7 +4550,7 @@ const char* CClient::RaceRecordStart(const char *pFilename)
 	if(State() != STATE_ONLINE)
 		dbg_msg("demorec/record", "client is not online");
 	else
-		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client");
+		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), NULL);
 
 	return m_aCurrentMap;
 }
