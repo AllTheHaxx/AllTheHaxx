@@ -1161,7 +1161,8 @@ void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char
 		Escapes \ and " characters in a string.
 
 	Parameters:
-		dst - Destination array pointer, gets increased
+		dst - Destination array pointer, gets increased, will point to
+		      the terminating null.
 		src - Source array
 		end - End of destination array
 */
