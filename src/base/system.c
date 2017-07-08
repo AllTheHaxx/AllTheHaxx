@@ -2669,6 +2669,16 @@ const char *str_next_word(char *str, char delim, char *buf, int *cursor)
 	}
 }
 
+void str_escape(char **dst, const char *src, const char *end)
+{
+	while(*src && *dst < end)
+	{
+		if(*src == '"' || *src == '\\') // escape \ and "
+			*(*dst)++ = '\\';
+		*(*dst)++ = *src++;
+	}
+}
+
 
 int mem_comp(const void *a, const void *b, unsigned int size)
 {
