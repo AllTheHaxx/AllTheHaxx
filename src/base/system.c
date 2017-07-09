@@ -2992,7 +2992,7 @@ void shell_execute(const char *file)
 #endif
 }
 
-int os_compare_version(int major, int minor)
+int os_compare_version(unsigned int major, unsigned int minor)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	OSVERSIONINFO ver;
