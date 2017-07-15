@@ -32,8 +32,6 @@ Import("other/luajit/luajit.lua")
 Import("other/freetype/freetype.lua")
 Import("other/curl/curl.lua")
 Import("other/opus/opusfile.lua")
-Import("other/opus/opus.lua")
-Import("other/opus/ogg.lua")
 Import("other/mysql/mysql.lua")
 
 --- Setup Config -------
@@ -48,8 +46,6 @@ config:Add(luajit.OptFind("luajit", false))
 config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
-config:Add(Opus.OptFind("opus", true))
-config:Add(Ogg.OptFind("ogg", true))
 config:Add(Mysql.OptFind("mysql", false))
 -- some config vars for customization:
 config:Add(OptString("websockets", false))
@@ -408,8 +404,6 @@ function build(settings)
 	config.freetype:Apply(client_settings)
 	config.curl:Apply(client_settings)
 	config.opusfile:Apply(client_settings)
-	config.opus:Apply(client_settings)
-	config.ogg:Apply(client_settings)
 
 	if family == "unix" and (platform == "macosx" or platform == "linux") then
 		engine_settings.link.libs:Add("dl")
