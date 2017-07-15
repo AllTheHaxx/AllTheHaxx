@@ -239,7 +239,7 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
 	{
-		if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)
+		if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags == PLAYERFLAG_CHATTING)
 		{
 			if(IsDDNet(GameClient()->Client()->GetServerInfo()))
 				ResetInput(g_Config.m_ClDummy);
