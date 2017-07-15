@@ -1904,9 +1904,8 @@ int CMenus::Render()
 
 void CMenus::SetActive(bool Active)
 {
-	CALLSTACK_ADD();
-
-	Input()->SetIMEState(Active);
+	if(Active != m_MenuActive)
+		Input()->SetIMEState(Active);
 	m_MenuActive = Active;
 #if defined(__ANDROID__)
 	UI()->AndroidShowScreenKeys(!m_MenuActive && !m_pClient->m_pControls->m_UsingGamepad);
