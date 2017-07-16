@@ -61,7 +61,7 @@ public:
 	{
 		if(!m_pStorage || (!Force && !g_Config.m_ClSaveSettings))
 			return false;
-		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE ".tmp", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 
 		if(!m_ConfigFile)
 			return false;
@@ -82,7 +82,6 @@ public:
 
 		io_close(m_ConfigFile);
 		m_ConfigFile = 0;
-		return m_pStorage->RenameFile(CONFIG_FILE ".tmp", CONFIG_FILE, IStorageTW::TYPE_SAVE);
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
