@@ -3527,6 +3527,9 @@ void CClient::Run()
 				m_CurMenuTick++;
 		}
 
+		if(g_Config.m_ClInactiveLowCPU && !m_pGraphics->WindowActive())
+			thread_sleep(50);
+
 		//for(int oz = 0; oz < m_Lua.GetLuaFiles().size(); oz++)
 		//	;
 

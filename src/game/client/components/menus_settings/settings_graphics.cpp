@@ -23,11 +23,17 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
 
-	CUIRect ModeList;
-	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
+	// prepare the grid
+	CUIRect Left, Right, ModeList;
+	MainView.VSplitLeft(300.0f, &Left, &MainView);
+	MainView.VSplitLeft(300.0f, &Right, &ModeList);
+	Left.VSplitRight(10.0f/2.0f, &Left, 0);
+	Right.VMargin(10.0f/2.0f, &Right);
+	ModeList.VSplitLeft(10.0f/2.0f, 0, &ModeList);
+
 
 	// draw allmodes switch
-	ModeList.HSplitTop(20, &Button, &ModeList);
+	ModeList.HSplitTop(20.0f, &Button, &ModeList);
 	static CButtonContainer s_CheckboxDisplayAllModes;
 	if(DoButton_CheckBox(&s_CheckboxDisplayAllModes, Localize("Show only supported"), g_Config.m_GfxDisplayAllModes^1, &Button))
 	{
@@ -79,32 +85,25 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	// switches
 	static CButtonContainer s_Checkbox1, s_Checkbox2, s_Checkbox3, s_Checkbox4, s_Checkbox5, s_Checkbox6, s_Checkbox7;
-	MainView.VSplitRight(30.0f, &MainView, 0);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&s_Checkbox1, Localize("Borderless window"), g_Config.m_GfxBorderless, &Button))
 	{
 		Client()->ToggleWindowBordered();
 	}
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&s_Checkbox2, Localize("Fullscreen"), g_Config.m_GfxFullscreen, &Button))
 	{
 		Client()->ToggleFullscreen();
 	}
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&s_Checkbox3, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if your game reacts too slow")))
-	{
-		Client()->ToggleWindowVSync();
-	}
 
 	if(Graphics()->GetNumScreens() > 1)
 	{
 		int NumScreens = Graphics()->GetNumScreens();
-		MainView.HSplitTop(3.0f, 0, &MainView);
-		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Right.HSplitTop(3.0f, 0, &Right);
+		Right.HSplitTop(20.0f, &Button, &Right);
 		int Screen_MouseButton = DoButton_CheckBox_Number(&s_Checkbox4, Localize("Screen"), g_Config.m_GfxScreen, &Button);
 		if(Screen_MouseButton == 1) //inc
 		{
@@ -118,9 +117,65 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		}
 	}
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&s_Checkbox5, Localize("FSAA samples"), g_Config.m_GfxFsaaSamples, &Button, Localize("Smooths graphics at the expense of FPS"));
+
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&s_Checkbox6, Localize("Quality Textures"), g_Config.m_GfxTextureQuality, &Button))
+	{
+		g_Config.m_GfxTextureQuality ^= 1;
+		CheckSettings = true;
+	}
+
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_CheckboxHighDetail;
+	if(DoButton_CheckBox(&s_CheckboxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button, Localize("Show map decoration elements")))
+		g_Config.m_GfxHighDetail ^= 1;
+
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_CheckboxLowGraphics;
+	if(DoButton_CheckBox(&s_CheckboxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button, Localize("Disable fancy effects to gain more fps")))
+		g_Config.m_GfxLowGraphics ^= 1;
+
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_CheckboxMenuMap;
+	if(DoButton_CheckBox(&s_CheckboxMenuMap, Localize("Menu Map"), g_Config.m_ClMenuBackground, &Button, Localize("Use the menu map")))
+		g_Config.m_ClMenuBackground ^= 1;
+
+	if(g_Config.m_ClMenuBackground)
+	{
+		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		static CButtonContainer s_CheckboxMenuMapRotation;
+		if(DoButton_CheckBox(&s_CheckboxMenuMapRotation, Localize("Enable rotation"), g_Config.m_ClMenuBackgroundRotation, &Button, Localize("Gives the menu background a little more dynamicness")))
+			g_Config.m_ClMenuBackgroundRotation ^= 1;
+	}
+
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_CheckboxLowInactiveCPU;
+	if(DoButton_CheckBox(&s_CheckboxLowInactiveCPU, Localize("Low FPS when in background"), g_Config.m_ClInactiveLowCPU, &Button, Localize("Limits CPU usage while ATH is in the background")))
+		g_Config.m_ClInactiveLowCPU ^= 1;
+
+	Left.HSplitTop(3.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	static CButtonContainer s_CheckboxLowConsoleCPU;
+	if(DoButton_CheckBox(&s_CheckboxLowConsoleCPU, Localize("Low FPS when in console"), g_Config.m_ClConsoleLowCPU, &Button, Localize("Limits FPS while console is open in order to lower our CPU usage")))
+		g_Config.m_ClConsoleLowCPU ^= 1;
+
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&s_Checkbox3, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if your game reacts too slow")))
+	{
+		Client()->ToggleWindowVSync();
+	}
+
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&s_Checkbox5, Localize("FSAA samples"), g_Config.m_GfxFsaaSamples, &Button, Localize("Anti-Aliasing smooths graphics at the expense of FPS"));
 	if(GfxFsaaSamples_MouseButton == 1) //inc
 	{
 		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples+1)%17;
@@ -132,72 +187,46 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CheckSettings = true;
 	}
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&s_Checkbox6, Localize("Quality Textures"), g_Config.m_GfxTextureQuality, &Button))
-	{
-		g_Config.m_GfxTextureQuality ^= 1;
-		CheckSettings = true;
-	}
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&s_Checkbox7, Localize("Texture Compression"), g_Config.m_GfxTextureCompression, &Button, Localize("Disable this if you get blurry textures")))
 	{
 		g_Config.m_GfxTextureCompression ^= 1;
 		CheckSettings = true;
 	}
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxHighDetail;
-	if(DoButton_CheckBox(&s_CheckboxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button, Localize("Show map decoration elements")))
-		g_Config.m_GfxHighDetail ^= 1;
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxLowGraphics;
-	if(DoButton_CheckBox(&s_CheckboxLowGraphics, Localize("Low Graphics Mode"), g_Config.m_GfxLowGraphics, &Button, Localize("Disable fancy effects to gain more fps")))
-		g_Config.m_GfxLowGraphics ^= 1;
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxBackgroundRender;
 	if(DoButton_CheckBox(&s_CheckboxBackgroundRender, Localize("Render when inactive"), g_Config.m_GfxBackgroundRender, &Button, Localize("Render graphics when window is in background")))
 		g_Config.m_GfxBackgroundRender ^= 1;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxNoclip;
-	if(DoButton_CheckBox(&s_CheckboxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button, Localize("May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered → hard laggs.")))
+	if(DoButton_CheckBox(&s_CheckboxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button, Localize("May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered = hard laggs.")))
 		g_Config.m_GfxNoclip ^= 1;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxQuadAsTriangle;
-	if(DoButton_CheckBox(&s_CheckboxQuadAsTriangle, Localize("Render quads as triangles"), g_Config.m_GfxQuadAsTriangle, &Button, Localize("Fixes quad coloring on some GPUs")))
+	if(DoButton_CheckBox(&s_CheckboxQuadAsTriangle, Localize("Render quads as triangles"), g_Config.m_GfxQuadAsTriangle, &Button, Localize("Fixes quad coloring on some GPUs, but needs more vertices")))
 		g_Config.m_GfxQuadAsTriangle ^= 1;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxFinish;
 	if(DoButton_CheckBox(&s_CheckboxFinish, Localize("Wait for GL commands to finish"), g_Config.m_GfxFinish, &Button, Localize("Can cause FPS laggs if enabled\n~ Info for nerds: glFinish() blocks until the effects of all GL executions are complete.")))
 		g_Config.m_GfxFinish ^= 1;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxHighdpi;
 	if(DoButton_CheckBox(&s_CheckboxHighdpi, Localize("High-DPI screen support"), g_Config.m_GfxHighdpi, &Button, Localize("Be careful: experimental")))
 	{
 		g_Config.m_GfxHighdpi ^= 1;
 		CheckSettings = true;
 	}
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxConsoleCPU;
-	if(DoButton_CheckBox(&s_CheckboxConsoleCPU, Localize("Low CPU usage console"), g_Config.m_ClConsoleLowCPU, &Button, Localize("Limits FPS while console is open in order to lower our CPU usage")))
-		g_Config.m_ClConsoleLowCPU ^= 1;
 
 
 	// check if the new settings require a restart
@@ -216,60 +245,76 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			m_NeedRestartGraphics = true;
 	}
 
-	CUIRect Text;
-	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Text, &MainView);
-	//text.VSplitLeft(15.0f, 0, &text);
+
+	Left.HSplitTop(20.0f-4.0f, 0, &Left);
 	{
-		CUIRect temp;
-		temp = Text;
-		temp.y -= 2.5f*1.5f;
-		temp.h = 21.0f*5+2.75f;
-		RenderTools()->DrawUIRect(&temp, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
+		CUIRect Rect;
+		Left.HSplitTop(20+150+5+19+4 + 3, &Rect, 0);
+		RenderTools()->DrawUIRect(&Rect, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
 	}
+	Left.HSplitTop(4.0f, 0, &Left);
+
+	CUIRect Text;
+	Left.HSplitTop(20.0f, &Text, &Left);
 	Text.VMargin(15.0f, &Text);
 	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, -1);
+	Text.HMargin(2.0f, &Text);
+	Text.VSplitRight(60.0f, 0, &Text);
+	static CButtonContainer s_ButtonReset;
+	if(g_Config.m_UiColorHue != 78 || g_Config.m_UiColorSat != 203 || g_Config.m_UiColorVal != 170) // TODO: change these values aswell when the defaults get changed!
+		if(DoButton_Menu(&s_ButtonReset, Localize("Reset"), 0, &Text))
+		{
+			g_Config.m_UiColorHue = 78;
+			g_Config.m_UiColorSat = 203;
+			g_Config.m_UiColorVal = 170;
+		}
 
-	const char *paLabels[] = {
-		Localize("Hue"),
-		Localize("Sat."),
-		Localize("Lht."),
-		Localize("Alpha")};
-	int *pColorSlider[4] = {&g_Config.m_UiColorHue, &g_Config.m_UiColorSat, &g_Config.m_UiColorLht, &g_Config.m_UiColorAlpha};
-	for(int s = 0; s < 4; s++)
+	// fancy color picker
+	Left.HSplitTop(150.0f, &Button, &Left);
+	static CButtonContainer s_ColorPickerA, s_ColorPickerB;
+	vec3 ColorHSV = vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorVal/255.0f);
+	if(DoColorPicker(&s_ColorPickerA, &s_ColorPickerB, &Button, &ColorHSV))
+	{
+		g_Config.m_UiColorHue = round_to_int(ColorHSV.h*255.0f);
+		g_Config.m_UiColorSat = round_to_int(ColorHSV.s*255.0f);
+		g_Config.m_UiColorVal = round_to_int(ColorHSV.v*255.0f);
+	}
+
+	Left.HSplitTop(5.0f, 0, &Left);
 	{
 		CUIRect Text;
-		MainView.HSplitTop(19.0f, &Button, &MainView);
+		Left.HSplitTop(19.0f, &Button, &Left);
 		Button.VMargin(15.0f, &Button);
 		Button.VSplitLeft(100.0f, &Text, &Button);
 		//Button.VSplitRight(5.0f, &Button, 0);
 		Button.HSplitTop(4.0f, 0, &Button);
 
-		float k = (*pColorSlider[s]) / 255.0f;
-		CPointerContainer Container(pColorSlider[s]);
-		k = DoScrollbarH(&Container, &Button, k, 0, k*255.0f);
-		*pColorSlider[s] = (int)(k*255.0f);
-		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
+		float k = g_Config.m_UiColorAlpha / 255.0f;
+		static CButtonContainer s_Container;
+		k = DoScrollbarH(&s_Container, &Button, k, 0, (int)(k * 255.0f));
+		g_Config.m_UiColorAlpha = (int)(k*255.0f);
+		UI()->DoLabelScaled(&Text, Localize("Alpha"), 15.0f, -1);
 	}
 
-	MainView.HSplitTop(20.0f, 0, &MainView);
 
-	MainView.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
+	Right.HSplitTop(20.0f, 0, &Right);
+
+	Right.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
 	Text.HMargin(-2.75f, &Text);
 	Text.h += 2.75f;
 	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
 
-	MainView.VMargin(15.0f, &MainView);
-	MainView.HSplitTop(20.0f, &Text, &MainView);
+	Right.VMargin(15.0f, &Right);
+	Right.HSplitTop(20.0f, &Text, &Right);
 	UI()->DoLabelScaled(&Text, Localize("UI Scale"), 14.0f, -1);
 
-	MainView.HSplitTop(10.0f, 0, &MainView);
-	MainView.HSplitTop(15.0f, &Text, &MainView);
+	Right.HSplitTop(10.0f, 0, &Right);
+	Right.HSplitTop(15.0f, &Text, &Right);
 	static CButtonContainer s_Scrollbar;
 	static int s_NewVal = g_Config.m_UiScale; // proxy it to not instantly change the ui size
-	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != (void*)&s_Scrollbar) // if it has been changed in f1
+	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != s_Scrollbar.GetID()) // if it has been changed in f1
 		s_NewVal = g_Config.m_UiScale;
-	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_Scrollbar, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider\nis not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
-	if(UI()->ActiveItem() != (void*)&s_Scrollbar)
+	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_Scrollbar, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider is not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
+	if(UI()->ActiveItem() != s_Scrollbar.GetID())
 		g_Config.m_UiScale = s_NewVal;
 }

@@ -1508,7 +1508,7 @@ void CMenus::RenderLoading()
 	float Percent = m_LoadCurrent++/(float)m_LoadTotal;
 
 	// need up date this here to get correct
-	vec3 Rgb = HslToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
+	vec3 Rgb = HsvToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorVal/255.0f));
 	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
 
 	CUIRect Screen = *UI()->Screen();
@@ -2149,7 +2149,7 @@ void CMenus::OnRender()
 	}
 
 	// update colors
-	vec3 Rgb = HslToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
+	vec3 Rgb = HsvToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorVal/255.0f));
 	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
 
 	ms_ColorTabbarInactiveOutgame = vec4(0,0,0,0.25f);
@@ -2376,7 +2376,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	LastLoadRender = time_get();
 
 	// need up date this here to get correct
-	vec3 Rgb = HslToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
+	vec3 Rgb = HsvToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorVal/255.0f));
 	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
 
 	CUIRect Screen = *UI()->Screen();

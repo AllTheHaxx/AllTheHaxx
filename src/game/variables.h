@@ -119,9 +119,9 @@ MACRO_CONFIG_INT(UiScale, ui_scale, 100, 50, 150, CFGFLAG_CLIENT|CFGFLAG_SAVE, "
 MACRO_CONFIG_INT(UiMousesens, ui_mousesens, 100, 5, 100000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Mouse sensitivity for menus/editor")
 
 MACRO_CONFIG_INT(UiColorHue, ui_color_hue, 78, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color hue")
-MACRO_CONFIG_INT(UiColorSat, ui_color_sat, 169, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color saturation")
-MACRO_CONFIG_INT(UiColorLht, ui_color_lht, 102, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color lightness")
-MACRO_CONFIG_INT(UiColorAlpha, ui_color_alpha, 198, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface alpha")
+MACRO_CONFIG_INT(UiColorSat, ui_color_sat, 203, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color saturation")
+MACRO_CONFIG_INT(UiColorVal, ui_color_val, 170, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color value")
+MACRO_CONFIG_INT(UiColorAlpha, ui_color_alpha, 180, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface alpha")
 
 MACRO_CONFIG_INT(UiColorizePing, br_colored_ping, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight ping")
 MACRO_CONFIG_INT(UiColorizeGametype, br_colored_gametype, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight gametype")
@@ -194,7 +194,8 @@ MACRO_CONFIG_INT(ClChatbubble, cl_chatbubble, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SA
 MACRO_CONFIG_STR(FtFont, ft_font_pack, 128, "DejaVuSansCJKName", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font to use")
 MACRO_CONFIG_STR(FtMonoFont, ft_mono_font_pack, 128, "UbuntuMono", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Monospace font to use")
 MACRO_CONFIG_INT(ClMonoFontSize, cl_monofont_size, 10, 6, 16, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font size in Console and IRC")
-MACRO_CONFIG_INT(ClConsoleLowCPU, cl_console_low_cpu, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Limits FPS while console is open in order to lower our CPU usage")
+MACRO_CONFIG_INT(ClInactiveLowCPU, cl_low_cpu_inactive, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Limits FPS while the windows is inactive to lower our CPU usage")
+MACRO_CONFIG_INT(ClConsoleLowCPU, cl_low_cpu_console, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Limits FPS while console is open in order to lower our CPU usage")
 
 // irc
 MACRO_CONFIG_INT(ClIRCAutoconnect, cl_irc_autoconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Connect to IRC on startup automatically")
