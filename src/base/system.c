@@ -105,6 +105,13 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 		dbg_break();
 	}
 }
+void dbg_assert_strict_imp(const char *filename, int line, int test, const char *msg)
+{
+	// strict debugging assertion: only perform the test if this is a debug build
+	#if defined(CONF_DEBUG)
+		dbg_assert_imp(filename, line, test, msg);
+	#endif
+}
 
 #if !defined(CONF_PLATFORM_MACOSX)
 #define QUEUE_SIZE 16

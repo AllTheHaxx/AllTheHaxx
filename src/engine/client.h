@@ -253,6 +253,10 @@ public:
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
 
+	virtual void OnLuaScriptLoaded(class CLuaFile *pLF) = 0;
+	virtual void OnLuaScriptUnload(class CLuaFile *pLF) = 0;
+
+
 	virtual int OnSnapInput(int *pData) = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
 	virtual void ResetDummyInput() = 0;

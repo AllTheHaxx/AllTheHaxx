@@ -1106,6 +1106,18 @@ void CGameClient::OnShutdown()
 		m_All.m_paComponents[i]->OnShutdown();
 }
 
+void CGameClient::OnLuaScriptLoaded(class CLuaFile *pLF)
+{
+	for(int i = 0; i < m_All.m_Num; i++)
+		m_All.m_paComponents[i]->OnLuaScriptLoaded(pLF);
+}
+
+void CGameClient::OnLuaScriptUnload(class CLuaFile *pLF)
+{
+	for(int i = 0; i < m_All.m_Num; i++)
+		m_All.m_paComponents[i]->OnLuaScriptUnload(pLF);
+}
+
 void CGameClient::OnEnterGame()
 {
 	g_GameClient.m_pEffects->ResetDamageIndicator();

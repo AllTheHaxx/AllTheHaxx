@@ -195,21 +195,14 @@ int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pU
 
 void CLua::StartReceiveEvents(CLuaFile *pLF)
 {
-#if defined(CONF_DEBUG)
-	dbg_assert(m_apActiveScripts.find(pLF, NULL) == NULL, "loaded a script twice!?");
-#endif
+	dbg_assert_strict(m_apActiveScripts.find(pLF, NULL) == NULL, "loaded a script twice!?");
 	m_apActiveScripts.add(pLF);
 }
 
 void CLua::StopReceiveEvents(CLuaFile *pLF)
 {
-#if defined(CONF_DEBUG)
-	bool Success = 
-#endif
-	m_apActiveScripts.remove_fast(pLF);
-#if defined(CONF_DEBUG)
-	dbg_assert(Success, "unloaded a script that wasn't even loaded!");
-#endif
+	bool Success = m_apActiveScripts.remove_fast(pLF);
+	dbg_assert_strict(Success, "unloaded a script that wasn't even loaded!");
 }
 
 int CLua::HandleException(std::exception &e, lua_State *L)

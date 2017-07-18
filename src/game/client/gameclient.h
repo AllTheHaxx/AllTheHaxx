@@ -329,6 +329,9 @@ public:
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
 
+	virtual void OnLuaScriptLoaded(class CLuaFile *pLF);
+	virtual void OnLuaScriptUnload(class CLuaFile *pLF);
+
 	virtual void ResetDummyInput();
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();

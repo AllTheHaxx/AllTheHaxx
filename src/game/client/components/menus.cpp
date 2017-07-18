@@ -2354,7 +2354,7 @@ void CMenus::LuaRequestFullscreen(CLuaFile *pLF)
 	m_Popup = POPUP_LUA_REQUEST_FULLSCREEN;
 }
 
-void CMenus::LuaRequestFullscreenAbort(CLuaFile *pLF)
+void CMenus::OnLuaScriptUnload(CLuaFile *pLF)
 {
 	if(m_pLuaFSModeRequester == pLF)
 	{

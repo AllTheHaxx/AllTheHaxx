@@ -17,7 +17,8 @@
 
 CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
 {
-	m_pLuaState = 0;
+	m_pLuaState = NULL;
+	m_pLuaStateContainer = NULL;
 	m_State = STATE_IDLE;
 	Reset();
 }
@@ -29,20 +30,6 @@ CLuaFile::~CLuaFile()
 
 void CLuaFile::Reset(bool error)
 {
-	if(CLua::m_pClient->Lua()->GetFullscreenedScript() == this)
-		Lua()->ExitFullscreen();
-
-	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
-		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
-
-	// close the lua state
-#if defined(FEATURE_LUA)
-	if(m_pLuaState)
-		lua_close(m_pLuaState);
-	CLua::m_pCGameClient->m_pMenus->LuaRequestFullscreenAbort(this);
-#endif
-	m_pLuaState = NULL;
-
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 
@@ -108,19 +95,27 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 void CLuaFile::Unload(bool error)
 {
 #if defined(FEATURE_LUA)
-//	if(m_pLuaState)			 // -- do not close it in order to prevent crashes
-//		lua_close(m_pLuaState);
-
-	// script is not loaded -> don't unload it
+	// if it's not loaded, don't take measures to unload it
 	if(m_State != STATE_LOADED)
 	{
 		Reset(error);
 		return;
 	}
 
-	// assertion right here because m_pLuaState just CANNOT be 0 at this
-	// point, and if it is, something went wrong that we need to debug!
+	// this can't happen. It just... can't!
 	dbg_assert(m_pLuaState != 0, "Something went fatally wrong! Active luafile has no state?!");
+
+
+	// unhook the script from the client
+	Lua()->StopReceiveEvents(this);
+
+	// exit fullscreen if necessary
+	if(Lua()->GetFullscreenedScript() == this)
+		Lua()->ExitFullscreen();
+
+	// unhook from debugging
+	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
+		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
 
 	try
 	{
@@ -133,7 +128,15 @@ void CLuaFile::Unload(bool error)
 		m_pLua->HandleException(e, this);
 	}
 
+	// tell everyone
+	CLua::m_pCGameClient->OnLuaScriptUnload(this);
+
 	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
+
+	// we do not close the lua state because there might be LuaRefs left that use it
+	// as these LuaRefs use the lua state in their dtor, they'd crash us if we where to close it here.
+	m_pLuaState = NULL;
+
 	Reset(error);
 #endif
 }
@@ -141,10 +144,14 @@ void CLuaFile::Unload(bool error)
 void CLuaFile::OpenLua()
 {
 #if defined(FEATURE_LUA)
-	if(m_pLuaState)
-		lua_close(m_pLuaState);
+	dbg_assert_strict(m_pLuaState == NULL, "possibly leaking a lua_state");
 
-	m_pLuaState = luaL_newstate();
+	// firstly, close a previous state if there is any
+	if(m_pLuaStateContainer)
+		lua_close(m_pLuaStateContainer);
+
+	m_pLuaStateContainer = luaL_newstate();
+	m_pLuaState = m_pLuaStateContainer;
 
 	lua_atpanic(m_pLuaState, CLua::Panic);
 	lua_register(m_pLuaState, "errorfunc", CLua::ErrorFunc);
@@ -178,26 +185,13 @@ void CLuaFile::ApplyPermissions(int Flags)
 
 }
 
-void CLuaFile::Activate()
-{
-	Init();
-	Lua()->StartReceiveEvents(this);
-}
-
-void CLuaFile::Deactivate()
-{
-	Unload();
-	Lua()->StopReceiveEvents(this);
-}
 
 void CLuaFile::Init()
 {
 #if defined(FEATURE_LUA)
-	if(m_State == STATE_LOADED)
-		Unload();
+	Unload();
 
 	m_Exceptions.clear();
-
 	m_State = STATE_IDLE;
 
 	OpenLua(); // create the state, open basic libraries
@@ -236,6 +230,9 @@ void CLuaFile::Init()
 
 	if(str_find_nocase(m_aScriptTitle, " b| ") || str_find_nocase(m_aScriptInfo, " b | ")) { Unload(false); return; }
 
+	// inject the script into the client
+	Lua()->StartReceiveEvents(this);
+
 	// call the OnScriptInit function if we have one
 	bool Error;
 	bool Success = CallFunc<bool>("OnScriptInit", true, &Error);
@@ -255,6 +252,9 @@ void CLuaFile::Init()
 	}
 
 	m_ScriptHasSettingsPage |= ScriptHasSettingsPage();
+
+	// tell everyone
+	CLua::m_pCGameClient->OnLuaScriptLoaded(this);
 
 #endif
 }

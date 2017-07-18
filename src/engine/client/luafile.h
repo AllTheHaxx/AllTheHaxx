@@ -49,6 +49,7 @@ public:
 private:
 	CLua *m_pLua;
 	lua_State *m_pLuaState;
+	lua_State *m_pLuaStateContainer;
 	int m_State;
 	const std::string m_Filename;
 
@@ -66,8 +67,9 @@ public:
 	CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload);
 	~CLuaFile();
 
-	void Activate();
-	void Deactivate();
+	// public passthoughs
+	void Activate() { Init(); }
+	void Deactivate() { Unload(); }
 
 #if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName) const;

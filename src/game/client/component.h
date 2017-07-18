@@ -38,6 +38,8 @@ public:
 	virtual void OnConsoleInit() {};
 	virtual void OnInit() {};
 	virtual void OnShutdown() {};
+	virtual void OnLuaScriptLoaded(class CLuaFile *pLF) {};
+	virtual void OnLuaScriptUnload(class CLuaFile *pLF) {};
 	virtual void OnReset() {};
 	virtual void OnRender() {};
 	virtual void OnRelease() {};
