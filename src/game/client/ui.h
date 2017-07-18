@@ -17,7 +17,7 @@ public:
 	void HSplitMid(CUIRect *pTop, CUIRect *pBottom) const;
 	void HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const;
 	void HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const;
-	void VSplitMid(CUIRect *pLeft, CUIRect *pRight) const;
+	void VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Offset = 0.0f) const;
 	void VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const;
 	void VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const;
 

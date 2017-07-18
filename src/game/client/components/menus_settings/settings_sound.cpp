@@ -7,8 +7,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-	CUIRect Button;
-	MainView.VSplitMid(&MainView, 0);
+	CUIRect Right, Button;
 	static int s_SndEnable = g_Config.m_SndEnable;
 	static int s_SndRate = g_Config.m_SndRate;
 
@@ -30,7 +29,12 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(!g_Config.m_SndEnable)
 		return;
 
-	MainView.HSplitTop(3.0f, 0, &MainView);
+
+	// do the left side (general sound settings)
+
+	MainView.HSplitTop(5.0f, 0, &MainView); // a little more offset to the big fat "enable sounds" button
+	MainView.VSplitMid(&MainView, &Right, 10.0f);
+
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	static CButtonContainer s_CheckboxSndMusic;
 	if(DoButton_CheckBox(&s_CheckboxSndMusic, Localize("Play background music"), g_Config.m_SndMusic, &Button))
@@ -47,114 +51,15 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
+	static CButtonContainer s_CheckboxSndHighlightVanilla;
+	if(DoButton_CheckBox(&s_CheckboxSndHighlightVanilla, Localize("Swap chat highlight sounds"), !g_Config.m_SndHighlightVanilla, &Button, Localize("Unchecked means vanilla behavior")))
+		g_Config.m_SndHighlightVanilla ^= 1;
+
+	MainView.HSplitTop(3.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	static CButtonContainer s_CheckboxSndNonactiveMute;
 	if(DoButton_CheckBox(&s_CheckboxSndNonactiveMute, Localize("Mute when not active"), g_Config.m_SndNonactiveMute, &Button))
 		g_Config.m_SndNonactiveMute ^= 1;
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxSndGame;
-	if(DoButton_CheckBox(&s_CheckboxSndGame, Localize("Enable game sounds"), g_Config.m_SndGame, &Button))
-		g_Config.m_SndGame ^= 1;
-
-	if(g_Config.m_SndGame)
-	{
-		{
-			MainView.HSplitTop(3.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(10.0f, 0, &Button);
-			static CButtonContainer s_Checkbox;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable hammer sound"), g_Config.m_SndHammer, &Button))
-				g_Config.m_SndHammer ^= 1;
-		}
-
-		{
-			MainView.HSplitTop(3.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(10.0f, 0, &Button);
-			static CButtonContainer s_Checkbox;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
-				g_Config.m_SndGun ^= 1;
-		}
-
-		{
-			MainView.HSplitTop(3.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(10.0f, 0, &Button);
-			static CButtonContainer s_Checkbox;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable shotgun sound"), g_Config.m_SndShotgun, &Button))
-				g_Config.m_SndShotgun ^= 1;
-		}
-
-		{
-			MainView.HSplitTop(3.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(10.0f, 0, &Button);
-			static CButtonContainer s_Checkbox;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable grenade sound"), g_Config.m_SndGrenade, &Button))
-				g_Config.m_SndGrenade ^= 1;
-		}
-
-		{
-			MainView.HSplitTop(3.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(10.0f, 0, &Button);
-			static CButtonContainer s_Checkbox;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable rifle sound"), g_Config.m_SndRifle, &Button))
-				g_Config.m_SndRifle ^= 1;
-		}
-
-		{
-			MainView.HSplitTop(3.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(10.0f, 0, &Button);
-			static CButtonContainer s_Checkbox;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable spawn sound"), g_Config.m_SndSpawn, &Button))
-				g_Config.m_SndSpawn ^= 1;
-		}
-
-		{
-			MainView.HSplitTop(3.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(10.0f, 0, &Button);
-			static CButtonContainer s_Checkbox;
-			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable pain sound"), g_Config.m_SndLongPain, &Button))
-				g_Config.m_SndLongPain ^= 1;
-		}
-
-		// TODO: Add more game sounds here!
-	}
-
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxSndServerMessage;
-	if(DoButton_CheckBox(&s_CheckboxSndServerMessage, Localize("Enable server message sound"), g_Config.m_SndServerMessage, &Button))
-		g_Config.m_SndServerMessage ^= 1;
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxSndChat;
-	if(DoButton_CheckBox(&s_CheckboxSndChat, Localize("Enable regular chat sound"), g_Config.m_SndChat, &Button))
-		g_Config.m_SndChat ^= 1;
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxSndTeamChat;
-	if(DoButton_CheckBox(&s_CheckboxSndTeamChat, Localize("Enable team chat sound"), g_Config.m_SndTeamChat, &Button))
-		g_Config.m_SndTeamChat ^= 1;
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxSndHighlight;
-	if(DoButton_CheckBox(&s_CheckboxSndHighlight, Localize("Enable highlighted chat sound"), g_Config.m_SndHighlight, &Button))
-		g_Config.m_SndHighlight ^= 1;
-
-	MainView.HSplitTop(3.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	static CButtonContainer s_CheckboxSndIRC;
-	if(DoButton_CheckBox(&s_CheckboxSndIRC, Localize("Enable irc chat sound"), g_Config.m_SndIRC, &Button))
-		g_Config.m_SndIRC ^= 1;
 
 	MainView.HSplitTop(3.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -200,4 +105,111 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		static CButtonContainer s_Scrollbar;
 		g_Config.m_SndMapSoundVolume = round_to_int(DoScrollbarH(&s_Scrollbar, &Button, g_Config.m_SndMapSoundVolume/100.0f, 0, g_Config.m_SndMapSoundVolume)*100.0f);
 	}
+
+
+	// do the right side (all the "enable stuff" checkboxes
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxSndGame;
+	if(DoButton_CheckBox(&s_CheckboxSndGame, Localize("Enable game sounds"), g_Config.m_SndGame, &Button))
+		g_Config.m_SndGame ^= 1;
+
+	if(g_Config.m_SndGame) // cascaded
+	{
+		{
+			Right.HSplitTop(3.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable hammer sound"), g_Config.m_SndHammer, &Button))
+				g_Config.m_SndHammer ^= 1;
+		}
+
+		{
+			Right.HSplitTop(3.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
+				g_Config.m_SndGun ^= 1;
+		}
+
+		{
+			Right.HSplitTop(3.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable shotgun sound"), g_Config.m_SndShotgun, &Button))
+				g_Config.m_SndShotgun ^= 1;
+		}
+
+		{
+			Right.HSplitTop(3.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable grenade sound"), g_Config.m_SndGrenade, &Button))
+				g_Config.m_SndGrenade ^= 1;
+		}
+
+		{
+			Right.HSplitTop(3.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable rifle sound"), g_Config.m_SndRifle, &Button))
+				g_Config.m_SndRifle ^= 1;
+		}
+
+		{
+			Right.HSplitTop(3.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable spawn sound"), g_Config.m_SndSpawn, &Button))
+				g_Config.m_SndSpawn ^= 1;
+		}
+
+		{
+			Right.HSplitTop(3.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			if(DoButton_CheckBox(&s_Checkbox, Localize("Enable pain sound"), g_Config.m_SndLongPain, &Button))
+				g_Config.m_SndLongPain ^= 1;
+		}
+
+		// TODO: Add more game sounds here!
+	}
+
+
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxSndServerMessage;
+	if(DoButton_CheckBox(&s_CheckboxSndServerMessage, Localize("Enable server message sound"), g_Config.m_SndServerMessage, &Button))
+		g_Config.m_SndServerMessage ^= 1;
+
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxSndChat;
+	if(DoButton_CheckBox(&s_CheckboxSndChat, Localize("Enable regular chat sound"), g_Config.m_SndChat, &Button))
+		g_Config.m_SndChat ^= 1;
+
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxSndTeamChat;
+	if(DoButton_CheckBox(&s_CheckboxSndTeamChat, Localize("Enable team chat sound"), g_Config.m_SndTeamChat, &Button))
+		g_Config.m_SndTeamChat ^= 1;
+
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxSndHighlight;
+	if(DoButton_CheckBox(&s_CheckboxSndHighlight, Localize("Enable highlighted chat sound"), g_Config.m_SndHighlight, &Button))
+		g_Config.m_SndHighlight ^= 1;
+
+	Right.HSplitTop(3.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	static CButtonContainer s_CheckboxSndIRC;
+	if(DoButton_CheckBox(&s_CheckboxSndIRC, Localize("Enable irc chat sound"), g_Config.m_SndIRC, &Button))
+		g_Config.m_SndIRC ^= 1;
 }

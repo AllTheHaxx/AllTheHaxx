@@ -319,7 +319,7 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 }
 
 
-void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
+void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Offset) const
 {
 	CUIRect r = *this;
 	float Cut = r.w/2;
@@ -339,6 +339,12 @@ void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
 		pRight->y = r.y;
 		pRight->w = r.w - Cut;
 		pRight->h = r.h;
+	}
+
+	if(Offset > 0.0f)
+	{
+		if(pLeft) pLeft->VSplitRight(Offset/2.0f, pLeft, 0);
+		if(pRight) pRight->VSplitLeft(Offset/2.0f, 0, pRight);
 	}
 }
 
