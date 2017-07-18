@@ -609,6 +609,19 @@ void CGameClient::OnInit()
 
 void CGameClient::OnUpdate()
 {
+	// process pending irc message events
+	{
+		LOCK_SECTION_DBG(m_IRCMessageEventQueueLock);
+
+		for(int m = 0; m < m_IRCMessageEventQueue.size(); m++)
+			for(int i = 0; i < m_All.m_Num; i++)
+				m_All.m_paComponents[i]->OnMessageIRC(m_IRCMessageEventQueue[m].m_From.c_str(),
+													  m_IRCMessageEventQueue[m].m_User.c_str(),
+													  m_IRCMessageEventQueue[m].m_Text.c_str());
+		m_IRCMessageEventQueue.clear();
+	}
+
+
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
 	Input()->MouseRelative(&x, &y);
@@ -909,10 +922,11 @@ void CGameClient::OnRelease()
 		m_All.m_paComponents[i]->OnRelease();
 }
 
-void CGameClient::OnMessageIRC(const char *pFrom, const char *pUser, const char *pText)
+// this function will only be called from the IRC thread (async!)
+void CGameClient::OnMessageIRC(const std::string& From, const std::string& User, const std::string& Text)
 {
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnMessageIRC(pFrom, pUser, pText);
+	LOCK_SECTION_DBG(m_IRCMessageEventQueueLock);
+	m_IRCMessageEventQueue.add(IRCMessage(From, User, Text));
 }
 
 void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)

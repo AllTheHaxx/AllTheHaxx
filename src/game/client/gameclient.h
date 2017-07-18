@@ -76,6 +76,24 @@ class CGameClient : public IGameClient
 	CStack m_Input;
 	CNetObjHandler m_NetObjHandler;
 
+	struct IRCMessage
+	{
+		std::string m_From;
+		std::string m_User;
+		std::string m_Text;
+
+		IRCMessage() { }
+
+		IRCMessage(const std::string From, const std::string User, const std::string Text) :
+				m_From(From), m_User(User), m_Text(Text)
+		{
+		}
+	};
+
+	array<IRCMessage> m_IRCMessageEventQueue;
+	LOCK_SMART m_IRCMessageEventQueueLock;
+
+
 protected:
 	class IEngine *m_pEngine;
 	class IInput *m_pInput;
@@ -317,7 +335,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy = 0);
-	virtual void OnMessageIRC(const char *pFrom, const char *pUser, const char *pText);
+	virtual void OnMessageIRC(const std::string& From, const std::string& User, const std::string& Text);
 	virtual void OnNewSnapshot();
 	virtual void OnPredict();
 	virtual void OnActivateEditor();
