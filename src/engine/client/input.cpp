@@ -400,7 +400,7 @@ int CInput::Update()
 				mem_zerob(HoldKeys);
 				HoldKeysInitialized = true;
 			}
-			if(Key >= 0 && Key < g_MaxKeys && !IgnoreKeys && m_CountEditingText == 0)
+			if(Key > KEY_FIRST && Key < g_MaxKeys && !IgnoreKeys && m_CountEditingText == 0)
 			{
 				if(Action&IInput::FLAG_PRESS)
 				{
