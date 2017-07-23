@@ -179,13 +179,14 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	{
 		// dig out whether ATH news have been updated
 
-		char aOldNews[NEWS_SIZE] = {0};
+		char aOldNews[NEWS_SIZE];
+		mem_zerob(aOldNews);
 
 		// read the old news
 		IOHANDLE f = pSelf->m_pStorage->OpenFile("tmp/cache/ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 		if(f)
 		{
-			io_read(f, aOldNews, NEWS_SIZE);
+			io_read(f, aOldNews, NEWS_LENGTH);
 			io_close(f);
 		}
 
@@ -195,12 +196,12 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			f = io_open("update/ath-news.txt", IOFLAG_READ);
 			if(f)
 			{
-				io_read(f, pSelf->m_aNews, NEWS_SIZE);
+				io_read(f, pSelf->m_aNews, NEWS_LENGTH);
 				io_close(f);
 			}
 		}
 		else
-			str_append(pSelf->m_aNews, aOldNews, NEWS_SIZE);
+			str_appendb(pSelf->m_aNews, aOldNews);
 
 		// dig out whether news have been updated
 		if(str_comp(aOldNews, pSelf->m_aNews + (IS_ERROR ? str_length(pFailedNewsMsg) : 0)) != 0)

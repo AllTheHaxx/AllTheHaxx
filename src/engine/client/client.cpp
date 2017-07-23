@@ -3113,7 +3113,7 @@ void CClient::InitInterfaces()
 	IOHANDLE newsFile = m_pStorage->OpenFile("tmp/cache/ddnet-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if (newsFile)
 	{
-		io_read(newsFile, m_aNewsDDNet, NEWS_SIZE);
+		io_read(newsFile, m_aNewsDDNet, NEWS_LENGTH);
 		io_close(newsFile);
 	}
 }
