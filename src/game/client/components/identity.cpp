@@ -98,6 +98,7 @@ int CIdentity::UnlinkAllIdents(const char *pName, int IsDir, int DirType, void *
 	if(g_Config.m_Debug)
 		dbg_msg("ident", "%s file '%s'", Success ? "removed" : "failed to remove", aFilePath);
 
+	return 0;
 }
 
 int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser)

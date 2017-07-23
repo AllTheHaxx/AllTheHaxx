@@ -1438,7 +1438,6 @@ bool CClient::UnloadCurrentMap()
 
 	m_aCurrentMap[0] = '\0';
 	m_aCurrentMapPath[0] = '\0';
-	m_CurrentMapCrc = 0;
 
 	return WasLoaded;
 }
@@ -1461,7 +1460,6 @@ void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
 
 	str_formatb(m_aCurrentMap, "~bgmap-%s", pName);
 	str_copyb(m_aCurrentMapPath, pFilename);
-	m_CurrentMapCrc = m_pMap->Crc();
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)
