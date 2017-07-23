@@ -20,6 +20,9 @@ void CIdentity::SaveIdents()
 {
 	CALLSTACK_ADD();
 
+	// delete all files, then rewrite them
+	Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "identities", CIdentity::UnlinkAllIdents, this);
+
 	int Successful = 0;
 	for(int i = 0; i < NumIdents(); i++)
 	{
@@ -80,6 +83,21 @@ void CIdentity::SaveIdents()
 void CIdentity::OnShutdown()
 {
 	SaveIdents();
+}
+
+int CIdentity::UnlinkAllIdents(const char *pName, int IsDir, int DirType, void *pUser)
+{
+	CIdentity *pSelf = (CIdentity*)pUser;
+
+	if(str_length(pName) < 4 || IsDir || str_comp(pName+str_length(pName)-3, ".id") != 0)
+		return 0;
+
+	char aFilePath[512];
+	str_format(aFilePath, sizeof(aFilePath), "identities/%s", pName);
+	bool Success = pSelf->Storage()->RemoveFile(aFilePath, IStorageTW::TYPE_SAVE);
+	if(g_Config.m_Debug)
+		dbg_msg("ident", "%s file '%s'", Success ? "removed" : "failed to remove", aFilePath);
+
 }
 
 int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser)

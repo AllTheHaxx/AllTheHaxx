@@ -66,9 +66,6 @@ public:
 	inline void AddIdent(const CIdentEntry& Entry) { m_aIdentities.add_unsorted(Entry); }
 	inline void DeleteIdent(int Ident)
 	{
-		char aFile[64];
-		str_format(aFile, sizeof(aFile), "identities/%s", m_aIdentities[Ident].m_aFilename);
-		Storage()->RemoveFile(aFile, IStorageTW::TYPE_SAVE);
 		m_aIdentities.remove_index(Ident);
 	}
 
@@ -182,6 +179,7 @@ public:
 	};
 
 private:
+	static int UnlinkAllIdents(const char *pName, int IsDir, int DirType, void *pUser);
 	static int FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser);
 
 	sorted_array<CIdentEntry> m_aIdentities;
