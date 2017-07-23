@@ -86,6 +86,7 @@ public:
 	//
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
+	virtual bool InputGrabbed() const = 0;
 	virtual void NativeMousePos(int *x, int *y) = 0;
 	virtual bool NativeMousePressed(int index) = 0;
 	virtual int MouseDoubleClick() = 0;

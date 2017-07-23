@@ -389,7 +389,13 @@ int CInput::Update()
 					return 1;
 			}
 
-			static bool HoldKeys[512] = {false};
+			static bool HoldKeys[512];
+			static bool HoldKeysInitialized = false;
+			if(!HoldKeysInitialized)
+			{
+				mem_zerob(HoldKeys);
+				HoldKeysInitialized = true;
+			}
 			if(Key >= 0 && Key < g_MaxKeys && !IgnoreKeys && !m_IsEditingText)
 			{
 				if(Action&IInput::FLAG_PRESS)

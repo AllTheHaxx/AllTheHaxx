@@ -47,6 +47,7 @@ public:
 	virtual void MouseRelative(float *x, float *y);
 	virtual void MouseModeAbsolute();
 	virtual void MouseModeRelative();
+	virtual bool InputGrabbed() const { return m_InputGrabbed != 0; }
 	virtual void NativeMousePos(int *x, int *y);
 	virtual bool NativeMousePressed(int index);
 	virtual int MouseDoubleClick();
