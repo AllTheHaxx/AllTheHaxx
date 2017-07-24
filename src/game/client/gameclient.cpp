@@ -1181,6 +1181,11 @@ void CGameClient::OnFlagGrab(int TeamID)
 	}
 }
 
+void CGameClient::OnRconType(bool UsernameReq)
+{
+	m_pGameConsole->RequireUsername(UsernameReq);
+}
+
 void CGameClient::OnRconLine(const char *pLine)
 {
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);

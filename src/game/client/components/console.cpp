@@ -65,7 +65,7 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CTRLPressed = false;
 
 	m_aUser[0] = '\0';
-	m_UseUser = false;
+	m_UsernameReq = false;
 
 	m_IsCommand = false;
 }
@@ -524,19 +524,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				PrintLine(aLine);
 			}
 
-			// end CTRL-keycombos
-		}
-		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
+	if(Event.m_Flags&IInput::FLAG_PRESS)
+	{
+		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
-			//if search is actice, skip to next position
-			if(m_pSearchString)
-			{
-				if(m_AtEnd == 2)
-					m_AtEnd = 0;
-
-				m_SearchFound = false;
-			}
-			else
+			CServerInfo pServerInfo;
+			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
+			if(m_Input.GetString()[0] || (IsDDNet(&pServerInfo) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 			{
 				if(m_Input.GetString()[0] || (UsingUserAuth() && !m_pGameConsole->Client()->RconAuthed() && !UserGot())) // the second part allows for empty user names
 				{
@@ -1691,6 +1685,11 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 	}
 }
 
+void CGameConsole::RequireUsername(bool UsernameReq)
+{
+	m_RemoteConsole.m_UsernameReq = UsernameReq;
+}
+
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_REMOTE)
@@ -1798,5 +1797,6 @@ void CGameConsole::OnStateChange(int NewState, int OldState)
 	{
 		m_RemoteConsole.ResetRconLogin();
 		m_RemoteConsole.m_Input.Clear();
+		m_RemoteConsole.m_UsernameReq = false;
 	}
 }
