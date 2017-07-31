@@ -115,7 +115,9 @@ private:
 
 	int DoButton_CheckBox_Common(CButtonContainer *pBC, const char *pText, const char *pBoxText, const CUIRect *pRect, const char *pTooltip = 0, bool Checked = false, int Corner = CUI::CORNER_ALL);
 	int DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL);
+	int DoButton_CheckBox_Direct(CButtonContainer *pBC, const char *pText, int *pVar, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL);
 	int DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL);
+	int DoButton_CheckBox_Number_Direct(CButtonContainer *pBC, const char *pText, int *pVar, int Min, int Max, const CUIRect *pRect, const char *pTooltip = 0, int Corner = CUI::CORNER_ALL);
 
 	/*static void ui_draw_menu_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
 	static void ui_draw_keyselect_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
@@ -223,6 +225,7 @@ public:	int m_LoadTotal;
 	int m_CallvoteSelectedPlayer;
 	char m_aCallvoteReason[VOTE_REASON_LENGTH<<4];
 	char m_aFilterString[25];
+	int64 m_VoteCalled;
 
 	// for callbacks
 	int *m_pActiveDropdown;
@@ -465,6 +468,9 @@ public:
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnReset();
 	virtual void OnRender();
+
+	virtual void OnMessage(int Msg, void *pRawMsg);
+
 	virtual bool OnInput(IInput::CEvent Event);
 	virtual bool OnMouseMove(float x, float y);
 

@@ -82,6 +82,8 @@ public:
 
 		io_close(m_ConfigFile);
 		m_ConfigFile = 0;
+
+		return true;
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)

@@ -97,6 +97,7 @@ CMenus::CMenus()
 
 	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
 	m_aCallvoteReason[0] = 0;
+	m_VoteCalled = 0;
 
 	m_FriendlistSelectedIndex = -1;
 	m_DoubleClickIndex = -1;
@@ -387,6 +388,15 @@ int CMenus::DoButton_CheckBox(CButtonContainer *pBC, const char *pText, int Chec
 
 	return DoButton_CheckBox_Common(pBC, pText, "", pRect, pTooltip, Checked, Corner);
 }
+int CMenus::DoButton_CheckBox_Direct(CButtonContainer *pBC, const char *pText, int *pVar, const CUIRect *pRect, const char *pTooltip, int Corner)
+{
+	CALLSTACK_ADD();
+
+	int result = DoButton_CheckBox_Common(pBC, pText, "", pRect, pTooltip, *pVar, Corner);
+	if(result)
+		*pVar ^= 1;
+	return result;
+}
 
 
 int CMenus::DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip, int Corner)
@@ -396,6 +406,28 @@ int CMenus::DoButton_CheckBox_Number(CButtonContainer *pBC, const char *pText, i
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d", Checked);
 	return DoButton_CheckBox_Common(pBC, pText, aBuf, pRect, pTooltip, false, Corner);
+}
+int CMenus::DoButton_CheckBox_Number_Direct(CButtonContainer *pBC, const char *pText, int *pVar, int Min, int Max, const CUIRect *pRect, const char *pTooltip, int Corner)
+{
+	CALLSTACK_ADD();
+
+	char aBuf[16];
+	str_format(aBuf, sizeof(aBuf), "%d", *pVar);
+	int result = DoButton_CheckBox_Common(pBC, pText, aBuf, pRect, pTooltip, false, Corner);
+	if(result == 1)
+	{
+//		*pVar = (*pVar + 1) % (Max + 1 - Min) + Min;
+		(*pVar)++;
+		if(*pVar > Max) // wrap around
+			*pVar = Min;
+	}
+	else if(result == 2)
+	{
+		(*pVar)--;
+		if(*pVar < Min) // wrap around
+			*pVar = Max;
+	}
+	return result;
 }
 
 int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pEmptyText, int Align, const char *pTooltip)

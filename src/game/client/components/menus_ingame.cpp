@@ -1025,7 +1025,7 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 #if defined(__ANDROID__)
 	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
 #else
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", NumOptions, 3, Selected, s_ScrollValue);
 #endif
 
 	for(int i = 0; i < NumOptions; i++)
@@ -1046,6 +1046,21 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 
 	Selected = UiDoListboxEnd(&s_ScrollValue, 0);
 	m_CallvoteSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
+}
+
+void CMenus::OnMessage(int Msg, void *pRawMsg)
+{
+	if(g_Config.m_ClShowVotesWindowAfterVoting != 2 || Msg != NETMSGTYPE_SV_VOTESET)
+		return;
+
+	// have a 2 second timeout to wait for the called vote to appear
+	if(time_get() < m_VoteCalled + 2*time_freq())
+	{
+		m_aCallvoteReason[0] = '\0';
+		SetActive(false);
+	}
+
+	m_VoteCalled = 0;
 }
 
 void CMenus::RenderServerControl(CUIRect MainView)
@@ -1130,6 +1145,22 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			}
 		}
 
+		// render close checkbox
+		if(s_ControlPage == 0)
+		{
+			Bottom.VSplitLeft(20.0f, 0, &Bottom);
+			Bottom.VSplitLeft(240.0f, &Button, &Bottom);
+			Button.HSplitTop(5.0f, 0, &Button);
+			static CButtonContainer s_Checkbox;
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Close menu after voting"),
+					   g_Config.m_ClShowVotesWindowAfterVoting == 0 ? Localize("Yes") :
+					   g_Config.m_ClShowVotesWindowAfterVoting == 1 ? Localize("No") :
+					   Localize("Auto")
+			);
+			DoButton_CheckBox_Number_Direct(&s_Checkbox, aBuf, &g_Config.m_ClShowVotesWindowAfterVoting, 0, 2, &Button);
+		}
+
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
 		static CButtonContainer s_CallVoteButton;
@@ -1140,23 +1171,24 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			else if(!m_FilterSpectators)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
-				{
+						m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
 					m_pClient->m_pVoting->CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason);
-					//SetActive(false);
-				}
 			}
 			else if(m_FilterSpectators)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
-				{
+						m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
 					m_pClient->m_pVoting->CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason);
-					//SetActive(false);
-				}
 			}
-			//m_aCallvoteReason[0] = 0;
-			SetActive(false);
+
+			// handle close-after-callvote
+			if(g_Config.m_ClShowVotesWindowAfterVoting == 0 || s_ControlPage == 1) // always close it for votekick
+			{
+				m_aCallvoteReason[0] = 0;
+				SetActive(false);
+			}
+			else if(g_Config.m_ClShowVotesWindowAfterVoting == 2)
+				m_VoteCalled = time_get();
 		}
 
 		// render reason

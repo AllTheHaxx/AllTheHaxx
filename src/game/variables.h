@@ -53,6 +53,7 @@ MACRO_CONFIG_INT(ClShowChatFriends, cl_show_chat_friends, 0, 0, 1, CFGFLAG_CLIEN
 MACRO_CONFIG_INT(ClShowChatCryptData, cl_show_chat_cryptdata, 3, 0, 3, CFGFLAG_CLIENT|CFGFLAG_SAVE, "0=show none | 1=show theirs | 2=show ours | 3=show both")
 MACRO_CONFIG_INT(ClShowKillMessages, cl_showkillmessages, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show kill messages")
 MACRO_CONFIG_INT(ClShowVotesAfterVoting, cl_show_votes_after_voting, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show votes window after voting")
+MACRO_CONFIG_INT(ClShowVotesWindowAfterVoting, cl_show_votes_window_after_voting, 2, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "0: Close after voting / 1: Don't close / 3: Auto (close on incoming vote)")
 MACRO_CONFIG_INT(ClShowLocalTimeAlways, cl_show_local_time_always, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Always show local time")
 MACRO_CONFIG_INT(ClShowfps, cl_showfps, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame FPS counter")
 MACRO_CONFIG_INT(ClShowpred, cl_showpred, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame prediction time in milliseconds")
