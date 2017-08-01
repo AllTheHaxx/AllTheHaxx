@@ -1156,6 +1156,18 @@ void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char
 #define str_clock_sec(buffer, buffer_size, time) str_clock_sec_impl(buffer, buffer_size, time, Localize("day"), Localize("days"))
 #define str_clock_secb(buffer, time) str_clock_sec_impl(buffer, sizeof(buffer), time, Localize("day"), Localize("days"))
 
+/*
+	Function: str_escape
+		Escapes \ and " characters in a string.
+
+	Parameters:
+		dst - Destination array pointer, gets increased, will point to
+		      the terminating null.
+		src - Source array
+		end - End of destination array
+*/
+void str_escape(char **dst, const char *src, const char *end);
+
 /* Group: Filesystem */
 
 /*
@@ -1526,7 +1538,7 @@ void shell_execute(const char *file);
 		0 - OS version same.
 		-1 - OS version lower.
 */
-int os_compare_version(int major, int minor);
+int os_compare_version(unsigned int major, unsigned int minor);
 
 
 /* Group: Security */

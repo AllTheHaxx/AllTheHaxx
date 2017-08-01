@@ -6,7 +6,7 @@
 void Process(IStorageTW *pStorage, const char *pMapName, const char *pConfigName)
 {
 	CDataFileReader Map;
-	if(!Map.Open(pStorage, pMapName, IStorageTW::TYPE_ALL))
+	if(!Map.Open(pStorage, pMapName, IStorageTW::TYPE_ABSOLUTE))
 	{
 		dbg_msg("config_retrieve", "error opening map '%s'", pMapName);
 		return;
@@ -28,7 +28,7 @@ void Process(IStorageTW *pStorage, const char *pMapName, const char *pConfigName
 			break;
 
 		ConfigFound = true;
-		IOHANDLE Config = pStorage->OpenFile(pConfigName, IOFLAG_WRITE, IStorageTW::TYPE_ALL);
+		IOHANDLE Config = pStorage->OpenFile(pConfigName, IOFLAG_WRITE, IStorageTW::TYPE_ABSOLUTE);
 		if(!Config)
 		{
 			dbg_msg("config_retrieve", "error opening config for writing '%s'", pConfigName);

@@ -50,7 +50,7 @@ void CUpdater::Init()
 	m_pFetcher = new CFetcher;
 	m_pFetcher->Init(m_pStorage);
 #if defined(CONF_FAMILY_WINDOWS)
-	m_IsWinXP = os_compare_version(5, 1) <= 0;
+	m_IsWinXP = os_compare_version(5U, 1U) <= 0;
 #endif
 }
 

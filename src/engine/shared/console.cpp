@@ -757,6 +757,17 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 			pConsole->ExecuteLine(aBuf);
 			aBuf[0] = 0;
 		}
+		else if(pfnCallback == StrVariableCommand)
+		{
+			CStrVariableData *pData = static_cast<CStrVariableData *>(pUserData);
+			const char *pStr = !str_comp(pData->m_pStr, pResult->GetString(1)) ? pResult->GetString(2) : pResult->GetString(1);
+			str_format(aBuf, sizeof(aBuf), "%s \"", pResult->GetString(0));
+			char *pDst = aBuf + str_length(aBuf);
+			str_escape(&pDst, pStr, aBuf + sizeof(aBuf));
+			str_append(aBuf, "\"", sizeof(aBuf));
+			pConsole->ExecuteLine(aBuf);
+			aBuf[0] = 0;
+		}
 		else
 			str_format(aBuf, sizeof(aBuf), "Invalid command: '%s'.", pResult->GetString(0));
 	}

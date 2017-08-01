@@ -27,15 +27,9 @@ class CConfig : public IConfig
 	CCallback m_aCallbacks[MAX_CALLBACKS];
 	int m_NumCallbacks;
 
-	void EscapeParam(char *pDst, const char *pSrc, int size)
+	void EscapeParam(char *pDst, const char *pSrc, int Size)
 	{
-		for(int i = 0; *pSrc && i < size - 1; ++i)
-		{
-			if(*pSrc == '"' || *pSrc == '\\') // escape \ and "
-				*pDst++ = '\\';
-			*pDst++ = *pSrc++;
-		}
-		*pDst = 0;
+		str_escape(&pDst, pSrc, pDst + Size);
 	}
 
 public:
@@ -67,7 +61,7 @@ public:
 	{
 		if(!m_pStorage || (!Force && !g_Config.m_ClSaveSettings))
 			return false;
-		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE ".tmp", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 
 		if(!m_ConfigFile)
 			return false;
@@ -88,7 +82,6 @@ public:
 
 		io_close(m_ConfigFile);
 		m_ConfigFile = 0;
-		return m_pStorage->RenameFile(CONFIG_FILE ".tmp", CONFIG_FILE, IStorageTW::TYPE_SAVE);
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)

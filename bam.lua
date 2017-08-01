@@ -32,8 +32,6 @@ Import("other/luajit/luajit.lua")
 Import("other/freetype/freetype.lua")
 Import("other/curl/curl.lua")
 Import("other/opus/opusfile.lua")
-Import("other/opus/opus.lua")
-Import("other/opus/ogg.lua")
 Import("other/mysql/mysql.lua")
 
 --- Setup Config -------
@@ -48,8 +46,6 @@ config:Add(luajit.OptFind("luajit", false))
 config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
-config:Add(Opus.OptFind("opus", true))
-config:Add(Ogg.OptFind("ogg", true))
 config:Add(Mysql.OptFind("mysql", false))
 -- some config vars for customization:
 config:Add(OptString("websockets", false))
@@ -335,18 +331,23 @@ function build(settings)
 		settings.cc.includes:Add("src/engine/external/zlib")
 	end
 
-	-- build the small libraries
-	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
-	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
-	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.cpp"))
-	md5 = Compile(settings, "src/engine/external/md5/md5.c")
-	aes128 = Compile(settings, "src/engine/external/aes128/aes.c")
-	if config.websockets.value then
-		libwebsockets = Compile(settings, Collect("src/engine/external/libwebsockets/*.c"))
+	external_settings = settings:Copy()
+	if config.compiler.driver == "cl" then
+		external_settings.cc.flags:Add("/w")
+	else
+		external_settings.cc.flags:Add("-w")
 	end
-	sqlite3 = Compile(settings, Collect("src/engine/external/sqlite3/*.c"))
-	astar_jps = Compile(settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
-	--lua = Compile(settings, Collect("src/engine/external/lua/*.c"))
+	-- build the small libraries
+	wavpack = Compile(external_settings, Collect("src/engine/external/wavpack/*.c"))
+	pnglite = Compile(external_settings, Collect("src/engine/external/pnglite/*.c"))
+	jsonparser = Compile(external_settings, Collect("src/engine/external/json-parser/*.cpp"))
+	md5 = Compile(external_settings, "src/engine/external/md5/md5.c")
+	aes128 = Compile(external_settings, "src/engine/external/aes128/aes.c")
+	if config.websockets.value then
+		libwebsockets = Compile(external_settings, Collect("src/engine/external/libwebsockets/*.c"))
+	end
+	sqlite3 = Compile(external_settings, Collect("src/engine/external/sqlite3/*.c"))
+	astar_jps = Compile(external_settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
 
 	-- apply luajit settings
 	if config.lua.value and config.luajit.value then
@@ -403,8 +404,6 @@ function build(settings)
 	config.freetype:Apply(client_settings)
 	config.curl:Apply(client_settings)
 	config.opusfile:Apply(client_settings)
-	config.opus:Apply(client_settings)
-	config.ogg:Apply(client_settings)
 
 	if family == "unix" and (platform == "macosx" or platform == "linux") then
 		engine_settings.link.libs:Add("dl")

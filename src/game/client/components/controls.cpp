@@ -238,7 +238,14 @@ int CControls::SnapInput(int *pData)
 	else if(m_pClient->m_pMenus->IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
+	{
+		if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags == PLAYERFLAG_CHATTING)
+		{
+			if(IsDDNet(GameClient()->Client()->GetServerInfo()))
+				ResetInput(g_Config.m_ClDummy);
+		}
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
+	}
 
 	if(g_Config.m_ClNamePlatesBroadcastATH || m_pClient->Client()->Lua()->NumActiveScripts() > 0)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
@@ -278,7 +285,8 @@ int CControls::SnapInput(int *pData)
 	// we freeze the input if chat or menu is activated
 	if(!(m_InputData[g_Config.m_ClDummy].m_PlayerFlags&PLAYERFLAG_PLAYING))
 	{
-		ResetInput(g_Config.m_ClDummy);
+		if(!IsDDNet(GameClient()->Client()->GetServerInfo()))
+			ResetInput(g_Config.m_ClDummy);
 
 		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
 
@@ -550,8 +558,7 @@ bool CControls::OnMouseMove(float x, float y)
 		return true;
 	}
 
-	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED) ||
-		(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_pChat->IsActive()))
+	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 		return false;
 
 #if defined(__ANDROID__) // No relative mouse on Android

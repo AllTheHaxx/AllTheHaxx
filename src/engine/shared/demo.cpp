@@ -23,12 +23,12 @@ static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
 
 
-CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData)
+CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {
 	m_File = 0;
 	m_LastTickMarker = -1;
 	m_pSnapshotDelta = pSnapshotDelta;
-	m_DelayedMapData = DelayedMapData;
+	m_NoMapData = NoMapData;
 }
 
 // Record
@@ -49,14 +49,16 @@ int CDemoRecorder::Start(class IStorageTW *pStorage, class IConsole *pConsole, c
 
 	CDemoHeader Header;
 	CTimelineMarkers TimelineMarkers;
-	if(m_File)
+	if(m_File) {
+		io_close(DemoFile);
 		return -1;
+	}
 
 	m_pConsole = pConsole;
 
 	IOHANDLE MapFile = NULL;
 
-	if(!m_DelayedMapData)
+	if(!pMapData)
 	{
 		// open mapfile
 		char aMapFilename[128];
@@ -92,8 +94,6 @@ int CDemoRecorder::Start(class IStorageTW *pStorage, class IConsole *pConsole, c
 	Header.m_Version = gs_ActVersion;
 	str_copy(Header.m_aNetversion, pNetVersion, sizeof(Header.m_aNetversion));
 	str_copy(Header.m_aMapName, pMap, sizeof(Header.m_aMapName));
-	if(!m_DelayedMapData)
-		MapSize = io_length(MapFile);
 	Header.m_aMapSize[0] = (MapSize>>24)&0xff;
 	Header.m_aMapSize[1] = (MapSize>>16)&0xff;
 	Header.m_aMapSize[2] = (MapSize>>8)&0xff;
@@ -108,9 +108,12 @@ int CDemoRecorder::Start(class IStorageTW *pStorage, class IConsole *pConsole, c
 	io_write(DemoFile, &Header, sizeof(Header));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
 
-	if(m_DelayedMapData)
+	if(m_NoMapData)
 	{
-		io_seek(DemoFile, MapSize, IOSEEK_CUR);
+	}
+	else if(pMapData)
+	{
+		io_write(DemoFile, pMapData, MapSize);
 	}
 	else
 	{
@@ -298,7 +301,7 @@ void CDemoRecorder::RecordMessage(const void *pData, int Size)
 	Write(CHUNKTYPE_MESSAGE, pData, Size);
 }
 
-int CDemoRecorder::Stop(bool Finalize)
+int CDemoRecorder::Stop()
 {
 	if(!m_File)
 		return -1;
@@ -330,12 +333,6 @@ int CDemoRecorder::Stop(bool Finalize)
 		aMarker[2] = (Marker>>8)&0xff;
 		aMarker[3] = (Marker)&0xff;
 		io_write(m_File, aMarker, sizeof(aMarker));
-	}
-
-	if(Finalize && m_DelayedMapData)
-	{
-		io_seek(m_File, gs_NumMarkersOffset + sizeof(CTimelineMarkers), IOSEEK_START);
-		io_write(m_File, m_pMapData, m_MapSize);
 	}
 
 	io_close(m_File);
@@ -923,14 +920,8 @@ bool CDemoPlayer::GetDemoInfo(class IStorageTW *pStorage, const char *pFilename,
 		return false;
 
 	io_read(File, pDemoHeader, sizeof(CDemoHeader));
-	if(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion)
-	{
-		io_close(File);
-		return false;
-	}
-
 	io_close(File);
-	return true;
+	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
 }
 
 int CDemoPlayer::GetDemoType() const
