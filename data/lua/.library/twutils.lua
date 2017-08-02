@@ -1,5 +1,10 @@
 -------------------- COMMON FUNCTIONS FOR TEEWORLDS --------------------
 
+function IsVanilla()
+	local gm = string.lower(Game.ServerInfo.GameMode)
+	return gm == "dm" or gm == "tdm" or gm == "ctf"
+end
+
 -- returns the ID of the player closest to you, -1 on failure.
 function GetClosestID()
 	local ClosestID = -1
@@ -62,4 +67,31 @@ function GetAngleDeg(DirVec)
 	local Angle = math.deg(GetAngle(DirVec))
 	if Angle < 0 then Angle = Angle + 360 end
 	return Angle
+end
+
+
+function IsFreezeTile(x, y)
+	local TILE_FREEZE = -1
+	local gm = string.lower(Game.ServerInfo.GameMode)
+	if(gm == "idd32+" or gm == "ddnet" or string.find(gm, "race") ~= nil) then
+		TILE_FREEZE = 9
+	elseif(gm == "if|city") then
+		TILE_FREEZE = 191
+	elseif(gm == "dm" or gm == "tdm" or gm == "ctf") then
+		TILE_FREEZE = 2 -- kill
+	end	
+	return Game.Collision:GetTile(x, y) == TILE_FREEZE
+end
+
+function IsFreezed(Id)
+	Id = Id or Game.LocalCID
+	if Game.CharSnap(Id).Cur.Weapon == 5 and not IsVanilla() then
+		if IsFreezeTile(Game.Players(Id).Tee.Pos.x, Game.Players(Id).Tee.Pos.y) then
+			return 2 -- frozen and in freeze
+		else
+			return 1 -- frozen but not in freeze
+		end
+	else
+		return 0
+	end
 end
