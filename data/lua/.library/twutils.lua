@@ -1,5 +1,10 @@
 -------------------- COMMON FUNCTIONS FOR TEEWORLDS --------------------
 
+function IsVanilla()
+	local gm = string.lower(Game.ServerInfo.GameMode)
+	return gm == "dm" or gm == "tdm" or gm == "ctf"
+end
+
 -- returns the ID of the player closest to you, -1 on failure.
 function GetClosestID()
 	local ClosestID = -1
@@ -70,22 +75,21 @@ function IsFreezeTile(x, y)
 	local gm = string.lower(Game.ServerInfo.GameMode)
 	if(gm == "idd32+" or gm == "ddnet" or string.find(gm, "race") ~= nil) then
 		TILE_FREEZE = 9
-	end
-	if(gm == "if|city") then
+	elseif(gm == "if|city") then
 		TILE_FREEZE = 191
-	end
-	if(gm == "dm" or gm == "tdm" or gm == "ctf") then
+	elseif(gm == "dm" or gm == "tdm" or gm == "ctf") then
 		TILE_FREEZE = 2 -- kill
 	end	
 	return Game.Collision:GetTile(x, y) == TILE_FREEZE
 end
 
 function IsFreezed(Id)
-	if Game.CharSnap(Id or Game.LocalCID).Cur.Weapon == 5 then
-		if IsFreezeTile(Game.Players(Id or Game.LocalCID).Tee.Pos.x,Game.Players(Id or Game.LocalCID).Tee.Pos.y) then
-			return 2
-		elseif not (IsFreezeTile(Game.Players(Id or Game.LocalCID).Tee.Pos.x,Game.Players(Id or Game.LocalCID).Tee.Pos.y)) then
-			return 1
+	Id = Id or Game.LocalCID
+	if Game.CharSnap(Id).Cur.Weapon == 5 and not IsVanilla() then
+		if IsFreezeTile(Game.Players(Id).Tee.Pos.x, Game.Players(Id).Tee.Pos.y) then
+			return 2 -- frozen and in freeze
+		else
+			return 1 -- frozen but not in freeze
 		end
 	else
 		return 0
