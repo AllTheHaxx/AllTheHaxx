@@ -140,6 +140,21 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
             .addFunction("SetString", &CMenus::lua::CEditboxContainer::SetString)
 		.endClass()
 
+		.beginClass< CTextCursor >("TextCursor")
+			.addConstructor <void (*) ()> ()
+			.addData("Flags", &CTextCursor::m_Flags)
+			.addData("LineCount", &CTextCursor::m_LineCount)
+			.addData("CharCount", &CTextCursor::m_CharCount)
+			.addData("MaxLines", &CTextCursor::m_MaxLines)
+			.addData("StartX", &CTextCursor::m_StartX)
+			.addData("StartY", &CTextCursor::m_StartY)
+			.addData("LineWidth", &CTextCursor::m_LineWidth)
+			.addData("X", &CTextCursor::m_X)
+			.addData("Y", &CTextCursor::m_Y)
+			//.addData("Font", &CTextCursor::m_pFont)
+			.addData("FontSize", &CTextCursor::m_FontSize)
+		.endClass()
+
 
 		// ------------------------------ ICLIENT ------------------------------
 
@@ -500,10 +515,12 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		/// Engine.TextRender
 		.beginClass<ITextRender>("ITextRender")
 			.addFunction("Text", &ITextRender::Text)
+			.addFunction("TextEx", &ITextRender::TextEx)
 			.addFunction("TextWidth", &ITextRender::TextWidth)
 			.addFunction("TextLineCount", &ITextRender::TextLineCount)
 			.addFunction("TextColor", &ITextRender::TextColor)
 			.addFunction("TextOutlineColor", &ITextRender::TextOutlineColor)
+			.addFunction("SetCursor", &ITextRender::SetCursorLua)
 		.endClass()
 
 		/// Engine.Storage
