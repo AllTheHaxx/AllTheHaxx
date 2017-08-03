@@ -131,7 +131,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginClass< CButtonContainer >("ButtonContainer")
 			.addConstructor <void (*) ()> ()
-            .addFunction("GetID", &CButtonContainer::GetID)
+            //.addFunction("GetID", &CButtonContainer::GetID)
 		.endClass()
 
 		.beginClass< CMenus::lua::CEditboxContainer >("EditboxContainer")
