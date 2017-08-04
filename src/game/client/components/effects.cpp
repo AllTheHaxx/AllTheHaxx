@@ -282,7 +282,7 @@ void CEffects::HammerHit(vec2 Pos)
 	p.m_EndSize = 0;
 	p.m_Rot = frandom()*pi*2;
 	m_pClient->m_pParticles->Add(CParticles::GROUP_EXPLOSIONS, &p);
-	if(g_Config.m_SndGame)
+	if(g_Config.m_SndGame && g_Config.m_SndHammer)
 		m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);
 }
 
