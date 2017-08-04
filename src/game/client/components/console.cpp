@@ -645,13 +645,15 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				m_BacklogActLine = 0;
 			Handled = true;
 		}
-		else if(Event.m_Key == KEY_HOME)
+		else if(Event.m_Key == KEY_HOME && m_CTRLPressed)
 		{
 			m_BacklogActLine = INT_MAX;
+			Handled = true;
 		}
-		else if(Event.m_Key == KEY_END)
+		else if(Event.m_Key == KEY_END && m_CTRLPressed)
 		{
 			m_BacklogActLine = 0;
+			Handled = true;
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
 		{
