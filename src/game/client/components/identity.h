@@ -13,15 +13,18 @@ public:
 	virtual void OnShutdown();
 
 	void SaveIdents();
+	void LoadIdents();
+	void LoadIdentsLegacy();
 
-	struct CIdentEntry
+	class CIdentEntry
 	{
+	public:
 		CIdentEntry()
 		{
 			mem_zero(this, sizeof(CIdentEntry));
 		}
 
-		char m_aFilename[64];
+		int m_StartingIndex;
 		char m_aTitle[16];
 
 		char m_aName[16];
@@ -35,8 +38,8 @@ public:
 		int m_ColorFeet;
 
 		// overloading n shit
-		bool operator<(const CIdentEntry& Other) { return str_comp(m_aFilename, Other.m_aFilename) < 0; }
-		bool operator==(const CIdentEntry& Other)
+		bool operator<(const CIdentEntry& Other) { return m_StartingIndex < Other.m_StartingIndex; }
+		bool operator==(const CIdentEntry& Other) const
 		{
 			return	str_comp(Other.m_aName, this->m_aName) == 0 &&
 					str_comp(Other.m_aClan, this->m_aClan) == 0 &&
@@ -62,14 +65,15 @@ public:
 	};
 
 	// getter and setter functions
-	inline int NumIdents() { return m_aIdentities.size(); }
+	inline int NumIdents() const { return m_aIdentities.size(); }
 	inline void AddIdent(const CIdentEntry& Entry) { m_aIdentities.add_unsorted(Entry); }
 	inline void DeleteIdent(int Ident)
 	{
 		m_aIdentities.remove_index(Ident);
 	}
 
-	inline int GetIdentID(const char *pName)
+	/* TODO: remove if not needed
+	inline int GetIdentID(const char *pName) const
 	{
 		for(int i = 0; i < NumIdents(); i++)
 		{
@@ -77,9 +81,9 @@ public:
 				return i;
 		}
 		return -1;
-	}
+	}*/
 
-	inline int GetIdentID(const CIdentEntry& Entry)
+	inline int GetIdentID(const CIdentEntry& Entry) const
 	{
 		for(int i = 0; i < NumIdents(); i++)
 		{
@@ -179,7 +183,6 @@ public:
 	};
 
 private:
-	static int UnlinkAllIdents(const char *pName, int IsDir, int DirType, void *pUser);
 	static int FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser);
 
 	sorted_array<CIdentEntry> m_aIdentities;

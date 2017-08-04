@@ -260,6 +260,8 @@ set(SOURCE_FILES
         src/engine/external/libwebsockets/extension-deflate-stream.h
         src/engine/external/json-parser/json.cpp
         src/engine/external/json-parser/json.hpp
+        src/engine/external/json-builder/json-builder.c
+        src/engine/external/json-builder/json-builder.h
         src/engine/external/pnglite/pnglite.c
         src/engine/external/pnglite/pnglite.h
         src/engine/external/astar-jps/IndexPriorityQueue.h

@@ -70,6 +70,35 @@ public:
 		return std::string(aHugeBuf);
 	}
 
+	/**
+	 * Reads the whole file and returns in as an std::string
+	 * @return a string containing the text
+	 * @note This leaves the cursor at the end of the file
+	 */
+	const std::string ReadAllText()
+	{
+		char *pBuf = ReadAllTextRaw();
+		std::string AllText(pBuf);
+		mem_free(pBuf);
+		return AllText;
+	}
+
+	/**
+	 * Reads the whole file into a heap buffer and returns a pointer to it
+	 * @return a string containing the text
+	 * @note This leaves the cursor at the end of the file
+	 * @note You have to free the buffer yourself!
+	 */
+	char *ReadAllTextRaw(unsigned int *pLen = NULL)
+	{
+		long Len = Length();
+		if(pLen) *pLen = (unsigned int)Len;
+		char *pBuf = mem_allocb(char, Len);
+		Seek(0, IOSEEK_START);
+		Read(pBuf, (unsigned int)Len);
+		return pBuf;
+	}
+
 	bool ReadNextLine(std::string *pDest)
 	{
 		RETURN_ON_NOT_OPEN(false)

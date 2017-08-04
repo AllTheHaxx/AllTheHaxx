@@ -341,6 +341,7 @@ function build(settings)
 	wavpack = Compile(external_settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(external_settings, Collect("src/engine/external/pnglite/*.c"))
 	jsonparser = Compile(external_settings, Collect("src/engine/external/json-parser/*.cpp"))
+	jsonbuilder = Compile(external_settings, Collect("src/engine/external/json-builder/*.c"))
 	md5 = Compile(external_settings, "src/engine/external/md5/md5.c")
 	aes128 = Compile(external_settings, "src/engine/external/aes128/aes.c")
 	if config.websockets.value then
@@ -448,7 +449,7 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack, aes128,
-		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification, sqlite3, astar_jps)
+		client_link_other, client_osxlaunch, jsonparser, jsonbuilder, libwebsockets, md5, client_notification, sqlite3, astar_jps)
 
 	server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)
