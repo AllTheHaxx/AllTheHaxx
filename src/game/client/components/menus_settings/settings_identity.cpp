@@ -70,7 +70,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 	// add a new identity from current settings as we need at least one
 	if(numID == 0)
-		m_pClient->m_pIdentity->AddIdent();
+		m_pClient->m_pIdentity->AddIdentCurr();
 
 	MainView.VSplitLeft(240.0f, &TabBar, &MainView);
 	TabBar.VSplitRight(2.0f, &TabBar, &Button);
@@ -111,7 +111,12 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			Button.VSplitRight(240.0f, 0, &Temp);
 			Button.VSplitRight(Button.w/3.0f, &Button, &RightButton);
 			if(DoButton_MenuTab(&s_aNewIdentIDs[i], Localize("New Identity"), false, &Button, CUI::CORNER_BL, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a)))
-				m_pClient->m_pIdentity->AddIdent();
+			{
+				m_pClient->m_pIdentity->AddIdentNew();
+				// select it right away so we can edit it immediately
+				Page = numID;
+				numID++;
+			}
 			if(DoButton_MenuTab(&s_aPasteIDs[i], Localize("Paste"), false, &RightButton, CUI::CORNER_BR, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a),
 								Localize("Double-click an identity to copy it to clipboard, You can then send the resulting text to someone. If you get sent an identity as text, copy the text an click this button.")))
 				m_pClient->m_pIdentity->AddIdentFromJson(Input()->GetClipboardText());

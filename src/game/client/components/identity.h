@@ -144,10 +144,10 @@ public:
 		return false;
 	};
 
-	void AddIdent() // adds a new ident with current settings
+	void AddIdentCurr() // adds a new ident with current settings
 	{
 		CIdentity::CIdentEntry Entry;
-		mem_zero(&Entry, sizeof(CIdentity::CIdentEntry));
+		mem_zerob(&Entry);
 		str_copy(Entry.m_aName, g_Config.m_PlayerName, sizeof(Entry.m_aName));
 		str_copy(Entry.m_aClan, g_Config.m_PlayerClan, sizeof(Entry.m_aClan));
 		str_copy(Entry.m_aSkin, g_Config.m_ClPlayerSkin, sizeof(Entry.m_aSkin));
@@ -155,6 +155,21 @@ public:
 		Entry.m_ColorBody = g_Config.m_ClPlayerColorBody;
 		Entry.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
 		Entry.m_Country = g_Config.m_PlayerCountry;
+		AddIdent(Entry);
+	}
+
+
+	void AddIdentNew() // adds a new default identity
+	{
+		CIdentity::CIdentEntry Entry;
+		mem_zerob(&Entry);
+		str_copyb(Entry.m_aName, "haxxless tee");
+		str_copyb(Entry.m_aClan, "AllTheHaxx");
+		str_copyb(Entry.m_aSkin, "default");
+		Entry.m_UseCustomColor = false;
+		Entry.m_ColorBody = 65408;
+		Entry.m_ColorFeet = 65408;
+		Entry.m_Country = g_Config.m_PlayerCountry; // use current country because country is likely to stay the same
 		AddIdent(Entry);
 	}
 
