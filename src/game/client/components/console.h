@@ -48,6 +48,7 @@ class CGameConsole : public CComponent
 		bool m_ReverseTAB;
 		bool m_CTRLPressed;
 
+
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
 		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
@@ -97,12 +98,12 @@ class CGameConsole : public CComponent
 			else
 				return m_aUser;
 		}
-		bool UsingUserAuth() const { return m_UsernameReq; }
+		bool UsingUserAuth() const { return m_UseUser; }
 		void ResetRconLogin();
 
 	private:
 		char m_aUser[64];
-		bool m_UsernameReq;
+		bool m_UseUser;
 	};
 
 	class IConsole *m_pConsole;
@@ -148,7 +149,6 @@ public:
 	CGameConsole();
 
 	void PrintLine(int Type, const char *pLine);
-	void RequireUsername(bool UsernameReq);
 
 	static int PrintLuaLine(lua_State *L);
 	void AttachLuaDebugger(const class CLuaFile *pLF);

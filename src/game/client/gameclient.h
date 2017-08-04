@@ -342,7 +342,6 @@ public:
 	virtual int OnSnapInput(int *pData);
 	virtual void OnShutdown();
 	virtual void OnEnterGame();
-	virtual void OnRconType(bool UsernameReq);
 	virtual void OnRconLine(const char *pLine);
 	virtual void OnGameOver();
 	virtual void OnStartGame();
