@@ -98,7 +98,6 @@ class CGameConsole : public CComponent
 				return m_aUser;
 		}
 		bool UsingUserAuth() const { return m_UsernameReq; }
-		void SetUsingUserAuth(bool Required) { m_UsernameReq = Required; }
 		void ResetRconLogin();
 
 	private:

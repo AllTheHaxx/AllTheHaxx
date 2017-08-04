@@ -450,15 +450,15 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			}
 			else if(Event.m_Key == KEY_T && m_Type == CONSOLETYPE_REMOTE && !m_pGameConsole->Client()->RconAuthed()) // toggle rcon login mode
 			{
-				if(UserAuthAvailable() || m_UsernameReq || (!m_UsernameReq && m_pGameConsole->Input()->KeyIsPressed(KEY_LSHIFT)))
+				if(UserAuthAvailable() || m_UseUser || (!m_UseUser && m_pGameConsole->Input()->KeyIsPressed(KEY_LSHIFT)))
 				{
-					m_UsernameReq ^= true;
+					m_UseUser ^= true;
 					m_Input.Clear();
 					mem_zerob(m_aUser);
 				}
 				else
 				{
-					m_UsernameReq = false;
+					m_UseUser = false;
 					PrintLine("User specific auth is only available on DDNet (use CTRL-SHIFT-T to force it)");
 				}
 			}
@@ -524,19 +524,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				PrintLine(aLine);
 			}
 
-			// end CTRL-keycombos
-		}
-		else if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
+	if(Event.m_Flags&IInput::FLAG_PRESS)
+	{
+		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
-			//if search is actice, skip to next position
-			if(m_pSearchString)
-			{
-				if(m_AtEnd == 2)
-					m_AtEnd = 0;
-
-				m_SearchFound = false;
-			}
-			else
+			CServerInfo pServerInfo;
+			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
+			if(m_Input.GetString()[0] || (IsDDNet(&pServerInfo) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 			{
 				if(m_Input.GetString()[0] || (UsingUserAuth() && !m_pGameConsole->Client()->RconAuthed() && !UserGot())) // the second part allows for empty user names
 				{
@@ -802,7 +796,7 @@ bool CGameConsole::CInstance::UserAuthAvailable() const
 void CGameConsole::CInstance::ResetRconLogin()
 {
 	mem_zerob(m_aUser);
-	m_UsernameReq = false;
+	m_UseUser = false;
 }
 
 CGameConsole::CGameConsole()
@@ -1693,7 +1687,7 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 
 void CGameConsole::RequireUsername(bool UsernameReq)
 {
-	m_RemoteConsole.SetUsingUserAuth(UsernameReq);
+	m_RemoteConsole.m_UsernameReq = UsernameReq;
 }
 
 void CGameConsole::PrintLine(int Type, const char *pLine)
@@ -1803,5 +1797,6 @@ void CGameConsole::OnStateChange(int NewState, int OldState)
 	{
 		m_RemoteConsole.ResetRconLogin();
 		m_RemoteConsole.m_Input.Clear();
+		m_RemoteConsole.m_UsernameReq = false;
 	}
 }

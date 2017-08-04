@@ -162,8 +162,6 @@ set(SOURCE_FILES
         src/engine/shared/storage.h
         src/engine/shared/netban.h
         src/engine/shared/netban.cpp
-        src/engine/shared/uuid_manager.cpp
-        src/engine/shared/uuid_manager.h
         src/engine/server/register.cpp
         src/engine/server/authmanager.cpp
         src/engine/server/sql_connector.h
@@ -287,7 +285,6 @@ set(SOURCE_FILES
         src/engine/map.h
         src/engine/storage.h
         src/engine/keys.h
-        src/engine/uuid.h
         src/game/localization.h
         src/game/localization.cpp
         src/game/client/animstate.cpp
