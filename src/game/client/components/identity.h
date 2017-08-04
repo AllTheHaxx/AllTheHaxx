@@ -5,6 +5,9 @@
 #include <base/tl/sorted_array.h>
 #include <engine/shared/linereader.h>
 #include <game/client/component.h>
+#include <engine/external/json-parser/json.hpp>
+
+
 
 class CIdentity : public CComponent
 {
@@ -67,6 +70,7 @@ public:
 	// getter and setter functions
 	inline int NumIdents() const { return m_aIdentities.size(); }
 	inline void AddIdent(const CIdentEntry& Entry) { m_aIdentities.add_unsorted(Entry); }
+	void AddIdentFromJson(const char *pJsonString);
 	inline void DeleteIdent(int Ident)
 	{
 		m_aIdentities.remove_index(Ident);
@@ -100,6 +104,9 @@ public:
 		else
 			return NULL;
 	}
+
+	json_value *GetIdentAsJson(int i, bool Packed = false);
+	char *GetIdentAsJsonStr(int i);
 
 	inline void SwapIdent(int i, int Dir)
 	{
@@ -186,6 +193,8 @@ private:
 	static int FindIDFiles(const char *pName, int IsDir, int DirType, void *pUser);
 
 	sorted_array<CIdentEntry> m_aIdentities;
+
+	CIdentEntry SingleIdentFromJson(const json_value &jsonInner) const;
 };
 
 #endif

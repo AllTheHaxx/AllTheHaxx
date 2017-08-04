@@ -29,6 +29,17 @@
 */
 
 
+static const json_serialize_opts json_opts_common = {
+		json_serialize_mode_multiline,
+		0,
+		2
+};
+static const json_serialize_opts json_opts_packed = {
+		json_serialize_mode_packed,
+		json_serialize_opt_no_space_after_colon|json_serialize_opt_no_space_after_comma|json_serialize_opt_pack_brackets,
+		0
+};
+
 
 void CIdentity::OnInit()
 {
@@ -79,16 +90,8 @@ void CIdentity::LoadIdents()
 			continue;
 		}
 
-		CIdentEntry Entry;
-		Entry.m_StartingIndex = (int)(json_int_t)(jsonOuter["index"]);;
-		str_copyb(Entry.m_aTitle, (const char *)jsonInner["title"]);
-		str_copyb(Entry.m_aName, (const char *)jsonInner["name"]);
-		str_copyb(Entry.m_aClan, (const char *)jsonInner["clan"]);
-		Entry.m_Country = (int)(json_int_t)jsonInner["country"];
-		str_copyb(Entry.m_aSkin, (const char *)jsonInner["skin"]);
-		Entry.m_UseCustomColor = (bool)jsonInner["use_custom_color"];
-		Entry.m_ColorBody = (int)(json_int_t)jsonInner["color_body"];
-		Entry.m_ColorFeet = (int)(json_int_t)jsonInner["color_feet"];
+		CIdentEntry Entry = SingleIdentFromJson(jsonInner);
+		Entry.m_StartingIndex = (int)(json_int_t)(jsonOuter["index"]);
 
 		// add the entry to our array
 		m_aIdentities.add(Entry);
@@ -100,6 +103,21 @@ void CIdentity::LoadIdents()
 
 }
 
+CIdentity::CIdentEntry CIdentity::SingleIdentFromJson(const json_value &jsonInner) const
+{
+	CIdentEntry Entry;
+
+	str_copyb(Entry.m_aTitle, (const char *)jsonInner["title"]);
+	str_copyb(Entry.m_aName, (const char *)jsonInner["name"]);
+	str_copyb(Entry.m_aClan, (const char *)jsonInner["clan"]);
+	Entry.m_Country = (int)(json_int_t)jsonInner["country"];
+	str_copyb(Entry.m_aSkin, (const char *)jsonInner["skin"]);
+	Entry.m_UseCustomColor = (bool)jsonInner["use_custom_color"];
+	Entry.m_ColorBody = (int)(json_int_t)jsonInner["color_body"];
+	Entry.m_ColorFeet = (int)(json_int_t)jsonInner["color_feet"];
+
+	return Entry;
+}
 
 void CIdentity::LoadIdentsLegacy()
 {
@@ -111,6 +129,39 @@ void CIdentity::LoadIdentsLegacy()
 	}
 }
 
+json_value *CIdentity::GetIdentAsJson(int i, bool Packed)
+{
+	const CIdentEntry *pIdent = GetIdent(i);
+	json_value *inner_obj = json_object_new(8);
+
+	#define add_str(NAME, STR) \
+		if(!Packed || (STR)[0] != '\0') \
+			json_object_push(inner_obj, NAME, json_string_new(STR));
+
+	#define add_int(NAME, VAR) \
+		if(!Packed || (VAR) != 0) \
+			json_object_push(inner_obj, NAME, json_integer_new(VAR));
+
+	#define add_bool(NAME, VAR) \
+		if(!Packed || (VAR) != false) \
+			json_object_push(inner_obj, NAME, json_boolean_new(VAR));
+
+	add_str("title", pIdent->m_aTitle);
+	add_str("name", pIdent->m_aName);
+	add_str("clan", pIdent->m_aClan);
+	add_int("country", pIdent->m_Country);
+	add_str("skin", pIdent->m_aSkin);
+	add_bool("use_custom_color", pIdent->m_UseCustomColor);
+	add_int("color_body", pIdent->m_ColorBody);
+	add_int("color_feet", pIdent->m_ColorFeet);
+
+	#undef add_str
+	#undef add_int
+	#undef add_bool
+
+	return inner_obj;
+}
+
 void CIdentity::SaveIdents()
 {
 	if(NumIdents() == 0)
@@ -119,18 +170,8 @@ void CIdentity::SaveIdents()
 	json_value *arr = json_array_new((unsigned)NumIdents());
 	for(int i = 0; i < NumIdents(); i++)
 	{
-		const CIdentEntry *pIdent = GetIdent(i);
 		json_value *outer_obj = json_object_new(2);
-		json_value *inner_obj = json_object_new(8);
-
-		json_object_push(inner_obj, "title", json_string_new(pIdent->m_aTitle));
-		json_object_push(inner_obj, "name", json_string_new(pIdent->m_aName));
-		json_object_push(inner_obj, "clan", json_string_new(pIdent->m_aClan));
-		json_object_push(inner_obj, "country", json_integer_new(pIdent->m_Country));
-		json_object_push(inner_obj, "skin", json_string_new(pIdent->m_aSkin));
-		json_object_push(inner_obj, "use_custom_color", json_boolean_new(pIdent->m_UseCustomColor));
-		json_object_push(inner_obj, "color_body", json_integer_new(pIdent->m_ColorBody));
-		json_object_push(inner_obj, "color_feet", json_integer_new(pIdent->m_ColorFeet));
+		json_value *inner_obj = GetIdentAsJson(i);
 
 		json_object_push(outer_obj, "index", json_integer_new(i));
 		json_object_push(outer_obj, "identity", inner_obj);
@@ -138,12 +179,8 @@ void CIdentity::SaveIdents()
 		json_array_push(arr, outer_obj);
 	}
 
-	json_serialize_opts opts;
-	opts.mode = json_serialize_mode_multiline;
-	opts.opts = 0;
-	opts.indent_size = 2;
-	char *pJsonBuf = mem_allocb(char, json_measure_ex(arr, opts));
-	json_serialize_ex(pJsonBuf, arr, opts);
+	char *pJsonBuf = mem_allocb(char, json_measure_ex(arr, json_opts_common));
+	json_serialize_ex(pJsonBuf, arr, json_opts_common);
 	json_value_free(arr);
 
 	IOHANDLE_SMART File = Storage()->OpenFileSmart(ALL_IDS_JSON_FILE, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
@@ -233,4 +270,31 @@ int CIdentity::FindIDFiles(const char *pName, int IsDir, int DirType, void *pUse
 	pSelf->m_aIdentities.add(Entry);
 
 	return 0;
+}
+
+
+char *CIdentity::GetIdentAsJsonStr(int i)
+{
+	json_value *pJson = GetIdentAsJson(i, true);
+
+	char *pJsonBuf = mem_allocb(char, json_measure_ex(pJson, json_opts_packed));
+	json_serialize_ex(pJsonBuf, pJson, json_opts_packed);
+
+	json_value_free(pJson);
+
+	return pJsonBuf;
+}
+
+void CIdentity::AddIdentFromJson(const char *pJsonString)
+{
+	json_value *pJson = json_parse(pJsonString, (unsigned)str_length(pJsonString));
+	if(!pJson)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident/ERROR", "failed to json-parse string from clipboard", true);
+		return;
+	}
+
+	AddIdent(SingleIdentFromJson(*pJson));
+
+	json_value_free(pJson);
 }

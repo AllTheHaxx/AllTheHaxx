@@ -85,6 +85,8 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	static CButtonContainer s_aUpIDs[512];
 	static CButtonContainer s_aDownIDs[512];
 	static CButtonContainer s_aPageIDs[512];
+	static CButtonContainer s_aNewIdentIDs[512];
+	static CButtonContainer s_aPasteIDs[512];
 	static CButtonContainer s_aItemIDs[512];
 	static CButtonContainer s_LeftListbox;
 	static float s_LeftListboxScrollVal = 0.0f;
@@ -104,15 +106,29 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		if(i == numID)
 		{
+			CUIRect RightButton;
 			Button.HSplitBottom(4.0f, &Button, 0);
 			Button.VSplitRight(240.0f, 0, &Temp);
-			if(DoButton_MenuTab(&s_aPageIDs[i], Localize("Add Identity"), false, &Button, CUI::CORNER_B, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a)))
+			Button.VSplitRight(Button.w/3.0f, &Button, &RightButton);
+			if(DoButton_MenuTab(&s_aNewIdentIDs[i], Localize("New Identity"), false, &Button, CUI::CORNER_BL, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a)))
 				m_pClient->m_pIdentity->AddIdent();
+			if(DoButton_MenuTab(&s_aPasteIDs[i], Localize("Paste"), false, &RightButton, CUI::CORNER_BR, vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarActive.a), vec4(0.7f, 0.7f, 0.2f, ms_ColorTabbarInactive.a),
+								Localize("Double-click an identity to copy it to clipboard, You can then send the resulting text to someone. If you get sent an identity as text, copy the text an click this button.")))
+				m_pClient->m_pIdentity->AddIdentFromJson(Input()->GetClipboardText());
 			break;
 		}
 
+		// select identity
 		if(DoButton_MenuTab(&s_aPageIDs[i], "", Page == i, &Button, i == 0 ? CUI::CORNER_T : 0, vec4(0.2f, 0.6f, 0.2f, ms_ColorTabbarActive.a), vec4(0.2f, 0.6f, 0.2f, ms_ColorTabbarInactive.a)))
 			Page = i;
+
+		// copy identity
+		if(UI()->MouseInside(&Button) && Input()->MouseDoubleClick())
+		{
+			char *pIdentJson = m_pClient->m_pIdentity->GetIdentAsJsonStr(i);
+			Input()->SetClipboardText(pIdentJson);
+			mem_free(pIdentJson);
+		}
 
 		Button.VSplitRight(Button.h, 0, &Temp);
 		Temp.Margin(4.0f, &Temp);
