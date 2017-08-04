@@ -530,6 +530,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		// XXX: cleanup!
+		/// TW.Game
 		.beginClass<CGameClient>("CGameClient")   //this class is kinda outdated due to "Game"
 		/*	.addData("Chat", &CGameClient::m_pChat)
 			.addData("ServerInfo", &CGameClient::m_CurrentServerInfo, false)
