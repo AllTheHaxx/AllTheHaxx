@@ -5,8 +5,8 @@
 #include "generated/nethash.cpp"
 
 #define GAME_VERSION "0.6.3"
-#define ATH_VERSION "0.30.4"
-#define DDNET_VERSION "10.6.3"
+#define ATH_VERSION "0.31"
+#define DDNET_VERSION "10.7.1"
 #define BUILD_DATE __DATE__ ", " __TIME__
 
 #if defined(FEATURE_LUA)
@@ -24,10 +24,10 @@
 
 // for updater
 static const char GAME_ATH_VERSION[10] = ATH_VERSION;
-#define GAME_ATH_VERSION_NUMERIC 3040
+#define GAME_ATH_VERSION_NUMERIC 3100
 
 // do not modify these, they belong to ddnet
 static const char GAME_RELEASE_VERSION[8] = DDNET_VERSION;
-#define CLIENT_VERSIONNR 10063
+#define CLIENT_VERSIONNR 10071
 
 #endif
