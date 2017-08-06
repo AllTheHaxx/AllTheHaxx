@@ -51,10 +51,16 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 		return;
 
 	std::ifstream f(pFilename);
-	std::string line; bool searching = true;
+	std::string line;
+	bool searching = true;
+	int CurrentLine = 0;
 	while(std::getline(f, line))
 	{
-		if(searching && line != "--[[#!")
+		// really noone puts the permission flag tags further down than this...
+		if(++CurrentLine >= 10)
+			break;
+
+		if(searching && str_comp_num(line.c_str(), "--[[#!", 6) != 0)
 			continue;
 
 		if(searching)
@@ -66,10 +72,9 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 			break;
 
 		// make sure we only get what we want
-		char aBuf[32]; char *p;
+		char aBuf[16]; char *p = aBuf;
 		str_copy(aBuf, line.c_str(), sizeof(aBuf));
 		str_sanitize_strong(aBuf);
-		p = aBuf;
 		while(*p == ' ' || *p == '\t')
 			p++;
 
@@ -77,15 +82,15 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 		if(p++[0] != '#')
 			continue;
 
-		if(str_comp_nocase("io", p) == 0)
+		if(str_comp_nocase_num("io", p, 2) == 0)
 			m_PermissionFlags |= PERMISSION_IO;
-		if(str_comp_nocase("debug", p) == 0)
+		else if(str_comp_nocase_num("debug", p, 5) == 0)
 			m_PermissionFlags |= PERMISSION_DEBUG;
-		if(str_comp_nocase("ffi", p) == 0)
+		else if(str_comp_nocase_num("ffi", p, 3) == 0)
 			m_PermissionFlags |= PERMISSION_FFI;
-		if(str_comp_nocase("os", p) == 0)
+		else if(str_comp_nocase_num("os", p, 2) == 0)
 			m_PermissionFlags |= PERMISSION_OS;
-		if(str_comp_nocase("package", p) == 0)
+		else if(str_comp_nocase_num("package", p, 7) == 0)
 			m_PermissionFlags |= PERMISSION_PACKAGE;
 	}
 
