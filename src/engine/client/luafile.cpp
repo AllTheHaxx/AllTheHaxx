@@ -101,44 +101,45 @@ void CLuaFile::Unload(bool error)
 {
 #if defined(FEATURE_LUA)
 	// if it's not loaded, don't take measures to unload it
-	if(m_State != STATE_LOADED)
+	if(m_State == STATE_LOADED)
 	{
-		Reset(error);
-		return;
+		// this can't happen. It just... can't!
+		dbg_assert(m_pLuaState != 0, "Something went fatally wrong! Active luafile has no state?!");
+
+
+		// unhook the script from the client
+		Lua()->StopReceiveEvents(this);
+
+		// exit fullscreen if necessary
+		if(Lua()->GetFullscreenedScript() == this)
+			Lua()->ExitFullscreen();
+
+		// unhook from debugging
+		if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
+			CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
+
+		try
+		{
+			LuaRef func = GetFunc("OnScriptUnload");
+			if(func.cast<bool>())
+				func();
+		}
+		catch(std::exception& e)
+		{
+			m_pLua->HandleException(e, this);
+		}
+
+		// tell everyone
+		CLua::m_pCGameClient->OnLuaScriptUnload(this);
+
+		lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
+	}
+	else if(m_State == STATE_IDLE)
+	{
+		dbg_assert_strict(m_pLuaState == 0, "existing lua state although the script has not been loaded?");
 	}
 
-	// this can't happen. It just... can't!
-	dbg_assert(m_pLuaState != 0, "Something went fatally wrong! Active luafile has no state?!");
-
-
-	// unhook the script from the client
-	Lua()->StopReceiveEvents(this);
-
-	// exit fullscreen if necessary
-	if(Lua()->GetFullscreenedScript() == this)
-		Lua()->ExitFullscreen();
-
-	// unhook from debugging
-	if(CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild == m_pLuaState)
-		CLua::m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = NULL;
-
-	try
-	{
-		LuaRef func = GetFunc("OnScriptUnload");
-		if(func.cast<bool>())
-			func();
-	}
-	catch(std::exception &e)
-	{
-		m_pLua->HandleException(e, this);
-	}
-
-	// tell everyone
-	CLua::m_pCGameClient->OnLuaScriptUnload(this);
-
-	lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
-
-	// we do not close the lua state because there might be LuaRefs left that use it
+	// we do not close the lua state because there might be LuaRefs left that use it.
 	// as these LuaRefs use the lua state in their dtor, they'd crash us if we where to close it here.
 	m_pLuaState = NULL;
 
@@ -218,7 +219,7 @@ void CLuaFile::Init()
 	// if we errored so far, don't go any further
 	if(m_State == STATE_ERROR)
 	{
-		Reset(true);
+		Unload(true);
 		return;
 	}
 
