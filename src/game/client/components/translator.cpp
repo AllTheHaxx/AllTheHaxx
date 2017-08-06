@@ -44,6 +44,7 @@ void CTranslator::TranslationWorker(void *pUser)
 		if(pTrans->m_Queue.size() > 0)
 		{
 			CTransEntry Entry = pTrans->m_Queue.front();
+			pTrans->m_Queue.erase(pTrans->m_Queue.begin());
 
 			char aPost[2048*8];
 			char aTranslated[1024*8];
@@ -62,23 +63,21 @@ void CTranslator::TranslationWorker(void *pUser)
 			const char *pResult = jsonValue["responseData"]["translatedText"];
 			if(str_length(pResult) == 0)
 			{
-				dbg_msg("trans", "got not text");
+				dbg_msg("trans/warn", "failed to parse response\n%s", Response.c_str());
 				continue;
 			}
 			str_copy(aTranslated, pResult, sizeof(aTranslated));
 			if(str_comp_nocase(Entry.m_Text, aTranslated) != 0)
 			{
-				dbg_msg("trans", "translated '%s' from '%s' to '%s', result: '%s'", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang, aTranslated);
+				if(g_Config.m_Debug)
+					dbg_msg("trans", "translated '%s' from '%s' to '%s', result: '%s'", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang, aTranslated);
 
 				// put the result to the queue
 				str_copy(Entry.m_Text, aTranslated, sizeof(Entry.m_Text));
 				pTrans->m_Results.push_back(Entry);
 			}
 			else
-				dbg_msg("trans", "translating '%s' from '%s' to '%s' failed", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang);
-
-			// done, remove the element from our queue
-			pTrans->m_Queue.erase(pTrans->m_Queue.begin());
+				dbg_msg("trans/warn", "translating '%s' from '%s' to '%s' failed", Entry.m_Text, Entry.m_SrcLang, Entry.m_DstLang);
 		}
 
 		thread_sleep(50);

@@ -2210,6 +2210,9 @@ void str_copy(char *dst, const char *src, int dst_size)
 
 int str_length(const char *str)
 {
+#ifndef CONF_DEBUG
+	if(!str) return 0;
+#endif
 	return (int)strlen(str);
 }
 
