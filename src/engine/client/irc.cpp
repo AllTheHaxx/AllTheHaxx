@@ -1192,6 +1192,21 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 	}
 }
 
+void CIRC::SendMsgLua(const char *to, const char *msg)
+{
+	int Type = MSG_TYPE_NORMAL;
+	if(str_comp_nocase_num(msg, "/me", 3) == 0)
+	{
+		Type = MSG_TYPE_ACTION;
+		if(str_length(msg) == 3)
+			msg = " ";
+		else
+			msg += 4;
+	}
+	SendMsg(to, msg, Type);
+}
+
+
 void CIRC::SendRaw(const char *fmt, ...)
 {
 	if (!fmt || fmt[0] == 0)

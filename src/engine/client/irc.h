@@ -53,10 +53,12 @@ public:
 	void SetMode(const char *mode, const char *to);
 	void SetNick(const char *nick);
 	const char* GetNick() { return m_Nick.c_str(); }
+	const std::string &GetNickStd() const { return m_Nick; }
 	int NumUnreadMessages(int *pArray = 0);
 	int GetMsgType(const char *msg);
 
 	void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL);
+	void SendMsgLua(const char *to, const char *msg);
 	void SendRaw(const char *fmt, ...)
 	#if defined(DO_NOT_COMPILE_THIS_CODE) && (defined(__GNUC__) || defined(__clang__))
 	__attribute__ ((format (printf, 1, 2))) /* Warn if you specify wrong arguments in printf format string */
@@ -73,7 +75,6 @@ public:
 
 	void ExecuteCommand(const char *cmd, char *params);
 
-	std::string m_Nick;
 
 protected:
 	class IGraphics *m_pGraphics;
@@ -85,6 +86,7 @@ protected:
 	NETSOCKET m_Socket;
 	NETADDR m_HostAddress;
 
+	std::string m_Nick;
 	char m_CmdToken[12];
 
 	array<CIRCCom*> m_apIRCComs;

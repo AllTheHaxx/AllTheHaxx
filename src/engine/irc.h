@@ -168,10 +168,12 @@ public:
     virtual void SetMode(const char *mode, const char *to) = 0;
     virtual void SetNick(const char *nick) = 0;
     virtual const char* GetNick() = 0;
-    virtual int NumUnreadMessages(int *pArray = 0) = 0;
+	virtual const std::string &GetNickStd() const = 0;
+	virtual int NumUnreadMessages(int *pArray = 0) = 0;
     virtual int GetMsgType(const char *msg) = 0;
 
     virtual void SendMsg(const char *to, const char *msg, int type = MSG_TYPE_NORMAL) = 0;
+    virtual void SendMsgLua(const char *to, const char *msg) = 0;
     virtual void SendRaw(const char *fmt, ...) = 0;
     virtual void SendGetServer(const char *to) = 0;
     virtual void SendVersion(const char *to) = 0;

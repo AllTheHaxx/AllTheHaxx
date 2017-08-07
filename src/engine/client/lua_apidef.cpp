@@ -240,8 +240,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		/// Game.IRC
 		.beginClass<IIRC>("IIRC")
-			.addFunction("SendMsg", &IIRC::SendMsg)
+			.addFunction("SendMsg", &IIRC::SendMsgLua)
 			.addFunction("JoinTo", &IIRC::JoinTo)
+			.addFunction("GetNick", &IIRC::GetNickStd)
 		.endClass()
 
 		/// Game.Emote

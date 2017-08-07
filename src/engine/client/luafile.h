@@ -30,7 +30,9 @@ public:
 	{
 		STATE_ERROR=-1,
 		STATE_IDLE,
-		STATE_LOADED
+		STATE_LOADED,
+
+		STATE_CONSOLE
 	};
 
 	enum
