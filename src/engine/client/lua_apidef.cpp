@@ -258,6 +258,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SetChannel", &ISound::SetChannel)
 			.addFunction("LoadSoundOpus", &ISound::LoadOpus)
 			.addFunction("LoadSoundWave", &ISound::LoadWV)
+			.addFunction("LoadSoundOpusMemory", &ISound::LoadOpusFromMem)
+			.addFunction("LoadSoundWaveMemory", &ISound::LoadWV)
+			.addFunction("UnloadSound", &ISound::UnloadSample)
+			.addFunction("MaxDuration", &ISound::GetSampleDuration)
 		.endClass()
 
 		/// Game.Emote
