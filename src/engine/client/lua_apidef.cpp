@@ -15,6 +15,7 @@
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/irc.h>
+#include <engine/sound.h>
 #include <engine/serverbrowser.h>
 #include <engine/curlwrapper.h>
 #include <engine/textrender.h>
@@ -155,6 +156,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("FontSize", &CTextCursor::m_FontSize)
 		.endClass()
 
+		.beginClass< ISound::CVoiceHandle >("VoiceHandle")
+			.addConstructor <void (*) ()> ()
+		.endClass()
+
 
 		// ------------------------------ ICLIENT ------------------------------
 
@@ -243,6 +248,16 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SendMsg", &IIRC::SendMsgLua)
 			.addFunction("JoinTo", &IIRC::JoinTo)
 			.addFunction("GetNick", &IIRC::GetNickStd)
+		.endClass()
+
+		/// Game.Sound
+		.beginClass<ISound>("ISound")
+			.addFunction("PlaySound", &ISound::Play)
+			.addFunction("StopSound", &ISound::Stop)
+			.addFunction("StopAllSounds", &ISound::StopAll)
+			.addFunction("SetChannel", &ISound::SetChannel)
+			.addFunction("LoadSoundOpus", &ISound::LoadOpus)
+			.addFunction("LoadSoundWave", &ISound::LoadWV)
 		.endClass()
 
 		/// Game.Emote
@@ -561,6 +576,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
 			.addVariable("IRC", &CLua::m_pCGameClient->m_pIRC, false)
+			.addVariable("Sound", &CLua::m_pCGameClient->m_pSound, false)
 			.addVariable("Menus", &CLua::m_pCGameClient->m_pMenus, false)
 			.addVariable("Voting", &CLua::m_pCGameClient->m_pVoting, false)
 			.addVariable("SpecInfo", &CLua::m_pCGameClient->m_Snap.m_SpecInfo, false)
