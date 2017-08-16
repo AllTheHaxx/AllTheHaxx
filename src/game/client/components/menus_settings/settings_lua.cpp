@@ -197,6 +197,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		static CButtonContainer pIDButtonToggleScript[MAX_SCRIPTS];
 		static CButtonContainer pIDButtonPermissions[MAX_SCRIPTS];
 		static CButtonContainer pIDButtonAutoload[MAX_SCRIPTS];
+		static CButtonContainer pIDButtonFavorite[MAX_SCRIPTS];
 
 		static CButtonContainer s_Listbox;
 		CUIRect ListBox = ListView;
@@ -239,7 +240,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 
 			if(Item.m_Visible)
 			{
-				CUIRect Label, Buttons, Button;
+				CUIRect Label, Buttons, Button, Fav, Empty;
 
 				Item.m_Rect.HMargin(2.5f, &Item.m_Rect);
 				Item.m_Rect.HSplitTop(5.0f, 0, &Label);
@@ -266,6 +267,9 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					// permission indicator
 					Item.m_Rect.VSplitRight(Item.m_Rect.h/2.0f, &Item.m_Rect, &Buttons);
 					Buttons.HSplitMid(&Buttons, &Button); // top: permission indicator, bottom: autoload checkbox
+					Item.m_Rect.VSplitRight(Item.m_Rect.h/2.0f, &Item.m_Rect, &Fav);
+					Fav.HSplitMid(&Empty, &Fav); // top: empty, bottom: favorite checkbox
+					RenderTools()->DrawUIRect(&Empty, vec4(0,0,0,0.25f), 0, 0); // Set the empty box to our Color
 
 					int PermissionFlags = L->GetPermissionFlags();
 					char aTooltip[1024] = {0};
@@ -295,6 +299,15 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 							Client()->Lua()->AddAutoload(L);
 						else
 							Client()->Lua()->RemoveAutoload(L);
+					}
+					if(DoButton_CheckBox(&pIDButtonFavorite[i], "", L->GetScriptIsFavorite(), &Fav, Localize("Favorite"), 0))
+					{
+						bool NewVal = !L->GetScriptIsFavorite();
+						L->SetScriptIsFavorite(NewVal);
+						if(NewVal)
+							Client()->Lua()->AddFavorite(L);
+						else
+							Client()->Lua()->RemoveFavorite(L);
 					}
 
 

@@ -53,6 +53,7 @@ class CLua
 	array<CLuaFile*> m_apLuaFiles;
 	array<CLuaFile*> m_apActiveScripts;
 	array<std::string> m_aAutoloadFiles;
+	array<std::string> m_aFavoriteFiles;
 	CLuaFile *m_pFullscreenedScript;
 
 public:
@@ -96,6 +97,8 @@ public:
 
 	void AddAutoload(const CLuaFile *pLF);
 	void RemoveAutoload(const CLuaFile *pLF);
+	void AddFavorite(const CLuaFile *pLF);
+	void RemoveFavorite(const CLuaFile *pLF);
 	void ScriptEnterFullscreen(CLuaFile *pLF);
 	void ExitFullscreen();
 	CLuaFile *GetFullscreenedScript() const { return m_pFullscreenedScript; }

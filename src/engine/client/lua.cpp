@@ -33,6 +33,9 @@ CLua::CLua()
 	char *pQueryBuf = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS lua_autoloads (path TEXT NOT NULL UNIQUE);");
 	CQuery *pQuery = new CQuery(pQueryBuf);
 	m_pDatabase->InsertQuery(pQuery);
+	char *pQueryBuf2 = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS lua_favorites (path TEXT NOT NULL UNIQUE);");
+	CQuery *pQuery2 = new CQuery(pQueryBuf2);
+	m_pDatabase->InsertQuery(pQuery2);
 }
 
 CLua::~CLua()
@@ -48,6 +51,7 @@ void CLua::Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole)
 	m_pStorage = pStorage;
 	m_pConsole = pConsole;
 	m_aAutoloadFiles.clear();
+	m_aFavoriteFiles.clear();
 
 	//LoadFolder(); // we can't do it that early
 }
@@ -70,7 +74,20 @@ void CLua::SortLuaFiles()
 	if(NUM < 2)
 		return;
 
-	for(int curr = 0; curr < NUM-1; curr++)
+	int FavoriteNum = 0;
+	for(int f = 0; f < NUM-1; f++) // Favorite add
+	{
+		CLuaFile *L = Client()->Lua()->GetLuaFiles()[f];
+		if (L->GetScriptIsFavorite()){
+			FavoriteNum++;
+		}
+	}
+
+	if(g_Config.m_Debug)
+		dbg_msg("Lua", "there are currently %d Fav scripts", FavoriteNum);
+
+
+	for(int curr = 0; curr < NUM-1; curr++) // Normal Sort.
 	{
 		int minIndex = curr;
 		for(int i = curr + 1; i < NUM; i++)
@@ -78,7 +95,7 @@ void CLua::SortLuaFiles()
 			int c = 4;
 			for(; str_uppercase(m_apLuaFiles[i]->GetFilename()[c]) == str_uppercase(m_apLuaFiles[minIndex]->GetFilename()[c]); c++);
 			if(str_uppercase(m_apLuaFiles[i]->GetFilename()[c]) < str_uppercase(m_apLuaFiles[minIndex]->GetFilename()[c]))
-				minIndex = i;
+				minIndex = i; // Found file with same start but not same ending
 		}
 
 		if(minIndex != curr)
@@ -86,6 +103,37 @@ void CLua::SortLuaFiles()
 			CLuaFile* temp = m_apLuaFiles[curr];
 			m_apLuaFiles[curr] = m_apLuaFiles[minIndex];
 			m_apLuaFiles[minIndex] = temp;
+		}
+	}
+
+	int FavSort = 0;
+	for(int curr = 0; curr < NUM-1; curr++) // Favorite sort
+	{
+		CLuaFile *L = Client()->Lua()->GetLuaFiles()[curr];
+		if (L->GetScriptIsFavorite()){
+			int minIndex = FavSort;
+
+			CLuaFile* temp = m_apLuaFiles[curr]; // Currently Script position
+			if(g_Config.m_Debug)
+				dbg_msg("Lua", "Saved %s as temp file",m_apLuaFiles[curr]->GetFilename());
+			//m_apLuaFiles[curr] = m_apLuaFiles[minIndex]; // File which we replace, better if we do it in a loop
+			int CurFile = curr;
+			
+			for (int i = curr; i > FavSort;i--) // Loop all needed Scripts backwards to increase their pos by 1
+			{
+				if(g_Config.m_Debug)
+					dbg_msg("Lua", "Setted %s",m_apLuaFiles[i]->GetFilename());
+				//CLuaFile* temp = m_apLuaFiles[i+1];
+				m_apLuaFiles[i] = m_apLuaFiles[i-1];
+				//m_apLuaFiles[i] = temp;
+				CurFile = i;
+			}
+			//m_apLuaFiles[curr] = m_apLuaFiles[curr-1];
+			FavSort++;
+			m_apLuaFiles[minIndex] = temp; // Set our file here!
+			if(g_Config.m_Debug)
+				dbg_msg("Lua", "Setted to place %d",minIndex);
+
 		}
 	}
 }
@@ -363,6 +411,26 @@ void CLua::RemoveAutoload(const CLuaFile *pLF)
 	m_pDatabase->InsertQuery(
 			new CQuery(
 					sqlite3_mprintf("DELETE FROM lua_autoloads WHERE path = '%q';", pLF->GetFilename())
+			)
+	);
+}
+
+void CLua::AddFavorite(const CLuaFile *pLF)
+{
+	m_aFavoriteFiles.add(std::string(pLF->GetFilename()));
+	m_pDatabase->InsertQuery(
+			new CQuery(
+					sqlite3_mprintf("INSERT OR IGNORE INTO lua_favorites ('path') VALUES ('%q');", pLF->GetFilename())
+			)
+	);
+}
+
+void CLua::RemoveFavorite(const CLuaFile *pLF)
+{
+	m_aFavoriteFiles.remove_fast(std::string(pLF->GetFilename()));
+	m_pDatabase->InsertQuery(
+			new CQuery(
+					sqlite3_mprintf("DELETE FROM lua_favorites WHERE path = '%q';", pLF->GetFilename())
 			)
 	);
 }

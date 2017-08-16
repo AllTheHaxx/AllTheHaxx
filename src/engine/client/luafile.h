@@ -61,6 +61,7 @@ private:
 	char m_aScriptInfo[128];
 	bool m_ScriptHasSettingsPage;
 	bool m_ScriptAutoload;
+	bool m_ScriptFavorite;
 
 	void Init(); // starts the script
 	void Unload(bool error = false); // stops the script
@@ -86,6 +87,8 @@ public:
 	bool GetScriptHasSettings() const { return m_ScriptHasSettingsPage; }
 	bool GetScriptIsAutoload() const { return m_ScriptAutoload; }
 	bool SetScriptIsAutoload(bool NewVal) { bool ret = m_ScriptAutoload; m_ScriptAutoload = NewVal; return ret; }
+	bool GetScriptIsFavorite() const { return m_ScriptFavorite; }
+	bool SetScriptIsFavorite(bool NewVal) { bool ret = m_ScriptFavorite; m_ScriptFavorite = NewVal; return ret; }
 	lua_State *L() const { return m_pLuaState; }
 
 	CLua *Lua() const { return m_pLua; }
