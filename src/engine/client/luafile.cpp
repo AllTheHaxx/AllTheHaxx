@@ -15,7 +15,7 @@
 #include "luabinding.h"
 
 
-CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
+CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload, bool Favorite) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload), m_ScriptFavorite(Favorite)
 {
 	m_pLuaState = NULL;
 	m_pLuaStateContainer = NULL;

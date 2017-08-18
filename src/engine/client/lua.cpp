@@ -169,10 +169,15 @@ void CLua::AddUserscript(const char *pFilename)
 		if(m_aAutoloadFiles[i] == file)
 			Autoload = true;
 
+	bool Favorite = false;
+	for (int i = 0; i < m_aFavoriteFiles.size(); i++)
+		if(m_aFavoriteFiles[i] == file)
+			Favorite = true;
+
 	if(g_Config.m_Debug)
 		dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
 
-	int index = m_apLuaFiles.add(new CLuaFile(this, file, Autoload));
+	int index = m_apLuaFiles.add(new CLuaFile(this, file, Autoload, Favorite));
 	if(Autoload)
 		m_apLuaFiles[index]->Activate();
 #endif
@@ -191,9 +196,19 @@ void CLua::LoadFolder()
 						&m_aAutoloadFiles
 				)
 		);
+		dbg_msg("Lua", "DENNIS A FILE AUOTO! %d",m_aFavoriteFiles.size());
+	}
+	{
+		m_aFavoriteFiles.clear();
+		m_pDatabase->InsertQuery(
+				new CQueryAutoloads( /*Lol, just steal this :3*/
+						sqlite3_mprintf("SELECT * FROM lua_favorites;"),
+						&m_aFavoriteFiles
+				)
+		);
+		dbg_msg("Lua", "DENNIS A FILE! %d",m_aFavoriteFiles.size());
 	}
 	m_pDatabase->Flush();
-
 	LoadFolder("lua");
 }
 

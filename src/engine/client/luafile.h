@@ -67,7 +67,7 @@ private:
 	void Unload(bool error = false); // stops the script
 
 public:
-	CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload);
+	CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload, bool Favorite);
 	~CLuaFile();
 
 	// public passthoughs

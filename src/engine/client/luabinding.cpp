@@ -31,7 +31,7 @@ CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	if(L == pGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState)
 	{
-		static CLuaFile ConLuaFile(pGameClient->Client()->Lua(), "[console]", false);
+		static CLuaFile ConLuaFile(pGameClient->Client()->Lua(), "[console]", false, false);
 		ConLuaFile.m_pLuaState = L;
 		ConLuaFile.m_State = CLuaFile::STATE_CONSOLE;
 		return &ConLuaFile;
