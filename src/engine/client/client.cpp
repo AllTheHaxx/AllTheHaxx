@@ -2381,6 +2381,14 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					}
 
 					// ack snapshot
+					if(g_Config.m_ClFakePing != 0)
+					{
+						GameTick = (GameTick + g_Config.m_ClAveragePing*2/40) - g_Config.m_ClFakePing*2/40;
+						if(GameTick % 10 == 1 or GameTick % 10 == 3 or GameTick % 10 == 5 or GameTick % 10 == 7 or GameTick % 10 == 9)
+							GameTick = GameTick-1; // GameTick must end with 0,2,4,6,8 otherwise its freezes
+					}
+					if(g_Config.m_ClFreezePing == 1)
+						GameTick = GameTick+1; // no matter if we make +1 or -1. Ping freezes with the ending of 1,3,5,7 or 9
 					m_AckGameTick[g_Config.m_ClDummy] = GameTick;
 				}
 			}

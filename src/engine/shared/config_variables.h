@@ -431,6 +431,11 @@ MACRO_CONFIG_INT(ClDemoSliceBegin, cl_demo_slice_begin, -1, 0, 0, CFGFLAG_SAVE|C
 MACRO_CONFIG_INT(ClDemoSliceEnd, cl_demo_slice_end, -1, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "End marker for demo slice")
 MACRO_CONFIG_INT(ClDemoShowSpeed, cl_demo_show_speed, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show speed meter on change")
 
+// fake ping
+MACRO_CONFIG_INT(ClFakePing, cl_fake_ping, 0, 0, 1000, CFGFLAG_CLIENT, "Fake ping. (0 = disabled)")
+MACRO_CONFIG_INT(ClAveragePing, cl_average_ping, 0, 0, 1000, CFGFLAG_CLIENT, "Average ping.")
+MACRO_CONFIG_INT(ClFreezePing, cl_freeze_ping, 0, 0, 1, CFGFLAG_CLIENT, "Freeze your ping. (0 = disabled, 1 = enabled )")
+
 
 #ifdef undef1
 #undef MACRO_CONFIG_INT
