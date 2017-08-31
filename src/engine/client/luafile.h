@@ -37,12 +37,13 @@ public:
 
 	enum
 	{
-		PERMISSION_IO		= 1 << 0,
-		PERMISSION_DEBUG	= 1 << 1,
-		PERMISSION_FFI		= 1 << 2,
-		PERMISSION_OS		= 1 << 3,
-		PERMISSION_PACKAGE	= 1 << 4,
-		NUM_PERMISSIONS
+		PERMISSION_IO         = 1 << 0,
+		PERMISSION_DEBUG      = 1 << 1,
+		PERMISSION_FFI        = 1 << 2,
+		PERMISSION_OS         = 1 << 3,
+		PERMISSION_PACKAGE    = 1 << 4,
+		PERMISSION_FILESYSTEM = 1 << 5,
+		PERMISSION_GODMODE    = 1 << 30
 	};
 
 	const char *m_pErrorStr;

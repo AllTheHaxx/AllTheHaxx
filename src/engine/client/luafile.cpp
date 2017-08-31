@@ -50,6 +50,12 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0 || str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0) // clc's and config files won't have permission flags!
 		return;
 
+	if(str_comp_num(pFilename, "data/lua/Official/", 18) == 0)
+	{
+		m_PermissionFlags = PERMISSION_GODMODE;
+		return;
+	}
+
 	std::ifstream f(pFilename);
 	std::string line;
 	bool searching = true;
@@ -177,16 +183,23 @@ void CLuaFile::OpenLua()
 void CLuaFile::ApplyPermissions(int Flags)
 {
 #if defined(FEATURE_LUA)
-	if(Flags&PERMISSION_IO)
-		luaopen_io(m_pLuaState);	// input/output of files
-	//if(Flags&PERMISSION_DEBUG) XXX
-	luaopen_debug(m_pLuaState);	// debug stuff for whatever... can be removed in further patches
-	if(Flags&PERMISSION_FFI)
-		luaopen_ffi(m_pLuaState);	// register and write own C-Functions and call them in lua (whoever may need that...)
-	//if(Flags&PERMISSION_OS) XXX
-	luaopen_os(m_pLuaState);	// evil
-	if(Flags&PERMISSION_PACKAGE)
-		luaopen_package(m_pLuaState); //used for modules etc... not sure whether we should load this
+	if(Flags&PERMISSION_GODMODE)
+	{
+		luaL_openlibs(m_pLuaState);
+	}
+	else
+	{
+		if(Flags & PERMISSION_IO)
+			luaopen_io(m_pLuaState); // input/output of files
+		if(Flags&PERMISSION_DEBUG)
+			luaopen_debug(m_pLuaState); // debug stuff
+		if(Flags & PERMISSION_FFI)
+			luaopen_ffi(m_pLuaState); // register and write own C-Functions and call them in lua (whoever may need that...)
+		if(Flags&PERMISSION_OS)
+			luaopen_os(m_pLuaState); // access to various operating system function
+		if(Flags & PERMISSION_PACKAGE)
+			luaopen_package(m_pLuaState); // used for modules etc... not sure whether we should load this
+	}
 #endif
 
 }
@@ -219,7 +232,7 @@ void CLuaFile::Init()
 	// if we errored so far, don't go any further
 	if(m_State == STATE_ERROR)
 	{
-		Unload(true);
+		Unload(true); // after OpenLua() has been called, Unload() must be used instead of Reset()!
 		return;
 	}
 
@@ -380,16 +393,16 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	LoadPermissionFlags(pFilename);
 	ApplyPermissions(m_PermissionFlags & ~BeforePermissions); // only apply those that are new
 
-	if(!Import)
+	if(!Import && !(m_PermissionFlags & PERMISSION_GODMODE))
 	{
 		// kill everything malicious
 		const char *const s_apBlacklist[] = {
-				"dofile"
-				,"os.exit"
+				"os.exit"
 				,"os.execute"
 				,"os.rename"
 				,"os.remove"
-				,"os.setlocal"
+				,"os.setlocale"
+				,"os.getenv"
 				,"require"
 				,"module"
 				,"load"

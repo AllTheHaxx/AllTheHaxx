@@ -271,6 +271,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					char aTooltip[1024] = {0};
 					if(PermissionFlags == 0)
 						str_copyb(aTooltip, Localize("This script has no additional permissions and is thus considered safe."));
+					else if(PermissionFlags == CLuaFile::PERMISSION_GODMODE)
+						str_copyb(aTooltip, Localize("This script is an official script and completely trustworthy."));
 					else
 					{
 						str_copyb(aTooltip, Localize("This script has the following additional permission:"));
@@ -282,7 +284,10 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						PERM_STR(PACKAGE, Localize("PACKAGE (Modules)"))
 #undef PERM_STR
 					}
-					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Buttons, aTooltip, 0, vec4(PermissionFlags > 0 ? .7f : .2f, PermissionFlags > 0 ? .2f : .7f, .2f, .8f)))
+					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Buttons, aTooltip, 0,
+									 PermissionFlags == CLuaFile::PERMISSION_GODMODE ? vec4(0.2f, 0.7f, 0.2f, 0.8f) :
+									 PermissionFlags == 0 ? vec4(0.7f, 0.7f, 0.2f, 0.8f) :
+									 vec4(0.7f, 0.2f, 0.2f, 0.8f)))
 						dbg_msg("lua/permissions", "'%s' | %i (%i)", L->GetFilename(), PermissionFlags, L->GetPermissionFlags());
 
 

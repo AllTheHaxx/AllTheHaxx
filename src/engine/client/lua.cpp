@@ -154,42 +154,30 @@ void CLua::LoadFolder(const char *pFolder)
 	CALLSTACK_ADD();
 
 #if defined(FEATURE_LUA)
-	//char FullDir[256];
-	//str_format(FullDir, sizeof(FullDir), "lua");
 
 	dbg_msg("Lua", "Loading Folder '%s'", pFolder);
-	CLua::LuaLoadHelper * pParams = new CLua::LuaLoadHelper;
-	pParams->pLua = this;
-	pParams->pString = pFolder;
-
-	m_pStorage->ListDirectory(IStorageTW::TYPE_ALL, pFolder, LoadFolderCallback, pParams);
-
-	delete pParams;
-
+	m_pStorage->ListDirectoryVerbose(IStorageTW::TYPE_ALL, pFolder, LoadFolderCallback, this);
 	SortLuaFiles();
+
 #endif
 }
 
-int CLua::LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser)
+int CLua::LoadFolderCallback(const char *pName, const char *pFullPath, int IsDir, int DirType, void *pUser)
 {
 	CALLSTACK_ADD();
 
 	if(pName[0] == '.')
 		return 0;
 
-	LuaLoadHelper *pParams = (LuaLoadHelper *)pUser;
+	CLua *pSelf = (CLua*)pUser;
 
-	CLua *pSelf = pParams->pLua;
-	const char *pFullDir = pParams->pString;
-
-	char File[64];
-	str_format(File, sizeof(File), "%s/%s", pFullDir, pName);
-	//dbg_msg("Lua", "-> Found File %s", File);
+	if(g_Config.m_Debug >= 2)
+		dbg_msg("lua/debug", "found: '%s'", pFullPath);
 
 	if(IsDir)
-		pParams->pLua->LoadFolder(File);
+		pSelf->LoadFolder(pFullPath);
 	else
-		pSelf->AddUserscript(File);
+		pSelf->AddUserscript(pFullPath);
 	return 0;
 }
 

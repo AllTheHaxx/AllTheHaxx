@@ -102,18 +102,10 @@ public:
 
 	IStorageTW *Storage() const { return m_pStorage; }
 
-	struct LuaLoadHelper
-	{
-		MACRO_ALLOC_HEAP()
-	public:
-		CLua * pLua;
-		const char * pString;
-	};
-
 	static void DbgPrintLuaStack(lua_State *L, const char *pNote = 0);
 
 private:
-	static int LoadFolderCallback(const char *pName, int IsDir, int DirType, void *pUser);
+	static int LoadFolderCallback(const char *pName, const char *pFullPath, int IsDir, int DirType, void *pUser);
 
 };
 

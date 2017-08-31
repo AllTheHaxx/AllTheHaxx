@@ -36,6 +36,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	lua_register(L, "ScriptPath", CLuaBinding::LuaScriptPath);
 	lua_register(L, "StrIsNetAddr", CLuaBinding::LuaStrIsNetAddr);
 
+	// re-bind common functions
+	luaL_dostring(L, "dofile = Import");
+
+
 	getGlobalNamespace(L)
 
 		// client namespace XXX: cleanup
