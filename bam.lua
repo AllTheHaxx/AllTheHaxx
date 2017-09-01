@@ -451,8 +451,8 @@ function build(settings)
 		engine, client, game_editor, zlib, pnglite, wavpack, aes128,
 		client_link_other, client_osxlaunch, jsonparser, jsonbuilder, libwebsockets, md5, client_notification, sqlite3, astar_jps)
 
-	server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
-		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)
+	--[[server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
+		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)]]
 
 	serverlaunch = {}
 	if platform == "macosx" then
@@ -471,11 +471,11 @@ function build(settings)
 	-- make targets
 	c = PseudoTarget("client".."_"..settings.config_name, client_exe, client_depends)
 	if string.find(settings.config_name, "sql") then
-		s = PseudoTarget("server".."_"..settings.config_name, server_exe, serverlaunch, server_sql_depends)
+		--s = PseudoTarget("server".."_"..settings.config_name, server_exe, serverlaunch, server_sql_depends)
 	else
-		s = PseudoTarget("server".."_"..settings.config_name, server_exe, serverlaunch)
+		--s = PseudoTarget("server".."_"..settings.config_name, server_exe, serverlaunch)
 	end
-	g = PseudoTarget("game".."_"..settings.config_name, client_exe, server_exe)
+	g = PseudoTarget("game".."_"..settings.config_name, client_exe--[[, server_exe]])
 
 	v = PseudoTarget("versionserver".."_"..settings.config_name, versionserver_exe)
 	m = PseudoTarget("masterserver".."_"..settings.config_name, masterserver_exe)
@@ -628,60 +628,60 @@ if platform == "macosx" then
 		if arch == "ia32" then
 			PseudoTarget("release", ppc_r, x86_r)
 			PseudoTarget("debug", ppc_d, x86_d)
-			PseudoTarget("server_release", "server_release_ppc", "server_release_x86")
-			PseudoTarget("server_debug", "server_debug_ppc", "server_debug_x86")
+			--PseudoTarget("server_release", "server_release_ppc", "server_release_x86")
+			--seudoTarget("server_debug", "server_debug_ppc", "server_debug_x86")
 			PseudoTarget("client_release", "client_release_ppc", "client_release_x86")
 			PseudoTarget("client_debug", "client_debug_ppc", "client_debug_x86")
 			PseudoTarget("sql_release", sql_ppc_r, sql_x86_r)
 			PseudoTarget("sql_debug", sql_ppc_d, sql_x86_d)
-			PseudoTarget("server_sql_release", "server_sql_release_ppc", "server_sql_release_x86")
-			PseudoTarget("server_sql_debug", "server_sql_debug_ppc", "server_sql_debug_x86")
+			--PseudoTarget("server_sql_release", "server_sql_release_ppc", "server_sql_release_x86")
+			--PseudoTarget("server_sql_debug", "server_sql_debug_ppc", "server_sql_debug_x86")
 		elseif arch == "amd64" then
 			PseudoTarget("release", ppc_r, x86_r, x86_64_r)
 			PseudoTarget("debug", ppc_d, x86_d, x86_64_d)
-			PseudoTarget("server_release", "server_release_ppc", "server_release_x86", "server_release_x86_64")
-			PseudoTarget("server_debug", "server_debug_ppc", "server_debug_x86", "server_debug_x86_64")
+			--PseudoTarget("server_release", "server_release_ppc", "server_release_x86", "server_release_x86_64")
+			--PseudoTarget("server_debug", "server_debug_ppc", "server_debug_x86", "server_debug_x86_64")
 			PseudoTarget("client_release", "client_release_ppc", "client_release_x86", "client_release_x86_64")
 			PseudoTarget("client_debug", "client_debug_ppc", "client_debug_x86", "client_debug_x86_64")
 			PseudoTarget("sql_release", sql_ppc_r, sql_x86_r, sql_x86_64_r)
 			PseudoTarget("sql_debug", sql_ppc_d, sql_x86_d, sql_x86_64_d)
-			PseudoTarget("server_sql_release", "server_sql_release_ppc", "server_sql_release_x86", "server_sql_release_x86_64")
-			PseudoTarget("server_sql_debug", "server_sql_debug_ppc", "server_sql_debug_x86", "server_sql_debug_x86_64")
+			--PseudoTarget("server_sql_release", "server_sql_release_ppc", "server_sql_release_x86", "server_sql_release_x86_64")
+			--PseudoTarget("server_sql_debug", "server_sql_debug_ppc", "server_sql_debug_x86", "server_sql_debug_x86_64")
 		else
 			PseudoTarget("release", ppc_r)
 			PseudoTarget("debug", ppc_d)
-			PseudoTarget("server_release", "server_release_ppc")
-			PseudoTarget("server_debug", "server_debug_ppc")
+			--PseudoTarget("server_release", "server_release_ppc")
+			--PseudoTarget("server_debug", "server_debug_ppc")
 			PseudoTarget("client_release", "client_release_ppc")
 			PseudoTarget("client_debug", "client_debug_ppc")
 			PseudoTarget("sql_release", sql_ppc_r)
 			PseudoTarget("sql_debug", sql_ppc_d)
-			PseudoTarget("server_sql_release", "server_sql_release_ppc")
-			PseudoTarget("server_sql_debug", "server_sql_debug_ppc")
+			--PseudoTarget("server_sql_release", "server_sql_release_ppc")
+			--PseudoTarget("server_sql_debug", "server_sql_debug_ppc")
 		end
 	else
 		if arch == "ia32" then
 			PseudoTarget("release", x86_r)
 			PseudoTarget("debug", x86_d)
-			PseudoTarget("server_release", "server_release_x86")
-			PseudoTarget("server_debug", "server_debug_x86")
+			--PseudoTarget("server_release", "server_release_x86")
+			--PseudoTarget("server_debug", "server_debug_x86")
 			PseudoTarget("client_release", "client_release_x86")
 			PseudoTarget("client_debug", "client_debug_x86")
 			PseudoTarget("sql_release", sql_x86_r)
 			PseudoTarget("sql_debug", sql_x86_d)
-			PseudoTarget("server_sql_release", "server_sql_release_x86")
-			PseudoTarget("server_sql_debug", "server_sql_debug_x86")
+			--PseudoTarget("server_sql_release", "server_sql_release_x86")
+			--PseudoTarget("server_sql_debug", "server_sql_debug_x86")
 		elseif arch == "amd64" then
 			PseudoTarget("release", x86_r, x86_64_r)
 			PseudoTarget("debug", x86_d, x86_64_d)
-			PseudoTarget("server_release", "server_release_x86", "server_release_x86_64")
-			PseudoTarget("server_debug", "server_debug_x86", "server_debug_x86_64")
+			--PseudoTarget("server_release", "server_release_x86", "server_release_x86_64")
+			--PseudoTarget("server_debug", "server_debug_x86", "server_debug_x86_64")
 			PseudoTarget("client_release", "client_release_x86", "client_release_x86_64")
 			PseudoTarget("client_debug", "client_debug_x86", "client_debug_x86_64")
 			PseudoTarget("sql_release", sql_x86_r, sql_x86_64_r)
 			PseudoTarget("sql_debug", sql_x86_d, sql_x86_64_d)
-			PseudoTarget("server_sql_release", "server_sql_release_x86", "server_sql_release_x86_64")
-			PseudoTarget("server_sql_debug", "server_sql_debug_x86", "server_sql_debug_x86_64")
+			--PseudoTarget("server_sql_release", "server_sql_release_x86", "server_sql_release_x86_64")
+			--PseudoTarget("server_sql_debug", "server_sql_debug_x86", "server_sql_debug_x86_64")
 		end
 	end
 else
