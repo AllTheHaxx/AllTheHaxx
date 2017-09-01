@@ -264,10 +264,8 @@ set(SOURCE_FILES
         src/engine/external/json-builder/json-builder.h
         src/engine/external/pnglite/pnglite.c
         src/engine/external/pnglite/pnglite.h
-        src/engine/external/astar-jps/IndexPriorityQueue.h
-        src/engine/external/astar-jps/AStar.h
-        src/engine/external/astar-jps/AStar.cpp
-        src/engine/external/astar-jps/IndexPriorityQueue.c
+        src/engine/external/astar-algorithm-cpp/stlastar.h
+        src/engine/external/astar-algorithm-cpp/fsa.h
         src/engine/config.h
         src/engine/kernel.h
         src/engine/updater.h
@@ -485,6 +483,6 @@ set(SOURCE_FILES
         src/game/client/components/menus_settings/settings_appearance.cpp
         src/game/client/components/menus_settings/settings_hud.cpp
         src/game/client/components/menus_listbox.cpp
-        src/game/client/components/menus_popups.cpp src/base/system++/linked_list.h)
+        src/game/client/components/menus_popups.cpp src/base/system++/linked_list.h src/engine/external/astar-algorithm-cpp/mapsearchnode.h src/engine/external/astar-algorithm-cpp/worldmap.h)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})

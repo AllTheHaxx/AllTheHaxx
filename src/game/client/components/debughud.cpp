@@ -16,6 +16,7 @@
 //#include "controls.h"
 //#include "camera.h"
 #include "debughud.h"
+#include "controls.h"
 
 void CDebugHud::RenderNetCorrections()
 {
@@ -31,7 +32,21 @@ void CDebugHud::RenderNetCorrections()
 	float Velspeed = length(vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX/256.0f, m_pClient->m_Snap.m_pLocalCharacter->m_VelY/256.0f))*50;
 	float Ramp = VelocityRamp(Velspeed, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampCurvature);
 
-	const char *paStrings[] = {"velspeed:", "velspeed*ramp:", "ramp:", "Pos", " x:", " y:", "angle:", "netobj corrections", " num:", " on:"};
+	const char *paStrings[] = { ""
+			,"velspeed:"
+			,"velspeed*ramp:"
+			,"ramp:"
+			,"Pos"
+			," x:"
+			," y:"
+			,"Mouse"
+			," x:"
+			," y:"
+			,"angle:"
+			,"netobj corrections"
+			," num:"
+			," on:"
+	};
 	const int Num = sizeof(paStrings)/sizeof(char *);
 	const float LineHeight = 6.0f;
 	const float Fontsize = 5.0f;
@@ -40,38 +55,43 @@ void CDebugHud::RenderNetCorrections()
 	for(int i = 0; i < Num; ++i)
 		TextRender()->Text(0, x, y+i*LineHeight, Fontsize, paStrings[i], -1);
 
+	#define PUT_STRING(FMT, ...) \
+		str_format(aBuf, sizeof(aBuf), FMT, __VA_ARGS__); \
+		w = TextRender()->TextWidth(0, Fontsize, aBuf, -1); \
+		TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1)
+
+	#define PUT_LINEBREAK() y += LineHeight
+
 	x = Width-10.0f;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%.0f", Velspeed/32);
-	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
-	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%.0f", Velspeed/32*Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
-	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%.2f", Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
-	y += 2*LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
-	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
-	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
-	y += 2*LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->NetobjNumCorrections());
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
-	y += LineHeight;
-	w = TextRender()->TextWidth(0, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
-	TextRender()->Text(0, x-w, y, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
+	float w;
+	PUT_LINEBREAK();
+
+	PUT_STRING("%.0f", Velspeed/32);
+	PUT_LINEBREAK();
+	PUT_STRING("%.0f", Velspeed/32*Ramp);
+	PUT_LINEBREAK();
+	PUT_STRING("%.2f", Ramp);
+	PUT_LINEBREAK();
+	PUT_LINEBREAK();
+	PUT_STRING("%.2f / %i", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f, m_pClient->m_Snap.m_pLocalCharacter->m_X);
+	PUT_LINEBREAK();
+	PUT_STRING("%.2f / %i", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
+	PUT_LINEBREAK();
+	PUT_LINEBREAK();
+	PUT_STRING("%.2f / %i", (m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x+m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f, round_to_int(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x+(float)m_pClient->m_Snap.m_pLocalCharacter->m_X));
+	PUT_LINEBREAK();
+	PUT_STRING("%.2f / %i", (m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].y+m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f, round_to_int(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].y+(float)m_pClient->m_Snap.m_pLocalCharacter->m_Y));
+	PUT_LINEBREAK();
+	PUT_STRING("%d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle);
+	PUT_LINEBREAK();
+	PUT_LINEBREAK();
+	PUT_STRING("%d", m_pClient->NetobjNumCorrections());
+	PUT_LINEBREAK();
+	PUT_STRING("%s", m_pClient->NetobjCorrectedOn() && m_pClient->NetobjCorrectedOn()[0] ? m_pClient->NetobjCorrectedOn() : "N/V");
+
+	#undef PUT_STRING
+	#undef PUT_LINEBREAK
 }
 
 void CDebugHud::RenderTuning()

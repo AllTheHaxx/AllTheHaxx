@@ -50,6 +50,7 @@ public:
 
 	operator const T* () { return &x; }
 
+	const char * tocstring() const { return tostring().c_str(); }
 	std::string tostring() const
 	{
 		char aBuf[64];
@@ -171,6 +172,7 @@ public:
 	operator const T* () { return &x; }
 	operator const vector2_base<T>* () { return vector2_base<T>(x,y); }
 
+	const char * tocstring() const { return tostring().c_str(); }
 	std::string tostring() const
 	{
 		char aBuf[64];
@@ -308,6 +310,7 @@ public:
 	operator const vector3_base<T> () { return vector3_base<T>(r,g,b); }
 	operator const vector2_base<T> () { return vector2_base<T>(r,g); }
 
+	const char * tocstring() const { return tostring().c_str(); }
 	std::string tostring() const
 	{
 		char aBuf[64];

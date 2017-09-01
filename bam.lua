@@ -348,7 +348,7 @@ function build(settings)
 		libwebsockets = Compile(external_settings, Collect("src/engine/external/libwebsockets/*.c"))
 	end
 	sqlite3 = Compile(external_settings, Collect("src/engine/external/sqlite3/*.c"))
-	astar_jps = Compile(external_settings, Collect("src/engine/external/astar-jps/*.c", "src/engine/external/astar-jps/*.cpp"))
+	astar = Compile(external_settings, Collect("src/engine/external/astar-algorithm-cpp/*.c", "src/engine/external/astar-algorithm-cpp/*.cpp"))
 
 	-- apply luajit settings
 	if config.lua.value and config.luajit.value then
@@ -449,7 +449,7 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack, aes128,
-		client_link_other, client_osxlaunch, jsonparser, jsonbuilder, libwebsockets, md5, client_notification, sqlite3, astar_jps)
+		client_link_other, client_osxlaunch, jsonparser, jsonbuilder, libwebsockets, md5, client_notification, sqlite3, astar)
 
 	--[[server_exe = Link(server_settings, "AllTheHaxx-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)]]

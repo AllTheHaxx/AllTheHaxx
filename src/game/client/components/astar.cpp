@@ -1,5 +1,6 @@
 #include <base/system.h>
 #include <base/math.h>
+#include <base/vmath.h>
 #include <base/tl/array.h>
 
 #include <game/generated/protocol.h>
@@ -11,12 +12,16 @@
 #include <game/client/gameclient.h>
 #include <game/client/component.h>
 
-#include <engine/external/astar-jps/AStar.h>
+#include <engine/external/astar-algorithm-cpp/stlastar.h>
 #include <engine/graphics.h>
+#include <astar-algorithm-cpp/stlastar.h>
+#include <astar-algorithm-cpp/mapsearchnode.h>
+#include <astar-algorithm-cpp/worldmap.h>
 
 #include "astar.h"
 #include "effects.h"
 #include "hud.h"
+
 
 CAStar::CAStar()
 {
@@ -113,10 +118,10 @@ void CAStar::OnRender()
 	Graphics()->QuadsEnd();
 }
 
-int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
+bool CAStar::GetTileAreaCenter(vec2 *pResult, int TileID, int x, int y, int w, int h)
 {
-	if(x < 0 || y < 0)
-		return -1;
+	if(x < 0 || y < 0 || !pResult)
+		return false;
 
 	if(w < 1 || w > Collision()->GetWidth()-x)
 		w = Collision()->GetWidth()-x;
@@ -125,7 +130,8 @@ int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
 
 	size_t NumTiles = 0;
 	//int *aTiles = (int*)mem_alloc((w-x)*(h-y)*sizeof(int), 0); // <--that gonna be better but unsafer (leakyleak :0)
-	int aTiles[255];
+	const unsigned MAX_TILES_IN_AREA = 255;
+	vec2 aTiles[MAX_TILES_IN_AREA];
 
 	//dbg_msg("path/tilefinder", "Searching for tile=%i in AREA=(x%02i y%02i w%02i h%02i)", TileID, x, y, w, h);
 	for(int iy=y; iy < h; iy++)
@@ -135,45 +141,57 @@ int CAStar::GetTileAreaCenter(int TileID, int x, int y, int w, int h)
 			if(Collision()->GetTileRaw(ix*32, iy*32) == TileID)
 			{
 				//dbg_msg("path/tilefinder", "Found: tile=%i at x=%i y=%i", TileID, ix, iy);
-				if(NumTiles >= sizeof(aTiles))
+				aTiles[NumTiles++] = vec2(ix, iy);
+				if(NumTiles >= MAX_TILES_IN_AREA)
 					break;
-				aTiles[NumTiles++] = iy*w+ix;
 			}
 		}
 	}
 
-	int middle = NumTiles > 0 ? aTiles[NumTiles/2] : -1;
-	//mem_free(aTiles);
-	return middle;
+	if(NumTiles > 0)
+	{
+		*pResult = aTiles[NumTiles/2];
+		return true;
+	}
+	return false;
 }
 
 
-char *CAStar::FillGrid(bool NoFreeze) // NoFreeze: do not go through freeze tiles
+AStarWorldMap* CAStar::FillGrid(AStarWorldMap *pMap)
 {
+	const int Height = pMap->GetHeight();
+	const int Width = pMap->GetWidth();
+
+
 	// feed the grid with data from the map
-	char *pField = (char *)mem_alloc(Collision()->GetWidth() * Collision()->GetHeight() * sizeof(char), 1);
-	for(int y = 0; y < Collision()->GetHeight()-1; y++)
+	for(int y = 0; y < Height-1; y++)
 	{
-		for(int x = 0; x < Collision()->GetWidth()-1; x++)
+		for(int x = 0; x < Width-1; x++)
 		{
 			if(m_ThreadsShouldExit)
-				return pField;
+				return pMap;
 
-			pField[y*Collision()->GetWidth()+x] = (NoFreeze && Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE) || // treat freeze as air if allowed
-					!(
-							Collision()->CheckPoint(x * 32, y * 32) || // the following makes sure that the path isn't going through edge-passages
-									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
-									(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
-									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
-									(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32))
-					) || (
-							Collision()->GetTileRaw(x * 32, y * 32) == TILE_STOP // I have no clue how we could handle one-way stop tiles :o
-							// TODO: have a clue how to handle one-way stop tiles + implement it.
-					);
+			if(Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE)
+				pMap->AddNext(5); // 5 to prevent freeze if possible
+			else if(
+						!(
+								Collision()->CheckPoint(x * 32, y * 32) || // the following makes sure that the path isn't going through edge-passages
+										(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
+										(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
+										(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
+										(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32))
+						) || (
+								Collision()->GetTileRaw(x * 32, y * 32) == TILE_STOP // I have no clue how we could handle one-way stop tiles :o
+								// TODO: have a clue how to handle one-way stop tiles + implement it.
+						)
+					)
+				pMap->AddNext(9); // 9 means not passable
+			else
+				pMap->AddNext(0); // 0 is flawlessly passable (like air)
 		}
 	}
 
-	return pField;
+	return pMap;
 }
 
 void CAStar::OnStateChange(int NewState, int OldState)
@@ -205,57 +223,129 @@ void CAStar::StopThreads()
 
 // THREADS
 
+
+/* function copied and edited from https://github.com/justinhj/astar-algorithm-cpp/blob/master/cpp/findpath.cpp */
 void CAStar::BuildPath(void *pUser)
 {
-	CAStar* pSelf = (CAStar*)pUser;
+	CAStar *pSelf = (CAStar*)pUser;
 
 	{
-		CServerInfo Info; pSelf->Client()->GetServerInfo(&Info);
-		if(!g_Config.m_ClPathFinding || (!IsRace(&Info) && !IsDDNet(&Info)))
+		const CServerInfo *pInfo = pSelf->Client()->GetServerInfo();
+		if(!g_Config.m_ClPathFinding || (!IsRace(pInfo) && !IsDDNet(pInfo)))
 			return;
 	}
 
 	int SolutionLength = -1;
-	int *pSolution = 0;
-	int Start = pSelf->GetStart();
-	int Finish = pSelf->GetFinish();
+	float SolutionCost = -1;
+	vec2 Start, Finish;
 
-/*	if(Start == -1)
-		dbg_msg("path", "didn't find start tile");
-	if(Finish == -1)
-		dbg_msg("path", "didn't find finish tile");
-*/
-	if(Start >= 0 && Finish >= 0)
+	if(!pSelf->GetStart(&Start) || !pSelf->GetFinish(&Start))
 	{
-		char *pField = pSelf->FillGrid(false);
-		pSolution = astar_compute((const char *)pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
-		mem_free(pField);
-		dbg_msg("path", "start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
-	}
-
-	if(pSelf->m_ThreadsShouldExit)
-	{
-		if(pSolution)
-			free(pSolution);
+		dbg_msg("path", "missing start or finish");
 		return;
 	}
 
-	if(SolutionLength == -1) // try again, ignoring freeze
+	AStarWorldMap Field(pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight());
+	pSelf->FillGrid(&Field);
+
+	AStarSearch<AStarMapSearchNode> astarsearch;
+
+	// Create a start state
+	AStarMapSearchNode nodeStart;
+	nodeStart.x = (int)Start.x;
+	nodeStart.y = (int)Start.y;
+
+	// Define the goal state
+	AStarMapSearchNode nodeEnd;
+	nodeEnd.x = (int)Finish.x;
+	nodeEnd.y = (int)Finish.y;
+
+	// Set Start and goal states
+
+	astarsearch.SetStartAndGoalStates( &Field, nodeStart, nodeEnd );
+
+	unsigned int SearchState;
+	unsigned int SearchSteps = 0;
+
+	dbg_msg("astar", "starting search. Path: %s to %s", Start.tocstring(), Finish.tocstring());
+
+	do
 	{
-		char *pField = pSelf->FillGrid(false);
-		pSolution = astar_compute((const char*)pField, &SolutionLength, pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight(), Start, Finish);
-		mem_free(pField);
-		dbg_msg("path", "ignored freeze: start=%i, finish=%i, length=%i", Start, Finish, SolutionLength);
+		if(pSelf->m_ThreadsShouldExit)
+		{
+			return;
+		}
+
+		SearchState = astarsearch.SearchStep();
+		SearchSteps++;
 	}
+	while( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_SEARCHING );
+
+	if( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_SUCCEEDED )
+	{
+		dbg_msg("astar", "Search found goal state");
+
+		AStarMapSearchNode *node = astarsearch.GetSolutionStart();
+
+		int steps = 0;
+
+		SolutionLength = astarsearch.GetStepCount();
+		SolutionCost = astarsearch.GetSolutionCost();
+
+		pSelf->m_Path.clear();
+
+		for( ;; )
+		{
+			if(pSelf->m_ThreadsShouldExit)
+			{
+				return;
+			}
+
+			pSelf->m_Path.add_unsorted(Node(steps, vec2(node->x, node->y)));
+
+			node = astarsearch.GetSolutionNext();
+
+			if( !node )
+			{
+				break;
+			}
+
+			steps ++;
+		};
+
+		pSelf->m_Path.sort_range();
+
+
+		dbg_msg("astar", "Solution steps %i / path length %i", steps, pSelf->m_Path.size());
+
+		// Once you're done with the solution you can free the nodes up
+		astarsearch.FreeSolutionNodes();
+
+
+	}
+	else if( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_FAILED )
+	{
+		dbg_msg("astar", "Search terminated. Did not find goal state");
+	}
+
+	if(g_Config.m_Debug)
+		dbg_msg("astar", "SearchSteps : %i", SearchState);
+
+	astarsearch.EnsureMemoryFreed();
+
+
+	if(SolutionLength > -1)
+	{
+		dbg_msg("path", "found path: start=%s, finish=%s, length=%i, cost=%.2f", Start.tocstring(), Finish.tocstring(), SolutionLength, SolutionCost);
+	}
+
 
 	if(pSelf->m_ThreadsShouldExit)
 	{
-		if(pSolution)
-			free(pSolution);
 		return;
 	}
 
-	if(SolutionLength != -1)
+	if(SolutionLength > -1)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Found path. Length: %i", SolutionLength);
@@ -264,23 +354,6 @@ void CAStar::BuildPath(void *pUser)
 	else
 		pSelf->m_pClient->m_pHud->PushNotification("No possible path found.");
 
-	if(pSolution)
-	{
-		if(SolutionLength > 0)
-		{
-			for(int i = SolutionLength; i >= 0 ; i--)
-			{
-				pSelf->m_Path.add_unsorted(Node(i-SolutionLength, pSelf->Collision()->GetPos(pSolution[i])));
-				if(pSelf->m_ThreadsShouldExit)
-				{
-					free(pSolution);
-					return;
-				}
-			}
-			pSelf->m_Path.sort_range();
-		}
-		free(pSolution);
-	}
 }
 
 void CAStar::StartCalcScoreThread(void *pUser)

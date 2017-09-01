@@ -28,12 +28,12 @@ class CAStar : public CComponent
 
 	int m_LastClosestNode; // death position
 
-	int GetTileAreaCenter(int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
-	int GetStart() { return GetTileAreaCenter(TILE_BEGIN); }
-	int GetFinish() { return GetTileAreaCenter(TILE_END); }
-	char *FillGrid(bool NoFreeze);
+	bool GetTileAreaCenter(vec2 *pResult, int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
+	bool GetStart(vec2 *pStart) { return GetTileAreaCenter(pStart, TILE_BEGIN); }
+	bool GetFinish(vec2 *pFinish) { return GetTileAreaCenter(pFinish, TILE_END); }
+	class AStarWorldMap* FillGrid(class AStarWorldMap *pMap);
 	static void BuildPath(void *pUser);
-	bool PathFound() const { return m_Path.size() > 0; }
+	bool PathFound() const { return !m_Path.empty(); }
 
 	sorted_array<Node> m_Path;
 
