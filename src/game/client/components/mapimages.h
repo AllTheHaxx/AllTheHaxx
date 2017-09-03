@@ -8,7 +8,7 @@ class CMapImages : public CComponent
 {
 	friend class CBackground;
 	
-	int m_aTextures[64];
+	int m_aTextures[128];
 	int m_Count;
 
 public:
