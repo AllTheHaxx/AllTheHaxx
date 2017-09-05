@@ -48,6 +48,8 @@ public:
 
 	int GetMap( int x, int y ) const
 	{
+		dbg_assert_strict(m_CurrentIndex == m_MapWidth*m_MapHeight, "map not entirely initialized!");
+
 		if( x < 0 ||
 			x >= m_MapWidth ||
 			y < 0 ||

@@ -462,7 +462,20 @@ public: // methods
 
 	float GetCost(const UserState& node, const UserState& successor) const
 	{
-		return GetMap(node.x, node.y);
+		float ExtraCost = 0.0f;
+
+		// when going diagonal, we have to take a couple more things into account
+		if(node.x != successor.x && node.y != successor.y)
+		{
+			// make sure we are not being blocked
+			int dx = successor.x - node.x;
+			int dy = successor.y - node.y;
+
+			float Average = ((float)GetMap(node.x+dx, node.y) + (float)GetMap(node.x, node.y+dy)) / 2.0f;
+			ExtraCost = Average;
+		}
+
+		return GetMap(successor.x, successor.y) + ExtraCost;
 	}
 
 	// Functions for traversing the solution

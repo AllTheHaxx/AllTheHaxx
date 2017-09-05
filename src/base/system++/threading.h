@@ -120,9 +120,9 @@ public:
 };
 
 
-#define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&LOCKVAR, false, __FILE__, __LINE__); __SectionLock.WaitAndLock()
+#define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&(LOCKVAR), false, __FILE__, __LINE__); __SectionLock.WaitAndLock()
 #define UNLOCK_SECTION() __SectionLock.Unlock()
-#define LOCK_SECTION_LAZY_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&LOCKVAR, false, __FILE__, __LINE__)
+#define LOCK_SECTION_LAZY_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&(LOCKVAR), false, __FILE__, __LINE__)
 
 class LOCK_SMART
 {

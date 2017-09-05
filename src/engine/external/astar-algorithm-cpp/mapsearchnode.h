@@ -44,7 +44,7 @@ bool AStarMapSearchNode::IsSameState( AStarMapSearchNode &rhs )
 
 float AStarMapSearchNode::GoalDistanceEstimate( AStarMapSearchNode &nodeGoal )
 {
-	return fabsf(x - nodeGoal.x) + fabsf(y - nodeGoal.y);
+	return (fabsf(x - nodeGoal.x) + fabsf(y - nodeGoal.y));
 }
 
 bool AStarMapSearchNode::IsGoal( AStarMapSearchNode &nodeGoal )
@@ -79,38 +79,40 @@ bool AStarMapSearchNode::GetSuccessors( AStarSearch<AStarMapSearchNode> *astarse
 
 	// push each possible move except allowing the search to go backwards
 
-	if( (astarsearch->GetMap( x-1, y ) < 9)
-		&& !((parent_x == x-1) && (parent_y == y))
-			)
-	{
-		AStarMapSearchNode NewNode = AStarMapSearchNode( x-1, y );
-		astarsearch->AddSuccessor( NewNode );
+	#define TEST_NODE(xval, yval) \
+	if( (astarsearch->GetMap( xval, yval ) < 9) \
+		&& !((parent_x == xval) && (parent_y == yval)) \
+			) \
+	{ \
+		AStarMapSearchNode NewNode = AStarMapSearchNode( xval, yval ); \
+		astarsearch->AddSuccessor( NewNode ); \
 	}
 
-	if( (astarsearch->GetMap( x, y-1 ) < 9)
-		&& !((parent_x == x) && (parent_y == y-1))
-			)
-	{
-		AStarMapSearchNode NewNode = AStarMapSearchNode( x, y-1 );
-		astarsearch->AddSuccessor( NewNode );
-	}
+	// NORTH
+	TEST_NODE(x, y-1)
 
-	if( (astarsearch->GetMap( x+1, y ) < 9)
-		&& !((parent_x == x+1) && (parent_y == y))
-			)
-	{
-		AStarMapSearchNode NewNode = AStarMapSearchNode( x+1, y );
-		astarsearch->AddSuccessor( NewNode );
-	}
+	// NORTH-EAST
+	TEST_NODE(x+1, y-1)
 
+	// EAST
+	TEST_NODE(x+1, y)
 
-	if( (astarsearch->GetMap( x, y+1 ) < 9)
-		&& !((parent_x == x) && (parent_y == y+1))
-			)
-	{
-		AStarMapSearchNode NewNode = AStarMapSearchNode( x, y+1 );
-		astarsearch->AddSuccessor( NewNode );
-	}
+	// SOUTH-EAST
+	TEST_NODE(x+1, y+1)
+
+	// SOUTH
+	TEST_NODE(x, y+1)
+
+	// SOUTH-WEST
+	TEST_NODE(x-1, y+1)
+
+	// WEST
+	TEST_NODE(x-1, y)
+
+	// NORTH-WEST
+	TEST_NODE(x-1, y-1)
+
+	#undef TEST_NODE
 
 	return true;
 }

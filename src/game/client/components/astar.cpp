@@ -21,6 +21,8 @@
 #include "astar.h"
 #include "effects.h"
 #include "hud.h"
+#include "controls.h"
+#include "camera.h"
 
 
 CAStar::CAStar()
@@ -29,7 +31,13 @@ CAStar::CAStar()
 	m_ThreadsShouldExit = false;
 	m_pBuilderThread = NULL;
 	m_pScoreThread = NULL;
+	m_pCurrentMapGrid = NULL;
 	OnReset();
+}
+
+void CAStar::OnConsoleInit()
+{
+	Console()->Register("path_to_mouse", "", CFGFLAG_CLIENT, ConPathToMouse, this, "Try finding a path to your mouse cursor (use unlocked mouse!)");
 }
 
 void CAStar::OnShutdown()
@@ -41,6 +49,10 @@ void CAStar::OnShutdown()
 
 void CAStar::OnReset() // is being called right after OnMapLoad()
 {
+	if(m_pCurrentMapGrid)
+		delete m_pCurrentMapGrid;
+	mem_zerob(m_aCurrentMap);
+	m_pCurrentMapGrid = NULL;
 	m_Path.clear();
 	m_LastClosestNode = -1;
 	m_LastPos = vec2(0);
@@ -51,7 +63,7 @@ void CAStar::OnPlayerDeath()
 	if(!PathFound() || !g_Config.m_ClPathFinding || m_LastPos == vec2(0))
 		return;
 
-	m_pScoreThread = thread_init(StartCalcScoreThread, this);
+	m_pScoreThread = thread_init(CalcScoreThreadProxy, this);
 }
 
 void CAStar::OnRender()
@@ -70,25 +82,36 @@ void CAStar::OnRender()
 
 		if(s_ActivationTime && time_get() > s_ActivationTime+time_freq())
 		{
-			m_pBuilderThread = thread_init_named(BuildPath, this, "astar builder");
+			BuildPathRace();
 			s_ActivationTime = 0;
 		}
 	}
 
+	// don't interfere with the builder thread
+	LOCK_SECTION_LAZY_DBG(m_PathLock);
+	if(!__SectionLock.TryToLock())
+		return;
 
+	// check if there is anything to be shown
+	if(m_Path.empty())
+		return;
+
+	// set up pointers
 	const CNetObj_Character *pPlayerChar = m_pClient->m_Snap.m_pLocalCharacter;
 	const CNetObj_Character *pPrevChar = m_pClient->m_Snap.m_pLocalPrevCharacter;
 
 	if (pPlayerChar && pPrevChar)
 		m_LastPos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
 
+	const bool DebugVisualisation = g_Config.m_Debug && g_Config.m_DbgAStar;
+
 	// visualize the path
 	Graphics()->BlendAdditive();
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
+	Graphics()->TextureSet(DebugVisualisation ? -1 : g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.9f, 0.9f, 0.9f, 0.85f);
 
-	for(int i = 0; i < m_Path.size(); i++)
+	for(int i = m_Path.size()-1; i >= 0; i--)
 	{
 		if(i == m_LastClosestNode && g_Config.m_ClPathFindingColor)
 		{
@@ -104,18 +127,46 @@ void CAStar::OnRender()
 		}
 
 		// don't render out of view
-		vec2 Pos = GameClient()->m_Snap.m_SpecInfo.m_Active ? vec2(GameClient()->m_Snap.m_pSpectatorInfo->m_X, GameClient()->m_Snap.m_pSpectatorInfo->m_X) : m_LastPos;
-		if(distance(Pos, m_Path[i].m_Pos) > 1000)
+		if(distance(GameClient()->m_pCamera->m_Center, m_Path[i].m_Pos) > 1000)
 			continue;
 
 		static const int aSprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
 		RenderTools()->SelectSprite(aSprites[i%3]);
-		//Graphics()->QuadsSetRotation(Client()->GameTick());
-		IGraphics::CQuadItem QuadItem(m_Path[i].m_Pos.x, m_Path[i].m_Pos.y, 16, 16);
-
+		if(!DebugVisualisation || g_Config.m_Debug > 1) Graphics()->QuadsSetRotation((float)i/3.1415f);
+		IGraphics::CQuadItem QuadItem(m_Path[i].m_Pos.x, m_Path[i].m_Pos.y, DebugVisualisation ? 30 : 16, DebugVisualisation ? 30 : 16);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 	Graphics()->QuadsEnd();
+
+
+	// debug
+	if(DebugVisualisation)
+	{
+		Graphics()->BlendNormal();
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+		int Height = m_pCurrentMapGrid->GetHeight();
+		int Width = m_pCurrentMapGrid->GetWidth();
+		for(int y = 0; y < Height; y++)
+			for(int x = 0; x < Width; x++)
+			{
+				// don't render out of view
+				if(distance(GameClient()->m_pCamera->m_Center, vec2(x*32, y*32)) > 1000)
+					continue;
+
+				switch(m_pCurrentMapGrid->GetMap(x, y))
+				{
+					case 0: Graphics()->SetColor(1,1,1,0.15f); break;
+					case 5: Graphics()->SetColor(0,0,0,0.25f); break;
+					case 9: Graphics()->SetColor(0,0,0,0.50f); break;
+					default: Graphics()->SetColor(1,0,0,0.5f); break;
+				}
+
+				IGraphics::CQuadItem QuadItem(x*32, y*32, 30, 30);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+			}
+		Graphics()->QuadsEnd();
+	}
 }
 
 bool CAStar::GetTileAreaCenter(vec2 *pResult, int TileID, int x, int y, int w, int h)
@@ -156,42 +207,49 @@ bool CAStar::GetTileAreaCenter(vec2 *pResult, int TileID, int x, int y, int w, i
 	return false;
 }
 
-
 AStarWorldMap* CAStar::FillGrid(AStarWorldMap *pMap)
 {
 	const int Height = pMap->GetHeight();
 	const int Width = pMap->GetWidth();
 
-
 	// feed the grid with data from the map
-	for(int y = 0; y < Height-1; y++)
+	for(int iy = 0; iy < Height; iy++)
 	{
-		for(int x = 0; x < Width-1; x++)
+		for(int ix = 0; ix < Width; ix++)
 		{
 			if(m_ThreadsShouldExit)
 				return pMap;
 
-			if(Collision()->GetTileRaw(x * 32, y * 32) == TILE_FREEZE)
-				pMap->AddNext(5); // 5 to prevent freeze if possible
-			else if(
-						!(
-								Collision()->CheckPoint(x * 32, y * 32) || // the following makes sure that the path isn't going through edge-passages
-										(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
-										(Collision()->CheckPoint((x-1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32)) ||
-										(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y-1) * 32)) ||
-										(Collision()->CheckPoint((x+1) * 32, y * 32) && Collision()->CheckPoint(x * 32, (y+1) * 32))
-						) || (
-								Collision()->GetTileRaw(x * 32, y * 32) == TILE_STOP // I have no clue how we could handle one-way stop tiles :o
+			int x = ix * 32 + 16;
+			int y = iy * 32 + 16;
+
+			if(Collision()->GetTileRaw(x, y) == TILE_FREEZE)
+			{
+				pMap->AddNext(COST_FREEZE); // 5 to prevent freeze if possible
+			}
+			else if(Collision()->CheckPoint(x, y) || Collision()->GetTileRaw(x, y) == TILE_STOP
 								// TODO: have a clue how to handle one-way stop tiles + implement it.
-						)
 					)
-				pMap->AddNext(9); // 9 means not passable
+			{
+				pMap->AddNext(COST_SOLID); // 9 means not passable (solid)
+			}
 			else
-				pMap->AddNext(0); // 0 is flawlessly passable (like air)
+			{
+				pMap->AddNext(COST_AIR); // 0 is flawlessly passable (air)
+			}
 		}
 	}
 
 	return pMap;
+}
+
+void CAStar::ScanMap()
+{
+	dbg_assert_strict(m_pCurrentMapGrid == NULL, "[pathfinding] double-scanned map?!");
+	delete m_pCurrentMapGrid; // for release-mode; deleting nullpointer doesn't do anything
+
+	m_pCurrentMapGrid = new AStarWorldMap(Collision()->GetWidth(), Collision()->GetHeight());
+	FillGrid(m_pCurrentMapGrid);
 }
 
 void CAStar::OnStateChange(int NewState, int OldState)
@@ -205,29 +263,40 @@ void CAStar::OnMapLoad()
 	m_MapReloaded = true;
 }
 
+
 void CAStar::StopThreads()
 {
 	m_ThreadsShouldExit = true;
 	if(m_pScoreThread)
 	{
+		dbg_msg("astar", "waiting for score thread to finish...");
 		thread_destroy(m_pScoreThread);
-		m_pScoreThread = 0;
+		m_pScoreThread = NULL;
 	}
 	if(m_pBuilderThread)
 	{
+		dbg_msg("astar", "waiting for builder thread to finish...");
 		thread_destroy(m_pBuilderThread);
-		m_pBuilderThread = 0;
+		m_pBuilderThread = NULL;
 	}
 	m_ThreadsShouldExit = false;
 }
 
 // THREADS
 
-
 /* function copied and edited from https://github.com/justinhj/astar-algorithm-cpp/blob/master/cpp/findpath.cpp */
-void CAStar::BuildPath(void *pUser)
+void CAStar::BuildPath(void *pData)
 {
-	CAStar *pSelf = (CAStar*)pUser;
+	CPathBuilderParams *pParams = (CPathBuilderParams*)pData;
+	CAStar *pSelf = pParams->m_pSelf;
+	const vec2 Start = pParams->m_From;
+	const vec2 Finish = pParams->m_To;
+	delete pParams;
+
+	DEFER(pSelf, [](void *pUser){
+		((CAStar*)pUser)->m_pBuilderThread = NULL;
+	})
+
 
 	{
 		const CServerInfo *pInfo = pSelf->Client()->GetServerInfo();
@@ -237,16 +306,10 @@ void CAStar::BuildPath(void *pUser)
 
 	int SolutionLength = -1;
 	float SolutionCost = -1;
-	vec2 Start, Finish;
 
-	if(!pSelf->GetStart(&Start) || !pSelf->GetFinish(&Start))
-	{
-		dbg_msg("path", "missing start or finish");
-		return;
-	}
-
-	AStarWorldMap Field(pSelf->Collision()->GetWidth(), pSelf->Collision()->GetHeight());
-	pSelf->FillGrid(&Field);
+	if(!(pSelf->m_pCurrentMapGrid))
+		pSelf->ScanMap();
+	pSelf->FillGrid(pSelf->m_pCurrentMapGrid);
 
 	AStarSearch<AStarMapSearchNode> astarsearch;
 
@@ -262,18 +325,18 @@ void CAStar::BuildPath(void *pUser)
 
 	// Set Start and goal states
 
-	astarsearch.SetStartAndGoalStates( &Field, nodeStart, nodeEnd );
+	astarsearch.SetStartAndGoalStates( pSelf->m_pCurrentMapGrid, nodeStart, nodeEnd );
 
 	unsigned int SearchState;
 	unsigned int SearchSteps = 0;
 
-	dbg_msg("astar", "starting search. Path: %s to %s", Start.tocstring(), Finish.tocstring());
+	dbg_msg("astar", "starting search. Path: %s to %s", Start.tostring().c_str(), Finish.tostring().c_str());
 
 	do
 	{
 		if(pSelf->m_ThreadsShouldExit)
 		{
-			return;
+			astarsearch.CancelSearch();
 		}
 
 		SearchState = astarsearch.SearchStep();
@@ -281,42 +344,51 @@ void CAStar::BuildPath(void *pUser)
 	}
 	while( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_SEARCHING );
 
+	LOCK_SECTION_DBG(pSelf->m_PathLock);
+
 	if( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_SUCCEEDED )
 	{
 		dbg_msg("astar", "Search found goal state");
 
 		AStarMapSearchNode *node = astarsearch.GetSolutionStart();
 
-		int steps = 0;
-
-		SolutionLength = astarsearch.GetStepCount();
+		SolutionLength = 0;
 		SolutionCost = astarsearch.GetSolutionCost();
 
 		pSelf->m_Path.clear();
+		pSelf->m_LastClosestNode = -1;
 
 		for( ;; )
 		{
 			if(pSelf->m_ThreadsShouldExit)
 			{
-				return;
+				pSelf->m_Path.clear();
+				SolutionLength = -1;
+				break;
 			}
 
-			pSelf->m_Path.add_unsorted(Node(steps, vec2(node->x, node->y)));
+			pSelf->m_Path.add_unsorted(Node(SolutionLength, vec2(node->x*32+16, node->y*32+16)));
 
 			node = astarsearch.GetSolutionNext();
+
+			SolutionLength++;
 
 			if( !node )
 			{
 				break;
 			}
-
-			steps ++;
 		};
 
 		pSelf->m_Path.sort_range();
+		//for(int i = 0; i < pSelf->m_Path.size(); i++)
+		//	dbg_msg("astar/dbg", "Node #%03i (%03i) %s", i, pSelf->m_Path[i].m_ID, pSelf->m_Path[i].m_Pos.tostring().c_str());
 
-
-		dbg_msg("astar", "Solution steps %i / path length %i", steps, pSelf->m_Path.size());
+		if(pSelf->m_Path.empty())
+		{
+			dbg_msg("astar", "Solution found but analysis was aborted.");
+		}
+		else
+			dbg_msg("astar", "Solution steps %i (path length %i)", SolutionLength, pSelf->m_Path.size());
 
 		// Once you're done with the solution you can free the nodes up
 		astarsearch.FreeSolutionNodes();
@@ -329,14 +401,14 @@ void CAStar::BuildPath(void *pUser)
 	}
 
 	if(g_Config.m_Debug)
-		dbg_msg("astar", "SearchSteps : %i", SearchState);
+		dbg_msg("astar", "SearchSteps : %i", SearchSteps);
 
 	astarsearch.EnsureMemoryFreed();
 
 
 	if(SolutionLength > -1)
 	{
-		dbg_msg("path", "found path: start=%s, finish=%s, length=%i, cost=%.2f", Start.tocstring(), Finish.tocstring(), SolutionLength, SolutionCost);
+		dbg_msg("path", "found path: start=%s, finish=%s, length=%i, cost=%.2f", Start.tostring().c_str(), Finish.tostring().c_str(), SolutionLength, SolutionCost);
 	}
 
 
@@ -348,7 +420,7 @@ void CAStar::BuildPath(void *pUser)
 	if(SolutionLength > -1)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Found path. Length: %i", SolutionLength);
+		str_format(aBuf, sizeof(aBuf), "Found path. Length: %i, Cost: %.2f", SolutionLength, SolutionCost);
 		pSelf->m_pClient->m_pHud->PushNotification(aBuf);
 	}
 	else
@@ -356,7 +428,7 @@ void CAStar::BuildPath(void *pUser)
 
 }
 
-void CAStar::StartCalcScoreThread(void *pUser)
+void CAStar::CalcScoreThreadProxy(void *pUser)
 {
 	CAStar *pSelf = (CAStar*)pUser;
 	pSelf->CalcScoreThread();
@@ -364,6 +436,10 @@ void CAStar::StartCalcScoreThread(void *pUser)
 
 void CAStar::CalcScoreThread()
 {
+	DEFER(this, [](void *pUser){
+		((CAStar*)pUser)->m_pScoreThread = NULL;
+	})
+
 	// fitness calculation
 	float ClosestNodeDist = -1.0f;
 	int ClosestID = -1;
@@ -395,4 +471,40 @@ void CAStar::CalcScoreThread()
 		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", m_Path.size()-ClosestID, m_Path.size(), (((float)m_Path.size()-ClosestID)/(float)m_Path.size())*100.0f);
 		m_pClient->m_pHud->PushNotification(aBuf);
 	}
+}
+
+void CAStar::BuildPathRace()
+{
+	vec2 Start, Finish;
+	if(!GetStart(&Start) || !GetFinish(&Finish))
+	{
+		dbg_msg("path", "missing start or finish");
+		return;
+	}
+
+	InitPathBuilder(Start, Finish);
+}
+
+void CAStar::ConPathToMouse(IConsole::IResult *pResult, void *pUserData)
+{
+	CAStar *pSelf = (CAStar*)pUserData;
+
+	vec2 Start(
+			pSelf->m_pClient->m_Snap.m_pLocalCharacter->m_X/32.0f,
+			pSelf->m_pClient->m_Snap.m_pLocalCharacter->m_Y/32.0f
+	);
+	vec2 Finish(
+			(pSelf->m_pClient->m_Snap.m_pLocalCharacter->m_X+pSelf->m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x)/32.0f,
+			(pSelf->m_pClient->m_Snap.m_pLocalCharacter->m_Y+pSelf->m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].y)/32.0f
+	);
+
+	pSelf->InitPathBuilder(Start, Finish);
+}
+
+void CAStar::InitPathBuilder(const vec2& From, const vec2& To)
+{
+	StopThreads();
+
+	CPathBuilderParams *pParams = new CPathBuilderParams(this, From, To);
+	m_pBuilderThread = thread_init_named(BuildPath, pParams, "A* path finder");
 }

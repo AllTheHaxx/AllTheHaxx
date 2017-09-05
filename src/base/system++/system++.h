@@ -6,6 +6,9 @@
 
 #define dbg_assert(test,msg) if(!(test)) throw CTWException(__FILE__, __LINE__, #test, msg)
 
+#define SELF_FROM_USER(TYPE) TYPE *pSelf = (TYPE*)pUser;
+
+
 class CTWException : public std::exception
 {
 	char m_aWhat[1024];
@@ -19,6 +22,35 @@ public:
 };
 
 void dbg_break();
+
+
+class CDeferHandler
+{
+public:
+	typedef void (*DEFER_FUNCTION)(void *pData);
+
+private:
+	DEFER_FUNCTION m_pFnDeferFunc;
+	void *m_pData;
+
+public:
+	CDeferHandler(DEFER_FUNCTION pFnDeferFunc, void *pData)
+	{
+		m_pFnDeferFunc = pFnDeferFunc;
+		m_pData = pData;
+	}
+
+	~CDeferHandler()
+	{
+		m_pFnDeferFunc(m_pData);
+	}
+};
+
+
+/**
+ * The given function FUNC will automatically be executed with DATA as argument right before the current function returns
+ */
+#define DEFER(DATA, FUNC) CDeferHandler __DeferHandler(FUNC, DATA);
 
 
 #endif
