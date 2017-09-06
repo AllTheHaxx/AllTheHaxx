@@ -212,6 +212,8 @@ AStarWorldMap* CAStar::FillGrid(AStarWorldMap *pMap)
 	const int Height = pMap->GetHeight();
 	const int Width = pMap->GetWidth();
 
+	dbg_msg("astar", "started filling grid. width=%i height=%i size=%i", Width, Height, Width*Height);
+
 	// feed the grid with data from the map
 	for(int iy = 0; iy < Height; iy++)
 	{
@@ -227,11 +229,20 @@ AStarWorldMap* CAStar::FillGrid(AStarWorldMap *pMap)
 			{
 				pMap->AddNext(COST_FREEZE); // 5 to prevent freeze if possible
 			}
-			else if(Collision()->CheckPoint(x, y) || Collision()->GetTileRaw(x, y) == TILE_STOP
-								// TODO: have a clue how to handle one-way stop tiles + implement it.
-					)
+			else if(Collision()->CheckPoint(x, y) || Collision()->GetTileRaw(x, y) == TILE_STOP || // TODO: have a clue how to handle one-way stop tiles + implement it.
+					Collision()->GetTileRaw(x, y) == TILE_DEATH)
 			{
 				pMap->AddNext(COST_SOLID); // 9 means not passable (solid)
+			}
+			else if(Collision()->GetTileRaw(x, y-1) == TILE_FREEZE || Collision()->GetTileRaw(x+1, y) == TILE_FREEZE ||
+					Collision()->GetTileRaw(x, y+1) == TILE_FREEZE || Collision()->GetTileRaw(x-1, y) == TILE_FREEZE)
+			{
+				pMap->AddNext(COST_NEAR_FREEZE); // we're not really keen on going right next to freeze tiles
+			}
+			else if(Collision()->GetTileRaw(x, y-1) == TILE_DEATH || Collision()->GetTileRaw(x+1, y) == TILE_DEATH ||
+					Collision()->GetTileRaw(x, y+1) == TILE_DEATH || Collision()->GetTileRaw(x-1, y) == TILE_DEATH)
+			{
+				pMap->AddNext(COST_NEAR_DEATH); // death tiles are more scary than freeze
 			}
 			else
 			{
@@ -309,9 +320,8 @@ void CAStar::BuildPath(void *pData)
 
 	if(!(pSelf->m_pCurrentMapGrid))
 		pSelf->ScanMap();
-	pSelf->FillGrid(pSelf->m_pCurrentMapGrid);
 
-	AStarSearch<AStarMapSearchNode> astarsearch;
+	AStarSearch<AStarMapSearchNode> astarsearch(65536);
 
 	// Create a start state
 	AStarMapSearchNode nodeStart;
@@ -348,7 +358,7 @@ void CAStar::BuildPath(void *pData)
 
 	if( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_SUCCEEDED )
 	{
-		dbg_msg("astar", "Search found goal state");
+		dbg_msg("astar", "Search found goal state in %i iterations", SearchSteps);
 
 		AStarMapSearchNode *node = astarsearch.GetSolutionStart();
 
@@ -397,11 +407,8 @@ void CAStar::BuildPath(void *pData)
 	}
 	else if( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_FAILED )
 	{
-		dbg_msg("astar", "Search terminated. Did not find goal state");
+		dbg_msg("astar", "Search terminated. Did %i iterations but failed to find goal state", SearchSteps);
 	}
-
-	if(g_Config.m_Debug)
-		dbg_msg("astar", "SearchSteps : %i", SearchSteps);
 
 	astarsearch.EnsureMemoryFreed();
 

@@ -42,6 +42,7 @@ public:
 
 	const int GetWidth() const { return m_MapWidth; }
 	const int GetHeight() const { return m_MapHeight; }
+	const int GetSize() const { return m_MapWidth*m_MapHeight; }
 
 
 // map helper function

@@ -11,7 +11,9 @@ class CAStar : public CComponent
 {
 	enum
 	{
-		COST_AIR = 1,
+		COST_AIR = 0,
+		COST_NEAR_FREEZE = 1,
+		COST_NEAR_DEATH = 2,
 		COST_FREEZE = 5,
 		COST_SOLID = 9
 	};

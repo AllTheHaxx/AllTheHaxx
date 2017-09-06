@@ -309,7 +309,7 @@ public: // methods
 				{
 					if( (*openlist_result)->m_UserState.IsSameState( (*successor)->m_UserState ) )
 					{
-						break;					
+						break;
 					}
 				}
 
@@ -333,7 +333,7 @@ public: // methods
 				{
 					if( (*closedlist_result)->m_UserState.IsSameState( (*successor)->m_UserState ) )
 					{
-						break;					
+						break;
 					}
 				}
 
