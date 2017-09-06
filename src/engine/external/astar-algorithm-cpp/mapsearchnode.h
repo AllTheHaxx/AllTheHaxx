@@ -44,7 +44,7 @@ bool AStarMapSearchNode::IsSameState( AStarMapSearchNode &rhs )
 
 float AStarMapSearchNode::GoalDistanceEstimate( AStarMapSearchNode &nodeGoal )
 {
-	return (fabsf(x - nodeGoal.x) + fabsf(y - nodeGoal.y));
+	return 0.0f;//(fabsf(x - nodeGoal.x) + fabsf(y - nodeGoal.y));
 }
 
 bool AStarMapSearchNode::IsGoal( AStarMapSearchNode &nodeGoal )

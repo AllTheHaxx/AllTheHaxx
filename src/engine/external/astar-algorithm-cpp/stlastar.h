@@ -472,7 +472,7 @@ public: // methods
 			int dy = successor.y - node.y;
 
 			float Average = ((float)GetMap(node.x+dx, node.y) + (float)GetMap(node.x, node.y+dy)) / 2.0f;
-			ExtraCost = Average;
+			ExtraCost = Average / 2.0f;
 		}
 
 		return GetMap(successor.x, successor.y) + ExtraCost;

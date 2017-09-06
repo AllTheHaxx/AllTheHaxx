@@ -234,13 +234,13 @@ AStarWorldMap* CAStar::FillGrid(AStarWorldMap *pMap)
 			{
 				pMap->AddNext(COST_SOLID); // 9 means not passable (solid)
 			}
-			else if(Collision()->GetTileRaw(x, y-1) == TILE_FREEZE || Collision()->GetTileRaw(x+1, y) == TILE_FREEZE ||
-					Collision()->GetTileRaw(x, y+1) == TILE_FREEZE || Collision()->GetTileRaw(x-1, y) == TILE_FREEZE)
+			else if(Collision()->GetTileRaw(x, y-32) == TILE_FREEZE || Collision()->GetTileRaw(x+32, y) == TILE_FREEZE ||
+					Collision()->GetTileRaw(x, y+32) == TILE_FREEZE || Collision()->GetTileRaw(x-32, y) == TILE_FREEZE)
 			{
 				pMap->AddNext(COST_NEAR_FREEZE); // we're not really keen on going right next to freeze tiles
 			}
-			else if(Collision()->GetTileRaw(x, y-1) == TILE_DEATH || Collision()->GetTileRaw(x+1, y) == TILE_DEATH ||
-					Collision()->GetTileRaw(x, y+1) == TILE_DEATH || Collision()->GetTileRaw(x-1, y) == TILE_DEATH)
+			else if(Collision()->GetTileRaw(x, y-32) == TILE_DEATH || Collision()->GetTileRaw(x+32, y) == TILE_DEATH ||
+					Collision()->GetTileRaw(x, y+32) == TILE_DEATH || Collision()->GetTileRaw(x-32, y) == TILE_DEATH)
 			{
 				pMap->AddNext(COST_NEAR_DEATH); // death tiles are more scary than freeze
 			}
