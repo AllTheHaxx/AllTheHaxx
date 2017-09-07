@@ -197,6 +197,8 @@ public: // methods
 
 	}
 
+	unsigned int GetMaxElements() const { return m_MaxElements; }
+
 	// For debugging this displays both lists (using the prev/next list pointers)
 	void Debug()
 	{

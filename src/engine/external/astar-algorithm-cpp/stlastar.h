@@ -45,7 +45,8 @@ using std::vector;
 
 // fast fixed size memory allocator, used for fast node memory management
 #include "fsa.h"
-#include "worldmap.h"
+#include "interfaces.h"
+#include "mapsearchnode.h"
 
 // Fixed size memory allocator can be disabled to compare performance
 // Uses std new and delete instead if you turn it off
@@ -57,12 +58,12 @@ using std::vector;
 #pragma warning( disable : 4786 )
 #endif
 
-template <class T> class AStarState;
+
 
 // The AStar search class. UserState is the users state space type
-template <class UserState> class AStarSearch
+template <class UserState>
+class CAStarSearch
 {
-
 public: // data
 
 	enum
@@ -123,7 +124,7 @@ public: // methods
 
 
 	// constructor just initialises private data
-	AStarSearch() :
+	CAStarSearch() :
 		m_State( SEARCH_STATE_NOT_INITIALISED ),
 		m_CurrentSolutionNode( NULL ),
 #if USE_FSA_MEMORY
@@ -134,7 +135,7 @@ public: // methods
 	{
 	}
 
-	AStarSearch( int MaxNodes ) :
+	CAStarSearch( unsigned int MaxNodes ) :
 		m_State( SEARCH_STATE_NOT_INITIALISED ),
 		m_CurrentSolutionNode( NULL ),
 #if USE_FSA_MEMORY
@@ -152,8 +153,15 @@ public: // methods
 	}
 
 	// Set Start and goal states
-	void SetStartAndGoalStates( const AStarWorldMap *pMap, UserState &Start, UserState &Goal )
+	void SetStartAndGoalStates( const IAStarWorldMap *pMap, const UserState &Start, const UserState &Goal )
 	{
+		// check if start and goal are valid
+		if(Start.GetOwnCost(pMap) >= 9 || Goal.GetOwnCost(pMap) >= 9)
+		{
+			m_State = SEARCH_STATE_FAILED;
+			return;
+		}
+
 		m_CancelRequest = false;
 
 		m_Start = AllocateNode();
@@ -163,8 +171,8 @@ public: // methods
 
 		assert((m_Start != NULL && m_Goal != NULL));
 		
-		m_Start->m_UserState = Start;
-		m_Goal->m_UserState = Goal;
+		m_Start->m_UserState = static_cast<UserState>(Start);
+		m_Goal->m_UserState = static_cast<UserState>(Goal);
 
 		m_State = SEARCH_STATE_SEARCHING;
 		
@@ -295,7 +303,7 @@ public: // methods
 			{
 
 				// 	The g value for this successor ...
-				float newg = n->g + GetCost(n->m_UserState, (*successor)->m_UserState);//n->m_UserState.GetCost( (*successor)->m_UserState );
+				float newg = n->g + n->m_UserState.GetCost(m_pMap, (*successor)->m_UserState);
 
 				// Now we need to find whether the node is on the open or closed lists
 				// If it is but the node that is already on them is better (lower g)
@@ -305,7 +313,7 @@ public: // methods
 
 				typename vector< Node * >::iterator openlist_result;
 
-				for( openlist_result = m_OpenList.begin(); openlist_result != m_OpenList.end(); openlist_result ++ )
+				for( openlist_result = m_OpenList.begin(); openlist_result != m_OpenList.end(); openlist_result ++ ) // TODO: SLOW!!
 				{
 					if( (*openlist_result)->m_UserState.IsSameState( (*successor)->m_UserState ) )
 					{
@@ -329,7 +337,7 @@ public: // methods
 
 				typename vector< Node * >::iterator closedlist_result;
 
-				for( closedlist_result = m_ClosedList.begin(); closedlist_result != m_ClosedList.end(); closedlist_result ++ )
+				for( closedlist_result = m_ClosedList.begin(); closedlist_result != m_ClosedList.end(); closedlist_result ++ ) // TODO: EVEN SLOWER!!!
 				{
 					if( (*closedlist_result)->m_UserState.IsSameState( (*successor)->m_UserState ) )
 					{
@@ -410,7 +418,7 @@ public: // methods
 
 	// User calls this to add a successor to a list of successors
 	// when expanding the search frontier
-	bool AddSuccessor( UserState &State )
+	bool AddSuccessor( const UserState &State )
 	{
 		Node *node = AllocateNode();
 
@@ -458,30 +466,13 @@ public: // methods
 
 	}
 
-	int GetMap(int x, int y) const { return m_pMap->GetMap(x, y); }
+	const IAStarWorldMap *GetMap() const { return m_pMap; }
 
-	float GetCost(const UserState& node, const UserState& successor) const
-	{
-		float ExtraCost = 0.0f;
-
-		// when going diagonal, we have to take a couple more things into account
-		if(node.x != successor.x && node.y != successor.y)
-		{
-			// make sure we are not being blocked
-			int dx = successor.x - node.x;
-			int dy = successor.y - node.y;
-
-			float Average = ((float)GetMap(node.x+dx, node.y) + (float)GetMap(node.x, node.y+dy)) / 2.0f;
-			ExtraCost = Average / 2.0f;
-		}
-
-		return GetMap(successor.x, successor.y) + ExtraCost;
-	}
 
 	// Functions for traversing the solution
 
 	// Get start node
-	UserState *GetSolutionStart()
+	IAStarState *GetSolutionStart()
 	{
 		m_CurrentSolutionNode = m_Start;
 		if( m_Start )
@@ -495,7 +486,7 @@ public: // methods
 	}
 	
 	// Get next node
-	UserState *GetSolutionNext()
+	IAStarState *GetSolutionNext()
 	{
 		if( m_CurrentSolutionNode )
 		{
@@ -514,7 +505,7 @@ public: // methods
 	}
 	
 	// Get end node
-	UserState *GetSolutionEnd()
+	IAStarState *GetSolutionEnd()
 	{
 		m_CurrentSolutionNode = m_Goal;
 		if( m_Goal )
@@ -528,7 +519,7 @@ public: // methods
 	}
 	
 	// Step solution iterator backwards
-	UserState *GetSolutionPrev()
+	IAStarState *GetSolutionPrev()
 	{
 		if( m_CurrentSolutionNode )
 		{
@@ -563,13 +554,13 @@ public: // methods
 	// For educational use and debugging it is useful to be able to view
 	// the open and closed list at each step, here are two functions to allow that.
 
-	UserState *GetOpenListStart()
+	IAStarState *GetOpenListStart()
 	{
 		float f,g,h;
 		return GetOpenListStart( f,g,h );
 	}
 
-	UserState *GetOpenListStart( float &f, float &g, float &h )
+	IAStarState *GetOpenListStart( float &f, float &g, float &h )
 	{
 		iterDbgOpen = m_OpenList.begin();
 		if( iterDbgOpen != m_OpenList.end() )
@@ -583,13 +574,13 @@ public: // methods
 		return NULL;
 	}
 
-	UserState *GetOpenListNext()
+	IAStarState *GetOpenListNext()
 	{
 		float f,g,h;
 		return GetOpenListNext( f,g,h );
 	}
 
-	UserState *GetOpenListNext( float &f, float &g, float &h )
+	IAStarState *GetOpenListNext( float &f, float &g, float &h )
 	{
 		iterDbgOpen++;
 		if( iterDbgOpen != m_OpenList.end() )
@@ -603,13 +594,13 @@ public: // methods
 		return NULL;
 	}
 
-	UserState *GetClosedListStart()
+	IAStarState *GetClosedListStart()
 	{
 		float f,g,h;
 		return GetClosedListStart( f,g,h );
 	}
 
-	UserState *GetClosedListStart( float &f, float &g, float &h )
+	IAStarState *GetClosedListStart( float &f, float &g, float &h )
 	{
 		iterDbgClosed = m_ClosedList.begin();
 		if( iterDbgClosed != m_ClosedList.end() )
@@ -624,13 +615,13 @@ public: // methods
 		return NULL;
 	}
 
-	UserState *GetClosedListNext()
+	IAStarState *GetClosedListNext()
 	{
 		float f,g,h;
 		return GetClosedListNext( f,g,h );
 	}
 
-	UserState *GetClosedListNext( float &f, float &g, float &h )
+	IAStarState *GetClosedListNext( float &f, float &g, float &h )
 	{
 		iterDbgClosed++;
 		if( iterDbgClosed != m_ClosedList.end() )
@@ -781,7 +772,7 @@ private: // data
 	// are generated
 	vector< Node * > m_Successors;
 
-	const AStarWorldMap *m_pMap;
+	const IAStarWorldMap *m_pMap;
 
 	// State
 	unsigned int m_State;
@@ -810,17 +801,6 @@ private: // data
 	
 	bool m_CancelRequest;
 
-};
-
-template <class T> class AStarState
-{
-public:
-	virtual ~AStarState() {}
-	virtual float GoalDistanceEstimate( T &nodeGoal ) = 0; // Heuristic function which computes the estimated cost to the goal node
-	virtual bool IsGoal( T &nodeGoal ) = 0; // Returns true if this node is the goal node
-	virtual bool GetSuccessors( AStarSearch<T> *astarsearch, T *parent_node ) = 0; // Retrieves all successors to this node and adds them via astarsearch.addSuccessor()
-	//virtual float GetCost( T &successor ) = 0; // Computes the cost of travelling from this node to the successor node
-	virtual bool IsSameState( T &rhs ) = 0; // Returns true if this node is the same as the rhs node
 };
 
 #endif

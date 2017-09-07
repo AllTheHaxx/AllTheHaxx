@@ -1,78 +1,67 @@
 #pragma once
 
 #include "stlastar.h" // See header for copyright and usage information
-#include <math.h>
+#include "interfaces.h"
 
 
 
 // Definitions
 
-class AStarMapSearchNode : public AStarState<AStarMapSearchNode>
+class CAStarMapSearchNode : public IAStarState
 {
 public:
-	int x;	 // the (x,y) positions of the node
-	int y;
+	int m_X;	 // the (x,y) positions of the node
+	int m_Y;
 
-	explicit AStarMapSearchNode() { x = y = 0; }
-	AStarMapSearchNode(int px, int py) { x=px; y=py; }
+	CAStarMapSearchNode() { m_X = m_Y = 0; }
+	CAStarMapSearchNode(int px, int py) { m_X=px; m_Y=py; }
 
-	float GoalDistanceEstimate( AStarMapSearchNode &nodeGoal );
-	bool IsGoal( AStarMapSearchNode &nodeGoal );
-	bool GetSuccessors( AStarSearch<AStarMapSearchNode> *astarsearch, AStarMapSearchNode *parent_node );
-//	float GetCost( AStarMapSearchNode &successor );
-	bool IsSameState( AStarMapSearchNode &rhs );
+	float GoalDistanceEstimate( const IAStarState &nodeGoal ) const;
+	bool IsGoal( IAStarState &nodeGoal ) const;
+	bool GetSuccessors( CAStarSearch<CAStarMapSearchNode> *astarsearch, IAStarState *parent );
+	float GetCost( const IAStarWorldMap *pMap, const IAStarState &successor ) const;
+	float GetOwnCost( const IAStarWorldMap *pMap ) const;
+	bool IsSameState( const IAStarState &rhs ) const;
 };
 
-bool AStarMapSearchNode::IsSameState( AStarMapSearchNode &rhs )
+bool CAStarMapSearchNode::IsSameState( const IAStarState &rhs ) const
 {
+	const CAStarMapSearchNode &node = dynamic_cast<const CAStarMapSearchNode &>(rhs);
 
 	// same state in a maze search is simply when (x,y) are the same
-	if( (x == rhs.x) &&
-		(y == rhs.y) )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return (m_X == node.m_X) &&
+		   (m_Y == node.m_Y);
 
 }
 
 // Here's the heuristic function that estimates the distance from a Node
 // to the Goal. 
 
-float AStarMapSearchNode::GoalDistanceEstimate( AStarMapSearchNode &nodeGoal )
+float CAStarMapSearchNode::GoalDistanceEstimate( const IAStarState &nodeGoal ) const
 {
 	return 0.0f;//(fabsf(x - nodeGoal.x) + fabsf(y - nodeGoal.y));
 }
 
-bool AStarMapSearchNode::IsGoal( AStarMapSearchNode &nodeGoal )
+bool CAStarMapSearchNode::IsGoal( IAStarState &nodeGoal ) const
 {
-
-	if( (x == nodeGoal.x) &&
-		(y == nodeGoal.y) )
-	{
-		return true;
-	}
-
-	return false;
+	return IsSameState(nodeGoal);
 }
 
 // This generates the successors to the given Node. It uses a helper function called
 // AddSuccessor to give the successors to the AStar class. The A* specific initialisation
 // is done for each node internally, so here you just set the state information that
 // is specific to the application
-bool AStarMapSearchNode::GetSuccessors( AStarSearch<AStarMapSearchNode> *astarsearch, AStarMapSearchNode *parent_node )
+bool CAStarMapSearchNode::GetSuccessors( CAStarSearch<CAStarMapSearchNode> *astarsearch, IAStarState *parent )
 {
+	CAStarMapSearchNode *parent_node = dynamic_cast<CAStarMapSearchNode *>(parent);
 
 	int parent_x = -1;
 	int parent_y = -1;
 
 	if( parent_node )
 	{
-		parent_x = parent_node->x;
-		parent_y = parent_node->y;
+		parent_x = parent_node->m_X;
+		parent_y = parent_node->m_Y;
 	}
 
 
@@ -80,37 +69,37 @@ bool AStarMapSearchNode::GetSuccessors( AStarSearch<AStarMapSearchNode> *astarse
 	// push each possible move except allowing the search to go backwards
 
 	#define TEST_NODE(xval, yval) \
-	if( (astarsearch->GetMap( xval, yval ) < 9) \
+	if( (astarsearch->GetMap()->GetField( xval, yval ) < 9) \
 		&& !((parent_x == xval) && (parent_y == yval)) \
 			) \
 	{ \
-		AStarMapSearchNode NewNode = AStarMapSearchNode( xval, yval ); \
+		CAStarMapSearchNode NewNode = CAStarMapSearchNode( xval, yval ); \
 		astarsearch->AddSuccessor( NewNode ); \
 	}
 
 	// NORTH
-	TEST_NODE(x, y-1)
+	TEST_NODE(m_X, m_Y-1)
 
 	// NORTH-EAST
-	TEST_NODE(x+1, y-1)
+	TEST_NODE(m_X+1, m_Y-1)
 
 	// EAST
-	TEST_NODE(x+1, y)
+	TEST_NODE(m_X+1, m_Y)
 
 	// SOUTH-EAST
-	TEST_NODE(x+1, y+1)
+	TEST_NODE(m_X+1, m_Y+1)
 
 	// SOUTH
-	TEST_NODE(x, y+1)
+	TEST_NODE(m_X, m_Y+1)
 
 	// SOUTH-WEST
-	TEST_NODE(x-1, y+1)
+	TEST_NODE(m_X-1, m_Y+1)
 
 	// WEST
-	TEST_NODE(x-1, y)
+	TEST_NODE(m_X-1, m_Y)
 
 	// NORTH-WEST
-	TEST_NODE(x-1, y-1)
+	TEST_NODE(m_X-1, m_Y-1)
 
 	#undef TEST_NODE
 
@@ -120,11 +109,30 @@ bool AStarMapSearchNode::GetSuccessors( AStarSearch<AStarMapSearchNode> *astarse
 // given this node, what does it cost to move to successor. In the case
 // of our map the answer is the map terrain value at this node since that is 
 // conceptually where we're moving
-/*
-float AStarMapSearchNode::GetCost( AStarMapSearchNode &successor )
-{
-	return (float) GetMap( x, y );
 
+float CAStarMapSearchNode::GetCost( const IAStarWorldMap *pMap, const IAStarState &successor ) const
+{
+	const CAStarMapSearchNode &next = dynamic_cast<const CAStarMapSearchNode &>(successor);
+
+	float ExtraCost = 0.0f;
+
+	// when going diagonal, we have to take a couple more things into account
+	if(m_X != next.m_X && m_Y != next.m_Y)
+	{
+		// make sure we are not being blocked
+		int dx = next.m_X - m_X;
+		int dy = next.m_Y - m_Y;
+
+		float Average = ((float)pMap->GetField(m_X+dx, m_Y) + (float)pMap->GetField(m_X, m_Y+dy)) / 2.0f;
+		ExtraCost = Average / 2.0f;
+	}
+
+	return pMap->GetField(next.m_X, next.m_Y) + ExtraCost;
 }
 
-*/
+float CAStarMapSearchNode::GetOwnCost( const IAStarWorldMap *pMap ) const
+{
+	return pMap->GetField(m_X, m_Y);
+}
+
+

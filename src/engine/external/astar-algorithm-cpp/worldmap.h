@@ -1,15 +1,15 @@
-//
+// (c) 2017 The AllTheHaxx Team
 // Please note that this file is not part of the astar-algorithm-cpp project,
 // but of AllTheHaxx itself. Thus, copyright goes to The AllTheHaxx Team.
-//
 
 #pragma once
 
 #include <base/system.h>
+#include "interfaces.h"
 
 
 // The world map
-class AStarWorldMap
+class CAStarWorldMap : public IAStarWorldMap
 {
 	const int m_MapWidth;
 	const int m_MapHeight;
@@ -18,14 +18,14 @@ class AStarWorldMap
 	int m_CurrentIndex;
 
 public:
-	AStarWorldMap(const int Width, const int Height)
+	CAStarWorldMap(const int Width, const int Height)
 			: m_MapWidth(Width), m_MapHeight(Height)
 	{
 		m_pWorldMap = mem_allocb(int, Width*Height);
 		m_CurrentIndex = 0;
 	}
 
-	~AStarWorldMap()
+	virtual ~CAStarWorldMap()
 	{
 		mem_free(m_pWorldMap);
 	}
@@ -47,7 +47,7 @@ public:
 
 // map helper function
 
-	int GetMap( int x, int y ) const
+	int GetField( int x, int y ) const
 	{
 		dbg_assert_strict(m_CurrentIndex == m_MapWidth*m_MapHeight, "map not entirely initialized!");
 

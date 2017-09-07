@@ -47,7 +47,7 @@ class CAStar : public CComponent
 	LOCK_SMART m_PathLock;
 
 	char m_aCurrentMap[64];
-	class AStarWorldMap *m_pCurrentMapGrid;
+	class CAStarWorldMap *m_pCurrentMapGrid;
 	int m_LastClosestNode; // death position
 
 	bool GetTileAreaCenter(vec2 *pResult, int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
@@ -55,7 +55,7 @@ class CAStar : public CComponent
 	bool GetFinish(vec2 *pFinish) { return GetTileAreaCenter(pFinish, TILE_END); }
 
 	void ScanMap();
-	class AStarWorldMap* FillGrid(class AStarWorldMap *pMap);
+	class CAStarWorldMap* FillGrid(class CAStarWorldMap *pMap);
 
 	static void BuildPath(void *pParam);
 	void InitPathBuilder(const vec2& From, const vec2& To);

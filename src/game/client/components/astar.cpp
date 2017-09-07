@@ -12,11 +12,10 @@
 #include <game/client/gameclient.h>
 #include <game/client/component.h>
 
+#include <engine/external/astar-algorithm-cpp/worldmap.h>
+#include <engine/external/astar-algorithm-cpp/mapsearchnode.h>
 #include <engine/external/astar-algorithm-cpp/stlastar.h>
 #include <engine/graphics.h>
-#include <astar-algorithm-cpp/stlastar.h>
-#include <astar-algorithm-cpp/mapsearchnode.h>
-#include <astar-algorithm-cpp/worldmap.h>
 
 #include "astar.h"
 #include "effects.h"
@@ -154,12 +153,14 @@ void CAStar::OnRender()
 				if(distance(GameClient()->m_pCamera->m_Center, vec2(x*32, y*32)) > 1000)
 					continue;
 
-				switch(m_pCurrentMapGrid->GetMap(x, y))
+				switch(m_pCurrentMapGrid->GetField(x, y))
 				{
-					case 0: Graphics()->SetColor(1,1,1,0.15f); break;
-					case 5: Graphics()->SetColor(0,0,0,0.25f); break;
-					case 9: Graphics()->SetColor(0,0,0,0.50f); break;
-					default: Graphics()->SetColor(1,0,0,0.5f); break;
+					case COST_AIR: Graphics()->SetColor(1,1,1,0.15f); break;
+					case COST_NEAR_FREEZE: Graphics()->SetColor(0,0,0,0.25f); break;
+					case COST_FREEZE: Graphics()->SetColor(0,0,0.5f,0.25f); break;
+					case COST_NEAR_DEATH: Graphics()->SetColor(0.5f,0,0,0.25f); break;
+					case COST_SOLID: Graphics()->SetColor(0,0,0,0.50f); break;
+					default: Graphics()->SetColor(1,0,1,0.5f); break;
 				}
 
 				IGraphics::CQuadItem QuadItem(x*32, y*32, 30, 30);
@@ -207,7 +208,7 @@ bool CAStar::GetTileAreaCenter(vec2 *pResult, int TileID, int x, int y, int w, i
 	return false;
 }
 
-AStarWorldMap* CAStar::FillGrid(AStarWorldMap *pMap)
+CAStarWorldMap* CAStar::FillGrid(CAStarWorldMap *pMap)
 {
 	const int Height = pMap->GetHeight();
 	const int Width = pMap->GetWidth();
@@ -259,7 +260,7 @@ void CAStar::ScanMap()
 	dbg_assert_strict(m_pCurrentMapGrid == NULL, "[pathfinding] double-scanned map?!");
 	delete m_pCurrentMapGrid; // for release-mode; deleting nullpointer doesn't do anything
 
-	m_pCurrentMapGrid = new AStarWorldMap(Collision()->GetWidth(), Collision()->GetHeight());
+	m_pCurrentMapGrid = new CAStarWorldMap(Collision()->GetWidth(), Collision()->GetHeight());
 	FillGrid(m_pCurrentMapGrid);
 }
 
@@ -321,17 +322,17 @@ void CAStar::BuildPath(void *pData)
 	if(!(pSelf->m_pCurrentMapGrid))
 		pSelf->ScanMap();
 
-	AStarSearch<AStarMapSearchNode> astarsearch(65536);
+	CAStarSearch<CAStarMapSearchNode> astarsearch(65536);
 
 	// Create a start state
-	AStarMapSearchNode nodeStart;
-	nodeStart.x = (int)Start.x;
-	nodeStart.y = (int)Start.y;
+	CAStarMapSearchNode nodeStart;
+	nodeStart.m_X = (int)Start.x;
+	nodeStart.m_Y = (int)Start.y;
 
 	// Define the goal state
-	AStarMapSearchNode nodeEnd;
-	nodeEnd.x = (int)Finish.x;
-	nodeEnd.y = (int)Finish.y;
+	CAStarMapSearchNode nodeEnd;
+	nodeEnd.m_X = (int)Finish.x;
+	nodeEnd.m_Y = (int)Finish.y;
 
 	// Set Start and goal states
 
@@ -352,15 +353,15 @@ void CAStar::BuildPath(void *pData)
 		SearchState = astarsearch.SearchStep();
 		SearchSteps++;
 	}
-	while( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_SEARCHING );
+	while( SearchState == CAStarSearch<CAStarMapSearchNode>::SEARCH_STATE_SEARCHING );
 
 	LOCK_SECTION_DBG(pSelf->m_PathLock);
 
-	if( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_SUCCEEDED )
+	if( SearchState == CAStarSearch<CAStarMapSearchNode>::SEARCH_STATE_SUCCEEDED )
 	{
 		dbg_msg("astar", "Search found goal state in %i iterations", SearchSteps);
 
-		AStarMapSearchNode *node = astarsearch.GetSolutionStart();
+		CAStarMapSearchNode *node = dynamic_cast<CAStarMapSearchNode *>(astarsearch.GetSolutionStart());
 
 		SolutionLength = 0;
 		SolutionCost = astarsearch.GetSolutionCost();
@@ -377,9 +378,9 @@ void CAStar::BuildPath(void *pData)
 				break;
 			}
 
-			pSelf->m_Path.add_unsorted(Node(SolutionLength, vec2(node->x*32+16, node->y*32+16)));
+			pSelf->m_Path.add_unsorted(Node(SolutionLength, vec2(node->m_X*32+16, node->m_Y*32+16)));
 
-			node = astarsearch.GetSolutionNext();
+			node = dynamic_cast<CAStarMapSearchNode *>(astarsearch.GetSolutionNext());
 
 			SolutionLength++;
 
@@ -405,7 +406,7 @@ void CAStar::BuildPath(void *pData)
 
 
 	}
-	else if( SearchState == AStarSearch<AStarMapSearchNode>::SEARCH_STATE_FAILED )
+	else if( SearchState == CAStarSearch<CAStarMapSearchNode>::SEARCH_STATE_FAILED )
 	{
 		dbg_msg("astar", "Search terminated. Did %i iterations but failed to find goal state", SearchSteps);
 	}
