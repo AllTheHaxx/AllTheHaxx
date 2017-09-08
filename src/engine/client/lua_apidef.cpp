@@ -616,5 +616,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	if(g_Config.m_Debug)
 		dbg_msg("lua/debug", "registering lua bindings complete (L=%p)", L);
 
+
+	// register type aliases
+	luaL_dostring(L, "vec2=vec2f");
+	luaL_dostring(L, "vec3=vec3f");
+	luaL_dostring(L, "vec4=vec4f");
+
 #endif
 }
