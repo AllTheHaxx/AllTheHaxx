@@ -35,6 +35,7 @@ given where due.
 #include <algorithm>
 #include <set>
 #include <vector>
+#include <map>
 #include <cfloat>
 
 //using namespace std;
@@ -42,6 +43,7 @@ using std::make_heap;
 using std::push_heap;
 using std::pop_heap;
 using std::vector;
+using std::map;
 
 // fast fixed size memory allocator, used for fast node memory management
 #include "fsa.h"
@@ -187,6 +189,7 @@ public: // methods
 		// Push the start node on the Open list
 
 		m_OpenList.push_back( m_Start ); // heap now unsorted
+		m_OpenListMap[m_Start->m_UserState.GetUID()] = m_Start;
 
 		// Sort back element into heap
 		push_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
@@ -227,8 +230,9 @@ public: // methods
 		Node *n = m_OpenList.front(); // get pointer to the node
 		pop_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
 		m_OpenList.pop_back();
+		m_OpenListMap.erase(n->m_UserState.GetUID());
 
-		// Check for the goal, once we pop that we're done
+		// Check for the goal; once we pop that, we're done
 		if( n->m_UserState.IsGoal( m_Goal->m_UserState ) )
 		{
 			// The user is going to use the Goal Node he passed in 
@@ -309,55 +313,35 @@ public: // methods
 				// If it is but the node that is already on them is better (lower g)
 				// then we can forget about this successor
 
-				// First linear search of open list to find node
-
-				typename vector< Node * >::iterator openlist_result;
-
-				for( openlist_result = m_OpenList.begin(); openlist_result != m_OpenList.end(); openlist_result ++ ) // TODO: SLOW!!
+				// search this node on the open list
+				Node *openlist_node = NULL;
+				try
 				{
-					if( (*openlist_result)->m_UserState.IsSameState( (*successor)->m_UserState ) )
-					{
-						break;
-					}
-				}
-
-				if( openlist_result != m_OpenList.end() )
-				{
+					openlist_node = m_OpenListMap.at((*successor)->m_UserState.GetUID());
 
 					// we found this state on open
-
-					if( (*openlist_result)->g <= newg )
+					if( openlist_node->g <= newg )
 					{
-						FreeNode( (*successor) );
-
 						// the one on Open is cheaper than this one
+						FreeNode( (*successor) );
 						continue;
 					}
-				}
+				} catch(std::out_of_range) {};
 
-				typename vector< Node * >::iterator closedlist_result;
-
-				for( closedlist_result = m_ClosedList.begin(); closedlist_result != m_ClosedList.end(); closedlist_result ++ ) // TODO: EVEN SLOWER!!!
+				// search this node on the closed list
+				Node *closedlist_node = NULL;
+				try
 				{
-					if( (*closedlist_result)->m_UserState.IsSameState( (*successor)->m_UserState ) )
-					{
-						break;
-					}
-				}
-
-				if( closedlist_result != m_ClosedList.end() )
-				{
+					closedlist_node = m_ClosedListMap.at((*successor)->m_UserState.GetUID());
 
 					// we found this state on closed
-
-					if( (*closedlist_result)->g <= newg )
+					if( closedlist_node->g <= newg )
 					{
 						// the one on Closed is cheaper than this one
 						FreeNode( (*successor) );
-
 						continue;
 					}
-				}
+				} catch(std::out_of_range) {};
 
 				// This node is the best node so far with this particular state
 				// so lets keep it and set up its AStar specific data ...
@@ -368,25 +352,22 @@ public: // methods
 				(*successor)->f = (*successor)->g + (*successor)->h;
 
 				// Remove successor from closed if it was on it
-
-				if( closedlist_result != m_ClosedList.end() )
+				if( closedlist_node )
 				{
 					// remove it from Closed
-					FreeNode(  (*closedlist_result) ); 
-					m_ClosedList.erase( closedlist_result );
-
-					// Fix thanks to ...
-					// Greg Douglas <gregdouglasmail@gmail.com>
-					// who noticed that this code path was incorrect
-					// Here we have found a new state which is already CLOSED
-					// anus
-					
+					m_ClosedListMap.erase(closedlist_node->m_UserState.GetUID());
+					FreeNode( closedlist_node );
 				}
 
 				// Update old version of this node
-				if( openlist_result != m_OpenList.end() )
-				{	   
+				if( openlist_node )
+				{
+					typename vector< Node * >::iterator openlist_result;
+					openlist_result = std::find(m_OpenList.begin(), m_OpenList.end(), openlist_node);
+					if(openlist_result == m_OpenList.end())
+						printf("shit happens DENNIS %lu %lu", m_OpenList.size(), m_OpenListMap.size());
 
+					m_OpenListMap.erase((*openlist_result)->m_UserState.GetUID());
 					FreeNode( (*openlist_result) ); 
 			   		m_OpenList.erase( openlist_result );
 
@@ -400,6 +381,7 @@ public: // methods
 
 				// heap now unsorted
 				m_OpenList.push_back( (*successor) );
+				m_OpenListMap[(*successor)->m_UserState.GetUID()] = *successor;
 
 				// sort back element into heap
 				push_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
@@ -408,7 +390,7 @@ public: // methods
 
 			// push n onto Closed, as we have expanded it now
 
-			m_ClosedList.push_back( n );
+			m_ClosedListMap[n->m_UserState.GetUID()] = n;
 
 		} // end else (not goal so expand)
 
@@ -551,93 +533,7 @@ public: // methods
 		}
 	}
 
-	// For educational use and debugging it is useful to be able to view
-	// the open and closed list at each step, here are two functions to allow that.
-
-	IAStarState *GetOpenListStart()
-	{
-		float f,g,h;
-		return GetOpenListStart( f,g,h );
-	}
-
-	IAStarState *GetOpenListStart( float &f, float &g, float &h )
-	{
-		iterDbgOpen = m_OpenList.begin();
-		if( iterDbgOpen != m_OpenList.end() )
-		{
-			f = (*iterDbgOpen)->f;
-			g = (*iterDbgOpen)->g;
-			h = (*iterDbgOpen)->h;
-			return &(*iterDbgOpen)->m_UserState;
-		}
-
-		return NULL;
-	}
-
-	IAStarState *GetOpenListNext()
-	{
-		float f,g,h;
-		return GetOpenListNext( f,g,h );
-	}
-
-	IAStarState *GetOpenListNext( float &f, float &g, float &h )
-	{
-		iterDbgOpen++;
-		if( iterDbgOpen != m_OpenList.end() )
-		{
-			f = (*iterDbgOpen)->f;
-			g = (*iterDbgOpen)->g;
-			h = (*iterDbgOpen)->h;
-			return &(*iterDbgOpen)->m_UserState;
-		}
-
-		return NULL;
-	}
-
-	IAStarState *GetClosedListStart()
-	{
-		float f,g,h;
-		return GetClosedListStart( f,g,h );
-	}
-
-	IAStarState *GetClosedListStart( float &f, float &g, float &h )
-	{
-		iterDbgClosed = m_ClosedList.begin();
-		if( iterDbgClosed != m_ClosedList.end() )
-		{
-			f = (*iterDbgClosed)->f;
-			g = (*iterDbgClosed)->g;
-			h = (*iterDbgClosed)->h;
-
-			return &(*iterDbgClosed)->m_UserState;
-		}
-
-		return NULL;
-	}
-
-	IAStarState *GetClosedListNext()
-	{
-		float f,g,h;
-		return GetClosedListNext( f,g,h );
-	}
-
-	IAStarState *GetClosedListNext( float &f, float &g, float &h )
-	{
-		iterDbgClosed++;
-		if( iterDbgClosed != m_ClosedList.end() )
-		{
-			f = (*iterDbgClosed)->f;
-			g = (*iterDbgClosed)->g;
-			h = (*iterDbgClosed)->h;
-
-			return &(*iterDbgClosed)->m_UserState;
-		}
-
-		return NULL;
-	}
-
 	// Get the number of steps
-
 	int GetStepCount() { return m_Steps; }
 
 	void EnsureMemoryFreed()
@@ -666,17 +562,17 @@ private: // methods
 		}
 
 		m_OpenList.clear();
+		m_OpenListMap.clear();
 
 		// iterate closed list and delete unused nodes
-		typename vector< Node * >::iterator iterClosed;
-
-		for( iterClosed = m_ClosedList.begin(); iterClosed != m_ClosedList.end(); iterClosed ++ )
+		typename map<AStarNodeUID, Node *>::iterator iterClosed;
+		for( iterClosed = m_ClosedListMap.begin(); iterClosed != m_ClosedListMap.end(); iterClosed++ )
 		{
-			Node *n = (*iterClosed);
+			Node *n = iterClosed->second;
 			FreeNode( n );
 		}
 
-		m_ClosedList.clear();
+		m_ClosedListMap.clear();
 
 		// delete the goal
 
@@ -690,40 +586,31 @@ private: // methods
 	void FreeUnusedNodes()
 	{
 		// iterate open list and delete unused nodes
-		typename vector< Node * >::iterator iterOpen = m_OpenList.begin();
-
-		while( iterOpen != m_OpenList.end() )
+		typename vector< Node * >::iterator iterOpen;
+		for( iterOpen = m_OpenList.begin(); iterOpen != m_OpenList.end(); iterOpen++ )
 		{
 			Node *n = (*iterOpen);
 
 			if( !n->child )
 			{
 				FreeNode( n );
-
-				n = NULL;
 			}
-
-			iterOpen ++;
 		}
-
 		m_OpenList.clear();
+		m_OpenListMap.clear();
 
 		// iterate closed list and delete unused nodes
-		typename vector< Node * >::iterator iterClosed;
-
-		for( iterClosed = m_ClosedList.begin(); iterClosed != m_ClosedList.end(); iterClosed ++ )
+		typename map<AStarNodeUID, Node *>::iterator iterClosed;
+		for( iterClosed = m_ClosedListMap.begin(); iterClosed != m_ClosedListMap.end(); iterClosed ++ )
 		{
-			Node *n = (*iterClosed);
+			Node *n = iterClosed->second;
 
 			if( !n->child )
 			{
 				FreeNode( n );
-				n = NULL;
-
 			}
 		}
-
-		m_ClosedList.clear();
+		m_ClosedListMap.clear();
 
 	}
 
@@ -765,8 +652,9 @@ private: // data
 	// Heap (simple vector but used as a heap, cf. Steve Rabin's game gems article)
 	vector< Node *> m_OpenList;
 
-	// Closed list is a vector.
-	vector< Node * > m_ClosedList; 
+	// provides fast access to specific nodes (these maps are keeping iterators into m_OpenList bzw. m_ClosedList)
+	map<AStarNodeUID, Node *> m_OpenListMap;
+	map<AStarNodeUID, Node *> m_ClosedListMap;
 
 	// Successors is a vector filled out by the user each type successors to a node
 	// are generated
@@ -790,11 +678,6 @@ private: // data
 	// Memory
  	FixedSizeAllocator<Node> m_FixedSizeAllocator;
 #endif
-	
-	//Debug : need to keep these two iterators around
-	// for the user Dbg functions
-	typename vector< Node * >::iterator iterDbgOpen;
-	typename vector< Node * >::iterator iterDbgClosed;
 
 	// debugging : count memory allocation and free's
 	int m_AllocateNodeCount;

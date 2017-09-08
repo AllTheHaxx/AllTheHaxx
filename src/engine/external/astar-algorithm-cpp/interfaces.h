@@ -1,5 +1,7 @@
 #pragma once
 
+typedef unsigned long AStarNodeUID;
+
 
 class IAStarWorldMap
 {
@@ -24,5 +26,6 @@ public:
 	virtual float GetCost( const IAStarWorldMap *pMap, const IAStarState &successor ) const = 0; // Computes the cost of travelling from this node to the successor node
 	virtual float GetOwnCost( const IAStarWorldMap *pMap ) const = 0; // Computes the cost of travelling from this node to the successor node
 	virtual bool IsSameState( const IAStarState &rhs ) const = 0; // Returns true if this node is the same as the rhs node
+	virtual AStarNodeUID GetUID() const = 0;
 };
 

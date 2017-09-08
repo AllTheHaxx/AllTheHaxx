@@ -1,7 +1,7 @@
 #pragma once
 
-#include "stlastar.h" // See header for copyright and usage information
 #include "interfaces.h"
+#include "stlastar.h" // See header for copyright and usage information
 
 
 
@@ -22,6 +22,7 @@ public:
 	float GetCost( const IAStarWorldMap *pMap, const IAStarState &successor ) const;
 	float GetOwnCost( const IAStarWorldMap *pMap ) const;
 	bool IsSameState( const IAStarState &rhs ) const;
+	AStarNodeUID GetUID() const { return (unsigned)((AStarNodeUID)m_X << 0xF) | (unsigned)m_Y; };
 };
 
 bool CAStarMapSearchNode::IsSameState( const IAStarState &rhs ) const
@@ -74,7 +75,8 @@ bool CAStarMapSearchNode::GetSuccessors( CAStarSearch<CAStarMapSearchNode> *asta
 			) \
 	{ \
 		CAStarMapSearchNode NewNode = CAStarMapSearchNode( xval, yval ); \
-		astarsearch->AddSuccessor( NewNode ); \
+		if(!astarsearch->AddSuccessor( NewNode )) \
+			return false; \
 	}
 
 	// NORTH
