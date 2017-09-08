@@ -36,6 +36,8 @@ CUI::CUI()
 	m_Screen.y = 0;
 	m_Screen.w = 848.0f;
 	m_Screen.h = 480.0f;
+
+	m_ClippingAreaStack.clear();
 }
 
 int CUI::Update(float Mx, float My, float Mwx, float Mwy, int Buttons)
@@ -50,10 +52,21 @@ int CUI::Update(float Mx, float My, float Mwx, float Mwy, int Buttons)
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
 	m_pBecommingHotItem = 0;
+
+	m_ClippingAreaStack.clear();
+
 	return 0;
 }
 
 int CUI::MouseInside(const CUIRect *r)
+{
+	if(!m_ClippingAreaStack.empty() && !MouseInsideImpl(&(m_ClippingAreaStack[-1])))
+		return 0;
+	return MouseInsideImpl(r);
+	//return MouseInsideImpl(r) && (!MouseInsideImpl(&m_ClippingArea) || !m_ClippingEnabled);
+}
+
+int CUI::MouseInsideImpl(const CUIRect *r)
 {
 	if(m_MouseX >= r->x && m_MouseX <= r->x+r->w && m_MouseY >= r->y && m_MouseY <= r->y+r->h)
 		return 1;
@@ -242,6 +255,12 @@ float CUIRect::Scale() const
 
 void CUI::ClipEnable(const CUIRect *r)
 {
+	m_ClippingAreaStack.add(*r);
+	ClipEnableImpl(r);
+}
+
+void CUI::ClipEnableImpl(const CUIRect *r)
+{
 	float XScale = Graphics()->ScreenWidth()/Screen()->w;
 	float YScale = Graphics()->ScreenHeight()/Screen()->h;
 	Graphics()->ClipEnable((int)(r->x*XScale), (int)(r->y*YScale), (int)(r->w*XScale), (int)(r->h*YScale));
@@ -249,7 +268,12 @@ void CUI::ClipEnable(const CUIRect *r)
 
 void CUI::ClipDisable()
 {
-	Graphics()->ClipDisable();
+	if(!m_ClippingAreaStack.empty())
+		m_ClippingAreaStack.remove_index_fast(-1);
+	if(m_ClippingAreaStack.empty())
+		Graphics()->ClipDisable();
+	else
+		ClipEnableImpl(&(m_ClippingAreaStack[-1]));
 }
 
 void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom) const

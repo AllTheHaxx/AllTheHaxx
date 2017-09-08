@@ -60,6 +60,7 @@ private:
 
 	char m_aScriptTitle[64];
 	char m_aScriptInfo[128];
+	bool m_ScriptHidden;
 	bool m_ScriptHasSettingsPage;
 	bool m_ScriptAutoload;
 
@@ -85,9 +86,10 @@ public:
 	const char* GetScriptTitle() const { return m_aScriptTitle; }
 	const char* GetScriptInfo() const { return m_aScriptInfo; }
 	bool GetScriptHasSettings() const { return m_ScriptHasSettingsPage; }
+	bool GetScriptIsHidden() const { return m_ScriptHidden; }
 	bool GetScriptIsAutoload() const { return m_ScriptAutoload; }
 	bool SetScriptIsAutoload(bool NewVal) { bool ret = m_ScriptAutoload; m_ScriptAutoload = NewVal; return ret; }
-	lua_State *L() const { return m_pLuaState; }
+	inline lua_State *L() const { return m_pLuaState; }
 
 	CLua *Lua() const { return m_pLua; }
 

@@ -62,6 +62,14 @@ void CLua::Shutdown()
 	m_apLuaFiles.clear();
 }
 
+void CLua::Reload()
+{
+	CALLSTACK_ADD();
+
+	Shutdown();
+	LoadFolder();
+}
+
 void CLua::SortLuaFiles()
 {
 	CALLSTACK_ADD();

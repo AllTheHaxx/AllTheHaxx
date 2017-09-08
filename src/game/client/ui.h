@@ -3,6 +3,8 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include <base/tl/array.h>
+
 class CUIRect
 {
 	// TODO: Refactor: Redo UI scaling
@@ -39,6 +41,7 @@ class CUI
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
+	array<CUIRect> m_ClippingAreaStack;
 
 	CUIRect m_Screen;
 	class IGraphics *m_pGraphics;
@@ -90,6 +93,7 @@ public:
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	int MouseInside(const CUIRect *pRect);
+	int MouseInsideImpl(const CUIRect *pRect);
 	int MouseInsideNative(float mx, float my, const CUIRect *pRect);
 	int MouseInsideAbsolute(float mx, float my, const CUIRect *s, const CUIRect *r);
 	void ConvertMouseMove(float *x, float *y);
@@ -97,6 +101,7 @@ public:
 	CUIRect *Screen();
 	float PixelSize();
 	void ClipEnable(const CUIRect *pRect);
+	void ClipEnableImpl(const CUIRect *pRect);
 	void ClipDisable();
 
 	// TODO: Refactor: Redo UI scaling

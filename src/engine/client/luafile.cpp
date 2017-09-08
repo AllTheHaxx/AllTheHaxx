@@ -32,6 +32,7 @@ void CLuaFile::Reset(bool error)
 {
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
+	m_ScriptHidden = false;
 
 	if(!error)
 		m_pErrorStr = NULL;
@@ -52,8 +53,7 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 
 	if(str_comp_num(pFilename, "data/lua/Official/", 18) == 0)
 	{
-		m_PermissionFlags = PERMISSION_GODMODE;
-		return;
+		m_PermissionFlags |= PERMISSION_GODMODE;
 	}
 
 	std::ifstream f(pFilename);
@@ -63,7 +63,7 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 	while(std::getline(f, line))
 	{
 		// really noone puts the permission flag tags further down than this...
-		if(++CurrentLine >= 10)
+		if(searching && ++CurrentLine >= 10)
 			break;
 
 		if(searching && str_comp_num(line.c_str(), "--[[#!", 6) != 0)
@@ -78,26 +78,33 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 			break;
 
 		// make sure we only get what we want
-		char aBuf[16]; char *p = aBuf;
+		char aBuf[512]; char *p = aBuf;
 		str_copy(aBuf, line.c_str(), sizeof(aBuf));
 		str_sanitize_strong(aBuf);
 		while(*p == ' ' || *p == '\t')
 			p++;
 
-		// some sort of syntax error there? just ignore the line
-		if(p++[0] != '#')
-			continue;
-
-		if(str_comp_nocase_num("io", p, 2) == 0)
-			m_PermissionFlags |= PERMISSION_IO;
-		else if(str_comp_nocase_num("debug", p, 5) == 0)
-			m_PermissionFlags |= PERMISSION_DEBUG;
-		else if(str_comp_nocase_num("ffi", p, 3) == 0)
-			m_PermissionFlags |= PERMISSION_FFI;
-		else if(str_comp_nocase_num("os", p, 2) == 0)
-			m_PermissionFlags |= PERMISSION_OS;
-		else if(str_comp_nocase_num("package", p, 7) == 0)
-			m_PermissionFlags |= PERMISSION_PACKAGE;
+		char TypeIndicator = p++[0];
+		if(TypeIndicator == '#')
+		{
+			if(str_comp_nocase("io", p) == 0)
+				m_PermissionFlags |= PERMISSION_IO;
+			else if(str_comp_nocase("debug", p) == 0)
+				m_PermissionFlags |= PERMISSION_DEBUG;
+			else if(str_comp_nocase("ffi", p) == 0)
+				m_PermissionFlags |= PERMISSION_FFI;
+			else if(str_comp_nocase("os", p) == 0)
+				m_PermissionFlags |= PERMISSION_OS;
+			else if(str_comp_nocase("package", p) == 0)
+				m_PermissionFlags |= PERMISSION_PACKAGE;
+		}
+		else if(TypeIndicator == '$')
+		{
+			if(str_comp_nocase("hidden", p) == 0)
+				m_ScriptHidden = true;
+			else if(str_comp_nocase_num("info ", p, 5) == 0 && (p+5)[0] != '\0')
+				str_copyb(m_aScriptInfo, p+5);
+		}
 	}
 
 #endif

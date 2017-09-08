@@ -1,4 +1,6 @@
-g_ScriptHidden = true
+--[[#!
+	$info This script demonstrates basic graphic rendering
+]]--#
 
 function Render()
 	local ClipRect = UIRect(0,0,0,0)

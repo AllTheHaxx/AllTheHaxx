@@ -125,7 +125,8 @@ public:
 	{
 		if(index < 0)
 			index += num_elements;
-		dbg_assert_legacy(index >= 0 && index < num_elements, "index out of range");
+		if(dbg_assert_strict(index >= 0 && index < num_elements, "index out of range"))
+			return;
 		if(index != num_elements-1)
 			list[index] = list[num_elements-1];
 		set_size(size()-1);
@@ -158,7 +159,8 @@ public:
 	{
 		if(index < 0)
 			index += num_elements;
-		dbg_assert_legacy(index >= 0 && index < num_elements, "index out of range");
+		if(dbg_assert_strict(index >= 0 && index < num_elements, "index out of range"))
+			return;
 		for(int i = index+1; i < num_elements; i++)
 			list[i-1] = list[i];
 

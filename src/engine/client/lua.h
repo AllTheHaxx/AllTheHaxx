@@ -61,6 +61,7 @@ public:
 
 	void Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole);
 	void Shutdown();
+	void Reload();
 	void AddUserscript(const char *pFilename);
 	void LoadFolder();
 	void LoadFolder(const char *pFolder);

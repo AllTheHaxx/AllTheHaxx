@@ -168,7 +168,10 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton, "Reload the list of files", s_SelectedScript > -1 ? 0 : CUI::CORNER_TR))
 		{
 			s_SelectedScript = -1;
-			Client()->Lua()->LoadFolder();
+			if(!Input()->KeyIsPressed(KEY_LSHIFT))
+				Client()->Lua()->Reload();
+			else
+				Client()->Lua()->LoadFolder();
 		}
 
 	if(DoButton_CheckBox(&s_LuaButton, Localize("Use Lua"), g_Config.m_ClLua, &Button, 0, g_Config.m_ClLua ? CUI::CORNER_TL : CUI::CORNER_ALL))
@@ -212,6 +215,9 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			if(!L)
 				continue;
 
+			if(L->GetScriptIsHidden())
+				continue;
+
 			if(L->State() == CLuaFile::STATE_LOADED)
 				NumActiveScripts++;
 
@@ -223,7 +229,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			else if(ShowActiveOnly == 2 && L->State() == CLuaFile::STATE_LOADED)
 				continue;
 
-			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i], 0);
+			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i]);
 			NumListedFiles++;
 
 			if(i >= MAX_SCRIPTS-1)
