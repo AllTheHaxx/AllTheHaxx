@@ -169,6 +169,7 @@ MACRO_CONFIG_INT(ClChatShowIPs, cl_chat_show_ips, 1, 0, 1, CFGFLAG_CLIENT|CFGFLA
 MACRO_CONFIG_INT(ClChatDennisProtection, cl_chat_dennis_protection, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Be protected like a dennis. Be a dennis.")
 MACRO_CONFIG_INT(ClColorfulClient, cl_colorful_client, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Colorize everything! (highly recommended!!)")
 MACRO_CONFIG_INT(ClNotifications, cl_notifications, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show notifications")
+MACRO_CONFIG_INT(ClNotificationsLifetime, cl_notifications_lifetime, 15, 1, 60, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Now long notifications will stay on screen (in seconds)")
 MACRO_CONFIG_INT(ClPathFinding, cl_path_finding, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")
 MACRO_CONFIG_INT(ClPathFindingColor, cl_path_finding_color, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")
 MACRO_CONFIG_INT(ClPathFindingColorR, cl_path_finding_color_r, 100, 0, 100, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Find and display the shortest path in ddrace using a* algorithm")

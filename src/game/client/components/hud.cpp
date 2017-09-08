@@ -456,12 +456,12 @@ void CHud::RenderNotifications()
 	if(!g_Config.m_ClNotifications)
 		return;
 
-	const float NOTIFICATION_LIFETIME = 15.0f; // in seconds
+	const float NOTIFICATION_LIFETIME = (float)g_Config.m_ClNotificationsLifetime; // in seconds
 	const float TEXT_SIZE = 6.0f;
 	const float Y_BOTTOM = m_Height/1.7f;
 
 	// render background
-	if(m_Notifications.size())
+	if(!m_Notifications.empty())
 	{
 		// check for the required number of lines
 		int NumLines = 0;
@@ -469,11 +469,21 @@ void CHud::RenderNotifications()
 			NumLines += TextRender()->TextLineCount(0, TEXT_SIZE, m_Notifications[i].m_aMsg, m_Width/4.3f);
 
 		float ybottom = Y_BOTTOM + TEXT_SIZE/2;
-		float ytop = ybottom - NumLines*TEXT_SIZE - TEXT_SIZE/2;
+		float ytop_wanted = ybottom - NumLines*TEXT_SIZE - TEXT_SIZE/2;
+		static float ytop = ytop_wanted;
+		smooth_set(&ytop, ytop_wanted, 15.0f, Client()->RenderFrameTime());
 		float height = ybottom-ytop;
 		CUIRect r;
-		r.x = m_Width-m_Width/4.3f-2.5f; r.y = ytop; r.w = m_Width/4.3f+2.5f; r.h = height;
-		RenderTools()->DrawUIRect(&r, vec4(0,0,0,m_Notifications.size()>1?0.5f:min(0.5f,(float)(m_Notifications[0].m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME)), CUI::CORNER_L, 3.5f);
+		r.x = m_Width-m_Width/4.3f-2.5f;
+		r.y = ytop;
+		r.w = m_Width/4.3f+2.5f;
+		r.h = height;
+		RenderTools()->DrawUIRect(
+				&r,
+				vec4(0,0,0,
+					 m_Notifications.size() > 1 ? 0.5f
+												: min(0.5f, (m_Notifications[0].m_SpawnTime + NOTIFICATION_LIFETIME-Client()->LocalTime()) / NOTIFICATION_LIFETIME)),
+				CUI::CORNER_L, 3.5f);
 	}
 
 	// render all the notifications
