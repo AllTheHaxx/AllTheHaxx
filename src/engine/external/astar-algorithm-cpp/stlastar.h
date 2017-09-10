@@ -25,11 +25,7 @@ given where due.
 
 #ifndef STLASTAR_H
 #define STLASTAR_H
-// used for text debugging
-#include <iostream>
-#include <stdio.h>
-//#include <conio.h>
-#include <assert.h>
+#include <base/system++/system++.h>
 
 // stl includes
 #include <algorithm>
@@ -364,19 +360,17 @@ public: // methods
 				{
 					typename vector< Node * >::iterator openlist_result;
 					openlist_result = std::find(m_OpenList.begin(), m_OpenList.end(), openlist_node);
-					if(openlist_result == m_OpenList.end())
-						printf("shit happens DENNIS %lu %lu", m_OpenList.size(), m_OpenListMap.size());
-
-					m_OpenListMap.erase((*openlist_result)->m_UserState.GetUID());
-					FreeNode( (*openlist_result) ); 
-			   		m_OpenList.erase( openlist_result );
-
+					if(!dbg_assert_strict(openlist_result != m_OpenList.end(), "m_OpenListMap contains element that's not in m_OpenList"))
+					{
+						m_OpenListMap.erase((*openlist_result)->m_UserState.GetUID());
+						FreeNode((*openlist_result));
+						m_OpenList.erase(openlist_result);
+					}
 					// re-make the heap 
 					// make_heap rather than sort_heap is an essential bug fix
 					// thanks to Mike Ryynanen for pointing this out and then explaining
 					// it in detail. sort_heap called on an invalid heap does not work
 					make_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
-			
 				}
 
 				// heap now unsorted
@@ -539,9 +533,8 @@ public: // methods
 	void EnsureMemoryFreed()
 	{
 #if USE_FSA_MEMORY
-		assert(m_AllocateNodeCount == 0);
+		dbg_assert_strict(m_AllocateNodeCount == 0, "CAStarSearch::EnsureMemoryFreed() - memory was not freed entirely");
 #endif
-
 	}
 
 private: // methods
