@@ -154,6 +154,8 @@ void CBinds::SetDefaults()
 	Bind(KEY_PAGEDOWN, "+nextweapon");
 #else
 	Bind(KEY_RETURN, "+show_chat; chat all");
+	Bind(KEY_SLASH, "+show_chat; chat all /");
+	Bind(KEY_HASH, "+show_chat; chat all /"); // For German keyboards
 	Bind(KEY_RIGHT, "spectate_next");
 	Bind(KEY_LEFT, "spectate_previous");
 	Bind(KEY_RSHIFT, "+spectate");

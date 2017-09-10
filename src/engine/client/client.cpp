@@ -416,10 +416,10 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 CClient::~CClient()
 {
-	if(m_pDatabase)
-		delete m_pDatabase;
 	if(m_pMapdownloadTask)
 		m_pMapdownloadTask->Abort();
+	if(m_pDatabase)
+		delete m_pDatabase;
 }
 
 void CClient::LoadMapDatabaseUrls()

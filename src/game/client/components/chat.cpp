@@ -133,20 +133,22 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 {
 	CALLSTACK_ADD();
 
+	SELF_FROM_USERDATA(CChat);
+
 	const char *pMode = pResult->GetString(0);
 	if(str_comp(pMode, "all") == 0)
-		((CChat*)pUserData)->EnableMode(0);
+		pSelf->EnableMode(0);
 	else if(str_comp(pMode, "team") == 0)
-		((CChat*)pUserData)->EnableMode(1);
+		pSelf->EnableMode(1);
 	else if(str_comp(pMode, "hidden") == 0)
-		((CChat*)pUserData)->EnableMode(2);
+		pSelf->EnableMode(2);
 	else if(str_comp(pMode, "crypt") == 0)
-		((CChat*)pUserData)->EnableMode(3);
+		pSelf->EnableMode(3);
 	else
-		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all, team, hidden or crypt as mode");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all, team, hidden or crypt as mode");
 
 	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
-		((CChat*)pUserData)->m_Input.Set(pResult->GetString(1));
+		pSelf->m_Input.Set(pResult->GetString(1));
 }
 
 void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)

@@ -7,6 +7,7 @@
 #define dbg_assert(test,msg) if(!(test)) throw CTWException(__FILE__, __LINE__, #test, msg)
 
 #define SELF_FROM_USER(TYPE) TYPE *pSelf = (TYPE*)pUser;
+#define SELF_FROM_USERDATA(TYPE) TYPE *pSelf = (TYPE*)pUserData;
 
 
 class CTWException : public std::exception

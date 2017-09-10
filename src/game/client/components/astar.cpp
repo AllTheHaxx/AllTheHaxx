@@ -44,6 +44,8 @@ void CAStar::OnShutdown()
 	if(m_pBuilderThread || m_pScoreThread)
 		dbg_msg("astar", "waiting for threads to finish...");
 	StopThreads();
+
+	OnReset();
 }
 
 void CAStar::OnReset() // is being called right after OnMapLoad()
