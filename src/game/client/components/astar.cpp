@@ -73,6 +73,7 @@ void CAStar::OnRender()
 		return;
 
 	// find the path one second after joining to be buffered
+	if(IsRace(Client()->GetServerInfo()) || IsDDNet(Client()->GetServerInfo()));
 	{
 		static int64 s_ActivationTime = 0;
 		if(m_MapReloaded)
@@ -311,12 +312,8 @@ void CAStar::BuildPath(void *pData)
 		((CAStar*)pUser)->m_pBuilderThread = NULL;
 	})
 
-
-	{
-		const CServerInfo *pInfo = pSelf->Client()->GetServerInfo();
-		if(!g_Config.m_ClPathFinding || (!IsRace(pInfo) && !IsDDNet(pInfo)))
-			return;
-	}
+	if(!g_Config.m_ClPathFinding)
+		return;
 
 	int SolutionLength = -1;
 	float SolutionCost = -1;
