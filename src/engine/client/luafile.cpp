@@ -192,10 +192,13 @@ void CLuaFile::ApplyPermissions(int Flags)
 #if defined(FEATURE_LUA)
 	if(Flags&PERMISSION_GODMODE)
 	{
-		luaL_openlibs(m_pLuaState);
+		//luaL_openlibs(m_pLuaState); // calling this after RegisterLuaCallbacks discards our overrides again
+		Flags = 0x7fffffff;
 	}
-	else
+	//else
 	{
+		Flags &= ~PERMISSION_PACKAGE; // buggy (crashs the client on script load)
+
 		if(Flags & PERMISSION_IO)
 			luaopen_io(m_pLuaState); // input/output of files
 		if(Flags&PERMISSION_DEBUG)

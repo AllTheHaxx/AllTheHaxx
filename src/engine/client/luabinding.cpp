@@ -286,7 +286,7 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 	if(nargs < 1)
 		return luaL_error(L, "print expects 1 argument or more");
 
-	char aSys[64];
+	char aSys[128];
 	str_format(aSys, sizeof(aSys), "LUA|%s", pLF->GetFilename());
 
 	// construct the message from all arguments
@@ -325,9 +325,15 @@ int CLuaBinding::LuaThrow(lua_State *L)
 
 	argcheck(lua_isstring(L, nargs) || lua_isnumber(L, nargs), nargs, "string or number");
 
+	// receive the current line
+	lua_Debug ar;
+	lua_getstack(L, 1, &ar);
+	lua_getinfo(L, "nSl", &ar);
+	int Line = ar.currentline;
+
 	// add the exception
 	char aMsg[512];
-	str_formatb(aMsg, "Custom error: %s", lua_tostring(L, nargs));
+	str_formatb(aMsg, ":%i: Custom Exception: %s", Line, lua_tostring(L, nargs));
 	int result = CLua::m_pClient->Lua()->HandleException(aMsg, pLF);
 
 	// pop argument
