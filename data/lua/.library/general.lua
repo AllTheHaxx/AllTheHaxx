@@ -38,3 +38,11 @@ function int(var)
     if t == "string" or t == "number" then return math.floor(tonumber(var)+0.5) end
     return nil
 end
+
+function GetKey(tbl, value)
+    for k,v in next, tbl do
+        if v == value then
+            return k
+        end
+    end
+end

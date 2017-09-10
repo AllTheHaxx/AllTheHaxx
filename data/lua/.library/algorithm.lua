@@ -23,12 +23,14 @@ function spairs(t, order)
     end
 end
 
-function GetKey(tbl, value)
-    for k,v in next, tbl do
-        if v == value then
-            return k
-        end
+function range(tbl, first, last)
+    first = first or 1
+    last = last or #tbl
+    local new_tbl = {}
+    for i = first, last do
+        table.insert(new_tbl, tbl[i])
     end
+    return new_tbl
 end
 
 function dump(o)
@@ -36,10 +38,15 @@ function dump(o)
         local s = '{ '
         for k,v in pairs(o) do
             if type(k) ~= 'number' then k = '"'..k..'"' end
-            s = s .. '['..k..'] = ' .. dump(v) .. ','
+            s = s .. '['..k..'] = ' .. dump(v) .. ', '
         end
+        s = s:sub(1, -3) .. ' ' -- remove trailing comma
         return s .. '} '
-    else
+    elseif type(o) == 'string' then
+        return '"' .. o .. '"'
+    elseif type(o) == 'number' then
         return tostring(o)
+    else
+        return '"<' .. tostring(o) .. '>"'
     end
 end
