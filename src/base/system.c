@@ -135,6 +135,7 @@ static void dbg_break()
 	//*((volatile unsigned*)0) = 0x0;
 
 	wait_log_queue();
+	io_flush(io_stdout());
 	abort();
 }
 

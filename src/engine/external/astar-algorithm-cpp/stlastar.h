@@ -183,7 +183,7 @@ public: // methods
 		m_Start->parent = 0;
 
 		// Push the start node on the Open list
-
+		m_FixedSizeAllocator.MakeWeakReference(m_Start, &m_Start);
 		m_OpenList.push_back( m_Start ); // heap now unsorted
 		m_OpenListMap[m_Start->m_UserState.GetUID()] = m_Start;
 
@@ -238,9 +238,9 @@ public: // methods
 
 			// A special case is that the goal was passed in as the start state
 			// so handle that here
-			if( false == n->m_UserState.IsSameState( m_Start->m_UserState ) )
+			if( ! n->m_UserState.IsSameState( m_Start->m_UserState ) )
 			{
-				FreeNode( n );
+				FreeNode( &n );
 
 				// set the child pointers in each node (except Goal which has no child)
 				Node *nodeChild = m_Goal;
@@ -278,15 +278,19 @@ public: // methods
 			// node 'n' to m_Successors
 			bool ret = n->m_UserState.GetSuccessors( this, n->parent ? &n->parent->m_UserState : NULL ); 
 
+			// if it failed, we must have gone oom
 			if( !ret )
 			{
-
+				dbg_msg("astar/warning", "out of memory, aborting search!");
+				#if USE_FSA_MEMORY
+				dbg_msg("astar/memory", "[FSA] Used Elements: %u, Max Elements: %u, Free Elements: %u", m_FixedSizeAllocator.GetElementCount(), m_FixedSizeAllocator.GetMaxElements(), m_FixedSizeAllocator.GetMaxElements()-m_FixedSizeAllocator.GetElementCount());
+				#endif
 			    typename vector< Node * >::iterator successor;
 
 				// free the nodes that may previously have been added 
 				for( successor = m_Successors.begin(); successor != m_Successors.end(); successor ++ )
 				{
-					FreeNode( (*successor) );
+					FreeNode( &(*successor) );
 				}
 
 				m_Successors.clear(); // empty vector of successor nodes to n
@@ -319,7 +323,7 @@ public: // methods
 					if( openlist_node->g <= newg )
 					{
 						// the one on Open is cheaper than this one
-						FreeNode( (*successor) );
+						FreeNode( &(*successor) );
 						continue;
 					}
 				} catch(std::out_of_range) {};
@@ -334,7 +338,7 @@ public: // methods
 					if( closedlist_node->g <= newg )
 					{
 						// the one on Closed is cheaper than this one
-						FreeNode( (*successor) );
+						FreeNode( &(*successor) );
 						continue;
 					}
 				} catch(std::out_of_range) {};
@@ -352,7 +356,7 @@ public: // methods
 				{
 					// remove it from Closed
 					m_ClosedListMap.erase(closedlist_node->m_UserState.GetUID());
-					FreeNode( closedlist_node );
+					FreeNode( &closedlist_node );
 				}
 
 				// Update old version of this node
@@ -363,7 +367,7 @@ public: // methods
 					if(!dbg_assert_strict(openlist_result != m_OpenList.end(), "m_OpenListMap contains element that's not in m_OpenList"))
 					{
 						m_OpenListMap.erase((*openlist_result)->m_UserState.GetUID());
-						FreeNode((*openlist_result));
+						FreeNode(&(*openlist_result));
 						m_OpenList.erase(openlist_result);
 					}
 					// re-make the heap 
@@ -423,21 +427,18 @@ public: // methods
 			{
 				Node *del = n;
 				n = n->child;
-				FreeNode( del );
-
-				del = NULL;
-
+				FreeNode( &del );
 			} while( n != m_Goal );
 
-			FreeNode( n ); // Delete the goal
+			FreeNode( &n ); // Delete the goal
 
 		}
 		else
 		{
 			// if the start node is the solution we need to just delete the start and goal
 			// nodes
-			FreeNode( m_Start );
-			FreeNode( m_Goal );
+			FreeNode( &m_Start );
+			FreeNode( &m_Goal );
 		}
 
 	}
@@ -533,6 +534,12 @@ public: // methods
 	void EnsureMemoryFreed()
 	{
 #if USE_FSA_MEMORY
+		if(m_AllocateNodeCount != 0)
+		{
+			dbg_msg("astar/assertinfo", "-----------------------------------------");
+			dbg_msg("astar/assertinfo", "StartNode: %s, EndNode: %s, AllocationCount: %i", m_Start ? "alloc" : "free", m_Goal ? "alloc" : "free", m_AllocateNodeCount);
+			dbg_msg("astar/assertinfo", "[FSA] Used Elements: %u, Max Elements: %u, Free Elements: %u", m_FixedSizeAllocator.GetElementCount(), m_FixedSizeAllocator.GetMaxElements(), m_FixedSizeAllocator.GetMaxElements()-m_FixedSizeAllocator.GetElementCount());
+		}
 		dbg_assert_strict(m_AllocateNodeCount == 0, "CAStarSearch::EnsureMemoryFreed() - memory was not freed entirely");
 #endif
 	}
@@ -549,7 +556,7 @@ private: // methods
 		while( iterOpen != m_OpenList.end() )
 		{
 			Node *n = (*iterOpen);
-			FreeNode( n );
+			FreeNode( &n );
 
 			iterOpen ++;
 		}
@@ -562,14 +569,14 @@ private: // methods
 		for( iterClosed = m_ClosedListMap.begin(); iterClosed != m_ClosedListMap.end(); iterClosed++ )
 		{
 			Node *n = iterClosed->second;
-			FreeNode( n );
+			FreeNode( &n );
 		}
 
 		m_ClosedListMap.clear();
 
-		// delete the goal
-
-		FreeNode(m_Goal);
+		// delete the start and goal nodes
+		FreeNode(&m_Start);
+		FreeNode(&m_Goal);
 	}
 
 
@@ -586,7 +593,7 @@ private: // methods
 
 			if( !n->child )
 			{
-				FreeNode( n );
+				FreeNode( &n );
 			}
 		}
 		m_OpenList.clear();
@@ -600,7 +607,7 @@ private: // methods
 
 			if( !n->child )
 			{
-				FreeNode( n );
+				FreeNode( &n );
 			}
 		}
 		m_ClosedListMap.clear();
@@ -627,9 +634,15 @@ private: // methods
 #endif
 	}
 
-	void FreeNode( Node *node )
+	void FreeNode( Node **node_ptr )
 	{
+		//if(dbg_assert_strict(node_ptr != NULL && *node_ptr != NULL, "FreeNode got nullptr"))
+		if(node_ptr == NULL || *node_ptr == NULL)
+			return;
 
+		dbg_assert(m_AllocateNodeCount > 0, "going to free something we didn't allocate...?!");
+		Node *node = *node_ptr;
+		*node_ptr = NULL;
 		m_AllocateNodeCount --;
 
 #if !USE_FSA_MEMORY

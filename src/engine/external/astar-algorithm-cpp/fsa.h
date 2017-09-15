@@ -47,6 +47,8 @@ given where due.
 
 #include <string.h>
 #include <stdio.h>
+#include <map>
+#include <vector>
 
 template <class USER_TYPE> class FixedSizeAllocator
 {
@@ -195,6 +197,26 @@ public: // methods
 			m_pFirstFree = pNode;
 		}
 
+		// invalidate all hooked references to this data
+		try
+		{
+			std::vector<USER_TYPE **> &refs = m_References.at(user_data);
+			for(typename std::vector<USER_TYPE **>::iterator user_variable_pp = refs.begin(); user_variable_pp != refs.end(); user_variable_pp++)
+				*(*user_variable_pp) = NULL;
+			m_References.erase(user_data);
+		} catch(std::out_of_range) {};
+
+	}
+
+	/**
+	 * A weak-reference-pointer variable will be invalidated when the data pointed by it will are freed
+	 * (automatic dereferencing)
+	 * @param user_data Pointer (A) to listen for
+	 * @param user_variable Variable containing 'Pointer A' that will be nulled on A's deletion
+	 */
+	void MakeWeakReference(USER_TYPE *user_data, USER_TYPE **user_variable)
+	{
+		m_References[user_data].push_back(user_variable);
 	}
 
 	unsigned int GetMaxElements() const { return m_MaxElements; }
@@ -207,7 +229,7 @@ public: // methods
 		FSA_ELEMENT *p = m_pFirstFree;
 		while( p )
 		{
-			printf( "%x!%x ", p->pPrev, p->pNext );
+			printf( "%p!%p ", p->pPrev, p->pNext );
 			p = p->pNext;
 		}
 		printf( "\n" );
@@ -217,10 +239,22 @@ public: // methods
 		p = m_pFirstUsed;
 		while( p )
 		{
-			printf( "%x!%x ", p->pPrev, p->pNext );
+			printf( "%p!%p ", p->pPrev, p->pNext );
 			p = p->pNext;
 		}
 		printf( "\n" );
+	}
+
+	unsigned int GetElementCount() const
+	{
+		unsigned int Count = 0;
+		FSA_ELEMENT *p = m_pFirstUsed;
+		while( p )
+		{
+			Count++;
+			p = p->pNext;
+		}
+		return Count;
 	}
 
 	// Iterators
@@ -249,6 +283,7 @@ private: // data
 	unsigned int m_MaxElements;
 	FSA_ELEMENT *m_pMemory;
 
+	std::map< USER_TYPE *, std::vector<USER_TYPE **> > m_References;
 };
 
 #endif // defined FSA_H

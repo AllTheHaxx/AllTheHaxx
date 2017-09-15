@@ -71,7 +71,7 @@ bool CAStarMapSearchNode::GetSuccessors( CAStarSearch<CAStarMapSearchNode> *asta
 
 	#define TEST_NODE(xval, yval) \
 	if( (astarsearch->GetMap()->GetField( xval, yval ) < 9) \
-		&& !((parent_x == xval) && (parent_y == yval)) \
+		&& !((parent_x == (xval)) && (parent_y == (yval))) \
 			) \
 	{ \
 		CAStarMapSearchNode NewNode = CAStarMapSearchNode( xval, yval ); \

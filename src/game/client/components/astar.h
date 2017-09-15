@@ -15,7 +15,7 @@ class CAStar : public CComponent
 		COST_AIR = 1,
 		COST_NEAR_FREEZE = 2,
 		COST_NEAR_DEATH = 3,
-		COST_FREEZE = 5,
+		COST_FREEZE = 6,
 		COST_SOLID = 9
 	};
 

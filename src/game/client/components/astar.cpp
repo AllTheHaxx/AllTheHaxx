@@ -43,20 +43,18 @@ void CAStar::OnShutdown()
 {
 	if(m_pBuilderThread || m_pScoreThread)
 		dbg_msg("astar", "waiting for threads to finish...");
-	StopThreads();
-
 	OnReset();
 }
 
 void CAStar::OnReset() // is being called right after OnMapLoad()
 {
-	if(m_pCurrentMapGrid)
-		delete m_pCurrentMapGrid;
+	StopThreads();
 	mem_zerob(m_aCurrentMap);
-	m_pCurrentMapGrid = NULL;
 	m_Path.clear();
 	m_LastClosestNode = -1;
 	m_LastPos = vec2(0);
+	delete m_pCurrentMapGrid;
+	m_pCurrentMapGrid = NULL;
 }
 
 void CAStar::OnPlayerDeath()
@@ -102,7 +100,7 @@ void CAStar::OnRender()
 	const CNetObj_Character *pPlayerChar = m_pClient->m_Snap.m_pLocalCharacter;
 	const CNetObj_Character *pPrevChar = m_pClient->m_Snap.m_pLocalPrevCharacter;
 
-	if (pPlayerChar && pPrevChar)
+	if (pPlayerChar && pPrevChar && !m_pScoreThread)
 		m_LastPos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
 
 	const bool DebugVisualisation = g_Config.m_Debug && g_Config.m_DbgAStar;
@@ -321,7 +319,7 @@ void CAStar::BuildPath(void *pData)
 	if(!(pSelf->m_pCurrentMapGrid))
 		pSelf->ScanMap();
 
-	CAStarSearch<CAStarMapSearchNode> astarsearch(65536);
+	CAStarSearch<CAStarMapSearchNode> astarsearch((unsigned int)(pSelf->m_pCurrentMapGrid->GetSize()));
 
 	// Create a start state
 	CAStarMapSearchNode nodeStart;
@@ -409,6 +407,10 @@ void CAStar::BuildPath(void *pData)
 	{
 		dbg_msg("astar", "Search terminated. Did %i iterations but failed to find goal state", SearchSteps);
 	}
+	else if( SearchState == CAStarSearch<CAStarMapSearchNode>::SEARCH_STATE_OUT_OF_MEMORY )
+	{
+		dbg_msg("astar", "Search terminated. Engine reported out of memory after %i iterations!", SearchSteps);
+	}
 
 	astarsearch.EnsureMemoryFreed();
 
@@ -463,7 +465,8 @@ void CAStar::CalcScoreThread()
 			break;
 		}
 
-		if((ClosestNodeDist < 0.0f || d < ClosestNodeDist) && !Collision()->IntersectLine(m_LastPos, m_Path[i].m_Pos, 0x0, 0x0))
+		if((ClosestNodeDist < 0.0f || d < ClosestNodeDist))
+			if(!Collision()->IntersectLine(m_LastPos, m_Path[i].m_Pos, 0x0, 0x0))
 		{
 			ClosestNodeDist = d;
 			ClosestID = i;
@@ -475,7 +478,7 @@ void CAStar::CalcScoreThread()
 	if(ClosestID > 0)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", m_Path.size()-ClosestID, m_Path.size(), (((float)m_Path.size()-ClosestID)/(float)m_Path.size())*100.0f);
+		str_format(aBuf, sizeof(aBuf), "Fitness Score: %i/%i (%.2f%%)", ClosestID, m_Path.size(), (((float)ClosestID)/(float)m_Path.size())*100.0f);
 		m_pClient->m_pHud->PushNotification(aBuf);
 	}
 }
