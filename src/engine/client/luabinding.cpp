@@ -363,6 +363,73 @@ int CLuaBinding::LuaGetPlayerScore(int ClientID)
 	return -1;
 }
 
+// io stuff
+int CLuaBinding::LuaIO_Open(lua_State *L)
+{
+#if defined(FEATURE_LUA)
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	int nargs = lua_gettop(L);
+	if(nargs < 1 || nargs > 2)
+		return luaL_error(L, "io.open expects 1 or 2 arguments");
+
+	argcheck(lua_isstring(L, 1), 1, "string"); // path
+	if(nargs == 2)
+		argcheck(lua_isstring(L, 2), 2, "string"); // mode
+
+	const char *pFilename = lua_tostring(L, 1);
+	const char *pOpenMode = luaL_optstring(L, 2, "r");
+
+
+	// replace all backslashes with forward slashes
+	char aTmp[512];
+	str_copy(aTmp, pFilename, sizeof(aTmp));
+	for(char *p = aTmp; *p; p++)
+		if(*p == '\\')
+			*p = '/';
+	pFilename = aTmp;
+	// sandbox it
+	for(; *pFilename && ((*pFilename == '.' && pFilename[1] == '/') || *pFilename == '/'); pFilename++);
+
+	char aFilename[512];
+	str_formatb(aFilename, "lua_sandbox/%s/%s", pLF->GetFilename(), pFilename);
+
+	char aFullPath[512];
+	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, aFilename, aFullPath, sizeof(aFullPath));
+	fs_makedir_rec_for(aFullPath);
+
+	CLua::DbgPrintLuaStack(L, "AAAA");// XXX DENNIS REMOVE ME
+
+	// now we make a call to the builtin function 'io.open'
+	lua_pop(L, nargs); // pop our args
+
+	// receive the original io.open that we have saved in the registry
+	lua_getregistry(L);
+	lua_getfield(L, -1, LUA_REGINDEX_IO_OPEN);
+
+	// push the arguments
+	lua_pushstring(L, aFullPath); // he needs the full path
+	lua_pushstring(L, pOpenMode);
+	CLua::DbgPrintLuaStack(L, "BBBB");// XXX DENNIS REMOVE ME
+
+	// fire it off
+	// this pops 3 things (function + args) and pushes 1 (resulting file handle)
+	if(lua_pcall(L, 2, 1, 0) != 0)
+	{
+		return luaL_error(L, "internal error");
+	}
+
+	// push an additional argument for the scripter
+	lua_pushstring(L, aFilename);
+	CLua::DbgPrintLuaStack(L, "CCCC");// XXX DENNIS REMOVE ME
+	return 2; // we'll leave cleaning the stack up to lua
+#else
+	return 0;
+#endif
+}
+
 void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, float rot) // depreciated
 {
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();

@@ -27,6 +27,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 #if defined(FEATURE_LUA)
 
 	lua_register(L, "print", CLuaBinding::LuaPrintOverride);
+	lua_register(L, "_io_open", CLuaBinding::LuaIO_Open);
 	lua_register(L, "throw", CLuaBinding::LuaThrow); // adds an exception, but doesn't jump out like 'error' does
 	lua_register(L, "Import", CLuaBinding::LuaImport);
 	//lua_register(L, "Exec", CLuaBinding::LuaExec);
@@ -43,6 +44,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 	getGlobalNamespace(L)
 
+#if defined(CONF_DEBUG)
+		.beginNamespace("_debug")
+			.addFunction("DumpStack", &CLua::DbgPrintLuaStack)
+		.endNamespace()
+#endif
 		// client namespace XXX: cleanup
 		.beginNamespace("_client")
 			// external info

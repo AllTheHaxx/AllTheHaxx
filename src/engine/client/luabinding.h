@@ -27,6 +27,9 @@ public:
 	static int LuaThrow(lua_State *L);
 	static int LuaStrIsNetAddr(lua_State *L);
 
+	// io namespace
+	static int LuaIO_Open(lua_State *L);
+
 	// low level lua callbacks
 	/** @LuaFunc @code bool Import(const char *pFilename) */
 	static int LuaImport(lua_State *L);

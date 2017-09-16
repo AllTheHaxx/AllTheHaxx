@@ -398,11 +398,37 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
 		return false;
 
+	// check if the file exists
+	IOHANDLE f = io_open(pFilename, IOFLAG_READ);
+	if(!f)
+	{
+		if(g_Config.m_Debug)
+			dbg_msg("Lua/debug", "Could not load file '%s' (file not accessible)", pFilename);
+		return false;
+	}
+
 	// some security steps right here...
 	int BeforePermissions = Import ? m_PermissionFlags : 0;
+	int NewFlags = m_PermissionFlags & ~BeforePermissions;
 	LoadPermissionFlags(pFilename);
-	ApplyPermissions(m_PermissionFlags & ~BeforePermissions); // only apply those that are new
+	ApplyPermissions(NewFlags); // only apply those that are new
 
+	// inject our complicated overrides
+	if(NewFlags & PERMISSION_IO)
+	{
+		// store the original io.open function somewhere secretly
+		// we must store it IN lua, otherwise it won't work anymore :/
+		lua_getregistry(m_pLuaState);                           // STACK: +1
+		lua_getglobal(m_pLuaState, "io");                       // STACK: 2+
+		lua_getfield(m_pLuaState, -1, "open");                  // STACK: 3+
+		lua_setfield(m_pLuaState, -3, LUA_REGINDEX_IO_OPEN);    // STACK: 2-
+		lua_pop(m_pLuaState, 2);                                // STACK: 0-
+
+		// now override it with our own function
+		luaL_dostring(m_pLuaState, "io.open = _io_open");
+	}
+
+	// now cut down the current environment for safety
 	if(!Import && !(m_PermissionFlags & PERMISSION_GODMODE))
 	{
 		// kill everything malicious
@@ -431,19 +457,10 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 
-	// make sure that source code scripts are what they're supposed to be
-	IOHANDLE f = io_open(pFilename, IOFLAG_READ);
-	if(!f)
-	{
-		if(g_Config.m_Debug)
-			dbg_msg("Lua/debug", "Could not load file '%s' (file not accessible)", pFilename);
-		return false;
-	}
-
 	if(g_Config.m_Debug)
 		dbg_msg("lua/debug", "loading '%s' with flags %i", pFilename, m_PermissionFlags);
 
-
+	// make sure that source code scripts are what they're supposed to be
 	char aData[sizeof(LUA_SIGNATURE)] = {0};
 	io_read(f, aData, sizeof(aData));
 	io_close(f);

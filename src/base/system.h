@@ -241,6 +241,7 @@ typedef struct IOINTERNAL *IOHANDLE;
 
 */
 IOHANDLE io_open(const char *filename, int flags);
+IOHANDLE io_open_raw(const char *filename, const char *flags);
 
 /*
 	Function: io_read

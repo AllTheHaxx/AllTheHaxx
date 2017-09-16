@@ -46,6 +46,9 @@ public:
 		PERMISSION_GODMODE    = 1 << 30
 	};
 
+	#define LUA_REGINDEX_ENV_FULL "ATHEnvFull"
+	#define LUA_REGINDEX_IO_OPEN "ATH_Backup:io.open"
+
 	const char *m_pErrorStr;
 	array<std::string> m_Exceptions;
 

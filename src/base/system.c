@@ -598,6 +598,11 @@ IOHANDLE io_open(const char *filename, int flags)
 	return 0x0;
 }
 
+IOHANDLE io_open_raw(const char *filename, const char *flags)
+{
+	return (IOHANDLE)fopen(filename, flags);
+}
+
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 {
 	return fread(buffer, 1, size, (FILE*)io);
