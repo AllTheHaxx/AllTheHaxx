@@ -29,7 +29,7 @@ public:
 
 class CMenusTooltip : public CComponent
 {
-	char m_aTooltip[1024];
+	char m_aTooltip[2048];
 
 public:
 	CMenusTooltip() { m_aTooltip[0] = 0; }

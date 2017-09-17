@@ -274,7 +274,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					Buttons.HSplitMid(&Buttons, &Button); // top: permission indicator, bottom: autoload checkbox
 
 					int PermissionFlags = L->GetPermissionFlags();
-					char aTooltip[1024] = {0};
+					char aTooltip[2048] = {0};
 					if(PermissionFlags == 0)
 						str_copyb(aTooltip, Localize("This script has no additional permissions and is thus considered safe."));
 					else if(PermissionFlags == CLuaFile::PERMISSION_GODMODE)
@@ -287,7 +287,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						PERM_STR(DEBUG, Localize("DEBUG (WARNING: if you are not currently debugging this script, DO NOT TO USE IT!! It may cause security and performance problems!)"))
 						PERM_STR(FFI, Localize("FFI (Execution of native C code from within Lua - please be sure that this code is not malicious, as the ATH API cannot control it"))
 						PERM_STR(OS, Localize("OS (Access to various operation system functionalities such as time and date"))
-						PERM_STR(PACKAGE, Localize("PACKAGE (Modules)"))
+						PERM_STR(PACKAGE, Localize("PACKAGE (Modules - currently not available; might cause script errors)"))
 #undef PERM_STR
 					}
 					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Buttons, aTooltip, 0,

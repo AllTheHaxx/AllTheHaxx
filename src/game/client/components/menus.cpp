@@ -134,13 +134,13 @@ void CMenusTooltip::OnRender()
 		return;
 
 	const float FONT_SIZE = 13.0f;
-	const float LINE_WIDTH = 250.0f * UI()->Scale();
-	const int lineCount = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, LINE_WIDTH);
+	const float LINE_WIDTH = 300.0f * UI()->Scale();
+	const int LineCount = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, LINE_WIDTH);
 
 	CUIRect Rect;
 	Rect.x = UI()->MouseX() + 30.0f;
 	Rect.y = UI()->MouseY() + 5.0f;
-	Rect.h = (FONT_SIZE * (float)lineCount + 2.5f);
+	Rect.h = (FONT_SIZE * (float)LineCount + 2.0f+1.0f + (float)(LineCount-5)*0.25f);
 	Rect.w = TextRender()->TextWidth(0, FONT_SIZE, m_aTooltip, -1, LINE_WIDTH);
 	Rect.Margin(-3.0f, &Rect); // outsize it a bit to give it a little padding to the text
 
