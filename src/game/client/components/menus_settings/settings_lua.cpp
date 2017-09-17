@@ -68,6 +68,9 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 		{
 			float gb = Input()->KeyIsPressed(KEY_MOUSE_1) ? 0.7f : 1.0f;
 			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1,gb,gb,0.25f), CUI::CORNER_ALL, 8.0f);
+			char aTooltip[2048];
+			str_formatb(aTooltip, "<click to copy>\n#%i @@ %s", i+1, L->m_Exceptions[i].c_str());
+			m_pClient->m_pTooltip->SetTooltip(aTooltip);
 		}
 
 		CUIRect Button;
