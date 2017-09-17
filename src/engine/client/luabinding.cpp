@@ -1,3 +1,6 @@
+#include <vector>
+#include <algorithm>
+
 #include <engine/client.h>
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
@@ -382,16 +385,9 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	const char *pFilename = lua_tostring(L, 1);
 	const char *pOpenMode = luaL_optstring(L, 2, "r");
 
-
-	// replace all backslashes with forward slashes
 	char aTmp[512];
-	str_copy(aTmp, pFilename, sizeof(aTmp));
-	for(char *p = aTmp; *p; p++)
-		if(*p == '\\')
-			*p = '/';
-	pFilename = aTmp;
-	// sandbox it
-	for(; *pFilename && ((*pFilename == '.' && pFilename[1] == '/') || *pFilename == '/'); pFilename++);
+	str_copyb(aTmp, pFilename);
+	pFilename = SandboxPath(aTmp, sizeof(aTmp));
 
 	char aFilename[512];
 	str_formatb(aFilename, "lua_sandbox/%s/%s", pLF->GetFilename(), pFilename);
@@ -399,8 +395,6 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	char aFullPath[512];
 	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, aFilename, aFullPath, sizeof(aFullPath));
 	fs_makedir_rec_for(aFullPath);
-
-	CLua::DbgPrintLuaStack(L, "AAAA");// XXX DENNIS REMOVE ME
 
 	// now we make a call to the builtin function 'io.open'
 	lua_pop(L, nargs); // pop our args
@@ -412,7 +406,6 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	// push the arguments
 	lua_pushstring(L, aFullPath); // he needs the full path
 	lua_pushstring(L, pOpenMode);
-	CLua::DbgPrintLuaStack(L, "BBBB");// XXX DENNIS REMOVE ME
 
 	// fire it off
 	// this pops 3 things (function + args) and pushes 1 (resulting file handle)
@@ -423,7 +416,6 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 
 	// push an additional argument for the scripter
 	lua_pushstring(L, aFilename);
-	CLua::DbgPrintLuaStack(L, "CCCC");// XXX DENNIS REMOVE ME
 	return 2; // we'll leave cleaning the stack up to lua
 #else
 	return 0;
@@ -459,4 +451,95 @@ void CLuaBinding::LuaRenderQuadRaw(int x, int y, int w, int h)
 	Item.m_X = x; Item.m_Y = y;
 	Item.m_Width = w; Item.m_Height = h;
 	pGraphics->QuadsDraw(&Item, 1);
+}
+
+const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize)
+{
+	if(dbg_assert_strict(BufferSize > 0, "SandboxPath: zero-size buffer?!"))
+		return NULL;
+
+	// replace all backslashes with forward slashes
+	for(char *p = pBuffer; p < pBuffer+BufferSize && *p; p++)
+		if(*p == '\\')
+			*p = '/';
+
+	// don't allow entering the root directory / another partition
+	{
+		#if defined(CONF_FAMILY_UNIX)
+		char *p = pBuffer;
+		while(p[0] == '/') p++;
+		if(p != pBuffer)
+		{
+			char aTmp[512];
+			str_copyb(aTmp, p);
+			str_copy(pBuffer, aTmp, (int)BufferSize);
+		}
+		#elif defined(CONF_FAMILY_WINDOWS)
+		char *p = str_find_rev(pBuffer, ":");
+		if(p)
+		{
+			char aTmp[512];
+			str_copyb(aTmp, p+1);
+			str_copy(pBuffer, aTmp, (int)BufferSize);
+		}
+		#endif
+	}
+
+	// sandbox it
+	std::vector<std::string> PathStack;
+	{
+		int CurrentDirLevel = 0;
+		const char *pFound = pBuffer;
+		const char *pLast = pBuffer;
+//		char aNewBuffer[512] = {0};
+		while((pFound = str_find(pFound, "/")))
+		{
+			pFound++;
+			char aPart[512];
+			str_copy(aPart, pLast, (int)min<long unsigned int>((long unsigned int)sizeof(aPart), (long unsigned int)(pFound - pLast)));
+			if(str_comp(aPart, "..") == 0)
+			{
+				if(CurrentDirLevel > 0)
+				{
+//					str_append(aNewBuffer, aPart, sizeof(aNewBuffer));
+					PathStack.push_back(std::string(aPart));
+					CurrentDirLevel--;
+				}
+				else
+				{
+					// ignore it
+				}
+			}
+			else if(aPart[0] != '\0')
+			{
+//				str_append(aNewBuffer, aPart, sizeof(aNewBuffer));
+				PathStack.push_back(std::string(aPart));
+				CurrentDirLevel++;
+			}
+//			str_appendb(aNewBuffer, "/");
+
+			if(*(pLast = pFound) == '\0')
+				break;
+		}
+
+//		str_appendb(aNewBuffer, pLast);
+		PathStack.push_back(pLast);
+//		str_copy(pBuffer, aNewBuffer, BufferSize);
+	}
+
+	// reassemble and prettify it
+	std::vector<std::string> FinalResult;
+	for(std::vector<std::string>::iterator it = PathStack.begin(); it != PathStack.end(); it++)
+	{
+		if(*it == "..")
+			FinalResult.pop_back();
+		else if(it->length() > 0 && *it != ".")
+			FinalResult.push_back(*it);
+	}
+
+	pBuffer[0] = '\0';
+	for(std::vector<std::string>::iterator it = FinalResult.begin(); it != FinalResult.end(); it++)
+		str_append(pBuffer, it->c_str(), BufferSize);
+
+	return pBuffer;
 }

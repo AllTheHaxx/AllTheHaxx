@@ -53,6 +53,9 @@ public:
 	// graphics namespace
 	static void LuaRenderTexture(int ID, float x, float y, float w, float h, float rot);
 	static void LuaRenderQuadRaw(int x, int y, int w, int h);
+
+	// helper functions
+	static const char *SandboxPath(char *pBuffer, unsigned BufferSize);
 };
 
 struct CConfigProperties
