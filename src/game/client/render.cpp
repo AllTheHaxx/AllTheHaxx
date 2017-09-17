@@ -89,6 +89,8 @@ void CRenderTools::DrawSprite(float x, float y, float Size)
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)
 {
+	r = min(r, min(w/2.0f, h/2.0f));
+
 	IGraphics::CFreeformItem ArrayF[32];
 	int NumItems = 0;
 	int Num = 8;
@@ -158,6 +160,8 @@ void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
 void CRenderTools::DrawUIRect(const CUIRect *r, vec4 Color, int Corners, float Rounding)
 {
 	dbg_assert(r != NULL, "given CUIRect* is NULL");
+
+	Rounding *= (float)g_Config.m_UiCornerRoundingPercentage/100.0f;
 
 	Graphics()->TextureSet(-1);
 

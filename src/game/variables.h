@@ -129,6 +129,8 @@ MACRO_CONFIG_INT(UiColorizeGametype, br_colored_gametype, 1, 0, 1, CFGFLAG_CLIEN
 
 MACRO_CONFIG_STR(UiDemoSelected, ui_demo_selected, 256, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Selected demo file")
 
+MACRO_CONFIG_INT(UiCornerRoundingPercentage, ui_corner_rounding_percentage, 100, 0, 1000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Adjust the roundness of ui corners")
+
 MACRO_CONFIG_INT(GfxNoclip, gfx_noclip, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Disable clipping")
 
 // dummy
