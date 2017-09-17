@@ -394,7 +394,8 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 
 	char aFullPath[512];
 	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, aFilename, aFullPath, sizeof(aFullPath));
-	fs_makedir_rec_for(aFullPath);
+	if(fs_makedir_rec_for(aFullPath) != 0)
+		return luaL_error(L, "Failed to create path for file '%s'", aFullPath);
 
 	// now we make a call to the builtin function 'io.open'
 	lua_pop(L, nargs); // pop our args
@@ -485,61 +486,27 @@ const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize)
 		#endif
 	}
 
-	// sandbox it
+	// split it into pieces
 	std::vector<std::string> PathStack;
-	{
-		int CurrentDirLevel = 0;
-		const char *pFound = pBuffer;
-		const char *pLast = pBuffer;
-//		char aNewBuffer[512] = {0};
-		while((pFound = str_find(pFound, "/")))
-		{
-			pFound++;
-			char aPart[512];
-			str_copy(aPart, pLast, (int)min<long unsigned int>((long unsigned int)sizeof(aPart), (long unsigned int)(pFound - pLast)));
-			if(str_comp(aPart, "..") == 0)
-			{
-				if(CurrentDirLevel > 0)
-				{
-//					str_append(aNewBuffer, aPart, sizeof(aNewBuffer));
-					PathStack.push_back(std::string(aPart));
-					CurrentDirLevel--;
-				}
-				else
-				{
-					// ignore it
-				}
-			}
-			else if(aPart[0] != '\0')
-			{
-//				str_append(aNewBuffer, aPart, sizeof(aNewBuffer));
-				PathStack.push_back(std::string(aPart));
-				CurrentDirLevel++;
-			}
-//			str_appendb(aNewBuffer, "/");
-
-			if(*(pLast = pFound) == '\0')
-				break;
-		}
-
-//		str_appendb(aNewBuffer, pLast);
-		PathStack.push_back(pLast);
-//		str_copy(pBuffer, aNewBuffer, BufferSize);
-	}
+	StringSplit(pBuffer, "/", &PathStack);
 
 	// reassemble and prettify it
 	std::vector<std::string> FinalResult;
 	for(std::vector<std::string>::iterator it = PathStack.begin(); it != PathStack.end(); it++)
 	{
 		if(*it == "..")
-			FinalResult.pop_back();
+		{
+			if(!FinalResult.empty())
+				FinalResult.pop_back();
+		}
 		else if(it->length() > 0 && *it != ".")
 			FinalResult.push_back(*it);
 	}
 
 	pBuffer[0] = '\0';
 	for(std::vector<std::string>::iterator it = FinalResult.begin(); it != FinalResult.end(); it++)
-		str_append(pBuffer, it->c_str(), BufferSize);
+		str_append(pBuffer, (*it + std::string("/")).c_str(), BufferSize);
+	pBuffer[str_length(pBuffer)-1] = '\0'; // remove the trailing slash
 
 	return pBuffer;
 }

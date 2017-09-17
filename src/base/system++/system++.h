@@ -2,6 +2,8 @@
 #define BASE_SYSTEMPP_SYSTEMPP_H
 
 #include <exception>
+#include <vector>
+#include <string>
 
 
 #define dbg_assert(test,msg) if(!(test)) throw CTWException(__FILE__, __LINE__, #test, msg)
@@ -52,6 +54,10 @@ public:
  * The given function FUNC will automatically be executed with DATA as argument right before the current function returns
  */
 #define DEFER(DATA, FUNC) CDeferHandler __DeferHandler(FUNC, DATA);
+
+
+void StringSplit(const char *pString, const char *pDelim, std::vector<std::string> *pDest);
+
 
 
 #endif
