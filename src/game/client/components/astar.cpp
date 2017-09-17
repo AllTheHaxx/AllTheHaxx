@@ -127,7 +127,7 @@ void CAStar::OnRender()
 		}
 
 		// don't render out of view
-		if(distance(GameClient()->m_pCamera->m_Center, m_Path[i].m_Pos) > 1000)
+		if(distance(GameClient()->m_pCamera->m_Center, m_Path[i].m_Pos) > 1000*GameClient()->m_pCamera->m_Zoom)
 			continue;
 
 		static const int aSprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
