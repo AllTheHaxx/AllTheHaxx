@@ -122,7 +122,8 @@ public: // methods
 
 
 	// constructor just initialises private data
-	CAStarSearch() :
+	CAStarSearch(int SolidTileCost = 9) :
+		m_SolidTileCost(SolidTileCost),
 		m_State( SEARCH_STATE_NOT_INITIALISED ),
 		m_CurrentSolutionNode( NULL ),
 #if USE_FSA_MEMORY
@@ -133,7 +134,8 @@ public: // methods
 	{
 	}
 
-	CAStarSearch( unsigned int MaxNodes ) :
+	CAStarSearch( unsigned int MaxNodes, int SolidTileCost = 9) :
+		m_SolidTileCost(SolidTileCost),
 		m_State( SEARCH_STATE_NOT_INITIALISED ),
 		m_CurrentSolutionNode( NULL ),
 #if USE_FSA_MEMORY
@@ -154,7 +156,7 @@ public: // methods
 	void SetStartAndGoalStates( const IAStarWorldMap *pMap, const UserState &Start, const UserState &Goal )
 	{
 		// check if start and goal are valid
-		if(Start.GetOwnCost(pMap) >= 9 || Goal.GetOwnCost(pMap) >= 9)
+		if(Start.GetOwnCost(pMap) >= m_SolidTileCost || Goal.GetOwnCost(pMap) >= m_SolidTileCost)
 		{
 			m_State = SEARCH_STATE_FAILED;
 			return;
@@ -443,6 +445,8 @@ public: // methods
 
 	}
 
+	const int GetSolidTileCost() const { return m_SolidTileCost; }
+
 	const IAStarWorldMap *GetMap() const { return m_pMap; }
 
 
@@ -667,6 +671,8 @@ private: // data
 	vector< Node * > m_Successors;
 
 	const IAStarWorldMap *m_pMap;
+
+	const int m_SolidTileCost;
 
 	// State
 	unsigned int m_State;

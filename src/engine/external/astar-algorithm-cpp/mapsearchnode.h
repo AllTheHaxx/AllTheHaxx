@@ -70,7 +70,7 @@ bool CAStarMapSearchNode::GetSuccessors( CAStarSearch<CAStarMapSearchNode> *asta
 	// push each possible move except allowing the search to go backwards
 
 	#define TEST_NODE(xval, yval) \
-	if( (astarsearch->GetMap()->GetField( xval, yval ) < 9) \
+	if( (astarsearch->GetMap()->GetField( xval, yval ) < astarsearch->GetSolidTileCost()) \
 		&& !((parent_x == (xval)) && (parent_y == (yval))) \
 			) \
 	{ \

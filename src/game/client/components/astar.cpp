@@ -209,6 +209,20 @@ bool CAStar::GetTileAreaCenter(vec2 *pResult, int TileID, int x, int y, int w, i
 	return false;
 }
 
+unsigned short CAStar::CountTilesAround(int x, int y, int TileID)
+{
+	unsigned short Count = 0;
+	if(Collision()->GetTileRaw(x, y - 32) == TileID)
+		Count++;
+	if(Collision()->GetTileRaw(x + 32, y) == TileID)
+		Count++;
+	if(Collision()->GetTileRaw(x, y + 32) == TileID)
+		Count++;
+	if(Collision()->GetTileRaw(x - 32, y) == TileID)
+		Count++;
+	return Count;
+}
+
 CAStarWorldMap* CAStar::FillGrid(CAStarWorldMap *pMap)
 {
 	const int Height = pMap->GetHeight();
@@ -234,21 +248,19 @@ CAStarWorldMap* CAStar::FillGrid(CAStarWorldMap *pMap)
 			else if(Collision()->CheckPoint(x, y) || Collision()->GetTileRaw(x, y) == TILE_STOP || // TODO: have a clue how to handle one-way stop tiles + implement it.
 					Collision()->GetTileRaw(x, y) == TILE_DEATH)
 			{
-				pMap->AddNext(COST_SOLID); // 9 means not passable (solid)
+				pMap->AddNext(COST_SOLID); // means not passable (solid)
 			}
-			else if(Collision()->GetTileRaw(x, y-32) == TILE_FREEZE || Collision()->GetTileRaw(x+32, y) == TILE_FREEZE ||
-					Collision()->GetTileRaw(x, y+32) == TILE_FREEZE || Collision()->GetTileRaw(x-32, y) == TILE_FREEZE)
+			else if(int FreezeTileCount = CountTilesAround(x, y, TILE_FREEZE))
 			{
-				pMap->AddNext(COST_NEAR_FREEZE); // we're not really keen on going right next to freeze tiles
+				pMap->AddNext(COST_NEAR_FREEZE * FreezeTileCount); // we're not really keen on going right next to freeze tiles
 			}
-			else if(Collision()->GetTileRaw(x, y-32) == TILE_DEATH || Collision()->GetTileRaw(x+32, y) == TILE_DEATH ||
-					Collision()->GetTileRaw(x, y+32) == TILE_DEATH || Collision()->GetTileRaw(x-32, y) == TILE_DEATH)
+			else if(int DeatchTileCount = CountTilesAround(x, y, TILE_DEATH))
 			{
-				pMap->AddNext(COST_NEAR_DEATH); // death tiles are more scary than freeze
+				pMap->AddNext(COST_NEAR_DEATH * DeatchTileCount); // death tiles are even more scary than freeze
 			}
 			else
 			{
-				pMap->AddNext(COST_AIR); // 0 is flawlessly passable (air)
+				pMap->AddNext(COST_AIR); // flawlessly passable (air)
 			}
 		}
 	}
@@ -319,7 +331,7 @@ void CAStar::BuildPath(void *pData)
 	if(!(pSelf->m_pCurrentMapGrid))
 		pSelf->ScanMap();
 
-	CAStarSearch<CAStarMapSearchNode> astarsearch((unsigned int)(pSelf->m_pCurrentMapGrid->GetSize()));
+	CAStarSearch<CAStarMapSearchNode> astarsearch((unsigned int)(pSelf->m_pCurrentMapGrid->GetSize()), COST_SOLID);
 
 	// Create a start state
 	CAStarMapSearchNode nodeStart;

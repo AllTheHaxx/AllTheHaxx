@@ -13,10 +13,10 @@ class CAStar : public CComponent
 	{
 		COST_NULL = 0,
 		COST_AIR = 1,
-		COST_NEAR_FREEZE = 2,
-		COST_NEAR_DEATH = 3,
-		COST_FREEZE = 6,
-		COST_SOLID = 9
+		COST_NEAR_FREEZE = 3,
+		COST_NEAR_DEATH = 4,
+		COST_FREEZE = (COST_NEAR_FREEZE*3 + 1) * 5 + COST_NEAR_FREEZE,
+		COST_SOLID = 100
 	};
 
 	struct Node
@@ -55,6 +55,7 @@ class CAStar : public CComponent
 	bool GetFinish(vec2 *pFinish) { return GetTileAreaCenter(pFinish, TILE_END); }
 
 	void ScanMap();
+	unsigned short CountTilesAround(int TileID, int x, int y);
 	class CAStarWorldMap* FillGrid(class CAStarWorldMap *pMap);
 
 	static void BuildPath(void *pParam);

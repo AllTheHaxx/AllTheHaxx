@@ -40,6 +40,13 @@ public:
 		return -1; // error
 	}
 
+	int GetPrevious() const
+	{
+		if(m_CurrentIndex == 0)
+			return -1; // error
+		return m_pWorldMap[m_CurrentIndex-1 - 1]; // m_CurrentIndex is actually the NEXT thing that is yet to be written, thus -2
+	}
+
 	const int GetWidth() const { return m_MapWidth; }
 	const int GetHeight() const { return m_MapHeight; }
 	const int GetSize() const { return m_MapWidth*m_MapHeight; }
