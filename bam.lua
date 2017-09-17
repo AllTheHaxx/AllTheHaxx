@@ -425,9 +425,6 @@ function build(settings)
 	game_server = Compile(settings, CollectRecursive("src/game/server/*.cpp"), server_content_source)
 	game_editor = Compile(settings, Collect("src/game/editor/*.cpp"))
 
-	-- build tools (TODO: fix this so we don't get double _d_d stuff)
-	tools_src = Collect("src/tools/*.cpp", "src/tools/*.c")
-
 	client_notification = {}
 	client_osxlaunch = {}
 	server_osxlaunch = {}
@@ -439,11 +436,18 @@ function build(settings)
 		server_osxlaunch = Compile(launcher_settings, "src/osxlaunch/server.m")
 	end
 
+	-- build tools (TODO: fix this so we don't get double _d_d stuff)
+	tools_settings = engine_settings:Copy()
+	tools_settings.link.libs:Add("ssl")
+	tools_settings.link.libs:Add("crypto")
+	tools_src = Collect("src/tools/*.cpp", "src/tools/*.c")
 
 	tools = {}
 	for i,v in ipairs(tools_src) do
+		config.lua.value = false
 		toolname = PathFilename(PathBase(v))
-		tools[i] = Link(settings, toolname, Compile(settings, v), engine, zlib, pnglite, md5, game_shared)
+		tools[i] = Link(tools_settings, toolname, Compile(tools_settings, v), 
+						engine, zlib, pnglite, md5, game_shared, aes128)
 	end
 
 	-- build client, server, version server and master server

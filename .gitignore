@@ -27,6 +27,7 @@ datasrc/*.pyc
 /slc_unpack*
 /cdns*
 luacert*
+lad_maker*
 /teeworlds*
 /teeworlds_srv*
 /serverlaunch_*

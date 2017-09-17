@@ -401,7 +401,7 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	if(!Shared)
 		pFilename = SandboxPath(aFilename, sizeof(aFilename), pLF);
 	else
-		pFilename = SandboxPath(aFilename, sizeof(aFilename), "lua_sandbox/_shared");
+		pFilename = CLua::m_pCGameClient->Storage()->SandboxPath(aFilename, sizeof(aFilename), "lua_sandbox/_shared");
 
 
 	char aFullPath[512];
@@ -467,73 +467,6 @@ void CLuaBinding::LuaRenderQuadRaw(int x, int y, int w, int h)
 	pGraphics->QuadsDraw(&Item, 1);
 }
 
-const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend, bool ForcePrepend)
-{
-	if(dbg_assert_strict(BufferSize > 0, "SandboxPath: zero-size buffer?!"))
-		return NULL;
-
-	// replace all backslashes with forward slashes
-	for(char *p = pBuffer; p < pBuffer+BufferSize && *p; p++)
-		if(*p == '\\')
-			*p = '/';
-
-	// don't allow entering the root directory / another partition
-	{
-		#if defined(CONF_FAMILY_UNIX)
-		char *p = pBuffer;
-		while(p[0] == '/') p++;
-		if(p != pBuffer)
-		{
-			char aTmp[512];
-			str_copyb(aTmp, p);
-			str_copy(pBuffer, aTmp, (int)BufferSize);
-		}
-		#elif defined(CONF_FAMILY_WINDOWS)
-		const char *p = str_find_rev(pBuffer, ":");
-		if(p)
-		{
-			char aTmp[512];
-			str_copyb(aTmp, p+1);
-			str_copy(pBuffer, aTmp, (int)BufferSize);
-		}
-		#endif
-	}
-
-	// split it into pieces
-	std::vector<std::string> PathStack;
-	StringSplit(pBuffer, "/", &PathStack);
-
-	// reassemble and prettify it
-	std::vector<std::string> FinalResult;
-	for(std::vector<std::string>::iterator it = PathStack.begin(); it != PathStack.end(); it++)
-	{
-		if(*it == "..")
-		{
-			if(!FinalResult.empty())
-				FinalResult.pop_back();
-		}
-		else if(it->length() > 0 && *it != ".")
-			FinalResult.push_back(*it);
-	}
-
-	pBuffer[0] = '\0';
-	if(pPrepend)
-	{
-		if(ForcePrepend || fs_compare(FinalResult[0].c_str(), pPrepend) != 0)
-		{
-			str_copy(pBuffer, pPrepend, BufferSize);
-			if(pPrepend[str_length(pPrepend)-1] != '/')
-				str_append(pBuffer, "/", BufferSize);
-		}
-	}
-
-	for(std::vector<std::string>::iterator it = FinalResult.begin(); it != FinalResult.end(); it++)
-		str_append(pBuffer, (*it + std::string("/")).c_str(), BufferSize);
-	pBuffer[str_length(pBuffer)-1] = '\0'; // remove the trailing slash
-
-	return pBuffer;
-}
-
 const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, lua_State *L)
 {
 #if defined(FEATURE_LUA)
@@ -556,7 +489,7 @@ const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, CLuaFil
 		pSubdir = pLF->GetFilename();
 
 	char aFullPath[512];
-	str_formatb(aFullPath, "lua_sandbox/%s/%s", pSubdir, SandboxPath(pBuffer, BufferSize));
+	str_formatb(aFullPath, "lua_sandbox/%s/%s", pSubdir, CLua::m_pCGameClient->Storage()->SandboxPath(pBuffer, BufferSize));
 	str_copy(pBuffer, aFullPath, BufferSize);
 
 	return pBuffer;

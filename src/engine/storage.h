@@ -52,6 +52,8 @@ public:
 	virtual const char* GetBinaryPath(const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
 
 	virtual const char* GetExecutableName() const = 0;
+
+	virtual const char *SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend = 0, bool ForcePrepend = false) const = 0;
 };
 
 extern IStorageTW *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);
