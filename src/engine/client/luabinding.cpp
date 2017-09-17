@@ -542,6 +542,10 @@ const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, lua_Sta
 	dbg_assert_strict(pLF != NULL, "FATAL: got no lua file handler for this script?!");
 	return SandboxPath(pBuffer, BufferSize, pLF);
 
+#else
+
+	return SandboxPath(pBuffer, BufferSize);
+
 #endif
 }
 

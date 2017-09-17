@@ -49,6 +49,7 @@ given where due.
 #include <stdio.h>
 #include <map>
 #include <vector>
+#include <stdexcept>
 
 template <class USER_TYPE> class FixedSizeAllocator
 {

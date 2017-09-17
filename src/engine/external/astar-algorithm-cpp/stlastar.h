@@ -169,7 +169,7 @@ public: // methods
 
 		m_pMap = pMap;
 
-		assert((m_Start != NULL && m_Goal != NULL));
+		dbg_assert((m_Start != NULL && m_Goal != NULL), "failed to allocate start or goal");
 		
 		m_Start->m_UserState = static_cast<UserState>(Start);
 		m_Goal->m_UserState = static_cast<UserState>(Goal);
@@ -200,8 +200,10 @@ public: // methods
 	unsigned int SearchStep()
 	{
 		// Firstly break if the user has not initialised the search
-		assert( (m_State > SEARCH_STATE_NOT_INITIALISED) &&
-				(m_State < SEARCH_STATE_INVALID) );
+		if(dbg_assert_strict( (m_State > SEARCH_STATE_NOT_INITIALISED) && (m_State < SEARCH_STATE_INVALID), "SearchStep called before initializing" ))
+		{
+			m_State = SEARCH_STATE_FAILED;
+		}
 
 		// Next I want it to be safe to do a searchstep once the search has succeeded...
 		if( (m_State == SEARCH_STATE_SUCCEEDED) ||

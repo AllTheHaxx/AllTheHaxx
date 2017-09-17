@@ -526,7 +526,7 @@ public:
 		return !fs_makedir(GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer)));
 	}
 
-	virtual bool CreateFolderLua(const char *pFoldername, struct lua_State *L)
+	virtual bool CreateFolderLua(const char *pFoldername, lua_State *L)
 	{
 		char aBuf[MAX_PATH_LENGTH];
 		str_copyb(aBuf, pFoldername);
