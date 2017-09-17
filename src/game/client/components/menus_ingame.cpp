@@ -983,7 +983,7 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&Container);
 
 		if(Item.m_Visible)
-			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, CUI::ALIGN_LEFT, -1.0f, m_aFilterString);
 
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
@@ -1163,8 +1163,18 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
+		bool EnterPressed = false;
+		for(int i = 0; i < m_NumInputEvents; i++)
+		{
+			if(m_aInputEvents[i].m_Key == KEY_RETURN)
+			{
+				EnterPressed = true;
+				break;
+			}
+		}
+
 		static CButtonContainer s_CallVoteButton;
-		if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button))
+		if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || EnterPressed)
 		{
 			if(s_ControlPage == 0)
 				m_pClient->m_pVoting->CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
