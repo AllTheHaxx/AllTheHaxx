@@ -55,7 +55,9 @@ public:
 	static void LuaRenderQuadRaw(int x, int y, int w, int h);
 
 	// helper functions
-	static const char *SandboxPath(char *pBuffer, unsigned BufferSize);
+	static const char *SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend = 0, bool ForcePrepend = false);
+	static const char *SandboxPath(char *pBuffer, unsigned BufferSize, lua_State *L);
+	static const char *SandboxPath(char *pBuffer, unsigned BufferSize, CLuaFile *pLF);
 };
 
 struct CConfigProperties

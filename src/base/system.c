@@ -2116,6 +2116,26 @@ int fs_rename(const char *oldname, const char *newname)
 	return 0;
 }
 
+int fs_compare(const char *a, const char *b)
+{
+#if defined(CONF_FAMILY_UNIX)
+	return str_comp(a, b);
+#elif defined(CONF_FAMILY_WINDOWS)
+	return str_comp_nocase(a, b);
+#endif
+}
+
+int fs_compare_num(const char *a, const char *b, int num)
+{
+#if defined(CONF_FAMILY_UNIX)
+	str_comp_num(a, b, num);
+#elif defined(CONF_FAMILY_WINDOWS)
+	str_comp_nocase_num(a, b, num);
+#endif
+}
+
+
+
 void swap_endian(void *data, unsigned elem_size, unsigned num)
 {
 	char *src = (char*) data;

@@ -1312,6 +1312,9 @@ int fs_remove(const char *filename);
 */
 int fs_rename(const char *oldname, const char *newname);
 
+int fs_compare(const char *a, const char *b);
+int fs_compare_num(const char *a, const char *b, int num);
+
 /*
 	Group: Undocumented
 */

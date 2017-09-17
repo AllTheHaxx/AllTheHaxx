@@ -38,7 +38,7 @@ public:
 	virtual bool RemoveFile(const char *pFilename, int Type) = 0;
 	virtual bool RenameFile(const char* pOldFilename, const char* pNewFilename, int Type) = 0;
 	virtual bool CreateFolder(const char *pFoldername, int Type) = 0;
-	virtual bool CreateFolderLua(const char *pFoldername) = 0;
+	virtual bool CreateFolderLua(const char *pFoldername, struct lua_State *L) = 0;
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
 
 	virtual bool RemoveBinaryFile(const char *pFilename) = 0;

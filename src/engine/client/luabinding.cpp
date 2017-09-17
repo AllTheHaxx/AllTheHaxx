@@ -31,6 +31,9 @@ int CLuaBinding::LuaListdirCallback(const char *name, const char *full_path, int
 
 CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
 {
+	if(!L)
+		return NULL;
+
 	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
 	if(L == pGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState)
 	{
@@ -47,7 +50,7 @@ CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
 			return pGameClient->Client()->Lua()->GetLuaFiles()[i];
 		}
 	}
-	return 0;
+	return NULL;
 }
 
 // global namespace
@@ -385,12 +388,9 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	const char *pFilename = lua_tostring(L, 1);
 	const char *pOpenMode = luaL_optstring(L, 2, "r");
 
-	char aTmp[512];
-	str_copyb(aTmp, pFilename);
-	pFilename = SandboxPath(aTmp, sizeof(aTmp));
-
 	char aFilename[512];
-	str_formatb(aFilename, "lua_sandbox/%s/%s", pLF->GetFilename(), pFilename);
+	str_copyb(aFilename, pFilename);
+	pFilename = SandboxPath(aFilename, sizeof(aFilename), pLF);
 
 	char aFullPath[512];
 	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, aFilename, aFullPath, sizeof(aFullPath));
@@ -412,7 +412,8 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	// this pops 3 things (function + args) and pushes 1 (resulting file handle)
 	if(lua_pcall(L, 2, 1, 0) != 0)
 	{
-		return luaL_error(L, "internal error");
+		const char *pErrorMsg = lua_isstring(L, -1) ? lua_tostring(L, -1) : "unknown";
+		return luaL_error(L, "internal error: %s", pErrorMsg);
 	}
 
 	// push an additional argument for the scripter
@@ -454,7 +455,7 @@ void CLuaBinding::LuaRenderQuadRaw(int x, int y, int w, int h)
 	pGraphics->QuadsDraw(&Item, 1);
 }
 
-const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize)
+const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend, bool ForcePrepend)
 {
 	if(dbg_assert_strict(BufferSize > 0, "SandboxPath: zero-size buffer?!"))
 		return NULL;
@@ -504,9 +505,44 @@ const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize)
 	}
 
 	pBuffer[0] = '\0';
+	if(pPrepend)
+	{
+		if(ForcePrepend || fs_compare(FinalResult[0].c_str(), pPrepend) != 0)
+		{
+			str_copy(pBuffer, pPrepend, BufferSize);
+			if(pPrepend[str_length(pPrepend)-1] != '/')
+				str_append(pBuffer, "/", BufferSize);
+		}
+	}
+
 	for(std::vector<std::string>::iterator it = FinalResult.begin(); it != FinalResult.end(); it++)
 		str_append(pBuffer, (*it + std::string("/")).c_str(), BufferSize);
 	pBuffer[str_length(pBuffer)-1] = '\0'; // remove the trailing slash
 
 	return pBuffer;
+}
+
+const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, lua_State *L)
+{
+#if defined(FEATURE_LUA)
+
+	CLuaFile *pLF = GetLuaFile(L);
+	dbg_assert_strict(pLF != NULL, "FATAL: got no lua file handler for this script?!");
+	return SandboxPath(pBuffer, BufferSize, pLF);
+
+#endif
+}
+
+const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, CLuaFile *pLF)
+{
+	const char *pSubdir = "_shared";
+	if(pLF)
+		pSubdir = pLF->GetFilename();
+
+	char aFullPath[512];
+	str_formatb(aFullPath, "lua_sandbox/%s/%s", pSubdir, SandboxPath(pBuffer, BufferSize));
+	str_copy(pBuffer, aFullPath, BufferSize);
+
+	return pBuffer;
+
 }
