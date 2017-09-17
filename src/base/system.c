@@ -2128,9 +2128,9 @@ int fs_compare(const char *a, const char *b)
 int fs_compare_num(const char *a, const char *b, int num)
 {
 #if defined(CONF_FAMILY_UNIX)
-	str_comp_num(a, b, num);
+	return str_comp_num(a, b, num);
 #elif defined(CONF_FAMILY_WINDOWS)
-	str_comp_nocase_num(a, b, num);
+	return str_comp_nocase_num(a, b, num);
 #endif
 }
 

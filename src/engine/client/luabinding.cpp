@@ -489,7 +489,7 @@ const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, const c
 			str_copy(pBuffer, aTmp, (int)BufferSize);
 		}
 		#elif defined(CONF_FAMILY_WINDOWS)
-		char *p = str_find_rev(pBuffer, ":");
+		const char *p = str_find_rev(pBuffer, ":");
 		if(p)
 		{
 			char aTmp[512];
