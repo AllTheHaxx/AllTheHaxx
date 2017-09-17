@@ -378,19 +378,31 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
 
 	int nargs = lua_gettop(L);
-	if(nargs < 1 || nargs > 2)
-		return luaL_error(L, "io.open expects 1 or 2 arguments");
+	if(nargs < 1 || nargs > 3)
+		return luaL_error(L, "io.open expects between 1 to 3 arguments");
 
 	argcheck(lua_isstring(L, 1), 1, "string"); // path
-	if(nargs == 2)
+	if(nargs >= 2)
 		argcheck(lua_isstring(L, 2), 2, "string"); // mode
+	if(nargs == 3)
+		argcheck(lua_isstring(L, 3) && str_comp_nocase(lua_tostring(L, 3), "shared") == 0, 3, "literally \"shared\""); // shared flag
 
 	const char *pFilename = lua_tostring(L, 1);
 	const char *pOpenMode = luaL_optstring(L, 2, "r");
+	bool Shared = nargs == 3;
+	if(str_comp_nocase(pOpenMode, "shared") == 0)
+	{
+		Shared = true;
+		pOpenMode = "r";
+	}
 
 	char aFilename[512];
 	str_copyb(aFilename, pFilename);
-	pFilename = SandboxPath(aFilename, sizeof(aFilename), pLF);
+	if(!Shared)
+		pFilename = SandboxPath(aFilename, sizeof(aFilename), pLF);
+	else
+		pFilename = SandboxPath(aFilename, sizeof(aFilename), "lua_sandbox/_shared");
+
 
 	char aFullPath[512];
 	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, aFilename, aFullPath, sizeof(aFullPath));
