@@ -477,7 +477,7 @@ const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, lua_Sta
 
 #else
 
-	return SandboxPath(pBuffer, BufferSize);
+	return CLua::m_pCGameClient->Storage()->SandboxPath(pBuffer, BufferSize);
 
 #endif
 }
