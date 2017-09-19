@@ -261,12 +261,13 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	Text.HMargin(2.0f, &Text);
 	Text.VSplitRight(60.0f, 0, &Text);
 	static CButtonContainer s_ButtonReset;
-	if(g_Config.m_UiColorHue != 78 || g_Config.m_UiColorSat != 203 || g_Config.m_UiColorVal != 170) // TODO: change these values aswell when the defaults get changed!
+	if(g_Config.m_UiColorHue != 78 || g_Config.m_UiColorSat != 203 || g_Config.m_UiColorVal != 170 || g_Config.m_UiColorAlpha != 180) // TODO: change these values aswell when the defaults get changed!
 		if(DoButton_Menu(&s_ButtonReset, Localize("Reset"), 0, &Text))
 		{
 			g_Config.m_UiColorHue = 78;
 			g_Config.m_UiColorSat = 203;
 			g_Config.m_UiColorVal = 170;
+			g_Config.m_UiColorAlpha = 180;
 		}
 
 	// fancy color picker
@@ -296,7 +297,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		UI()->DoLabelScaled(&Text, Localize("Alpha"), 15.0f, -1);
 	}
 
-
+	// UI Scale
 	Right.HSplitTop(20.0f, 0, &Right);
 
 	Right.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
@@ -304,17 +305,40 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	Text.h += 2.75f;
 	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
 
-	Right.VMargin(15.0f, &Right);
-	Right.HSplitTop(20.0f, &Text, &Right);
-	UI()->DoLabelScaled(&Text, Localize("UI Scale"), 14.0f, -1);
+	{
+		Right.VMargin(15.0f, &Right);
+		Right.HSplitTop(20.0f, &Text, &Right);
+		UI()->DoLabelScaled(&Text, Localize("UI Scale"), 14.0f, -1);
+	}
 
 	Right.HSplitTop(10.0f, 0, &Right);
 	Right.HSplitTop(15.0f, &Text, &Right);
-	static CButtonContainer s_Scrollbar;
+	static CButtonContainer s_ScrollbarScale;
 	static int s_NewVal = g_Config.m_UiScale; // proxy it to not instantly change the ui size
-	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != s_Scrollbar.GetID()) // if it has been changed in f1
+	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != s_ScrollbarScale.GetID()) // if it has been changed in f1
 		s_NewVal = g_Config.m_UiScale;
-	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_Scrollbar, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider is not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
-	if(UI()->ActiveItem() != s_Scrollbar.GetID())
+	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_ScrollbarScale, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider is not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
+	if(UI()->ActiveItem() != s_ScrollbarScale.GetID())
 		g_Config.m_UiScale = s_NewVal;
+
+	// Corner Rounding
+	Right.VMargin(-15.0f, &Right);
+	Right.HSplitTop(20.0f, 0, &Right);
+
+	Right.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
+	Text.HMargin(-2.75f, &Text);
+	Text.h += 2.75f;
+	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
+
+	{
+		Right.VMargin(15.0f, &Right);
+		Right.HSplitTop(20.0f, &Text, &Right);
+		UI()->DoLabelScaled(&Text, Localize("Corner Rounding"), 14.0f, -1);
+	}
+
+	Right.HSplitTop(10.0f, 0, &Right);
+	Right.HSplitTop(15.0f, &Text, &Right);
+	static CButtonContainer s_ScrollbarRounding;
+	g_Config.m_UiCornerRoundingPercentage = round_to_int(250.0f*DoScrollbarH(&s_ScrollbarRounding, &Text, (float)g_Config.m_UiCornerRoundingPercentage/250.0f, 0, g_Config.m_UiCornerRoundingPercentage));
+
 }
