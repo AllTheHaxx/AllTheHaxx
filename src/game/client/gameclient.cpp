@@ -557,7 +557,7 @@ void CGameClient::OnInit()
 
 	m_ResetConfig = false;
 
-	// auto-update the config
+	// auto-update config
 	if(g_Config.m_ClConfigVersion < 3020)
 	{
 		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3020", g_Config.m_ClConfigVersion);
@@ -583,6 +583,8 @@ void CGameClient::OnInit()
 		g_Config.m_BrMaxRequests = max(g_Config.m_BrMaxRequests, 50);
 		g_Config.m_BrAutoCache = 1;
 		g_Config.m_BrAutoRefresh = 7;
+		g_Config.m_BrSort = 4;
+		g_Config.m_BrSortOrder = 1;
 	}
 	g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
 

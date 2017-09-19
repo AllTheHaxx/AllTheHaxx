@@ -449,6 +449,7 @@ int64 CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterVersionStrict	<< n++;
 	i |= g_Config.m_BrFilterCountry			<< n++;
 	i |= g_Config.m_BrFilterPing			<< n++;
+	i |= m_NumServers						<< n++;
 	return i;
 }
 
@@ -1263,7 +1264,7 @@ void CServerBrowser::Update(bool ForceResort)
 	UNLOCK_SECTION();
 
 	// check if we need to resort
-	if(!(g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90))
+//	if(!(g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90))
 		if(ForceResort || m_Sorthash != SortHash())
 			Sort();
 }
