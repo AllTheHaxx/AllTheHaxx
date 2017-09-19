@@ -203,7 +203,6 @@ inline vec3 GetColorV3(int v)
 }
 
 
-// these two don't seem to work so pretty well... please don't rely on them.
 inline vec3 HslToHsv(const vec3& hsl)
 {
 	return RgbToHsv(HslToRgb(hsl));
@@ -211,7 +210,7 @@ inline vec3 HslToHsv(const vec3& hsl)
 
 inline vec3 HsvToHsl(const vec3& hsv)
 {
-	return RgbToHsl(HsvToRgb(hsv));
+	return RgbToHsl(HsvToRgb(hsv)) / 255.0f;
 }
 
 

@@ -269,8 +269,10 @@ void CMenus::RenderSettingsHUDColors(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		{
 			static CButtonContainer s_BtColorPicker1, s_BtColorPicker2;
-			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsl))
+			vec3 hsv = HslToHsv(hsl);
+			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsv))
 			{
+				hsl = HsvToHsl(hsv);
 				g_Config.m_ClMessageSystemHue = round_to_int(hsl.h*255.0f);
 				g_Config.m_ClMessageSystemSat = round_to_int(hsl.s*255.0f);
 				g_Config.m_ClMessageSystemLht = round_to_int(hsl.l*255.0f);
@@ -339,8 +341,10 @@ void CMenus::RenderSettingsHUDColors(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		{
 			static CButtonContainer s_BtColorPicker1, s_BtColorPicker2;
-			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsl))
+			vec3 hsv = HslToHsv(hsl);
+			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsv))
 			{
+				hsl = HsvToHsl(hsv);
 				g_Config.m_ClMessageHighlightHue = round_to_int(hsl.h*255.0f);
 				g_Config.m_ClMessageHighlightSat = round_to_int(hsl.s*255.0f);
 				g_Config.m_ClMessageHighlightLht = round_to_int(hsl.l*255.0f);
@@ -414,8 +418,10 @@ void CMenus::RenderSettingsHUDColors(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		{
 			static CButtonContainer s_BtColorPicker1, s_BtColorPicker2;
-			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsl))
+			vec3 hsv = HslToHsv(hsl);
+			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsv))
 			{
+				hsl = HsvToHsl(hsv);
 				g_Config.m_ClMessageTeamHue = round_to_int(hsl.h*255.0f);
 				g_Config.m_ClMessageTeamSat = round_to_int(hsl.s*255.0f);
 				g_Config.m_ClMessageTeamLht = round_to_int(hsl.l*255.0f);
@@ -482,8 +488,10 @@ void CMenus::RenderSettingsHUDColors(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		{
 			static CButtonContainer s_BtColorPicker1, s_BtColorPicker2;
-			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsl))
+			vec3 hsv = HslToHsv(hsl);
+			if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsv))
 			{
+				hsl = HsvToHsl(hsv);
 				g_Config.m_ClMessageHue = round_to_int(hsl.h*255.0f);
 				g_Config.m_ClMessageSat = round_to_int(hsl.s*255.0f);
 				g_Config.m_ClMessageLht = round_to_int(hsl.l*255.0f);
@@ -558,8 +566,10 @@ void CMenus::RenderSettingsHUDColors(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 			{
 				static CButtonContainer s_BtColorPicker1, s_BtColorPicker2;
-				if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsl))
+				vec3 hsv = HslToHsv(hsl);
+				if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsv))
 				{
+					hsl = HsvToHsl(hsv);
 					g_Config.m_ClLaserInnerHue = round_to_int(hsl.h*255.0f);
 					g_Config.m_ClLaserInnerSat = round_to_int(hsl.s*255.0f);
 					g_Config.m_ClLaserInnerLht = round_to_int(hsl.l*255.0f);
@@ -611,8 +621,10 @@ void CMenus::RenderSettingsHUDColors(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 			{
 				static CButtonContainer s_BtColorPicker1, s_BtColorPicker2;
-				if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsl))
+				vec3 hsv = HslToHsv(hsl);
+				if(DoColorPicker(&s_BtColorPicker1, &s_BtColorPicker2, &Button, &hsv))
 				{
+					hsl = HsvToHsl(hsv);
 					g_Config.m_ClLaserOutlineHue = round_to_int(hsl.h*255.0f);
 					g_Config.m_ClLaserOutlineSat = round_to_int(hsl.s*255.0f);
 					g_Config.m_ClLaserOutlineLht = round_to_int(hsl.l*255.0f);

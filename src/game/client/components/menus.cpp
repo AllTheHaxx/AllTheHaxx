@@ -1042,14 +1042,15 @@ int CMenus::DoColorPicker(const CButtonContainer *pBC1, const CButtonContainer *
 	vec3 hsv = *pColorHSV;
 	IGraphics::CColorVertex ColorArray[4];
 
-	vec3 c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
-	ColorArray[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
-	ColorArray[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
-	ColorArray[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
-	ColorArray[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f);
+	vec3 c;
+	c = HsvToRgb(vec3(hsv.h, 0.0f, 1.0f));
+	ColorArray[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f); // TL
+	c = HsvToRgb(vec3(hsv.h, 1.0f, 1.0f));
+	ColorArray[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f); // TR
+	c = HsvToRgb(vec3(hsv.h, 1.0f, 1.0f));
+	ColorArray[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f); // BR
+	c = HsvToRgb(vec3(hsv.h, 0.0f, 1.0f));
+	ColorArray[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f); // BL
 
 	Graphics()->SetColorVertex(ColorArray, 4);
 
@@ -1083,8 +1084,8 @@ int CMenus::DoColorPicker(const CButtonContainer *pBC1, const CButtonContainer *
 	float X, Y;
 	if(UI()->DoPickerLogic(pBC1->GetID(), &SVPicker, &X, &Y))
 	{
-		hsv.y = X/SVPicker.w;
-		hsv.z = 1.0f - Y/SVPicker.h;
+		hsv.s = X/SVPicker.w;
+		hsv.v = 1.0f - Y/SVPicker.h;
 	}
 
 	// hue slider
