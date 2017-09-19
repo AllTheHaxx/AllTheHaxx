@@ -1828,7 +1828,7 @@ int CMenus::Render()
 				if(m_pClient->ServerBrowser()->CacheExists())
 				{
 					m_pClient->ServerBrowser()->LoadCache();
-					ServerBrowser()->Refresh(-1, true);
+					ServerBrowser()->RefreshQuick();
 				}
 				else
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

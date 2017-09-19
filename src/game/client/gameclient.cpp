@@ -451,7 +451,7 @@ void CGameClient::OnInit()
 	int CurrentIndex = 0;
 #define SET_LOAD_LABEL(TEXT) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT); if(g_Config.m_Debug) dbg_msg("loading/debug", "[%.2f%%] %s", ((float)CurrentIndex / (float)g_GameClient.m_pMenus->m_LoadTotal)*100.0f, g_GameClient.m_pMenus->m_aLoadLabel)
 #define SET_LOAD_LABEL_V(TEXT, ...) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT, __VA_ARGS__); if(g_Config.m_Debug) dbg_msg("loading/debug", "[%.2f%%] %s", ((float)CurrentIndex / (float)g_GameClient.m_pMenus->m_LoadTotal)*100.0f, g_GameClient.m_pMenus->m_aLoadLabel)
-#define LOAD_STUFF(ITERATIONS) for(int i = 0; i < ITERATIONS; i++, CurrentIndex++, g_GameClient.m_pMenus->RenderLoading())
+#define LOAD_STUFF(ITERATIONS) for(int i = 0; i < (ITERATIONS); i++, CurrentIndex++, g_GameClient.m_pMenus->RenderLoading())
 
 	// load textures
 	LOAD_STUFF(g_pData->m_NumImages)
@@ -576,6 +576,13 @@ void CGameClient::OnInit()
 		UPDATE_BIND("+unlock_mouse", "unlock_mouse")
 
 		#undef UPDATE_BIND
+	}
+	if(g_Config.m_ClConfigVersion < 3200)
+	{
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3200", g_Config.m_ClConfigVersion);
+		g_Config.m_BrMaxRequests = max(g_Config.m_BrMaxRequests, 50);
+		g_Config.m_BrAutoCache = 1;
+		g_Config.m_BrAutoRefresh = 7;
 	}
 	g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
 

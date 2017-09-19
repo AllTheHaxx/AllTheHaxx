@@ -586,40 +586,32 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	// auto-cache when refreshed
 	{
-		static bool HasCached = false;
+		static bool s_HasCached = false;
 		if(g_Config.m_BrAutoCache)
 		{
-			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !HasCached && !ServerBrowser()->IsRefreshing() && ServerBrowser()->UpgradeProgression() == 100 && m_ActivePage == PAGE_BROWSER && g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_INTERNET && !s_HasCached &&
+					!ServerBrowser()->IsRefreshing() && m_ActivePage == PAGE_BROWSER && g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 			{
 				ServerBrowser()->SaveCache();
-				HasCached = true;
+				s_HasCached = true;
 			}
-			else if(HasCached && ServerBrowser()->IsRefreshing())
+			else if(s_HasCached && ServerBrowser()->IsRefreshing())
 			{
-				HasCached = false;
+				s_HasCached = false;
 			}
 		}
 	}
 
 	// auto-refresh
-//	set_new_tick();
 	if(g_Config.m_BrAutoRefresh && !ServerBrowser()->IsRefreshing())
 	{
-		if(time_get() > m_RefreshTimer + time_freq() * g_Config.m_BrAutoRefresh && ServerBrowser()->UpgradeProgression() == 100)
-			ServerBrowser()->Refresh(-1, 1);
-		else if((m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh < 0 && ServerBrowser()->UpgradeProgression() == 100 && !ServerBrowser()->IsRefreshing())
+		if(time_get() > m_RefreshTimer + time_freq() * g_Config.m_BrAutoRefresh)
+			ServerBrowser()->RefreshQuick();
+		else if((m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh < 0 && !ServerBrowser()->IsRefreshing())
 			m_RefreshTimer = time_get();
 	}
-	if(g_Config.m_BrAutoRefresh && (ServerBrowser()->IsRefreshing() || ServerBrowser()->UpgradeProgression() < 100))
+	if(g_Config.m_BrAutoRefresh && ServerBrowser()->IsRefreshing())
 		m_RefreshTimer = time_get();
-
-	// upgrade queue
-	static int64 s_LastUpgrade = time_get();
-	if(time_get() > s_LastUpgrade + time_freq()/10)
-	{
-		s_LastUpgrade = time_get();
-		ServerBrowser()->Refresh(-1, 2);
-	}
 }
 
 void CMenus::RenderServerbrowserFilters(CUIRect View)
@@ -789,7 +781,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		ServerFilter.HSplitTop(20.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(15.0f, &Button, &ServerFilter);
 		static CButtonContainer Scrollbar;
-		g_Config.m_BrAutoRefresh = round_to_int(DoScrollbarH(&Scrollbar, &Button, (float)g_Config.m_BrAutoRefresh/3600.0f, Localize("Time in seconds to refresh the infos"))*3600.0f);
+		g_Config.m_BrAutoRefresh = round_to_int(DoScrollbarH(&Scrollbar, &Button, (float)g_Config.m_BrAutoRefresh/60.0f, Localize("Time in seconds to refresh the infos"), g_Config.m_BrAutoRefresh)*60.0f);
 
 		ServerFilter.HSplitTop(10.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
@@ -1552,15 +1544,13 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 		{
 			static CButtonContainer s_UpdateButton;
-			if(ServerBrowser()->UpgradeProgression() < 100)
-				str_format(aBuf, sizeof(aBuf), "%s (%i%%)", Localize("Update"), ServerBrowser()->UpgradeProgression());
-			else if (g_Config.m_BrAutoRefresh)
+			if (g_Config.m_BrAutoRefresh)
 				str_format(aBuf, sizeof(aBuf), "%s (%is)", Localize("Update"), (int)max((int64)0, (m_RefreshTimer - time_get()) / time_freq() + (int64)g_Config.m_BrAutoRefresh));
 			else
 				str_copy(aBuf, Localize("Update"), sizeof(aBuf));
-			if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button, Localize("Just update the info of the entries")) && !ServerBrowser()->IsRefreshing())
+			if(DoButton_Menu(&s_UpdateButton, aBuf, 0, &Button, Localize("Just update the info of the entries")))
 			{
-				ServerBrowser()->Refresh(-1, 1);
+				ServerBrowser()->RefreshQuick();
 			}
 		}
 

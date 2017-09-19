@@ -80,7 +80,6 @@ CServerBrowser::CServerBrowser()
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 
 	m_NeedRefresh = 0;
-	m_NeedUpgrade = 0;
 	m_CacheExists = true; // let's just assume this
 	m_aRecentServers.clear();
 	m_aRecentServers.hint_size(50);
@@ -92,8 +91,6 @@ CServerBrowser::CServerBrowser()
 
 	m_NumDDNetTypes = 0;
 	m_NumDDNetCountries = 0;
-
-	m_UpgradeProgression = 0;
 
 	m_Sorthash = 0;
 	m_aFilterString[0] = 0;
@@ -208,7 +205,10 @@ const char *CServerBrowser::GetDebugString(int Index) const
 			   "\n"
 			   "NextIp = %p\n"
 			   "PrevReq = %p\n"
-			   "NextReq = %p\n",
+			   "NextReq = %p\n"
+			   "\n"
+			   "CurrentMaxRequests = %i"
+			,
 			   Index, m_NumSortedServers, pInfo,
 			   aAddr,
 			   aInfoAge,
@@ -216,7 +216,8 @@ const char *CServerBrowser::GetDebugString(int Index) const
 			   pInfo->m_Request64Legacy ? "true" : "false",
 			   pInfo->m_pNextIp,
 			   pInfo->m_pPrevReq,
-			   pInfo->m_pNextReq
+			   pInfo->m_pNextReq,
+			   m_CurrentMaxRequests
 	);
 
 	return s_aBuffer;
@@ -694,16 +695,28 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		Sort();
 }
 
-void CServerBrowser::Refresh(int Type, int NoReload)
+void CServerBrowser::AbortRefresh()
 {
-	if(NoReload || Type < 0)
+	CServerEntry *pEntry = m_pFirstReqServer;
+	while(pEntry)
 	{
-		if(NoReload == 1 && !IsRefreshing())
-			m_NeedUpgrade = true;
-		if(NoReload == 2 && m_NeedUpgrade)
-			Upgrade();
-		return;
+		CServerEntry *pNext = pEntry->m_pNextReq;
+		RemoveRequest(pEntry); // release request
+		pEntry = pNext;
 	}
+
+	m_pFirstReqServer = 0;
+	m_pLastReqServer = 0;
+	m_NumRequests = 0;
+	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+
+	m_NeedRefresh = false;
+}
+
+void CServerBrowser::Refresh(int Type)
+{
+	if(dbg_assert_strict(Type > TYPE_NONE && Type < TYPE_OUT_OF_BOUNDS, "Invalid Type"))
+		return;
 
 	{ // BEGIN LOCKED SECTION
 		LOCK_SECTION_LAZY_DBG(m_Lock);
@@ -725,7 +738,6 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 
 		//
 		m_ServerlistType = Type;
-		m_NeedUpgrade = false;
 
 	} // END LOCKED SECTION
 
@@ -750,7 +762,7 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 		Packet.m_aExtraData[1] = (unsigned char)(m_BroadcastExtraToken & 0xff);
 		m_BroadcastTime = time_get();
 
-		for(unsigned short i = 8303; i <= 8310; i++)
+		for(unsigned short i = g_Config.m_BrLanScanStart; i <= min(65535, g_Config.m_BrLanScanStart+g_Config.m_BrLanScanRange); i++)
 		{
 			Packet.m_Address.port = i;
 			m_pNetClient->Send(&Packet);
@@ -795,6 +807,34 @@ void CServerBrowser::Refresh(int Type, int NoReload)
 				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pCntr->m_aTypes[g]))
 					Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0, true);
 			Sort();
+		}
+	}
+}
+
+void CServerBrowser::RefreshQuick()
+{
+	LOCK_SECTION_LAZY_DBG(m_Lock);
+	if(!__SectionLock.TryToLock())
+		return;
+
+	if(IsRefreshing())
+		AbortRefresh();
+
+	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
+
+	const int Length = NumServers();
+
+	// queue request for all existing servers by sorted order
+	{
+		//dbg_msg("browser", "upgrading part %i/%i", CurrPart+1, NumParts);
+		for(int i = 0; i < Length; i++)
+		{
+			CServerEntry *pEntry = m_ppServerlist[m_pSortedServerlist && m_NumSortedServers == Length ? m_pSortedServerlist[i] : i];
+			if(!pEntry)
+				continue;
+			pEntry->m_RequestTime = /*Now*/0;
+			pEntry->m_GotInfo = 0;
+			QueueRequest(m_ppServerlist[i]);
 		}
 	}
 }
@@ -981,7 +1021,6 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 
 	if(g_Config.m_Debug)
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i), took %.2fms", pSelf->m_NumServers, NumServers, ((time_get()-StartTime)*1000)/(float)time_freq()); // TODO: check if saving actually succeeded
-	//m_NeedUpgrade = true; // disabled due to sending our ip out to the whole universe
 	pSelf->Sort();
 	return;// true;
 }
@@ -1050,135 +1089,100 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 		pEntry->m_RequestTime = time_get();
 }
 
+
 void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
 {
 	RequestImpl(Addr, 0);
 }
 
+void CServerBrowser::RequestServerCount()
+{
+	NETADDR Addr;
+	CNetChunk Packet;
+	int i = 0;
 
-void CServerBrowser::Update(bool ForceResort)
+	m_NeedRefresh = 0;
+	m_MasterServerCount = -1;
+	mem_zero(&Packet, sizeof(Packet));
+	Packet.m_ClientID = -1;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_DataSize = sizeof(SERVERBROWSE_GETCOUNT);
+	Packet.m_pData = SERVERBROWSE_GETCOUNT;
+
+	for(i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
+	{
+		if(!m_pMasterServer->IsValid(i))
+			continue;
+
+		Addr = m_pMasterServer->GetAddr(i);
+		m_pMasterServer->SetCount(i, -1);
+		Packet.m_Address = Addr;
+		m_pNetClient->Send(&Packet);
+		if(g_Config.m_Debug)
+		{
+			dbg_msg("client_srvbrowse", "count-request sent to %d", i);
+		}
+	}
+}
+
+void CServerBrowser::ProcessServerCount()
+{
+	m_MasterServerCount = 0;
+	for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
+	{
+		if(!m_pMasterServer->IsValid(i))
+			continue;
+		int Count = m_pMasterServer->GetCount(i);
+		if(Count == -1)
+		{
+			/* ignore Server
+				m_MasterServerCount = -1;
+				return;
+				// we don't have the required server information
+				*/
+		}
+		else
+			m_MasterServerCount += Count;
+	}
+}
+
+void CServerBrowser::RequestServerList()
+{
+	// request serverlist
+	NETADDR Addr;
+	CNetChunk Packet;
+	mem_zero(&Packet, sizeof(Packet));
+	Packet.m_ClientID = -1;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_DataSize = sizeof(SERVERBROWSE_GETLIST);
+	Packet.m_pData = SERVERBROWSE_GETLIST;
+
+	for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
+	{
+		if(!m_pMasterServer->IsValid(i))
+			continue;
+
+		Addr = m_pMasterServer->GetAddr(i);
+		Packet.m_Address = Addr;
+		m_pNetClient->Send(&Packet);
+	}
+	if(g_Config.m_Debug)
+	{
+		dbg_msg("client_srvbrowse", "servercount: %d, requesting server list", m_MasterServerCount);
+	}
+	m_LastPacketTick = 0;
+}
+
+void CServerBrowser::ProcessServerList()
 {
 	int64 Timeout = time_freq();
 	int64 Now = time_get();
-	CServerEntry *pEntry, *pNext;
-
-	// do server list requests
-	if(m_NeedRefresh && !m_pMasterServer->IsRefreshing())
-	{
-		NETADDR Addr;
-		CNetChunk Packet;
-		int i = 0;
-
-		m_NeedRefresh = 0;
-		m_MasterServerCount = -1;
-		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_ClientID = -1;
-		Packet.m_Flags = NETSENDFLAG_CONNLESS;
-		Packet.m_DataSize = sizeof(SERVERBROWSE_GETCOUNT);
-		Packet.m_pData = SERVERBROWSE_GETCOUNT;
-
-		for(i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
-		{
-			if(!m_pMasterServer->IsValid(i))
-				continue;
-
-			Addr = m_pMasterServer->GetAddr(i);
-			m_pMasterServer->SetCount(i, -1);
-			Packet.m_Address = Addr;
-			m_pNetClient->Send(&Packet);
-			if(g_Config.m_Debug)
-			{
-				dbg_msg("client_srvbrowse", "count-request sent to %d", i);
-			}
-		}
-	}
-
-	// check if all server counts arrived
-	if(m_MasterServerCount == -1)
-	{
-		m_MasterServerCount = 0;
-		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
-		{
-			if(!m_pMasterServer->IsValid(i))
-				continue;
-			int Count = m_pMasterServer->GetCount(i);
-			if(Count == -1)
-			{
-				/* ignore Server
-					m_MasterServerCount = -1;
-					return;
-					// we don't have the required server information
-					*/
-			}
-			else
-				m_MasterServerCount += Count;
-		}
-
-		// request serverlist
-		NETADDR Addr;
-		CNetChunk Packet;
-		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_ClientID = -1;
-		Packet.m_Flags = NETSENDFLAG_CONNLESS;
-		Packet.m_DataSize = sizeof(SERVERBROWSE_GETLIST);
-		Packet.m_pData = SERVERBROWSE_GETLIST;
-
-		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
-		{
-			if(!m_pMasterServer->IsValid(i))
-				continue;
-
-			Addr = m_pMasterServer->GetAddr(i);
-			Packet.m_Address = Addr;
-			m_pNetClient->Send(&Packet);
-		}
-		if(g_Config.m_Debug)
-		{
-			dbg_msg("client_srvbrowse", "servercount: %d, requesting server list", m_MasterServerCount);
-		}
-		m_LastPacketTick = 0;
-	}
-	else if(m_MasterServerCount > -1)
-	{
-		m_MasterServerCount = 0;
-		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
-		{
-			if(!m_pMasterServer->IsValid(i))
-				continue;
-			int Count = m_pMasterServer->GetCount(i);
-			if(Count == -1)
-			{
-				/* ignore Server
-					m_MasterServerCount = -1;
-					return;
-					// we don't have the required server information
-					*/
-			}
-			else
-				m_MasterServerCount += Count;
-		}
-		//if(g_Config.m_Debug)
-		//{
-		//	dbg_msg("client_srvbrowse", "ServerCount2: %d", m_MasterServerCount);
-		//}
-	}
-	if(m_MasterServerCount > m_NumRequests + m_LastPacketTick)
-	{
-		++m_LastPacketTick;
-		return; // wait for more packets
-	}
-
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return;
+	CServerEntry *pEntry;
 
 	pEntry = m_pFirstReqServer;
 	int Count = 0;
-	while(1) // go through all entries that we currently have and request the infos
+	while(pEntry) // go through all entries that we currently have and request the infos
 	{
-		if(!pEntry) // no more entries
-			break;
-
 		// check if entry timed out
 		if(pEntry->m_RequestTime && pEntry->m_RequestTime+Timeout < Now)
 		{
@@ -1186,7 +1190,7 @@ void CServerBrowser::Update(bool ForceResort)
 			continue;
 		}
 
-		// no more than 10 concurrent requests
+		// no more than X concurrent requests
 		if(Count >= m_CurrentMaxRequests)
 			break;
 
@@ -1203,82 +1207,65 @@ void CServerBrowser::Update(bool ForceResort)
 	}
 
 	// no more current server requests
-	if(m_pFirstReqServer && Count == 0 && m_CurrentMaxRequests > 1)
+	if(Count == 0)
 	{
-		// reset old ones
-		pEntry = m_pFirstReqServer;
-		while(1)
+		if(m_pFirstReqServer && m_CurrentMaxRequests > g_Config.m_BrCurrRequestsAbortLimit)
 		{
-			if(!pEntry) // no more entries
-				break;
+			// reset old ones
+			pEntry = m_pFirstReqServer;
+			while(pEntry)
+			{
+				pEntry->m_RequestTime = 0;
+				pEntry = pEntry->m_pNextReq;
+			}
 
-			pEntry->m_RequestTime = 0;
-			pEntry = pEntry->m_pNextReq;
-		}
-
-		// update max-requests
-		m_CurrentMaxRequests /= 2;
-		if(m_CurrentMaxRequests <= 3)
-		{
-			m_CurrentMaxRequests = 1;
-			m_NeedRefresh = false;
+			// update max-requests
+			m_CurrentMaxRequests /= 2;
+			if(m_CurrentMaxRequests <= g_Config.m_BrCurrRequestsAbortLimit)
+			{
+				AbortRefresh();
+			}
 		}
 	}
-	else if(Count == 0 && m_CurrentMaxRequests == 1) // we reached the limit, just release all left requests. If a server sends us a packet, a new request will be added automatically, so we can delete all
-	{
-		pEntry = m_pFirstReqServer;
-		while(1)
-		{
-			if(!pEntry) // no more entries
-				break;
-			pNext = pEntry->m_pNextReq;
-			RemoveRequest(pEntry); // release request
-			pEntry = pNext;
-		}
-	}
-
-	__SectionLock.Unlock();
-
-	// check if we need to resort
-	if(!(g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90))
-		if(m_Sorthash != SortHash() || ForceResort)
-			Sort();
 }
 
-void CServerBrowser::Upgrade()
+void CServerBrowser::Update(bool ForceResort)
 {
+	// StateMachine part 1: do server list requests
+	if(m_NeedRefresh && !m_pMasterServer->IsRefreshing())
+	{
+		RequestServerCount();
+	}
+
+	// StateMachine part 2: check if all server counts arrived & request the serverlist
+	if(m_MasterServerCount == -1)
+	{
+		ProcessServerCount();
+		RequestServerList();
+	}
+	else if(m_MasterServerCount > -1)
+	{
+		ProcessServerCount();
+	}
+
+	if(m_MasterServerCount > m_NumRequests + m_LastPacketTick)
+	{
+		++m_LastPacketTick;
+		return; // wait for more packets
+	}
+
 	LOCK_SECTION_LAZY_DBG(m_Lock);
 	if(!__SectionLock.TryToLock())
 		return;
 
-	if(IsRefreshing())
-		return;
+	ProcessServerList();
 
-	const int64 Now = time_get();
-	const int Length = NumServers();
-	const int PartLen = g_Config.m_BrMaxRequests;
-	const int NumParts = Length/PartLen;
+	UNLOCK_SECTION();
 
-	// request the infos for all existing entries partwise
-	static int CurrPart = 0;
-	if(CurrPart < NumParts)
-	{
-		//dbg_msg("browser", "upgrading part %i/%i", CurrPart+1, NumParts);
-		m_UpgradeProgression = (CurrPart+1.0f)/(float)NumParts;
-		for(int i = CurrPart*PartLen; i < (CurrPart+1)*PartLen; i++)
-		{
-			if(!m_ppServerlist[i]) continue;
-			m_ppServerlist[i]->m_RequestTime = Now;
-			m_ppServerlist[i]->m_GotInfo = 0;
-			RequestImpl(m_ppServerlist[i]->m_Addr, 0);
-		}
-		CurrPart++;
-	}
-	else
-	{
-		m_NeedUpgrade = false;
-		CurrPart = 0;
-	}
+	// check if we need to resort
+	if(!(g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90))
+		if(ForceResort || m_Sorthash != SortHash())
+			Sort();
 }
 
 
@@ -1531,14 +1518,6 @@ int CServerBrowser::LoadingProgression() const
 	float Servers = m_NumServers;
 	float Loaded = m_NumServers-m_NumRequests;
 	return round_to_int(100.0f * Loaded/Servers);
-}
-
-int CServerBrowser::UpgradeProgression() const
-{
-	if(m_NumServers == 0 || !m_NeedUpgrade)
-		return 100;
-
-	return round_to_int(100.0f * m_UpgradeProgression);
 }
 
 

@@ -91,8 +91,9 @@ public:
 	~CServerBrowser();
 
 	// interface functions
-	void Refresh(int Type, int NoReload=false);
-	void AbortRefresh() { m_pFirstReqServer = 0; m_NumRequests = 0; } // dunno if something needs to be cleaned up here...?
+	void Refresh(int Type);
+	void RefreshQuick(); // only re-request all the infos of the current page
+	void AbortRefresh(); // dunno if something needs to be cleaned up here...?
 	void SaveCache();
 	void LoadCache();
 	static void LoadCacheThread(void *pUser);
@@ -100,7 +101,6 @@ public:
 	bool IsRefreshing() const;
 	bool IsRefreshingMasters() const;
 	int LoadingProgression() const;
-	int UpgradeProgression() const;
 
 	int NumServers() const { return m_NumServers; }
 	bool IsLocked();
@@ -135,7 +135,10 @@ public:
 
 	//
 	void Update(bool ForceResort);
-	void Upgrade(); // only re-request all the infos
+	void RequestServerCount();
+	void ProcessServerCount();
+	void RequestServerList();
+	void ProcessServerList();
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo, bool NoSort);
 	void RequestCurrentServer(const NETADDR &Addr) const;
 
@@ -183,13 +186,11 @@ private:
 	int m_LastPacketTick;
 
 	int m_NeedRefresh;
-	bool m_NeedUpgrade;
 	bool m_CacheExists;
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
 	int m_NumServers;
-	float m_UpgradeProgression;
 	int m_NumServerCapacity;
 
 	int64 m_Sorthash;

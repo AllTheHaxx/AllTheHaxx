@@ -106,6 +106,7 @@ public:
 		TYPE_FAVORITES = 3,
 		TYPE_RECENT = 4,
 		TYPE_DDNET = 5,
+		TYPE_OUT_OF_BOUNDS,
 
 		SET_MASTER_ADD=1,
 		SET_FAV_ADD,
@@ -114,14 +115,14 @@ public:
 		SET_RECENT,
 	};
 
-	virtual void Refresh(int Type, int NoReload=0) = 0;
+	virtual void Refresh(int Type) = 0;
+	virtual void RefreshQuick() = 0;
 	virtual void AbortRefresh() = 0;
 	virtual void SaveCache() = 0;
 	virtual void LoadCache() = 0;
 	virtual bool IsRefreshing() const = 0;
 	virtual bool IsRefreshingMasters() const = 0;
 	virtual int LoadingProgression() const = 0;
-	virtual int UpgradeProgression() const = 0;
 	virtual bool CacheExists() const = 0;
 
 	virtual int NumServers() const = 0;
