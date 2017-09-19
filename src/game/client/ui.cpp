@@ -519,7 +519,7 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	else if(Inside)
 		SetHotItem(pID);
 
-	if(!Inside || !MouseButton(0))
+	if(!Inside || !MouseButton(0) || ActiveItem() != pID)
 		return 0;
 
 	if(pX)
