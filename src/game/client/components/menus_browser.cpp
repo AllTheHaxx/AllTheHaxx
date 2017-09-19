@@ -769,7 +769,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		Rect.w = Rect.h*2;
 		Rect.x += (OldWidth-Rect.w)/2.0f;
 		vec4 Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry?1.0f: 0.5f);
-		m_pClient->m_pCountryFlags->Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
+		m_pClient->m_pCountryFlags->Render(g_Config.m_BrFilterCountryIndex, Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
 		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
 			m_Popup = POPUP_COUNTRY;
@@ -940,7 +940,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					if (!Active)
 						Color.a = 0.2f;
 
-					m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
+					m_pClient->m_pCountryFlags->Render(FlagID, Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
 				}
 			}
 		}
@@ -1158,7 +1158,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			// flag
 			vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
-			m_pClient->m_pCountryFlags->Render(pSelectedServer->m_aClients[i].m_Country, &Color, Flag.x, Flag.y, Flag.w, Flag.h);
+			m_pClient->m_pCountryFlags->Render(pSelectedServer->m_aClients[i].m_Country, Color, Flag.x, Flag.y, Flag.w, Flag.h);
 		}
 
 		UiDoListboxEnd(&s_ScrollValue, 0);

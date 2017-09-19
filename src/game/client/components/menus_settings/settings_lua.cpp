@@ -207,11 +207,11 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		static CButtonContainer s_Listbox;
 		CUIRect ListBox = ListView;
 		char aHeadline[128], aBottomLine[128];
-		static int NumListedFiles = 0, NumActiveScripts = 0;
-		str_format(aHeadline, sizeof(aHeadline), Localize("%s (%i files listed, %i scripts active)"), Localize("Lua files"), NumListedFiles, NumActiveScripts);
-		str_format(aBottomLine, sizeof(aBottomLine), Localize("(%i files found – %i filtered away)"), Client()->Lua()->GetLuaFiles().size(), Client()->Lua()->GetLuaFiles().size() - NumListedFiles);
-		UiDoListboxStart(&s_Listbox, &ListBox, 50.0f, aHeadline, aBottomLine, NumListedFiles, 1, -1/*s_SelectedScript*/, s_ScrollValue, 0, 0);
-		NumListedFiles = 0; NumActiveScripts = 0;
+		static int s_NumListedFiles = 0, NumActiveScripts = 0;
+		str_format(aHeadline, sizeof(aHeadline), Localize("%s (%i files listed, %i scripts active)"), Localize("Lua files"), s_NumListedFiles, NumActiveScripts);
+		str_format(aBottomLine, sizeof(aBottomLine), Localize("(%i files found – %i filtered away)"), Client()->Lua()->GetLuaFiles().size(), Client()->Lua()->GetLuaFiles().size() - s_NumListedFiles);
+		UiDoListboxStart(&s_Listbox, &ListBox, 50.0f, aHeadline, aBottomLine, s_NumListedFiles, 1, -1/*s_SelectedScript*/, s_ScrollValue, 0, 0);
+		s_NumListedFiles = 0; NumActiveScripts = 0;
 		for(int i = 0; i < NumLuaFiles; i++)
 		{
 			CLuaFile *L = Client()->Lua()->GetLuaFiles()[i];
@@ -233,7 +233,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 				continue;
 
 			CListboxItem Item = UiDoListboxNextItem(&pIDItem[i]);
-			NumListedFiles++;
+			s_NumListedFiles++;
 
 			if(i >= MAX_SCRIPTS-1)
 			{

@@ -76,11 +76,26 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	TabBar.VSplitRight(2.0f, &TabBar, &Button);
 	RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.8f, 0.6f, 0.5f), 0, 0);
 
+	// render legacy view button above ident list
 	TabBar.HSplitTop(20.0f, &Button, &TabBar);
 	static CButtonContainer s_ButtonOpenLegacy;
-	if(DoButton_Menu(&s_ButtonOpenLegacy, Localize("Open legacy view"), 0, &Button, 0, CUI::CORNER_T))
+	if(DoButton_Menu(&s_ButtonOpenLegacy, Localize("Open legacy view"), 0, &Button, 0, CUI::CORNER_TL))
 		s_LegacyIsOpen = 1;
-	
+
+	// render filter box below ident list
+	TabBar.HSplitBottom(20.0f, &TabBar, &Temp);
+	Temp.VSplitRight(15.0f, &Temp, &Button);
+	static CButtonContainer s_EditboxFilter;
+	static float s_Offset = 0.0f;
+	DoEditBox(&s_EditboxFilter, &Temp, m_aIdentFilterString, sizeof(m_aIdentFilterString), 12.0f, &s_Offset, false, CUI::CORNER_BL, Localize("Search..."));
+	// clear button
+	static CButtonContainer s_ClearButton;
+	if(DoButton_Menu(&s_ClearButton, "×", 0, &Button, 0, CUI::CORNER_NONE))
+	{
+		m_aIdentFilterString[0] = '\0';
+		UI()->SetActiveItem(s_EditboxFilter.GetID());
+	}
+
 	static CButtonContainer s_aDeleteIDs[512];
 	static CButtonContainer s_aUpIDs[512];
 	static CButtonContainer s_aDownIDs[512];
@@ -89,14 +104,30 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 	static CButtonContainer s_aPasteIDs[512];
 	static CButtonContainer s_aItemIDs[512];
 	static CButtonContainer s_LeftListbox;
+	static int s_NumIdentsShown = numID;
+	char aBottomLine[64];
+	str_formatb(aBottomLine, "%i/%i shown", s_NumIdentsShown, numID);
 	static float s_LeftListboxScrollVal = 0.0f;
-	UiDoListboxStart(&s_LeftListbox, &TabBar, 24.0f, "", "", numID+1, 1, -1, s_LeftListboxScrollVal, 0);
+	bool AllShown = s_NumIdentsShown == numID;
+	UiDoListboxStart(&s_LeftListbox, &TabBar, 24.0f, Localize("Identities"), aBottomLine, s_NumIdentsShown+1, 1, -1, s_LeftListboxScrollVal, CUI::CORNER_NONE, CUI::CORNER_NONE);
+	s_NumIdentsShown = 0;
 	for(int i = 0; i < numID+1; i++)
 	{
 		if(i >= 512)
 			break;
 
 		CIdentity::CIdentEntry *pEntry = m_pClient->m_pIdentity->GetIdent(i);
+
+		if(i < numID)
+		{
+			if(m_aIdentFilterString[0] != '\0' &&
+			   !str_find_nocase(pEntry->m_aTitle, m_aIdentFilterString) && !str_find_nocase(pEntry->m_aName, m_aIdentFilterString))
+				continue;
+		}
+
+		if(i < numID)
+			s_NumIdentsShown++;
+
 		CListboxItem Item = UiDoListboxNextItem(&s_aItemIDs[i], false/*Page == i*/);
 
 		if(!Item.m_Visible)
@@ -139,7 +170,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		Temp.Margin(4.0f, &Temp);
 		if(m_pClient->m_pIdentity->NumIdents() > 1)
 		{
-			if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (i < numID - 1 ? 0 : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
+			if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (i < numID - 1 && AllShown ? CUI::CORNER_NONE : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
 			{
 				m_pClient->m_pIdentity->DeleteIdent(i);
 				if(i < Page)
@@ -147,35 +178,38 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			}
 		}
 
-		if(i < numID-1)
+		if(AllShown)
 		{
-			Button.VSplitRight(Button.h, 0, &Temp);
-			Temp.Margin(4.0f, &Temp);
-			Temp.x -= 16.0f;
-			if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i >= 1 ? 0 : CUI::CORNER_L))
+			if(i < numID-1)
 			{
-				m_pClient->m_pIdentity->SwapIdent(i, 1);
-				m_MousePos.y += 36.0f;
-				if(Page == i)
-					Page++;
-				else if(i == Page-1)
-					Page--;
+				Button.VSplitRight(Button.h, 0, &Temp);
+				Temp.Margin(4.0f, &Temp);
+				Temp.x -= 16.0f;
+				if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i >= 1 ? 0 : CUI::CORNER_L))
+				{
+					m_pClient->m_pIdentity->SwapIdent(i, 1);
+					m_MousePos.y += 36.0f;
+					if(Page == i)
+						Page++;
+					else if(i == Page-1)
+						Page--;
+				}
 			}
-		}
 
-		if(i >= 1)
-		{
-			Button.VSplitRight(Button.h, 0, &Temp);
-			Temp.Margin(4.0f, &Temp);
-			Temp.x -= 32.0f;
-			if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, 0, i < numID-1 ? CUI::CORNER_L : CUI::CORNER_ALL))
+			if(i >= 1)
 			{
-				m_MousePos.y -= 36.0f;
-				m_pClient->m_pIdentity->SwapIdent(i, -1);
-				if(i == Page)
-					Page--;
-				else if(i == Page+1)
-					Page++;
+				Button.VSplitRight(Button.h, 0, &Temp);
+				Temp.Margin(4.0f, &Temp);
+				Temp.x -= 32.0f;
+				if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, 0, i < numID-1 ? CUI::CORNER_L : CUI::CORNER_ALL))
+				{
+					m_MousePos.y -= 36.0f;
+					m_pClient->m_pIdentity->SwapIdent(i, -1);
+					if(i == Page)
+						Page--;
+					else if(i == Page+1)
+						Page++;
+				}
 			}
 		}
 
@@ -204,7 +238,9 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 		OwnSkinInfo.m_Size = 26.0f*UI()->Scale();
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x + OwnSkinInfo.m_Size, Button.y + Button.h *0.6f));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x + OwnSkinInfo.m_Size/2.0f, Button.y + Button.h *0.6f));
+		const CCountryFlags::CCountryFlag *pFlag = m_pClient->m_pCountryFlags->GetByCountryCode(pEntry->m_Country);
+		m_pClient->m_pCountryFlags->Render(pFlag->m_CountryCode, vec4(1), Button.x + OwnSkinInfo.m_Size/2.0f + 25.0f/2.0f, Button.y + Button.h/2.0f-13.0f/2.0f, 25.0f, 13.0f);
 		Button.HMargin(2.0f, &Button);
 		Button.HSplitBottom(16.0f, 0, &Button);
 		const bool IsMain = m_pClient->m_pIdentity->UsingIdent(i, false);
@@ -212,9 +248,9 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		vec3 rgb = IsMain && !IsDummy ? vec3(0.7f, 0.7f, 0.2f) : !IsMain && IsDummy ? vec3(0.2f, 0.7f, 0.7f) : IsMain && IsDummy ? vec3(0.2f, 0.7f, 0.2f) : vec3(1,1,1);
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 		if(str_length(pEntry->m_aTitle) > 0)
-			UI()->DoLabelScaled(&Button, pEntry->m_aTitle, 14.0f, 0);
+			UI()->DoLabelScaled(&Button, pEntry->m_aTitle, 14.0f, CUI::ALIGN_CENTER, -1.0f, m_aIdentFilterString);
 		else
-			UI()->DoLabelScaled(&Button, pEntry->m_aName, 14.0f, 0);
+			UI()->DoLabelScaled(&Button, pEntry->m_aName, 14.0f, CUI::ALIGN_CENTER, -1.0f, m_aIdentFilterString);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	UiDoListboxEnd(&s_LeftListboxScrollVal, 0);
@@ -345,7 +381,7 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	}
 
 	// country flag selector
-	int *Country = &pEntry->m_Country;
+	int *pCountry = &pEntry->m_Country;
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	static float s_ScrollValue = 0.0f;
 	int OldSelected = -1;
@@ -355,7 +391,7 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pFlag = m_pClient->m_pCountryFlags->GetByIndex(i);
-		if(pFlag->m_CountryCode == *Country)
+		if(pFlag->m_CountryCode == *pCountry)
 			OldSelected = i;
 		CPointerContainer Container(&pFlag->m_CountryCode);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
@@ -367,8 +403,7 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 			float OldWidth = Item.m_Rect.w;
 			Item.m_Rect.w = Item.m_Rect.h*2;
 			Item.m_Rect.x += (OldWidth-Item.m_Rect.w)/ 2.0f;
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_pCountryFlags->Render(pFlag->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
+			m_pClient->m_pCountryFlags->Render(pFlag->m_CountryCode, vec4(1), Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
 			if(pFlag->m_Texture != -1)
 				UI()->DoLabel(&FlagLabel, pFlag->m_aCountryCodeString, 10.0f, 0);
 		}
@@ -377,7 +412,7 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
+		*pCountry = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
 		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else

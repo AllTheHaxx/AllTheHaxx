@@ -224,7 +224,7 @@ public:	int m_LoadTotal;
 	int m_CallvoteSelectedOption;
 	int m_CallvoteSelectedPlayer;
 	char m_aCallvoteReason[VOTE_REASON_LENGTH<<4];
-	char m_aFilterString[25];
+	char m_aCallvoteFilterString[64];
 	int64 m_VoteCalled;
 
 	// for callbacks
@@ -399,6 +399,7 @@ public:	int m_LoadTotal;
 	void RenderSettingsIdentTee(CUIRect MainView, int Page);
 	void RenderSettingsIdentPlayer(CUIRect MainView, int Page);
 	array<std::string> m_aIRCBacklog;
+	char m_aIdentFilterString[64];
 
 	// found in menus_hotbar.cpp
 	bool m_HotbarActive;

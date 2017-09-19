@@ -693,7 +693,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		//Cursor.m_LineWidth = Button.w;
 
 		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_pCountryFlags->Render(pCurrClient->m_Country, &Color,
+		m_pClient->m_pCountryFlags->Render(pCurrClient->m_Country, Color,
 										   Button2.x, (float)(Button2.y + Button2.h / 2.0f - 0.75 * Button2.h / 2.0f), 1.5f * Button2.h, 0.75f * Button2.h);
 
 		// ignore button
@@ -961,7 +961,7 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
-		if(m_aFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(m_aCallvoteFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aCallvoteFilterString))
 			continue;
 		TotalShown++;
 	}
@@ -976,14 +976,14 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
 		i++;
-		if(m_aFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(m_aCallvoteFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aCallvoteFilterString))
 			continue;
 
 		CPointerContainer Container(pOption);
 		CListboxItem Item = UiDoListboxNextItem(&Container);
 
 		if(Item.m_Visible)
-			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, CUI::ALIGN_LEFT, -1.0f, m_aFilterString);
+			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, CUI::ALIGN_LEFT, -1.0f, m_aCallvoteFilterString);
 
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
@@ -1011,7 +1011,7 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && m_pClient->m_Snap.m_paInfoByName[i]->m_Team == TEAM_SPECTATORS))
 			continue;
 
-		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
+		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aCallvoteFilterString))
 			continue;
 
 		if(m_CallvoteSelectedPlayer == Index)
@@ -1128,7 +1128,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button2);
 			static float Offset = 0.0f;
 			static CButtonContainer s_FilterStringEditbox;
-			if(DoEditBox(&s_FilterStringEditbox, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
+			if(DoEditBox(&s_FilterStringEditbox, &QuickSearch, m_aCallvoteFilterString, sizeof(m_aCallvoteFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
 			{
 				// TODO: Implement here
 			}
@@ -1138,7 +1138,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				static CButtonContainer s_ClearButton;
 				if(DoButton_Menu(&s_ClearButton, "×", 0, &Button2, 0, CUI::CORNER_R, vec4(1,1,1,0.35f)))
 				{
-					m_aFilterString[0] = 0;
+					m_aCallvoteFilterString[0] = 0;
 					UI()->SetActiveItem(s_FilterStringEditbox.GetID());
 					Client()->ServerBrowserUpdate();
 				}

@@ -142,14 +142,14 @@ const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(int Index) const
 	return &m_aCountryFlags[max(0, Index%m_aCountryFlags.size())];
 }
 
-void CCountryFlags::Render(int CountryCode, const vec4 *pColor, float x, float y, float w, float h)
+void CCountryFlags::Render(int CountryCode, const vec4 &Color, float x, float y, float w, float h)
 {
 	const CCountryFlag *pFlag = GetByCountryCode(CountryCode);
 	if(pFlag->m_Texture != -1)
 	{
 		Graphics()->TextureSet(pFlag->m_Texture);
 		Graphics()->QuadsBegin();
-		Graphics()->SetColor(pColor->r, pColor->g, pColor->b, pColor->a);
+		Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
 		IGraphics::CQuadItem QuadItem(x, y, w, h);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 		Graphics()->QuadsEnd();

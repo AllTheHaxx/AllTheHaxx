@@ -531,7 +531,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// country flag
 		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f*m_FadeVal);
-		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
+		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, Color,
 											CountryOffset, y+(Spacing+TeeSizeMod*5.0f)/2.0f, CountryLength, LineHeight-Spacing-TeeSizeMod*5.0f);
 
 		// ping

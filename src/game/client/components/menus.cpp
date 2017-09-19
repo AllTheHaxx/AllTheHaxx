@@ -97,7 +97,10 @@ CMenus::CMenus()
 
 	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
 	m_aCallvoteReason[0] = 0;
+	m_aCallvoteFilterString[0] = 0;
 	m_VoteCalled = 0;
+
+	m_aIdentFilterString[0] = 0;
 
 	m_FriendlistSelectedIndex = -1;
 	m_DoubleClickIndex = -1;
