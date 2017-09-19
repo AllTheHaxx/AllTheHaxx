@@ -444,7 +444,7 @@ function build(settings)
 
 	tools = {}
 	for i,v in ipairs(tools_src) do
-		config.lua.value = false
+		-- XXX HACK: config.lua.value = false
 		toolname = PathFilename(PathBase(v))
 		tools[i] = Link(tools_settings, toolname, Compile(tools_settings, v), 
 						engine, zlib, pnglite, md5, game_shared, aes128)
