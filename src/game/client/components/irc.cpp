@@ -83,17 +83,14 @@ void CIRCBind::OnMessageIRC(const char *pChan, const char *pUser, const char *pT
 		GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "IRC", aBuf, false);
 
 		// ...to notifications
-		if(false && g_Config.m_ClNotifications)
-		{
-			if(str_comp(pChan, GameClient()->IRC()->GetNick()) == 0) // private chat
-				str_format(aBuf, sizeof(aBuf), "[%s]: %s", pUser, pText);
-			else
-				str_format(aBuf, sizeof(aBuf), "[%s]: <%s> %s", pChan, pUser, pText);
-			GameClient()->m_pHud->PushNotification(aBuf, str_find_nocase(pText, GameClient()->IRC()->GetNick()) ?
-																vec4(0.2f, 1, 0.5f, 1) :
-																vec4(0.2f, 0.5f, 1, 1));
-		}
-		else if(str_find_nocase(pText, GameClient()->IRC()->GetNick()))
+		const char *pFound = str_find_nocase(pText, GameClient()->IRC()->GetNick());
+		char PrevChar = pFound > pText ? *(pFound-1) : (char)0;
+		if(pFound && !(
+							 (PrevChar >= '0' && PrevChar <= '9') ||
+							 (PrevChar >= 'A' && PrevChar <= 'Z') ||
+							 (PrevChar >= 'a' && PrevChar <= 'z')
+					 )
+				)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "[%s] You were mentioned by %s", pChan, pUser);
