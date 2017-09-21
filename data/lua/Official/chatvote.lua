@@ -7,8 +7,8 @@ Import("algorithm")
 
 function OnChatSend(_, Message)
 	-- syntaktic sugar
-	if Message:lower():sub(1, 5) == "/kick" or Message:lower():sub(1, 5) == "/spec" then
-		Message = "/vote " .. Message:sub(2, -1)
+	if Message:lower():sub(1, 5) == "//kick" or Message:lower():sub(1, 5) == "//spec" then
+		Message = "/vote " .. Message:sub(3, -1)
 	end
 
 	if Message:lower():sub(1, 5) ~= "/vote" then return end
