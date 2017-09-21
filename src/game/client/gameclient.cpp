@@ -1704,7 +1704,7 @@ void CGameClient::OnPredict()
 		return;
 	}
 
-	static bool IsWeaker[2][MAX_CLIENTS] = {{0}};
+	static bool IsWeaker[2][MAX_CLIENTS] = { {false} };
 	if(AntiPingPlayers())
 		FindWeaker(IsWeaker);
 

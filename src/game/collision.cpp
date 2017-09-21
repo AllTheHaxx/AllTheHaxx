@@ -229,7 +229,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		int hit = 0;
 		if(CheckPoint(ix, iy))
 		{
-			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
+			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1) && m_pLayers->IsHookThrough(Last, Pos) == false)
 				hit = GetCollisionAt(ix, iy);
 		}
 		else if(IsHookBlocker(ix, iy, Pos0, Pos1))

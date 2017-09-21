@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "gamecore.h"
+#include "layers.h"
 
 #include <engine/shared/config.h>
 #include <engine/server/server.h>
@@ -472,12 +473,16 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		}
 
 		int Index = MapIndex;
-		if(g_Config.m_ClPredictDDRace && IsClient && m_pCollision->IsSpeedup(Index))
+		bool IsExtraSpeedup = m_pCollision->Layers()->IsExtrasSpeedup(m_Pos);
+		if(g_Config.m_ClPredictDDRace && IsClient && (IsExtraSpeedup || m_pCollision->IsSpeedup(Index)))
 		{
 			vec2 Direction, MaxVel, TempVel = m_Vel;
 			int Force, MaxSpeed = 0;
 			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-			m_pCollision->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
+			if(IsExtraSpeedup)
+				m_pCollision->Layers()->GetExtrasSpeedup(m_Pos, &Force, &MaxSpeed, &Direction);
+			else
+				m_pCollision->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
 			if(Force == 255 && MaxSpeed)
 			{
 				m_Vel = Direction * (MaxSpeed/5);

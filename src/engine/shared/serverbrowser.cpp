@@ -47,12 +47,17 @@ bool IsDDNet(const CServerInfo *pInfo)
 
 // other
 
+bool IsBWMod(const CServerInfo *pInfo)
+{
+	return str_comp_nocase(pInfo->m_aGameType, "bw") == 0;
+}
+
 bool Is64Player(const CServerInfo *pInfo)
 {
 	return str_find(pInfo->m_aGameType, "64")
 	    || str_find(pInfo->m_aName, "64")
 		|| str_comp(pInfo->m_aName, "iF|City") == 0
-	    || IsDDNet(pInfo);
+	    || IsDDNet(pInfo) || IsBWMod(pInfo);
 }
 
 bool IsPlus(const CServerInfo *pInfo)
