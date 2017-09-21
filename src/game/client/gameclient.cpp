@@ -691,6 +691,8 @@ void CGameClient::OnConnected()
 	// snap
 	Client()->Rcon("crashmeplx"); // for legacy 64p
 	//Client()->Rcon("crashmeharder"); // for newer >64p TODO: implement 256!
+	if(IsBWMod(&m_CurrentServerInfo))
+		Client()->Rcon("hithisisath"); // for chosen gametypes
 }
 
 void CGameClient::OnReset()
