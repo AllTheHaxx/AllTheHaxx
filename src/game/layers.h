@@ -58,6 +58,7 @@ public:
 
 	bool IsHookThrough(const vec2& Last, const vec2& Pos);
 	bool IsExtrasSpeedup(const vec2& Pos);
+	bool IsExtrasUnpassable(const vec2& Pos);
 	void GetExtrasSpeedup(const vec2& Pos, int *pOutForce, int *pOutMaxSpeed, vec2 *pOutDirection);
 
 private:

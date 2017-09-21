@@ -346,6 +346,17 @@ bool CLayers::IsExtrasSpeedup(const vec2& Pos)
 	return false;
 }
 
+bool CLayers::IsExtrasUnpassable(const vec2& Pos)
+{
+	for (int i = 0; i < m_NumExtrasLayer; i++)
+	{
+		int Tile = GetExtrasTile(i)[ExtrasIndex(i, round_to_int(Pos.x), round_to_int(Pos.y))].m_Index;
+		if (Tile == EXTRAS_SPEEDUP)
+			return true;
+	}
+	return false;
+}
+
 void CLayers::GetExtrasSpeedup(const vec2& Pos, int *pOutForce, int *pOutMaxSpeed, vec2 *pOutDirection)
 {
 	for (int i = 0; i < m_NumExtrasLayer; i++)
