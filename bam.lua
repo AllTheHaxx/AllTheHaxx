@@ -267,6 +267,7 @@ function build(settings)
 	else
 		settings.cc.flags:Add("-Wall")
 		settings.cc.flags:Add("-Wno-deprecated", "-Werror=format")
+		settings.cc.flags_cxx:Add("-std=c++11")
 		if family == "windows" then
 			if config.compiler.driver == "gcc" then
 				settings.link.flags:Add("-static-libgcc")
