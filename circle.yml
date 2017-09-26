@@ -57,7 +57,7 @@ test:
           DST=win32
         fi;
         
-        ~/bam/bam client_release;
+        ~/bam/bam -j 20 client_release;
         RETVAL=$?;
         if [ ! $RETVAL -eq 0 ]; then
           exit $RETVAL
