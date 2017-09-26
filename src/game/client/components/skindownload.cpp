@@ -34,7 +34,7 @@ void CSkinDownload::OnInit()
 
 void CSkinDownload::OnRender()
 {
-	if(Client()->State() != IClient::STATE_ONLINE)
+	if(!g_Config.m_ClSkinFetcherUi || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	const int NUM_TASKS = NumTasks();
