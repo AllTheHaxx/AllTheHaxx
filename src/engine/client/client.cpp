@@ -3475,12 +3475,19 @@ void CClient::Run()
 
 				// update frametime
 				int64 Now = time_get();
+				static int64 s_Last = Now;
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
 				if(m_RenderFrameTime < m_RenderFrameTimeLow)
 					m_RenderFrameTimeLow = m_RenderFrameTime;
 				if(m_RenderFrameTime > m_RenderFrameTimeHigh)
 					m_RenderFrameTimeHigh = m_RenderFrameTime;
-				m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
+
+				// update fps graph at constant rate
+				if(Now > s_Last + time_freq()/100)
+				{
+					m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
+					s_Last = Now;
+				}
 
 				m_LastRenderTime = Now;
 
