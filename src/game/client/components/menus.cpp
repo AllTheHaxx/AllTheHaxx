@@ -954,6 +954,16 @@ float CMenus::DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Cu
 	return clamp(ReturnValue, 0.0f, 1.0f);
 }
 
+int CMenus::DoScrollbarIntSelect(CButtonContainer *pBC, const CUIRect *pRect, int *pCurrent, int Min, int Max, const char *pTooltip)
+{
+	return *pCurrent = round_to_int(map_val(
+			DoScrollbarH(pBC, pRect, map_val(*pCurrent, Min, Max, 0.0f, 1.0f), pTooltip, *pCurrent),
+			0.0f, 1.0f,
+			Min, Max
+	));
+}
+
+
 int CMenus::DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, const char *pTooltip)
 {
 	CALLSTACK_ADD();
@@ -1159,8 +1169,6 @@ int CMenus::RenderMenubar(CUIRect r)
 		static CButtonContainer s_NewsButton;
 		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS_ATH || m_ActivePage==PAGE_NEWS_DDNET, &Button, CUI::CORNER_T))
 		{
-			m_pClient->m_pCamera->m_RotationCenter = vec2(300.0f, 300.0f);
-
 			NewPage = PAGE_NEWS_ATH;
 			m_DoubleClickIndex = -1;
 		}
@@ -1190,7 +1198,6 @@ int CMenus::RenderMenubar(CUIRect r)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_RECENT);
 
 			NewPage = PAGE_BROWSER;
-			m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 			m_DoubleClickIndex = -1;
 		}
 
@@ -1199,8 +1206,6 @@ int CMenus::RenderMenubar(CUIRect r)
 		static CButtonContainer s_DemosButton;
 		if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
 		{
-			m_pClient->m_pCamera->m_RotationCenter = vec2(400.0f, 1500.0f);
-
 			DemolistPopulate();
 			NewPage = PAGE_DEMOS;
 			m_DoubleClickIndex = -1;
@@ -1271,7 +1276,9 @@ int CMenus::RenderMenubar(CUIRect r)
 		PREPARE_BUTTON("⚙", Localize("Settings"))
 		static CButtonContainer s_SettingsButton;
 		if(DoButton_MenuTab(&s_SettingsButton, aBuf, m_ActivePage == PAGE_SETTINGS, &Button, 0))
+		{
 			NewPage = PAGE_SETTINGS;
+		}
 	}
 
 	//Box.VSplitRight(10.0f, &Box, &Button);
@@ -2170,17 +2177,18 @@ void CMenus::OnRender()
 		UseMouseButtons(true);
 
 	if(Client()->State() == IClient::STATE_OFFLINE &&
-			g_Config.m_ClMenuBackground && !Client()->MapLoaded())
+			g_Config.m_ClMenuBackground &&
+			(!Client()->MapLoaded() || (str_comp_filenames(Client()->GetCurrentMapPath(), g_Config.m_ClMenuBackgroundMap) != 0)))
 	{
-		Client()->LoadBackgroundMap("menu_day", "ui/menu_day.map");
-
-		m_pClient->Layers()->Init(Kernel());
-		m_pClient->Collision()->Init(Layers());
-		RenderTools()->RenderTilemapGenerateSkip(Layers());
-		m_pClient->m_pMapimages->OnMapLoad();
+		if(Client()->LoadBackgroundMap())
+		{
+			m_pClient->Layers()->Init(Kernel());
+			m_pClient->Collision()->Init(Layers());
+			RenderTools()->RenderTilemapGenerateSkip(Layers());
+			m_pClient->m_pMapimages->OnMapLoad();
+		}
 
 		m_pClient->m_pCamera->m_Center = vec2(500.0f, 1000.0f);
-		m_pClient->m_pCamera->m_RotationCenter = vec2(500.0f, 500.0f);
 	}
 
 	// update colors

@@ -1,6 +1,7 @@
 #include "../menus.h"
 
 #include <engine/graphics.h>
+#include <engine/textrender.h>
 
 
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
@@ -146,12 +147,95 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	if(g_Config.m_ClMenuBackground)
 	{
+		CUIRect Label;
+		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.VSplitLeft(TextRender()->TextWidth(0, 12.0f, Localize("Map")), &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Map"), 12.0f, CUI::ALIGN_LEFT);
+
+		Button.VSplitLeft(10.0f, 0, &Button);
+		static char s_aEditboxContents[64] = {1};
+		if(*s_aEditboxContents == 1)
+			str_copyb(s_aEditboxContents, g_Config.m_ClMenuBackgroundMap);
+		const bool Changed = str_comp_filenames(s_aEditboxContents, g_Config.m_ClMenuBackgroundMap) != 0;
+		if(Changed)
+			Button.VSplitRight(TextRender()->TextWidth(0, 12.0f, Localize("Apply")) + 2*10.0f, &Button, &Label);
+		static float s_Offset = 0;
+		static CButtonContainer s_EditboxMenuMapSelection;
+		DoEditBox(&s_EditboxMenuMapSelection, &Button, s_aEditboxContents, sizeof(s_aEditboxContents), 12.0f, &s_Offset, false, Changed ? CUI::CORNER_L: CUI::CORNER_ALL, "ui/menu_day.map", CUI::ALIGN_LEFT,
+				  "Examples:\n"
+					"- ui/my_menu_map.map\n"
+					"- maps/Kobra 4.map\n"
+					"- downloadedmaps/Aip-Gores_4d8869b8.map");
+		static CButtonContainer s_ButtonApplyMenuMap;
+		if(Changed)
+			if(DoButton_Menu(&s_ButtonApplyMenuMap, Localize("Apply"), 1, &Label, 0, CUI::CORNER_R))
+			{
+				g_Config.m_ClMenuBackground = 1;
+				str_copyb(g_Config.m_ClMenuBackgroundMap, s_aEditboxContents);
+			}
+
+
+		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.VSplitLeft(TextRender()->TextWidth(0, 12.0f, Localize("Distance")), &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Distance"), 12.0f, CUI::ALIGN_LEFT);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.HMargin(2.5f, &Button);
+		static CButtonContainer s_ScrollbarMenuMapDistance;
+		DoScrollbarIntSelect(&s_ScrollbarMenuMapDistance, &Button, &g_Config.m_ClMenuBackgroundDistance, 10, 150);
+
+/*		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.VSplitLeft(TextRender()->TextWidth(0, 12.0f, Localize("Pos X")), &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Pos X"), 12.0f, CUI::ALIGN_LEFT);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.HMargin(2.5f, &Button);
+		static CButtonContainer s_ScrollbarMenuMapPosX;
+		DoScrollbarIntSelect(&s_ScrollbarMenuMapPosX, &Button, &g_Config.m_ClMenuBackgroundPositionX, -1, 100);
+
+		Left.HSplitTop(3.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.VSplitLeft(TextRender()->TextWidth(0, 12.0f, Localize("Pos Y")), &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Pos Y"), 12.0f, CUI::ALIGN_LEFT);
+		Button.VSplitLeft(10.0f, 0, &Button);
+		Button.HMargin(2.5f, &Button);
+		static CButtonContainer s_ScrollbarMenuMapPosY;
+		DoScrollbarIntSelect(&s_ScrollbarMenuMapPosY, &Button, &g_Config.m_ClMenuBackgroundPositionY, -1, 100);
+*/
 		Left.HSplitTop(3.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(10.0f, 0, &Button);
 		static CButtonContainer s_CheckboxMenuMapRotation;
 		if(DoButton_CheckBox(&s_CheckboxMenuMapRotation, Localize("Enable rotation"), g_Config.m_ClMenuBackgroundRotation, &Button, Localize("Gives the menu background a little more dynamicness")))
 			g_Config.m_ClMenuBackgroundRotation ^= 1;
+
+		if(g_Config.m_ClMenuBackgroundRotation)
+		{
+			Left.HSplitTop(3.0f, 0, &Left);
+			Left.HSplitTop(20.0f, &Button, &Left);
+			Button.VSplitLeft(2*10.0f, 0, &Button);
+			Button.VSplitLeft(TextRender()->TextWidth(0, 12.0f, Localize("Rotation Delay")), &Label, &Button);
+			UI()->DoLabelScaled(&Label, Localize("Rotation Delay"), 12.0f, CUI::ALIGN_LEFT);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			Button.HMargin(2.5f, &Button);
+			static CButtonContainer s_ScrollbarMenuMapRotationSpeed;
+			DoScrollbarIntSelect(&s_ScrollbarMenuMapRotationSpeed, &Button, &g_Config.m_ClMenuBackgroundRotationSpeed, 1, 120);
+
+			Left.HSplitTop(3.0f, 0, &Left);
+			Left.HSplitTop(20.0f, &Button, &Left);
+			Button.VSplitLeft(2*10.0f, 0, &Button);
+			Button.VSplitLeft(TextRender()->TextWidth(0, 12.0f, Localize("Rotation Radius")), &Label, &Button);
+			UI()->DoLabelScaled(&Label, Localize("Rotation Radius"), 12.0f, CUI::ALIGN_LEFT);
+			Button.VSplitLeft(10.0f, 0, &Button);
+			Button.HMargin(2.5f, &Button);
+			static CButtonContainer s_ScrollbarMenuMapRotationRadius;
+			DoScrollbarIntSelect(&s_ScrollbarMenuMapRotationRadius, &Button, &g_Config.m_ClMenuBackgroundRotationRadius, 1, 500);
+		}
 	}
 
 	Left.HSplitTop(3.0f, 0, &Left);
@@ -246,16 +330,61 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 
-	Left.HSplitTop(20.0f-4.0f, 0, &Left);
+	CUIRect Text;
+
+	// UI Scale
+	Left.HSplitTop(20.0f, 0, &Left);
+
+	Left.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
+	Text.HMargin(-2.75f, &Text);
+	Text.h += 2.75f;
+	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
+
+	{
+		Left.VMargin(15.0f, &Left);
+		Left.HSplitTop(20.0f, &Text, &Left);
+		UI()->DoLabelScaled(&Text, Localize("UI Scale"), 14.0f, -1);
+	}
+
+	Left.HSplitTop(10.0f, 0, &Left);
+	Left.HSplitTop(15.0f, &Text, &Left);
+	static CButtonContainer s_ScrollbarScale;
+	static int s_NewVal = g_Config.m_UiScale; // proxy it to not instantly change the ui size
+	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != s_ScrollbarScale.GetID()) // if it has been changed in f1
+		s_NewVal = g_Config.m_UiScale;
+	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_ScrollbarScale, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider is not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
+	if(UI()->ActiveItem() != s_ScrollbarScale.GetID())
+		g_Config.m_UiScale = s_NewVal;
+
+	// Corner Rounding
+	Left.VMargin(-15.0f, &Left);
+	Left.HSplitTop(20.0f, 0, &Left);
+
+	Left.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
+	Text.HMargin(-2.75f, &Text);
+	Text.h += 2.75f;
+	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
+
+	{
+		Left.VMargin(15.0f, &Left);
+		Left.HSplitTop(20.0f, &Text, &Left);
+		UI()->DoLabelScaled(&Text, Localize("Corner Rounding"), 14.0f, -1);
+	}
+
+	Left.HSplitTop(10.0f, 0, &Left);
+	Left.HSplitTop(15.0f, &Text, &Left);
+	static CButtonContainer s_ScrollbarRounding;
+	g_Config.m_UiCornerRoundingPercentage = round_to_int(250.0f*DoScrollbarH(&s_ScrollbarRounding, &Text, (float)g_Config.m_UiCornerRoundingPercentage/250.0f, 0, g_Config.m_UiCornerRoundingPercentage));
+
+	// ui color
+	Right.HSplitTop(20.0f-4.0f, 0, &Right);
 	{
 		CUIRect Rect;
-		Left.HSplitTop(20+150+5+19+4 + 3, &Rect, 0);
+		Right.HSplitTop(20+150+5+19+4 + 3, &Rect, 0);
 		RenderTools()->DrawUIRect(&Rect, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
 	}
-	Left.HSplitTop(4.0f, 0, &Left);
-
-	CUIRect Text;
-	Left.HSplitTop(20.0f, &Text, &Left);
+	Right.HSplitTop(4.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Text, &Right);
 	Text.VMargin(15.0f, &Text);
 	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, -1);
 	Text.HMargin(2.0f, &Text);
@@ -271,7 +400,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		}
 
 	// fancy color picker
-	Left.HSplitTop(150.0f, &Button, &Left);
+	Right.HSplitTop(150.0f, &Button, &Right);
 	static CButtonContainer s_ColorPickerA, s_ColorPickerB;
 	vec3 ColorHSV = vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorVal/255.0f);
 	if(DoColorPicker(&s_ColorPickerA, &s_ColorPickerB, &Button, &ColorHSV))
@@ -281,12 +410,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_UiColorVal = round_to_int(ColorHSV.v*255.0f);
 	}
 
-	Left.HSplitTop(5.0f, 0, &Left);
+	Right.HSplitTop(5.0f, 0, &Right);
 	{
 		CUIRect Text;
-		Left.HSplitTop(19.0f, &Button, &Left);
+		Right.HSplitTop(19.0f, &Button, &Right);
 		Button.VMargin(15.0f, &Button);
-		Button.VSplitLeft(100.0f, &Text, &Button);
+		Button.VSplitRight(100.0f, &Text, &Button);
 		//Button.VSplitRight(5.0f, &Button, 0);
 		Button.HSplitTop(4.0f, 0, &Button);
 
@@ -296,49 +425,5 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_UiColorAlpha = (int)(k*255.0f);
 		UI()->DoLabelScaled(&Text, Localize("Alpha"), 15.0f, -1);
 	}
-
-	// UI Scale
-	Right.HSplitTop(20.0f, 0, &Right);
-
-	Right.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
-	Text.HMargin(-2.75f, &Text);
-	Text.h += 2.75f;
-	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
-
-	{
-		Right.VMargin(15.0f, &Right);
-		Right.HSplitTop(20.0f, &Text, &Right);
-		UI()->DoLabelScaled(&Text, Localize("UI Scale"), 14.0f, -1);
-	}
-
-	Right.HSplitTop(10.0f, 0, &Right);
-	Right.HSplitTop(15.0f, &Text, &Right);
-	static CButtonContainer s_ScrollbarScale;
-	static int s_NewVal = g_Config.m_UiScale; // proxy it to not instantly change the ui size
-	if(g_Config.m_UiScale != s_NewVal && UI()->ActiveItem() != s_ScrollbarScale.GetID()) // if it has been changed in f1
-		s_NewVal = g_Config.m_UiScale;
-	s_NewVal = round_to_int(50.0f+100.0f*DoScrollbarH(&s_ScrollbarScale, &Text, ((float)s_NewVal-50.0f)/100.0f, Localize("READ BEFORE CHANGING:\nIf you happen to mess it up so that this slider is not on your screen anymore, type in f1:\nui_scale 100"), s_NewVal));
-	if(UI()->ActiveItem() != s_ScrollbarScale.GetID())
-		g_Config.m_UiScale = s_NewVal;
-
-	// Corner Rounding
-	Right.VMargin(-15.0f, &Right);
-	Right.HSplitTop(20.0f, 0, &Right);
-
-	Right.HSplitTop(20.0f+10.0f+15.0f, &Text, 0);
-	Text.HMargin(-2.75f, &Text);
-	Text.h += 2.75f;
-	RenderTools()->DrawUIRect(&Text, vec4(0,0,0,0.2f), CUI::CORNER_ALL, 5.0f);
-
-	{
-		Right.VMargin(15.0f, &Right);
-		Right.HSplitTop(20.0f, &Text, &Right);
-		UI()->DoLabelScaled(&Text, Localize("Corner Rounding"), 14.0f, -1);
-	}
-
-	Right.HSplitTop(10.0f, 0, &Right);
-	Right.HSplitTop(15.0f, &Text, &Right);
-	static CButtonContainer s_ScrollbarRounding;
-	g_Config.m_UiCornerRoundingPercentage = round_to_int(250.0f*DoScrollbarH(&s_ScrollbarRounding, &Text, (float)g_Config.m_UiCornerRoundingPercentage/250.0f, 0, g_Config.m_UiCornerRoundingPercentage));
 
 }

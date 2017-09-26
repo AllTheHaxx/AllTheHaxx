@@ -248,9 +248,13 @@ MACRO_CONFIG_INT(ClScoreboardFadeTime, cl_scoreboard_fade_duration, 400, 0, 1000
 MACRO_CONFIG_INT(ClMouseRotation, cl_mouse_rotation, 0, 0, 360, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Rotate the mouse cursor (degree)")
 
 MACRO_CONFIG_INT(ClMenuBackground, cl_menu_background, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Activate Menu Background")
+MACRO_CONFIG_STR(ClMenuBackgroundMap, cl_menu_background_map, 64, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Name of the map to use as menu background")
+MACRO_CONFIG_INT(ClMenuBackgroundDistance, cl_menu_background_distance, 70, 10, 150, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Menu Background Camera Distance")
 MACRO_CONFIG_INT(ClMenuBackgroundRotation, cl_menu_background_rotation, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Activate Menu Background Camera rotation")
 MACRO_CONFIG_INT(ClMenuBackgroundRotationRadius, cl_menu_background_rotation_radius, 30, 1, 500, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Menu Background Camera rotation radius")
 MACRO_CONFIG_INT(ClMenuBackgroundRotationSpeed, cl_menu_background_rotation_speed, 40, 1, 120, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Menu Background Camera rotation duration")
+MACRO_CONFIG_INT(ClMenuBackgroundPositionX, cl_menu_background_position_x, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Menu Background Camera Position x (percent)")
+MACRO_CONFIG_INT(ClMenuBackgroundPositionY, cl_menu_background_position_y, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Menu Background Camera Position y (percent)")
 
 MACRO_CONFIG_INT(ClChatAvatar, cl_chat_avatar, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render a small avatar in front of every chat message")
 

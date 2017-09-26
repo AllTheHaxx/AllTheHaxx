@@ -12,6 +12,7 @@
 
 #include "camera.h"
 #include "controls.h"
+#include "menus.h"
 
 #include <engine/serverbrowser.h>
 
@@ -65,22 +66,48 @@ void CCamera::OnRender()
 
 
 	// update camera center
+	static bool s_WasOnline = true;
+	if(Client()->State() == IClient::STATE_ONLINE)
+		s_WasOnline = true;
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
-		m_Zoom = 0.7f;
-		m_WantedZoom = 0.7f;
+		m_WantedZoom = (float)g_Config.m_ClMenuBackgroundDistance/100.0f;
+		if(s_WasOnline)
+		{
+			m_Zoom = m_WantedZoom;
+			s_WasOnline = false;
+		}
+
 		static vec2 Dir = vec2(1.0f, 0.0f);
 
-		if(g_Config.m_ClMenuBackground && g_Config.m_ClMenuBackgroundRotation && distance(m_Center, m_RotationCenter) <= (float)g_Config.m_ClMenuBackgroundRotationRadius+0.5f)
+//		if(m_pClient->m_pCollision)
 		{
-			// do little rotation
-			float RotPerTick = 360.0f/(float)g_Config.m_ClMenuBackgroundRotationSpeed * Client()->RenderFrameTime();
-			Dir = rotate(Dir, RotPerTick);
-			m_WantedCenter = m_RotationCenter+Dir*(float)g_Config.m_ClMenuBackgroundRotationRadius/*(length(m_Center)/length(m_WantedCenter))*/;
-			//m_WantedCenter = vec2(0.0f, 0.0f);
+/*			m_RotationCenter = vec2(
+					(g_Config.m_ClMenuBackgroundPositionX/100.0f)*(m_pClient->m_pCollision->GetWidth()*32.0f),
+					(g_Config.m_ClMenuBackgroundPositionY/100.0f)*(m_pClient->m_pCollision->GetHeight()*32.0f)
+			);
+*/
+
+			switch(m_pClient->m_pMenus->m_ActivePage)
+			{
+				case CMenus::PAGE_NEWS_ATH: \
+				case CMenus::PAGE_NEWS_DDNET: m_RotationCenter = vec2(300.0f, 300.0f); break;
+				case CMenus::PAGE_BROWSER: m_RotationCenter = vec2(500.0f, 500.0f); break;
+				case CMenus::PAGE_DEMOS: m_RotationCenter = vec2(600.0f, 1200.0f); break;
+				case CMenus::PAGE_SETTINGS: m_RotationCenter = vec2(800.0f, 800.0f); break;
+			}
+
+			if(g_Config.m_ClMenuBackground && g_Config.m_ClMenuBackgroundRotation != 0 && distance(m_Center, m_RotationCenter) <= (float)g_Config.m_ClMenuBackgroundRotationRadius + 0.5f)
+			{
+				// do little rotation
+				float RotPerTick = 360.0f / (float)g_Config.m_ClMenuBackgroundRotationSpeed * Client()->RenderFrameTime();
+				Dir = rotate(Dir, RotPerTick);
+				m_WantedCenter = m_RotationCenter + Dir * (float)g_Config.m_ClMenuBackgroundRotationRadius/*(length(m_Center)/length(m_WantedCenter))*/;
+				//m_WantedCenter = vec2(0.0f, 0.0f);
+			}
+			else
+				m_WantedCenter = m_RotationCenter;
 		}
-		else
-			m_WantedCenter = m_RotationCenter;
 		//else ///// THIS PART IS DONE BY THE CINEMATIC CAMERA /////
 		//{
 		//	Dir = normalize(m_RotationCenter-m_WantedCenter);
@@ -98,33 +125,33 @@ void CCamera::OnRender()
 			m_CamType = CAMTYPE_SPEC;
 		}
 
-	/*	if(m_GodlikeSpec && false) // TODO: this needs some more work.
-		{
-			vec2 Middlwerd(0.0f, 0.0f);
-			int Num = 0;
-			for(int i = 0; i < MAX_CLIENTS; i++)
+		/*	if(m_GodlikeSpec && false) // TODO: this needs some more work.
 			{
-				CGameClient::CClientData *pClient = &m_pClient->m_aClients[i];
-				if(!pClient->m_Active || pClient->m_Team == TEAM_SPECTATORS)
-					continue;
-				Num++;
-				vec2 Pos = mix(pClient->m_Predicted.m_Pos, pClient->m_PrevPredicted.m_Pos, 0.5f);
-				Middlwerd += Pos*32;
-				//dbg_msg("debug", "Player '%s' at (%.1f, %.1f)", pClient->m_aName, Pos.x, Pos.y);
-			}
+				vec2 Middlwerd(0.0f, 0.0f);
+				int Num = 0;
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					CGameClient::CClientData *pClient = &m_pClient->m_aClients[i];
+					if(!pClient->m_Active || pClient->m_Team == TEAM_SPECTATORS)
+						continue;
+					Num++;
+					vec2 Pos = mix(pClient->m_Predicted.m_Pos, pClient->m_PrevPredicted.m_Pos, 0.5f);
+					Middlwerd += Pos*32;
+					//dbg_msg("debug", "Player '%s' at (%.1f, %.1f)", pClient->m_aName, Pos.x, Pos.y);
+				}
 
-			if(Middlwerd.x > 0.0f && Middlwerd.y > 0.0f)
-			{
-				Middlwerd.x /= Num;
-				Middlwerd.y /= Num;
-				m_WantedCenter = Middlwerd;
-				dbg_msg("Middlwert", "(%.1f %.1f)", Middlwerd.x, Middlwerd.y);
+				if(Middlwerd.x > 0.0f && Middlwerd.y > 0.0f)
+				{
+					Middlwerd.x /= Num;
+					Middlwerd.y /= Num;
+					m_WantedCenter = Middlwerd;
+					dbg_msg("Middlwert", "(%.1f %.1f)", Middlwerd.x, Middlwerd.y);
+				}
+				else
+					m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
 			}
-			else
-				m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
-		}
-		else*/
-			m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+			else*/
+		m_WantedCenter = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
 		//dbg_msg("center", "(%.1f %.1f) wanted (%.1f %.1f)", m_Center.x, m_Center.y, m_WantedCenter.x, m_WantedCenter.y);
 	}
 	else

@@ -28,6 +28,9 @@ public:
 
 	virtual bool Load(const char *pMapName)
 	{
+		if(dbg_assert_strict(!IsLoaded(), "re-loaded map without unloading it first"))
+			Unload();
+
 		IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 		if(!pStorage)
 			return false;

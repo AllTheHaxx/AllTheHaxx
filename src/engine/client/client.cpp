@@ -1442,24 +1442,32 @@ bool CClient::UnloadCurrentMap()
 	return WasLoaded;
 }
 
-void CClient::LoadBackgroundMap(const char *pName, const char *pFilename)
+bool CClient::LoadBackgroundMap()
 {
 	CALLSTACK_ADD();
 
 	if(!g_Config.m_ClMenuBackground)
-		return;
+		return false;
 
-	if(!m_pMap->Load(pFilename))
+	if(g_Config.m_ClMenuBackgroundMap[0] == '\0')
+		str_copyb(g_Config.m_ClMenuBackgroundMap, "ui/menu_day.map");
+
+	if(m_pMap->IsLoaded())
+		m_pMap->Unload();
+
+	if(!m_pMap->Load(g_Config.m_ClMenuBackgroundMap))
 	{
-		dbg_msg("client/error", "failed to load background map, disabling it!");
+		m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "menus", "failed to load background map '%s', disabling it!", g_Config.m_ClMenuBackgroundMap);
 		g_Config.m_ClMenuBackground = 0;
-		return;
+		g_Config.m_ClMenuBackgroundMap[0] = '\0';
+		return false;
 	}
 
-	m_pConsole->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "loaded background map '%s'", pFilename);
+	m_pConsole->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "loaded background map '%s'", g_Config.m_ClMenuBackgroundMap);
 
-	str_formatb(m_aCurrentMap, "~bgmap-%s", pName);
-	str_copyb(m_aCurrentMapPath, pFilename);
+	str_formatb(m_aCurrentMap, "~bgmap-%s", g_Config.m_ClMenuBackgroundMap);
+	str_copyb(m_aCurrentMapPath, g_Config.m_ClMenuBackgroundMap);
+	return true;
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)

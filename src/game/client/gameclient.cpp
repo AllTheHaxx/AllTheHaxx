@@ -471,7 +471,7 @@ void CGameClient::OnInit()
 	LOAD_STUFF(1)
 	{
 		SET_LOAD_LABEL("Loading Background Map");
-		Client()->LoadBackgroundMap("dm1", "ui/menu_day.map");
+		Client()->LoadBackgroundMap();
 	}
 
 	// reset all components after loading

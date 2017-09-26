@@ -318,7 +318,7 @@ public:
 	virtual const char *ErrorString();
 
 	bool MapLoaded();
-	void LoadBackgroundMap(const char *pName, const char *pFilename);
+	bool LoadBackgroundMap();
 
 	const char *LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, int WantedCrc);

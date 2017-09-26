@@ -27,6 +27,17 @@ inline T clamp(T val, T min, T max)
 	return val;
 }
 
+inline float map_val(float val, float a_min, float a_max, float b_min, float b_max)
+{
+	// pct of 2 on 1 through 3 = 50%
+//	float Percentage = (val-min_a) / (max_a-min_a); // y = (x-a)/(x-b)
+//	float mapped_val = (-min_b + max_b*Percentage) / (Percentage - 1); // x = (-a + b y) / (y - 1)
+//	return mapped_val;
+	const float slope = (b_max - b_min) / (a_max - a_min);
+	float mapped = slope * (val - a_min) + b_min;
+	return mapped;
+}
+
 inline float sign(float f)
 {
 	return f<0.0f?-1.0f:1.0f;

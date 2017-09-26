@@ -70,22 +70,15 @@ void CGameTextureManager::OnInit()
 	{
 		m_aSkins[i].clear();
 
-		// load Default
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "textures/%s/!default.png", ms_pTextureDirs[i]);
-
 		// set default skin data
 		CGameSkin DefaultSkin(g_pData->m_aImages[MapGroupToImage(i)]);
-		/*CGameSkin DefaultSkin;
-		DefaultSkin.m_Texture = Graphics()->LoadTexture(aBuf, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-		str_format(DefaultSkin.m_aName, sizeof(DefaultSkin.m_aName), "!default");*/
 		m_aSkins[i].add(DefaultSkin);
 
-
+		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "data/textures/%s", ms_pTextureDirs[i]);
 		CLoadHelper LoadHelper(this, i);
 		Storage()->ListDirectory(IStorageTW::TYPE_ALL, aBuf, SkinScan, &LoadHelper);
-		if(!m_aSkins[i].size())
+		if(m_aSkins[i].empty())
 		{
 			Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load textures. folder='textures/%s'", ms_pTextureDirs[i]);
 			CGameSkin DummySkin;

@@ -141,6 +141,7 @@ private:
 
 	float DoScrollbarV(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0, int LenPercent = ~0);
 	float DoScrollbarH(CButtonContainer *pBC, const CUIRect *pRect, float Current, const char *pTooltip = 0, int Value = ~0, int LenPercent = ~0);
+	int DoScrollbarIntSelect(CButtonContainer *pBC, const CUIRect *pRect, int *pCurrent, int Min, int Max, const char *pTooltip = 0);
 	void DoButton_KeySelect(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pTooltip = 0);
 	int DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, const char *pTooltip = 0);
 
@@ -169,7 +170,7 @@ private:
 
 	int m_GamePage;
 	int m_Popup;
-	int m_ActivePage;
+public: int m_ActivePage; private:
 	bool m_MenuActive;
 	bool m_UseMouseButtons;
 	vec2 m_MousePos;
