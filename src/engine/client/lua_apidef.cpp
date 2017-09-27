@@ -62,7 +62,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endNamespace()
 
 		// global types
-		.beginClass< vector2_base<float> >("vec2f")
+		.beginClass< vector2_base<float> >("vec2")
 			.addConstructor <void (*) (float, float)> ()
 			.addFunction("__add", &vector2_base<float>::operator+)
 			.addFunction("__sub", &vector2_base<float>::operator-)
@@ -75,7 +75,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("u", &vector2_base<float>::u)
 			.addData("v", &vector2_base<float>::v)
 		.endClass()
-		.beginClass< vector3_base<float> >("vec3f")
+		.beginClass< vector3_base<float> >("vec3")
 			.addConstructor <void (*) (float, float, float)> ()
 			.addFunction("__add", &vector3_base<float>::operator+)
 			.addFunction("__sub", &vector3_base<float>::operator-)
@@ -94,7 +94,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("l", &vector3_base<float>::l)
 			.addData("v", &vector3_base<float>::v)
 		.endClass()
-		.beginClass< vector4_base<float> >("vec4f")
+		.beginClass< vector4_base<float> >("vec4")
 			.addConstructor <void (*) (float, float, float, float)> ()
 			.addFunction("__add", &vector4_base<float>::operator+)
 			.addFunction("__sub", &vector4_base<float>::sub)
@@ -645,10 +645,10 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		dbg_msg("lua/debug", "registering lua bindings complete (L=%p)", L);
 
 
-	// register type aliases
-	luaL_dostring(L, "vec2=vec2f");
-	luaL_dostring(L, "vec3=vec3f");
-	luaL_dostring(L, "vec4=vec4f");
+	// register legacy type aliases (deprecated)
+	luaL_dostring(L, "vec2f=vec2");
+	luaL_dostring(L, "vec3f=vec3");
+	luaL_dostring(L, "vec4f=vec4");
 
 #endif
 }

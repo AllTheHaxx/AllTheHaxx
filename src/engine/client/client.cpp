@@ -4473,6 +4473,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// For XOpenIM in SDL2: https://bugzilla.libsdl.org/show_bug.cgi?id=3102
 	setlocale(LC_ALL, "");
+	setlocale(LC_NUMERIC, "C");
 
 	// run the client
 	dbg_msg("client", "starting...");

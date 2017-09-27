@@ -1,4 +1,4 @@
-
+Import("types")
 
 --USAGE: for k,v in spairs(TBL, function(t,a,b) return t[b] <- t[a] end) do ... end
 function spairs(t, order)
@@ -33,6 +33,19 @@ function range(tbl, first, last)
     return new_tbl
 end
 
+function dump_custom_type(o)
+    if is_UIRect(o) then
+        return "UIRect(" .. o.x .. ", " .. o.y .. ", " .. o.w .. ", " .. o.h .. ")"
+    elseif is_vec4(o) then
+        return "vec4" .. string.gsub(tostring(o), "|", ", ")
+    elseif is_vec3(o) then
+        return "vec3" .. string.gsub(tostring(o), "|", ", ")
+    elseif is_vec2(o) then
+        return "vec2" .. string.gsub(tostring(o), "|", ", ")
+    end
+    return '"<' .. tostring(o) .. '>"'
+end
+
 function dump(o)
     if type(o) == 'table' then
         local s = '{ '
@@ -47,6 +60,6 @@ function dump(o)
     elseif type(o) == 'number' then
         return tostring(o)
     else
-        return '"<' .. tostring(o) .. '>"'
+        return dump_custom_type(o)
     end
 end

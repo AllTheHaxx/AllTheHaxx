@@ -4,10 +4,8 @@ _CWD = ScriptPath():sub(1, -ScriptPath():reverse():find("/")-1) -- has no traili
 _ScriptFileName = ScriptPath():sub(ScriptPath():reverse():find("/")+1, -1)
 
 _copy = {
-    UIRect = function(Rect)
-        if Rect == nil then error("passed a nil value to _copy.UIRect", 2) end
-        local NewRect = UIRect(Rect.x, Rect.y, Rect.w, Rect.h)
-        return NewRect
+    UIRect = function(Rect) -- legacy alias
+        return Rect:copy()
     end,
 
     vec2 = function(v)
@@ -29,7 +27,7 @@ _copy = {
     end,
 }
 
-CopyUIRect = _copy.UIRect -- legacy alias
+CopyUIRect = _copy.UIRect -- legacy alias, deprecated!
 
 
 function int(var)
