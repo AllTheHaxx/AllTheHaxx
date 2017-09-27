@@ -11,7 +11,7 @@
 
 #include <base/detect.h>
 #include <base/math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include "SDL.h"
 #include "SDL_syswm.h"
 #if defined(__ANDROID__)
