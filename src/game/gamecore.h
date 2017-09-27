@@ -24,6 +24,7 @@ class CTuneParam
 public:
 	void Set(int v) { m_Value = v; }
 	int Get() const { return m_Value; }
+	float GetFloat() const { return m_Value/100.0f; }
 	CTuneParam &operator = (int v) { m_Value = (int)(v*100.0f); return *this; }
 	CTuneParam &operator = (float v) { m_Value = (int)(v*100.0f); return *this; }
 	operator float() const { return m_Value/100.0f; }

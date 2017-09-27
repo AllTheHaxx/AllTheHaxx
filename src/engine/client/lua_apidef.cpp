@@ -408,7 +408,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		.beginClass<CTuneParam>("CTuneParam")
+			.addFunction("__tonumber", &CTuneParam::GetFloat)
 			.addProperty("Value", &CTuneParam::Get)
+			.addFunction("Get", &CTuneParam::GetFloat)
 		.endClass()
 
 #define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) \
