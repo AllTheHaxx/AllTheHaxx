@@ -609,15 +609,15 @@ int CCollision::IsTune(int Index)
 	return 0;
 }
 
-void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed)
+void CCollision::GetSpeedup(int Index, vec2 *pOutDir, int *pOutForce, int *pOutMaxSpeed)
 {
 	if(Index < 0 || !m_pSpeedup)
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
-	*Force = m_pSpeedup[Index].m_Force;
-	*Dir = vec2(cos(Angle), sin(Angle));
-	if(MaxSpeed)
-		*MaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
+	*pOutForce = m_pSpeedup[Index].m_Force;
+	*pOutDir = vec2(cosf(Angle), sinf(Angle));
+	if(pOutMaxSpeed)
+		*pOutMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
 
 int CCollision::IsSwitch(int Index)

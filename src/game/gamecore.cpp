@@ -483,6 +483,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 				m_pCollision->Layers()->GetExtrasSpeedup(m_Pos, &Force, &MaxSpeed, &Direction);
 			else
 				m_pCollision->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
+
 			if(Force == 255 && MaxSpeed)
 			{
 				m_Vel = Direction * (MaxSpeed/5);
@@ -493,33 +494,33 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 				if(MaxSpeed > 0)
 				{
 					if(Direction.x > 0.0000001f)
-						SpeederAngle = -atan(Direction.y / Direction.x);
+						SpeederAngle = -atanf(Direction.y / Direction.x);
 					else if(Direction.x < 0.0000001f)
-						SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+						SpeederAngle = atanf(Direction.y / Direction.x) + 2.0f * asinf(1.0f);
 					else if(Direction.y > 0.0000001f)
-						SpeederAngle = asin(1.0f);
+						SpeederAngle = asinf(1.0f);
 					else
-						SpeederAngle = asin(-1.0f);
+						SpeederAngle = asinf(-1.0f);
 
 					if(SpeederAngle < 0)
-						SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+						SpeederAngle = 4.0f * asinf(1.0f) + SpeederAngle;
 
 					if(TempVel.x > 0.0000001f)
-						TeeAngle = -atan(TempVel.y / TempVel.x);
+						TeeAngle = -atanf(TempVel.y / TempVel.x);
 					else if(TempVel.x < 0.0000001f)
-						TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+						TeeAngle = atanf(TempVel.y / TempVel.x) + 2.0f * asinf(1.0f);
 					else if(TempVel.y > 0.0000001f)
-						TeeAngle = asin(1.0f);
+						TeeAngle = asinf(1.0f);
 					else
-						TeeAngle = asin(-1.0f);
+						TeeAngle = asinf(-1.0f);
 
 					if(TeeAngle < 0)
-						TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+						TeeAngle = 4.0f * asinf(1.0f) + TeeAngle;
 
-					TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+					TeeSpeed = sqrtf(powf(TempVel.x, 2.0f) + powf(TempVel.y, 2.0f));
 
 					DiffAngle = SpeederAngle - TeeAngle;
-					SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
+					SpeedLeft = MaxSpeed / 5.0f - cosf(DiffAngle) * TeeSpeed;
 					if(abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
 					else if(abs((int)SpeedLeft) > Force)

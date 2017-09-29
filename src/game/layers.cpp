@@ -351,7 +351,7 @@ bool CLayers::IsExtrasUnpassable(const vec2& Pos)
 	for (int i = 0; i < m_NumExtrasLayer; i++)
 	{
 		int Tile = GetExtrasTile(i)[ExtrasIndex(i, round_to_int(Pos.x), round_to_int(Pos.y))].m_Index;
-		if (Tile == EXTRAS_SPEEDUP)
+		if (Tile == EXTRAS_SPEEDUP) // DENNIS XXX what dis
 			return true;
 	}
 	return false;
@@ -374,7 +374,8 @@ void CLayers::GetExtrasSpeedup(const vec2& Pos, int *pOutForce, int *pOutMaxSpee
 		pData += +gs_ExtrasSizes[Tile][1];
 		int Angle = str_toint(pData);
 		pData += +gs_ExtrasSizes[Tile][2];
-		*pOutDirection = vec2(cosf(Angle), sinf(Angle));
+		float AngleRad = Angle * (3.1415f/180.0f);
+		*pOutDirection = vec2(cosf(AngleRad), sinf(AngleRad));
 		*pOutForce = Force;
 		*pOutMaxSpeed = MaxSpeed;
 	}
