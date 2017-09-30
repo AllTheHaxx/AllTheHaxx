@@ -836,7 +836,7 @@ void CGameClient::UpdatePositions()
 }
 
 
-static void Evolve(CNetObj_Character *pCharacter, int Tick)
+static void Evolve(CNetObj_Character *pCharacter, int Tick, const char *pGameType)
 {
 	CWorldCore TempWorld;
 	CCharacterCore TempCore;
@@ -850,7 +850,7 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	while(pCharacter->m_Tick < Tick)
 	{
 		pCharacter->m_Tick++;
-		TempCore.Tick(false, true);
+		TempCore.Tick(false, true, pGameType);
 		TempCore.Move();
 		TempCore.Quantize();
 	}
@@ -1407,9 +1407,9 @@ void CGameClient::OnNewSnapshot()
 						m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
 
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick(), Client()->GetServerInfo()->m_aGameType);
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick(), Client()->GetServerInfo()->m_aGameType);
 					}
 
 					if(g_Config.m_ClFlagChat && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
@@ -2015,12 +2015,12 @@ void CGameClient::OnPredict()
 				if(h == 1)
 				{
 					if(World.m_apCharacters[m_Snap.m_LocalClientID])
-						World.m_apCharacters[m_Snap.m_LocalClientID]->Tick(true, true);
+						World.m_apCharacters[m_Snap.m_LocalClientID]->Tick(true, true, Client()->GetServerInfo()->m_aGameType);
 				}
 				else
 					for(int c = 0; c < MAX_CLIENTS; c++)
 						if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && ((h == 0 && IsWeaker[g_Config.m_ClDummy][c]) || (h == 2 && !IsWeaker[g_Config.m_ClDummy][c])))
-							World.m_apCharacters[c]->Tick(false, true);
+							World.m_apCharacters[c]->Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 			}
 		}
 		else
@@ -2030,9 +2030,9 @@ void CGameClient::OnPredict()
 				if(!World.m_apCharacters[c])
 					continue;
 				if(m_Snap.m_LocalClientID == c)
-					World.m_apCharacters[c]->Tick(true, true);
+					World.m_apCharacters[c]->Tick(true, true, Client()->GetServerInfo()->m_aGameType);
 				else
-					World.m_apCharacters[c]->Tick(false, true);
+					World.m_apCharacters[c]->Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 			}
 		}
 
@@ -2702,13 +2702,13 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 			{
 				if(dir == 0)
 				{
-					LocalChar.Tick(false, true);
-					OtherChar.Tick(false, true);
+					LocalChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
+					OtherChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 				}
 				else
 				{
-					OtherChar.Tick(false, true);
-					LocalChar.Tick(false, true);
+					OtherChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
+					LocalChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 				}
 				LocalChar.Move();
 				LocalChar.Quantize();

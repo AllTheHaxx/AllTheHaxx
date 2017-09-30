@@ -214,7 +214,7 @@ public:
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams);
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > *pTeleOuts);
 	void Reset();
-	void Tick(bool UseInput, bool IsClient);
+	void Tick(bool UseInput, bool IsClient, const char *pGametype);
 	void Move();
 
 	void Read(const CNetObj_CharacterCore *pObjCore);
@@ -267,6 +267,7 @@ private:
 	int m_TileFFlagsB;
 	int m_TileSIndexB;
 	int m_TileSFlagsB;
+	const char *m_pGametype;
 	bool IsRightTeam(int MapIndex);
 };
 

@@ -91,6 +91,8 @@ public:
 
 	int IsMover(int x, int y, int* Flags);
 
+	void HandleBWCollision(const vec2 &Pos, vec2 *pVel);
+
 	vec2 CpSpeed(int index, int Flags = 0);
 
 	class CTeleTile *TeleLayer() { return m_pTele; }

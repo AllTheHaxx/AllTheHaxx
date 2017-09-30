@@ -667,6 +667,37 @@ int CCollision::IsMover(int x, int y, int* Flags)
 		return 0;
 }
 
+void CCollision::HandleBWCollision(const vec2 &Pos, vec2 *pVel)
+{
+	const int PhysSize = 28;
+
+	// oneway tiles
+	int TileTR = GetTileRaw(round_to_int(Pos.x - PhysSize / 3.f), round_to_int(Pos.y + PhysSize / 3.f));
+	int TileTL = GetTileRaw(round_to_int(Pos.x - PhysSize / 3.f), round_to_int(Pos.y - PhysSize / 3.f));
+	int TileBR = GetTileRaw(round_to_int(Pos.x + PhysSize / 3.f), round_to_int(Pos.y + PhysSize / 3.f));
+	int TileBL = GetTileRaw(round_to_int(Pos.x + PhysSize / 3.f), round_to_int(Pos.y - PhysSize / 3.f));
+
+	if (TileTR == TILE_ONEWAY_RIGHT || TileTL == TILE_ONEWAY_RIGHT ||
+		TileBR == TILE_ONEWAY_RIGHT || TileBL == TILE_ONEWAY_RIGHT)
+		if (pVel->x < 0.0f)
+			pVel->x = 0.0f;
+
+	if (TileTR == TILE_ONEWAY_LEFT || TileTL == TILE_ONEWAY_LEFT ||
+		TileBR == TILE_ONEWAY_LEFT || TileBL == TILE_ONEWAY_LEFT)
+		if (pVel->x > 0.0f)
+			pVel->x = 0.0f;
+
+	if (TileTR == TILE_ONEWAY_UP || TileTL == TILE_ONEWAY_UP ||
+		TileBR == TILE_ONEWAY_UP || TileBL == TILE_ONEWAY_UP)
+		if (pVel->y > 0.0f)
+			pVel->y = 0.0f;
+
+	if (TileTR == TILE_ONEWAY_DOWN || TileTL == TILE_ONEWAY_DOWN ||
+		TileBR == TILE_ONEWAY_DOWN || TileBL == TILE_ONEWAY_DOWN)
+		if (pVel->y < 0.0f)
+			pVel->y = 0.0f;
+}
+
 vec2 CCollision::CpSpeed(int Index, int Flags)
 {
 	if(Index < 0)
