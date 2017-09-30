@@ -91,7 +91,7 @@ public:
 
 	int IsMover(int x, int y, int* Flags);
 
-	void HandleBWCollision(const vec2 &Pos, vec2 *pVel);
+	bool HandleBWCollision(class CCharacterCore *pCharCore, vec2 *pOverrideVel = 0);
 
 	vec2 CpSpeed(int index, int Flags = 0);
 

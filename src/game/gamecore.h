@@ -217,13 +217,14 @@ public:
 	void Tick(bool UseInput, bool IsClient, const char *pGametype);
 	void Move();
 
-	void Read(const CNetObj_CharacterCore *pObjCore);
+	void Read(const CNetObj_CharacterCore *pObjCore, const CNetObj_PlayerInfo *pPlayerInfo);
 	void Write(CNetObj_CharacterCore *pObjCore);
 	void Quantize();
 
 	// DDRace
 
 	int m_Id;
+	int m_Score;
 	bool m_pReset;
 	class CCollision *Collision() { return m_pCollision; }
 

@@ -13,6 +13,7 @@
 #include <game/collision.h>
 
 #include <engine/shared/config.h>
+#include "gamecore.h"
 
 CCollision::CCollision()
 {
@@ -667,35 +668,135 @@ int CCollision::IsMover(int x, int y, int* Flags)
 		return 0;
 }
 
-void CCollision::HandleBWCollision(const vec2 &Pos, vec2 *pVel)
+static void STOP_LEFT(vec2 *pVel) { if(pVel->x < 0.0f) pVel->x = 0; }
+static void STOP_RIGHT(vec2 *pVel) { if(pVel->x > 0.0f) pVel->x = 0; }
+static void STOP_DOWN(vec2 *pVel) { if(pVel->y > 0.0f) pVel->y = 0; }
+static void STOP_UP(vec2 *pVel) { if(pVel->y < 0.0f) pVel->y = 0; }
+bool CCollision::HandleBWCollision(CCharacterCore *pCharCore, vec2 *pOverrideVel)
 {
 	const int PhysSize = 28;
+	const vec2 &Pos = pCharCore->m_Pos;
+	vec2 *pVel = pOverrideVel ? pOverrideVel : &pCharCore->m_Vel;
 
-	// oneway tiles
 	int TileTR = GetTileRaw(round_to_int(Pos.x - PhysSize / 3.f), round_to_int(Pos.y + PhysSize / 3.f));
 	int TileTL = GetTileRaw(round_to_int(Pos.x - PhysSize / 3.f), round_to_int(Pos.y - PhysSize / 3.f));
 	int TileBR = GetTileRaw(round_to_int(Pos.x + PhysSize / 3.f), round_to_int(Pos.y + PhysSize / 3.f));
 	int TileBL = GetTileRaw(round_to_int(Pos.x + PhysSize / 3.f), round_to_int(Pos.y - PhysSize / 3.f));
+	int TileR = GetTileRaw(round_to_int(Pos.x + PhysSize/2.0f+2), round_to_int(Pos.y));
+	int TileL = GetTileRaw(round_to_int(Pos.x - PhysSize/2.0f+2), round_to_int(Pos.y));
+	int TileT = GetTileRaw(round_to_int(Pos.x), round_to_int(Pos.y - PhysSize/2.0f+2));
+	int TileB = GetTileRaw(round_to_int(Pos.x), round_to_int(Pos.y + PhysSize/2.0f+2));
 
-	if (TileTR == TILE_ONEWAY_RIGHT || TileTL == TILE_ONEWAY_RIGHT ||
-		TileBR == TILE_ONEWAY_RIGHT || TileBL == TILE_ONEWAY_RIGHT)
-		if (pVel->x < 0.0f)
-			pVel->x = 0.0f;
+	// oneway tiles
+	#define COLLIDING_WITH(TILE_ID) \
+			(TileTR == (TILE_ID) || TileTL == (TILE_ID) || \
+			 TileBR == (TILE_ID) || TileBL == (TILE_ID))
 
-	if (TileTR == TILE_ONEWAY_LEFT || TileTL == TILE_ONEWAY_LEFT ||
-		TileBR == TILE_ONEWAY_LEFT || TileBL == TILE_ONEWAY_LEFT)
-		if (pVel->x > 0.0f)
-			pVel->x = 0.0f;
+	if(COLLIDING_WITH(TILE_ONEWAY_RIGHT))
+		STOP_LEFT(pVel);
 
-	if (TileTR == TILE_ONEWAY_UP || TileTL == TILE_ONEWAY_UP ||
-		TileBR == TILE_ONEWAY_UP || TileBL == TILE_ONEWAY_UP)
-		if (pVel->y > 0.0f)
-			pVel->y = 0.0f;
+	if(COLLIDING_WITH(TILE_ONEWAY_LEFT))
+		STOP_RIGHT(pVel);
 
-	if (TileTR == TILE_ONEWAY_DOWN || TileTL == TILE_ONEWAY_DOWN ||
-		TileBR == TILE_ONEWAY_DOWN || TileBL == TILE_ONEWAY_DOWN)
-		if (pVel->y < 0.0f)
-			pVel->y = 0.0f;
+	if(COLLIDING_WITH(TILE_ONEWAY_UP))
+		STOP_DOWN(pVel);
+
+	if(COLLIDING_WITH(TILE_ONEWAY_DOWN))
+		STOP_UP(pVel);
+
+	#undef COLLIDING_WITH
+
+
+	// level barrier
+	const int Score = pCharCore->m_Score;
+	if(Score < 50)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_1) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_1) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_1) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_1) STOP_DOWN(pVel);
+	}
+	else if(Score < 50)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_50) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_50) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_50) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_50) STOP_DOWN(pVel);
+	}
+	else if(Score < 100)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_100) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_100) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_100) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_100) STOP_DOWN(pVel);
+	}
+	else if(Score < 200)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_200) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_200) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_200) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_200) STOP_DOWN(pVel);
+	}
+	else if(Score < 300)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_300) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_300) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_300) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_300) STOP_DOWN(pVel);
+	}
+	else if(Score < 400)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_400) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_400) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_400) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_400) STOP_DOWN(pVel);
+	}
+	else if(Score < 500)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_500) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_500) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_500) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_500) STOP_DOWN(pVel);
+	}
+	else if(Score < 600)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_600) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_600) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_600) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_600) STOP_DOWN(pVel);
+	}
+	else if(Score < 700)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_700) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_700) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_700) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_700) STOP_DOWN(pVel);
+	}
+	else if(Score < 800)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_800) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_800) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_800) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_800) STOP_DOWN(pVel);
+	}
+	else if(Score < 900)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_900) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_900) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_900) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_900) STOP_DOWN(pVel);
+	}
+	else if(Score < 999)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_999) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_999) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_999) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_999) STOP_DOWN(pVel);
+	}
+
+	#undef COLLIDING_WITH
+
+	return false;
 }
 
 vec2 CCollision::CpSpeed(int Index, int Flags)

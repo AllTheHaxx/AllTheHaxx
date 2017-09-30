@@ -453,7 +453,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)
 					if(Temp.y > 0 && ((pCharCore->m_TileIndex == TILE_STOP && pCharCore->m_TileFlags == ROTATION_0) || (pCharCore->m_TileIndexT == TILE_STOP && pCharCore->m_TileFlagsT == ROTATION_0) || (pCharCore->m_TileIndexT == TILE_STOPS && (pCharCore->m_TileFlagsT == ROTATION_0 || pCharCore->m_TileFlagsT == ROTATION_180)) || (pCharCore->m_TileIndexT == TILE_STOPA) || (pCharCore->m_TileFIndex == TILE_STOP && pCharCore->m_TileFFlags == ROTATION_0) || (pCharCore->m_TileFIndexT == TILE_STOP && pCharCore->m_TileFFlagsT == ROTATION_0) || (pCharCore->m_TileFIndexT == TILE_STOPS && (pCharCore->m_TileFFlagsT == ROTATION_0 || pCharCore->m_TileFFlagsT == ROTATION_180)) || (pCharCore->m_TileFIndexT == TILE_STOPA) || (pCharCore->m_TileSIndex == TILE_STOP && pCharCore->m_TileSFlags == ROTATION_0) || (pCharCore->m_TileSIndexT == TILE_STOP && pCharCore->m_TileSFlagsT == ROTATION_0) || (pCharCore->m_TileSIndexT == TILE_STOPS && (pCharCore->m_TileSFlagsT == ROTATION_0 || pCharCore->m_TileSFlagsT == ROTATION_180)) || (pCharCore->m_TileSIndexT == TILE_STOPA)))
 						Temp.y = 0;
 					if(IsBWMod(m_pGametype))
-						Collision()->HandleBWCollision(pCharCore->m_Pos, &Temp);
+						Collision()->HandleBWCollision(pCharCore, &Temp);
 
 					// add a little bit force to the guy who has the grip
 					pCharCore->m_Vel = Temp;
@@ -468,7 +468,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)
 					if(Temp.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
 						Temp.y = 0;
 					if(IsBWMod(m_pGametype))
-						Collision()->HandleBWCollision(m_Pos, &Temp);
+						Collision()->HandleBWCollision(this, &Temp);
 					m_Vel = Temp;
 				}
 			}
@@ -548,7 +548,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)
 				if(TempVel.y > 0 && ((this->m_TileIndex == TILE_STOP && this->m_TileFlags == ROTATION_0) || (this->m_TileIndexT == TILE_STOP && this->m_TileFlagsT == ROTATION_0) || (this->m_TileIndexT == TILE_STOPS && (this->m_TileFlagsT == ROTATION_0 || this->m_TileFlagsT == ROTATION_180)) || (this->m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
 					TempVel.y = 0;
 				if(IsBWMod(m_pGametype))
-					Collision()->HandleBWCollision(m_Pos, &m_Vel);
+					Collision()->HandleBWCollision(this);
 
 				m_Vel = TempVel;
 			}
@@ -594,7 +594,8 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)
 			// bw stop tiles handling (aka oneway)
 			if(IsBWMod(m_pGametype))
 			{
-				Collision()->HandleBWCollision(m_Pos, &m_Vel);
+				if(Collision()->HandleBWCollision(this))
+					m_Pos = PrevPos;
 			}
 		}
 	}
@@ -687,7 +688,7 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore, const CNetObj_PlayerInfo *pPlayerInfo)
 {
 	m_Pos.x = pObjCore->m_X;
 	m_Pos.y = pObjCore->m_Y;
@@ -703,6 +704,11 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_Jumped = pObjCore->m_Jumped;
 	m_Direction = pObjCore->m_Direction;
 	m_Angle = pObjCore->m_Angle;
+	if(pPlayerInfo)
+	{
+		m_Id = pPlayerInfo->m_ClientID;
+		m_Score = pPlayerInfo->m_Score;
+	}
 
 	// do corrections
 	if(m_HookedPlayer < -1 || m_HookedPlayer >= MAX_CLIENTS)
@@ -717,7 +723,7 @@ void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
 	Write(&Core);
-	Read(&Core);
+	Read(&Core, 0);
 }
 
 // DDRace
@@ -735,7 +741,7 @@ void CCharacterCore::LimitForce(vec2 *pForce)
 	vec2 Temp = *pForce;
 	if(IsBWMod(m_pGametype))
 	{
-		Collision()->HandleBWCollision(m_Pos, pForce);
+		Collision()->HandleBWCollision(this, pForce);
 	}
 	else if(IsDDNet(m_pGametype) || IsDDRace(m_pGametype))
 	{

@@ -836,7 +836,7 @@ void CGameClient::UpdatePositions()
 }
 
 
-static void Evolve(CNetObj_Character *pCharacter, int Tick, const char *pGameType)
+static void Evolve(CNetObj_Character *pCharacter, const CNetObj_PlayerInfo *pPlayerInfo, int Tick, const char *pGameType)
 {
 	CWorldCore TempWorld;
 	CCharacterCore TempCore;
@@ -844,7 +844,7 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick, const char *pGameTyp
 	mem_zero(&TempCore, sizeof(TempCore));
 	mem_zero(&TempTeams, sizeof(TempTeams));
 	TempCore.Init(&TempWorld, g_GameClient.Collision(), &TempTeams);
-	TempCore.Read(pCharacter);
+	TempCore.Read(pCharacter, pPlayerInfo);
 	TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
 
 	while(pCharacter->m_Tick < Tick)
@@ -1407,9 +1407,9 @@ void CGameClient::OnNewSnapshot()
 						m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
 
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick(), Client()->GetServerInfo()->m_aGameType);
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, m_Snap.m_paPlayerInfos[Item.m_ID], Client()->PrevGameTick(), Client()->GetServerInfo()->m_aGameType);
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick(), Client()->GetServerInfo()->m_aGameType);
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, m_Snap.m_paPlayerInfos[Item.m_ID], Client()->GameTick(), Client()->GetServerInfo()->m_aGameType);
 					}
 
 					if(g_Config.m_ClFlagChat && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
@@ -1695,12 +1695,12 @@ void CGameClient::OnPredict()
 	{
 		if(m_Snap.m_pLocalCharacter)
 		{
-			m_PredictedChar.Read(m_Snap.m_pLocalCharacter);
+			m_PredictedChar.Read(m_Snap.m_pLocalCharacter, m_Snap.m_pLocalInfo);
 			m_PredictedChar.m_ActiveWeapon = m_Snap.m_pLocalCharacter->m_Weapon;
 		}
 		if(m_Snap.m_pLocalPrevCharacter)
 		{
-			m_PredictedPrevChar.Read(m_Snap.m_pLocalPrevCharacter);
+			m_PredictedPrevChar.Read(m_Snap.m_pLocalPrevCharacter, m_Snap.m_pLocalInfo);
 			m_PredictedPrevChar.m_ActiveWeapon = m_Snap.m_pLocalPrevCharacter->m_Weapon;
 		}
 		return;
@@ -1723,7 +1723,8 @@ void CGameClient::OnPredict()
 		g_GameClient.m_aClients[i].m_Predicted.Init(&World, Collision(), &m_Teams);
 		World.m_apCharacters[i] = &g_GameClient.m_aClients[i].m_Predicted;
 		World.m_apCharacters[i]->m_Id = m_Snap.m_paPlayerInfos[i]->m_ClientID;
-		g_GameClient.m_aClients[i].m_Predicted.Read(&m_Snap.m_aCharacters[i].m_Cur);
+		World.m_apCharacters[i]->m_Score = m_Snap.m_paPlayerInfos[i]->m_Score;
+		g_GameClient.m_aClients[i].m_Predicted.Read(&m_Snap.m_aCharacters[i].m_Cur, m_Snap.m_paPlayerInfos[i]);
 		g_GameClient.m_aClients[i].m_Predicted.m_ActiveWeapon = m_Snap.m_aCharacters[i].m_Cur.m_Weapon;
 	}
 
@@ -2681,7 +2682,7 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 	if(HookedPlayer >= 0 && m_Snap.m_aCharacters[HookedPlayer].m_Active && m_Snap.m_paPlayerInfos[HookedPlayer])
 	{
 		CCharacterCore OtherCharCur;
-		OtherCharCur.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Cur);
+		OtherCharCur.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Cur, m_Snap.m_paPlayerInfos[HookedPlayer]);
 		float PredictErr[2];
 		for(int dir = 0; dir < 2; dir++)
 		{
@@ -2691,12 +2692,12 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 			CCharacterCore OtherChar;
 			OtherChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[HookedPlayer] = &OtherChar;
-			OtherChar.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Prev);
+			OtherChar.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Prev, m_Snap.m_paPlayerInfos[HookedPlayer]);
 
 			CCharacterCore LocalChar;
 			LocalChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[m_Snap.m_LocalClientID] = &LocalChar;
-			LocalChar.Read(&m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev);
+			LocalChar.Read(&m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev, m_Snap.m_paPlayerInfos[m_Snap.m_LocalClientID]);
 
 			for(int Tick = Client()->PrevGameTick(); Tick < Client()->GameTick(); Tick++)
 			{
