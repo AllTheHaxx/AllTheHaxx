@@ -566,7 +566,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 		#ifdef CONF_FAMILY_WINDOWS
 			if(!getenv("SDL_VIDEO_WINDOW_POS") && !getenv("SDL_VIDEO_CENTERED")) // ignore_convention
-				putenv("SDL_VIDEO_WINDOW_POS=center"); // ignore_convention
+				_putenv("SDL_VIDEO_WINDOW_POS=center"); // ignore_convention
 		#endif
 	}
 
