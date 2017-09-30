@@ -385,7 +385,11 @@ int CControls::SnapInput(int *pData)
 
 	// remove the hookline flag from the sent data
 	CServerInfo ServerInfo; Client()->GetServerInfo(&ServerInfo);
-	if((m_InputData[g_Config.m_ClDummy].m_PlayerFlags & PLAYERFLAG_AIM) && (!g_Config.m_ClSendHookline || str_find_nocase(ServerInfo.m_aGameType, "stitch") || str_find_nocase(ServerInfo.m_aGameType, "626")))
+	if((m_InputData[g_Config.m_ClDummy].m_PlayerFlags & PLAYERFLAG_AIM) && (!g_Config.m_ClSendHookline
+																			#if defined(CONF_DEBUG)
+																			|| str_find_nocase(ServerInfo.m_aGameType, "stitch") || str_find_nocase(ServerInfo.m_aGameType, "626")
+																			#endif
+																		   ))
 	{
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags ^= PLAYERFLAG_AIM;
 		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
