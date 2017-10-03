@@ -703,10 +703,16 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 		// request translations, even for decrypted chat!
 		if(TranslatorAvailable() && g_Config.m_ClTransIn &&
-			str_length(pMsg->m_pMessage) > 1 &&
-			pMsg->m_ClientID != m_pClient->m_Snap.m_LocalClientID &&
-			pMsg->m_ClientID != -1)
-			m_pTranslator->RequestTranslation(g_Config.m_ClTransInSrc, g_Config.m_ClTransInDst, pDecrypted ? pDecrypted : pMsg->m_pMessage, true);
+				str_length(pMsg->m_pMessage) > 1 &&
+				pMsg->m_ClientID != m_pClient->m_Snap.m_LocalClientID &&
+				pMsg->m_ClientID != -1)
+		{
+			char aMentionedName[MAX_NAME_LENGTH];
+			const char *pTransStart = PrepareMsgForTrans(pDecrypted ? pDecrypted : pMsg->m_pMessage, aMentionedName);
+			if(str_length(pTransStart) > 1)
+				m_pTranslator->RequestTranslation(g_Config.m_ClTransInSrc, g_Config.m_ClTransInDst, pTransStart, true,
+												  aMentionedName, m_pClient->m_aClients[pMsg->m_ClientID].m_aName);
+		}
 	}
 }
 
@@ -825,12 +831,13 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
 		}
-		else if(ClientID == -1337)
+		else if(ClientID == FAKE_ID_TRANS)
 		{
-			str_copy(m_aLines[m_CurrentLine].m_aName, "[*Translator*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
+			//str_copy(m_aLines[m_CurrentLine].m_aName, "[*Translator*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
+			m_aLines[m_CurrentLine].m_NameColor = FAKE_ID_TRANS;
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
 		}
-		else if(ClientID <= -2)
+		else if(ClientID <= FAKE_ID_LUA)
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "[*Lua*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
@@ -928,18 +935,28 @@ void CChat::OnRender()
 
 	if(TranslatorAvailable())
 	{
-		if(m_pTranslator->GetTranslation())
+		if(m_pTranslator->HasTranslation())
 		{
-			char aBuf[512];
-			if(m_pTranslator->GetTranslation()->m_In)
+			char aBuf[1024];
+			CTranslator::CTransEntry Entry = m_pTranslator->NextTranslation();
+			if(Entry.m_In)
 			{
-				str_format(aBuf, sizeof(aBuf), "'%s' (%s → %s)", m_pTranslator->GetTranslation()->m_Text, m_pTranslator->GetTranslation()->m_SrcLang, m_pTranslator->GetTranslation()->m_DstLang);
-				AddLine(-1337, 0, aBuf);
+				str_format(aBuf, sizeof(aBuf), "%s: '%s%s%s' (%s → %s)",
+						   Entry.m_aSaidBy,
+						   Entry.m_aMentionedName, Entry.m_aMentionedName[0] != '\0' ? ": " : "", Entry.m_aText,
+						   Entry.m_aSrcLang, Entry.m_aDstLang);
+				AddLine(FAKE_ID_TRANS, 0, aBuf);
 			}
 			else
-				Say(0, m_pTranslator->GetTranslation()->m_Text, true);
-
-			m_pTranslator->RemoveTranslation();
+			{
+				if(Entry.m_aMentionedName[0] != '\0')
+				{
+					str_formatb(aBuf, "%s: %s", Entry.m_aMentionedName, Entry.m_aText);
+					Say(0, aBuf, true);
+				}
+				else
+					Say(0, Entry.m_aText, true);
+			}
 		}
 	}
 
@@ -1127,9 +1144,9 @@ void CChat::OnRender()
 		// friends always in green // TODO: settings pls!
 		if(m_aLines[r].m_ClientID > 0 && m_aLines[r].m_ClientID < MAX_CLIENTS && g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aName, m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aClan, true))
 			TextRender()->TextColor(0,0.7f,0,Blend);
-		else if (m_aLines[r].m_ClientID == -1337) // translator in blue
+		else if (m_aLines[r].m_ClientID == FAKE_ID_TRANS) // translator in blue
 			TextRender()->TextColor(0.2f,0.2f,0.7f,Blend);
-		else if (m_aLines[r].m_ClientID < -1) // lua in ReD
+		else if (m_aLines[r].m_ClientID <= FAKE_ID_LUA) // lua in ReD
 			TextRender()->TextColor(0.7f,0.2f,0.2f,Blend);
 		TextRender()->TextEx(&Cursor, aName, -1);
 
@@ -1137,9 +1154,9 @@ void CChat::OnRender()
 		vec3 rgb;
 		if (m_aLines[r].m_ClientID == -1) // system message
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
-		else if (m_aLines[r].m_ClientID == -1337) // translator
+		else if (m_aLines[r].m_ClientID == FAKE_ID_TRANS) // translator
 			rgb = vec3(0.45f, 0.45f, 1.0f);
-		else if (m_aLines[r].m_ClientID < -1) // lua
+		else if (m_aLines[r].m_ClientID <= FAKE_ID_LUA) // lua
 			rgb = vec3(1.0f, 0.45f, 0.45f);
 		else if (m_aLines[r].m_Highlighted)
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
@@ -1199,6 +1216,33 @@ void CChat::OnRender()
 #endif
 }
 
+const char *CChat::PrepareMsgForTrans(const char *pMessage, char aNameBuf[MAX_NAME_LENGTH]) const
+{
+	// check for player mentions and ignore them
+	const char *pTranslateStart = pMessage;
+	aNameBuf[0] = '\0';
+	const char *pColonAt = str_find(pMessage, ":");
+	if(pColonAt)
+	{
+		// search for a player with this name to check if it's actually a name
+		int PrefixLen = (int)(pColonAt - pMessage);
+		if(PrefixLen < MAX_NAME_LENGTH)
+		{
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(m_pClient->m_aClients[i].m_Active &&
+				   str_comp_num(m_pClient->m_aClients[i].m_aName, pMessage, PrefixLen) == 0)
+				{
+					pTranslateStart = pColonAt+1;
+					str_copy(aNameBuf, pMessage, min((int)MAX_NAME_LENGTH, PrefixLen+1));
+					return pTranslateStart;
+				}
+			}
+		}
+	}
+	return pTranslateStart;
+}
+
 bool CChat::HandleTCommands(const char *pMsg)
 {
 	CALLSTACK_ADD();
@@ -1226,50 +1270,56 @@ bool CChat::HandleTCommands(const char *pMsg)
 
 	if(!str_comp_nocase(aCmd[0], "$cmdlist"))
 	{
-		AddLine(-1337, 0, "~~~~ Commands ~~~~");
-		AddLine(-1337, 0, "'$$tout <dst> <message>': Translate a message");
-		AddLine(-1337, 0, "'$$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
+		AddLine(FAKE_ID_TRANS, 0, "~~~~ Commands ~~~~");
+		AddLine(FAKE_ID_TRANS, 0, "'$$tout <dst> <message>': Translate a message");
+		AddLine(FAKE_ID_TRANS, 0, "'$$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
 		return true;
 	}
 	else if(!str_comp_nocase(aCmd[0], "$tout"))
 	{
 		if(!aCmd[1][0] || !aCmd[2][0])
 		{
-			AddLine(-1337, 0, "Please use '$$tout <dst> <message>'");
+			AddLine(FAKE_ID_TRANS, 0, "Please use '$$tout <dst> <message>'");
 			return true;
 		}
 
 		int i = 2;
 		char aBuf[256];
-		char RawMsg[512];
+		char aRawMsg[512];
 
-		mem_zero(&RawMsg, sizeof(RawMsg));
+		mem_zero(&aRawMsg, sizeof(aRawMsg));
 
 		while(aCmd[i][0])
 		{
 			str_format(aBuf, sizeof(aBuf), "%s ", aCmd[i]);
-			str_append(RawMsg, aBuf, sizeof(RawMsg));
+			str_append(aRawMsg, aBuf, sizeof(aRawMsg));
 			i++;
 		}
 
-		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, aCmd[1], RawMsg, false);
+		char aMentionedName[MAX_NAME_LENGTH];
+		const char *pTransStart = PrepareMsgForTrans(aRawMsg, aMentionedName);
+		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, aCmd[1], pTransStart, false, aMentionedName);
 		return true;
 	}
 	else if(!str_comp_nocase(aCmd[0], "$tin"))
 	{
 		if(!aCmd[1][0] || !aCmd[2][0])
 		{
-			AddLine(-1337, 0, "Please use '$$tin <src> <ID>'");
+			AddLine(FAKE_ID_TRANS, 0, "Please use '$$tin <src> <ID>'");
 			return true;
 		}
 
 		int MsgID = str_toint(aCmd[2]);
+		// DENNIS XXX TODO RANGE CHECK
 
-		m_pTranslator->RequestTranslation(aCmd[1], g_Config.m_ClTransInDst, m_aLines[m_CurrentLine-MsgID].m_aText, true);
+		char aMentionedName[MAX_NAME_LENGTH];
+		const char *pTransStart = PrepareMsgForTrans(m_aLines[m_CurrentLine-MsgID].m_aText, aMentionedName);
+		m_pTranslator->RequestTranslation(aCmd[1], g_Config.m_ClTransInDst, pTransStart, true,
+										  aMentionedName, m_pClient->m_aClients[m_aLines[m_CurrentLine-MsgID].m_ClientID].m_aName);
 		return true;
 	}
 
-	//AddLine(-1337, 0, "Unknown command. Try '$$cmdlist'!");
+	//AddLine(FAKE_ID_TRANS, 0, "Unknown command. Try '$$cmdlist'!");
 	//return true;
 	return false;
 }
@@ -1283,16 +1333,22 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 
 	m_LastChatSend = time_get();
 
-	char aMessage[1024];
-	str_copy(aMessage, pLine, sizeof(aMessage));
-
 	if(HandleTCommands(pLine))
 		return;
 
-	if(TranslatorAvailable() && g_Config.m_ClTransOut && str_length(aMessage) > 4 && aMessage[0] != '/' && !NoTrans)
+	char aMessage[1024];
+	str_copy(aMessage, pLine, sizeof(aMessage));
+
+	if(!NoTrans && g_Config.m_ClTransOut && TranslatorAvailable())
 	{
-		m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, aMessage, false);
-		return;
+		// translate
+		char aMentionedName[MAX_NAME_LENGTH];
+		const char *pTransStart = PrepareMsgForTrans(aMessage, aMentionedName);
+		if(str_length(pTransStart) > 1 && pTransStart[0] != '/')
+		{
+			m_pTranslator->RequestTranslation(g_Config.m_ClTransOutSrc, g_Config.m_ClTransOutDst, pTransStart, false, aMentionedName);
+			return;
+		}
 	}
 
 	int DiscardChat = false;

@@ -14,6 +14,8 @@ class CChat : public CComponent
 	enum
 	{
 		MAX_LINES = 25,
+		FAKE_ID_TRANS = -1337,
+		FAKE_ID_LUA = -2,
 	};
 
 	struct CLine
@@ -78,6 +80,7 @@ class CChat : public CComponent
 	AES128_IV m_CryptIV;
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
+	const char *PrepareMsgForTrans(const char *pMessage, char aNameBuf[MAX_NAME_LENGTH]) const;
 	bool HandleTCommands(const char *pMsg);
 
 public:
