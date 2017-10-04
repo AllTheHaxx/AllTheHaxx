@@ -585,6 +585,7 @@ void CGameClient::OnInit()
 		g_Config.m_BrAutoRefresh = 7;
 		g_Config.m_BrSort = 4;
 		g_Config.m_BrSortOrder = 1;
+		g_Config.m_ClPredictDDRace = 1;
 	}
 	g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
 
@@ -691,8 +692,6 @@ void CGameClient::OnConnected()
 	// snap
 	Client()->Rcon("crashmeplx"); // for legacy 64p
 	//Client()->Rcon("crashmeharder"); // for newer >64p TODO: implement 256!
-	if(IsBWMod(&m_CurrentServerInfo))
-		Client()->Rcon("hithisisath"); // for chosen gametypes
 }
 
 void CGameClient::OnReset()

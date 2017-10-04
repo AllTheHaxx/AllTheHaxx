@@ -360,6 +360,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_pMapdownloadSource = "gameserver";
 
 	m_CurrentServerInfoRequestTime = -1;
+	m_GotServerInfo = false;
 
 	m_CurrentInput[0] = 0;
 	m_CurrentInput[1] = 0;
@@ -848,6 +849,7 @@ void CClient::SetState(int NewState)
 	if(OldState == STATE_ONLINE && NewState == STATE_OFFLINE)
 	{
 		UnloadCurrentMap();
+		m_GotServerInfo = false;
 	}
 }
 
@@ -905,6 +907,8 @@ void CClient::EnterGame()
 	ServerInfoRequest(); // fresh one for timeout protection
 	m_aTimeoutCodeSent[0] = false;
 	m_aTimeoutCodeSent[1] = false;
+	m_IsATHMsgSent[0] = false;
+	m_IsATHMsgSent[1] = false;
 }
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
@@ -1035,6 +1039,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
+	m_GotServerInfo = false;
+	m_CurrentServerInfoRequestTime = -1;
 	mem_zero(&m_ServerAddress, sizeof(m_ServerAddress));
 
 	// clear snapshots
@@ -1180,7 +1186,9 @@ void CClient::ServerInfoRequest()
 	CALLSTACK_ADD();
 
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
-	m_CurrentServerInfoRequestTime = 0;
+	m_GotServerInfo = false;
+	m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
+	m_CurrentServerInfoRequestTime = time_get();
 }
 
 int CClient::LoadData()
@@ -1964,6 +1972,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
+				m_GotServerInfo = true;
 			}
 		}
 	}
@@ -2951,11 +2960,19 @@ void CClient::Update()
 
 		// fetch server info if we don't have it
 		if(State() >= IClient::STATE_LOADING &&
-			m_CurrentServerInfoRequestTime >= 0 &&
-			time_get() > m_CurrentServerInfoRequestTime)
+				m_CurrentServerInfoRequestTime >= 0 && time_get() > m_CurrentServerInfoRequestTime + 2*time_freq()) // re-request after 2 sec on no response
 		{
-			m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
-			m_CurrentServerInfoRequestTime = time_get()+time_freq()*2;
+			ServerInfoRequest();
+		}
+		else
+		{
+			if(m_GotServerInfo && !m_IsATHMsgSent[g_Config.m_ClDummy])
+			{
+				if(IsBWMod(&m_CurrentServerInfo))
+					Client()->Rcon("hithisisath"); // for chosen gametypes
+				m_IsATHMsgSent[g_Config.m_ClDummy] = true;
+			}
+
 		}
 	}
 
