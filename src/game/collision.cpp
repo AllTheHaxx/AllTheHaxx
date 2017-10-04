@@ -13,6 +13,7 @@
 #include <game/collision.h>
 
 #include <engine/shared/config.h>
+#include "gamecore.h"
 
 CCollision::CCollision()
 {
@@ -229,7 +230,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		int hit = 0;
 		if(CheckPoint(ix, iy))
 		{
-			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
+			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1) && m_pLayers->IsHookThrough(Last, Pos) == false)
 				hit = GetCollisionAt(ix, iy);
 		}
 		else if(IsHookBlocker(ix, iy, Pos0, Pos1))
@@ -609,15 +610,15 @@ int CCollision::IsTune(int Index)
 	return 0;
 }
 
-void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed)
+void CCollision::GetSpeedup(int Index, vec2 *pOutDir, int *pOutForce, int *pOutMaxSpeed)
 {
 	if(Index < 0 || !m_pSpeedup)
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
-	*Force = m_pSpeedup[Index].m_Force;
-	*Dir = vec2(cos(Angle), sin(Angle));
-	if(MaxSpeed)
-		*MaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
+	*pOutForce = m_pSpeedup[Index].m_Force;
+	*pOutDir = vec2(cosf(Angle), sinf(Angle));
+	if(pOutMaxSpeed)
+		*pOutMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
 
 int CCollision::IsSwitch(int Index)
@@ -665,6 +666,150 @@ int CCollision::IsMover(int x, int y, int* Flags)
 		return Index;
 	else
 		return 0;
+}
+
+static void STOP_LEFT(vec2 *pVel) { if(pVel->x < 0.0f) pVel->x = 0; }
+static void STOP_RIGHT(vec2 *pVel) { if(pVel->x > 0.0f) pVel->x = 0; }
+static void STOP_DOWN(vec2 *pVel) { if(pVel->y > 0.0f) pVel->y = 0; }
+static void STOP_UP(vec2 *pVel) { if(pVel->y < 0.0f) pVel->y = 0; }
+bool CCollision::HandleBWCollision(CCharacterCore *pCharCore, vec2 *pOverrideVel)
+{
+	const int PhysSize = 28;
+	const vec2 &Pos = pCharCore->m_Pos;
+	vec2 *pVel = pOverrideVel ? pOverrideVel : &pCharCore->m_Vel;
+
+	int TileTR = GetTileRaw(round_to_int(Pos.x - PhysSize / 3.f), round_to_int(Pos.y + PhysSize / 3.f));
+	int TileTL = GetTileRaw(round_to_int(Pos.x - PhysSize / 3.f), round_to_int(Pos.y - PhysSize / 3.f));
+	int TileBR = GetTileRaw(round_to_int(Pos.x + PhysSize / 3.f), round_to_int(Pos.y + PhysSize / 3.f));
+	int TileBL = GetTileRaw(round_to_int(Pos.x + PhysSize / 3.f), round_to_int(Pos.y - PhysSize / 3.f));
+	int TileR = GetTileRaw(round_to_int(Pos.x + PhysSize/2.0f+2), round_to_int(Pos.y));
+	int TileL = GetTileRaw(round_to_int(Pos.x - PhysSize/2.0f-2), round_to_int(Pos.y));
+	int TileT = GetTileRaw(round_to_int(Pos.x), round_to_int(Pos.y - PhysSize/2.0f-2));
+	int TileB = GetTileRaw(round_to_int(Pos.x), round_to_int(Pos.y + PhysSize/2.0f+2));
+	int TileC = GetTileRaw(round_to_int(Pos.x), round_to_int(Pos.y));
+
+	// oneway tiles
+	#define COLLIDING_WITH(TILE_ID) \
+			(TileTR == (TILE_ID) || TileTL == (TILE_ID) || \
+			 TileBR == (TILE_ID) || TileBL == (TILE_ID))
+
+	if(COLLIDING_WITH(TILE_ONEWAY_RIGHT))
+		STOP_LEFT(pVel);
+
+	if(COLLIDING_WITH(TILE_ONEWAY_LEFT))
+		STOP_RIGHT(pVel);
+
+	if(COLLIDING_WITH(TILE_ONEWAY_UP))
+		STOP_DOWN(pVel);
+
+	if(COLLIDING_WITH(TILE_ONEWAY_DOWN))
+		STOP_UP(pVel);
+
+	#undef COLLIDING_WITH
+
+
+	// level barrier
+	const int Score = pCharCore->m_Score;
+	if(Score < 1)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_1) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_1) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_1) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_1) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_1) *pVel = vec2(0);
+	}
+	else if(Score < 50)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_50) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_50) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_50) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_50) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_50) *pVel = vec2(0);
+	}
+	else if(Score < 100)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_100) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_100) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_100) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_100) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_100) *pVel = vec2(0);
+	}
+	else if(Score < 200)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_200) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_200) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_200) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_200) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_200) *pVel = vec2(0);
+	}
+	else if(Score < 300)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_300) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_300) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_300) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_300) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_300) *pVel = vec2(0);
+	}
+	else if(Score < 400)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_400) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_400) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_400) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_400) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_400) *pVel = vec2(0);
+	}
+	else if(Score < 500)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_500) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_500) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_500) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_500) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_500) *pVel = vec2(0);
+	}
+	else if(Score < 600)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_600) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_600) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_600) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_600) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_600) *pVel = vec2(0);
+	}
+	else if(Score < 700)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_700) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_700) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_700) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_700) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_700) *pVel = vec2(0);
+	}
+	else if(Score < 800)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_800) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_800) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_800) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_800) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_800) *pVel = vec2(0);
+	}
+	else if(Score < 900)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_900) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_900) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_900) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_900) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_900) *pVel = vec2(0);
+	}
+	else if(Score < 999)
+	{
+		if(TileR == TILE_BARRIER_LEVEL_999) STOP_RIGHT(pVel);
+		if(TileL == TILE_BARRIER_LEVEL_999) STOP_LEFT(pVel);
+		if(TileT == TILE_BARRIER_LEVEL_999) STOP_UP(pVel);
+		if(TileB == TILE_BARRIER_LEVEL_999) STOP_DOWN(pVel);
+		if(TileC == TILE_BARRIER_LEVEL_999) *pVel = vec2(0);
+	}
+
+	#undef COLLIDING_WITH
+
+	return false;
 }
 
 vec2 CCollision::CpSpeed(int Index, int Flags)

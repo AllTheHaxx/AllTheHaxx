@@ -74,7 +74,7 @@ public:
 	int IsTCheckpoint(int Index);
 	int IsSpeedup(int Index);
 	int IsTune(int Index);
-	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed);
+	void GetSpeedup(int Index, vec2 *pOutDir, int *pOutForce, int *pOutMaxSpeed);
 	int IsSwitch(int Index);
 	int GetSwitchNumber(int Index);
 	int GetSwitchDelay(int Index);
@@ -90,6 +90,8 @@ public:
 	int IsFCheckpoint(int Index);
 
 	int IsMover(int x, int y, int* Flags);
+
+	bool HandleBWCollision(class CCharacterCore *pCharCore, vec2 *pOverrideVel = 0);
 
 	vec2 CpSpeed(int index, int Flags = 0);
 

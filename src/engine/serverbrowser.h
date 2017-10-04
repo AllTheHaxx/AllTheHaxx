@@ -69,8 +69,12 @@ bool IsCatch(const CServerInfo *pInfo);
 bool IsInsta(const CServerInfo *pInfo);
 bool IsFNG(const CServerInfo *pInfo);
 bool IsRace(const CServerInfo *pInfo);
+bool IsDDRace(const char *pGameType);
 bool IsDDRace(const CServerInfo *pInfo);
+bool IsDDNet(const char *pGameType);
 bool IsDDNet(const CServerInfo *pInfo);
+bool IsBWMod(const char *pGameType);
+bool IsBWMod(const CServerInfo *pInfo);
 
 bool Is64Player(const CServerInfo *pInfo);
 bool IsPlus(const CServerInfo *pInfo);

@@ -33,26 +33,44 @@ bool IsRace(const CServerInfo *pInfo)
 	    || str_find_nocase(pInfo->m_aGameType, "fastcap");
 }
 
+bool IsDDRace(const char *pGameType)
+{
+	return str_find_nocase(pGameType, "ddrace")
+		   || str_find_nocase(pGameType, "mkrace");
+}
 bool IsDDRace(const CServerInfo *pInfo)
 {
-	return str_find_nocase(pInfo->m_aGameType, "ddrace")
-	    || str_find_nocase(pInfo->m_aGameType, "mkrace");
+	return IsDDRace(pInfo->m_aGameType);
 }
+bool IsDDNet(const char *pGameType)
+{
+	return str_find_nocase(pGameType, "ddracenet")
+	    || str_find_nocase(pGameType, "ddnet");
 
+}
 bool IsDDNet(const CServerInfo *pInfo)
 {
-	return str_find_nocase(pInfo->m_aGameType, "ddracenet")
-	    || str_find_nocase(pInfo->m_aGameType, "ddnet");
+	return IsDDNet(pInfo->m_aGameType);
 }
 
 // other
+bool IsBWMod(const char *pGameType)
+{
+	return (str_comp_nocase_num(pGameType, "bw", 2) == 0 && str_length(pGameType) > 3 && pGameType[2] == ' ' && pGameType[3] == ' ')
+		   || str_comp_nocase(pGameType, "bw") == 0;
+
+}
+bool IsBWMod(const CServerInfo *pInfo)
+{
+	return IsBWMod(pInfo->m_aGameType);
+}
 
 bool Is64Player(const CServerInfo *pInfo)
 {
 	return str_find(pInfo->m_aGameType, "64")
 	    || str_find(pInfo->m_aName, "64")
-		|| str_comp(pInfo->m_aName, "iF|City") == 0
-	    || IsDDNet(pInfo);
+		|| str_comp(pInfo->m_aGameType, "iF|City") == 0
+	    || IsDDNet(pInfo) || IsBWMod(pInfo);
 }
 
 bool IsPlus(const CServerInfo *pInfo)

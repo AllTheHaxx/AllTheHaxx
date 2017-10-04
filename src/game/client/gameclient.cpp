@@ -585,6 +585,7 @@ void CGameClient::OnInit()
 		g_Config.m_BrAutoRefresh = 7;
 		g_Config.m_BrSort = 4;
 		g_Config.m_BrSortOrder = 1;
+		g_Config.m_ClPredictDDRace = 1;
 	}
 	g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
 
@@ -834,7 +835,7 @@ void CGameClient::UpdatePositions()
 }
 
 
-static void Evolve(CNetObj_Character *pCharacter, int Tick)
+static void Evolve(CNetObj_Character *pCharacter, const CNetObj_PlayerInfo *pPlayerInfo, int Tick, const char *pGameType)
 {
 	CWorldCore TempWorld;
 	CCharacterCore TempCore;
@@ -842,13 +843,13 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	mem_zero(&TempCore, sizeof(TempCore));
 	mem_zero(&TempTeams, sizeof(TempTeams));
 	TempCore.Init(&TempWorld, g_GameClient.Collision(), &TempTeams);
-	TempCore.Read(pCharacter);
+	TempCore.Read(pCharacter, pPlayerInfo);
 	TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
 
 	while(pCharacter->m_Tick < Tick)
 	{
 		pCharacter->m_Tick++;
-		TempCore.Tick(false, true);
+		TempCore.Tick(false, true, pGameType);
 		TempCore.Move();
 		TempCore.Quantize();
 	}
@@ -1405,9 +1406,9 @@ void CGameClient::OnNewSnapshot()
 						m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
 
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, m_Snap.m_paPlayerInfos[Item.m_ID], Client()->PrevGameTick(), Client()->GetServerInfo()->m_aGameType);
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, m_Snap.m_paPlayerInfos[Item.m_ID], Client()->GameTick(), Client()->GetServerInfo()->m_aGameType);
 					}
 
 					if(g_Config.m_ClFlagChat && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_PlayerFlags > 2048)
@@ -1693,18 +1694,18 @@ void CGameClient::OnPredict()
 	{
 		if(m_Snap.m_pLocalCharacter)
 		{
-			m_PredictedChar.Read(m_Snap.m_pLocalCharacter);
+			m_PredictedChar.Read(m_Snap.m_pLocalCharacter, m_Snap.m_pLocalInfo);
 			m_PredictedChar.m_ActiveWeapon = m_Snap.m_pLocalCharacter->m_Weapon;
 		}
 		if(m_Snap.m_pLocalPrevCharacter)
 		{
-			m_PredictedPrevChar.Read(m_Snap.m_pLocalPrevCharacter);
+			m_PredictedPrevChar.Read(m_Snap.m_pLocalPrevCharacter, m_Snap.m_pLocalInfo);
 			m_PredictedPrevChar.m_ActiveWeapon = m_Snap.m_pLocalPrevCharacter->m_Weapon;
 		}
 		return;
 	}
 
-	static bool IsWeaker[2][MAX_CLIENTS] = {{0}};
+	static bool IsWeaker[2][MAX_CLIENTS] = { {false} };
 	if(AntiPingPlayers())
 		FindWeaker(IsWeaker);
 
@@ -1721,7 +1722,8 @@ void CGameClient::OnPredict()
 		g_GameClient.m_aClients[i].m_Predicted.Init(&World, Collision(), &m_Teams);
 		World.m_apCharacters[i] = &g_GameClient.m_aClients[i].m_Predicted;
 		World.m_apCharacters[i]->m_Id = m_Snap.m_paPlayerInfos[i]->m_ClientID;
-		g_GameClient.m_aClients[i].m_Predicted.Read(&m_Snap.m_aCharacters[i].m_Cur);
+		World.m_apCharacters[i]->m_Score = m_Snap.m_paPlayerInfos[i]->m_Score;
+		g_GameClient.m_aClients[i].m_Predicted.Read(&m_Snap.m_aCharacters[i].m_Cur, m_Snap.m_paPlayerInfos[i]);
 		g_GameClient.m_aClients[i].m_Predicted.m_ActiveWeapon = m_Snap.m_aCharacters[i].m_Cur.m_Weapon;
 	}
 
@@ -2013,12 +2015,12 @@ void CGameClient::OnPredict()
 				if(h == 1)
 				{
 					if(World.m_apCharacters[m_Snap.m_LocalClientID])
-						World.m_apCharacters[m_Snap.m_LocalClientID]->Tick(true, true);
+						World.m_apCharacters[m_Snap.m_LocalClientID]->Tick(true, true, Client()->GetServerInfo()->m_aGameType);
 				}
 				else
 					for(int c = 0; c < MAX_CLIENTS; c++)
 						if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && ((h == 0 && IsWeaker[g_Config.m_ClDummy][c]) || (h == 2 && !IsWeaker[g_Config.m_ClDummy][c])))
-							World.m_apCharacters[c]->Tick(false, true);
+							World.m_apCharacters[c]->Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 			}
 		}
 		else
@@ -2028,9 +2030,9 @@ void CGameClient::OnPredict()
 				if(!World.m_apCharacters[c])
 					continue;
 				if(m_Snap.m_LocalClientID == c)
-					World.m_apCharacters[c]->Tick(true, true);
+					World.m_apCharacters[c]->Tick(true, true, Client()->GetServerInfo()->m_aGameType);
 				else
-					World.m_apCharacters[c]->Tick(false, true);
+					World.m_apCharacters[c]->Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 			}
 		}
 
@@ -2679,7 +2681,7 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 	if(HookedPlayer >= 0 && m_Snap.m_aCharacters[HookedPlayer].m_Active && m_Snap.m_paPlayerInfos[HookedPlayer])
 	{
 		CCharacterCore OtherCharCur;
-		OtherCharCur.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Cur);
+		OtherCharCur.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Cur, m_Snap.m_paPlayerInfos[HookedPlayer]);
 		float PredictErr[2];
 		for(int dir = 0; dir < 2; dir++)
 		{
@@ -2689,24 +2691,24 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 			CCharacterCore OtherChar;
 			OtherChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[HookedPlayer] = &OtherChar;
-			OtherChar.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Prev);
+			OtherChar.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Prev, m_Snap.m_paPlayerInfos[HookedPlayer]);
 
 			CCharacterCore LocalChar;
 			LocalChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[m_Snap.m_LocalClientID] = &LocalChar;
-			LocalChar.Read(&m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev);
+			LocalChar.Read(&m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev, m_Snap.m_paPlayerInfos[m_Snap.m_LocalClientID]);
 
 			for(int Tick = Client()->PrevGameTick(); Tick < Client()->GameTick(); Tick++)
 			{
 				if(dir == 0)
 				{
-					LocalChar.Tick(false, true);
-					OtherChar.Tick(false, true);
+					LocalChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
+					OtherChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 				}
 				else
 				{
-					OtherChar.Tick(false, true);
-					LocalChar.Tick(false, true);
+					OtherChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
+					LocalChar.Tick(false, true, Client()->GetServerInfo()->m_aGameType);
 				}
 				LocalChar.Move();
 				LocalChar.Quantize();

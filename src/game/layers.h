@@ -3,6 +3,7 @@
 #ifndef GAME_LAYERS_H
 #define GAME_LAYERS_H
 
+#include <base/vmath.h>
 #include <engine/map.h>
 #include <game/mapitems.h>
 
@@ -16,8 +17,19 @@ class CLayers
 	CMapItemLayerTilemap *m_pGameLayer;
 	class IMap *m_pMap;
 
+	// BW mod
+	int m_NumExtrasLayer;
+	CExtrasData **m_apExtrasData;
+	CTile **m_apExtrasTiles;
+	int *m_aExtrasWidth;
+	int *m_aExtrasHeight;
+
+	void InitGameLayers();
+	void InitExtraLayers();
+
 public:
 	CLayers();
+	~CLayers();
 	void Init(class IKernel *pKernel);
 	void InitBackground(class IMap *pMap);
 	int NumGroups() const { return m_GroupsNum; };
@@ -35,6 +47,18 @@ public:
 	CMapItemLayerTilemap *FrontLayer() const { return m_pFrontLayer; };
 	CMapItemLayerTilemap *SwitchLayer() const { return m_pSwitchLayer; };
 	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; };
+
+	// BW
+	int ExtrasIndex(int Index, float x, float y);
+	int GetNumExtrasLayer() const { return m_NumExtrasLayer; };
+	CTile *GetExtrasTile(int Index) const { return m_apExtrasTiles[Index]; };
+	CExtrasData *GetExtrasData(int Index) const { return m_apExtrasData[Index]; };
+	int GetExtrasWidth(int Index) const { return m_aExtrasWidth[Index]; };
+	int GetExtrasHeight(int Index) const { return m_aExtrasHeight[Index]; };
+
+	bool IsHookThrough(const vec2& Last, const vec2& Pos);
+	bool IsExtrasSpeedup(const vec2& Pos);
+	void GetExtrasSpeedup(const vec2& Pos, int *pOutForce, int *pOutMaxSpeed, vec2 *pOutDirection);
 
 private:
 

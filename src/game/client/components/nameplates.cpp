@@ -95,7 +95,7 @@ void CNamePlates::RenderNameplate(
 
 		// render score
 		if(g_Config.m_ClNamePlatesScore
-				&& !IsRace(Client()->GetServerInfo(0)) && !IsDDNet(Client()->GetServerInfo(0)))
+				&& !IsRace(Client()->GetServerInfo()) && !IsDDNet(Client()->GetServerInfo()) && !IsBWMod(Client()->GetServerInfo()))
 		{
 			CUIRect Bg;
 			Bg.x = Position.x - twScore / 2.0f        -4.0f;

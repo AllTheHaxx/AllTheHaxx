@@ -5,6 +5,10 @@
 
 #include <engine/shared/protocol.h>
 
+// for compatibility with BW mod
+#define EXTRATILE_DATA 20
+#define EXTRA_VERSION 0
+
 // layer types
 enum
 {
@@ -13,11 +17,12 @@ enum
 	LAYERTYPE_GAME,
 	LAYERTYPE_TILES,
 	LAYERTYPE_QUADS,
-	LAYERTYPE_FRONT,
-	LAYERTYPE_TELE,
-	LAYERTYPE_SPEEDUP,
-	LAYERTYPE_SWITCH,
-	LAYERTYPE_TUNE,
+	LAYERTYPE_FRONT, // unused
+	LAYERTYPE_EXTRAS = LAYERTYPE_FRONT, // BW mod
+	LAYERTYPE_TELE, // unused
+	LAYERTYPE_SPEEDUP, // unused
+	LAYERTYPE_SWITCH, // unused
+	LAYERTYPE_TUNE, // unused
 	LAYERTYPE_SOUNDS_DEPRECATED, // deprecated! do not use this, this is just for compatibility reasons
 	LAYERTYPE_SOUNDS,
 
@@ -155,6 +160,73 @@ enum
 	TILE_NPH_START,
 	TILE_ENTITIES_OFF_1 = 190,
 	TILE_ENTITIES_OFF_2,
+
+	// legacy race/custom mod support
+//	TILE_AIR = 0,
+//	TILE_SOLID, 1
+//	TILE_DEATH, 2
+//	TILE_NOHOOK, 3
+//	TILE_FREEZE, 4
+//	TILE_UNFREEZE, 5
+	TILE_FREEZE_DEEP=6,
+	TILE_UNFREEZE_DEEP,
+	TILE_RACE_START,
+	TILE_RACE_FINISH,
+	TILE_RESTART,
+	TILE_ONEWAY_RIGHT,
+	TILE_ONEWAY_UP,
+	TILE_ONEWAY_LEFT,
+	TILE_ONEWAY_DOWN,
+	TILE_VIP,
+	TILE_BESTCLAN,
+	TILE_BARRIER_ENTITIES,
+	TILE_ENDLESSHOOK,
+	TILE_SUPERHAMMER,
+	TILE_GIVEPASSIVE,
+	TILE_BARRIER_LEVEL_1,
+	TILE_BARRIER_LEVEL_50,
+	TILE_BARRIER_LEVEL_100,
+	TILE_BARRIER_LEVEL_200,
+	TILE_BARRIER_LEVEL_300,
+	TILE_BARRIER_LEVEL_400,
+	TILE_BARRIER_LEVEL_500,
+	TILE_BARRIER_LEVEL_600,
+	TILE_BARRIER_LEVEL_700,
+	TILE_BARRIER_LEVEL_800,
+	TILE_BARRIER_LEVEL_900,
+	TILE_BARRIER_LEVEL_999,
+	TILE_EXTRAJUMP,
+	NUM_TILES,
+
+	EXTRAS_TELEPORT_FROM=1,
+	EXTRAS_TELEPORT_TO,
+	EXTRAS_SPEEDUP,
+	EXTRAS_FREEZE,
+	EXTRAS_UNFREEZE,
+	EXTRAS_DOOR,
+	EXTRAS_DOOR_HANDLE,
+	EXTRAS_BUF1,//replace
+	EXTRAS_ZONE_PROTECTION,
+	EXTRAS_ZONE_SPAWN,
+	EXTRAS_ZONE_UNTOUCHABLE,
+	EXTRAS_MAP,
+	EXTRAS_SELL_SKINMANI,
+	EXTRAS_SELL_GUNDESIGN,
+	EXTRAS_SELL_KNOCKOUT,
+	EXTRAS_SELL_EXTRAS,
+	EXTRAS_PLAYERCOUNT,
+	EXTRAS_HOOKTHROUGH,
+	EXTRAS_HOOKTHROUGH_TOP,
+	EXTRAS_HOOKTHROUGH_BOTTOM,
+	EXTRAS_HOOKTHROUGH_LEFT,
+	EXTRAS_HOOKTHROUGH_RIGHT,
+	EXTRAS_BUF0,//replace
+	EXTRAS_INFO_LEVEL,
+	EXTRAS_LASERGUN,
+	EXTRAS_LASERGUN_TRIGGER,
+	NUM_EXTRAS,
+
+
 	//End of higher tiles
 	//Layers
 	LAYER_GAME=0,
@@ -216,6 +288,12 @@ public:
 	unsigned char m_Flags;
 	unsigned char m_Skip;
 	unsigned char m_Reserved;
+};
+
+class CExtrasData
+{
+public:
+	char m_aData[EXTRATILE_DATA];
 };
 
 struct CMapItemInfo
@@ -300,6 +378,28 @@ struct CMapItemLayerTilemap
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
+} ;
+
+struct CMapItemLayerTilemapBW
+{
+	CMapItemLayer m_Layer;
+	int m_Version;
+
+	int m_Width;
+	int m_Height;
+	int m_Flags;
+
+	CColor m_Color;
+	int m_ColorEnv;
+	int m_ColorEnvOffset;
+
+	int m_Image;
+	int m_Data;
+
+	int m_aName[3];
+
+	int m_ExtrasData;
+	unsigned char m_ExtraVersion;
 } ;
 
 struct CMapItemLayerQuads
