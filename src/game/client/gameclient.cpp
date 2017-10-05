@@ -587,6 +587,11 @@ void CGameClient::OnInit()
 		g_Config.m_BrSortOrder = 1;
 		g_Config.m_ClPredictDDRace = 1;
 	}
+	if(g_Config.m_ClConfigVersion < 3201)
+	{
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3201", g_Config.m_ClConfigVersion);
+		g_Config.m_BrAutoRefresh = 0;
+	}
 	g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
 
 
