@@ -404,6 +404,8 @@ int CControls::SnapInput(int *pData)
 void CControls::OnRender()
 {
 	CALLSTACK_ADD();
+	if(!Client()->IsIngame())
+		return;
 
 	enum {
 		JOYSTICK_RUN_DISTANCE = 65536 / 8,

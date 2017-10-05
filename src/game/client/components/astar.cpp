@@ -187,7 +187,7 @@ bool CAStar::GetTileAreaCenter(vec2 *pResult, int TileID, int x, int y, int w, i
 	vec2 aTiles[MAX_TILES_IN_AREA];
 
 	//dbg_msg("path/tilefinder", "Searching for tile=%i in AREA=(x%02i y%02i w%02i h%02i)", TileID, x, y, w, h);
-	for(int iy=y; iy < h; iy++)
+	for(int iy=y; iy < h && NumTiles < MAX_TILES_IN_AREA; iy++)
 	{
 		for(int ix=x; ix < w; ix++)
 		{

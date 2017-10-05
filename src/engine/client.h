@@ -90,6 +90,8 @@ public:
 
 	//
 	inline int State() const { return m_State; }
+	inline bool IsOnline() const { return m_State == STATE_ONLINE; }
+	inline bool IsIngame() const { return m_State == STATE_ONLINE || m_State == STATE_DEMOPLAYBACK; }
 
 	// tick time access
 	inline int PrevGameTick() const { return m_PrevGameTick[g_Config.m_ClDummy]; }

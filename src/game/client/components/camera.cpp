@@ -32,15 +32,19 @@ void CCamera::OnRender()
 	CALLSTACK_ADD();
 
 	// ------------------ zooming ------------------
-	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(Client()->GetServerInfo(0)) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if(Client()->IsIngame())
 	{
-		m_ZoomSet = false;
-		m_Zoom = 1.0;
-	}
-	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
-	{
-		m_ZoomSet = true;
-		OnReset();
+		// forbid zoom on vanilla except for spec and demo of course
+		if(IsVanilla(Client()->GetServerInfo()) && !(m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+		{
+			m_ZoomSet = false;
+			m_Zoom = 1.0;
+		}
+		else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
+		{
+			m_ZoomSet = true;
+			OnReset();
+		}
 	}
 
 	// smart zoom

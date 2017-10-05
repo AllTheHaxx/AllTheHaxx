@@ -860,7 +860,8 @@ static void Evolve(CNetObj_Character *pCharacter, const CNetObj_PlayerInfo *pPla
 void CGameClient::OnRender()
 {
 	// update the local character and spectate position
-	UpdatePositions();
+	if(Client()->IsIngame())
+		UpdatePositions();
 
 	// render all systems
 	for(int i = 0; i < m_All.m_Num; i++)

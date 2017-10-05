@@ -980,7 +980,6 @@ void CClient::ConnectImpl()
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
-	ServerInfoRequest();
 	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[0].NetType()) != 0)
 	{
 		char aBufMsg[256];
@@ -988,6 +987,7 @@ void CClient::ConnectImpl()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
 		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
+	ServerInfoRequest();
 
 	m_RconAuthed[0] = 0;
 	if(m_ServerAddress.port == 0)
@@ -1171,6 +1171,7 @@ void CClient::DummyInfo()
 
 const CServerInfo *CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
+	dbg_assert_strict(m_GotServerInfo, "GetServerInfo called but hasn't got any infos!");
 	if(pServerInfo)
 	{
 		mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
@@ -2338,9 +2339,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
 					unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
 					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
-					CServerInfo Info;
-					GetServerInfo(&Info);
-					if(IsDDNet(&Info))
+					if(m_GotServerInfo && IsDDNet(GetServerInfo()))
 						SnapshotRemoveExtraInfo(aExtraInfoRemoved);
 
 					// add snapshot to demo
