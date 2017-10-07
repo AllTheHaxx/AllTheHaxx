@@ -311,17 +311,19 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 	if(DoButton_Menu(&s_ServerConfigButton, Localize("Server Config"), s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR, &Button, Localize("Execute commands when joining this server")))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SERVERCONFIG_CREATOR ? EXTRAS_NONE : EXTRAS_SERVERCONFIG_CREATOR;
 
+	#if defined(CONF_SPOOFING)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Network Sniffer")), &Button, &ButtonBar);
 	static CButtonContainer s_SnifferSettingsButton;
 	if(DoButton_Menu(&s_SnifferSettingsButton, Localize("Network Sniffer"), s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS, &Button, Localize("Packet sniffing settings")))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS ? EXTRAS_NONE : EXTRAS_SNIFFER_SETTINGS;
+	#endif
 
 #if defined(FEATURE_LUA)
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Lua QuickAccess")), &Button, &ButtonBar);
 	static CButtonContainer s_LuaQuickAccessButton;
-	if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "Scripts can create GUIs in here as they like"))
+	if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "A list of all active lua scripts"))
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
 #endif
 
@@ -555,8 +557,15 @@ void CMenus::RenderLuaQuickAccess(CUIRect MainView)
 		RenderTools()->DrawUIRect(&Item.m_Rect, vec4(0.8f, 0.2f+(i%2)*0.6f, 0.2f+(float)(1-i%2)*0.6f, 0.5f), 0, 0);
 
 		Item.m_Rect.VSplitRight(Item.m_Rect.h, &Item.m_Rect, &Button);
-		if(DoButton_Menu(&pBCs[i], "x", 0, &Button, Localize("Deactivate"), CUI::CORNER_R, vec4(1,0,0,0.5f)))
+		if(DoButton_Menu(&pBCs[i], "×", 0, &Button, Localize("Deactivate"), CUI::CORNER_R, vec4(1,0,0,0.5f)))
 			L->Deactivate();
+
+	/*	if(L->GetScriptHasSettings())
+		{
+			Item.m_Rect.VSplitRight(Item.m_Rect.h, &Item.m_Rect, &Button);
+			if(DoButton_Menu(&pBCs[i], "⚙", 0, &Button, Localize("Settings"), CUI::CORNER_NONE))
+				L->();
+		}*/
 
 		//ButtonBar.VSplitRight(ButtonBar.h, &ButtonBar, &Button);
 		str_format(aBuf, sizeof(aBuf), "[%s] '%s'", L->GetFilename(), L->GetScriptTitle());

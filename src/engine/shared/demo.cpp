@@ -389,7 +389,7 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		return -1;
 
 	if(io_read(m_File, &Chunk, sizeof(Chunk)) != sizeof(Chunk))
-		return -1;
+		return 1;
 
 	if(Chunk&CHUNKTYPEFLAG_TICKMARKER)
 	{
@@ -458,7 +458,7 @@ void CDemoPlayer::ScanFile()
 	{
 		long CurrentPos = io_tell(m_File);
 
-		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
+		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick) != 0)
 			break;
 
 		// read the chunk
@@ -515,13 +515,13 @@ void CDemoPlayer::DoTick()
 
 	while(1)
 	{
-		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
+		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick) != 0)
 		{
 			// stop on error or eof
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
 			if(m_Info.m_PreviousTick == -1)
 			{
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "empty demo");
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "failed to play demo: empty or corrupt file", true);
 				Stop();
 			}
 			else
@@ -535,7 +535,7 @@ void CDemoPlayer::DoTick()
 			if(io_read(m_File, aCompresseddata, ChunkSize) != (unsigned)ChunkSize)
 			{
 				// stop on error or eof
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error reading chunk");
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error reading chunk", true);
 				Stop();
 				break;
 			}
@@ -544,7 +544,7 @@ void CDemoPlayer::DoTick()
 			if(DataSize < 0)
 			{
 				// stop on error or eof
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during network decompression");
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during network decompression", true);
 				Stop();
 				break;
 			}
