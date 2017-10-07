@@ -297,7 +297,7 @@ public:
 	int m_LastDummyConnectTime;
 	int m_Fire;
 
-	virtual const CServerInfo *GetServerInfo(CServerInfo *pServerInfo = 0) const;
+	const CServerInfo *GetServerInfo(CServerInfo *pServerInfo = 0) const;
 	void ServerInfoRequest();
 
 	int LoadData();

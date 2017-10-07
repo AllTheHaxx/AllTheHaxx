@@ -96,13 +96,19 @@ static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
+static int abort_on_assert = 1;
 static void dbg_break();
+void set_abort_on_assert(int enabled)
+{
+	abort_on_assert = enabled;
+}
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
 	{
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
-		dbg_break();
+		if(abort_on_assert)
+			dbg_break();
 	}
 }
 int dbg_assert_strict_imp(const char *filename, int line, int test, const char *msg)

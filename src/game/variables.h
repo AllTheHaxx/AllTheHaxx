@@ -188,7 +188,7 @@ MACRO_CONFIG_INT(ClCinematicCamera, cl_cinematic_camera, 1, 0, 2, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClCinematicCameraDelay, cl_cinematic_camera_delay, 25, 0, 250, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How long it should take for the cinematic camera to move")
 MACRO_CONFIG_INT(ClSmoothChat, cl_smooth_chat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth chat animation")
 MACRO_CONFIG_INT(ClSmoothEmoteWheel, cl_smooth_emotewheel, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Smooth emote wheel animation")
-MACRO_CONFIG_INT(ClSmoothEmoteWheelDelay, cl_smooth_emotewheel_delay, 40, 1, 1000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How long the smooth emote wheel animation should take")
+MACRO_CONFIG_INT(ClSmoothEmoteWheelDelay, cl_smooth_emotewheel_delay, 10, 10, 1000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How long the smooth emote wheel animation should take")
 MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send \"Zzz\" emotes while being in console mode")
 MACRO_CONFIG_INT(ClResetServerCfgOnDc, cl_reset_server_cfg_on_disconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Discard config changes when disconnecting, use 'config_save' if you want to keep them")
 MACRO_CONFIG_INT(ClSendHookline, cl_send_hookline, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send the hookline (forced-off on stitch-* gamemodes)")

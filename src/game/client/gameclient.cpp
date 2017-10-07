@@ -560,8 +560,6 @@ void CGameClient::OnInit()
 	// auto-update config
 	if(g_Config.m_ClConfigVersion < 3020)
 	{
-		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3020", g_Config.m_ClConfigVersion);
-
 		#define UPDATE_BIND(OLD, NEW) \
 		{ const char *pBindKey = m_pBinds->GetKey(OLD); \
 			if(pBindKey && *pBindKey) \
@@ -579,7 +577,6 @@ void CGameClient::OnInit()
 	}
 	if(g_Config.m_ClConfigVersion < 3200)
 	{
-		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3200", g_Config.m_ClConfigVersion);
 		g_Config.m_BrMaxRequests = max(g_Config.m_BrMaxRequests, 50);
 		g_Config.m_BrAutoCache = 1;
 		g_Config.m_BrAutoRefresh = 7;
@@ -589,10 +586,19 @@ void CGameClient::OnInit()
 	}
 	if(g_Config.m_ClConfigVersion < 3201)
 	{
-		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> 3201", g_Config.m_ClConfigVersion);
 		g_Config.m_BrAutoRefresh = 0;
 	}
-	g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
+	if(g_Config.m_ClConfigVersion < 3202)
+	{
+		g_Config.m_SndIRC = 0;
+		g_Config.m_ClSmoothEmoteWheelDelay = 10;
+	}
+
+	if(g_Config.m_ClConfigVersion != GAME_ATH_VERSION_NUMERIC)
+	{
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> %i", g_Config.m_ClConfigVersion, GAME_ATH_VERSION_NUMERIC);
+		g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
+	}
 
 
 	// Set free binds to DDRace binds if it's active

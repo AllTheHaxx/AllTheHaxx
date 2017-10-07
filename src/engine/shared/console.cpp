@@ -912,16 +912,23 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 	for(int i = 0; i < NumArgs; i++)
 	{
 		// check for scripts to execute
-		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
+		if(ppArguments[i][0] == '-')
 		{
-			if(NumArgs - i > 1)
-				ExecuteFile(ppArguments[i+1], -1, true);
-			i++;
-		}
-		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
-		{
-			// skip silent param
-			continue;
+			if(ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
+			{
+				if(NumArgs - i > 1)
+					ExecuteFile(ppArguments[i + 1], -1, true);
+				i++;
+			}
+			else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
+			{
+				// skip silent param
+				continue;
+			}
+			else if(!str_comp("-d", ppArguments[i]) || !str_comp("--disable-assert-break", ppArguments[i]))
+			{
+				set_abort_on_assert(0);
+			}
 		}
 		else
 		{
