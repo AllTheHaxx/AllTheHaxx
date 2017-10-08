@@ -71,7 +71,7 @@ void CAStar::OnRender()
 		return;
 
 	// find the path one second after joining to be buffered
-	if(IsRace(Client()->GetServerInfo()) || IsDDNet(Client()->GetServerInfo()));
+	if(IsRace(Client()->GetServerInfo()) || IsDDNet(Client()->GetServerInfo()))
 	{
 		static int64 s_ActivationTime = 0;
 		if(m_MapReloaded)

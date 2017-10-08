@@ -171,7 +171,7 @@ void CBackground::OnRender()
 				CTile *pTiles = (CTile *)m_pMap->GetData(pTMap->m_Data);
 				int Size = m_pMap->GetDataSize(pTMap->m_Data);
 
-				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
+				if ((unsigned)Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 				{
 					Graphics()->BlendNone();
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
