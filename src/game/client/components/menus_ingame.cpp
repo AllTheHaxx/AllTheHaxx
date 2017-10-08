@@ -273,6 +273,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 #define BUTTON_WIDTH(TEXT) (max(130.0f, TextRender()->TextWidth(0, (ButtonBar.h-2.0f)*ms_FontmodHeight, TEXT, -1)))
 
 	// render buttons
+#if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Console Mode")), &Button, &ButtonBar);
 	static CButtonContainer s_ConModeButton;
@@ -293,6 +294,7 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 
 		SetActive(false);
 	}
+#endif
 
 	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("IRC Chat")), &Button, &ButtonBar);
