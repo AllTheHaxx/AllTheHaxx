@@ -10,7 +10,7 @@ class IMap : public IInterface
 	MACRO_INTERFACE("map", 0)
 public:
 	virtual void *GetData(int Index) = 0;
-	virtual int GetUncompressedDataSize(int Index) = 0;
+	virtual int GetDataSize(int Index) = 0;
 	virtual void *GetDataSwapped(int Index) = 0;
 	virtual void UnloadData(int Index) = 0;
 	virtual void *GetItem(int Index, int *Type, int *pID) = 0;
@@ -30,6 +30,7 @@ public:
 	virtual void Unload() = 0;
 	virtual unsigned Crc() = 0;
 	virtual int MapSize() = 0;
+	virtual IOHANDLE File() = 0;
 };
 
 extern IEngineMap *CreateEngineMap();

@@ -54,6 +54,24 @@ int CMenus::DoButton_Sprite(CButtonContainer *pBC, int ImageID, int SpriteID, in
 	return UI()->DoButtonLogic(pBC->GetID(), "", Checked, pRect);
 }
 
+bool CMenus::DemoFilterChat(const void *pData, int Size, void *pUser)
+{
+	bool DoFilterChat = *(bool *)pUser;
+	if(!DoFilterChat)
+	{
+		return false;
+	}
+
+	CUnpacker Unpacker;
+	Unpacker.Reset(pData, Size);
+
+	int Msg = Unpacker.GetInt();
+	int Sys = Msg&1;
+	Msg >>= 1;
+
+	return !Unpacker.Error() && !Sys && Msg == NETMSGTYPE_SV_CHAT;
+}
+
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
 	CALLSTACK_ADD();
@@ -120,15 +138,25 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"), sizeof(m_aDemoPlayerPopupHint));
 			else
 			{
-				m_DemoPlayerState = DEMOPLAYER_NONE;
-
 				int len = str_length(m_aCurrentDemoFile);
 				if(len < 5 || str_comp_nocase(&m_aCurrentDemoFile[len-5], ".demo"))
 					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
-				Client()->DemoSlice(aPath, s_RemoveChat);
+
+				IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorageTW::TYPE_SAVE);
+				const char* pStr = Localize("File already exists, do you want to overwrite it?");
+				if(DemoFile && str_comp_num(m_aDemoPlayerPopupHint, pStr, sizeof(m_aDemoPlayerPopupHint)) != 0)
+				{
+					io_close(DemoFile);
+					str_copy(m_aDemoPlayerPopupHint, pStr, sizeof(m_aDemoPlayerPopupHint));
+				}
+				else
+				{
+					m_DemoPlayerState = DEMOPLAYER_NONE;
+					Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
+				}
 			}
 		}
 
@@ -156,7 +184,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, -1);
 		static float Offset = 0.0f;
 		static CButtonContainer s_NameEditbox;
-		DoEditBox(&s_NameEditbox, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
+		if(DoEditBox(&s_NameEditbox, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset))
+			m_aDemoPlayerPopupHint[0] = '\0';
 	}
 
 	// handle mousewheel independent of active menu

@@ -21,6 +21,8 @@ enum
 	RECORDER_MAX=3,
 };
 
+typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
+
 extern CCallstack gDebugInfo;
 class IClient : public IInterface
 {
@@ -222,7 +224,7 @@ public:
 
 	virtual void DemoSliceBegin() = 0;
 	virtual void DemoSliceEnd() = 0;
-	virtual void DemoSlice(const char *pDstPath, bool RemoveChat) = 0;
+	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
 	virtual void RequestDDNetSrvList() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
