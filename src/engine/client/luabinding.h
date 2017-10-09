@@ -58,8 +58,8 @@ public:
 	static int LuaGetIrcUserlist(lua_State *L);
 
 	// helper functions
-	static const char *SandboxPath(char *pBuffer, unsigned BufferSize, lua_State *L);
-	static const char *SandboxPath(char *pBuffer, unsigned BufferSize, CLuaFile *pLF);
+	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L);
+	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF);
 };
 
 struct CConfigProperties

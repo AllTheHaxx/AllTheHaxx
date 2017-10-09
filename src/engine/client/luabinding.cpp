@@ -103,10 +103,20 @@ int CLuaBinding::LuaImport(lua_State *L)
 	{
 		// search everywhere
 		str_format(aBuf, sizeof(aBuf), "lua/.library/%s", aFilename);
-		if(IOHANDLE tmp = CLua::m_pCGameClient->Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath)))
+		IOHANDLE tmp = CLua::m_pCGameClient->Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath));
+		if(tmp)
 			io_close(tmp);
 		else
-			str_copy(aFullPath, aBuf, sizeof(aFullPath)); // fall back to lua folder if it fails
+		{
+			str_copy(aBuf, aFilename, sizeof(aBuf));
+			SandboxPath(aBuf, sizeof(aBuf), pLF);
+			tmp = CLua::m_pCGameClient->Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath));
+			if(tmp)
+				io_close(tmp);
+			else
+				str_copy(aFullPath, aBuf, sizeof(aFullPath)); // fall back to lua folder if it fails
+		}
+
 		ret = pLF->LoadFile(aFullPath, true);
 
 		if(!ret)
@@ -119,7 +129,7 @@ int CLuaBinding::LuaImport(lua_State *L)
 	}
 
 	if(g_Config.m_Debug)
-		dbg_msg("Lua/debug", "script '%s' %s '%s'", pLF->GetFilename()+4, ret ? "successfully Import()ed" : "failed to Import()", aFilename);
+		dbg_msg("Lua/debug", "script '%s' Import(\"%s\") -> %s", pLF->GetFilename(), aFilename, ret ? "successful" : "failed");
 
 	// return some stuff to the script
 	lua_pushboolean(L, (int)ret); // success?
@@ -515,13 +525,13 @@ int CLuaBinding::LuaGetIrcUserlist(lua_State *L)
 #endif
 }
 
-const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, lua_State *L)
+const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L)
 {
 #if defined(FEATURE_LUA)
 
 	CLuaFile *pLF = GetLuaFile(L);
 	dbg_assert_strict(pLF != NULL, "FATAL: got no lua file handler for this script?!");
-	return SandboxPath(pBuffer, BufferSize, pLF);
+	return SandboxPath(pInOutBuffer, BufferSize, pLF);
 
 #else
 
@@ -530,16 +540,16 @@ const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, lua_Sta
 #endif
 }
 
-const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, CLuaFile *pLF)
+const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF)
 {
 	const char *pSubdir = "_shared";
 	if(pLF)
 		pSubdir = pLF->GetFilename();
 
 	char aFullPath[512];
-	str_formatb(aFullPath, "lua_sandbox/%s/%s", pSubdir, CLua::m_pCGameClient->Storage()->SandboxPath(pBuffer, BufferSize));
-	str_copy(pBuffer, aFullPath, BufferSize);
+	str_formatb(aFullPath, "lua_sandbox/%s/%s", pSubdir, CLua::m_pCGameClient->Storage()->SandboxPath(pInOutBuffer, BufferSize));
+	str_copy(pInOutBuffer, aFullPath, BufferSize);
 
-	return pBuffer;
+	return pInOutBuffer;
 
 }
