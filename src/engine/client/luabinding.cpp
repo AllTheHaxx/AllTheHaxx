@@ -3,6 +3,7 @@
 
 #include <engine/client.h>
 #include <engine/graphics.h>
+#include <engine/irc.h>
 #include <game/client/gameclient.h>
 #include <game/client/components/console.h>
 #include <game/client/components/menus.h>
@@ -465,6 +466,53 @@ void CLuaBinding::LuaRenderQuadRaw(int x, int y, int w, int h)
 	Item.m_X = x; Item.m_Y = y;
 	Item.m_Width = w; Item.m_Height = h;
 	pGraphics->QuadsDraw(&Item, 1);
+}
+
+// irc namespace
+int CLuaBinding::LuaGetIrcUserlist(lua_State *L)
+{
+#if defined(FEATURE_LUA)
+	CLuaFile *pLF = GetLuaFile(L);
+	if(!pLF)
+		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+	int nargs = lua_gettop(L);
+	if(nargs == 0)
+		return luaL_error(L, "Game.IRC:GetUserlist expects at least one argument");
+
+	for(int i = 1; i <= nargs; i++)
+	{
+		argcheck(lua_isstring(L, i), i, "string");
+		const char *pChanName = lua_tostring(L, i);
+
+		CIRCCom *pCom = CLua::m_pCGameClient->m_pIRC->GetCom(std::string(pChanName));
+		if(pCom)
+		{
+			if(pCom->GetType() == CIRCCom::TYPE_CHANNEL)
+			{
+				CComChan *pChan = static_cast<CComChan*>(pCom);
+				const sorted_array<CComChan::CUser>& Userlist = pChan->m_Users;
+				lua_createtable(L, 0, Userlist.size());
+				int TableIndex = lua_gettop(L);
+				for(int u = 0; u < Userlist.size(); u++)
+				{
+					lua_pushinteger(L, u+1); // lua is 1-based
+					lua_pushstring(L, Userlist[u].c_str());
+					lua_settable(L, TableIndex);
+				}
+			}
+			else
+				lua_pushstring(L, pChanName);
+		}
+		else
+			lua_pushnil(L);
+	}
+
+	return nargs;
+
+#else
+	return 0;
+#endif
 }
 
 const char *CLuaBinding::SandboxPath(char *pBuffer, unsigned BufferSize, lua_State *L)

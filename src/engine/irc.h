@@ -21,12 +21,6 @@ public:
 		TYPE_QUERY
 	};
 
-	CIRCCom(unsigned int type)
-	{
-		m_Type = type;
-		m_NumUnreadMsg = 0;
-	}
-
 	std::vector<std::string> m_Buffer;
 	int m_NumUnreadMsg;
 	char m_aName[25]; // channel/user
@@ -35,6 +29,14 @@ public:
 
 	void AddMessage(const char *fmt, ...);
 	void AddMessage_nofmt(const char *msg);
+
+protected:
+	CIRCCom(unsigned int type)
+	{
+		m_Type = type;
+		m_NumUnreadMsg = 0;
+	}
+
 };
 
 
@@ -71,11 +73,16 @@ public:
 
 		const char *c_str() const { return m_Nick.c_str(); }
 
-		bool operator<(const CUser& other)
+		bool operator<(const CUser& other) const
 		{
 			if(m_Level != other.m_Level)
 				return m_Level > other.m_Level;
 			return m_Nick < other.m_Nick;
+		}
+
+		bool operator==(const CUser& other) const
+		{
+			return m_Nick == other.m_Nick;
 		}
 	};
 
@@ -154,7 +161,7 @@ public:
 	virtual void SetActiveCom(CIRCCom *pCom) = 0;
     virtual CIRCCom* GetActiveCom() = 0;
     virtual CIRCCom* GetCom(unsigned index) = 0;
-    virtual CIRCCom* GetCom(std::string name) = 0;
+    virtual CIRCCom* GetCom(const std::string& name) = 0;
 	virtual void CloseCom(unsigned index) = 0;
 	virtual void CloseCom(CIRCCom *pCom) = 0;
     virtual unsigned GetNumComs() = 0;

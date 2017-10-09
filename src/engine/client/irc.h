@@ -37,14 +37,15 @@ public:
 	void SetActiveCom(CIRCCom *pCom);
 	CIRCCom* GetActiveCom();
 	CIRCCom* GetCom(unsigned index);
-	CIRCCom* GetCom(std::string name);
+	CIRCCom* GetCom(const std::string& Name);
 	void CloseCom(unsigned index);
 	void CloseCom(CIRCCom *pCom);
 	unsigned GetNumComs() { return (unsigned)m_apIRCComs.size(); }
 	bool CanCloseCom(CIRCCom *pCom);
 
-	template<class TCOM>
-	TCOM* OpenCom(const char *pName, bool SwitchTo = true, int UnreadMessages = 0);
+	CIRCCom* OpenCom(int Type, const char *pName, bool SwitchTo = true, int UnreadMessages = 0);
+	CComQuery* OpenComQuery(const char *pName, bool SwitchTo = true, int UnreadMessages = 0) { return static_cast<CComQuery *>(OpenCom(CIRCCom::TYPE_QUERY, pName, SwitchTo, UnreadMessages)); }
+	CComChan* OpenComChan(const char *pName, bool SwitchTo = true, int UnreadMessages = 0) { return static_cast<CComChan *>(OpenCom(CIRCCom::TYPE_CHANNEL, pName, SwitchTo, UnreadMessages)); }
 	void OpenQuery(const char *to);
 	void JoinTo(const char *to, const char *pass = "");
 	void SetTopic(const char *topic);

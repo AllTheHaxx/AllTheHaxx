@@ -113,23 +113,13 @@ CIRCCom* CIRC::GetCom(unsigned index)
 	return m_apIRCComs[index];
 }
 
-CIRCCom* CIRC::GetCom(std::string name)
+CIRCCom* CIRC::GetCom(const std::string& Name)
 {
 	for(int i = 0; i < m_apIRCComs.size(); i++)
 	{
 		CIRCCom *pCom = m_apIRCComs[i];
-		if (pCom->GetType() == CIRCCom::TYPE_CHANNEL)
-		{
-			CComChan *pChan = static_cast<CComChan*>(pCom);
-			if(str_comp_nocase(name.c_str(), pChan->m_aName) == 0)
-				return pCom;
-		}
-		else if (pCom->GetType() == CIRCCom::TYPE_QUERY)
-		{
-			CComQuery *pQuery = static_cast<CComQuery*>(pCom);
-			if(str_comp_nocase(name.c_str(), pQuery->m_aName) == 0)
-				return pCom;
-		}
+		if(str_comp_nocase(Name.c_str(), pCom->m_aName) == 0)
+			return pCom;
 	}
 
 	return 0x0;
@@ -220,7 +210,7 @@ void CIRC::StartConnection() // call this from a thread only!
 	SendRaw("USER %s 0 * :%s", "allthehax", g_Config.m_PlayerName);
 
 	// status tab
-	OpenCom<CComQuery>("@Status");
+	OpenComQuery("@Status");
 
 	m_StartTime = time_get();
 	m_State = STATE_CONNECTED;
@@ -228,7 +218,7 @@ void CIRC::StartConnection() // call this from a thread only!
 	std::string NetData;
 	//int TotalRecv = 0;
 	//int TotalBytes = 0;
-	int CurrentRecv = 0;
+	long CurrentRecv = 0;
 	char LastPong[255]={0};
 	while ((CurrentRecv = net_tcp_recv(m_Socket, aNetBuff, sizeof(aNetBuff))) >= 0 && m_State == STATE_CONNECTED)
 	{
@@ -244,20 +234,20 @@ void CIRC::StartConnection() // call this from a thread only!
 
 			if (aNetBuff[i]=='\n')
 			{
-				size_t del = NetData.find_first_of(":");
+				size_t del = NetData.find_first_of(':');
 				size_t ldel = 0;
 				if (del > 0)
 				{ //NeT Message
 					std::string aMsgID = NetData.substr(0, del-1);
 					std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
-					if (aMsgID.compare("PING") == 0)
+					if (aMsgID == "PING")
 					{
 						SendRaw("PONG %s :%s", LastPong, aMsgText.c_str());
 						if(g_Config.m_Debug)
 							dbg_msg("engine/IRC", "Ping? Pong!");
 						LastPong[0]=0;
 					}
-					else if (aMsgID.compare("PONG") == 0)
+					else if (aMsgID == "PONG")
 						str_copy(LastPong, aMsgText.c_str(), sizeof(LastPong));
 					else
 					{
@@ -269,16 +259,16 @@ void CIRC::StartConnection() // call this from a thread only!
 					}
 				} else
 				{ //raw message
-					del = NetData.find_first_of(" ");
-					std::string aMsgFServer = NetData.substr(1, del);
+					del = NetData.find_first_of(' ');
+					std::string MsgFServer = NetData.substr(1, del);
 					ldel = del;
-					del = NetData.find_first_of(" ",del+1);
-					std::string aMsgID = NetData.substr(ldel+1, del-ldel-1);
+					del = NetData.find_first_of(' ',del+1);
+					std::string MsgID = NetData.substr(ldel+1, del-ldel-1);
 
-					//dbg_msg("IRC", "Raw MSG [%s]: %s",aMsgID.c_str(), aMsgFServer.c_str());
+					//dbg_msg("IRC", "Raw MSG [%s]: %s",MsgID.c_str(), MsgFServer.c_str());
 					//dbg_msg("IRC-RAW", NetData.c_str());
 
-					if (aMsgID.compare("001") == 0)
+					if (MsgID == "001")
 					{
 						// set the user's wanted modes
 						SetMode(g_Config.m_ClIRCModes, m_Nick.c_str());
@@ -293,13 +283,13 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.channel = "@Status";
 						reply.from = "quakenet.org";
 					}
-					else if (aMsgID.compare("332") == 0) // topic
+					else if (MsgID == "332") // topic
 					{
-						del = NetData.find_first_of(" ",del+1);
-						ldel = NetData.find_first_of(" ",del+1);
+						del = NetData.find_first_of(' ',del+1);
+						ldel = NetData.find_first_of(' ',del+1);
 						std::string aMsgChan = NetData.substr(del+1,ldel-del-1);
 
-						del = NetData.find_first_of(":", 1);
+						del = NetData.find_first_of(':', 1);
 						std::string aMsgTopic = NetData.substr(del+1, NetData.length()-del-1);
 
 						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
@@ -309,21 +299,22 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.channel = aMsgChan;
 						reply.params = aMsgTopic;
 					}
-					else if (aMsgID.compare("353") == 0) // NAMREPLY
+					else if (MsgID == "353") // NAMREPLY
 					{
-						del = NetData.find_first_of("=");
-						ldel = NetData.find_first_of(" ",del+2);
+						del = NetData.find_first_of('=');
+						ldel = NetData.find_first_of(' ',del+2);
 
 						std::string aMsgChan = NetData.substr(del+2, ldel-del-2);
-						del = NetData.find_first_of(":",1);
+						del = NetData.find_first_of(':',1);
 						std::string aMsgUsers = NetData.substr(del+1, NetData.length()-del-1);
 
 						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
 						if(pChan)
 						{
 							size_t del=0, ldel=0;
-							do {
-								del = aMsgUsers.find_first_of(" ",del+1);
+							do
+							{
+								del = aMsgUsers.find_first_of(' ', del+1);
 								std::string name = aMsgUsers.substr(ldel, del-ldel);
 								int level = 0;
 								if(name.c_str()[0] == '@')
@@ -337,7 +328,11 @@ void CIRC::StartConnection() // call this from a thread only!
 
 								CComChan::CUser User(name);
 								User.m_Level = level;
-								pChan->m_Users.add_unsorted(User);
+								CComChan::CUser *pFound = pChan->m_Users.find(User);
+								if(pFound)
+									*pFound = User; // update the entry
+								else
+									pChan->m_Users.add_unsorted(User);
 
 								ldel=del+1;
 							} while (del != std::string::npos);
@@ -345,10 +340,10 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.channel = aMsgChan;
 						reply.params = aMsgUsers;
 					}
-					else if (aMsgID.compare("366") == 0) // ENDOFNAMES
+					else if (MsgID == "366") // ENDOFNAMES
 					{
-						del = NetData.find_first_of(" ",del+1);
-						ldel = NetData.find_first_of(" ",del+1);
+						del = NetData.find_first_of(' ',del+1);
+						ldel = NetData.find_first_of(' ',del+1);
 						std::string aMsgChan = NetData.substr(del+1,ldel-del-1);
 
 						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
@@ -358,12 +353,12 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.channel = aMsgChan;
 
 					}
-					else if (aMsgID.compare("401") == 0) // NOSUCHNICK
+					else if (MsgID == "401") // NOSUCHNICK
 					{
-						del = NetData.find_first_of(" ",del+1);
-						ldel = NetData.find_first_of(" ",del+1);
+						del = NetData.find_first_of(' ',del+1);
+						ldel = NetData.find_first_of(' ',del+1);
 						std::string aMsgFrom = NetData.substr(del+1,ldel-del-1);
-						del = NetData.find_first_of(":",1);
+						del = NetData.find_first_of(':',1);
 						std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
 
 						CIRCCom *pCom = GetCom(aMsgFrom);
@@ -376,12 +371,12 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.params = aMsgText;
 
 					}
-					else if (aMsgID.compare("421") == 0) // UNKNOWNCOMMAND
+					else if (MsgID == "421") // UNKNOWNCOMMAND
 					{
-						del = NetData.find_first_of(" ",del+1);
-						ldel = NetData.find_first_of(" ",del+1);
+						del = NetData.find_first_of(' ',del+1);
+						ldel = NetData.find_first_of(' ',del+1);
 						std::string aMsgCmd = NetData.substr(del+1,ldel-del-1);
-						del = NetData.find_first_of(":",1);
+						del = NetData.find_first_of(':',1);
 						std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
 
 						CIRCCom *pCom = GetCom(0);
@@ -391,77 +386,77 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.params = aMsgText;
 
 					}
-					else if (aMsgID.compare("JOIN") == 0)
+					else if (MsgID == "JOIN")
 					{
-						std::string aMsgChannel = NetData.substr(del+1, NetData.length()-del-1);
-						del = aMsgFServer.find_first_of("!");
-						std::string aMsgFrom = aMsgFServer.substr(0,del);
+						std::string MsgChannel = NetData.substr(del+1, NetData.length()-del-1);
+						del = MsgFServer.find_first_of('!');
+						std::string MsgFrom = MsgFServer.substr(0,del);
 
-						if (aMsgFrom == m_Nick) // we (were) joined a channel
+						if (MsgFrom == m_Nick) // we (were) joined a channel
 						{
-							OpenCom<CComChan>(aMsgChannel.c_str());
+							OpenComChan(MsgChannel.c_str());
 						}
-						else if(aMsgFrom != "circleci-bot") // ignore the ci bot
+						else if(MsgFrom != "circleci-bot") // ignore the ci bot
 						{
-							CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChannel));
+							CComChan *pChan = static_cast<CComChan*>(GetCom(MsgChannel));
 							if(pChan)
 							{
-								pChan->m_Users.add(CComChan::CUser(aMsgFrom));
+								pChan->m_Users.add(CComChan::CUser(MsgFrom));
 								if(g_Config.m_ClIRCShowJoins)
-									pChan->AddMessage("*** '%s' has joined %s", aMsgFrom.c_str(), aMsgChannel.c_str());
+									pChan->AddMessage("*** '%s' has joined %s", MsgFrom.c_str(), MsgChannel.c_str());
 							}
 						}
 
-						reply.channel = aMsgChannel;
-						reply.from = aMsgFrom;
+						reply.channel = MsgChannel;
+						reply.from = MsgFrom;
 					}
-					else if (aMsgID.compare("PART") == 0)
+					else if (MsgID == "PART")
 					{
-						std::string aMsgChannel = NetData.substr(del+1, NetData.length()-del-1);
-						del = aMsgFServer.find_first_of("!");
-						std::string aMsgFrom = aMsgFServer.substr(0,del);
+						std::string MsgChannel = NetData.substr(del+1, NetData.length()-del-1);
+						del = MsgFServer.find_first_of('!');
+						std::string MsgFrom = MsgFServer.substr(0,del);
 
-						if (aMsgFrom == m_Nick) // we (were) left a channel
+						if (MsgFrom == m_Nick) // we (were) left a channel
 						{
-							CIRCCom *pCom = GetCom(aMsgChannel);
+							CIRCCom *pCom = GetCom(MsgChannel);
 							if(pCom)
 							{
 								CloseCom(pCom);
 							}
 						}
-						else if(aMsgFrom != "circleci-bot") // ignore the ci bot
+						else if(MsgFrom != "circleci-bot") // ignore the ci bot
 						{
 							char aChanName[128];
-							str_copy(aChanName, aMsgChannel.c_str(), sizeof(aChanName));
+							str_copy(aChanName, MsgChannel.c_str(), sizeof(aChanName));
 							const char *pReason = str_find(aChanName, ":")+1;
 							if(str_replace_char(aChanName, ':', '\0'))
 								aChanName[str_length(aChanName)-1] = '\0';
 							CComChan *pChan = static_cast<CComChan*>(GetCom(std::string(aChanName)));
 							if(pChan)
 							{
-								pChan->RemoveUserFromList(aMsgFrom.c_str());
+								pChan->RemoveUserFromList(MsgFrom.c_str());
 
 								if(g_Config.m_ClIRCShowJoins)
 								{
 									if(pReason)
-										pChan->AddMessage("*** '%s' left %s (%s)", aMsgFrom.c_str(), aChanName, pReason);
+										pChan->AddMessage("*** '%s' left %s (%s)", MsgFrom.c_str(), aChanName, pReason);
 									else
-										pChan->AddMessage("*** '%s' left %s", aMsgFrom.c_str(), aChanName);
+										pChan->AddMessage("*** '%s' left %s", MsgFrom.c_str(), aChanName);
 								}
 							}
 							else
-								dbg_msg("IRC", "WARNING: Got a PART message but no channel for it! { '%s' > '%s' }", aMsgFrom.c_str(), aMsgChannel.c_str());
+								dbg_msg("IRC", "WARNING: Got a PART message but no channel for it! { '%s' > '%s' }", MsgFrom.c_str(), MsgChannel.c_str());
 						}
 
-					   reply.channel = aMsgChannel;
-					   reply.from = aMsgFrom;
+					   reply.channel = MsgChannel;
+					   reply.from = MsgFrom;
 					}
-					else if (aMsgID.compare("QUIT") == 0)
+					else if (MsgID == "QUIT")
 					{
-						del = NetData.find_first_of(":",1);
+						del = NetData.find_first_of(':',1);
 						std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
-						del = aMsgFServer.find_first_of("!");
-						std::string aMsgFrom = aMsgFServer.substr(0,del);
+						del = MsgFServer.find_first_of('!');
+						std::string aMsgFrom = MsgFServer.substr(0,del);
 
 						if(aMsgFrom != m_Nick && aMsgFrom != "circleci-bot") // ignore the ci bot) // this applies only for channels, not for queries
 						{
@@ -487,14 +482,14 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.params = aMsgText;
 						reply.from = aMsgFrom;
 					}
-					else if (aMsgID.compare("TOPIC") == 0)
+					else if (MsgID == "TOPIC")
 					{
-						ldel = NetData.find_first_of(" ",del+1);
+						ldel = NetData.find_first_of(' ',del+1);
 						std::string aMsgChan = NetData.substr(del+1, ldel-del-1);
-						del = NetData.find_first_of(":",1);
+						del = NetData.find_first_of(':',1);
 						std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
-						del = aMsgFServer.find_first_of("!");
-						std::string aMsgFrom = aMsgFServer.substr(0,del);
+						del = MsgFServer.find_first_of('!');
+						std::string aMsgFrom = MsgFServer.substr(0,del);
 
 						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
 						if (pChan)
@@ -507,32 +502,32 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.from = aMsgFrom;
 						reply.params = aMsgText;
 					}
-					else if (aMsgID.compare("PRIVMSG") == 0)
+					else if (MsgID == "PRIVMSG")
 					{
 						char aBuff[1024];
-						ldel = NetData.find_first_of(" ", del + 1);
+						ldel = NetData.find_first_of(' ', del + 1);
 						std::string aMsgChan = NetData.substr(del + 1, ldel - del - 1);
 
-						del = NetData.find_first_of(":", 1);
+						del = NetData.find_first_of(':', 1);
 						std::string aMsgText = NetData.substr(del + 1, NetData.length() - del - 1);
 						int MsgType = GetMsgType(aMsgText.c_str());
 
-						del = aMsgFServer.find_first_of("!");
-						std::string aMsgFrom = aMsgFServer.substr(0, del);
+						del = MsgFServer.find_first_of('!');
+						std::string MsgFrom = MsgFServer.substr(0, del);
 
 						if(MsgType == MSG_TYPE_TWSERVER) // somebody sends us his server
 						{
 							if(aMsgChan == m_Nick)
 							{
-								del = aMsgText.find_first_of(" ");
-								ldel = aMsgText.find_last_of(" ");
+								del = aMsgText.find_first_of(' ');
+								ldel = aMsgText.find_last_of(' ');
 								if(del != std::string::npos && del != ldel)
 								{
 									char aAddr[NETADDR_MAXSTRSIZE];
 									mem_zero(aAddr, sizeof(aAddr));
 									std::string CleanMsg = aMsgText.substr(10);
 									CleanMsg = CleanMsg.substr(0, CleanMsg.length() - 1);
-									size_t pc = CleanMsg.find_first_of(" ");
+									size_t pc = CleanMsg.find_first_of(' ');
 									if(pc != std::string::npos)
 									{
 										str_copy(aAddr, CleanMsg.substr(pc + 1).c_str(), sizeof(aAddr));
@@ -553,14 +548,14 @@ void CIRC::StartConnection() // call this from a thread only!
 													if(str_comp_nocase(aAddr, "FORBIDDEN") == 0)
 														str_format(aBuf, sizeof(aBuf),
 																"*** '%s' forbids joining his server!",
-																aMsgFrom.c_str());
+																MsgFrom.c_str());
 													else if(str_comp_nocase(aAddr, "NONE") == 0)
 														str_format(aBuf, sizeof(aBuf),
 																"*** '%s' isn't playing on a server!",
-																aMsgFrom.c_str());
+																MsgFrom.c_str());
 													else
 														str_format(aBuf, sizeof(aBuf),
-																"*** '%s' sent invalid information!", aMsgFrom.c_str());
+																"*** '%s' sent invalid information!", MsgFrom.c_str());
 													pCom->m_Buffer.push_back(std::string(aBuf));
 												}
 											}
@@ -579,7 +574,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								CleanMsg = CleanMsg.substr(0, CleanMsg.length() - 1);
 
 								if(!CleanMsg.empty())
-									SendServer(aMsgFrom.c_str(), CleanMsg.c_str());
+									SendServer(MsgFrom.c_str(), CleanMsg.c_str());
 							}
 						}
 						else if(MsgType == MSG_TYPE_CTCP) // custom ctcp message
@@ -589,24 +584,27 @@ void CIRC::StartConnection() // call this from a thread only!
 							str_copy(aBuf, aMsgText.c_str(), sizeof(aBuf));
 							Ptr = aBuf+1;
 							str_replace_char_rev_num(Ptr, 1, '\1', '\0');
-							dbg_msg("IRC", "got a CTCP '%s' from '%s'", Ptr, aMsgFrom.c_str());
+							#if !defined(CONF_DEBUG)
+							if(m_Debug)
+							#endif
+								dbg_msg("IRC", "got a CTCP '%s' from '%s'", Ptr, MsgFrom.c_str());
 
 							for (char *p = strtok(Ptr, " "); p != NULL; p = strtok(NULL, " "))
 								CmdListParams.add(p);
 
 							if(str_comp_nocase(CmdListParams[0].c_str(), "version") == 0)
-								SendVersion(aMsgFrom.c_str());
+								SendVersion(MsgFrom.c_str());
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "time") == 0)
 							{
 								char aTime[64];
 								str_timestamp(aTime, sizeof(aTime));
-								SendRaw("NOTICE %s :TIME %s", aMsgFrom.c_str(), aTime);
+								SendRaw("NOTICE %s :TIME %s", MsgFrom.c_str(), aTime);
 							}
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "playerinfo") == 0)
 							{
-								str_format(aBuf, sizeof(aBuf), "NOTICE %s :PLAYERINFO", aMsgFrom.c_str());
+								str_format(aBuf, sizeof(aBuf), "NOTICE %s :PLAYERINFO", MsgFrom.c_str());
 								CmdListParams.remove_index(0);
-								while(CmdListParams.size())
+								while(!CmdListParams.empty())
 								{
 									str_append(aBuf, " '", sizeof(aBuf));
 									str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
@@ -631,7 +629,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						else // normal message
 						{
 							reply.channel = aMsgChan;
-							reply.from = aMsgFrom;
+							reply.from = MsgFrom;
 							reply.params = aMsgText;
 
 
@@ -639,15 +637,15 @@ void CIRC::StartConnection() // call this from a thread only!
 								CIRCCom *pCom;
 								if(aMsgChan == m_Nick) // this is the case for private chats ("Query"s)
 								{
-									pCom = GetCom(aMsgFrom);
+									pCom = GetCom(MsgFrom);
 									if(!pCom)
-										pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false);
+										pCom = OpenComQuery(MsgFrom.c_str(), false);
 								}
 								else
 								{
 									pCom = GetCom(aMsgChan);
 									if(!pCom)
-										pCom = OpenCom<CComChan>(aMsgChan.c_str(), false);
+										pCom = OpenComChan(aMsgChan.c_str(), false);
 								}
 
 								if(pCom)
@@ -657,13 +655,13 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									if(MsgType == MSG_TYPE_ACTION) // the "/me" thingy
 									{
-										str_format(aBuff, sizeof(aBuff), "* %s ", aMsgFrom.c_str());
+										str_format(aBuff, sizeof(aBuff), "* %s ", MsgFrom.c_str());
 										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
 										str_replace_char_rev_num(aBuff, 1, '\1', '\0');
 									}
 									else
 									{
-										str_format(aBuff, sizeof(aBuff), "<%s> ", aMsgFrom.c_str());
+										str_format(aBuff, sizeof(aBuff), "<%s> ", MsgFrom.c_str());
 										str_append(aBuff, aMsgText.c_str(), sizeof(aBuff));
 									}
 
@@ -674,35 +672,35 @@ void CIRC::StartConnection() // call this from a thread only!
 								{
 									aMsgChan.insert(0, "[");
 									aMsgChan.append("] ");
-									aMsgFrom.insert(0, "<");
-									aMsgFrom.append("> ");
-									//aMsgFrom.insert(0, aTime);
+									MsgFrom.insert(0, "<");
+									MsgFrom.append("> ");
+									//MsgFrom.insert(0, aTime);
 								}
-								m_pGameClient->OnMessageIRC(aMsgChan, aMsgFrom, aMsgText);
+								m_pGameClient->OnMessageIRC(aMsgChan, MsgFrom, aMsgText);
 							}
 						}
 					}
-					else if (aMsgID.compare("NOTICE") == 0)
+					else if (MsgID == "NOTICE")
 					{
 						char aBuff[1024];
-						ldel = NetData.find_first_of(" ", del + 1);
-						std::string aMsgChan = NetData.substr(del + 1, ldel - del - 1);
+						ldel = NetData.find_first_of(' ', del + 1);
+						std::string MsgChan = NetData.substr(del + 1, ldel - del - 1);
 
-						del = NetData.find_first_of(":", 1);
-						std::string aMsgText = NetData.substr(del + 1, NetData.length() - del - 1);
-						int MsgType = GetMsgType(aMsgText.c_str());
+						del = NetData.find_first_of(':', 1);
+						std::string MsgText = NetData.substr(del + 1, NetData.length() - del - 1);
+						int MsgType = GetMsgType(MsgText.c_str());
 
-						del = aMsgFServer.find_first_of("!");
-						std::string aMsgFrom = aMsgFServer.substr(0, del);
+						del = MsgFServer.find_first_of('!');
+						std::string MsgFrom = MsgFServer.substr(0, del);
 						{
-							reply.channel = aMsgChan;
-							reply.from = aMsgFrom;
-							reply.params = aMsgText;
+							reply.channel = MsgChan;
+							reply.from = MsgFrom;
+							reply.params = MsgText;
 
-							if(aMsgChan == m_Nick)
+							if(MsgChan == m_Nick)
 							{
-								CIRCCom *pCom = GetCom(aMsgFrom);
-								std::replace(aMsgText.begin(), aMsgText.end(), '\1', ' ');
+								CIRCCom *pCom = GetCom(MsgFrom);
+								std::replace(MsgText.begin(), MsgText.end(), '\1', ' ');
 								if(!pCom)
 								{
 									// search through all users
@@ -727,9 +725,9 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									for(std::vector<const char *>::iterator it = s_AvailableQueries.begin(); it != s_AvailableQueries.end(); it++)
 									{
-										if(str_comp(*it, aMsgFrom.c_str()) == 0)
+										if(str_comp(*it, MsgFrom.c_str()) == 0)
 										{
-											pCom = OpenCom<CComQuery>(aMsgFrom.c_str(), false); // only open a com for seeable users
+											pCom = OpenComQuery(MsgFrom.c_str(), false); // only open a com for seeable users
 											break;
 										}
 									}
@@ -744,14 +742,14 @@ void CIRC::StartConnection() // call this from a thread only!
 										pCom->m_NumUnreadMsg++;
 
 									if(MsgType == MSG_TYPE_ACTION)
-										pCom->AddMessage(aMsgText.substr(8, -1).c_str());
+										pCom->AddMessage(MsgText.substr(8, -1).c_str());
 									else
-										pCom->AddMessage_nofmt((aMsgFrom + ": " + aMsgText).c_str());
+										pCom->AddMessage_nofmt((MsgFrom + ": " + MsgText).c_str());
 								}
 							}
 							else
 							{
-								CIRCCom *pCom = GetCom(aMsgChan);
+								CIRCCom *pCom = GetCom(MsgChan);
 								if(pCom)
 								{
 									if(pCom != GetActiveCom())
@@ -759,35 +757,35 @@ void CIRC::StartConnection() // call this from a thread only!
 
 									if(MsgType == MSG_TYPE_ACTION)
 									{
-										str_format(aBuff, sizeof(aBuff), "* %s ", aMsgFrom.c_str());
-										str_append(aBuff, aMsgText.substr(8, -1).c_str(), sizeof(aBuff));
+										str_format(aBuff, sizeof(aBuff), "* %s ", MsgFrom.c_str());
+										str_append(aBuff, MsgText.substr(8, -1).c_str(), sizeof(aBuff));
 									}
 									else
 									{
-										str_format(aBuff, sizeof(aBuff), "<%s> ", aMsgFrom.c_str());
-										str_append(aBuff, aMsgText.c_str(), sizeof(aBuff));
+										str_format(aBuff, sizeof(aBuff), "<%s> ", MsgFrom.c_str());
+										str_append(aBuff, MsgText.c_str(), sizeof(aBuff));
 									}
 									pCom->AddMessage_nofmt(aBuff);
 								}
 
 								if(pCom == GetActiveCom())
 								{
-									aMsgChan.insert(0, "[");
-									aMsgChan.append("] ");
-									aMsgFrom.insert(0, "<");
-									aMsgFrom.append("> ");
-									//aMsgFrom.insert(0, aTime);
+									MsgChan.insert(0, "[");
+									MsgChan.append("] ");
+									MsgFrom.insert(0, "<");
+									MsgFrom.append("> ");
+									//MsgFrom.insert(0, aTime);
 								}
-								m_pGameClient->OnMessageIRC(aMsgChan.c_str(), aMsgFrom.c_str(), aMsgText.c_str());
+								m_pGameClient->OnMessageIRC(MsgChan, MsgFrom, MsgText);
 							}
 						}
 					}
-					else if (aMsgID.compare("NICK") == 0)
+					else if (MsgID == "NICK")
 					{
-						del = aMsgFServer.find_first_of("!");
-						std::string aMsgOldNick = aMsgFServer.substr(0,del);
+						del = MsgFServer.find_first_of('!');
+						std::string aMsgOldNick = MsgFServer.substr(0,del);
 
-						del = NetData.find_first_of(":", 1);
+						del = NetData.find_first_of(':', 1);
 						std::string aMsgNewNick = NetData.substr(del+1, NetData.length()-del-1);
 
 						if(aMsgOldNick == m_Nick) // our name has changed
@@ -826,21 +824,21 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.from = aMsgOldNick;
 						reply.to = aMsgNewNick;
 					}
-					else if (aMsgID.compare("MODE") == 0)
+					else if (MsgID == "MODE")
 					{
-						del = aMsgFServer.find_first_of("!");
-						std::string aNickFrom = aMsgFServer.substr(0,del);
+						del = MsgFServer.find_first_of('!');
+						std::string aNickFrom = MsgFServer.substr(0,del);
 
-						del = NetData.find_first_of(" ");
-						ldel = NetData.find_first_of(" ", del+1);
-						del = NetData.find_first_of(" ", ldel+1);
+						del = NetData.find_first_of(' ');
+						ldel = NetData.find_first_of(' ', del+1);
+						del = NetData.find_first_of(' ', ldel+1);
 						std::string aChannel = NetData.substr(ldel+1, (del)-(ldel+1));
 
-						ldel = NetData.find_first_of(" ", del+1);
+						ldel = NetData.find_first_of(' ', del+1);
 						std::string aMode = NetData.substr(del+1, ldel-(del+1));
 
-						ldel = NetData.find_first_of(" ", del+1);
-						del = NetData.find_first_of(" ", ldel+1);
+						ldel = NetData.find_first_of(' ', del+1);
+						del = NetData.find_first_of(' ', ldel+1);
 						std::string aNickTo = NetData.substr(ldel+1, del-(ldel+1));
 
 
@@ -883,20 +881,20 @@ void CIRC::StartConnection() // call this from a thread only!
 						reply.to = aNickTo;
 						reply.params = aMode;
 					}
-					else if (aMsgID.compare("KICK") == 0)
+					else if (MsgID == "KICK")
 					{
-						del = aMsgFServer.find_first_of("!");
-						std::string aNickFrom = aMsgFServer.substr(0,del);
+						del = MsgFServer.find_first_of('!');
+						std::string aNickFrom = MsgFServer.substr(0,del);
 
-						del = NetData.find_first_of(" ");
-						ldel = NetData.find_first_of(" ", del+1);
-						del = NetData.find_first_of(" ", ldel+1);
+						del = NetData.find_first_of(' ');
+						ldel = NetData.find_first_of(' ', del+1);
+						del = NetData.find_first_of(' ', ldel+1);
 						std::string aChannel = NetData.substr(ldel+1, (del)-(ldel+1));
 
-						ldel = NetData.find_first_of(" ", del+1);
+						ldel = NetData.find_first_of(' ', del+1);
 						std::string aNickTo = NetData.substr(del+1, ldel-(del+1));
 
-						ldel = NetData.find_first_of(":", 1);
+						ldel = NetData.find_first_of(':', 1);
 						std::string aKickReason = NetData.substr(ldel+1);
 
 
@@ -925,22 +923,22 @@ void CIRC::StartConnection() // call this from a thread only!
 					else
 					{
 						char aBuff[1024];
-						ldel = NetData.find_first_of(" ", del+1);
+						ldel = NetData.find_first_of(' ', del+1);
 						del = ldel;
-						ldel = NetData.find_first_of(" ", del+1);
-						std::string aMsgData = NetData.substr(del+1, ldel-del-1);
-						del = NetData.find_first_of(":", 1);
-						std::string aMsgText = NetData.substr(del+1, NetData.length()-del-1);
+						ldel = NetData.find_first_of(' ', del+1);
+						std::string MsgData = NetData.substr(del+1, ldel-del-1);
+						del = NetData.find_first_of(':', 1);
+						std::string MsgText = NetData.substr(del+1, NetData.length()-del-1);
 
 						if (ldel < del && ldel != std::string::npos)
-							str_format(aBuff, sizeof(aBuff), "%s %s", aMsgData.c_str(), aMsgText.c_str());
+							str_format(aBuff, sizeof(aBuff), "%s %s", MsgData.c_str(), MsgText.c_str());
 						else
-							str_format(aBuff, sizeof(aBuff), "%s", aMsgText.c_str());
+							str_format(aBuff, sizeof(aBuff), "%s", MsgText.c_str());
 
 						GetCom(0)->AddMessage_nofmt(aBuff);
 					}
 
-					CallHooks(aMsgID.c_str(), &reply);
+					CallHooks(MsgID.c_str(), &reply);
 				}
 
 				NetData.clear();
@@ -950,6 +948,7 @@ void CIRC::StartConnection() // call this from a thread only!
 		}
 	}
 
+	dbg_msg("irc", "closing socket");
 	net_tcp_close(m_Socket);
 
 	mem_zero(m_CmdToken, sizeof(m_CmdToken));
@@ -975,22 +974,24 @@ void CIRC::PrevRoom()
 
 void CIRC::OpenQuery(const char *to)
 {
-	char aSanNick[25] = {0};
+	char aSanNick[25];
 	str_copy(aSanNick, to, sizeof(aSanNick));
 
 	CIRCCom *pCom = GetCom(aSanNick);
 	if(pCom)
 		SetActiveCom(pCom);
 	else
-		OpenCom<CComQuery>(aSanNick);
+		OpenCom(CIRCCom::TYPE_QUERY, aSanNick);
 }
 
-template<class TCOM> // returns a new CComChan or CComQuery
-TCOM* CIRC::OpenCom(const char *pName, bool SwitchTo, int UnreadMessages)
+CIRCCom* CIRC::OpenCom(int Type, const char *pName, bool SwitchTo, int UnreadMessages)
 {
-	TCOM *pNewCom = new TCOM();
-	dbg_assert(pNewCom != NULL, "in CIRC::OpenCom failed to create com");
-	static_cast<CIRCCom>(*pNewCom); // assures that only superclasses of CIRCCom are being created
+	if(dbg_assert_strict(Type == CIRCCom::TYPE_CHANNEL || Type == CIRCCom::TYPE_QUERY, "invalid type"))
+		return NULL;
+
+	CIRCCom *pNewCom = Type == CIRCCom::TYPE_CHANNEL
+					   ? static_cast<CIRCCom *>(new CComChan())
+					   : static_cast<CIRCCom *>(new CComQuery());
 
 	pNewCom->m_NumUnreadMsg = UnreadMessages;
 	str_copy(pNewCom->m_aName, pName, sizeof(pNewCom->m_aName));
@@ -1300,28 +1301,28 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 
 	if (str_comp_nocase(cmd, "join") == 0 || str_comp_nocase(cmd, "j") == 0)
 	{
-		if (CmdListParams.size() == 0)
+		if (CmdListParams.empty())
 			return;
 
 		JoinTo(CmdListParams[0].c_str(), (CmdListParams.size() > 1)?CmdListParams[1].c_str():"");
 	}
 	else if (str_comp_nocase(cmd, "query") == 0 || str_comp_nocase(cmd, "q") == 0)
 	{
-		if (CmdListParams.size() == 0)
+		if (CmdListParams.empty())
 			return;
 
 		OpenQuery(CmdListParams[0].c_str());
 	}
 	else if (str_comp_nocase(cmd, "squery") == 0 || str_comp_nocase(cmd, "sq") == 0)
 	{
-		if (CmdListParams.size() == 0)
+		if (CmdListParams.empty())
 			return;
 
 		SendGetServer(CmdListParams[0].c_str());
 	}
 	else if (str_comp_nocase(cmd, "topic") == 0 || str_comp_nocase(cmd, "t") == 0)
 	{
-		if (CmdListParams.size() == 0)
+		if (CmdListParams.empty())
 			return;
 
 		SetTopic(params);
@@ -1332,35 +1333,35 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 	}
 	else if (str_comp_nocase(cmd, "nick") == 0)
 	{
-		if (CmdListParams.size() == 0)
+		if (CmdListParams.empty())
 			return;
 
 		SetNick(CmdListParams[0].c_str());
 	}
 	else if (str_comp_nocase(cmd, "op") == 0)
 	{
-		if (CmdListParams.size() > 0)
+		if (!CmdListParams.empty())
 			SetMode("+o", CmdListParams[0].c_str());
 		else
 			SetMode("+o", 0x0);
 	}
 	else if (str_comp_nocase(cmd, "deop") == 0)
 	{
-		if (CmdListParams.size() > 0)
+		if (!CmdListParams.empty())
 			SetMode("-o", CmdListParams[0].c_str());
 		else
 			SetMode("-o", 0x0);
 	}
 	else if (str_comp_nocase(cmd, "voz") == 0)
 	{
-		if (CmdListParams.size() > 0)
+		if (!CmdListParams.empty())
 			SetMode("+v", CmdListParams[0].c_str());
 		else
 			SetMode("+v", 0x0);
 	}
 	else if (str_comp_nocase(cmd, "devoz") == 0)
 	{
-		if (CmdListParams.size() > 0)
+		if (!CmdListParams.empty())
 			SetMode("-v", CmdListParams[0].c_str());
 		else
 			SetMode("-v", 0x0);
@@ -1380,7 +1381,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
 			CmdListParams.remove_index(0); // pop twice
 			CmdListParams.remove_index(0); //   -> the first two arguments
-			while(CmdListParams.size() > 0) // add all other arguments
+			while(!CmdListParams.empty()) // add all other arguments
 			{
 				str_append(aBuf, " ", sizeof(aBuf));
 				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
@@ -1398,7 +1399,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
 			CmdListParams.remove_index(0); // pop twice
 			CmdListParams.remove_index(0); //   -> the first two arguments
-			while(CmdListParams.size() > 0) // add all other arguments
+			while(!CmdListParams.empty()) // add all other arguments
 			{
 				str_append(aBuf, " ", sizeof(aBuf));
 				str_append(aBuf, CmdListParams[0].c_str(), sizeof(aBuf));
@@ -1412,11 +1413,11 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 	{
 		char aBuf[1024] = {0};
 		char aMsg[768] = {0};
-		if (CmdListParams.size() >= 1)
+		if (!CmdListParams.empty())
 		{
 			str_format(aMsg, sizeof(aMsg), "%s", CmdListParams[0].c_str()); // first word
 			CmdListParams.remove_index(0); // pop
-			while(CmdListParams.size() > 0) // add all other arguments to the message
+			while(!CmdListParams.empty()) // add all other arguments to the message
 			{
 				str_append(aMsg, " ", sizeof(aMsg));
 				str_append(aMsg, CmdListParams[0].c_str(), sizeof(aMsg));
