@@ -674,6 +674,9 @@ static void STOP_DOWN(vec2 *pVel) { if(pVel->y > 0.0f) pVel->y = 0; }
 static void STOP_UP(vec2 *pVel) { if(pVel->y < 0.0f) pVel->y = 0; }
 bool CCollision::HandleBWCollision(CCharacterCore *pCharCore, vec2 *pOverrideVel)
 {
+	if(pCharCore->m_Id < 0)
+		return false;
+
 	const int PhysSize = 28;
 	const vec2 &Pos = pCharCore->m_Pos;
 	vec2 *pVel = pOverrideVel ? pOverrideVel : &pCharCore->m_Vel;
