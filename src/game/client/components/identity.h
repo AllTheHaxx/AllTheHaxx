@@ -189,6 +189,7 @@ public:
 			g_Config.m_ClPlayerColorBody = pIdent->m_ColorBody;
 			g_Config.m_ClPlayerColorFeet = pIdent->m_ColorFeet;
 			g_Config.m_PlayerCountry = pIdent->m_Country;
+			m_pClient->SendInfo(false);
 		}
 		else
 		{
@@ -200,8 +201,8 @@ public:
 			g_Config.m_ClDummyColorBody = pIdent->m_ColorBody;
 			g_Config.m_ClDummyColorFeet = pIdent->m_ColorFeet;
 			g_Config.m_ClDummyCountry = pIdent->m_Country;
+			m_pClient->SendDummyInfo(false);
 		}
-		m_pClient->SendInfo(false);
 	};
 
 private:
