@@ -4,6 +4,7 @@
 #define ENGINE_SHARED_SNAPSHOT_H
 
 #include <base/system.h>
+#include <base/system++/pool.h>
 
 // CSnapshot
 
@@ -106,6 +107,7 @@ public:
 
 	CHolder *m_pFirst;
 	CHolder *m_pLast;
+	CPool<CHolder> m_HeapPool;
 
 	void Init();
 	void PurgeAll();

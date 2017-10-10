@@ -524,6 +524,12 @@ void mem_free(void *p)
 		if(header->next)
 			header->next->prev = header->prev;
 
+		#if defined(CONF_DEBUG)
+		header->next = 0;
+		header->prev = 0;
+		header->checksum = 0xBAADC0DE;
+		header->line = 0xBAADC0DE;
+		#endif
 		free(header);
 	}
 }

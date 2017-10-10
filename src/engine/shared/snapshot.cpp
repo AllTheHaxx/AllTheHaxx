@@ -415,6 +415,7 @@ void CSnapshotStorage::Init()
 {
 	m_pFirst = 0;
 	m_pLast = 0;
+	m_HeapPool.HintSize(10, 3072);
 }
 
 void CSnapshotStorage::PurgeAll()
@@ -425,7 +426,7 @@ void CSnapshotStorage::PurgeAll()
 	while(pHolder)
 	{
 		pNext = pHolder->m_pNext;
-		mem_free(pHolder);
+		m_HeapPool.Free(pHolder);
 		pHolder = pNext;
 	}
 
@@ -444,7 +445,7 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 		pNext = pHolder->m_pNext;
 		if(pHolder->m_Tick >= Tick)
 			return; // no more to remove
-		mem_free(pHolder);
+		m_HeapPool.Free(pHolder);
 
 		// did we come to the end of the list?
 		if (!pNext)
@@ -464,12 +465,11 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 void CSnapshotStorage::Add(int Tick, int64 Tagtime, int DataSize, void *pData, int CreateAlt)
 {
 	// allocate memory for holder + snapshot_data
-	int TotalSize = sizeof(CHolder)+DataSize;
-
+	int TotalSize = DataSize;
 	if(CreateAlt)
 		TotalSize += DataSize;
 
-	CHolder *pHolder = (CHolder *)mem_alloc(TotalSize, 1);
+	CHolder *pHolder = m_HeapPool.Allocate(TotalSize);
 
 	// set data
 	pHolder->m_Tick = Tick;

@@ -999,8 +999,8 @@ void CClient::ConnectImpl()
 		if(m_DemoRecorder[i].IsRecording())
 			DemoRecorder_Stop(i);
 
-	m_InputtimeMarginGraph.Init(-150.0f, 150.0f);
-	m_GametimeMarginGraph.Init(-150.0f, 150.0f);
+	m_InputtimeMarginGraph.Init(-75.0f, 150.0f);
+	m_GametimeMarginGraph.Init(-75.0f, 150.0f);
 
 	GenerateTimeoutCodes();
 }
