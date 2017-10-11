@@ -54,12 +54,12 @@ Flags = [
 Objects = [
 
 	NetObject("PlayerInput", [
-		NetIntAny("m_Direction"),
-		NetIntAny("m_TargetX"),
-		NetIntAny("m_TargetY"),
+		NetIntAny("m_ViewDir"),
+		NetIntAny("m_AimX"),
+		NetIntAny("m_AimY"),
 
 		NetIntAny("m_Jump"),
-		NetIntAny("m_Fire"),
+		NetIntAny("m_FCount"),
 		NetIntAny("m_Hook"),
 
 		NetIntRange("m_PlayerFlags", 0, 'max_int'),

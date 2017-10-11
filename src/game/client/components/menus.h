@@ -386,6 +386,7 @@ public:	int m_LoadTotal;
 	void RenderLoadingLua();
 
 	CLuaFile *m_pLuaFSModeRequester;
+public: int m_Nalf[2]; private:
 	void LuaRequestFullscreen(class CLuaFile *pLF);
 	void OnLuaScriptUnload(class CLuaFile *pLF);
 #else

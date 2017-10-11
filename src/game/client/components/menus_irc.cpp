@@ -296,7 +296,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				//else
 					strCmdRaw = aEntryText + 1;
 				char aCmd[32] = { 0 }, aCmdParams[255] = { 0 };
-				size_t del = strCmdRaw.find_first_of(" ");
+				size_t del = strCmdRaw.find_first_of(' ');
 				if(del != std::string::npos)
 				{
 					str_copy(aCmd, strCmdRaw.substr(0, del).c_str(), sizeof(aCmd));
@@ -401,7 +401,12 @@ void CMenus::RenderIRC(CUIRect MainView)
 
 				// colors for admin and voice
 				if(pUser->IsAdmin())
-					TextRender()->TextColor(0.2f, 0.7f, 0.2f, 1);
+				{
+					if(pUser->m_Nick == "ATHmin" || pUser->m_Nick == "Q")
+						TextRender()->TextColor(0.7f, 0.7f, 0.2f, 1); // bots in yellow
+					else
+						TextRender()->TextColor(0.2f, 0.7f, 0.2f, 1); // admins in green
+				}
 				else if(pUser->IsVoice())
 					TextRender()->TextColor(0.2f, 0.2f, 0.7f, 1);
 

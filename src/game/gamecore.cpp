@@ -156,7 +156,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)
 	if(m_pCollision->CheckPoint(m_Pos.x-PhysSize/2, m_Pos.y+PhysSize/2+5))
 		Grounded = true;
 
-	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
+	vec2 TargetDirection = normalize(vec2(m_Input.m_AimX, m_Input.m_AimY));
 
 	m_Vel.y += m_pWorld->m_Tuning[g_Config.m_ClDummy].m_Gravity;
 
@@ -167,16 +167,16 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)
 	// handle input
 	if(UseInput)
 	{
-		m_Direction = m_Input.m_Direction;
+		m_Direction = m_Input.m_ViewDir;
 
 		// setup angle
 		float a = 0;
-		if(m_Input.m_TargetX == 0)
-			a = atanf((float)m_Input.m_TargetY);
+		if(m_Input.m_AimX == 0)
+			a = atanf((float)m_Input.m_AimY);
 		else
-			a = atanf((float)m_Input.m_TargetY/(float)m_Input.m_TargetX);
+			a = atanf((float)m_Input.m_AimY/(float)m_Input.m_AimX);
 
-		if(m_Input.m_TargetX < 0)
+		if(m_Input.m_AimX < 0)
 			a = a+pi;
 
 		m_Angle = (int)(a*256.0f);
@@ -555,7 +555,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)
 		}
 
 		// jetpack and ninjajetpack prediction
-		if(IsClient && UseInput && (m_Input.m_Fire&1) && (m_ActiveWeapon == WEAPON_GUN || m_ActiveWeapon == WEAPON_NINJA)) {
+		if(IsClient && UseInput && (m_Input.m_FCount&1) && (m_ActiveWeapon == WEAPON_GUN || m_ActiveWeapon == WEAPON_NINJA)) {
 			m_Vel += TargetDirection * -1.0f * (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_JetpackStrength / 100.0f / 6.11f);
 		}
 

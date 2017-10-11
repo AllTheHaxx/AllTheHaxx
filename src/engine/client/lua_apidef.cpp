@@ -379,13 +379,13 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		/// Game.VClient(i).Input
 		.beginClass<CNetObj_PlayerInput>("CNetObj_PlayerInput")
-			.addData("Direction", &CNetObj_PlayerInput::m_Direction)
-			.addData("Fire", &CNetObj_PlayerInput::m_Fire)
+			.addData("Direction", &CNetObj_PlayerInput::m_ViewDir)
+			.addData("Fire", &CNetObj_PlayerInput::m_FCount)
 			.addData("Hook", &CNetObj_PlayerInput::m_Hook)
 			.addData("Jump", &CNetObj_PlayerInput::m_Jump)
 			.addData("WantedWeapon", &CNetObj_PlayerInput::m_WantedWeapon)
-			.addData("TargetX", &CNetObj_PlayerInput::m_TargetX)
-			.addData("TargetY", &CNetObj_PlayerInput::m_TargetY)
+			.addData("TargetX", &CNetObj_PlayerInput::m_AimX)
+			.addData("TargetY", &CNetObj_PlayerInput::m_AimY)
 		.endClass()
 
 		/// Game.Players(ID).Tee

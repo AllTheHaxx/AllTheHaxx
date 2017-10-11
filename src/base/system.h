@@ -513,6 +513,7 @@ void set_new_tick();
 		To know how fast the timer is ticking, see <time_freq>.
 */
 int64 time_get();
+int64 time_get_raw();
 
 /*
 	Function: time_freq

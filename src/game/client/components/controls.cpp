@@ -84,12 +84,12 @@ void CControls::ResetInput(int dummy)
 {
 	CALLSTACK_ADD();
 
-	m_LastData[dummy].m_Direction = 0;
+	m_LastData[dummy].m_ViewDir = 0;
 	//m_LastData.m_Hook = 0;
 	// simulate releasing the fire button
-	if((m_LastData[dummy].m_Fire&1) != 0)
-		m_LastData[dummy].m_Fire++;
-	m_LastData[dummy].m_Fire &= INPUT_STATE_MASK;
+	if((m_LastData[dummy].m_FCount&1) != 0)
+		m_LastData[dummy].m_FCount++;
+	m_LastData[dummy].m_FCount &= INPUT_STATE_MASK;
 	m_LastData[dummy].m_Jump = 0;
 	m_InputData[dummy] = m_LastData[dummy];
 
@@ -197,7 +197,7 @@ void CControls::OnConsoleInit()
 	{ static CInputState s_State = {this, &m_InputDirectionRight[0], &m_InputDirectionRight[1]}; Console()->Register("+right", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Move right"); }
 	{ static CInputState s_State = {this, &m_InputData[0].m_Jump, &m_InputData[1].m_Jump}; Console()->Register("+jump", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Jump"); }
 	{ static CInputState s_State = {this, &m_InputData[0].m_Hook, &m_InputData[1].m_Hook}; Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Hook"); }
-	{ static CInputState s_State = {this, &m_InputData[0].m_Fire, &m_InputData[1].m_Fire}; Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, (void *)&s_State, "Fire"); }
+	{ static CInputState s_State = {this, &m_InputData[0].m_FCount, &m_InputData[1].m_FCount}; Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, (void *)&s_State, "Fire"); }
 	{ static CInputState s_State = {this, &m_ShowHookColl[0], &m_ShowHookColl[1]}; Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Show Hook Collision"); }
 	{ static CInputState s_State = {this, &m_SuperDyncam[0], &m_SuperDyncam[1]}; Console()->Register("+super_dyncam", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Super Dynamic Camera (unlock the view)"); }
 
@@ -250,7 +250,7 @@ int CControls::SnapInput(int *pData)
 	if(g_Config.m_ClNamePlatesBroadcastATH || m_pClient->Client()->Lua()->NumActiveScripts() > 0)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
 
-	if(m_pClient->m_pChat->m_CryptSendQueue.size())
+	if(!m_pClient->m_pChat->m_CryptSendQueue.empty())
 	{
 		int buf = m_pClient->m_pChat->m_CryptSendQueue[0] << 16;
 		int serial = m_HiddenCharSerialCount << 24;
@@ -296,42 +296,42 @@ int CControls::SnapInput(int *pData)
 	}
 	else
 	{
-		m_InputData[g_Config.m_ClDummy].m_TargetX = (int)m_MousePos[g_Config.m_ClDummy].x;
-		m_InputData[g_Config.m_ClDummy].m_TargetY = (int)m_MousePos[g_Config.m_ClDummy].y;
-		if(!m_InputData[g_Config.m_ClDummy].m_TargetX && !m_InputData[g_Config.m_ClDummy].m_TargetY)
+		m_InputData[g_Config.m_ClDummy].m_AimX = (int)m_MousePos[g_Config.m_ClDummy].x;
+		m_InputData[g_Config.m_ClDummy].m_AimY = (int)m_MousePos[g_Config.m_ClDummy].y;
+		if(!m_InputData[g_Config.m_ClDummy].m_AimX && !m_InputData[g_Config.m_ClDummy].m_AimY)
 		{
-			m_InputData[g_Config.m_ClDummy].m_TargetX = 1;
+			m_InputData[g_Config.m_ClDummy].m_AimX = 1;
 			m_MousePos[g_Config.m_ClDummy].x = 1;
 		}
 
 		// set direction
-		m_InputData[g_Config.m_ClDummy].m_Direction = 0;
+		m_InputData[g_Config.m_ClDummy].m_ViewDir = 0;
 		if(m_InputDirectionLeft[g_Config.m_ClDummy] && !m_InputDirectionRight[g_Config.m_ClDummy])
-			m_InputData[g_Config.m_ClDummy].m_Direction = -1;
+			m_InputData[g_Config.m_ClDummy].m_ViewDir = -1;
 		if(!m_InputDirectionLeft[g_Config.m_ClDummy] && m_InputDirectionRight[g_Config.m_ClDummy])
-			m_InputData[g_Config.m_ClDummy].m_Direction = 1;
+			m_InputData[g_Config.m_ClDummy].m_ViewDir = 1;
 
 		// moonwalk, bitch please!
 		{
 			if(m_InputDirectionLeft[g_Config.m_ClDummy] && m_InputDirectionRight[g_Config.m_ClDummy])
-				m_InputData[g_Config.m_ClDummy].m_Direction = m_LastData[g_Config.m_ClDummy].m_Direction ? -m_LastData[g_Config.m_ClDummy].m_Direction : 1;
+				m_InputData[g_Config.m_ClDummy].m_ViewDir = m_LastData[g_Config.m_ClDummy].m_ViewDir ? -m_LastData[g_Config.m_ClDummy].m_ViewDir : 1;
 		}
 
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)
 		{
 			CNetObj_PlayerInput *DummyInput = &Client()->m_DummyInput;
-			DummyInput->m_Direction = m_InputData[g_Config.m_ClDummy].m_Direction * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
+			DummyInput->m_ViewDir = m_InputData[g_Config.m_ClDummy].m_ViewDir * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
 			DummyInput->m_Hook = m_InputData[g_Config.m_ClDummy].m_Hook;
 			DummyInput->m_Jump = m_InputData[g_Config.m_ClDummy].m_Jump;
 			DummyInput->m_PlayerFlags = m_InputData[g_Config.m_ClDummy].m_PlayerFlags;
-			DummyInput->m_TargetX = m_InputData[g_Config.m_ClDummy].m_TargetX * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
-			DummyInput->m_TargetY = m_InputData[g_Config.m_ClDummy].m_TargetY;
+			DummyInput->m_AimX = m_InputData[g_Config.m_ClDummy].m_AimX * (g_Config.m_ClDummyCopyMirror ? -1 : 1);
+			DummyInput->m_AimY = m_InputData[g_Config.m_ClDummy].m_AimY;
 			DummyInput->m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon;
 
 
 
-			DummyInput->m_Fire += m_InputData[g_Config.m_ClDummy].m_Fire - m_LastData[g_Config.m_ClDummy].m_Fire;
+			DummyInput->m_FCount += m_InputData[g_Config.m_ClDummy].m_FCount - m_LastData[g_Config.m_ClDummy].m_FCount;
 			DummyInput->m_NextWeapon += m_InputData[g_Config.m_ClDummy].m_NextWeapon - m_LastData[g_Config.m_ClDummy].m_NextWeapon;
 			DummyInput->m_PrevWeapon += m_InputData[g_Config.m_ClDummy].m_PrevWeapon - m_LastData[g_Config.m_ClDummy].m_PrevWeapon;
 
@@ -345,22 +345,22 @@ int CControls::SnapInput(int *pData)
 			float t = Client()->LocalTime();
 			mem_zero(&m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
 
-			m_InputData[g_Config.m_ClDummy].m_Direction = ((int)t/2)&1;
+			m_InputData[g_Config.m_ClDummy].m_ViewDir = ((int)t/2)&1;
 			m_InputData[g_Config.m_ClDummy].m_Jump = ((int)t);
-			m_InputData[g_Config.m_ClDummy].m_Fire = ((int)(t*10));
+			m_InputData[g_Config.m_ClDummy].m_FCount = ((int)(t*10));
 			m_InputData[g_Config.m_ClDummy].m_Hook = ((int)(t*2))&1;
 			m_InputData[g_Config.m_ClDummy].m_WantedWeapon = ((int)t)%NUM_WEAPONS;
-			m_InputData[g_Config.m_ClDummy].m_TargetX = (int)(sinf(t*3)*100.0f);
-			m_InputData[g_Config.m_ClDummy].m_TargetY = (int)(cosf(t*3)*100.0f);
+			m_InputData[g_Config.m_ClDummy].m_AimX = (int)(sinf(t*3)*100.0f);
+			m_InputData[g_Config.m_ClDummy].m_AimY = (int)(cosf(t*3)*100.0f);
 		}
 #endif
 
 		LUA_FIRE_EVENT("OnSnapInput");
 
 		// check if we need to send input
-		if(m_InputData[g_Config.m_ClDummy].m_Direction != m_LastData[g_Config.m_ClDummy].m_Direction) Send = true;
+		if(m_InputData[g_Config.m_ClDummy].m_ViewDir != m_LastData[g_Config.m_ClDummy].m_ViewDir) Send = true;
 		else if(m_InputData[g_Config.m_ClDummy].m_Jump != m_LastData[g_Config.m_ClDummy].m_Jump) Send = true;
-		else if(m_InputData[g_Config.m_ClDummy].m_Fire != m_LastData[g_Config.m_ClDummy].m_Fire) Send = true;
+		else if(m_InputData[g_Config.m_ClDummy].m_FCount != m_LastData[g_Config.m_ClDummy].m_FCount) Send = true;
 		else if(m_InputData[g_Config.m_ClDummy].m_Hook != m_LastData[g_Config.m_ClDummy].m_Hook) Send = true;
 		else if(m_InputData[g_Config.m_ClDummy].m_WantedWeapon != m_LastData[g_Config.m_ClDummy].m_WantedWeapon) Send = true;
 		else if(m_InputData[g_Config.m_ClDummy].m_NextWeapon != m_LastData[g_Config.m_ClDummy].m_NextWeapon) Send = true;
@@ -371,7 +371,7 @@ int CControls::SnapInput(int *pData)
 			Send = true;
 
 		if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalCharacter->m_Weapon == WEAPON_NINJA
-			&& (m_InputData[g_Config.m_ClDummy].m_Direction || m_InputData[g_Config.m_ClDummy].m_Jump || m_InputData[g_Config.m_ClDummy].m_Hook))
+			&& (m_InputData[g_Config.m_ClDummy].m_ViewDir || m_InputData[g_Config.m_ClDummy].m_Jump || m_InputData[g_Config.m_ClDummy].m_Hook))
 			Send = true;
 	}
 
@@ -386,7 +386,7 @@ int CControls::SnapInput(int *pData)
 	// remove the hookline flag from the sent data
 	CServerInfo ServerInfo; Client()->GetServerInfo(&ServerInfo);
 	if((m_InputData[g_Config.m_ClDummy].m_PlayerFlags & PLAYERFLAG_AIM) && (!g_Config.m_ClSendHookline
-																			#if defined(CONF_DEBUG)
+																			#if defined(FEATURE_DENNIS)
 																			|| str_find_nocase(ServerInfo.m_aGameType, "stitch") || str_find_nocase(ServerInfo.m_aGameType, "626")
 																			#endif
 																		   ))
@@ -479,9 +479,9 @@ void CControls::OnRender()
 			// Fire when releasing joystick
 			if( !AimPressed )
 			{
-				m_InputData[g_Config.m_ClDummy].m_Fire ++;
-				if( (bool)(m_InputData[g_Config.m_ClDummy].m_Fire % 2) != AimPressed )
-					m_InputData[g_Config.m_ClDummy].m_Fire ++;
+				m_InputData[g_Config.m_ClDummy].m_FCount ++;
+				if( (bool)(m_InputData[g_Config.m_ClDummy].m_FCount % 2) != AimPressed )
+					m_InputData[g_Config.m_ClDummy].m_FCount ++;
 				FireWasPressed = true;
 			}
 		}
@@ -524,7 +524,7 @@ void CControls::OnRender()
 		// Keep track of ammo count, we know weapon ammo only when we switch to that weapon, this is tracked on server and protocol does not track that
 		m_AmmoCount[m_pClient->m_Snap.m_pLocalCharacter->m_Weapon%NUM_WEAPONS] = m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
 		// Autoswitch weapon if we're out of ammo
-		if( (m_InputData[g_Config.m_ClDummy].m_Fire % 2 != 0 || FireWasPressed) &&
+		if( (m_InputData[g_Config.m_ClDummy].m_FCount % 2 != 0 || FireWasPressed) &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount == 0 &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA )

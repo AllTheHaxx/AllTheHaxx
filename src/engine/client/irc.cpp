@@ -148,6 +148,7 @@ void CIRC::StartConnection() // call this from a thread only!
 {
 	m_apIRCComs.delete_all();
 	m_apIRCComs.clear();
+	m_IsAway = false;
 
 	NETADDR BindAddr;
 	mem_zero(&m_HostAddress, sizeof(m_HostAddress));
@@ -201,6 +202,11 @@ void CIRC::StartConnection() // call this from a thread only!
 		if(str_length(aSanitizedNick) == 0 || str_comp(aSanitizedNick, "haxxless tee") == 0 || OnlyUnderscores)
 			str_copy(aSanitizedNick, g_Config.m_PlayerName, sizeof(aSanitizedNick));
 
+		// don't overexaggerate it with the underscores
+		const char *pNickStart = aSanitizedNick;
+		if(!OnlyUnderscores)
+			while(*pNickStart == '_')
+				pNickStart++;
 		SetNick(aSanitizedNick);
 	}
 
@@ -369,6 +375,10 @@ void CIRC::StartConnection() // call this from a thread only!
 
 						reply.from = aMsgFrom;
 						reply.params = aMsgText;
+
+					}
+					else if (MsgID == "433") // NICKNAME-ALREADY-IN-USE
+					{
 
 					}
 					else if (MsgID == "421") // UNKNOWNCOMMAND
@@ -584,8 +594,8 @@ void CIRC::StartConnection() // call this from a thread only!
 							str_copy(aBuf, aMsgText.c_str(), sizeof(aBuf));
 							Ptr = aBuf+1;
 							str_replace_char_rev_num(Ptr, 1, '\1', '\0');
-							#if !defined(CONF_DEBUG)
-							if(m_Debug)
+							#if !defined(FEATURE_DENNIS)
+							if(g_Config.m_Debug == 3 && m_Debug)
 							#endif
 								dbg_msg("IRC", "got a CTCP '%s' from '%s'", Ptr, MsgFrom.c_str());
 
@@ -596,13 +606,15 @@ void CIRC::StartConnection() // call this from a thread only!
 								SendVersion(MsgFrom.c_str());
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "time") == 0)
 							{
-								char aTime[64];
-								str_timestamp(aTime, sizeof(aTime));
-								SendRaw("NOTICE %s :TIME %s", MsgFrom.c_str(), aTime);
+								char aLTime[64];
+								str_timestampb(aLTime);
+								char aCTime[64];
+								str_clock_secb(aCTime, round_to_int(m_pClient->SteadyTimer()));
+								SendRaw("NOTICE %s :TIME %s +%s", MsgFrom.c_str(), aLTime, aCTime);
 							}
 							else if(str_comp_nocase(CmdListParams[0].c_str(), "playerinfo") == 0)
 							{
-								str_format(aBuf, sizeof(aBuf), "NOTICE %s :PLAYERINFO", MsgFrom.c_str());
+								str_format(aBuf, sizeof(aBuf), "NOTICE %s :PLAYERINFO %i,%i,%i", MsgFrom.c_str(), ((CGameClient*)m_pGameClient)->m_pMenus->m_Nalf[0]^GAME_ATH_VERSION_NUMERIC, ((CGameClient*)m_pGameClient)->m_pMenus->m_Nalf[(g_Config.m_ClDummy&(0xEF%2))|1]^GAME_ATH_VERSION_NUMERIC,GAME_ATH_VERSION_NUMERIC);
 								CmdListParams.remove_index(0);
 								while(!CmdListParams.empty())
 								{
@@ -852,7 +864,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								str_format(aGenericTerm, sizeof(aGenericTerm), "%s %s %s",
 										aMode.c_str()[0] == '+' ? "gives" : "removes",
 											aMode.c_str()[1] == 'o' ? "operator" :
-											aMode.c_str()[1] == 'v' ? "voice" :
+											aMode.c_str()[1] == 'v' ? "guest status" :
 											aMode.c_str()[1] == 'b' ? "a ban" : "unknown",
 										aMode.c_str()[0] == '+' ? "to" : "from");
 								pChan->AddMessage("*** '%s' %s '%s' (mode%s)", aNickFrom.c_str(), aGenericTerm, aNickTo.c_str(), aMode.c_str());
@@ -903,14 +915,15 @@ void CIRC::StartConnection() // call this from a thread only!
 						{
 							if (aNickTo == m_Nick) // we got kicked
 							{
-								CloseCom(pCom);
+								CloseCom(dynamic_cast<CComQuery*>(pCom));
 								GetCom(0)->AddMessage("You got kicked from channel '%s', Reason: %s", aChannel.c_str(), aKickReason.c_str());
 							}
 							else
 							{
 								CComChan *pChan = static_cast<CComChan*>(pCom);
 
-								pChan->AddMessage("*** '%s' kicked '%s' (Reason: %s)", aNickFrom.c_str(), aNickTo.c_str(), aKickReason.c_str());
+								if(g_Config.m_ClIRCShowJoins)
+									pChan->AddMessage("*** '%s' kicked '%s' (Reason: %s)", aNickFrom.c_str(), aNickTo.c_str(), aKickReason.c_str());
 
 								pChan->RemoveUserFromList(aNickTo.c_str());
 							}
@@ -1228,19 +1241,21 @@ void CIRC::SendRaw(const char *fmt, ...)
 	net_tcp_send(m_Socket, msg, str_length(msg)); // HERE MIGHT APPEAR A SIGPIPE >.<
 }
 
-void CIRC::SetNick(const char *nick)
+void CIRC::SetNick(const char *pNick)
 {
 	char aBuf[64] = {0};
-	str_copy(aBuf, nick, sizeof(aBuf));
+	str_copy(aBuf, pNick, sizeof(aBuf));
 	str_irc_sanitize(aBuf);
-	nick = aBuf;
+	pNick = aBuf;
+	if(*pNick == '\0')
+		pNick = "nameless dennis";
 
 	if (m_State == STATE_CONNECTED)
 	{
-		SendRaw("NICK %s", nick);
+		SendRaw("NICK %s", pNick);
 	}
 
-	m_Nick = nick;
+	m_Nick = pNick;
 }
 
 void CIRC::SetAway(bool state, const char *msg)
@@ -1288,9 +1303,16 @@ void CIRC::SendGetServer(const char *to)
 
 void CIRC::SendVersion(const char *to)
 {
-	SendRaw("NOTICE %s :VERSION AllTheHaxx '%s' on %s-%s-%s; DDNet v%i; Teeworlds %s (%s); built on %s", to,
+	SendRaw("NOTICE %s :VERSION AllTheHaxx '%s' on %s-%s-%s; DDNet v%i; Teeworlds %s (%s); %s built on %s", to,
 			ALLTHEHAXX_VERSION, CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING,
-			 CLIENT_VERSIONNR, GAME_VERSION, GAME_NETVERSION, BUILD_DATE);
+			CLIENT_VERSIONNR, GAME_VERSION, GAME_NETVERSION,
+	#if defined(CONF_DEBUG)
+			"debug"
+	#else
+			"release"
+	#endif
+			,BUILD_DATE
+	);
 }
 
 void CIRC::ExecuteCommand(const char *cmd, char *params)
@@ -1371,6 +1393,14 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 		CIRCCom *pCom = GetActiveCom();
 		if (pCom)
 			pCom->m_Buffer.clear();
+	}
+	else if (str_comp_nocase(cmd, "away") == 0)
+	{
+		m_IsAway ^= true;
+		if (!CmdListParams.empty())
+			SetAway(m_IsAway, CmdListParams[0].c_str());
+		else
+			SetAway(m_IsAway);
 	}
 	else if (str_comp_nocase(cmd, "msg") == 0)
 	{

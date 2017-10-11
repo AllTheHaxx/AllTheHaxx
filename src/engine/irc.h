@@ -30,12 +30,16 @@ public:
 	void AddMessage(const char *fmt, ...);
 	void AddMessage_nofmt(const char *msg);
 
+	virtual ~CIRCCom(){}
+
 protected:
 	CIRCCom(unsigned int type)
 	{
 		m_Type = type;
 		m_NumUnreadMsg = 0;
 	}
+
+	virtual void ImplementMe() const = 0; // to make it polymorphic
 
 };
 
@@ -109,6 +113,9 @@ public:
 				return &(m_Users[u]);
 		return 0;
 	}
+
+protected:
+	void ImplementMe() const {}
 };
 
 
@@ -117,6 +124,9 @@ class CComQuery : public CIRCCom
 public:
 	CComQuery() : CIRCCom(CIRCCom::TYPE_QUERY) { }
 	const char *User() const { return m_aName; }
+
+protected:
+	void ImplementMe() const {}
 };
 
 

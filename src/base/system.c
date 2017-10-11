@@ -886,9 +886,19 @@ int64 time_get()
 	if(new_tick != -1)
 		new_tick = 0;
 
-	{
+	int64 time = time_get_raw();
+#if defined(CONF_FAMILY_WINDOWS)
+	if(time < last) /* for some reason, QPC can return values in the past */
+		return last;
+#endif
+	last = time;
+	return last;
+}
+
+int64 time_get_raw()
+{
 #if defined(CONF_PLATFORM_MACOSX)
-		static int got_timebase = 0;
+	static int got_timebase = 0;
 		mach_timebase_info_data_t timebase;
 		uint64_t time;
 		uint64_t q;
@@ -900,24 +910,18 @@ int64 time_get()
 		time = mach_absolute_time();
 		q = time / timebase.denom;
 		r = time % timebase.denom;
-		last = q * timebase.numer + r * timebase.numer / timebase.denom;
-		return last;
+		return q * timebase.numer + r * timebase.numer / timebase.denom;
 #elif defined(CONF_FAMILY_UNIX)
-		struct timespec spec;
-		clock_gettime(CLOCK_MONOTONIC, &spec);
-		last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
-		return last;
+	struct timespec spec;
+	clock_gettime(CLOCK_MONOTONIC, &spec);
+	return (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
 #elif defined(CONF_FAMILY_WINDOWS)
-		int64 t;
+	int64 t;
 		QueryPerformanceCounter((PLARGE_INTEGER)&t);
-		if(t<last) /* for some reason, QPC can return values in the past */
-			return last;
-		last = t;
 		return t;
 #else
 		#error not implemented
-#endif
-	}
+	#endif
 }
 
 int64 time_freq()

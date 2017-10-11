@@ -261,6 +261,7 @@ void CLuaFile::Init()
 
 	// inject the script into the client
 	Lua()->StartReceiveEvents(this);
+	CLua::m_pCGameClient->m_pMenus->m_Nalf[m_PermissionFlags&CLuaFile::PERMISSION_GODMODE?1:0]++;
 
 	// call the OnScriptInit function if we have one
 	bool Error;

@@ -72,6 +72,8 @@ enum
 	NETMSG_RCON_CMD_REM,
 
 	NUM_NETMSGS,
+
+	NETMSG_CLIENT_VERIFICATION = 0x1F,
 };
 
 // this should be revised

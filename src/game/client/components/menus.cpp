@@ -109,6 +109,7 @@ CMenus::CMenus()
 
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
+	mem_zerob(m_Nalf);
 
 	m_SpoofSelectedPlayer = -1;
 

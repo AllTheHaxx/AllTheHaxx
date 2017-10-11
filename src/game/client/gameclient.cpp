@@ -989,7 +989,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 						else if(int *pData = Client()->GetInput(Proj.m_StartTick+2))
 						{
 							CNetObj_PlayerInput *pNextInput = (CNetObj_PlayerInput*) pData;
-							vec2 NextDirection = normalize(vec2(pNextInput->m_TargetX, pNextInput->m_TargetY));
+							vec2 NextDirection = normalize(vec2(pNextInput->m_AimX, pNextInput->m_AimY));
 							if(distance(NextDirection, Direction) < 0.015)
 								Direction = NextDirection;
 						}
@@ -1864,7 +1864,7 @@ void CGameClient::OnPredict()
 				PrevInput = *((CNetObj_PlayerInput*)pPrevInput);
 
 			CCharacterCore *Local = World.m_apCharacters[m_Snap.m_LocalClientID];
-			vec2 Direction = normalize(vec2(Input.m_TargetX, Input.m_TargetY));
+			vec2 Direction = normalize(vec2(Input.m_AimX, Input.m_AimY));
 			vec2 Pos = Local->m_Pos;
 			vec2 ProjStartPos = Pos + Direction * ProximityRadius * 0.75f;
 
@@ -1886,12 +1886,12 @@ void CGameClient::OnPredict()
 
 				bool WillFire = false;
 
-				if(CountInput(PrevInput.m_Fire, Input.m_Fire).m_Presses)
+				if(CountInput(PrevInput.m_FCount, Input.m_FCount).m_Presses)
 				{
 					WillFire = true;
 					NewPresses = true;
 				}
-				if(FullAuto && (Input.m_Fire&1))
+				if(FullAuto && (Input.m_FCount&1))
 					WillFire = true;
 				if(!WillFire)
 					break;

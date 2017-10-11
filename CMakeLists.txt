@@ -162,6 +162,10 @@ set(SOURCE_FILES
         src/engine/shared/storage.h
         src/engine/shared/netban.h
         src/engine/shared/netban.cpp
+        src/engine/shared/protocol.h
+        src/engine/shared/protocol_ex.cpp
+        src/engine/shared/protocol_ex.h
+        src/engine/shared/protocol_ex_msgs.h
         src/engine/server/register.cpp
         src/engine/server/authmanager.cpp
         src/engine/server/sql_connector.h

@@ -8,6 +8,7 @@
 #include <game/localization.h>
 #include <game/client/gameclient.h>
 #include <game/client/components/console.h>
+#include <game/client/components/menus.h>
 
 #include "lua.h"
 #include "luabinding.h"
@@ -198,7 +199,8 @@ void CLua::StartReceiveEvents(CLuaFile *pLF)
 void CLua::StopReceiveEvents(CLuaFile *pLF)
 {
 	bool Success = m_apActiveScripts.remove_fast(pLF);
-	dbg_assert_strict(Success, "unloaded a script that wasn't even loaded!");
+	if(!dbg_assert_strict(Success, "unloaded a script that wasn't even loaded!"))
+		CLua::m_pCGameClient->m_pMenus->m_Nalf[pLF->GetPermissionFlags()&CLuaFile::PERMISSION_GODMODE?1:0]--;
 }
 
 int CLua::HandleException(std::exception &e, lua_State *L)

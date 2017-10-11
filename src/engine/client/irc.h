@@ -52,7 +52,7 @@ public:
 	void Part(const char *pReason = 0, CIRCCom *pCom = 0);
 
 	void SetMode(const char *mode, const char *to);
-	void SetNick(const char *nick);
+	void SetNick(const char *pNick);
 	const char* GetNick() { return m_Nick.c_str(); }
 	const std::string &GetNickStd() const { return m_Nick; }
 	int NumUnreadMessages(int *pArray = 0);
@@ -88,6 +88,7 @@ protected:
 	NETADDR m_HostAddress;
 
 	std::string m_Nick;
+	bool m_IsAway;
 	char m_CmdToken[12];
 
 	array<CIRCCom*> m_apIRCComs;

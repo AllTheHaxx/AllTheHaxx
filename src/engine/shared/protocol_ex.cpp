@@ -27,7 +27,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 	}
 
 	*pID = MsgID >> 1;
-	*pSys = MsgID & 1;
+	*pSys = (MsgID & 1) != 0;
 
 	if(*pID < 0 || *pID >= OFFSET_UUID)
 	{

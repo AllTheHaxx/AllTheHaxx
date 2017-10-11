@@ -52,6 +52,8 @@ config:Add(OptString("websockets", false))
 config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
+config:Add(OptString("unstable", false))
+config:Add(OptString("verification", false))
 config:Finalize("config_" .. sysconf .. ".lua")
 
 if config.lua.value == false then sysconf = sysconf .. "NL" end
@@ -249,13 +251,16 @@ function build(settings)
 		settings.cc.defines:Add("CONF_SPOOFING")
 	end
 
+	if config.verification.value and type(config.verification.value) == "string" then
+		settings.cc.defines:Add("CLIENT_VERIFICATION_KEY='" .. config.verification.value .. "'")
+	end
+
 	if config.debugger.value then
 		settings.cc.defines:Add("FEATURE_DEBUGGER")
 	end
 
 	if config.lua.value and config.luajit.value then
 		settings.cc.defines:Add("FEATURE_LUA")
-		--settings.cc.includes:Add("src/engine/external/luabridge")
 	end
 
 	if config.compiler.driver == "cl" then
@@ -498,6 +503,9 @@ debug_settings.config_ext = "_d"
 debug_settings.debug = 1
 debug_settings.optimize = 0
 debug_settings.cc.defines:Add("CONF_DEBUG")
+if config.unstable.value then
+	debug_settings.cc.defines:Add("FEATURE_DENNIS")
+end
 
 debug_sql_settings = NewSettings()
 debug_sql_settings.config_name = "sql_debug"

@@ -373,7 +373,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 	mem_zero(&m_DummyInput, sizeof(m_DummyInput));
 	mem_zero(&HammerInput, sizeof(HammerInput));
-	HammerInput.m_Fire = 0;
+	HammerInput.m_FCount = 0;
 
 	m_State = IClient::STATE_OFFLINE;
 	m_Restarting = false;
@@ -674,9 +674,9 @@ void CClient::SendInput()
 		{
 			m_DummyInput.m_Jump = 0;
 			m_DummyInput.m_Hook = 0;
-			if(m_DummyInput.m_Fire & 1)
-				m_DummyInput.m_Fire++;
-			m_DummyInput.m_Direction = 0;
+			if(m_DummyInput.m_FCount & 1)
+				m_DummyInput.m_FCount++;
+			m_DummyInput.m_ViewDir = 0;
 			GameClient()->ResetDummyInput();
 		}
 	}
@@ -697,14 +697,14 @@ void CClient::SendInput()
 			}
 			m_Fire++;
 
-			HammerInput.m_Fire+=2;
+			HammerInput.m_FCount+=2;
 			HammerInput.m_WantedWeapon = 1;
 
 			vec2 Main = ((CGameClient *)GameClient())->m_LocalCharacterPos;
 			vec2 Dummy = ((CGameClient *)GameClient())->m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
 			vec2 Dir = Main - Dummy;
-			HammerInput.m_TargetX = Dir.x;
-			HammerInput.m_TargetY = Dir.y;
+			HammerInput.m_AimX = Dir.x;
+			HammerInput.m_AimY = Dir.y;
 
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
@@ -723,8 +723,8 @@ void CClient::SendInput()
 			vec2 Main = ((CGameClient *)GameClient())->m_LocalCharacterPos;
 			vec2 Dummy = ((CGameClient *)GameClient())->m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
 			vec2 Dir = Main - Dummy;
-			m_DummyInput.m_TargetX = Dir.x;
-			m_DummyInput.m_TargetY = Dir.y;
+			m_DummyInput.m_AimX = Dir.x;
+			m_DummyInput.m_AimY = Dir.y;
 
 			if(Dummy.y < Main.y && distance(Dummy, Main) > 16)
 				m_DummyInput.m_Hook = 1;
@@ -750,11 +750,11 @@ void CClient::SendInput()
 		{
 			if(m_Fire != 0)
 			{
-				m_DummyInput.m_Fire = HammerInput.m_Fire;
+				m_DummyInput.m_FCount = HammerInput.m_FCount;
 				m_Fire = 0;
 			}
 
-			if(!Size && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
+			if(!Size && (!m_DummyInput.m_ViewDir && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
 				return;
 
 			// pack input
@@ -2125,7 +2125,30 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_PING)
 		{
 			CMsgPacker Msg(NETMSG_PING_REPLY);
-			SendMsgEx(&Msg, 0);
+			SendMsgEx(&Msg, MSGFLAG_FLUSH);
+		}
+		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CLIENT_VERIFICATION)
+		{
+			int X = Unpacker.GetInt();
+			if(!Unpacker.Error())
+			{
+				CMsgPacker Msg(NETMSG_CLIENT_VERIFICATION);
+				#ifndef CLIENT_VERIFICATION_KEY
+					#define CLIENT_VERIFICATION_KEY (-1)
+					#define WAS_LOCALLY_DEFINED
+				#endif
+				int G = X > 0 ? (CLIENT_VERIFICATION_KEY) : -2;
+				#ifdef WAS_LOCALLY_DEFINED
+					#undef CLIENT_VERIFICATION_KEY
+					#undef WAS_LOCALLY_DEFINED
+				#endif
+				#if defined(CONF_DEBUG) && defined(FEATURE_DENNIS)
+					if(g_Config.m_Debug)
+						dbg_msg("verify/debug", "got client verification challenge %i, responding with %i", X, G);
+				#endif
+				Msg.AddInt(G);
+				SendMsgEx(&Msg, MSGFLAG_VITAL);
+			}
 		}
 		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
@@ -2162,14 +2185,14 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_PING_REPLY)
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "latency %.2f", (time_get() - m_PingStartTime)*1000 / (float)time_freq());
+			str_format(aBuf, sizeof(aBuf), "latency %.2f", (time_get_raw() - m_PingStartTime)*1000 / (float)time_freq());
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client/network", aBuf);
 		}
 		else if(Msg == NETMSG_INPUTTIMING)
 		{
 			int InputPredTick = Unpacker.GetInt();
 			int TimeLeft = Unpacker.GetInt();
-			int64 Now = time_get();
+			int64 Now = time_get_raw(); // get the actual time instead of the cached one for better prediction results
 
 			// adjust our prediction time
 			int64 Target = 0;
@@ -2975,11 +2998,13 @@ void CClient::Update()
 		{
 			if(m_GotServerInfo && !m_IsATHMsgSent[g_Config.m_ClDummy])
 			{
+				// for compatibility with chosen gametypes
 				if(IsBWMod(&m_CurrentServerInfo))
-					Client()->Rcon("hithisisath"); // for chosen gametypes
+				{
+					Client()->Rcon("hithisisath");
+				}
 				m_IsATHMsgSent[g_Config.m_ClDummy] = true;
 			}
-
 		}
 	}
 
@@ -3058,8 +3083,8 @@ void CClient::VersionUpdate()
 
 	if(m_VersionInfo.m_State == CVersionInfo::STATE_INIT)
 	{
-			Engine()->HostLookup(&m_VersionInfo.m_VersionServeraddr, g_Config.m_ClDDNetVersionServer, m_NetClient[0].NetType());
-			m_VersionInfo.m_State = CVersionInfo::STATE_START;
+		Engine()->HostLookup(&m_VersionInfo.m_VersionServeraddr, g_Config.m_ClDDNetVersionServer, m_NetClient[0].NetType());
+		m_VersionInfo.m_State = CVersionInfo::STATE_START;
 	}
 	else if(m_VersionInfo.m_State == CVersionInfo::STATE_START)
 	{
@@ -3588,7 +3613,7 @@ void CClient::Run()
 			thread_sleep(g_Config.m_ClCpuThrottleInactive);
 		else if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);
-			//thread_sleep(g_Config.m_ClCpuThrottle);
+		//thread_sleep(g_Config.m_ClCpuThrottle);
 
 		if(g_Config.m_ClConsoleMode)
 			thread_sleep(250);
@@ -3739,8 +3764,8 @@ void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
 
 	CClient *pSelf = (CClient *)pUserData;
 	CMsgPacker Msg(NETMSG_PING);
-	pSelf->SendMsgEx(&Msg, 0);
-	pSelf->m_PingStartTime = time_get();
+	pSelf->SendMsgEx(&Msg, MSGFLAG_FLUSH);
+	pSelf->m_PingStartTime = time_get_raw();
 }
 
 void CClient::Con_SaveConfig(IConsole::IResult *pResult, void *pUserData)
