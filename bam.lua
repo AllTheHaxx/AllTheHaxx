@@ -252,7 +252,7 @@ function build(settings)
 	end
 
 	if config.verification.value and type(config.verification.value) == "string" then
-		settings.cc.defines:Add("CLIENT_VERIFICATION_KEY='" .. config.verification.value .. "'")
+		settings.cc.defines:Add('CLIENT_VERIFICATION_KEY="' .. config.verification.value .. '"')
 	end
 
 	if config.debugger.value then

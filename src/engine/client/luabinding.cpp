@@ -535,7 +535,8 @@ const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, lu
 
 #else
 
-	return CLua::m_pCGameClient->Storage()->SandboxPath(pBuffer, BufferSize);
+	dbg_assert_strict(true, "use Storage()->SandboxPath instead");
+	return pInOutBuffer;
 
 #endif
 }

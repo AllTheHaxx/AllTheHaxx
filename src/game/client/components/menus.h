@@ -387,12 +387,12 @@ public:	int m_LoadTotal;
 	void RenderLoadingLua();
 
 	CLuaFile *m_pLuaFSModeRequester;
-public: int m_Nalf[2]; private:
 	void LuaRequestFullscreen(class CLuaFile *pLF);
 	void OnLuaScriptUnload(class CLuaFile *pLF);
 #else
 	void RenderSettingsLua(CUIRect MainView){};
 #endif
+	public: int m_Nalf[2]; private:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsAll(CUIRect MainView);
 	static int SkinCacheListdirCallback(const char *name, int is_dir, int dir_type, void *user);
