@@ -4,6 +4,7 @@ datasrc/__pycache__
 datasrc/*.pyc
 /objs
 /lua/
+/Lua-Scripts/
 /rsa
 /src/game/generated
 /update/
