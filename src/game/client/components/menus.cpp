@@ -2277,11 +2277,12 @@ void CMenus::OnRender()
 	// render cursor
 	if(m_pClient->m_pGameConsole->IsClosed())
 	{
+		float Scale = UI()->Scale();
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_HUDCURSOR].m_Id);
 		Graphics()->QuadsBegin();
 		Graphics()->QuadsSetRotation((float)g_Config.m_ClMouseRotation*((2.0f*3.1415926f)/360.0f));
 		Graphics()->SetColor(1,1,1,1);
-		IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
+		IGraphics::CQuadItem QuadItem(mx, my, 24*Scale, 24*Scale);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 		Graphics()->QuadsEnd();
 	}

@@ -13,6 +13,7 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 		if(Event.m_Flags&IInput::FLAG_PRESS)
 			Stroke = 1;
 
+
 		m_pBinds->GetConsole()->ExecuteLineStroked(Stroke, m_pBinds->m_apKeyBindings[Event.m_Key]);
 		return true;
 	}

@@ -594,10 +594,11 @@ void CGameClient::OnInit()
 		g_Config.m_ClSmoothEmoteWheelDelay = 10;
 		g_Config.m_ClIRCShowJoins = 0;
 	}
-	if(g_Config.m_ClConfigVersion < 3202)
+	if(g_Config.m_ClConfigVersion < 3203)
 	{
 		g_Config.m_ClCinematicCameraDelay = 17;
 		g_Config.m_ClShowhudChatbox = 0;
+		g_Config.m_BrShowDDNet = 0;
 	}
 
 	if(g_Config.m_ClConfigVersion != GAME_ATH_VERSION_NUMERIC)

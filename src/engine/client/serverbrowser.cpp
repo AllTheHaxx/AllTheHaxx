@@ -337,7 +337,7 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(!g_Config.m_BrFilterVersionStrict && g_Config.m_BrFilterVersion[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aVersion, g_Config.m_BrFilterVersion))
 			Filtered = 1;
-		else if(g_Config.m_BrShowDDNet && g_Config.m_UiBrowserPage != CMenus::PAGE_BROWSER_DDNET && g_Config.m_UiBrowserPage != CMenus::PAGE_BROWSER_FAVORITES && str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, "[DDRaceNetwork]"))
+		else if(g_Config.m_BrShowDDNet == 1 && g_Config.m_UiBrowserPage != CMenus::PAGE_BROWSER_DDNET && g_Config.m_UiBrowserPage != CMenus::PAGE_BROWSER_FAVORITES && str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, "[DDRaceNetwork]"))
 			Filtered = 1;
 		else
 		{

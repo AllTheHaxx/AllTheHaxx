@@ -462,10 +462,11 @@ void CSpectator::OnRender()
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// draw cursor
+	float Scale = UI()->Scale();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_HUDCURSOR].m_Id);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x+Width/2.0f, m_SelectorMouse.y+Height/2.0f, 48.0f, 48.0f);
+	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x+(Width/2.0f)*Scale, m_SelectorMouse.y+(Height/2.0f)*Scale, 48.0f*Scale, 48.0f*Scale);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 }

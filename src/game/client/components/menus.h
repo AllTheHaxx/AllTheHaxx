@@ -372,6 +372,7 @@ public:	int m_LoadTotal;
 	void RenderSettingsPlayer(CUIRect MainView);
 	void RenderSettingsTee(CUIRect MainView);
 	void RenderSettingsControls(CUIRect MainView);
+	void RenderSettingsControlsNew(CUIRect MainView);
 	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettingsHaxx(CUIRect MainView);
