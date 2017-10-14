@@ -77,26 +77,33 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxColorDepth = Depth;
 		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_Width;
 		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_Height;
-#if defined(SDL_VIDEO_DRIVER_X11)
+//#if defined(SDL_VIDEO_DRIVER_X11)
 		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-#else
-		CheckSettings = true;
-#endif
+//#else
+//		CheckSettings = true;
+//#endif
 	}
 
 	// switches
 	static CButtonContainer s_Checkbox1, s_Checkbox2, s_Checkbox3, s_Checkbox4, s_Checkbox5, s_Checkbox6, s_Checkbox7;
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&s_Checkbox1, Localize("Borderless window"), g_Config.m_GfxBorderless, &Button))
+	if(DoButton_CheckBox(&s_Checkbox1, Localize("Borderless window"), g_Config.m_GfxWindowMode == IGraphics::WINDOWMODE_BORDERLESS, &Button, 0, CUI::CORNER_T))
 	{
-		Client()->ToggleWindowBordered();
+		if(g_Config.m_GfxWindowMode == IGraphics::WINDOWMODE_BORDERLESS)
+			g_Config.m_GfxWindowMode = IGraphics::WINDOWMODE_WINDOWED;
+		else
+			g_Config.m_GfxWindowMode = IGraphics::WINDOWMODE_BORDERLESS;
+		Client()->GfxUpdateWindowMode();
 	}
 
-	Left.HSplitTop(3.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&s_Checkbox2, Localize("Fullscreen"), g_Config.m_GfxFullscreen, &Button))
+	if(DoButton_CheckBox(&s_Checkbox2, Localize("Fullscreen"), g_Config.m_GfxWindowMode == IGraphics::WINDOWMODE_FULLSCREEN, &Button, 0, CUI::CORNER_B))
 	{
-		Client()->ToggleFullscreen();
+		if(g_Config.m_GfxWindowMode == IGraphics::WINDOWMODE_FULLSCREEN)
+			g_Config.m_GfxWindowMode = IGraphics::WINDOWMODE_WINDOWED;
+		else
+			g_Config.m_GfxWindowMode = IGraphics::WINDOWMODE_FULLSCREEN;
+		Client()->GfxUpdateWindowMode();
 	}
 
 
@@ -254,7 +261,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&s_Checkbox3, Localize("V-Sync"), g_Config.m_GfxVsync, &Button, Localize("Disable this if your game reacts too slow")))
 	{
-		Client()->ToggleWindowVSync();
+		g_Config.m_GfxVsync ^= 1;
+		Client()->GfxUpdateVSync();
 	}
 
 	Right.HSplitTop(3.0f, 0, &Right);

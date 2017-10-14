@@ -8,6 +8,7 @@ add_definitions("-DCONF_DEBUG")
 add_definitions("-DFEATURE_LUA")
 add_definitions("-DDO_NOT_COMPILE_THIS_CODE")
 add_definitions("-D_GNU_SOURCE")
+add_definitions("-DSDL_VIDEO_DRIVER_X11")
 
 include_directories(
         other/sdl/include

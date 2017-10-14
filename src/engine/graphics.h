@@ -67,13 +67,17 @@ public:
 		TEXLOAD_NORESAMPLE = 1,
 		TEXLOAD_NOMIPMAPS = 2,
 		TEXLOAD_FILTER_NEAREST = 4,
+
+		WINDOWMODE_WINDOWED = 0,
+		WINDOWMODE_BORDERLESS = 1,
+		WINDOWMODE_FULLSCREEN = 2
 	};
 
 	int ScreenWidth() const { return m_ScreenWidth; }
 	int ScreenHeight() const { return m_ScreenHeight; }
 	float ScreenAspect() const { return (float)ScreenWidth()/(float)ScreenHeight(); }
 
-	virtual bool Fullscreen(bool State) = 0;
+	virtual bool SetFullscreen(bool State) = 0;
 	virtual void SetWindowBordered(bool State) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;

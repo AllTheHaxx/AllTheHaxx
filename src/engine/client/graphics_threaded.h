@@ -470,7 +470,7 @@ public:
 	virtual int GetNumScreens() const;
 	virtual void Minimize();
 	virtual void Maximize();
-	virtual bool Fullscreen(bool State);
+	virtual bool SetFullscreen(bool State);
 	virtual void SetWindowBordered(bool State);
 	virtual bool SetWindowScreen(int Index);
 	virtual void Resize(int w, int h);

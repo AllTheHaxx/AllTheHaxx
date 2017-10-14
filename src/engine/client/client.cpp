@@ -4154,17 +4154,44 @@ void CClient::Con_Panic(IConsole::IResult *pResult, void *pUserData)
 	g_Config.m_ClConsoleMode = 0;
 }
 
+void CClient::GfxUpdateWindowMode()
+{
+	// update window mode
+	switch(g_Config.m_GfxWindowMode)
+	{
+		case IGraphics::WINDOWMODE_BORDERLESS:
+			Graphics()->SetFullscreen(false);
+			Graphics()->SetWindowBordered(false);
+			break;
+
+		case IGraphics::WINDOWMODE_FULLSCREEN:
+			Graphics()->SetWindowBordered(true);
+			Graphics()->SetFullscreen(true);
+			break;
+
+		default:
+			Graphics()->SetFullscreen(false);
+			Graphics()->SetWindowBordered(true);
+	}
+}
+
+void CClient::GfxUpdateVSync()
+{
+	// update vsync state
+	Graphics()->SetVSync((bool)g_Config.m_GfxVsync);
+}
+
 void CClient::SwitchWindowScreen(int Index)
 {
 	CALLSTACK_ADD();
 
 	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
-	if(g_Config.m_GfxFullscreen)
+	if(g_Config.m_GfxWindowMode == IGraphics::WINDOWMODE_FULLSCREEN)
 	{
-		ToggleFullscreen();
+		Graphics()->SetFullscreen(false);
 		if(Graphics()->SetWindowScreen(Index))
 			g_Config.m_GfxScreen = Index;
-		ToggleFullscreen();
+		Graphics()->SetFullscreen(true);
 	}
 	else
 	{
@@ -4187,56 +4214,17 @@ void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, 
 		pfnCallback(pResult, pCallbackUserData);
 }
 
-void CClient::ToggleFullscreen()
-{
-	CALLSTACK_ADD();
-
-	if(Graphics()->Fullscreen(g_Config.m_GfxFullscreen^1))
-		g_Config.m_GfxFullscreen ^= 1;
-}
-
-void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CClient::ConchainWindowMode(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CALLSTACK_ADD();
 
 	CClient *pSelf = (CClient *)pUserData;
+
+	pfnCallback(pResult, pCallbackUserData);
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
-		if(g_Config.m_GfxFullscreen != pResult->GetInteger(0))
-			pSelf->ToggleFullscreen();
+		pSelf->GfxUpdateWindowMode();
 	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
-}
-
-void CClient::ToggleWindowBordered()
-{
-	CALLSTACK_ADD();
-
-	g_Config.m_GfxBorderless ^= 1;
-	Graphics()->SetWindowBordered(!g_Config.m_GfxBorderless);
-}
-
-void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	CALLSTACK_ADD();
-
-	CClient *pSelf = (CClient *)pUserData;
-	if(pSelf->Graphics() && pResult->NumArguments())
-	{
-		if(!g_Config.m_GfxFullscreen && (g_Config.m_GfxBorderless != pResult->GetInteger(0)))
-			pSelf->ToggleWindowBordered();
-	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
-}
-
-void CClient::ToggleWindowVSync()
-{
-	CALLSTACK_ADD();
-
-	if(Graphics()->SetVSync(g_Config.m_GfxVsync^1))
-		g_Config.m_GfxVsync ^= 1;
 }
 
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4244,13 +4232,12 @@ void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, I
 	CALLSTACK_ADD();
 
 	CClient *pSelf = (CClient *)pUserData;
+
+	pfnCallback(pResult, pCallbackUserData);
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
-		if(g_Config.m_GfxVsync != pResult->GetInteger(0))
-			pSelf->ToggleWindowVSync();
+		pSelf->GfxUpdateVSync();
 	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
 }
 
 void CClient::ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4314,8 +4301,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
 
 	m_pConsole->Chain("gfx_screen", ConchainWindowScreen, this);
-	m_pConsole->Chain("gfx_fullscreen", ConchainFullscreen, this);
-	m_pConsole->Chain("gfx_borderless", ConchainWindowBordered, this);
+	m_pConsole->Chain("gfx_window_mode", ConchainWindowMode, this);
 	m_pConsole->Chain("gfx_vsync", ConchainWindowVSync, this);
 
 	// DDRace
