@@ -570,58 +570,135 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 	return ret;
 }*/
 
-// TODO: if pHighlight is supplied, MaxWidth will be ignored! Fix this!
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont)
+// don't use non-ascii for this! it's giving str_length & co. some serious problems...
+#define COLOR_CODE_TAG "$$"
+
+bool CUI::SkipToNextPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes)
+{
+	if(!pStr || *pStr == '\0')
+		return false;
+
+	const char *pNextInterestingSectionStart = NULL;
+
+	// check for highlight
+	if(pHighlight && pHighlight[0] != '\0')
+	{
+		const char *pHightlightFound = str_find_nocase(pStr, pHighlight);
+		if(pHightlightFound > pStr)
+			pNextInterestingSectionStart = pHightlightFound;
+		else if(pHightlightFound == pStr) // only render it from its start, thus when we are right on it
+		{
+			pOut->m_pStart = pHightlightFound;
+			pOut->m_ColorR = 0.4f;
+			pOut->m_ColorG = 0.4f;
+			pOut->m_ColorB = 1.0f;
+			pOut->m_Length = str_length(pHighlight);
+//			pOut->m_Skip = 0;
+
+			return true;
+		}
+	}
+
+	// find color code, e.g. §AJ9hey there§$
+	if(!NoColorCodes)
+	{
+		// check how far we are allowed to render
+		const char *pNextCandidate = str_find(pStr+1, COLOR_CODE_TAG);
+		if(pNextCandidate && (!pNextInterestingSectionStart || pNextCandidate < pNextInterestingSectionStart)) // do not overwrite a predicted highlight
+			pNextInterestingSectionStart = pNextCandidate;
+
+		const int COLOR_CODE_LEN = str_length(COLOR_CODE_TAG);
+		if(str_comp_num(pStr, COLOR_CODE_TAG, COLOR_CODE_LEN) == 0 &&
+				pStr[COLOR_CODE_LEN+0] != '\0' && pStr[COLOR_CODE_LEN+1] != '\0' && pStr[COLOR_CODE_LEN+2] != '\0')
+		{
+			char aHackyBuf[2] = { pStr[COLOR_CODE_LEN+0], '\0'};
+			float Red = str_toint_base(aHackyBuf, 36) / 35.0f;
+
+			aHackyBuf[0] = pStr[COLOR_CODE_LEN+1];
+			float Green = str_toint_base(aHackyBuf, 36) / 35.0f;
+
+			aHackyBuf[0] = pStr[COLOR_CODE_LEN+2];
+			float Blue = str_toint_base(aHackyBuf, 36) / 35.0f;
+
+			const char *pStrBegin = pStr+COLOR_CODE_LEN+3;
+			//		const char *pEndFound = str_find(pStrBegin, "§$");
+
+			int MaxLen = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStrBegin) : str_length(pStrBegin);
+
+			//		if(!pEndFound)
+			{
+				pOut->m_Length = MaxLen;
+				//			pOut->m_Skip = 0;
+			}
+			//		else
+			//		{
+			//			pOut->m_Length = (int)(pEndFound-pStrBegin);
+			//			pOut->m_Skip = 2;
+			//		}
+			pOut->m_pStart = pStrBegin;
+			pOut->m_ColorR = Red;
+			pOut->m_ColorG = Green;
+			pOut->m_ColorB = Blue;
+
+			return true;
+		}
+	}
+
+	pOut->m_ColorR = 1.0f;
+	pOut->m_ColorG = 1.0f;
+	pOut->m_ColorB = 1.0f;
+	pOut->m_pStart = pStr;
+	pOut->m_Length = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStr) : str_length(pStr); // only draw to the next section
+//	pOut->m_Skip = 0;
+
+	return true;
+}
+
+#undef COLOR_CODE_TAG
+
+
+void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont, bool IgnoreColorCodes)
 {
 	// TODO: FIX ME!!!!
 	//Graphics()->BlendNormal();
-	if(Align == 0)
+
+	float xOffset = 0.0f;
+
+	if(Align == CUI::ALIGN_CENTER)
 	{
 		float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
-
-		// highlight the parts that matches
-		if(pHighlight && pHighlight[0] != '\0')
-		{
-			const char * const _pOrigText = pText;
-
-			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END, pFont);
-			Cursor.m_LineWidth = r->w;
-			while(pText)
-			{
-				const char *pFoundStr = str_find_nocase(pText, pHighlight);
-				if(pFoundStr)
-				{
-					TextRender()->TextEx(&Cursor, pText, (int)(pFoundStr - pText));
-					TextRender()->TextColor(0.8f, 0.7f, 0.15f, 1);
-					TextRender()->TextEx(&Cursor, pFoundStr, str_length(pHighlight));
-					TextRender()->TextColor(1, 1, 1, 1);
-					//TextRender()->TextEx(&Cursor, pFoundStr+str_length(m_pSearchString), -1);
-					pText = pFoundStr + str_length(pHighlight);
-				}
-				else
-				{
-					TextRender()->TextEx(&Cursor, pText, -1);
-					break;
-				}
-
-				if(pText > _pOrigText + str_length(_pOrigText) - 1 || pText < _pOrigText)
-					pText = 0;
-			}
-		}
-		else
-			TextRender()->Text(pFont, r->x + r->w / 2 - tw / 2, r->y - Size / 10, Size, pText, MaxWidth);
+		xOffset = r->w/2.0f - tw/2.0f;
 	}
-	else if(Align < 0)
+	else if(Align == CUI::ALIGN_RIGHT)
 	{
-		// highlight the parts that matches
-		if(pHighlight && pHighlight[0] != '\0')
+		float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
+		xOffset = r->w - tw;
+	}
+
+	const char *pStr = pText;
+	CTextCursor Cursor;
+	if(MaxWidth > 0.0f)
+		Cursor.m_LineWidth = MaxWidth;
+	TextRender()->SetCursor(&Cursor, r->x + xOffset, r->y - Size/10, Size, TEXTFLAG_RENDER | (MaxWidth > 0.0f ? TEXTFLAG_STOP_AT_END : 0), pFont);
+	CTextRenderSection Curr;
+	while(SkipToNextPart(pStr, pHighlight, &Curr, IgnoreColorCodes))
+	{
+		TextRender()->TextColor(Curr.m_ColorR, Curr.m_ColorG, Curr.m_ColorB, 1.0f);
+		TextRender()->TextEx(&Cursor, Curr.m_pStart, Curr.m_Length);
+
+		pStr = Curr.GetEnd();
+	}
+
+	return;
+	// highlight the parts that matches
+	if(pHighlight && pHighlight[0] != '\0')
+	{
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, r->x + xOffset, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, pFont);
+		//Cursor.m_LineWidth = r->w;
 		{
-			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, pFont);
-			Cursor.m_LineWidth = r->w;
-			const char *pStr = str_find_nocase(pText, pHighlight);
-			if(pStr)
+			const char *pStr = pText;
+			while((pStr = str_find_nocase(pStr, pHighlight)))
 			{
 				TextRender()->TextEx(&Cursor, pText, (int)(pStr-pText));
 				TextRender()->TextColor(0.4f,0.4f,1.0f,1);
@@ -629,41 +706,18 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 				TextRender()->TextColor(1,1,1,1);
 				TextRender()->TextEx(&Cursor, pStr+str_length(pHighlight), -1);
 			}
-			else
-				TextRender()->TextEx(&Cursor, pText, -1);
 		}
-		else
-			TextRender()->Text(pFont, r->x, r->y - Size/10, Size, pText, MaxWidth);
+//		else
+//			TextRender()->TextEx(&Cursor, pText, -1);
 	}
-	else if(Align > 0)
-	{
-		float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
-		// highlight the parts that matches
-		if(pHighlight && pHighlight[0] != '\0')
-		{
-			CTextCursor Cursor;
-			TextRender()->SetCursor(&Cursor, r->x + r->w-tw, r->y - Size/10, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END, pFont);
-			Cursor.m_LineWidth = r->w;
-			const char *pStr = str_find_nocase(pText, pHighlight);
-			if(pStr)
-			{
-				TextRender()->TextEx(&Cursor, pText, (int)(pStr-pText));
-				TextRender()->TextColor(0.4f,0.4f,1.0f,1);
-				TextRender()->TextEx(&Cursor, pStr, str_length(pHighlight));
-				TextRender()->TextColor(1,1,1,1);
-				TextRender()->TextEx(&Cursor, pStr+str_length(pHighlight), -1);
-			}
-			else
-				TextRender()->TextEx(&Cursor, pText, -1);
-		}
-		else
-			TextRender()->Text(pFont, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
-	}
+	else
+		TextRender()->Text(pFont, r->x + xOffset, r->y - Size/10, Size, pText, MaxWidth);
+
 }
 
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont)
+void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont, bool IgnoreColor)
 {
-	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight, pFont);
+	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight, pFont, IgnoreColor);
 }
 
 void CUI::DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)

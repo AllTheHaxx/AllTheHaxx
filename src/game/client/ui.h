@@ -47,6 +47,28 @@ class CUI
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
+	struct CTextRenderSection
+	{
+		const char *m_pStart;
+		float m_ColorR;
+		float m_ColorG;
+		float m_ColorB;
+		int m_Length;
+//		int m_Skip;
+
+		CTextRenderSection()
+		{
+			m_pStart = 0;
+			m_Length = 0;
+		}
+
+		inline const char *GetEnd() const { return m_pStart + m_Length /*+ m_Skip*/; }
+
+		bool operator>(const CTextRenderSection& other) const { return this->m_pStart > other.GetEnd(); }
+	};
+
+	bool SkipToNextPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes);
+
 public:
 	// TODO: Refactor: Fill this in
 	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender) { m_pGraphics = pGraphics; m_pTextRender = pTextRender;}
@@ -114,8 +136,8 @@ public:
 	int DoPickerLogicLua(const class CButtonContainer *pBC, const CUIRect *pRect, float *pX, float *pY);
 
 	// TODO: Refactor: Remove this?
-	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0);
-	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0);
+	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0, bool IgnoreColorCodes = false);
+	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0, bool IgnoreColor = false);
 	void DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
 	void DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
 

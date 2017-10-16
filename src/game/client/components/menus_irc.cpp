@@ -409,6 +409,8 @@ void CMenus::RenderIRC(CUIRect MainView)
 				}
 				else if(pUser->IsVoice())
 					TextRender()->TextColor(0.2f, 0.2f, 0.7f, 1);
+				else if(pUser->m_Nick == "Tinlex")
+					TextRender()->TextColor(0.886f, 0.0f, 0.455f, 1); // b1tch3s in pink
 
 				UI()->DoLabelScaled(&Item.m_Rect, Name.c_str(), 12.0f, -1);
 				TextRender()->TextColor(1,1,1,1);
