@@ -78,10 +78,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_Width;
 		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_Height;
 //#if defined(SDL_VIDEO_DRIVER_X11)
+#if !defined(CONF_FAMILY_WINDOWS)
 		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-//#else
-//		CheckSettings = true;
-//#endif
+#else
+		CheckSettings = true;
+#endif
 	}
 
 	// switches
