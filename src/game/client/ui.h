@@ -53,6 +53,7 @@ class CUI
 		float m_ColorR;
 		float m_ColorG;
 		float m_ColorB;
+		bool m_OverrideColor;
 		int m_Length;
 //		int m_Skip;
 
@@ -67,7 +68,7 @@ class CUI
 		bool operator>(const CTextRenderSection& other) const { return this->m_pStart > other.GetEnd(); }
 	};
 
-	bool SkipToNextPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes);
+	bool ProcessStringPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes);
 
 public:
 	// TODO: Refactor: Fill this in

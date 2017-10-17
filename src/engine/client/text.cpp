@@ -542,6 +542,14 @@ public:
 		m_TextA = a;
 	}
 
+	virtual void GetTextColor(float *r, float *g, float *b, float *a)
+	{
+		if(r) *r = m_TextR;
+		if(g) *g = m_TextG;
+		if(b) *b = m_TextB;
+		if(a) *a = m_TextA;
+	}
+
 	virtual void TextOutlineColor(float r, float g, float b, float a)
 	{
 		m_TextOutlineR = r;
