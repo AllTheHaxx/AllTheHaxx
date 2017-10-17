@@ -41,6 +41,13 @@
 #include "graphics_threaded.h"
 #include "backend_sdl.h"
 
+#ifdef __MINGW32__
+extern "C"
+{
+	int putenv(const char *);
+}
+#endif
+
 // ------------ CGraphicsBackend_Threaded
 
 void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
