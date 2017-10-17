@@ -56,10 +56,11 @@ public:
 
 	//
 	virtual float TextEx(CTextCursor *pCursor, const char *pText, int Length) = 0;
+	virtual float TextExParse(CTextCursor *pCursor, const char *pText, bool IgnoreColorCodes = false, const char *pHighlight = 0) = 0;
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
-	virtual void GetTextColor(float *r, float *g, float *b, float *a) = 0;
+//	virtual void GetTextColor(float *r, float *g, float *b, float *a) = 0;
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
 	virtual void Text(class CFont *pFontSetV, float x, float y, float Size, const char *pText, float MaxWidth) = 0;
 	virtual float TextWidth(class CFont *pFontSetV, float Size, const char *pText, int Length = -1, float LineWidth = -1) = 0;

@@ -23,6 +23,9 @@ enum
 
 static unsigned int aFontSizes[] = {8,9,10,11,12,13,14,15,16,17,18,19,20,36,64};
 #define NUM_FONT_SIZES (sizeof(aFontSizes)/sizeof(int))
+#define COLOR_CODE_TAG "$$" /* don't use non-ascii for this! it's giving str_length & co. some serious problems... */
+static const int COLOR_CODE_LEN = str_length(COLOR_CODE_TAG);
+
 
 struct CFontChar
 {
@@ -72,6 +75,26 @@ class CTextRender : public IEngineTextRender
 {
 	IGraphics *m_pGraphics;
 	IGraphics *Graphics() { return m_pGraphics; }
+
+	struct CTextRenderSection
+	{
+		const char *m_pStart;
+		float m_ColorR;
+		float m_ColorG;
+		float m_ColorB;
+		bool m_OverrideColor;
+		int m_Length;
+
+		CTextRenderSection()
+		{
+			m_pStart = 0;
+			m_Length = 0;
+		}
+
+		inline const char *GetEnd() const { return m_pStart + m_Length /*+ m_Skip*/; }
+
+		bool operator>(const CTextRenderSection& other) const { return this->m_pStart > other.GetEnd(); }
+	};
 
 	int WordLength(const char *pText)
 	{
@@ -431,6 +454,104 @@ class CTextRender : public IEngineTextRender
 		return (Kerning.x>>6);
 	}
 
+	bool IsValidColorCode(const char *pText)
+	{
+		return str_comp_num(pText, COLOR_CODE_TAG, COLOR_CODE_LEN) == 0 && (
+				(pText[COLOR_CODE_LEN+0] >= '0' && pText[COLOR_CODE_LEN+0] <= '9') ||
+				(pText[COLOR_CODE_LEN+0] >= 'A' && pText[COLOR_CODE_LEN+0] <= 'Z') ||
+				(pText[COLOR_CODE_LEN+0] >= 'a' && pText[COLOR_CODE_LEN+0] <= 'z') )
+				&& (
+				(pText[COLOR_CODE_LEN+1] >= '0' && pText[COLOR_CODE_LEN+1] <= '9') ||
+				(pText[COLOR_CODE_LEN+1] >= 'A' && pText[COLOR_CODE_LEN+1] <= 'Z') ||
+				(pText[COLOR_CODE_LEN+1] >= 'a' && pText[COLOR_CODE_LEN+1] <= 'z') )
+				&& (
+				(pText[COLOR_CODE_LEN+2] >= '0' && pText[COLOR_CODE_LEN+2] <= '9') ||
+				(pText[COLOR_CODE_LEN+2] >= 'A' && pText[COLOR_CODE_LEN+2] <= 'Z') ||
+				(pText[COLOR_CODE_LEN+2] >= 'a' && pText[COLOR_CODE_LEN+2] <= 'z') );
+	}
+
+	bool ProcessStringPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes)
+	{
+		if(!pStr || *pStr == '\0')
+			return false;
+
+		const char *pNextInterestingSectionStart = NULL;
+
+		// check for highlight
+		if(pHighlight && pHighlight[0] != '\0')
+		{
+			const char *pHightlightFound = str_find_nocase(pStr, pHighlight);
+			if(pHightlightFound > pStr)
+				pNextInterestingSectionStart = pHightlightFound;
+			else if(pHightlightFound == pStr) // only render it from its start, thus when we are right on it
+			{
+				pOut->m_pStart = pHightlightFound;
+				pOut->m_ColorR = 0.4f;
+				pOut->m_ColorG = 0.4f;
+				pOut->m_ColorB = 1.0f;
+				pOut->m_Length = str_length(pHighlight);
+				pOut->m_OverrideColor = true;
+
+				return true;
+			}
+		}
+
+		// find color code, e.g. §AJ9hey there§$
+		if(!NoColorCodes)
+		{
+			// check how far we are allowed to render
+			const char *pNextCandidate = str_find(pStr+/*COLOR_CODE_LEN+3*/1, COLOR_CODE_TAG);
+			if(pNextCandidate && (!pNextInterestingSectionStart || pNextCandidate < pNextInterestingSectionStart) && IsValidColorCode(pNextCandidate))
+				pNextInterestingSectionStart = pNextCandidate; // do not overwrite a predicted highlight
+
+			if(IsValidColorCode(pStr))
+			{
+				char aHackyBuf[2] = { pStr[COLOR_CODE_LEN+0], '\0'};
+				float Red = str_toint_base(aHackyBuf, 36) / 35.0f;
+
+				aHackyBuf[0] = pStr[COLOR_CODE_LEN+1];
+				float Green = str_toint_base(aHackyBuf, 36) / 35.0f;
+
+				aHackyBuf[0] = pStr[COLOR_CODE_LEN+2];
+				float Blue = str_toint_base(aHackyBuf, 36) / 35.0f;
+
+				const char *pStrBegin = pStr+COLOR_CODE_LEN+3;
+
+				// color code at string end? Don't render it.
+				if(pStrBegin == '\0')
+					return false; // no need to process the string once more
+
+				int MaxLen = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStrBegin) : str_length(pStrBegin);
+				if(MaxLen < 0)
+				{
+					/* in this case the next interesting section (most likely highlight) begins within our color tag,
+					 * thus the color tag should just be ignored.
+					 * instead, just hand over to the metioned section.
+					 */
+					return ProcessStringPart(pNextInterestingSectionStart, pHighlight, pOut, NoColorCodes);
+				}
+
+				pOut->m_Length = MaxLen;
+				pOut->m_pStart = pStrBegin;
+				pOut->m_ColorR = Red;
+				pOut->m_ColorG = Green;
+				pOut->m_ColorB = Blue;
+				pOut->m_OverrideColor = true;
+
+				return true;
+			}
+		}
+
+		pOut->m_ColorR = 1.0f;
+		pOut->m_ColorG = 1.0f;
+		pOut->m_ColorB = 1.0f;
+		pOut->m_pStart = pStr;
+		pOut->m_Length = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStr) : str_length(pStr); // don't render into the next section
+		pOut->m_OverrideColor = false;
+
+		return true;
+	}
+
 
 public:
 	CTextRender()
@@ -556,6 +677,23 @@ public:
 		m_TextOutlineG = g;
 		m_TextOutlineB = b;
 		m_TextOutlineA = a;
+	}
+
+	virtual float TextExParse(CTextCursor *pCursor, const char *pText, bool IgnoreColorCodes = false, const char *pHighlight = 0)
+	{
+		CTextRenderSection Section;
+		vec4 Color(m_TextR, m_TextG, m_TextB, m_TextA);
+		while(ProcessStringPart(pText, pHighlight, &Section, IgnoreColorCodes))
+		{
+			if(Section.m_OverrideColor)
+				TextColor(Section.m_ColorR, Section.m_ColorG, Section.m_ColorB, Color.a);
+			else
+				TextColor(Color.r, Color.g, Color.b, Color.a);
+			TextEx(pCursor, Section.m_pStart, Section.m_Length);
+
+			pText = Section.GetEnd();
+		}
+		TextColor(Color.r, Color.g, Color.b, Color.a);
 	}
 
 	virtual float TextEx(CTextCursor *pCursor, const char *pText, int Length)
@@ -759,9 +897,11 @@ public:
 			pCursor->m_Y = DrawY;
 
 		return MaxLineWidth;
-
 	}
 
 };
+
+#undef COLOR_CODE_TAG
+
 
 IEngineTextRender *CreateEngineTextRender() { return new CTextRender; }

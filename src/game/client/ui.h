@@ -47,29 +47,6 @@ class CUI
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
-	struct CTextRenderSection
-	{
-		const char *m_pStart;
-		float m_ColorR;
-		float m_ColorG;
-		float m_ColorB;
-		bool m_OverrideColor;
-		int m_Length;
-//		int m_Skip;
-
-		CTextRenderSection()
-		{
-			m_pStart = 0;
-			m_Length = 0;
-		}
-
-		inline const char *GetEnd() const { return m_pStart + m_Length /*+ m_Skip*/; }
-
-		bool operator>(const CTextRenderSection& other) const { return this->m_pStart > other.GetEnd(); }
-	};
-
-	bool ProcessStringPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes);
-
 public:
 	// TODO: Refactor: Fill this in
 	void SetGraphics(class IGraphics *pGraphics, class ITextRender *pTextRender) { m_pGraphics = pGraphics; m_pTextRender = pTextRender;}

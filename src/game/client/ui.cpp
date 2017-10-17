@@ -570,111 +570,6 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 	return ret;
 }*/
 
-// don't use non-ascii for this! it's giving str_length & co. some serious problems...
-#define COLOR_CODE_TAG "$$"
-const int COLOR_CODE_LEN = str_length(COLOR_CODE_TAG);
-
-static bool IsValidColorCode(const char *pText)
-{
-	return str_comp_num(pText, COLOR_CODE_TAG, COLOR_CODE_LEN) == 0 && (
-			(pText[COLOR_CODE_LEN+0] >= '0' && pText[COLOR_CODE_LEN+0] <= '9') ||
-			(pText[COLOR_CODE_LEN+0] >= 'A' && pText[COLOR_CODE_LEN+0] <= 'Z') ||
-			(pText[COLOR_CODE_LEN+0] >= 'a' && pText[COLOR_CODE_LEN+0] <= 'z') )
-			&& (
-			(pText[COLOR_CODE_LEN+1] >= '0' && pText[COLOR_CODE_LEN+1] <= '9') ||
-			(pText[COLOR_CODE_LEN+1] >= 'A' && pText[COLOR_CODE_LEN+1] <= 'Z') ||
-			(pText[COLOR_CODE_LEN+1] >= 'a' && pText[COLOR_CODE_LEN+1] <= 'z') )
-			&& (
-			(pText[COLOR_CODE_LEN+2] >= '0' && pText[COLOR_CODE_LEN+2] <= '9') ||
-			(pText[COLOR_CODE_LEN+2] >= 'A' && pText[COLOR_CODE_LEN+2] <= 'Z') ||
-			(pText[COLOR_CODE_LEN+2] >= 'a' && pText[COLOR_CODE_LEN+2] <= 'z') );
-}
-
-bool CUI::ProcessStringPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes)
-{
-	if(!pStr || *pStr == '\0')
-		return false;
-
-	const char *pNextInterestingSectionStart = NULL;
-
-	// check for highlight
-	if(pHighlight && pHighlight[0] != '\0')
-	{
-		const char *pHightlightFound = str_find_nocase(pStr, pHighlight);
-		if(pHightlightFound > pStr)
-			pNextInterestingSectionStart = pHightlightFound;
-		else if(pHightlightFound == pStr) // only render it from its start, thus when we are right on it
-		{
-			pOut->m_pStart = pHightlightFound;
-			pOut->m_ColorR = 0.4f;
-			pOut->m_ColorG = 0.4f;
-			pOut->m_ColorB = 1.0f;
-			pOut->m_Length = str_length(pHighlight);
-			pOut->m_OverrideColor = true;
-
-			return true;
-		}
-	}
-
-	// find color code, e.g. §AJ9hey there§$
-	if(!NoColorCodes)
-	{
-		// check how far we are allowed to render
-		const char *pNextCandidate = str_find(pStr+/*COLOR_CODE_LEN+3*/1, COLOR_CODE_TAG);
-		if(pNextCandidate && (!pNextInterestingSectionStart || pNextCandidate < pNextInterestingSectionStart) && IsValidColorCode(pNextCandidate))
-			pNextInterestingSectionStart = pNextCandidate; // do not overwrite a predicted highlight
-
-		if(IsValidColorCode(pStr))
-		{
-			char aHackyBuf[2] = { pStr[COLOR_CODE_LEN+0], '\0'};
-			float Red = str_toint_base(aHackyBuf, 36) / 35.0f;
-
-			aHackyBuf[0] = pStr[COLOR_CODE_LEN+1];
-			float Green = str_toint_base(aHackyBuf, 36) / 35.0f;
-
-			aHackyBuf[0] = pStr[COLOR_CODE_LEN+2];
-			float Blue = str_toint_base(aHackyBuf, 36) / 35.0f;
-
-			const char *pStrBegin = pStr+COLOR_CODE_LEN+3;
-
-			// color code at string end? Don't render it.
-			if(pStrBegin == '\0')
-				return false; // no need to process the string once more
-
-			int MaxLen = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStrBegin) : str_length(pStrBegin);
-			if(MaxLen < 0)
-			{
-				/* in this case the next interesting section (most likely highlight) begins within our color tag,
-				 * thus the color tag should just be ignored.
-				 * instead, just hand over to the metioned section.
-				 */
-				return ProcessStringPart(pNextInterestingSectionStart, pHighlight, pOut, NoColorCodes);
-			}
-
-			pOut->m_Length = MaxLen;
-			pOut->m_pStart = pStrBegin;
-			pOut->m_ColorR = Red;
-			pOut->m_ColorG = Green;
-			pOut->m_ColorB = Blue;
-			pOut->m_OverrideColor = true;
-
-			return true;
-		}
-	}
-
-	pOut->m_ColorR = 1.0f;
-	pOut->m_ColorG = 1.0f;
-	pOut->m_ColorB = 1.0f;
-	pOut->m_pStart = pStr;
-	pOut->m_Length = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStr) : str_length(pStr); // don't render into the next section
-	pOut->m_OverrideColor = false;
-
-	return true;
-}
-
-#undef COLOR_CODE_TAG
-
-
 void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont, bool IgnoreColorCodes)
 {
 	// TODO: FIX ME!!!!
@@ -698,20 +593,7 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 	if(MaxWidth > 0.0f)
 		Cursor.m_LineWidth = MaxWidth;
 	TextRender()->SetCursor(&Cursor, r->x + xOffset, r->y - Size/10, Size, TEXTFLAG_RENDER | (MaxWidth > 0.0f ? TEXTFLAG_STOP_AT_END : 0), pFont);
-	CTextRenderSection Curr;
-	vec4 Color;
-	TextRender()->GetTextColor(&Color.r, &Color.g, &Color.b, &Color.a);
-	while(ProcessStringPart(pStr, pHighlight, &Curr, IgnoreColorCodes))
-	{
-		if(Curr.m_OverrideColor)
-			TextRender()->TextColor(Curr.m_ColorR, Curr.m_ColorG, Curr.m_ColorB, Color.a);
-		else
-			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
-		TextRender()->TextEx(&Cursor, Curr.m_pStart, Curr.m_Length);
-
-		pStr = Curr.GetEnd();
-	}
-	TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+	TextRender()->TextExParse(&Cursor, pStr, IgnoreColorCodes, pHighlight);
 }
 
 void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont, bool IgnoreColor)
