@@ -1101,7 +1101,7 @@ void CChat::OnRender()
 			Cursor.m_LineWidth = LineWidth;
 			TextRender()->TextEx(&Cursor, "♥ ", -1);
 			TextRender()->TextEx(&Cursor, aName, -1);
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+			TextRender()->TextExParse(&Cursor, m_aLines[r].m_aText, g_Config.m_ClShowChatIgnoreColors);
 			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
 		}
 		y -= m_aLines[r].m_YOffset[OffsetType];
@@ -1179,7 +1179,7 @@ void CChat::OnRender()
 		}
 
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+		TextRender()->TextExParse(&Cursor, m_aLines[r].m_aText, g_Config.m_ClShowChatIgnoreColors);
 	}
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);

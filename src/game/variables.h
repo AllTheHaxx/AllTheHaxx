@@ -49,6 +49,7 @@ MACRO_CONFIG_INT(ClShowhudServerRecord, cl_showhud_server_record, 1, 0, 1, CFGFL
 MACRO_CONFIG_INT(ClShowRecord, cl_showrecord, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show old style DDRace client records")
 MACRO_CONFIG_INT(ClChat, cl_chat, 2, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable ingame chat (0=off, 1=server only, 2=all)")
 MACRO_CONFIG_INT(ClShowChat, cl_showchat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show chat")
+MACRO_CONFIG_INT(ClShowChatIgnoreColors, cl_show_chat_ignore_colors, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Disable parsing of color codes in chat")
 MACRO_CONFIG_INT(ClShowChatFriends, cl_show_chat_friends, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show only chat messages from friends")
 MACRO_CONFIG_INT(ClShowChatCryptData, cl_show_chat_cryptdata, 3, 0, 3, CFGFLAG_CLIENT|CFGFLAG_SAVE, "0=show none | 1=show theirs | 2=show ours | 3=show both")
 MACRO_CONFIG_INT(ClShowKillMessages, cl_showkillmessages, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show kill messages")

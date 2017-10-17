@@ -683,17 +683,20 @@ public:
 	{
 		CTextRenderSection Section;
 		vec4 Color(m_TextR, m_TextG, m_TextB, m_TextA);
+		float ret = 0.0f;
 		while(ProcessStringPart(pText, pHighlight, &Section, IgnoreColorCodes))
 		{
 			if(Section.m_OverrideColor)
 				TextColor(Section.m_ColorR, Section.m_ColorG, Section.m_ColorB, Color.a);
 			else
 				TextColor(Color.r, Color.g, Color.b, Color.a);
-			TextEx(pCursor, Section.m_pStart, Section.m_Length);
+			ret += TextEx(pCursor, Section.m_pStart, Section.m_Length);
 
 			pText = Section.GetEnd();
 		}
 		TextColor(Color.r, Color.g, Color.b, Color.a);
+
+		return ret;
 	}
 
 	virtual float TextEx(CTextCursor *pCursor, const char *pText, int Length)
