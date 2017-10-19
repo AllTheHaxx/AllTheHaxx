@@ -572,9 +572,6 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 
 void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, CFont *pFont, bool IgnoreColorCodes)
 {
-	// TODO: FIX ME!!!!
-	//Graphics()->BlendNormal();
-
 	float xOffset = 0.0f;
 
 	if(Align == CUI::ALIGN_CENTER)
@@ -590,9 +587,9 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 
 	const char *pStr = pText;
 	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, r->x + xOffset, r->y - Size/10, Size, TEXTFLAG_RENDER | (MaxWidth > 0.0f ? TEXTFLAG_STOP_AT_END : 0), pFont);
 	if(MaxWidth > 0.0f)
 		Cursor.m_LineWidth = MaxWidth;
-	TextRender()->SetCursor(&Cursor, r->x + xOffset, r->y - Size/10, Size, TEXTFLAG_RENDER | (MaxWidth > 0.0f ? TEXTFLAG_STOP_AT_END : 0), pFont);
 	TextRender()->TextExParse(&Cursor, pStr, IgnoreColorCodes, pHighlight);
 }
 
