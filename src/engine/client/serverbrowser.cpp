@@ -735,7 +735,7 @@ void CServerBrowser::Refresh(int Type)
 		m_NumRequests = 0;
 		m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 		// next token
-		m_CurrentToken = (m_CurrentToken+1)&0xff;
+		m_CurrentToken = secure_rand()%0xFF;
 
 		//
 		m_ServerlistType = Type;
