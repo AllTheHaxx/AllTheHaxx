@@ -142,7 +142,11 @@ static void dbg_break()
 
 	wait_log_queue();
 	io_flush(io_stdout());
+#if defined(CONF_FAMILY_WINDOWS)
+	*((volatile unsigned*)0) = 0x0;
+#else
 	abort();
+#endif
 }
 
 void wait_log_queue()
