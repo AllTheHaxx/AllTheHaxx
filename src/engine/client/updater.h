@@ -95,8 +95,8 @@ class CUpdater : public IUpdater
 public:
 	CUpdater();
 	~CUpdater();
-	static void ProgressCallback(CFetchTask *pTask, void *pUser);
-	static void CompletionCallback(CFetchTask *pTask, void *pUser);
+	static void ProgressCallback(IFetchTask *pTask, void *pUser);
+	static void CompletionCallback(IFetchTask *pTask, void *pUser);
 
 	const char *GetLatestVersion() const { return m_GitHubAPI.GetLatestVersion(); }
 	const char *GetNews() const { return m_aNews; }

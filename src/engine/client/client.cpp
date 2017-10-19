@@ -2674,7 +2674,7 @@ void CClient::MapFetcherStart(const char *pMap, int MapCrc)
 	str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
 	Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
 	str_format(aUrl, sizeof(aUrl), "%s/%s", m_pMapdownloadSource, aEscaped);
-	m_pMapdownloadTask = Fetcher()->QueueAdd(true, aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
+	m_pMapdownloadTask = Fetcher()->FetchFile(aUrl, m_aMapdownloadFilename, IStorageTW::TYPE_SAVE);
 	m_CurrentMapServer++;
 }
 
@@ -3039,9 +3039,9 @@ void CClient::Update()
 	PumpNetwork();
 	if(m_pMapdownloadTask)
 	{
-		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
+		if(m_pMapdownloadTask->State() == IFetchTask::STATE_DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
+		else if(m_pMapdownloadTask->State() == IFetchTask::STATE_ERROR)
 		{
 			if(m_CurrentMapServer < m_MapDbUrls.size())
 				MapFetcherStart(m_aMapdownloadFilename, m_MapdownloadCrc);
@@ -3052,7 +3052,7 @@ void CClient::Update()
 				SendMapRequest();
 			}
 		}
-		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
+		else if(m_pMapdownloadTask->State() == IFetchTask::STATE_ABORTED)
 		{
 			m_pMapdownloadTask = 0;
 		}

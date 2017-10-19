@@ -47,8 +47,7 @@ void CUpdater::Init()
 
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
-	m_pFetcher = new CFetcher;
-	m_pFetcher->Init(m_pStorage);
+	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 #if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5U, 1U) <= 0;
 #endif
@@ -117,7 +116,7 @@ void CUpdater::PerformUpdate()
 		dbg_msg("updater", "can't initiate update before version check!");
 }
 
-void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
+void CUpdater::ProgressCallback(IFetchTask *pTask, void *pUser)
 {
 	CALLSTACK_ADD();
 
@@ -126,14 +125,14 @@ void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
 	pUpdate->m_Percent = pTask->Progress();
 }
 
-void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
+void CUpdater::CompletionCallback(IFetchTask *pTask, void *pUser)
 {
 	CALLSTACK_ADD();
 
 	CUpdater *pSelf = (CUpdater *)pUser;
 	pSelf->m_TotalProgress++;
 
-	const bool IS_ERROR = pTask->State() == (const int)CFetchTask::STATE_ERROR;
+	const bool IS_ERROR = pTask->State() == (const int)IFetchTask::STATE_ERROR;
 
 	const char *a = 0; // a is full path
 	for(const char *c = pTask->Dest(); *c; c++)
@@ -221,7 +220,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			}
 		}
 	}
-	else if(pTask->State() == CFetchTask::STATE_DONE)
+	else if(pTask->State() == IFetchTask::STATE_DONE)
 	{
 		if(pSelf->State() == STATE_SYNC_REFRESH && str_comp(b, LATEST_VERSION_FILE) == 0)
 		{
@@ -509,7 +508,7 @@ void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDe
 		str_append(aDestPath, pFile, sizeof(aDestPath));
 	}
 
-	m_pFetcher->QueueAdd(false, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->FetchFile(aBuf, aDestPath, IStorageTW::TYPE_ABSOLUTE, true, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
@@ -529,7 +528,7 @@ void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
 		str_append(aDestPath, pFile, sizeof(aDestPath));
 	}
 
-	m_pFetcher->QueueAdd(false, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->FetchFile(aBuf, aDestPath, IStorageTW::TYPE_ABSOLUTE, true, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::InstallFile(const char *pFile)

@@ -1,4 +1,3 @@
-
 #include <sstream>
 #include <fstream>
 
@@ -7,11 +6,6 @@
 
 #include "skins.h"
 #include "skindownload.h"
-
-CSkinDownload::CSkinFetchTask * CSkinDownload::ms_apFetchTasks[MAX_FETCHTASKS] = {0};
-array<std::string> CSkinDownload::ms_aSkinDbUrls = array<std::string>();
-array<std::string> CSkinDownload::ms_FailedTasks = array<std::string>();
-
 
 void CSkinDownload::OnConsoleInit()
 {
@@ -25,8 +19,6 @@ void CSkinDownload::OnInit()
 {
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
-
-	mem_zero(ms_apFetchTasks, sizeof(ms_apFetchTasks));
 
 	m_DefaultSkin = -1;
 	LoadUrls();
@@ -64,26 +56,28 @@ void CSkinDownload::OnRender()
 	Screen.HSplitTop(15.0f, &Button, &Screen);
 	UI()->DoLabelScaled(&Button, Localize("Skin Downloads"), 14.0f, -1);
 
-	for(int i = 0; i < MAX_FETCHTASKS; i++)
+	array<const IFetchTask*> Remove = array<const IFetchTask*>();
+
+	for(auto &it : m_lpFetchTasks)
 	{
-		CSkinFetchTask *e = ms_apFetchTasks[i];
+		CSkinFetchTask *e = it.second;
 		if(!e)
 			continue;
 
 		int S = e->State();
-		if(S == CFetchTask::STATE_ERROR)
+		if(S == IFetchTask::STATE_ERROR)
 			TextRender()->TextColor(1,0,0,1);
-		else if(S == CFetchTask::STATE_DONE)
+		else if(S == IFetchTask::STATE_DONE)
 			TextRender()->TextColor(0,1,0,1);
-		else if(S == CFetchTask::STATE_QUEUED)
+		else if(S == IFetchTask::STATE_QUEUED)
 			TextRender()->TextColor(1,1,0,1);
-		else if(S == CFetchTask::STATE_RUNNING)
+		else if(S == IFetchTask::STATE_RUNNING)
 			TextRender()->TextColor(0.3f, 0.3f, 0.6f, 1);
-		else if(S == CFetchTask::STATE_ABORTED)
+		else if(S == IFetchTask::STATE_ABORTED)
 			TextRender()->TextColor(0.7f, 0.2f, 0.7f, 1);
 
 		// make sure that tasks don't stay in the list for ever
-		if(S != CFetchTask::STATE_QUEUED && S != CFetchTask::STATE_RUNNING && e->FinishTime() < 0)
+		if(S != IFetchTask::STATE_QUEUED && S != IFetchTask::STATE_RUNNING && e->FinishTime() < 0)
 			e->Finish();
 
 		Screen.HSplitTop(5.0f, 0, &Screen);
@@ -93,7 +87,7 @@ void CSkinDownload::OnRender()
 
 		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
-		if(e->State() == CFetchTask::STATE_RUNNING)
+		if(e->State() == IFetchTask::STATE_RUNNING)
 		{
 			Screen.HSplitTop(3.0f, 0, &Screen);
 			Screen.HSplitTop(2.0f, &Button, &Screen);
@@ -104,18 +98,24 @@ void CSkinDownload::OnRender()
 
 		if(e->FinishTime() > 0 && time_get() > e->FinishTime() + 2 * time_freq())
 		{
-			delete ms_apFetchTasks[i];
-			ms_apFetchTasks[i] = NULL;
+			delete e;
+			it.second = 0;
+			Remove.add(it.first);
 		}
 	}
+
+	// can't change the map contents while iterating over it, so gotta do it afterwards
+	for(int i = 0; i < Remove.size(); i++)
+		m_lpFetchTasks.erase(Remove[i]);
 
 	TextRender()->TextColor(1,1,1,1);
 
 }
 
-void CSkinDownload::CSkinFetchTask::ProgressCallback(CFetchTask *pTask, void *pUser)
+void CSkinDownload::CSkinFetchTask::ProgressCallback(IFetchTask *pTask, void *pUser)
 {
-	CSkinFetchTask *pTaskHandler = FindTask(pTask);
+	CSkinDownload *pSelf = static_cast<CSkinDownload*>(pUser);
+	CSkinFetchTask *pTaskHandler = pSelf->FindTask(pTask);
 	if(!pTaskHandler)
 	{
 		dbg_msg("skinfetcher/error", "FATAL: NO HANDLER FOR TASK %p", pTask);
@@ -126,7 +126,7 @@ void CSkinDownload::CSkinFetchTask::ProgressCallback(CFetchTask *pTask, void *pU
 	pTaskHandler->m_Progress = pTask->Progress();
 }
 
-void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
+void CSkinDownload::CompletionCallback(IFetchTask *pTask, void *pUser)
 {
 	CSkinDownload *pSelf = (CSkinDownload *)pUser;
 
@@ -140,9 +140,9 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 		return;
 	}
 
-	CSkinDownload::CSkinFetchTask::ProgressCallback(pTask, pTaskHandler);
+	CSkinDownload::CSkinFetchTask::ProgressCallback(pTask, pSelf);
 
-	if(pTask->State() == CFetchTask::STATE_ERROR || pTask->State() == CFetchTask::STATE_ABORTED)
+	if(pTask->State() == IFetchTask::STATE_ERROR || pTask->State() == IFetchTask::STATE_ABORTED)
 	{
 		if(g_Config.m_Debug)
 			dbg_msg("skinfetcher/debug", "download failed: '%s'", pDest);
@@ -150,7 +150,7 @@ void CSkinDownload::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(!pSelf->FetchNext(pTaskHandler))
 			pSelf->m_pStorage->RemoveBinaryFile(pDest); // delete the empty file dummy
 	}
-	else if(pTask->State() == CFetchTask::STATE_DONE)
+	else if(pTask->State() == IFetchTask::STATE_DONE)
 	{
 		if(g_Config.m_Debug)
 			dbg_msg("skinfetcher/debug", "download finished: '%s'", pDest);
@@ -181,8 +181,8 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 		return;
 
 	// don't rerun failed tasks
-	for(int i = 0; i < ms_FailedTasks.size(); i++)
-		if(str_comp_nocase(ms_FailedTasks[i].c_str(), pName) == 0)
+	for(int i = 0; i < m_FailedTasks.size(); i++)
+		if(str_comp_nocase(m_FailedTasks[i].c_str(), pName) == 0)
 			return;
 
 	// protect against malicious skin names
@@ -198,21 +198,11 @@ void CSkinDownload::RequestSkin(int *pDestID, const char *pName)
 #endif
 
 	// don't queue tasks multiple times
-	for(int i = 0; i < MAX_FETCHTASKS; i++)
-		if(ms_apFetchTasks[i])
-			if(str_comp_nocase(ms_apFetchTasks[i]->SkinName(), pName) == 0)
-				return;
+	for(auto &it : m_lpFetchTasks)
+		if(str_comp_nocase(it.second->SkinName(), pName) == 0)
+			return;
 
-	CSkinFetchTask **ppSlot = FindFreeSlot();
-	if(!ppSlot) // this check shouldn't be necessary... but safe is safe :/
-	{
-		dbg_msg("skinfetcher/debug", "!! WARNING !! > Couldn't find a free slot for new task '%s' (got %i/%i tasks)", pName, NumTasks(), MAX_FETCHTASKS);
-		return;
-	}
-
-	CSkinFetchTask *pTask = new CSkinFetchTask(pName);
-	*ppSlot = pTask;
-	FetchSkin(pTask);
+	FetchSkin(new CSkinFetchTask(pName));
 }
 
 bool CSkinDownload::FetchNext(CSkinFetchTask *pTaskHandler)
@@ -275,12 +265,13 @@ void CSkinDownload::FetchSkin(CSkinFetchTask *pTaskHandler)
 		return;
 	}
 
-	pTaskHandler->m_pCurlTask = m_pFetcher->QueueAdd(false, aBuf, aFullPath, -2, this, &CSkinDownload::CompletionCallback, &CSkinDownload::CSkinFetchTask::ProgressCallback);
+	pTaskHandler->m_pCurlTask = m_pFetcher->FetchFile(aBuf, aFullPath, IStorageTW::TYPE_ABSOLUTE, true, this, &CSkinDownload::CompletionCallback, &CSkinDownload::CSkinFetchTask::ProgressCallback);
+	m_lpFetchTasks[pTaskHandler->m_pCurlTask] = pTaskHandler;
 }
 
 void CSkinDownload::LoadUrls()
 {
-	ms_aSkinDbUrls.clear();
+	m_aSkinDbUrls.clear();
 
 	std::string line;
 	std::ifstream file(g_Config.m_ClSkinDbFile);
@@ -293,7 +284,7 @@ void CSkinDownload::LoadUrls()
 			if(str_length(pLine) <= 0 || pLine[0] == '#')
 				continue;
 
-			ms_aSkinDbUrls.add(std::string(pLine));
+			m_aSkinDbUrls.add(std::string(pLine));
 		}
 		file.close();
 
@@ -308,7 +299,7 @@ void CSkinDownload::LoadUrls()
 
 	if(NumURLs() == 0)
 	{
-		ms_aSkinDbUrls.add(std::string("https://ddnet.tw/skins/skin/"));
+		m_aSkinDbUrls.add(std::string("https://ddnet.tw/skins/skin/"));
 	}
 }
 

@@ -145,7 +145,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		bool operator<(const MapDbUrl& other) { return this->prior < other.prior; }
 	};
 	sorted_array<MapDbUrl> m_MapDbUrls;
-	CFetchTask *m_pMapdownloadTask;
+	IFetchTask *m_pMapdownloadTask;
 	int m_CurrentMapServer;
 
 	char m_aMapdownloadFilename[256];

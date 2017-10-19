@@ -2,6 +2,7 @@
 #define GAME_CLIENT_COMPONENTS_SKINDOWNLOAD_H
 
 #include <string>
+#include <map>
 
 #include <engine/fetcher.h>
 #include <engine/storage.h>
@@ -24,6 +25,7 @@ public:
 	public:
 		CSkinFetchTask(const char *pSkin) : m_SkinName(std::string(pSkin))
 		{
+			m_State = -1;
 			m_pCurlTask = 0;
 			m_Url = 0;
 			m_Progress = 0;
@@ -39,15 +41,15 @@ public:
 
 		void Invalidate()
 		{
-			m_State = CFetchTask::STATE_ERROR;
+			m_State = IFetchTask::STATE_ERROR;
 			m_FinishTime = time_get();
 			m_Progress = 100;
 		}
 
-		CFetchTask* m_pCurlTask;
+		IFetchTask* m_pCurlTask;
 
 		// getters
-		CFetchTask *Task() const { return m_pCurlTask; }
+		IFetchTask *Task() const { return m_pCurlTask; }
 		const char *SkinName() const { return m_SkinName.c_str(); }
 		int Url() const { return m_Url; }
 		int Progress() const { return m_Progress; }
@@ -58,7 +60,7 @@ public:
 		void Finish() { m_FinishTime = time_get(); }
 
 		// static shit
-		static void ProgressCallback(CFetchTask *pTask, void *pUser);
+		static void ProgressCallback(IFetchTask *pTask, void *pUser);
 
 	};
 
@@ -73,60 +75,59 @@ private:
 		MAX_FETCHTASKS = 4,
 	};
 
-	static array<std::string> ms_aSkinDbUrls;
-	static const char *GetURL(int i)
+	array<std::string> m_aSkinDbUrls;
+	const char *GetURL(int i)
 	{
-		dbg_assert(i >= 0 && i < ms_aSkinDbUrls.size(), "GetURL called with index out of range");
-		return ms_aSkinDbUrls[i].c_str();
+		if(dbg_assert_strict(i >= 0 && i < m_aSkinDbUrls.size(), "GetURL called with index out of range"))
+			return "";
+		return m_aSkinDbUrls[i].c_str();
 	}
-	static int NumURLs() { return ms_aSkinDbUrls.size(); }
-	static CSkinFetchTask *ms_apFetchTasks[MAX_FETCHTASKS];
-	static array<std::string> ms_FailedTasks;
+	int NumURLs() const { return m_aSkinDbUrls.size(); }
+	std::map<const IFetchTask*, CSkinFetchTask*> m_lpFetchTasks;
+	array<std::string> m_FailedTasks;
 
 
 	/**
 	 * @threadsafety DOESN'T lock, but accesses the critical array
 	 * @return The number of tasks
 	 */
-	static int NumTasks(bool ActiveOnly=false)
+	int NumTasks(bool ActiveOnly=false)
 	{
 		int ret = 0;
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i] != NULL)
-				if(!ActiveOnly || ms_apFetchTasks[i]->FinishTime() < 0)
-					ret++;
+		for(auto &it : m_lpFetchTasks)
+		{
+			if(!ActiveOnly || it.second->FinishTime() < 0)
+				ret++;
+		}
 		return ret;
 	}
 
-	static CSkinFetchTask *FindTask(const CFetchTask* pTask)
+	CSkinFetchTask *FindTask(const IFetchTask* pTask)
 	{
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i] != NULL)
-				if(ms_apFetchTasks[i]->Task() == pTask)
-					return ms_apFetchTasks[i];
-		return NULL;
-	}
-
-	static CSkinFetchTask **FindFreeSlot()
-	{
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i] == NULL)
-				return &(ms_apFetchTasks[i]);
-		return NULL;
+		try
+		{
+			CSkinFetchTask *pTaskHandler = m_lpFetchTasks.at(pTask);
+			return pTaskHandler;
+		} catch(std::out_of_range&) {
+			return NULL;
+		}
 	}
 
 	void LoadUrls();
 
-	void Fail(const char *pSkinName) { ms_FailedTasks.add(std::string(pSkinName)); }
+	void Fail(const char *pSkinName) { m_FailedTasks.add(std::string(pSkinName)); }
 	bool FetchNext(CSkinFetchTask *pTaskHandler);
 	void FetchSkin(CSkinFetchTask *pTaskHandler);
 
 public:
+	CSkinDownload() : m_pFetcher(0), m_pStorage(0), m_DefaultSkin(-1)
+	{
+	}
+
 	~CSkinDownload()
 	{
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i])
-				delete ms_apFetchTasks[i];
+		for(auto &it : m_lpFetchTasks)
+			delete it.second;
 	}
 
 	void OnConsoleInit();
@@ -144,7 +145,7 @@ public:
 	void RequestSkin(int *pDestID, const char *pName);
 
 	//static void ProgressCallback(CFetchTask *pTask, void *pUser);
-	static void CompletionCallback(CFetchTask *pTask, void *pUser);
+	static void CompletionCallback(IFetchTask *pTask, void *pUser);
 
 	static void ConFetchSkin(IConsole::IResult *pResult, void *pUserData);
 	static void ConDbgSpam(IConsole::IResult *pResult, void *pUserData);

@@ -1,45 +1,13 @@
 #ifndef ENGINE_FETCHER_H
 #define ENGINE_FETCHER_H
 
-#include <base/system++/system++.h>
+#include <engine/shared/jobs.h>
 #include "kernel.h"
 #include "stddef.h"
 
-class CFetchTask;
-
-typedef void (*PROGFUNC)(CFetchTask *pTask, void *pUser);
-typedef void (*COMPFUNC)(CFetchTask *pDest, void *pUser);
-
-class CFetchTask
+class IFetchTask
 {
-	MACRO_ALLOC_HEAP()
-	friend class CFetcher;
-
-	CFetchTask *m_pNext;
-
-	char m_aUrl[256];
-	char m_aDest[128];
-	PROGFUNC m_pfnProgressCallback;
-	COMPFUNC m_pfnCompCallback;
-	void *m_pUser;
-
-	double m_Current;
-	double m_Size;
-	int m_Progress;
-	int m_State;
-	bool m_Abort;
-	bool m_CanTimeout;
-	int m_StorageType;
-
-	CFetchTask(bool canTimeout);
 public:
-	~CFetchTask()
-	{
-		#if defined(CONF_DEBUG)
-		dbg_assert_legacy(m_State != STATE_RUNNING && m_State != STATE_QUEUED, "deleted an active fetch task!");
-		#endif
-	}
-
 	enum
 	{
 		STATE_ERROR = -1,
@@ -49,21 +17,27 @@ public:
 		STATE_ABORTED,
 	};
 
-	const double Current() const { return m_Current; }
-	const double Size() const { return m_Size; }
-	const int Progress() const { return m_Progress; }
-	const int State() const { return m_State; }
-	const char *Dest() const { return m_aDest; }
+	virtual ~IFetchTask() {};
 
-	void Abort() { m_Abort = true; };
+	virtual double Current() = 0;
+	virtual double Size() = 0;
+	virtual int Progress() = 0;
+	virtual int State() = 0;
+	virtual const char *Dest() = 0;
+	virtual void Abort() = 0;
+
+	virtual void Destroy() = 0;
 };
+
+typedef void (*PROGFUNC)(IFetchTask *pTask, void *pUser);
+typedef void (*COMPFUNC)(IFetchTask *pDest, void *pUser);
 
 class IFetcher : public IInterface
 {
 	MACRO_INTERFACE("fetcher", 0)
 public:
-	virtual bool Init(class IStorageTW *pStorage = 0) = 0;
-	virtual CFetchTask* QueueAdd(bool CanTimeout, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
+	virtual bool Init() = 0;
+	virtual IFetchTask *FetchFile(const char *pUrl, const char *pDest, int StorageType = -2, bool CanTimeout = true, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
 	virtual void Escape(char *pBud, size_t size, const char *pStr) = 0;
 };
 
