@@ -1183,7 +1183,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 				{
-					if(ServerBrowser()->CacheExists())
+					if(g_Config.m_BrAutoCache && ServerBrowser()->CacheExists())
 						ServerBrowser()->LoadCache();
 					else
 						ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -1837,9 +1837,9 @@ int CMenus::Render()
 		{
 			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 			{
-				if(m_pClient->ServerBrowser()->CacheExists())
+				if(g_Config.m_BrAutoCache && m_pClient->ServerBrowser()->CacheExists())
 				{
-					m_pClient->ServerBrowser()->LoadCache();
+					m_pClient->ServerBrowser()->LoadCacheWait();
 					ServerBrowser()->RefreshQuick();
 				}
 				else

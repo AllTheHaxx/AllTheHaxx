@@ -96,6 +96,7 @@ public:
 	void AbortRefresh(); // dunno if something needs to be cleaned up here...?
 	void SaveCache();
 	void LoadCache();
+	void LoadCacheWait();
 	static void LoadCacheThread(void *pUser);
 	bool CacheExists() const { return m_CacheExists; }
 	bool IsRefreshing() const;

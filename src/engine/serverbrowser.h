@@ -124,6 +124,7 @@ public:
 	virtual void AbortRefresh() = 0;
 	virtual void SaveCache() = 0;
 	virtual void LoadCache() = 0;
+	virtual void LoadCacheWait() = 0;
 	virtual bool IsRefreshing() const = 0;
 	virtual bool IsRefreshingMasters() const = 0;
 	virtual int LoadingProgression() const = 0;

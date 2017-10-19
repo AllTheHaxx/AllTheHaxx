@@ -600,6 +600,11 @@ void CGameClient::OnInit()
 		g_Config.m_ClShowhudChatbox = 0;
 		g_Config.m_BrShowDDNet = 0;
 	}
+	if(g_Config.m_ClConfigVersion < 3301)
+	{
+		g_Config.m_ClChatDennisProtection = 0;
+		g_Config.m_BrAutoCache = 1;
+	}
 
 	if(g_Config.m_ClConfigVersion != GAME_ATH_VERSION_NUMERIC)
 	{

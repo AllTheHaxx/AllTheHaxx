@@ -1570,7 +1570,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Right, Localize("Load the saved serverlist"), CUI::CORNER_R))
 			{
 				/*if(!*/ServerBrowser()->LoadCache()/*)
-					Console()->Print(0, "browser", "failed to load cache file", false)*/;
+							Console()->Print(0, "browser", "failed to load cache file", false)*/;
 			}
 		}
 		else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_FAVORITES)
@@ -1676,7 +1676,7 @@ void CMenus::RenderBrowser(CUIRect MainView, bool Ingame)
 		{
 			if(Page != PAGE_BROWSER_INTERNET)
 			{
-				if(ServerBrowser()->CacheExists())
+				if(g_Config.m_BrAutoCache && ServerBrowser()->CacheExists())
 					ServerBrowser()->LoadCache();
 				else
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

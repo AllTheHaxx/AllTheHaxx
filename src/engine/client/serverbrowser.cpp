@@ -80,7 +80,6 @@ CServerBrowser::CServerBrowser()
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 
 	m_NeedRefresh = 0;
-	m_CacheExists = true; // let's just assume this
 	m_aRecentServers.clear();
 	m_aRecentServers.hint_size(50);
 
@@ -144,6 +143,16 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
 	if(pConfig)
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
+
+	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
+	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorageTW::TYPE_SAVE);
+	m_CacheExists = true;
+	if(!File)
+	{
+		if(g_Config.m_Debug)
+			dbg_msg("browser", "no serverlist cache detected");
+		m_CacheExists = false;
+	}
 }
 
 const CServerInfo *CServerBrowser::SortedGet(int Index)// const
@@ -901,6 +910,13 @@ void CServerBrowser::LoadCache()
 	m_ServerlistType = TYPE_INTERNET;
 	void *pThread = thread_init(LoadCacheThread, this);
 	thread_detach(pThread);
+}
+
+void CServerBrowser::LoadCacheWait()
+{
+	LoadCache();
+	LOCK_SECTION_SMART LockHandler(&m_Lock);
+	LockHandler.WaitAndLock();
 }
 
 void CServerBrowser::LoadCacheThread(void *pUser)
