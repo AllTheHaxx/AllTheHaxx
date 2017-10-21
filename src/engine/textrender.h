@@ -64,6 +64,7 @@ public:
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
 	virtual void Text(class CFont *pFontSetV, float x, float y, float Size, const char *pText, float MaxWidth) = 0;
 	virtual float TextWidth(class CFont *pFontSetV, float Size, const char *pText, int Length = -1, float LineWidth = -1) = 0;
+	virtual float TextWidthParse(class CFont *pFontSetV, float Size, const char *pText, float LineWidth = -1, const char *pHighlight = 0) = 0;
 	virtual int TextLineCount(class CFont *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
 };
 

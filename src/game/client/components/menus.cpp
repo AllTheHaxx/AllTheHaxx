@@ -1405,7 +1405,7 @@ static const char *s_apSayings[] = {
 		,"Containing free melon-power!"
 		,"Jump the gun!"
 		,"øıŋĸ?"
-		,"§1C§2o§3l§4o§5r§6m§7a§8t§9i§ac"
+		,"$$00QC$$0Q0o$$0QQl$$Q00o$$Q0Qr$$UM7m$$QQQa$$999t$$99Zi$$9Z9c"
 		,"Have fun!"
 		,"What is a floppy disk...?"
 		,"Do you expect Haxx?"

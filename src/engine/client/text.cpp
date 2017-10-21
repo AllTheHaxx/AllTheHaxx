@@ -646,6 +646,16 @@ public:
 		return TextEx(&Cursor, pText, Length);
 	}
 
+	virtual float TextWidthParse(CFont *pFontSetV, float Size, const char *pText, float LineWidth, const char *pHightlight)
+	{
+		CTextCursor Cursor;
+		SetCursor(&Cursor, 0, 0, Size, 0, pFontSetV);
+		if(LineWidth > 0)
+			Cursor.m_LineWidth = LineWidth;
+		TextExParse(&Cursor, pText, false, pHightlight);
+		return Cursor.m_X;
+	}
+
 	virtual int TextLineCount(CFont *pFontSetV, float Size, const char *pText, float LineWidth)
 	{
 		CTextCursor Cursor;
