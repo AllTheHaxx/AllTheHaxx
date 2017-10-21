@@ -8,7 +8,7 @@
 class CUIRect
 {
 	// TODO: Refactor: Redo UI scaling
-	float Scale() const;
+	inline float Scale() const;
 public:
 	CUIRect() { x=0; y=0; w=0; h=0; }
 	CUIRect(float v) { x=v; y=v; w=v; h=v; }

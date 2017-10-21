@@ -187,30 +187,30 @@ void CMenus::RenderPopups()
 void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, const char *pButtonText, int ExtraAlign)
 {
 	char aBuf[128];
-	CUIRect Screen = *UI()->Screen();
+	const CUIRect& Screen = *UI()->Screen();
 
 	CUIRect Box, Part;
 	Box = Screen;
-	Box.VMargin(150.0f/UI()->Scale(), &Box);
+	Box.VMargin(150.0f, &Box);
 #if defined(__ANDROID__)
-	Box.HMargin(100.0f/UI()->Scale(), &Box);
+	Box.HMargin(100.0f, &Box);
 #else
-	Box.HMargin(150.0f/UI()->Scale(), &Box);
+	Box.HMargin(150.0f, &Box);
 #endif
 
 	// render the box
 	RenderTools()->DrawUIRect(&Box, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
 
-	Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
-	Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
-	Part.VMargin(20.f/UI()->Scale(), &Part);
+	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(24.f, &Part, &Box);
+	Part.VMargin(20.f, &Part);
 	if(TextRender()->TextWidth(0, 24.f, pTitle, -1) > Part.w)
 		UI()->DoLabelScaled(&Part, pTitle, 24.f, -1, (int)Part.w);
 	else
 		UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
-	Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
-	Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
-	Part.VMargin(20.f/UI()->Scale(), &Part);
+	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(24.f, &Part, &Box);
+	Part.VMargin(20.f, &Part);
 
 	if(ExtraAlign == -1)
 		UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
@@ -234,7 +234,7 @@ void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, cons
 
 		// additional info
 		Box.HSplitTop(10.0f, 0, &Box);
-		Box.VMargin(20.f/UI()->Scale(), &Box);
+		Box.VMargin(20.f, &Box);
 		if(m_pClient->Editor()->HasUnsavedData())
 		{
 			str_format(aBuf, sizeof(aBuf),
