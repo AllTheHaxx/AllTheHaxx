@@ -246,7 +246,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DrawRoundRectExt", &CRenderTools::DrawRoundRectExt)
 			.addFunction("DrawUIRect", &CRenderTools::DrawUIRect)
 			.addFunction("DrawCircle", &CRenderTools::DrawCircle)
-			.addFunction("RenderTee", &CRenderTools::RenderTee)
+			.addFunction("RenderTee", &CRenderTools::RenderTeeLua)
 		.endClass()
 
 		/// Game.Chat
