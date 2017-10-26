@@ -909,6 +909,7 @@ CConsole::~CConsole()
 
 void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 {
+	set_abort_on_assert(0);
 	for(int i = 0; i < NumArgs; i++)
 	{
 		// check for scripts to execute
@@ -925,9 +926,9 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 				// skip silent param
 				continue;
 			}
-			else if(!str_comp("-d", ppArguments[i]) || !str_comp("--disable-assert-break", ppArguments[i]))
+			else if(!str_comp("-A", ppArguments[i]) || !str_comp("--enable-assert", ppArguments[i]))
 			{
-				set_abort_on_assert(0);
+				set_abort_on_assert(1);
 			}
 		}
 		else
