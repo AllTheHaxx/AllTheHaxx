@@ -133,6 +133,15 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("HMargin", &CUIRect::HMargin)
 		.endClass()
 
+		.beginClass< CTeeRenderInfo >("TeeRenderInfo")
+			.addConstructor <void (*) ()> ()
+			.addData("Texture", &CTeeRenderInfo::m_Texture)
+			.addData("ColorBody", &CTeeRenderInfo::m_ColorBody)
+			.addData("ColorFeet", &CTeeRenderInfo::m_ColorFeet)
+			.addData("Size", &CTeeRenderInfo::m_Size)
+			.addData("GotAirJump", &CTeeRenderInfo::m_GotAirJump)
+		.endClass()
+
 		.beginClass< IGraphics::CQuadItem >("QuadItem")
 			.addConstructor <void (*) (float, float, float, float)> ()
 		.endClass()
@@ -237,6 +246,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("DrawRoundRectExt", &CRenderTools::DrawRoundRectExt)
 			.addFunction("DrawUIRect", &CRenderTools::DrawUIRect)
 			.addFunction("DrawCircle", &CRenderTools::DrawCircle)
+			.addFunction("RenderTee", &CRenderTools::RenderTee)
 		.endClass()
 
 		/// Game.Chat

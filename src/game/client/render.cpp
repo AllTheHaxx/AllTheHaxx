@@ -204,7 +204,12 @@ void CRenderTools::DrawCircle(float x, float y, float r, int Segments)
 		Graphics()->QuadsDrawFreeform(Array, NumItems);
 }
 
-void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool UseTeeAlpha, float AlphaLimit)
+void CRenderTools::RenderTeeLua(int Emote, CTeeRenderInfo *pInfo, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha, float AlphaLimit)
+{
+	RenderTee(CAnimState::GetIdle(), pInfo, Emote, Dir, Pos, UseTeeAlpha, AlphaLimit);
+}
+
+void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha, float AlphaLimit)
 {
 	vec2 Direction = Dir;
 	vec2 Position = Pos;

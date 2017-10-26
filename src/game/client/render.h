@@ -70,7 +70,8 @@ public:
 	void RenderTilemapGenerateSkip(class CLayers *pLayers);
 
 	// object render methods (gc_render_obj.cpp)
-	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool UseTeeAlpha = false, float AlphaLimit = 1.0f);
+	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha = false, float AlphaLimit = 1.0f);
+	void RenderTeeLua(int Emote, CTeeRenderInfo *pInfo, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha, float AlphaLimit);
 
 	// map render methods (gc_render_map.cpp)
 	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, float Time, float *pResult);
