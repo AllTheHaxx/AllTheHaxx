@@ -465,9 +465,7 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 void CSnapshotStorage::Add(int Tick, int64 Tagtime, int DataSize, void *pData, int CreateAlt)
 {
 	// allocate memory for holder + snapshot_data
-	int TotalSize = DataSize;
-	if(CreateAlt)
-		TotalSize += DataSize;
+	int TotalSize = sizeof(CHolder)+DataSize + CreateAlt*DataSize;
 
 	CHolder *pHolder = m_HeapPool.Allocate(TotalSize);
 

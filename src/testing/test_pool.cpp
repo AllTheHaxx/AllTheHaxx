@@ -1,5 +1,6 @@
 
 #include <base/system++/pool.h>
+#include <cstdlib>
 
 
 const int NUM_TEST_OBJECTS = 2048;
@@ -28,7 +29,7 @@ void test_pool(int64 *pTimeStart, int num)
 	}
 }
 
-void test_malloc(int64 *pTimeStart, int num)
+void test_memalloc(int64 *pTimeStart, int num)
 {
 	*pTimeStart = time_get_raw();
 	unsigned int *apArray[NUM_TEST_OBJECTS];
@@ -43,6 +44,25 @@ void test_malloc(int64 *pTimeStart, int num)
 		for(unsigned int i = 0; i < NUM_TEST_OBJECTS; i++)
 		{
 			mem_free(apArray[i]);
+		}
+	}
+}
+
+void test_malloc(int64 *pTimeStart, int num)
+{
+	*pTimeStart = time_get_raw();
+	unsigned int *apArray[NUM_TEST_OBJECTS];
+	for(int n = 0; n < num; n++)
+	{
+		for(unsigned int i = 0; i < NUM_TEST_OBJECTS; i++)
+		{
+			apArray[i] = (unsigned int*)malloc(sizeof(unsigned int));
+			*(apArray[i]) = i;
+		}
+
+		for(unsigned int i = 0; i < NUM_TEST_OBJECTS; i++)
+		{
+			free(apArray[i]);
 		}
 	}
 }
@@ -66,6 +86,12 @@ void test_malloc(int64 *pTimeStart, int num)
 void print_leakreport(const char *pTestName)
 {
 	mem_check();
+
+	if(mem_stats()->allocated == 0)
+	{
+		dbg_msg("leakreport", "all freed");
+		return;
+	}
 
 	dbg_msg("leakreport", "Total of %i bytes (%d kb) not freed after test '%s' exit. Backtrace:", mem_stats()->allocated, mem_stats()->allocated>>10, pTestName);
 	MEMHEADER *conductor = mem_stats()->first;
@@ -94,14 +120,17 @@ int main()
 	time_get_raw();
 
 	CONDUCT_TEST(pool, 50);
+	CONDUCT_TEST(memalloc, 50);
 	CONDUCT_TEST(malloc, 50);
 	dbg_msg("main", "------------------------");
 
 	CONDUCT_TEST(pool, 500);
+	CONDUCT_TEST(memalloc, 500);
 	CONDUCT_TEST(malloc, 500);
 	dbg_msg("main", "------------------------");
 
 	CONDUCT_TEST(pool, 5000);
+	CONDUCT_TEST(memalloc, 5000);
 	CONDUCT_TEST(malloc, 5000);
 
 	return 0;

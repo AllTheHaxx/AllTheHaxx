@@ -50,25 +50,14 @@ class CPool
 	};
 
 	CChunk *m_pFirst;
-	CChunk *m_pLast;
 	unsigned int m_Size;
 
 
 	void AddToPool(CChunk *pChunk)
 	{
-		if(m_pLast)
-		{
-			m_pLast->m_Header.m_pNext = pChunk;
-			m_pLast = pChunk;
-			if(!m_pFirst)
-				m_pFirst = m_pLast;
-		}
-		else
-		{
-			m_pFirst = pChunk;
-			m_pLast = m_pFirst;
-		}
-		pChunk->m_Header.m_pNext = NULL;
+		CChunk *pOldFirst = m_pFirst;
+		m_pFirst = pChunk;
+		pChunk->m_Header.m_pNext = pOldFirst;
 		m_Size++;
 	}
 
@@ -77,8 +66,6 @@ class CPool
 		// take a chunk from the allocated pool and return it
 		CChunk *pChunk = m_pFirst;
 		m_pFirst = pChunk->m_Header.m_pNext; // rip it out either way, even if we reallocate it
-		if(m_pFirst == NULL)
-			m_pLast = 0x0;
 		m_Size--;
 
 		// ensure there is enough size
@@ -112,7 +99,6 @@ public:
 	CPool()
 	{
 		m_pFirst = NULL;
-		m_pLast = NULL;
 		m_Size = 0;
 	}
 
@@ -126,7 +112,7 @@ public:
 	 * @return the new object
 	 * @remark This object must be 'freed' by using Free() or Delete(); no automatic memory management is being performed!
 	 */
-	T* Allocate(unsigned ExtraSpace = 0)
+	inline T* Allocate(unsigned ExtraSpace = 0)
 	{
 		// pool is empty? create a new object and return it right away
 		if(!m_pFirst)
@@ -198,7 +184,6 @@ public:
 			pChunk = pNext;
 		}
 		m_pFirst = NULL;
-		m_pLast = NULL;
 		m_Size = 0;
 	}
 };

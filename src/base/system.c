@@ -457,6 +457,7 @@ void dbg_logger_file(const char *filename)
 }
 /* */
 
+#if defined(CONF_DEBUG)
 /*typedef struct MEMHEADER
 {
 	const char *filename;
@@ -474,10 +475,14 @@ typedef struct MEMTAIL
 static struct MEMHEADER *first = 0;
 static const int MEM_GUARD_VAL = 0xbaadc0de;
 
+#endif
+
 void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment)
 {
 	/* TODO: fix alignment */
 	/* TODO: add debugging */
+
+#if defined(CONF_DEBUG)
 	MEMTAIL *tail;
 	MEMHEADER *header = (struct MEMHEADER *)malloc(sizeof(MEMHEADER)+size+sizeof(MEMTAIL));
 	dbg_assert_legacy(header != 0, "mem_alloc failure");
@@ -504,12 +509,16 @@ void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 
 	/*dbg_msg("mem", "++ %p", header+1); */
 	return header+1;
+#else
+	return malloc(size);
+#endif
 }
 
 void mem_free(void *p)
 {
 	if(p)
 	{
+#if defined(CONF_DEBUG)
 		MEMHEADER *header = (MEMHEADER *)p - 1;
 		MEMTAIL *tail = (MEMTAIL *)(((char*)(header+1))+header->size);
 
@@ -533,18 +542,21 @@ void mem_free(void *p)
 		if(header->next)
 			header->next->prev = header->prev;
 
-		#if defined(CONF_DEBUG)
 		header->next = 0;
 		header->prev = 0;
 		header->checksum = 0xBAADC0DE;
 		header->line = 0xBAADC0DE;
-		#endif
+
 		free(header);
+#else
+		free(p);
+#endif
 	}
 }
 
 void mem_debug_dump(IOHANDLE file)
 {
+#if defined(CONF_DEBUG)
 	char buf[1024];
 	MEMHEADER *header = first;
 	if(!file)
@@ -562,6 +574,7 @@ void mem_debug_dump(IOHANDLE file)
 
 		io_close(file);
 	}
+#endif
 }
 
 
@@ -587,6 +600,7 @@ void mem_set(void *block, int value, unsigned size)
 
 int mem_check_imp()
 {
+#if defined(CONF_DEBUG)
 	MEMHEADER *header = first;
 	while(header)
 	{
@@ -604,6 +618,7 @@ int mem_check_imp()
 
 		header = header->next;
 	}
+#endif
 
 	return 1;
 }
