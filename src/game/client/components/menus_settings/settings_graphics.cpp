@@ -77,6 +77,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxColorDepth = Depth;
 		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_Width;
 		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_Height;
+
+		float Ratio = (float)g_Config.m_GfxScreenWidth/(float)g_Config.m_GfxScreenHeight;
+		float Div = Ratio / (16.0f/9.0f);
+		int OptimalScale = round_to_int(Div * 100.0f);
+		g_Config.m_UiScale = OptimalScale;
+
 //#if defined(SDL_VIDEO_DRIVER_X11)
 #if !defined(CONF_FAMILY_WINDOWS)
 		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
