@@ -525,6 +525,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("Clan", &CGameClient::CClientData::GetClan)
 			.addProperty("SkinName", &CGameClient::CClientData::GetSkinName)
 			.addData("Tee", &CGameClient::CClientData::m_Predicted)
+			.addProperty("RenderInfo", &CGameClient::CClientData::GetTeeRenderInfo)
 		.endClass()
 
 		/// Engine.Graphics

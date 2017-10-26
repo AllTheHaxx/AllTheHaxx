@@ -286,6 +286,7 @@ public:
 		std::string GetName() const { return std::string(m_aName); }
 		std::string GetClan() const { return std::string(m_aClan); }
 		std::string GetSkinName() const { return std::string(m_aSkinName); }
+		const CTeeRenderInfo& GetTeeRenderInfo() const { return m_RenderInfo; }
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
