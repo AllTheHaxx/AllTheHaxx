@@ -259,10 +259,6 @@ function build(settings)
 		settings.cc.defines:Add("FEATURE_DEBUGGER")
 	end
 
-	if config.lua.value and config.luajit.value then
-		settings.cc.defines:Add("FEATURE_LUA")
-	end
-
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
@@ -367,6 +363,11 @@ function build(settings)
 	client_settings = engine_settings:Copy()
 	launcher_settings = engine_settings:Copy()
 
+	if config.lua.value and config.luajit.value then
+		client_settings.cc.defines:Add("FEATURE_LUA")
+	end
+
+
 	if family == "unix" then
 		if platform == "macosx" then
 			client_settings.link.frameworks:Add("OpenGL")
@@ -456,6 +457,17 @@ function build(settings)
 						engine, zlib, pnglite, md5, game_shared, aes128)
 	end
 
+	-- build tests
+	tests_settings = engine_settings:Copy()
+	tests_src = Collect("src/testing/*.cpp")
+	tests = {}
+	for i,v in ipairs(tests_src) do
+		testname = PathFilename(PathBase(v))
+		tests[i] = Link(tests_settings, testname, Compile(tools_settings, v), 
+						engine, zlib, pnglite, md5, game_shared, aes128)
+	end
+
+
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "AllTheHaxx", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack, aes128,
@@ -490,9 +502,10 @@ function build(settings)
 	v = PseudoTarget("versionserver".."_"..settings.config_name, versionserver_exe)
 	m = PseudoTarget("masterserver".."_"..settings.config_name, masterserver_exe)
 	t = PseudoTarget("tools".."_"..settings.config_name, tools)
+	d = PseudoTarget("tests".."_"..settings.config_name, tests)
 	p = PseudoTarget("twping".."_"..settings.config_name, twping_exe)
 
-	all = PseudoTarget(settings.config_name, c, s, v, m, t, p)
+	all = PseudoTarget(settings.config_name, c, s, v, m, t, p, d)
 	return all
 end
 

@@ -520,6 +520,11 @@ void mem_free(void *p)
 
 		memory_stats.allocated -= header->size;
 		memory_stats.active_allocations--;
+		if(memory_stats.active_allocations == 0)
+		{
+			dbg_assert_legacy(memory_stats.allocated == 0, "Got memory allocated while not having memory allocated??");
+			memory_stats.first = 0x0;
+		}
 
 		if(header->prev)
 			header->prev->next = header->next;

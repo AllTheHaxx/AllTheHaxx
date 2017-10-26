@@ -32,6 +32,7 @@ lad_maker*
 /teeworlds*
 /teeworlds_srv*
 /serverlaunch_*
+/test_*
 
 /*.dll
 /*.a

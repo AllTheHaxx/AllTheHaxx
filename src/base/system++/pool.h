@@ -77,6 +77,8 @@ class CPool
 		// take a chunk from the allocated pool and return it
 		CChunk *pChunk = m_pFirst;
 		m_pFirst = pChunk->m_Header.m_pNext; // rip it out either way, even if we reallocate it
+		if(m_pFirst == NULL)
+			m_pLast = 0x0;
 		m_Size--;
 
 		// ensure there is enough size
@@ -84,7 +86,7 @@ class CPool
 		{
 			// reallocating is much faster than searching for a large enough chunk
 			//  and probably having to reallocate after searching anyway
-			mem_free(pChunk); // we need to remove the chunk in order to replace it by a larget one
+			mem_free(pChunk); // we need to remove the chunk in order to replace it by a larger one
 			return CPool<T>::AllocChunk(ExtraSpace);
 		}
 		else
