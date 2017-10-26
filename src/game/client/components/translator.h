@@ -3,6 +3,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <queue>
+#include <atomic>
+#include <mutex>
 #include <game/client/component.h>
 #include "curl/curl.h"
 #include "curl/easy.h"
@@ -42,13 +44,18 @@ public:
 	void RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In, const char *pMentionedName, const char *pSaidBy = "");
 	inline bool HasTranslation()
 	{
-		LOCK_SECTION_DBG(m_Lock);
+		LOCK_SECTION_MUTEX_OPT(m_ThreadMutex, return false)
 		return !m_Results.empty();
+	}
+	inline bool HasQueue()
+	{
+		LOCK_SECTION_MUTEX_OPT(m_ThreadMutex, return false)
+		return !m_Queue.empty();
 	}
 
 	CTransEntry NextTranslation()
 	{
-		LOCK_SECTION_DBG(m_Lock);
+		LOCK_SECTION_MUTEX(m_ThreadMutex);
 		CTransEntry Result;
 		if(!dbg_assert_strict(!m_Results.empty(), "tried to get next translation but got no more results - USE 'HasTranslation()' !!!"))
 		{
@@ -61,9 +68,11 @@ public:
 private:
 	void *m_pThread;
 	CURL *m_pHandle;
-	LOCK_SMART m_Lock;
 
-	static void TranslationWorker(void *pUser);
+	std::atomic_bool m_ThreadRunning;
+	std::mutex m_ThreadMutex;
+	static void TranslationWorkerProxy(void *pUser);
+	void TranslationWorker();
 
 	std::queue<CTransEntry> m_Queue;
 	std::queue<CTransEntry> m_Results;

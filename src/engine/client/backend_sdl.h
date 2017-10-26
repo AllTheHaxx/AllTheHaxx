@@ -1,4 +1,4 @@
-
+#include <atomic>
 #include "SDL.h"
 
 #include "graphics_threaded.h"
@@ -66,7 +66,7 @@ protected:
 private:
 	ICommandProcessor *m_pProcessor;
 	CCommandBuffer * volatile m_pBuffer;
-	volatile bool m_Shutdown;
+	std::atomic_bool m_Shutdown;
 	semaphore m_Activity;
 	semaphore m_BufferDone;
 	void *m_pThread;

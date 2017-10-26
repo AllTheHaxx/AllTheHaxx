@@ -88,9 +88,7 @@ void CAStar::OnRender()
 	}
 
 	// don't interfere with the builder thread
-	LOCK_SECTION_LAZY_DBG(m_PathLock);
-	if(!__SectionLock.TryToLock())
-		return;
+	LOCK_SECTION_MUTEX_OPT(m_Mutex, return)
 
 	// check if there is anything to be shown
 	if(m_Path.empty())
@@ -223,6 +221,7 @@ unsigned short CAStar::CountTilesAround(int x, int y, int TileID)
 	return Count;
 }
 
+/* ON BUILD_PATH THREAD */
 CAStarWorldMap* CAStar::FillGrid(CAStarWorldMap *pMap)
 {
 	const int Height = pMap->GetHeight();
@@ -268,6 +267,7 @@ CAStarWorldMap* CAStar::FillGrid(CAStarWorldMap *pMap)
 	return pMap;
 }
 
+/* ON BUILD_PATH THREAD */
 void CAStar::ScanMap()
 {
 	dbg_assert_strict(m_pCurrentMapGrid == NULL, "[pathfinding] double-scanned map?!");
@@ -295,13 +295,13 @@ void CAStar::StopThreads()
 	if(m_pScoreThread)
 	{
 		dbg_msg("astar", "waiting for score thread to finish...");
-		thread_destroy(m_pScoreThread);
+		thread_wait(m_pScoreThread);
 		m_pScoreThread = NULL;
 	}
 	if(m_pBuilderThread)
 	{
 		dbg_msg("astar", "waiting for builder thread to finish...");
-		thread_destroy(m_pBuilderThread);
+		thread_wait(m_pBuilderThread);
 		m_pBuilderThread = NULL;
 	}
 	m_ThreadsShouldExit = false;
@@ -309,7 +309,7 @@ void CAStar::StopThreads()
 
 // THREADS
 
-/* function copied and edited from https://github.com/justinhj/astar-algorithm-cpp/blob/master/cpp/findpath.cpp */
+// function copied and edited from https://github.com/justinhj/astar-algorithm-cpp/blob/master/cpp/findpath.cpp
 void CAStar::BuildPath(void *pData)
 {
 	CPathBuilderParams *pParams = (CPathBuilderParams*)pData;
@@ -328,8 +328,11 @@ void CAStar::BuildPath(void *pData)
 	int SolutionLength = -1;
 	float SolutionCost = -1;
 
-	if(!(pSelf->m_pCurrentMapGrid))
-		pSelf->ScanMap();
+	{
+		LOCK_SECTION_MUTEX(pSelf->m_Mutex)
+		if(!(pSelf->m_pCurrentMapGrid))
+			pSelf->ScanMap();
+	}
 
 	CAStarSearch<CAStarMapSearchNode> astarsearch((unsigned int)(pSelf->m_pCurrentMapGrid->GetSize()), COST_SOLID);
 
@@ -364,7 +367,7 @@ void CAStar::BuildPath(void *pData)
 	}
 	while( SearchState == CAStarSearch<CAStarMapSearchNode>::SEARCH_STATE_SEARCHING );
 
-	LOCK_SECTION_DBG(pSelf->m_PathLock);
+	LOCK_SECTION_MUTEX_OPT(pSelf->m_Mutex, return)
 
 	if( SearchState == CAStarSearch<CAStarMapSearchNode>::SEARCH_STATE_SUCCEEDED )
 	{
@@ -464,6 +467,8 @@ void CAStar::CalcScoreThread()
 	// fitness calculation
 	float ClosestNodeDist = -1.0f;
 	int ClosestID = -1;
+
+	LOCK_SECTION_MUTEX(m_Mutex)
 	for(int i = m_Path.size()-1; i >= 0; i--)
 	{
 		if(m_ThreadsShouldExit)
@@ -495,6 +500,7 @@ void CAStar::CalcScoreThread()
 	}
 }
 
+/* ON MAIN THREAD */
 void CAStar::BuildPathRace()
 {
 	vec2 Start, Finish;

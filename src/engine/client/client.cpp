@@ -3342,7 +3342,7 @@ void CClient::Run()
 			{
 #if !(defined(CONF_FAMILY_WINDOWS) && defined(CONF_DEBUG))
 				if(m_pInputThread)
-					thread_destroy(m_pInputThread);
+					thread_wait(m_pInputThread);
 				else
 					dbg_msg("client/warn", "m_pInputThread == NULL");
 				m_pInputThread = NULL;

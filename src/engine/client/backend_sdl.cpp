@@ -90,7 +90,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 	m_Shutdown = true;
 	m_Activity.signal();
 	thread_wait(m_pThread);
-	thread_destroy(m_pThread);
+	m_pThread = 0;
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)

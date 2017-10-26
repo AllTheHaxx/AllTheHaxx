@@ -432,7 +432,7 @@ void thread_wait(void *thread);
 	Parameters:
 		thread - Thread to destroy.
 */
-void thread_destroy(void *thread);
+//void thread_destroy(void *thread);
 
 /*
 	Function: thread_yeild

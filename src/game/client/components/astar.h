@@ -1,6 +1,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_ASTAR_H
 #define GAME_CLIENT_COMPONENTS_ASTAR_H
 
+#include <mutex>
+#include <atomic>
 #include <base/vmath.h>
 #include <base/tl/sorted_array.h>
 
@@ -41,10 +43,10 @@ class CAStar : public CComponent
 
 	bool m_MapReloaded;
 
-	void *m_pBuilderThread;
-	void *m_pScoreThread;
-	bool m_ThreadsShouldExit;
-	LOCK_SMART m_PathLock;
+	std::atomic<void*> m_pBuilderThread;
+	std::atomic<void*> m_pScoreThread;
+	std::atomic_bool m_ThreadsShouldExit;
+	std::mutex m_Mutex;
 
 	char m_aCurrentMap[64];
 	class CAStarWorldMap *m_pCurrentMapGrid;
@@ -61,7 +63,11 @@ class CAStar : public CComponent
 	static void BuildPath(void *pParam);
 	void InitPathBuilder(const vec2& From, const vec2& To);
 	void BuildPathRace();
-	bool PathFound() const { return !m_Path.empty(); }
+	bool PathFound()
+	{
+		LOCK_SECTION_MUTEX(m_Mutex)
+		return !m_Path.empty();
+	}
 
 	sorted_array<Node> m_Path;
 
