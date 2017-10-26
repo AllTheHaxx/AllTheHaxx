@@ -387,6 +387,16 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("AttackTick", &CNetObj_Character::m_AttackTick)
 		.endClass()
 
+		/// Game.Snap:PlayerInfos(ID)
+		.beginClass<CNetObj_PlayerInfo>("CNetObj_PlayerInfo")
+			.addData("Local", &CNetObj_PlayerInfo::m_Local, false)
+			.addData("ClientID", &CNetObj_PlayerInfo::m_ClientID, false)
+			.addData("Team", &CNetObj_PlayerInfo::m_Team, false)
+			.addData("Score", &CNetObj_PlayerInfo::m_Score, false)
+			.addData("Latency", &CNetObj_PlayerInfo::m_Latency, false)
+		.endClass()
+
+
 		/// Game.VClient(i).Input
 		.beginClass<CNetObj_PlayerInput>("CNetObj_PlayerInput")
 			.addData("Direction", &CNetObj_PlayerInput::m_ViewDir)
@@ -446,6 +456,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
 			.addProperty("MouseX", &CControls::GetMouseX, &CControls::SetMouseX)
 			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
+			.addFunction("SetScoreboardFlag", &CControls::SetScoreboardFlag)
 		.endClass()
 
 		/// Engine.Input
@@ -487,10 +498,15 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("NumPlayers", &CServerInfo::m_NumPlayers, false)
 		.endClass()
 
-		// TODO: doc!
+		// Game.Snap
 		.beginClass<CGameClient::CSnapState>("CSnapState")
 			.addData("Tee", &CGameClient::CSnapState::m_pLocalCharacter)
 			.addData("ClientID", &CGameClient::CSnapState::m_LocalClientID)
+
+			.addFunction("PlayerInfos", &CGameClient::CSnapState::LuaGetPlayerInfos)
+			.addFunction("InfoByScore", &CGameClient::CSnapState::LuaGetInfoByScore)
+			.addFunction("InfoByName", &CGameClient::CSnapState::LuaGetInfoByName)
+			.addFunction("InfoByDDTeam", &CGameClient::CSnapState::LuaGetInfoByDDTeam)
 		.endClass()
 
 		/// Game.CharSnap(ID)
@@ -621,6 +637,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Client", &CLua::m_pClient, false)
 			.addFunction("Players", &CGameClient::LuaGetClientData)
 			.addFunction("CharSnap", &CGameClient::LuaGetCharacterInfo)
+			.addFunction("GetSnap", &CGameClient::LuaGetFullSnap)
+			.addVariable("Snap", &CLua::m_pCGameClient->m_Snap, false)
 			.addFunction("Tuning", &CGameClient::LuaGetTuning)
 			//dummy access
 			.addFunction("DummyInput", &CControls::LuaGetInputData)

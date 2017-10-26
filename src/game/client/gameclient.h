@@ -212,6 +212,11 @@ public:
 		//const CNetObj_PlayerInfo *m_paInfoByTeam[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByDDTeam[MAX_CLIENTS];
 
+		const CNetObj_PlayerInfo * LuaGetPlayerInfos(int ID) const { return m_paPlayerInfos[ID]; }
+		const CNetObj_PlayerInfo * LuaGetInfoByScore(int ID) const { return m_paInfoByScore[ID]; }
+		const CNetObj_PlayerInfo * LuaGetInfoByName(int ID) const { return m_paInfoByName[ID]; }
+		const CNetObj_PlayerInfo * LuaGetInfoByDDTeam(int ID) const { return m_paInfoByDDTeam[ID]; }
+
 		int m_LocalClientID;
 		int m_NumPlayers;
 		int m_aTeamSize[2];
@@ -434,6 +439,7 @@ public:
 
 	static CClientData * LuaGetClientData(int ID) { return &CLua::m_pCGameClient->m_aClients[ID]; }
 	static CSnapState::CCharacterInfo * LuaGetCharacterInfo(int ID) { return &CLua::m_pCGameClient->m_Snap.m_aCharacters[ID]; }
+	static const CSnapState& LuaGetFullSnap() { return CLua::m_pCGameClient->m_Snap; }
 	static CTuningParams * LuaGetTuning() { return &CLua::m_pCGameClient->m_Tuning[g_Config.m_ClDummy]; }
 	
 private:

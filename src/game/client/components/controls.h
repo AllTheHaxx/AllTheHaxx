@@ -63,14 +63,15 @@ public:
 	void SetTargetX(int n) { m_InputData[g_Config.m_ClDummy].m_AimX = n; }
 	int GetTargetY() const { return m_InputData[g_Config.m_ClDummy].m_AimY; }
 	void SetMouseX(int n) { m_MousePos[g_Config.m_ClDummy].x = n; }
-	int GetMouseX() const { return m_MousePos[g_Config.m_ClDummy].x; }
+	float GetMouseX() const { return m_MousePos[g_Config.m_ClDummy].x; }
 	void SetMouseY(int n) { m_MousePos[g_Config.m_ClDummy].y = n; }
-	int GetMouseY() const { return m_MousePos[g_Config.m_ClDummy].y; }
+	float GetMouseY() const { return m_MousePos[g_Config.m_ClDummy].y; }
 	void SetTargetY(int n) { m_InputData[g_Config.m_ClDummy].m_AimY = n; }
 	void SetDirRight(int n) { m_InputDirectionRight[g_Config.m_ClDummy] = n; }
 	void SetDirLeft(int n) { m_InputDirectionLeft[g_Config.m_ClDummy] = n; }
 	int GetDirRight() const { return m_InputDirectionRight[g_Config.m_ClDummy]; }
 	int GetDirLeft() const { return m_InputDirectionLeft[g_Config.m_ClDummy]; }
+	void SetScoreboardFlag() { m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD; }
 
 	static CNetObj_PlayerInput* LuaGetInputData(lua_State *L);
 
