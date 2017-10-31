@@ -16,54 +16,43 @@ const char* vanillaSkins[] = {"bluekitty.png", "bluestripe.png", "brownbear.png"
 	"pinky.png", "redbopp.png", "redstripe.png", "saddo.png", "toptri.png",
 	"twinbop.png", "twintri.png", "warpaint.png", "x_ninja.png"};
 
-int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
+
+
+int CSkins::CSkin::GetColorTexture() const
 {
-	CALLSTACK_ADD();
+	if(m_ColorTexture == SKIN_TEXTURE_NOT_LOADED)
+		m_pSkins->LoadTextures(const_cast<CSkin*>(this)); // const-cheatsy allowed here because this should look like a plain getter to the outside
 
-	int l = str_length(pName);
-	if(l < 4 || IsDir || str_comp(pName+l-4, ".png") != 0)
-		return 0;
+	return m_ColorTexture;
+}
 
-	CSkin Skin;
-	Skin.m_IsVanilla = false;
-	for(unsigned int i = 0; i < sizeof(vanillaSkins) / sizeof(vanillaSkins[0]); i++)
-	{
-		if(str_comp(pName, vanillaSkins[i]) == 0)
-		{
-			Skin.m_IsVanilla = true;
-			break;
-		}
-	}
+int CSkins::CSkin::GetOrgTexture() const
+{
+	if(m_OrgTexture == SKIN_TEXTURE_NOT_LOADED)
+		m_pSkins->LoadTextures(const_cast<CSkin*>(this));
 
-	if(g_Config.m_ClVanillaSkinsOnly && !Skin.m_IsVanilla)
-		return 0;
+	return m_OrgTexture;
+}
 
-	IStorageTW::CLoadHelper<CSkins> *pLoadHelper = (IStorageTW::CLoadHelper<CSkins> *)pUser;
-	CSkins *pSelf = pLoadHelper->pSelf;
 
-	// Don't add duplicate skins (one from user's config directory, other from
-	// client itself)
-	for(int i = 0; i < pSelf->Num(); i++)
-	{
-		const char* pExName = pSelf->Get(i)->m_aName;
-		if(str_comp_num(pExName, pName, l-4) == 0 && str_length(pExName) == l-4)
-			return 0;
-	}
+void CSkins::LoadTextures(CSkin *pSkin)
+{
+	pSkin->m_ColorTexture = CSkin::SKIN_TEXTURE_NOT_FOUND;
+	pSkin->m_OrgTexture = CSkin::SKIN_TEXTURE_NOT_FOUND;
 
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "%s/%s", pLoadHelper->pFullDir, pName);
 	CImageInfo Info;
-	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+	if(!Graphics()->LoadPNG(&Info, pSkin->m_FileInfo.m_aFullPath, pSkin->m_FileInfo.m_DirType))
 	{
-		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "failed to load skin from %s", aBuf);
-		return 0;
+		Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "failed to load skin from %s", pSkin->m_FileInfo.m_aFullPath);
+		return;
 	}
 
-	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	pSkin->m_OrgTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 	int BodySize = 96; // body size
 	if (BodySize > Info.m_Height)
-		return 0;
+		return;
+
 	unsigned char *d = (unsigned char *)Info.m_pData;
 	int Pitch = Info.m_Width*4;
 
@@ -81,7 +70,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 				}
 			}
 
-		Skin.m_BloodColor = normalize(vec3(aColors[0], aColors[1], aColors[2]));
+		pSkin->m_BloodColor = normalize(vec3(aColors[0], aColors[1], aColors[2]));
 	}
 
 	// create colorless version
@@ -131,15 +120,65 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			d[y*Pitch+x*4+2] = v;
 		}
 
-	Skin.m_ColorTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	pSkin->m_ColorTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 	mem_free(Info.m_pData);
+
+	if(g_Config.m_Debug)
+		Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "loaded skin texture for '%s'", pSkin->m_aName);
+}
+
+
+int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
+{
+	CALLSTACK_ADD();
+
+	int l = str_length(pName);
+	if(l < 4 || IsDir || str_comp(pName+l-4, ".png") != 0)
+		return 0;
+
+	CSkin Skin;
+	Skin.m_IsVanilla = false;
+	for(unsigned int i = 0; i < sizeof(vanillaSkins) / sizeof(vanillaSkins[0]); i++)
+	{
+		if(str_comp(pName, vanillaSkins[i]) == 0)
+		{
+			Skin.m_IsVanilla = true;
+			break;
+		}
+	}
+
+	if(g_Config.m_ClVanillaSkinsOnly && !Skin.m_IsVanilla)
+		return 0;
+
+	IStorageTW::CLoadHelper<CSkins> *pLoadHelper = (IStorageTW::CLoadHelper<CSkins> *)pUser;
+	CSkins *pSelf = pLoadHelper->pSelf;
+
+	Skin.m_pSkins = pSelf;
+
+	// Don't add duplicate skins (one from user's config directory, other from
+	// client itself)
+	for(int i = 0; i < pSelf->Num(); i++)
+	{
+		const char *pExName = pSelf->Get(i)->m_aName;
+		if(str_comp_num(pExName, pName, l-4) == 0 && str_length(pExName) == l-4)
+			return 0;
+	}
+
+	Skin.m_FileInfo.m_DirType = DirType;
+	str_formatb(Skin.m_FileInfo.m_aFullPath, "%s/%s", pLoadHelper->pFullDir, pName);
+
+	// textures are being loaded on-demand; later when skin is needed
+	Skin.m_OrgTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
+	Skin.m_ColorTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, min((int)sizeof(Skin.m_aName),l-3));
-	pSelf->m_aSkins.add(Skin);
+	int Index = pSelf->m_aSkins.add(Skin);
+	if(str_comp_nocase(Skin.m_aName, "default") == 0)
+		pSelf->m_DefaultSkinIndex = Index;
 
 	if(g_Config.m_Debug)
-		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "loaded skin '%s'", Skin.m_aName);
+		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "added skin '%s'", Skin.m_aName);
 
 	return 0;
 }
@@ -172,7 +211,7 @@ void CSkins::RefreshSkinList(bool clear)
 		Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "downloadedskins", SkinScan, pLoadHelper);
 	}
 
-	if(m_aSkins.size() == 0)
+	if(m_aSkins.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
@@ -180,7 +219,7 @@ void CSkins::RefreshSkinList(bool clear)
 		DummySkin.m_ColorTexture = -1;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
 		DummySkin.m_BloodColor = vec3(1.0f, 1.0f, 1.0f);
-		m_aSkins.add(DummySkin);
+		m_DefaultSkinIndex = m_aSkins.add(DummySkin);
 	}
 
 	delete pLoadHelper;
@@ -214,13 +253,14 @@ void CSkins::Clear()
 {
 	CALLSTACK_ADD();
 
-	while(m_aSkins.size() > 0)
+	while(!m_aSkins.empty())
 	{
 		Graphics()->UnloadTexture(m_aSkins[0].m_OrgTexture);
 		Graphics()->UnloadTexture(m_aSkins[0].m_ColorTexture);
 		m_aSkins.remove_index_fast(0);
 	}
 	m_aSkins.clear();
+	m_DefaultSkinIndex = -1;
 }
 
 vec3 CSkins::GetColorV3(int v)

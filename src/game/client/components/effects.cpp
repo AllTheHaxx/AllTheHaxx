@@ -196,7 +196,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(m_pClient->m_aClients[ClientID].m_SkinID);
 			if(s)
-				BloodColor = s->m_BloodColor;
+				BloodColor = s->GetBloodColor();
 		}
 	}
 

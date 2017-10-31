@@ -10,13 +10,39 @@ class CSkins : public CComponent
 {
 public:
 	// do this better and nicer
-	struct CSkin
+	class CSkin
 	{
+		friend class CSkins;
+	public:
+		enum
+		{
+			SKIN_TEXTURE_NOT_LOADED = -3,
+			SKIN_TEXTURE_LOADING = -2,
+			SKIN_TEXTURE_NOT_FOUND = -1
+		};
+
+	private:
+		CSkins *m_pSkins;
+
 		int m_OrgTexture;
 		int m_ColorTexture;
-		char m_aName[24];
+		char m_aName[64];
 		vec3 m_BloodColor;
 		bool m_IsVanilla;
+
+		struct
+		{
+			char m_aFullPath[512];
+			int m_DirType;
+		} m_FileInfo;
+
+	public:
+
+		int GetColorTexture() const;
+		int GetOrgTexture() const;
+		const char *GetName() const { return m_aName; }
+		const vec3& GetBloodColor() const { return m_BloodColor; }
+		bool IsVanilla() const { return m_IsVanilla; }
 
 		bool operator<(const CSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
 	};
@@ -28,12 +54,17 @@ public:
 	vec4 GetColorV4(int v);
 	int Num();
 	const CSkin *Get(int Index);
+	const CSkin *GetDefaultSkin() { return Get(m_DefaultSkinIndex); }
 	int Find(const char *pName);
 	void Clear();
 
+	void LoadTextures(CSkin *pSkin);
+
 private:
+	int m_DefaultSkinIndex;
 	sorted_array<CSkin> m_aSkins;
 
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };
+
 #endif

@@ -227,13 +227,13 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		CTeeRenderInfo OwnSkinInfo;
 		if(pEntry->m_UseCustomColor)
 		{
-			OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
+			OwnSkinInfo.m_Texture = pOwnSkin->GetColorTexture();
 			OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorBody);
 			OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorFeet);
 		}
 		else
 		{
-			OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
+			OwnSkinInfo.m_Texture = pOwnSkin->GetOrgTexture();
 			OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
@@ -288,13 +288,13 @@ void CMenus::RenderSettingsIdentPlayer(CUIRect MainView, int Page)
 	CTeeRenderInfo OwnSkinInfo;
 	if(pEntry->m_UseCustomColor)
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
+		OwnSkinInfo.m_Texture = pOwnSkin->GetColorTexture();
 		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorBody);
 		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorFeet);
 	}
 	else
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
+		OwnSkinInfo.m_Texture = pOwnSkin->GetOrgTexture();
 		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
@@ -433,13 +433,13 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	CTeeRenderInfo OwnSkinInfo;
 	if(pEntry->m_UseCustomColor)
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
+		OwnSkinInfo.m_Texture = pOwnSkin->GetColorTexture();
 		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorBody);
 		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorFeet);
 	}
 	else
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
+		OwnSkinInfo.m_Texture = pOwnSkin->GetOrgTexture();
 		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
@@ -550,7 +550,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		if(!s)
 			continue;
 
-		if(str_comp(s->m_aName, pEntry->m_aSkin) == 0)
+		if(str_comp(s->GetName(), pEntry->m_aSkin) == 0)
 			OldSelected = i;
 
 		CPointerContainer Container(&m_apSkinList[i]);
@@ -559,7 +559,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 		{
 			if(UI()->MouseInside(&Item.m_HitRect))
 			{
-				m_pClient->m_pTooltip->SetTooltip(s->m_aName);
+				m_pClient->m_pTooltip->SetTooltip(s->GetName());
 				if(i != OldSelected)
 					RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1,1,1,0.2f), CUI::CORNER_ALL, 3.5f);
 			}
@@ -567,13 +567,13 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 			CTeeRenderInfo Info;
 			if(pEntry->m_UseCustomColor)
 			{
-				Info.m_Texture = s->m_ColorTexture;
+				Info.m_Texture = s->GetColorTexture();
 				Info.m_ColorBody = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorBody);
 				Info.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pEntry->m_ColorFeet);
 			}
 			else
 			{
-				Info.m_Texture = s->m_OrgTexture;
+				Info.m_Texture = s->GetOrgTexture();
 				Info.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 				Info.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			}
@@ -584,7 +584,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 
 			if(g_Config.m_Debug)
 			{
-				vec3 BloodColor = pEntry->m_UseCustomColor ? m_pClient->m_pSkins->GetColorV3(pEntry->m_ColorBody) : s->m_BloodColor;
+				vec3 BloodColor = pEntry->m_UseCustomColor ? m_pClient->m_pSkins->GetColorV3(pEntry->m_ColorBody) : s->GetBloodColor();
 				Graphics()->TextureSet(-1);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
@@ -598,7 +598,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		str_copyb(pEntry->m_aSkin, m_apSkinList[NewSelected]->m_aName);
+		str_copyb(pEntry->m_aSkin, m_apSkinList[NewSelected]->GetName());
 		m_NeedSendinfo = true;
 	}
 

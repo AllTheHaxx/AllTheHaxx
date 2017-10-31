@@ -161,10 +161,10 @@ void CGhost::RenderGhost(CGhostCharacter Player, CGhostCharacter Prev, CNetObj_C
 	RenderInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(Info.m_ColorFeet);
 
 	if(Info.m_UseCustomColor)
-		RenderInfo.m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_ColorTexture;
+		RenderInfo.m_Texture = m_pClient->m_pSkins->Get(SkinId)->GetOrgTexture();
 	else
 	{
-		RenderInfo.m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_OrgTexture;
+		RenderInfo.m_Texture = m_pClient->m_pSkins->Get(SkinId)->GetOrgTexture();
 		RenderInfo.m_ColorBody = vec4(1,1,1,1);
 		RenderInfo.m_ColorFeet = vec4(1,1,1,1);
 	}

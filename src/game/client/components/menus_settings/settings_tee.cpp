@@ -32,13 +32,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	CTeeRenderInfo OwnSkinInfo;
 	if(*UseCustomColor)
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
+		OwnSkinInfo.m_Texture = pOwnSkin->GetColorTexture();
 		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
 		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
 	}
 	else
 	{
-		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
+		OwnSkinInfo.m_Texture = pOwnSkin->GetOrgTexture();
 		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
@@ -235,7 +235,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(s == 0)
 			continue;
 
-		if(str_comp(s->m_aName, Skin) == 0)
+		if(str_comp(s->GetName(), Skin) == 0)
 			OldSelected = i;
 
 		CPointerContainer Container(&m_apSkinList[i]);
@@ -246,13 +246,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			CTeeRenderInfo Info;
 			if(*UseCustomColor)
 			{
-				Info.m_Texture = s->m_ColorTexture;
+				Info.m_Texture = s->GetColorTexture();
 				Info.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
 				Info.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
 			}
 			else
 			{
-				Info.m_Texture = s->m_OrgTexture;
+				Info.m_Texture = s->GetOrgTexture();
 				Info.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 				Info.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			}
@@ -264,11 +264,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
-			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
+			str_format(aBuf, sizeof(aBuf), "%s", s->GetName());
 			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1, Item.m_Rect.w, g_Config.m_ClSkinFilterString);
 			if(g_Config.m_Debug)
 			{
-				vec3 BloodColor = *UseCustomColor ? m_pClient->m_pSkins->GetColorV3(*ColorBody) : s->m_BloodColor;
+				vec3 BloodColor = *UseCustomColor ? m_pClient->m_pSkins->GetColorV3(*ColorBody) : s->GetBloodColor();
 				Graphics()->TextureSet(-1);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
@@ -282,7 +282,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(Skin, m_apSkinList[NewSelected]->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(Skin, m_apSkinList[NewSelected]->GetName(), sizeof(g_Config.m_ClPlayerSkin));
 		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else

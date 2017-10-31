@@ -202,13 +202,13 @@ void CMenus::RenderGame(CUIRect MainView)
 	CTeeRenderInfo OwnSkinInfo;
 	if(g_Config.m_ClDummyUseCustomColor)
 	{
-		OwnSkinInfo.m_Texture = pDummySkin->m_ColorTexture;
+		OwnSkinInfo.m_Texture = pDummySkin->GetColorTexture();
 		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClDummyColorBody);
 		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClDummyColorFeet);
 	}
 	else
 	{
-		OwnSkinInfo.m_Texture = pDummySkin->m_OrgTexture;
+		OwnSkinInfo.m_Texture = pDummySkin->GetOrgTexture();
 		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}

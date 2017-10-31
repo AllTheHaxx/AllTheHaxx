@@ -1366,10 +1366,10 @@ void CGameClient::OnNewSnapshot()
 					}
 
 					if(m_aClients[ClientID].m_UseCustomColor)
-						m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_ColorTexture;
+						m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->GetColorTexture();
 					else
 					{
-						m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_OrgTexture;
+						m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->GetOrgTexture();
 						m_aClients[ClientID].m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
 						m_aClients[ClientID].m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
 					}
@@ -2211,7 +2211,7 @@ void CGameClient::CClientData::UpdateRenderInfo()
 	// force team colors
 	if(g_GameClient.m_Snap.m_pGameInfoObj && g_GameClient.m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 	{
-		m_RenderInfo.m_Texture = g_GameClient.m_pSkins->Get(m_SkinID)->m_ColorTexture;
+		m_RenderInfo.m_Texture = g_GameClient.m_pSkins->Get(m_SkinID)->GetColorTexture();
 		const int TeamColors[2] = {65387, 10223467};
 		if(m_Team >= TEAM_RED && m_Team <= TEAM_BLUE)
 		{
@@ -2238,7 +2238,7 @@ void CGameClient::CClientData::Reset()
 	m_EmoticonStart = -1;
 	m_Active = false;
 	m_ChatIgnore = false;
-	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
+	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->GetDefaultSkin()->GetColorTexture();
 	m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
 	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
 

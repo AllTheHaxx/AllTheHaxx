@@ -923,10 +923,10 @@ void CPlayers::OnRender()
 			if(Skin != -1)
 			{
 				if(IsTeamplay)
-					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_ColorTexture;
+					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->GetColorTexture();
 				else
 				{
-					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
+					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->GetOrgTexture();
 					m_aRenderInfo[i].m_ColorBody = vec4(1,1,1,1);
 					m_aRenderInfo[i].m_ColorFeet = vec4(1,1,1,1);
 				}

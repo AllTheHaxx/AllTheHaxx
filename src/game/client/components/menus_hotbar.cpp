@@ -79,21 +79,22 @@ void CMenus::RenderIdents(CUIRect MainView)
 
 		if(pIdent->m_UseCustomColor)
 		{
-			SkinInfo.m_Texture = pSkin->m_ColorTexture;
+			SkinInfo.m_Texture = pSkin->GetColorTexture();
 			SkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(pIdent->m_ColorBody);
 			SkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pIdent->m_ColorFeet);
 		}
 		else
 		{
-			SkinInfo.m_Texture = pSkin->m_OrgTexture;
+			SkinInfo.m_Texture = pSkin->GetOrgTexture();
 			SkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			SkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 
 		Button.VSplitLeft(80.0f, &Label, &Button);
+		const vec3& BloodColor = pSkin->GetBloodColor();
 		static CButtonContainer s_Button[512];
 		if(DoButton_Menu(&s_Button[i], "", 0, &Label, 0, CUI::CORNER_ALL, pIdent->m_UseCustomColor ? mix(SkinInfo.m_ColorBody, SkinInfo.m_ColorFeet, 0.4f)*0.7f :
-				vec4(pSkin->m_BloodColor.r, pSkin->m_BloodColor.g, pSkin->m_BloodColor.b, 0.7f)))
+				vec4(BloodColor.r, BloodColor.g, BloodColor.b, 0.7f)))
 		{
 			GameClient()->m_pIdentity->ApplyIdent(i, (bool)g_Config.m_ClDummy);
 		}
@@ -107,7 +108,7 @@ void CMenus::RenderIdents(CUIRect MainView)
 		const float Hue = (sinf(Client()->LocalTime()/3.1415f)/2.0f)+0.5f;
 		vec3 rgb = HslToRgb(vec3(Hue, 1.0f, 0.5f));
 		RenderTools()->DrawUIRect(&Label, GameClient()->m_pIdentity->UsingIdent(i, (bool)g_Config.m_ClDummy) ? vec4(rgb.r, rgb.g, rgb.b, 0.71f) :
-				vec4(pSkin->m_BloodColor.r * 0.3f, pSkin->m_BloodColor.g * 0.3f, pSkin->m_BloodColor.b * 0.3f, 0.95f), CUI::CORNER_T, 4.0f);
+				vec4(BloodColor.r * 0.3f, BloodColor.g * 0.3f, BloodColor.b * 0.3f, 0.95f), CUI::CORNER_T, 4.0f);
 		UI()->DoLabelScaled(&Label, pIdent->m_aName, 10.0f, 0);
 		Button.VSplitLeft(15.0f, 0, &Button);
 	}
