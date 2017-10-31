@@ -1030,6 +1030,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_MapdownloadChunk = 0;
 	if(m_pMapdownloadTask)
 		m_pMapdownloadTask->Abort();
+	m_pMapdownloadTask = NULL;
 	if(m_MapdownloadFile)
 		io_close(m_MapdownloadFile);
 	m_MapdownloadFile = 0;
