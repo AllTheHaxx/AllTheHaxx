@@ -21,7 +21,10 @@ const char* vanillaSkins[] = {"bluekitty.png", "bluestripe.png", "brownbear.png"
 int CSkins::CSkin::GetColorTexture() const
 {
 	if(m_ColorTexture == SKIN_TEXTURE_NOT_LOADED)
-		m_pSkins->LoadTextures(const_cast<CSkin*>(this)); // const-cheatsy allowed here because this should look like a plain getter to the outside
+		m_pSkins->LoadTexturesThreaded(const_cast<CSkin*>(this)); // const-cheatsy allowed here because this should look like a plain getter to the outside
+
+	if(m_ColorTexture == SKIN_TEXTURE_LOADING)
+		return m_pSkins->GetDefaultSkinColorTexture();
 
 	return m_ColorTexture;
 }
@@ -29,20 +32,22 @@ int CSkins::CSkin::GetColorTexture() const
 int CSkins::CSkin::GetOrgTexture() const
 {
 	if(m_OrgTexture == SKIN_TEXTURE_NOT_LOADED)
-		m_pSkins->LoadTextures(const_cast<CSkin*>(this));
+		m_pSkins->LoadTexturesThreaded(const_cast<CSkin*>(this));
+
+	if(m_ColorTexture == SKIN_TEXTURE_LOADING)
+		return m_pSkins->GetDefaultSkinOrgTexture();
 
 	return m_OrgTexture;
 }
 
 
-void CSkins::LoadTextures(CSkin *pSkin)
+void CSkins::LoadTexturesImpl(CSkin *pSkin)
 {
-	pSkin->m_ColorTexture = CSkin::SKIN_TEXTURE_NOT_FOUND;
-	pSkin->m_OrgTexture = CSkin::SKIN_TEXTURE_NOT_FOUND;
-
 	CImageInfo Info;
 	if(!Graphics()->LoadPNG(&Info, pSkin->m_FileInfo.m_aFullPath, pSkin->m_FileInfo.m_DirType))
 	{
+		pSkin->m_ColorTexture = m_DefaultSkinColorTexture;//CSkin::SKIN_TEXTURE_NOT_FOUND;
+		pSkin->m_OrgTexture = m_DefaultSkinOrgTexture;//CSkin::SKIN_TEXTURE_NOT_FOUND;
 		Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "failed to load skin from %s", pSkin->m_FileInfo.m_aFullPath);
 		return;
 	}
@@ -173,9 +178,13 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, min((int)sizeof(Skin.m_aName),l-3));
-	int Index = pSelf->m_aSkins.add(Skin);
+	pSelf->m_aSkins.add(Skin);
 	if(str_comp_nocase(Skin.m_aName, "default") == 0)
-		pSelf->m_DefaultSkinIndex = Index;
+	{
+		pSelf->LoadTexturesImpl(&Skin); // always load textures for default skin as replacement for skin textures that are currently being loaded
+		pSelf->m_DefaultSkinColorTexture = Skin.m_ColorTexture;
+		pSelf->m_DefaultSkinOrgTexture = Skin.m_OrgTexture;
+	}
 
 	if(g_Config.m_Debug)
 		pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "added skin '%s'", Skin.m_aName);
@@ -219,7 +228,7 @@ void CSkins::RefreshSkinList(bool clear)
 		DummySkin.m_ColorTexture = -1;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
 		DummySkin.m_BloodColor = vec3(1.0f, 1.0f, 1.0f);
-		m_DefaultSkinIndex = m_aSkins.add(DummySkin);
+		m_aSkins.add(DummySkin);
 	}
 
 	delete pLoadHelper;
@@ -260,7 +269,9 @@ void CSkins::Clear()
 		m_aSkins.remove_index_fast(0);
 	}
 	m_aSkins.clear();
-	m_DefaultSkinIndex = -1;
+
+	m_DefaultSkinColorTexture = -1;
+	m_DefaultSkinOrgTexture = -1;
 }
 
 vec3 CSkins::GetColorV3(int v)
@@ -272,4 +283,19 @@ vec4 CSkins::GetColorV4(int v)
 {
 	vec3 r = GetColorV3(v);
 	return vec4(r.r, r.g, r.b, 1.0f);
+}
+
+void CSkins::LoadTexturesThreaded(CSkins::CSkin *pSkin)
+{
+	pSkin->m_ColorTexture = CSkin::SKIN_TEXTURE_LOADING;
+	pSkin->m_OrgTexture = CSkin::SKIN_TEXTURE_LOADING;
+
+	thread_init_named(CSkins::LoadTexturesThreadProxy, pSkin, "skin_loader");
+}
+
+void CSkins::LoadTexturesThreadProxy(void *pUser)
+{
+	CSkin *pSkin = (CSkin*)pUser;
+	CSkins *pSelf = pSkin->m_pSkins;
+	pSelf->LoadTexturesImpl(pSkin);
 }

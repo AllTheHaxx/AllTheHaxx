@@ -24,8 +24,8 @@ public:
 	private:
 		CSkins *m_pSkins;
 
-		int m_OrgTexture;
-		int m_ColorTexture;
+		volatile int m_OrgTexture;
+		volatile int m_ColorTexture;
 		char m_aName[64];
 		vec3 m_BloodColor;
 		bool m_IsVanilla;
@@ -54,17 +54,22 @@ public:
 	vec4 GetColorV4(int v);
 	int Num();
 	const CSkin *Get(int Index);
-	const CSkin *GetDefaultSkin() { return Get(m_DefaultSkinIndex); }
+	int GetDefaultSkinColorTexture() const { return m_DefaultSkinColorTexture; }
+	int GetDefaultSkinOrgTexture() const { return m_DefaultSkinOrgTexture; }
 	int Find(const char *pName);
 	void Clear();
 
-	void LoadTextures(CSkin *pSkin);
 
 private:
-	int m_DefaultSkinIndex;
+	int m_DefaultSkinColorTexture;
+	int m_DefaultSkinOrgTexture;
 	sorted_array<CSkin> m_aSkins;
 
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	void LoadTexturesImpl(CSkin *pSkin);
+	void LoadTexturesThreaded(CSkin *pSkin);
+	static void LoadTexturesThreadProxy(void *pUser);
 };
 
 #endif
