@@ -592,7 +592,9 @@ void CHud::RenderVoting()
 	Rect.w = 100+4+5;
 	Rect.h = 46;
 
-	static float Offset = Rect.w;
+	static float RectOffset = Rect.w;
+	static float VBarsInset = 0.0f;
+	const float VBarsMargin = Rect.w*0.25f+20.0f;
 	static bool ShouldRender = false;
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice())
 			|| !m_pClient->m_pVoting->IsVoting()
@@ -603,24 +605,39 @@ void CHud::RenderVoting()
 
 
 	if(ShouldRender)
-		smooth_set(&Offset, 0.0f, (0.01f/Client()->RenderFrameTime())*10.0f, 0.03f); // visible
+	{
+		// 100% visible
+		smooth_set(&RectOffset, 0.0f, 30.0f, Client()->RenderFrameTime());
+		smooth_set(&VBarsInset, 0.0f, 7.0f, Client()->RenderFrameTime());
+	}
 	else if(!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_pScoreboard->Active() && m_pClient->m_pVoting->TakenChoice() && m_pClient->m_pVoting->IsVoting())
-		smooth_set(&Offset, Rect.w*0.75f, 20.0f, Client()->RenderFrameTime()); // only a bit visible
+	{
+		// 75% visible
+		smooth_set(&RectOffset, Rect.w*0.75f, 20.0f, Client()->RenderFrameTime());
+		smooth_set(&VBarsInset, VBarsMargin,  40.0f, Client()->RenderFrameTime());
+	}
 	else
-		smooth_set(&Offset, Rect.w, (0.01f/Client()->RenderFrameTime())*10.0f, 0.02f); // invisible
+	{
+		// invisible
+		smooth_set(&RectOffset, Rect.w, 20.0f, Client()->RenderFrameTime());
+		smooth_set(&VBarsInset, 0, 10.0f, Client()->RenderFrameTime());
+	}
 
+	// draw irc notification attached to the right of the voting window
 	{
 		CUIRect IRCRect = Rect;
 		IRCRect.x += Rect.w;
-		IRCRect.x -= Offset;
+		IRCRect.x -= RectOffset;
 		RenderIRCNotifications(IRCRect);
 	}
 
+	m_pClient->m_pVoting->CalculateBars();
+
 	// completely invisible, nothing to render
-	if(Offset == Rect.w && !ShouldRender)
+	if(RectOffset >= Rect.w && !ShouldRender)
 		return;
 
-
+	// draw the rect
 #if defined(__ANDROID__)
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
@@ -634,11 +651,40 @@ void CHud::RenderVoting()
 	RenderTools()->DrawRoundRect(TextX+TextW/2+20, TextY+TextH+2, TextW/2-10, 20, 5.0f);
 	Graphics()->QuadsEnd();
 #else
-	Rect.x -= Offset;
+	Rect.x -= RectOffset;
 	RenderTools()->DrawUIRect(&Rect, vec4(0,0,0,0.40f), CUI::CORNER_R, 5.0f);
-	Rect.x += Offset;
+
+	// HACK FOR CLIPPING: the clipping does not take into account the screen mapping!
+	// 600 seems to be some kind of magical value concerning screen mapping
+	// we are using 300, so we have to multiply by 2 to get the values for clipping
+	{
+		CUIRect ClippingRect(Rect.x*2, Rect.y*2, Rect.w*2, Rect.h*2);
+		UI()->ClipEnable(&ClippingRect);
+	}
+	// END HACK
+
+	Rect.x += RectOffset;
 #endif
 
+	// render vertical bars
+	{
+		float yPos = 60.0f;
+		float VerticalBarsX = Rect.w-RectOffset - VBarsInset + (Rect.w*0.25f) + 10.0f;
+
+		CTextCursor Cursor;
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), Localize("%ds"), m_pClient->m_pVoting->SecondsLeft());
+		float tw = TextRender()->TextWidth(0x0, 6, aBuf, -1);
+		TextRender()->SetCursor(&Cursor, VerticalBarsX+4 - tw, yPos, 6.0f, TEXTFLAG_RENDER);
+		TextRender()->TextEx(&Cursor, aBuf, -1);
+
+		yPos += 10.0f; // space to the seconds-text
+		CUIRect Base(VerticalBarsX, yPos, 4, Rect.h - (yPos-Rect.y) - 5.0f);
+		m_pClient->m_pVoting->RenderBarsVertical(Base, true);
+	}
+	UI()->ClipDisable();
+
+	float TotalOffset = RectOffset + VBarsInset*1.2f;
 	TextRender()->TextColor(1,1,1,1);
 
 	CTextCursor Cursor;
@@ -649,7 +695,7 @@ void CHud::RenderVoting()
 	TextRender()->SetCursor(&Cursor, TextX+TextW-tw, 0.0f, 10.0f, TEXTFLAG_RENDER);
 #else
 	float tw = TextRender()->TextWidth(0x0, 6, aBuf, -1);
-	TextRender()->SetCursor(&Cursor, 5.0f+100.0f-tw-Offset, 60.0f, 6.0f, TEXTFLAG_RENDER);
+	TextRender()->SetCursor(&Cursor, 5.0f+100.0f-tw-TotalOffset, 60.0f, 6.0f, TEXTFLAG_RENDER);
 #endif
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
@@ -657,7 +703,7 @@ void CHud::RenderVoting()
 	TextRender()->SetCursor(&Cursor, TextX, 0.0f, 10.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = TextW-tw;
 #else
-	TextRender()->SetCursor(&Cursor, 5.0f-Offset, 60.0f, 6.0f, TEXTFLAG_RENDER);
+	TextRender()->SetCursor(&Cursor, 5.0f-TotalOffset, 60.0f, 6.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = 100.0f-tw;
 #endif
 	Cursor.m_MaxLines = 3;
@@ -668,7 +714,7 @@ void CHud::RenderVoting()
 #if defined(__ANDROID__)
 	TextRender()->SetCursor(&Cursor, TextX, 23.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 #else
-	TextRender()->SetCursor(&Cursor, 5.0f-Offset, 79.0f, 6.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	TextRender()->SetCursor(&Cursor, 5.0f-TotalOffset, 79.0f, 6.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 #endif
 	Cursor.m_LineWidth = 100.0f;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -676,7 +722,7 @@ void CHud::RenderVoting()
 #if defined(__ANDROID__)
 	CUIRect Base(TextX, TextH - 8, TextW, 4);
 #else
-	CUIRect Base(5-Offset, 88, 100, 4);
+	CUIRect Base(5-TotalOffset, 88, 100, 4);
 #endif
 	m_pClient->m_pVoting->RenderBars(Base, false);
 
@@ -931,7 +977,7 @@ void CHud::RenderSpectatorHud()
 	// draw the text
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Spectate"), m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ?
-		m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName : Localize("Free-View"));
+																   m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName : Localize("Free-View"));
 	TextRender()->Text(0, m_Width-174.0f, m_Height-13.0f, 8.0f, aBuf, -1);
 }
 
@@ -1113,11 +1159,11 @@ void CHud::RenderDDRaceEffects()
 			TextRender()->TextColor(1,1,1,1);
 		}
 	}
-		/*else if(m_DDRaceTimeReceived)
-		{
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", m_DDRaceTime/60, m_DDRaceTime%60, m_DDRaceTick/10);
-			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12,"00:00.0",-1)/2, 20, 12, aBuf, -1); // use fixed value for text width so its not shaky
-		}*/
+	/*else if(m_DDRaceTimeReceived)
+	{
+		str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", m_DDRaceTime/60, m_DDRaceTime%60, m_DDRaceTick/10);
+		TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12,"00:00.0",-1)/2, 20, 12, aBuf, -1); // use fixed value for text width so its not shaky
+	}*/
 
 
 

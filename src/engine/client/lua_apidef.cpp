@@ -566,6 +566,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addFunction("MapScreen", &IGraphics::MapScreen)
 
+			.addProperty("ScreenAspect", &IGraphics::ScreenAspect)
 			.addProperty("ScreenWidth", &IGraphics::ScreenWidth)
 			.addProperty("ScreenHeight", &IGraphics::ScreenHeight)
 			

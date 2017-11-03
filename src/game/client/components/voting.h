@@ -22,6 +22,9 @@ class CVoting : public CComponent
 	int m_Voted;
 	int m_Yes, m_No, m_Pass, m_Total;
 
+	// for rendering
+	float m_YesVal, m_NoVal;
+
 	void AddOption(const char *pDescription);
 	void ClearOptions();
 	void Callvote(const char *pType, const char *pValue, const char *pReason);
@@ -40,7 +43,9 @@ public:
 	virtual void OnMessage(int Msgtype, void *pRawMsg);
 	virtual void OnRender();
 
+	void CalculateBars();
 	void RenderBars(const CUIRect& Bars, bool Text) const;
+	void RenderBarsVertical(const CUIRect& VBars, bool Text) const;
 
 	void CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote = false);
 	void CallvoteKick(int ClientID, const char *pReason, bool ForceVote = false);

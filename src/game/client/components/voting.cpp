@@ -145,6 +145,9 @@ CVoting::CVoting()
 	m_aReason[0] = 0;
 	m_Yes = m_No = m_Pass = m_Total = 0;
 	m_Voted = 0;
+
+	m_YesVal = 0.0f;
+	m_NoVal = 0.0f;
 }
 
 void CVoting::AddOption(const char *pDescription)
@@ -195,6 +198,9 @@ void CVoting::OnReset()
 	m_aReason[0] = 0;
 	m_Yes = m_No = m_Pass = m_Total = 0;
 	m_Voted = 0;
+
+	m_YesVal = 0.0f;
+	m_NoVal = 0.0f;
 }
 
 void CVoting::OnConsoleInit()
@@ -306,6 +312,97 @@ void CVoting::OnRender()
 }
 
 
+void CVoting::CalculateBars()
+{
+	if(m_Total <= 0)
+	{
+		m_YesVal = 0.0f;
+		m_NoVal = 0.0f;
+		return;
+	}
+
+	if(m_Yes)
+		smooth_set(&m_YesVal, m_Yes, 100.0f, Client()->RenderFrameTime());
+	else
+		m_YesVal = 0.0f;
+
+	if(m_No)
+		smooth_set(&m_NoVal, m_No, 100.0f, Client()->RenderFrameTime());
+	else
+		m_NoVal = 0.0f;
+}
+
+void CVoting::RenderBarsVertical(const CUIRect& Bars, bool Text) const
+{
+	RenderTools()->DrawUIRect(&Bars, vec4(0.8f,0.8f,0.8f,0.5f), CUI::CORNER_ALL, Bars.h/3);
+
+	CUIRect Splitter = Bars;
+	Splitter.y = Splitter.y+Splitter.h/2.0f;
+	Splitter.h = Splitter.w/2.0f;
+	Splitter.y -= Splitter.h/2.0f;
+	RenderTools()->DrawUIRect(&Splitter, vec4(0.4f,0.4f,0.4f,0.5f), CUI::CORNER_ALL, Splitter.w/4);
+
+	if(m_Total <= 0)
+		return;
+
+	float TextSize = 5.0f;
+
+	// render them bars vertically!
+
+	if(m_Yes)
+	{
+		CUIRect YesArea = Bars;
+		YesArea.h *= m_YesVal/(float)m_Total;
+		RenderTools()->DrawUIRect(&YesArea, vec4(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.w/3.0f);
+
+		if(Text)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%d", m_Yes);
+			CUIRect TextRect = YesArea;
+			TextRect.x -= 20.0f; // doesn't really matter as the text is right-aligned
+			TextRect.w = 20.0f - 3.0f;
+			TextRect.h = TextSize;
+			UI()->DoLabel(&TextRect, aBuf, TextSize, CUI::ALIGN_RIGHT);
+		}
+	}
+
+	if(m_No)
+	{
+		CUIRect NoArea = Bars;
+		NoArea.h *= m_NoVal/(float)m_Total;
+		NoArea.y = (Bars.y + Bars.h)-NoArea.h;
+		RenderTools()->DrawUIRect(&NoArea, vec4(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.w/3.0f);
+
+		if(Text)
+		{
+			char Buf[8];
+			str_format(Buf, sizeof(Buf), "%d", m_No);
+			CUIRect TextRect;
+			TextRect.x = NoArea.x - 20.0f;
+			TextRect.w = 20.0f - 3.0f;
+			TextRect.y = NoArea.y + NoArea.h - TextSize;
+			TextRect.h = TextSize;
+			UI()->DoLabel(&TextRect, Buf, TextSize, CUI::ALIGN_RIGHT);
+		}
+	}
+
+
+	TextSize -= 1.0f;
+
+	if(Text && m_Pass)
+	{
+		char aBuf[8];
+		str_format(aBuf, sizeof(aBuf), "-%d", m_Pass);
+		CUIRect TextRect;
+		TextRect.x = Bars.x-Bars.w - 20.0f;
+		TextRect.w = 20.0f - 3.0f;
+		TextRect.y = Bars.y + Bars.h/2.0f - TextSize/2.0f;
+		TextRect.h = TextSize;
+		UI()->DoLabel(&TextRect, aBuf, TextSize, CUI::ALIGN_RIGHT);
+	}
+}
+
 void CVoting::RenderBars(const CUIRect& Bars, bool Text) const
 {
 	CALLSTACK_ADD();
@@ -318,55 +415,51 @@ void CVoting::RenderBars(const CUIRect& Bars, bool Text) const
 	Splitter.x -= Splitter.w/2;
 	RenderTools()->DrawUIRect(&Splitter, vec4(0.4f,0.4f,0.4f,0.5f), CUI::CORNER_ALL, Splitter.h/4);
 
-	if(m_Total)
+	if(m_Total <= 0)
+		return;
+
+	// render them bars horizontally!
+
+	CUIRect PassArea = Bars;
+
+	if(m_Yes)
 	{
-		CUIRect PassArea = Bars;
-		static float s_YesVal = 1.0f, s_NoVal = 1.0f;
-		if(m_Yes)
+		CUIRect YesArea = Bars;
+		YesArea.w *= m_YesVal/(float)m_Total;
+		RenderTools()->DrawUIRect(&YesArea, vec4(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
+
+		if(Text)
 		{
-			CUIRect YesArea = Bars;
-			smooth_set(&s_YesVal, m_Yes, 100.0f, Client()->RenderFrameTime());
-			YesArea.w *= s_YesVal/(float)m_Total;
-			RenderTools()->DrawUIRect(&YesArea, vec4(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
-
-			if(Text)
-			{
-				char Buf[256];
-				str_format(Buf, sizeof(Buf), "%d", m_Yes);
-				UI()->DoLabel(&YesArea, Buf, Bars.h*0.75f, 0);
-			}
-
-			PassArea.x += YesArea.w;
-			PassArea.w -= YesArea.w;
+			char Buf[256];
+			str_format(Buf, sizeof(Buf), "%d", m_Yes);
+			UI()->DoLabel(&YesArea, Buf, Bars.h*0.75f, 0);
 		}
-		else
-			s_YesVal = 0.0f;
 
-		if(m_No)
+		PassArea.x += YesArea.w;
+		PassArea.w -= YesArea.w;
+	}
+
+	if(m_No)
+	{
+		CUIRect NoArea = Bars;
+		NoArea.w *= m_NoVal/(float)m_Total;
+		NoArea.x = (Bars.x + Bars.w)-NoArea.w;
+		RenderTools()->DrawUIRect(&NoArea, vec4(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
+
+		if(Text)
 		{
-			CUIRect NoArea = Bars;
-			smooth_set(&s_NoVal, m_No, 100.0f, Client()->RenderFrameTime());
-			NoArea.w *= s_NoVal/(float)m_Total;
-			NoArea.x = (Bars.x + Bars.w)-NoArea.w;
-			RenderTools()->DrawUIRect(&NoArea, vec4(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
-
-			if(Text)
-			{
-				char Buf[8];
-				str_format(Buf, sizeof(Buf), "%d", m_No);
-				UI()->DoLabel(&NoArea, Buf, Bars.h*0.75f, 0);
-			}
-
-			PassArea.w -= NoArea.w;
+			char Buf[8];
+			str_format(Buf, sizeof(Buf), "%d", m_No);
+			UI()->DoLabel(&NoArea, Buf, Bars.h*0.75f, 0);
 		}
-		else
-			s_NoVal = 1.0f;
 
-		if(Text && m_Pass)
-		{
-			char aBuf[8];
-			str_format(aBuf, sizeof(aBuf), "%d", m_Pass);
-			UI()->DoLabel(&PassArea, aBuf, Bars.h*0.75f, 0);
-		}
+		PassArea.w -= NoArea.w;
+	}
+
+	if(Text && m_Pass)
+	{
+		char aBuf[8];
+		str_format(aBuf, sizeof(aBuf), "%d", m_Pass);
+		UI()->DoLabel(&PassArea, aBuf, Bars.h*0.75f, 0);
 	}
 }
