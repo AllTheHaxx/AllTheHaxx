@@ -125,7 +125,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("HSplitMid", &CUIRect::HSplitMid)
 			.addFunction("HSplitTop", &CUIRect::HSplitTop)
 			.addFunction("HSplitBottom", &CUIRect::HSplitBottom)
-			.addFunction("VSplitMid", &CUIRect::HSplitMid)
+			.addFunction("VSplitMid", &CUIRect::VSplitMid)
 			.addFunction("VSplitLeft", &CUIRect::VSplitLeft)
 			.addFunction("VSplitRight", &CUIRect::VSplitRight)
 			.addFunction("Margin", &CUIRect::Margin)

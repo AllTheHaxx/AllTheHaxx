@@ -213,12 +213,12 @@ int CLua::HandleException(const char *pError, lua_State *L)
 	return HandleException(pError, CLuaBinding::GetLuaFile(L));
 }
 
-int CLua::HandleException(std::exception &e, CLuaFile *pLF)
+int CLua::HandleException(std::exception &e, CLuaFile *pLF, bool CalledFromUnloadFromExceptionHandler)
 {
-	return HandleException(e.what(), pLF);
+	return HandleException(e.what(), pLF, CalledFromUnloadFromExceptionHandler);
 }
 
-int CLua::HandleException(const char *pError, CLuaFile *pLF)
+int CLua::HandleException(const char *pError, CLuaFile *pLF, bool CalledFromUnloadFromExceptionHandler)
 {
 	if(!pLF)
 		return -1;
@@ -284,8 +284,13 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF)
 	if(!Console)
 	{
 		pLF->m_pErrorStr = Localize("Error count limit exceeded (too many exceptions thrown)");
-		pLF->Unload(true);
-		dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", pLF->GetFilename());
+		if(CalledFromUnloadFromExceptionHandler)
+			dbg_msg("lua|ERROR", "exception while force-unloading script due to exception overflow");
+		else
+		{
+			pLF->Unload(true, true);
+			dbg_msg("lua|ERROR", "<<< unloaded script '%s' (error count exceeded limit)", pLF->GetFilename());
+		}
 	}
 	else
 	{

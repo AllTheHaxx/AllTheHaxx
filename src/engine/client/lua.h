@@ -73,9 +73,9 @@ public:
 	static int ErrorFunc(lua_State *L);
 	static int Panic(lua_State *L);
 	int HandleException(std::exception &e, lua_State *L);
-	int HandleException(std::exception &e, CLuaFile *pLF);
+	int HandleException(std::exception &e, CLuaFile *pLF, bool CalledFromUnloadFromExceptionHandler = false);
 	int HandleException(const char *pError, lua_State *L);
-	int HandleException(const char *pError, CLuaFile *pLF);
+	int HandleException(const char *pError, CLuaFile *pLF, bool CalledFromUnloadFromExceptionHandler = false);
 
 	static IClient *m_pClient;
 	static IGameClient *m_pGameClient;

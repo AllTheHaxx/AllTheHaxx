@@ -67,7 +67,7 @@ private:
 	bool m_ScriptAutoload;
 
 	void Init(); // starts the script
-	void Unload(bool error = false); // stops the script
+	void Unload(bool error = false, bool CalledFromExceptionHandler = false); // stops the script
 
 public:
 	CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload);

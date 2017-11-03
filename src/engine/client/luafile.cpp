@@ -110,7 +110,7 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 #endif
 }
 
-void CLuaFile::Unload(bool error)
+void CLuaFile::Unload(bool error, bool CalledFromExceptionHandler)
 {
 #if defined(FEATURE_LUA)
 	// if it's not loaded, don't take measures to unload it
@@ -139,7 +139,9 @@ void CLuaFile::Unload(bool error)
 		}
 		catch(std::exception& e)
 		{
-			m_pLua->HandleException(e, this);
+			if(CalledFromExceptionHandler)
+				dbg_msg("lua", "exception while handling an exception; disregarding it");
+			m_pLua->HandleException(e, this, CalledFromExceptionHandler);
 		}
 
 		// tell everyone
