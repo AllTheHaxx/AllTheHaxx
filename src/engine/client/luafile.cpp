@@ -412,8 +412,8 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 
 	// some security steps right here...
 	int BeforePermissions = Import ? m_PermissionFlags : 0;
-	int NewFlags = m_PermissionFlags & ~BeforePermissions;
 	LoadPermissionFlags(pFilename);
+	int NewFlags = m_PermissionFlags & ~BeforePermissions;
 	ApplyPermissions(NewFlags); // only apply those that are new
 
 	// inject our complicated overrides
