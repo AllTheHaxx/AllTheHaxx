@@ -8,7 +8,7 @@ if Import("general") ~= true then error("The 'general' library is needed to use 
 
 
 g_ScriptConfig = {}
-g_ScriptConfigFile = ScriptPath():sub(1, -5) .. ".conf.lua"
+g_ScriptConfigFile = "autoconfig.conf.lua" --ScriptPath():sub(1, -5) .. ".conf.lua"
 
 function _ConfigSet(varname, value)
 	if varname == nil then return end
@@ -21,7 +21,7 @@ function _ConfigGet(varname)
 end
 
 function _ConfigLoad() -- call this in OnScriptInit()
-	local ConfFile = g_ScriptConfigFile:sub(-g_ScriptConfigFile:reverse():find('/')+1, -1)
+	local ConfFile = g_ScriptConfigFile--g_ScriptConfigFile:sub(-g_ScriptConfigFile:reverse():find('/')+1, -1)
 	if Config.debug == 1 then print("[config] Loading settings from '" .. ConfFile .. "'") end
 	local ret, path = Import(ConfFile)
 	if Config.debug == 1 then
@@ -46,6 +46,7 @@ function _ConfigSave() -- call this in OnScriptUnload()
 	end
 	file:flush()
 	file:close()
+	if Config.debug == 1 then print("[config] Saved settings to '" .. g_ScriptConfigFile .. "'") end
 end
 
 function OnScriptRenderSettings(MainView) -- some default page to inform the user
