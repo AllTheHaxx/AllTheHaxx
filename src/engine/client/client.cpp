@@ -3476,17 +3476,7 @@ void CClient::Run()
 
 		if(CtrlShiftKey(KEY_L, LastL))
 		{
-			int NumLuaFiles = Lua()->GetLuaFiles().size();
-			int Counter = 0;
-			for(int i = 0; i < NumLuaFiles; i++)
-			{
-				CLuaFile *pLF = Lua()->GetLuaFiles()[i];
-				if(pLF->State() == CLuaFile::STATE_LOADED)
-				{
-					pLF->Deactivate();
-					Counter++;
-				}
-			}
+			int Counter = Lua()->UnloadAll();
 			dbg_msg("client/lua", "quick-unloaded all %i active scripts", Counter);
 		}
 
@@ -4241,6 +4231,33 @@ void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, I
 	}
 }
 
+void CClient::ConchainLuaEnable(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CALLSTACK_ADD();
+
+	CClient *pSelf = (CClient *)pUserData;
+
+	pfnCallback(pResult, pCallbackUserData);
+
+	if(g_StealthMode)
+	{
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client/lua", "NOTE: cl_lua has no effect in stealth mode as lua is not available at all.");
+	}
+	else
+	{
+		if(pResult->NumArguments() && pSelf->Lua()->Inited())
+		{
+			if(!g_Config.m_ClLua)
+			{
+				int Count = pSelf->Lua()->UnloadAll();
+				dbg_msg("client/lua", "unloaded all %i active scripts due to disabling lua", Count);
+			}
+			else
+				pSelf->Lua()->LoadFolder();
+		}
+	}
+}
+
 void CClient::ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4305,6 +4322,8 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("gfx_window_mode", ConchainWindowMode, this);
 	m_pConsole->Chain("gfx_vsync", ConchainWindowVSync, this);
 
+	m_pConsole->Chain("cl_lua", ConchainLuaEnable, this);
+
 	// DDRace
 
 
@@ -4329,6 +4348,29 @@ static CClient *CreateClient()
 	Prediction Latency
 		Upstream latency
 */
+
+
+static void ParseArgumentsForSwitches(int NumArgs, const char **ppArguments)
+{
+	for(int i = 0; i < NumArgs; i++)
+	{
+		if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
+		{
+			// skip silent param
+			continue;
+		}
+		else if(!str_comp("-A", ppArguments[i]) || !str_comp("--enable-assert", ppArguments[i]))
+		{
+			set_abort_on_assert(1);
+		}
+		else if(!str_comp("-u", ppArguments[i]) || !str_comp("--stealth", ppArguments[i]) || !str_comp("--stealth-mode", ppArguments[i]))
+		{
+			dbg_msg("main", "+++ RUNNING IN STEALTH MODE, ALL SHADY/GRAY-ZONE THINGS ARE DISABLED +++");
+			g_StealthMode = true;
+		}
+	}
+};
+
 
 void *main_thread_handle = 0;
 
@@ -4356,6 +4398,10 @@ int main(int argc, const char **argv) // ignore_convention
 #if !defined(CONF_PLATFORM_MACOSX)
 	dbg_enable_threaded();
 #endif
+	dbg_logger_stdout();
+	dbg_logger_debugger();
+
+	ParseArgumentsForSwitches(argc-1, &argv[1]);
 
 	if(secure_random_init() != 0)
 	{

@@ -36,6 +36,8 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnReset();
 
+	bool ZoomAllowed() const;
+
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);

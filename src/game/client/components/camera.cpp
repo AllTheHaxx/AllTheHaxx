@@ -34,8 +34,7 @@ void CCamera::OnRender()
 	// ------------------ zooming ------------------
 	if(Client()->IsIngame())
 	{
-		// forbid zoom on vanilla except for spec and demo of course
-		if(IsVanilla(Client()->GetServerInfo()) && !(m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+		if(!ZoomAllowed() && !(m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 		{
 			m_ZoomSet = false;
 			m_Zoom = 1.0;
@@ -58,7 +57,7 @@ void CCamera::OnRender()
 	if(Client()->State() == IClient::STATE_ONLINE && Vel != vec2(0))
 	{
 		if((g_Config.m_ClSmartZoom == 1 && (IsRace(Client()->GetServerInfo(0)) || IsDDNet(Client()->GetServerInfo(0)))) ||
-				(g_Config.m_ClSmartZoom == 2 && !IsVanilla(Client()->GetServerInfo(0))))
+				(g_Config.m_ClSmartZoom == 2 && ZoomAllowed()))
 		{
 			float ExtraZoom = (length(Vel) / 24000.0f) * ((float)g_Config.m_ClSmartZoomVal/100.0f);
 			TotalZoom += ExtraZoom;
@@ -271,7 +270,7 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CCamera *pSelf = (CCamera *)pUserData;
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(pSelf->Client()->GetServerInfo(0)) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->ZoomAllowed() || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*ZoomStep;
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
@@ -279,7 +278,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CCamera *pSelf = (CCamera *)pUserData;
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || !IsVanilla(pSelf->Client()->GetServerInfo(0)) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->ZoomAllowed() || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		((CCamera *)pUserData)->m_WantedZoom = ((CCamera *)pUserData)->m_WantedZoom*(1/ZoomStep);
 }
 void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
@@ -287,9 +286,7 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CCamera *pSelf = (CCamera *)pUserData;
-	CServerInfo Info;
-	pSelf->Client()->GetServerInfo(&Info);
-	((CCamera *)pUserData)->OnReset();
+	pSelf->OnReset();
 }
 
 void CCamera::ConToggleGodlikeSpec(IConsole::IResult *pResult, void *pUserData)
@@ -298,4 +295,26 @@ void CCamera::ConToggleGodlikeSpec(IConsole::IResult *pResult, void *pUserData)
 
 	CCamera *pSelf = (CCamera *)pUserData;
 	pSelf->m_GodlikeSpec ^= true;
+}
+
+bool CCamera::ZoomAllowed() const
+{
+	// forbid zoom on vanilla except for spec and demo of course
+	if(
+	#if !defined(FEATURE_DENNIS)
+	!g_StealthMode
+	#else
+	true
+	#endif
+	)
+	{
+		// oy-approach: don't care about anything else than vanilla
+		return !IsVanilla(Client()->GetServerInfo());
+	}
+	else
+	{
+		// actually give a shit about mods, to be nice...
+		const CServerInfo *pInfo = Client()->GetServerInfo();
+		return IsRace(pInfo) || IsDDNet(pInfo) || IsBWMod(pInfo);
+	}
 }

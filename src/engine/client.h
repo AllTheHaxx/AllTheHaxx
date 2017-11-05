@@ -13,6 +13,9 @@
 #include "client/debug.h"
 #include "curlwrapper.h"
 
+
+extern bool g_StealthMode;
+
 enum
 {
 	RECORDER_MANUAL=0,

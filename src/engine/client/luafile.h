@@ -1,18 +1,13 @@
 #ifndef ENGINE_CLIENT_LUAFILE_H
 #define ENGINE_CLIENT_LUAFILE_H
 
-#if defined(FEATURE_LUA)
-#include <lua.hpp>
-#include <engine/external/luabridge/LuaBridge.h>
-#include <engine/external/luabridge/RefCountedPtr.h>
-
-#else
-#define lua_State int
-#endif
-
 #include <string>
 #include <base/system.h>
 #include <base/tl/array.h>
+// lua
+#include <lua.hpp>
+#include <engine/external/luabridge/LuaBridge.h>
+#include <engine/external/luabridge/RefCountedPtr.h>
 
 
 class IClient;
@@ -77,9 +72,7 @@ public:
 	void Activate() { Init(); }
 	void Deactivate() { Unload(); }
 
-#if defined(FEATURE_LUA)
 	luabridge::LuaRef GetFunc(const char *pFuncName) const;
-#endif
 	template<class T> T CallFunc(const char *pFuncName, T def, bool *err=0);
 
 	int State() const { return m_State; }

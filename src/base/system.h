@@ -55,11 +55,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 int dbg_assert_strict_imp(const char *filename, int line, int test, const char *msg); // in release build, this returns true when the assert would have been triggered
 #define dbg_assert_legacy(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
 #define dbg_assert_strict(test,msg) dbg_assert_strict_imp(__FILE__, __LINE__, test, msg)
-#if defined(FEATURE_LUA)
 #define dbg_assert_lua(test,msg) if(!(test)) { luaL_error(L, "%s", msg); }
-#else
-#define dbg_assert_lua(test,msg) ;;
-#endif
 
 
 #ifdef __clang_analyzer__

@@ -2393,7 +2393,6 @@ int CMenus::DoButton_CheckBox_DontCare(CButtonContainer *pBC, const char *pText,
 	}
 }
 
-#if defined(FEATURE_LUA)
 void CMenus::LuaRequestFullscreen(CLuaFile *pLF)
 {
 	m_pLuaFSModeRequester = pLF;
@@ -2408,7 +2407,6 @@ void CMenus::OnLuaScriptUnload(CLuaFile *pLF)
 		m_Popup = POPUP_NONE;
 	}
 }
-#endif
 
 void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 {

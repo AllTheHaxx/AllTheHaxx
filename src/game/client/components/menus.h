@@ -381,7 +381,6 @@ public:	int m_LoadTotal;
 	void RenderSettingsAppearanceTexture(CUIRect MainView);
 	void RenderSettingsAppearanceFont(CUIRect MainView);
 	void RenderSettingsIRC(CUIRect MainView);
-#if defined(FEATURE_LUA)
 	void RenderSettingsLua(CUIRect MainView);
 	void RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L);
 	void RenderLoadingLua();
@@ -389,9 +388,6 @@ public:	int m_LoadTotal;
 	CLuaFile *m_pLuaFSModeRequester;
 	void LuaRequestFullscreen(class CLuaFile *pLF);
 	void OnLuaScriptUnload(class CLuaFile *pLF);
-#else
-	void RenderSettingsLua(CUIRect MainView){};
-#endif
 	public: int m_Nalf[2]; private:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsAll(CUIRect MainView);

@@ -19,9 +19,7 @@ IClient * CLua::m_pClient = 0;
 IGameClient * CLua::m_pGameClient = 0;
 CGameClient * CLua::m_pCGameClient = 0;
 
-#if defined(FEATURE_LUA)
 using namespace luabridge;
-#endif
 
 CLua::CLua()
 {
@@ -99,6 +97,22 @@ void CLua::SortLuaFiles()
 	}
 }
 
+int CLua::UnloadAll()
+{
+	int NumLuaFiles = GetLuaFiles().size();
+	int Counter = 0;
+	for(int i = 0; i < NumLuaFiles; i++)
+	{
+		CLuaFile *pLF = GetLuaFiles()[i];
+		if(pLF->State() == CLuaFile::STATE_LOADED)
+		{
+			pLF->Deactivate();
+			Counter++;
+		}
+	}
+	return Counter;
+}
+
 void CLua::SetGameClient(IGameClient *pGameClient)
 {
 	CALLSTACK_ADD();
@@ -111,7 +125,9 @@ void CLua::AddUserscript(const char *pFilename)
 {
 	CALLSTACK_ADD();
 
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
+
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0 || // hide config files from the list
 			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0)
@@ -136,12 +152,13 @@ void CLua::AddUserscript(const char *pFilename)
 	int index = m_apLuaFiles.add(new CLuaFile(this, file, Autoload));
 	if(Autoload)
 		m_apLuaFiles[index]->Activate();
-#endif
 }
 
 void CLua::LoadFolder()
 {
 	CALLSTACK_ADD();
+	if(g_StealthMode)
+		return;
 
 	// get the files which should be auto-loaded
 	{
@@ -161,14 +178,12 @@ void CLua::LoadFolder()
 void CLua::LoadFolder(const char *pFolder)
 {
 	CALLSTACK_ADD();
-
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
 
 	dbg_msg("Lua", "Loading Folder '%s'", pFolder);
 	m_pStorage->ListDirectoryVerbose(IStorageTW::TYPE_ALL, pFolder, LoadFolderCallback, this);
 	SortLuaFiles();
-
-#endif
 }
 
 int CLua::LoadFolderCallback(const char *pName, const char *pFullPath, int IsDir, int DirType, void *pUser)
@@ -239,9 +254,7 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF, bool CalledFromUnlo
 		else
 		{
 			// restart the lua console
-			#if defined(FEATURE_LUA)
 			lua_close(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState);
-			#endif
 			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->InitLua();
 			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_FullLine = "";
 			m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = 0;
@@ -298,9 +311,7 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF, bool CalledFromUnlo
 		//lua_close(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState);
 		//m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->InitLua();
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->LoadLuaFile("data/luabase/events.lua");
-		#if defined(FEATURE_LUA)
 		lua_gc(m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pLuaState, LUA_GCCOLLECT, 0),
-		#endif
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_FullLine = "";
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_pDebugChild = 0;
 		m_pCGameClient->m_pGameConsole->m_pStatLuaConsole->m_LuaHandler.m_ScopeCount = 0;
@@ -314,7 +325,9 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF, bool CalledFromUnlo
 
 void CLua::ScriptEnterFullscreen(CLuaFile *pLF)
 {
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
+
 	m_pFullscreenedScript = pLF;
 	try
 	{
@@ -326,14 +339,13 @@ void CLua::ScriptEnterFullscreen(CLuaFile *pLF)
 	{
 		HandleException(e, pLF);
 	}
-#endif
 }
 
 
 void CLua::ExitFullscreen()
 {
-#if defined(FEATURE_LUA)
-	dbg_assert(m_pFullscreenedScript, "CLua::ExitFullscreen called with no fullscreened script");
+	if(dbg_assert_strict(m_pFullscreenedScript != NULL, "CLua::ExitFullscreen called with no fullscreened script"))
+		return;
 
 	try
 	{
@@ -347,7 +359,6 @@ void CLua::ExitFullscreen()
 	}
 
 	m_pFullscreenedScript = 0;
-#endif
 }
 
 void CLua::AddAutoload(const CLuaFile *pLF)
@@ -374,20 +385,14 @@ int CLua::Panic(lua_State *L)
 {
 	CALLSTACK_ADD();
 
-#if defined(FEATURE_LUA)
 	if(g_Config.m_Debug)
 		dbg_msg("LUA/FATAL", "[%s] error in unprotected call resulted in panic, throwing an exception:", CLuaBinding::GetLuaFile(L)->GetFilename());
 	throw luabridge::LuaException(L, 0);
-#else
-	return 0;
-#endif
 }
 
 int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown as an exception)
 {
 	CALLSTACK_ADD();
-
-#if defined(FEATURE_LUA)
 
 	if (!lua_isstring(L, -1))
 		CLuaBinding::GetLuaFile(L)->Lua()->HandleException(": unknown error", L);
@@ -397,13 +402,11 @@ int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown
 	lua_pop(L, 1); // remove error message
 	lua_gc(L, LUA_GCCOLLECT, 0);
 
-#endif
 	return 0;
 }
 
 void CLua::DbgPrintLuaStack(lua_State *L, const char *pNote)
 {
-#if defined(FEATURE_LUA)
 	dbg_msg("lua/debug", "--- BEGIN LUA STACK --- %s", pNote ? pNote : "");
 	for(int i = 1; i <= lua_gettop(L); i++)
 	{
@@ -414,7 +417,6 @@ void CLua::DbgPrintLuaStack(lua_State *L, const char *pNote)
 		);
 	}
 	dbg_msg("lua/debug", "---- END LUA STACK ---- %s", pNote ? pNote : "");
-#endif
 }
 
 

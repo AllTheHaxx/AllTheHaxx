@@ -631,8 +631,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			return;
 
 		// EVENT CALL
-#if defined(FEATURE_LUA)
-		if(g_Config.m_ClLua)
+		if(!g_StealthMode && g_Config.m_ClLua)
 		{
 			for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 			{
@@ -645,7 +644,6 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChat");
 			if(confunc) try { HideChat |= confunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)).cast<bool>(); } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
 		}
-#endif
 
 		// some dennis (you can never have enough)
 		if(pMsg->m_ClientID == -1)
@@ -1352,9 +1350,8 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 	}
 
 	int DiscardChat = false;
-#if defined(FEATURE_LUA)
 	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
-	if(!CalledByLua)
+	if(!g_StealthMode && !CalledByLua)
 	{
 		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 		{
@@ -1366,7 +1363,6 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
 		if(confunc) try { if(confunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
 	}
-#endif
 
 	if(!g_Config.m_ClChat || DiscardChat)
 	{

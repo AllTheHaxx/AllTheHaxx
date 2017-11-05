@@ -47,7 +47,9 @@ void CLuaFile::Reset(bool error)
 
 void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interface for non-compiled scripts
 {
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
+
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0 || str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0) // clc's and config files won't have permission flags!
 		return;
 
@@ -106,13 +108,10 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 				str_copyb(m_aScriptInfo, p+5);
 		}
 	}
-
-#endif
 }
 
 void CLuaFile::Unload(bool error, bool CalledFromExceptionHandler)
 {
-#if defined(FEATURE_LUA)
 	// if it's not loaded, don't take measures to unload it
 	if(m_State == STATE_LOADED)
 	{
@@ -159,12 +158,13 @@ void CLuaFile::Unload(bool error, bool CalledFromExceptionHandler)
 	m_pLuaState = NULL;
 
 	Reset(error);
-#endif
 }
 
 void CLuaFile::OpenLua()
 {
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
+
 	dbg_assert_strict(m_pLuaState == NULL, "possibly leaking a lua_state");
 
 	// firstly, close a previous state if there is any
@@ -185,13 +185,13 @@ void CLuaFile::OpenLua()
 	luaopen_table(m_pLuaState);	// table operations
 	luaopen_bit(m_pLuaState);	// bit operations
 	//luaopen_jit(m_pLuaState);	// control the jit-compiler [not needed]
-
-#endif
 }
 
 void CLuaFile::ApplyPermissions(int Flags)
 {
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
+
 	if(Flags&PERMISSION_GODMODE)
 	{
 		//luaL_openlibs(m_pLuaState); // calling this after RegisterLuaCallbacks discards our overrides again
@@ -212,14 +212,14 @@ void CLuaFile::ApplyPermissions(int Flags)
 		if(Flags & PERMISSION_PACKAGE)
 			luaopen_package(m_pLuaState); // used for modules etc... not sure whether we should load this
 	}
-#endif
-
 }
 
 
 void CLuaFile::Init()
 {
-#if defined(FEATURE_LUA)
+	if(g_StealthMode || !g_Config.m_ClLua)
+		return;
+
 	Unload();
 
 	m_Exceptions.clear();
@@ -287,22 +287,17 @@ void CLuaFile::Init()
 
 	// tell everyone
 	CLua::m_pCGameClient->OnLuaScriptLoaded(this);
-
-#endif
 }
 
 
-#if defined(FEATURE_LUA)
 luabridge::LuaRef CLuaFile::GetFunc(const char *pFuncName) const
 {
 	return luabridge::getGlobal(m_pLuaState, pFuncName);
 }
-#endif
 
 template<class T>
 T CLuaFile::CallFunc(const char *pFuncName, T def, bool *err) // just for quick access
 {
-#if defined(FEATURE_LUA)
 	if(!m_pLuaState)
 	{
 		*err = true;
@@ -323,9 +318,6 @@ T CLuaFile::CallFunc(const char *pFuncName, T def, bool *err) // just for quick 
 		*err = true;
 	}
 	return ret;
-#else
-	return def;
-#endif
 }
 
 // trim from start (in place)
@@ -396,7 +388,9 @@ bool CLuaFile::CheckFile(const char *pFilename)
 
 bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 {
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return false;
+
 	if(!pFilename || !m_pLuaState || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
 		return false;
@@ -507,18 +501,13 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 	return true;
-#else
-	return false;
-#endif
 }
 
 bool CLuaFile::ScriptHasSettingsPage()
 {
-#if defined(FEATURE_LUA)
 	LuaRef func1 = GetFunc("OnScriptRenderSettings");
 	LuaRef func2 = GetFunc("OnScriptSaveSettings");
 	if(func1.cast<bool>() && func2.cast<bool>())
 		return true;
-#endif
 	return false;
 }

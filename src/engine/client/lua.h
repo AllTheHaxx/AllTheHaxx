@@ -2,17 +2,14 @@
 #define ENGINE_CLIENT_LUA_H
 
 #include <string>
-#if defined(FEATURE_LUA)
 #include <lua.hpp>
-#endif
 #include <base/tl/array.h>
 #include <engine/external/zlib/zlib.h>
 #include "luafile.h"
 #include "db_sqlite3.h"
 
-#if defined(FEATURE_LUA)
 #define LUA_FIRE_EVENT(EVENTNAME, ...) \
-	if(g_Config.m_ClLua) \
+	if(!g_StealthMode && g_Config.m_ClLua) \
 	{ \
 		for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetActiveLuaFiles().size(); ijdfg++) \
 		{ \
@@ -28,9 +25,7 @@
 			if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState); } \
 		} \
 	}
-#else
-#define LUA_FIRE_EVENT(EVENTNAME, ...) ;
-#endif
+
 
 class IClient;
 class CClient;
@@ -39,10 +34,7 @@ class IGameClient;
 class CGameClient;
 class CLuaFile;
 
-#if defined(FEATURE_LUA)
 using namespace luabridge;
-#endif
-
 
 class CLua
 {
@@ -60,12 +52,14 @@ public:
 	~CLua();
 
 	void Init(IClient *pClient, IStorageTW *pStorage, IConsole *pConsole);
+	bool Inited() const { return m_pClient != NULL && m_pStorage != NULL && m_pConsole != NULL; }
 	void Shutdown();
 	void Reload();
 	void AddUserscript(const char *pFilename);
 	void LoadFolder();
 	void LoadFolder(const char *pFolder);
 	void SortLuaFiles();
+	int UnloadAll();
 
 	void StartReceiveEvents(CLuaFile *pLF);
 	void StopReceiveEvents(CLuaFile *pLF);
@@ -88,11 +82,12 @@ public:
 	const array<CLuaFile*> &GetActiveLuaFiles() const { return m_apActiveScripts; }
 	int NumActiveScripts() const
 	{
-		int num = 0;
+		/*int num = 0;
 		for(int i = 0; i < m_apLuaFiles.size(); i++)
 			if(m_apLuaFiles[i]->State() == CLuaFile::STATE_LOADED)
 				num++;
-		return num;
+		return num;*/
+		return m_apActiveScripts.size();
 	}
 
 	void AddAutoload(const CLuaFile *pLF);

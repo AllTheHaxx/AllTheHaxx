@@ -96,7 +96,7 @@ static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
-static int abort_on_assert = 1;
+static int abort_on_assert = 0;
 static void dbg_break();
 void set_abort_on_assert(int enabled)
 {

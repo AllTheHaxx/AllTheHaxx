@@ -6,7 +6,6 @@
 #include "../console.h"
 
 
-#if defined(FEATURE_LUA)
 void CMenus::RenderLoadingLua()
 {
 	return;
@@ -178,8 +177,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		s_SelectedScript = -1;
 		if(!(g_Config.m_ClLua ^= 1))
 		{
-			Client()->Lua()->GetLuaFiles().delete_all();
-			Client()->Lua()->GetLuaFiles().clear();
+			int Counter = Client()->Lua()->UnloadAll();
+			dbg_msg("client/lua", "quick-unloaded all %i active scripts", Counter);
 		}
 		else
 			Client()->Lua()->LoadFolder();
@@ -530,5 +529,3 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 	}
 }
-
-#endif

@@ -21,12 +21,7 @@
 #include <math.h> // cosf, sinf
 
 // lua
-#if defined(FEATURE_LUA)
 #include <lua.hpp>
-#else
-#define lua_State int
-#endif
-
 #include "graphics_threaded.h"
 #include "luabinding.h"
 
@@ -304,7 +299,6 @@ int CGraphics_Threaded::LinesDrawLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == DRAWING_LINES, "called Graphics()->LinesDraw without begin");
 
-#if defined(FEATURE_LUA)
 	int n = lua_gettop(L)-1; // REMEMBER THAT THERE IS A 'self' ON THE STACK!
 	if(n != 1 && n != 2)
 		return luaL_error(L, "Engine.Graphics:LinesDraw expects 1 or 2 arguments, got %d", n);
@@ -329,7 +323,6 @@ int CGraphics_Threaded::LinesDrawLua(lua_State *L)
 	}
 	LinesDraw(aLineItems, NUM);
 	mem_free(aLineItems);
-#endif
 	return 0;
 }
 
@@ -685,7 +678,6 @@ int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsDraw without begin");
 
-#if defined(FEATURE_LUA)
 	int n = lua_gettop(L)-1; // REMEMBER THE 'self'!!
 	if(n != 1 && n != 2)
 		return luaL_error(L, "Engine.Graphics:QuadsDraw expects 1 or 2 arguments, got %d", n);
@@ -710,8 +702,6 @@ int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
 	}
 	QuadsDraw(aQuadItems, NUM);
 	mem_free(aQuadItems);
-
-#endif
 	return 0;
 }
 
@@ -719,7 +709,6 @@ int CGraphics_Threaded::QuadsDrawTLLua(lua_State *L)
 {
 	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-#if defined(FEATURE_LUA)
 	int n = lua_gettop(L)-1; // REMEMBER THE 'self'!!
 	if(n != 1 && n != 2)
 		return luaL_error(L, "Engine.Graphics:QuadsDrawTL expects 1 or 2 arguments, got %d", n);
@@ -744,8 +733,6 @@ int CGraphics_Threaded::QuadsDrawTLLua(lua_State *L)
 	}
 	QuadsDrawTL(aQuadItems, NUM);
 	mem_free(aQuadItems);
-
-#endif
 	return 0;
 }
 
@@ -955,14 +942,12 @@ bool CGraphics_Threaded::LuaCheckDrawingState(lua_State *L, const char *pFuncNam
 
 		if(!NoThrow)
 		{
-			#if defined(FEATURE_LUA)
 			// raise a lua error that results in panic, which then throws our exception
 			luaL_error(L, "callback for %s left the rendering pipeline in dirty state %d (%s)", pFuncName, PrevState,
 					   PrevState == DRAWING_QUADS ? "DRAWING_QUADS" :
 					   PrevState == DRAWING_LINES ? "DRAWING_LINES" :
 					   "UNKNOWN"
 			);
-			#endif
 		}
 	}
 	return false;

@@ -5,12 +5,7 @@
 
 #include "kernel.h"
 
-#if defined(FEATURE_LUA)
 struct lua_State;
-#else
-#define lua_State int
-#endif
-
 
 class CImageInfo
 {

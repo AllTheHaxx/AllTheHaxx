@@ -24,7 +24,8 @@
 
 void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 {
-#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
 
 	lua_register(L, "print", CLuaBinding::LuaPrintOverride);
 	lua_register(L, "_io_open", CLuaBinding::LuaIO_Open);
@@ -681,6 +682,4 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	luaL_dostring(L, "vec2f=vec2");
 	luaL_dostring(L, "vec3f=vec3");
 	luaL_dostring(L, "vec4f=vec4");
-
-#endif
 }

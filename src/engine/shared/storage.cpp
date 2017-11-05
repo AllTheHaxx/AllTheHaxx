@@ -531,7 +531,9 @@ public:
 
 	virtual bool CreateFolderLua(const char *pFoldername, lua_State *L)
 	{
-#if defined(FEATURE_LUA)
+		if(g_StealthMode)
+			return false;
+
 		char aBuf[MAX_PATH_LENGTH];
 		str_copyb(aBuf, pFoldername);
 		CLuaBinding::SandboxPath(aBuf, sizeof(aBuf), L);
@@ -540,9 +542,6 @@ public:
 
 		str_appendb(aFullPath, "/file"); // dummy file to satisfy fs_makedir_rec_for
 		return fs_makedir_rec_for(aFullPath) == 0;
-#else
-		return false;
-#endif
 	}
 
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
@@ -574,7 +573,7 @@ public:
 		if(!file)
 			return false;
 
-		#define write_line(line) io_write(file, line, sizeof(line)-1); io_write_newline(file)
+			#define write_line(line) io_write(file, line, sizeof(line)-1); io_write_newline(file)
 
 		write_line("####");
 		write_line("# This specifies where and in which order Teeworlds looks");

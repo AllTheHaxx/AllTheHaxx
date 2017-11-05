@@ -79,7 +79,9 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 void CGameConsole::CInstance::InitLua()
 {
-	#if defined(FEATURE_LUA)
+	if(g_StealthMode)
+		return;
+
 	if(m_Type == CONSOLETYPE_LUA)
 	{
 		m_LuaHandler.m_pLuaState = luaL_newstate();
@@ -107,8 +109,6 @@ void CGameConsole::CInstance::InitLua()
 
 		CGameConsole::m_pStatLuaConsole = this;
 	}
-	#endif
-
 }
 
 void CGameConsole::CInstance::ClearBacklog()
@@ -128,7 +128,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
 	{
-#if defined(FEATURE_LUA)
+		if(!g_StealthMode)
 		{
 			bool DiscardCommand = false;
 			if(g_Config.m_ClLua)
@@ -147,7 +147,6 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			if(DiscardCommand)
 				return;
 		}
-#endif
 		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
 	}
 	else if(m_Type == CGameConsole::CONSOLETYPE_REMOTE)
@@ -171,9 +170,8 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			}
 		}
 	}
-	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
+	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && !g_StealthMode && g_Config.m_ClLua)
 	{
-#if defined(FEATURE_LUA)
 		if(str_comp(pLine, "!help") == 0)
 		{
 			PrintLine("> ---------------------------[ LUACONSOLE HELP ]---------------------------");
@@ -378,7 +376,6 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			if(Limit >= 0)
 				PrintLine(aBuf);
 		}
-#endif // defined(FEATURE_LUA)
 	}
 }
 
@@ -764,8 +761,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 
 bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is for LuaConsole
 {
-#if defined(FEATURE_LUA)
-	if(m_Type != CONSOLETYPE_LUA)
+	if(g_StealthMode || m_Type != CONSOLETYPE_LUA)
 		return false;
 
 	if(!pFile || pFile[0] == '\0' || !m_LuaHandler.m_pLuaState)
@@ -791,9 +787,6 @@ bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is
 	}
 
 	return true;
-#else
-	return false;
-#endif
 }
 
 bool CGameConsole::CInstance::UserAuthAvailable() const
@@ -1705,7 +1698,6 @@ void CGameConsole::PrintLine(int Type, const char *pLine)
 
 int CGameConsole::PrintLuaLine(lua_State *L)
 {
-#if defined(FEATURE_LUA)
 	int nargs = lua_gettop(L);
 	if(nargs < 1)
 		return luaL_error(L, "print expects 1 argument or more");
@@ -1731,12 +1723,14 @@ int CGameConsole::PrintLuaLine(lua_State *L)
 	dbg_msg("LUA|console", "%s", aLine);
 
 	CGameConsole::m_pStatLuaConsole->PrintLine(aLine);
-#endif
 	return 0;
 }
 
 void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
 {
+	if(g_StealthMode)
+		return;
+
 	//m_LuaConsole.ClearBacklog();
 	for(int i = 0; i < 27-10; i++)
 		m_LuaConsole.PrintLine("");
@@ -1745,10 +1739,8 @@ void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
 	m_LuaConsole.m_LuaHandler.m_FullLine = "";
 	m_LuaConsole.m_LuaHandler.m_pDebugChild = pLF->L();
 
-#if defined(FEATURE_LUA)
 	luaL_loadstring(pLF->L(), "Import(\"debug\")");
 	lua_pcall(pLF->L(), 0, LUA_MULTRET, 0);
-#endif
 
 	m_LuaConsole.PrintLine("> ---------------------------[ DEBUGGER STARTED ]---------------------------");
 	{ char aBuf[256]; str_format(aBuf, sizeof(aBuf), "> The lua debugger was attached to the script '%s'", pLF->GetFilename()); m_LuaConsole.PrintLine(aBuf);}
@@ -1762,7 +1754,6 @@ void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
 	m_LuaConsole.PrintLine("> ");
 
 	Toggle(CONSOLETYPE_LUA);
-
 }
 
 void CGameConsole::OnConsoleInit()
@@ -1784,11 +1775,11 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
 
-#if defined(FEATURE_LUA)
-	Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
-	// XXX security leak! the lua console has elevated permissions, but this one can be used by every script!
-	//Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
-#endif
+	if(!g_StealthMode)
+	{
+		Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
+		Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
+	}
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 

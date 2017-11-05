@@ -123,21 +123,24 @@ void CMenus::RenderPopups()
 	}
 	else if(m_Popup == POPUP_LUA_REQUEST_FULLSCREEN)
 	{
-#if defined(FEATURE_LUA)
-		pTitle = Localize("Lua Script wants to go fullscreen");
-		char aScriptName[64];
-		if(str_length(m_pLuaFSModeRequester->GetScriptTitle()) > 0)
-			str_formatb(aScriptName, "'%s' (\"%s\")", m_pLuaFSModeRequester->GetFilename(), m_pLuaFSModeRequester->GetScriptTitle());
+		if(!g_StealthMode)
+		{
+			pTitle = Localize("Lua Script wants to go fullscreen");
+			char aScriptName[64];
+			if(str_length(m_pLuaFSModeRequester->GetScriptTitle()) > 0)
+				str_formatb(aScriptName, "'%s' (\"%s\")", m_pLuaFSModeRequester->GetFilename(), m_pLuaFSModeRequester->GetScriptTitle());
+			else
+				str_formatb(aScriptName, "'%s'", m_pLuaFSModeRequester->GetFilename());
+			str_formatb(aExtraText, "The script %s wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", aScriptName);
+			pExtraText = aExtraText;
+			ExtraAlign = CUI::ALIGN_LEFT;
+		}
 		else
-			str_formatb(aScriptName, "'%s'", m_pLuaFSModeRequester->GetFilename());
-		str_formatb(aExtraText, "The script %s wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", aScriptName);
-		pExtraText = aExtraText;
-		ExtraAlign = CUI::ALIGN_LEFT;
-#else
-		pTitle = "What the heck happened??";
-		pExtraText = "This popup is not supposed to appear when there is no lua in the client!";
-		ExtraAlign = CUI::ALIGN_CENTER;
-#endif
+		{
+			pTitle = "Whoups, you found a bug. Great!";
+			pExtraText = "This popup is not supposed to appear when in stealth mode!";
+			ExtraAlign = CUI::ALIGN_CENTER;
+		}
 	}
 	else if(m_Popup == POPUP_UPDATE)
 	{
@@ -156,23 +159,23 @@ void CMenus::RenderPopups()
 					pTitle = Localize("Downloading Update...");
 					pExtraText = Updater()->GetCurrentFile();
 					ExtraAlign = CUI::ALIGN_LEFT;
-				break;
+					break;
 				case IUpdater::STATE_MOVE_FILES:
 					pTitle = Localize("Installing Update...");
 					pExtraText = Updater()->GetCurrentFile();
 					ExtraAlign = CUI::ALIGN_LEFT;
-				break;
+					break;
 				case IUpdater::STATE_FAIL:
 					pTitle = Localize("Update Failed!");
 					str_formatb(aExtraText, "%s: %s", Localize("What failed"), Updater()->GetWhatFailed());
 					pExtraText = aExtraText;
 					ExtraAlign = CUI::ALIGN_LEFT;
-				break;
+					break;
 				case IUpdater::STATE_NEED_RESTART:
 					pTitle = Localize("Update finished!");
 					pExtraText = Localize("AllTheHaxx needs to be restarted");
 					ExtraAlign = CUI::ALIGN_CENTER;
-				break;
+					break;
 				default:
 					pTitle = Localize("Performing Update");
 					pExtraText = Localize("Please wait");
@@ -295,34 +298,38 @@ void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, cons
 
 		// buttons
 		Part.VMargin(80.0f, &Part);
-#if defined(FEATURE_LUA)
-		Part.VSplitMid(&No, &Yes);
-		Yes.VMargin(20.0f, &Yes);
-		No.VMargin(20.0f, &No);
 
-		bool Handled = false;
-
-		static CButtonContainer s_ButtonDeny;
-		if(DoButton_Menu(&s_ButtonDeny, Localize("Deny"), 0, &No) || m_EscapePressed)
-			Handled = true;
-		static CButtonContainer s_ButtonAllow;
-		if(DoButton_Menu(&s_ButtonAllow, Localize("Allow"), 0, &Yes))
+		if(!g_StealthMode)
 		{
-			Client()->Lua()->ScriptEnterFullscreen(m_pLuaFSModeRequester);
-			Handled = true;
-		}
+			Part.VSplitMid(&No, &Yes);
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
 
-		if(Handled)
-		{
-			m_pLuaFSModeRequester = 0;
-			m_Popup = POPUP_NONE;
+			bool Handled = false;
+
+			static CButtonContainer s_ButtonDeny;
+			if(DoButton_Menu(&s_ButtonDeny, Localize("Deny"), 0, &No) || m_EscapePressed)
+				Handled = true;
+			static CButtonContainer s_ButtonAllow;
+			if(DoButton_Menu(&s_ButtonAllow, Localize("Allow"), 0, &Yes))
+			{
+				Client()->Lua()->ScriptEnterFullscreen(m_pLuaFSModeRequester);
+				Handled = true;
+			}
+
+			if(Handled)
+			{
+				m_pLuaFSModeRequester = 0;
+				m_Popup = POPUP_NONE;
+			}
 		}
-#else
-		Part.VMargin(120.0f, &Part);
-		static CButtonContainer s_ButtonOk;
-		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Part) || m_EscapePressed || m_EnterPressed)
-			m_Popup = POPUP_NONE;
-#endif
+		else
+		{
+			Part.VMargin(120.0f, &Part);
+			static CButtonContainer s_ButtonOk;
+			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Part) || m_EscapePressed || m_EnterPressed)
+				m_Popup = POPUP_NONE;
+		}
 	}
 	else if(m_Popup == POPUP_UPDATE)
 	{

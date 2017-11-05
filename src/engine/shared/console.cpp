@@ -921,15 +921,6 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 					ExecuteFile(ppArguments[i + 1], -1, true);
 				i++;
 			}
-			else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
-			{
-				// skip silent param
-				continue;
-			}
-			else if(!str_comp("-A", ppArguments[i]) || !str_comp("--enable-assert", ppArguments[i]))
-			{
-				set_abort_on_assert(1);
-			}
 		}
 		else
 		{

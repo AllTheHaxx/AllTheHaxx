@@ -247,7 +247,10 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
 
-	if(g_Config.m_ClNamePlatesBroadcastATH || m_pClient->Client()->Lua()->NumActiveScripts() > 0)
+	#if defined(FEATURE_DENNIS)
+	if(!g_Config.m_ClUndercover)
+	#endif
+	if(((!g_StealthMode && g_Config.m_ClNamePlatesBroadcastATH) || (g_StealthMode && g_Config.m_ClStealthForceATHBroadcast)) || m_pClient->Client()->Lua()->NumActiveScripts() > 0)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
 
 	if(!m_pClient->m_pChat->m_CryptSendQueue.empty())
@@ -610,13 +613,9 @@ CNetObj_PlayerInput* CControls::LuaGetInputData(lua_State *L)
 {
 	CControls *pSelf = CLua::m_pCGameClient->m_pControls;
 
-#if defined(FEATURE_LUA)
 	const int NUM_VCLIENTS = sizeof(pSelf->m_InputData)/sizeof(pSelf->m_InputData[0]);
 	int vclient = (int)luaL_optinteger(L, 1+1, 1);
 	if(vclient < 0 || !(vclient < NUM_VCLIENTS))
 		luaL_error(L, "given VClient index of %d is out of range (valid: 0-%d)", vclient, NUM_VCLIENTS);
 	return &(pSelf->m_InputData[vclient]);
-#else
-	return &(pSelf->m_InputData[0]);
-#endif
 }

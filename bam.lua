@@ -42,21 +42,19 @@ config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-ve
 config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
-config:Add(luajit.OptFind("luajit", false))
+config:Add(luajit.OptFind("luajit", true))
 config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
 config:Add(Mysql.OptFind("mysql", false))
 -- some config vars for customization:
 config:Add(OptString("websockets", false))
-config:Add(OptString("lua", true))
 config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
 config:Add(OptString("unstable", false))
 config:Add(OptString("verification", false))
 config:Finalize("config_" .. sysconf .. ".lua")
 
-if config.lua.value == false then sysconf = sysconf .. "NL" end
 print("System Configurations: " .. sysconf)
 
 -- data compiler
@@ -181,9 +179,7 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libogg-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopusfile-0.dll"))
-		if config.lua.value and config.luajit.value then
-			table.insert(client_depends, CopyToDirectory(".", "other/luajit/windows/lib32/lua51.dll"))
-		end
+		table.insert(client_depends, CopyToDirectory(".", "other/luajit/windows/lib32/lua51.dll"))
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib64/freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL2.dll"))
@@ -198,9 +194,7 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libogg-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopusfile-0.dll"))
-		if config.lua.value and config.luajit.value then
-			table.insert(client_depends, CopyToDirectory(".", "other/luajit/windows/lib64/lua51.dll"))
-		end
+		table.insert(client_depends, CopyToDirectory(".", "other/luajit/windows/lib64/lua51.dll"))
 	end
 	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/libmysql.dll"))
@@ -353,19 +347,13 @@ function build(settings)
 	astar = Compile(external_settings, Collect("src/engine/external/astar-algorithm-cpp/*.c", "src/engine/external/astar-algorithm-cpp/*.cpp"))
 
 	-- apply luajit settings
-	if config.lua.value and config.luajit.value then
-		config.luajit:Apply(settings)
-	end
+	config.luajit:Apply(settings)
 
 	-- build game components
 	engine_settings = settings:Copy()
 	server_settings = engine_settings:Copy()
 	client_settings = engine_settings:Copy()
 	launcher_settings = engine_settings:Copy()
-
-	if config.lua.value and config.luajit.value then
-		client_settings.cc.defines:Add("FEATURE_LUA")
-	end
 
 
 	if family == "unix" then
@@ -451,7 +439,6 @@ function build(settings)
 
 	tools = {}
 	for i,v in ipairs(tools_src) do
-		-- XXX HACK: config.lua.value = false
 		toolname = PathFilename(PathBase(v))
 		tools[i] = Link(tools_settings, toolname, Compile(tools_settings, v), 
 						engine, zlib, pnglite, md5, game_shared, aes128)

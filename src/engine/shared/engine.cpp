@@ -57,8 +57,8 @@ public:
 
 	CEngine(const char *pAppname)
 	{
-		dbg_logger_stdout();
-		dbg_logger_debugger();
+		//dbg_logger_stdout();
+		//dbg_logger_debugger();
 
 		//
 		dbg_msg("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);

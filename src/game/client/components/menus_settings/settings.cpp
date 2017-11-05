@@ -197,8 +197,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
-	//static int s_SettingsPage = 0;
-
 	// render background
 	CUIRect Temp, TabBar, RestartWarning;
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
@@ -212,7 +210,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	CUIRect Button;
 
-	const char *aTabs[] = {
+	const char * const aTabs[] = {
 		Localize("Language"),
 		Localize("General"),
 		Localize("Identities"),
@@ -222,28 +220,39 @@ void CMenus::RenderSettings(CUIRect MainView)
 		("Haxx"),
 		m_pfnAppearanceSubpage == NULL ? Localize("Appearance") : Localize("< back"),
 		Localize("Misc."),
-#if defined(FEATURE_LUA)
 		Localize("Lua"),
-#endif
 		//Localize("All")
 	};
 
 	const int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
-	static float FadeVals[NumTabs] = {0.0f};
+	static float s_FadeVals[NumTabs];
+	static bool Inited = false;
+	if(!Inited)
+	{
+		mem_zerob(s_FadeVals);
+		Inited = true;
+	}
 
 	for(int i = 0; i < NumTabs; i++)
 	{
+		if(g_StealthMode && i == PAGE_SETTINGS_LUA)
+		{
+			if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_LUA)
+				g_Config.m_UiSettingsPage = PAGE_SETTINGS_GENERAL;
+			continue;
+		}
+
 		TabBar.HSplitTop(i == PAGE_SETTINGS_HAXX || i == PAGE_SETTINGS_LUA ? 24 : 10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(UI()->MouseInside(&Button))
-			smooth_set(&FadeVals[i], 5.0f, 10.0f, Client()->RenderFrameTime());
+			smooth_set(&s_FadeVals[i], 5.0f, 10.0f, Client()->RenderFrameTime());
 		else
-			smooth_set(&FadeVals[i], 0.0f, 10.0f, Client()->RenderFrameTime());
-		Button.w += FadeVals[i];
+			smooth_set(&s_FadeVals[i], 0.0f, 10.0f, Client()->RenderFrameTime());
+		Button.w += s_FadeVals[i];
 		CPointerContainer Container(&aTabs[i]);
 		if(DoButton_MenuTab(&Container, aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R,
-				i == PAGE_SETTINGS_APPEARANCE && m_pfnAppearanceSubpage ? vec4(0.8f, 0.6f, 0.25f, ms_ColorTabbarActive.a) : ms_ColorTabbarActive
-				))
+							i == PAGE_SETTINGS_APPEARANCE && m_pfnAppearanceSubpage ? vec4(0.8f, 0.6f, 0.25f, ms_ColorTabbarActive.a) : ms_ColorTabbarActive
+		))
 		{
 			m_pfnAppearanceSubpage = 0;
 			g_Config.m_UiSettingsPage = i;

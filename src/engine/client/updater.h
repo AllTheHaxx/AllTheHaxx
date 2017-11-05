@@ -9,11 +9,7 @@
 #include <string>
 #include "data_updater.h"
 
-#if defined(FEATURE_LUA)
 #define CLIENT_EXEC "AllTheHaxx"
-#else
-#define CLIENT_EXEC "AllTheHaxx-NoLua"
-#endif
 #define SERVER_EXEC "AllTheHaxx-Server"
 
 #if defined(CONF_FAMILY_WINDOWS)
