@@ -497,6 +497,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Latency", &CServerInfo::m_Latency, false)
 			.addData("MaxPlayers", &CServerInfo::m_MaxPlayers, false)
 			.addData("NumPlayers", &CServerInfo::m_NumPlayers, false)
+			.addData("MaxClients", &CServerInfo::m_MaxClients, false)
+			.addData("NumClients", &CServerInfo::m_NumClients, false)
 		.endClass()
 
 		// Game.Snap
