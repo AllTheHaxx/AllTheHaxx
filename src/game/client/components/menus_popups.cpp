@@ -62,6 +62,11 @@ void CMenus::RenderPopups()
 			pExtraText = aExtraText;
 			pButtonText = Localize("Abort");
 		}
+		else if(str_find_nocase(pExtraText, "bot"))
+		{
+			str_format(aExtraText, sizeof(aExtraText), "%s\n\n\n\n%s", pExtraText, Localize("(start ATH in stealth mode to play here)"));
+			pExtraText = aExtraText;
+		}
 		ExtraAlign = CUI::ALIGN_CENTER;
 	}
 	else if(m_Popup == POPUP_PURE)
