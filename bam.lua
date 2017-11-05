@@ -164,6 +164,8 @@ server_link_other = {}
 server_sql_depends = {}
 
 if family == "windows" then
+	table.insert(client_depends, CopyToDirectory(".", "other/config_directory.bat"))
+	table.insert(client_depends, CopyToDirectory(".", "other/AllTheHaxx-StealthMode.bat"))
 	if platform == "win32" then
 		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib32/freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib32/SDL2.dll"))
