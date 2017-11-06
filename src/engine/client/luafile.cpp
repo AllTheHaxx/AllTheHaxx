@@ -89,15 +89,15 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 		char TypeIndicator = p++[0];
 		if(TypeIndicator == '#')
 		{
-			if(str_comp_nocase("io", p) == 0)
+			if(str_comp_nocase_num("io", p, 2) == 0)
 				m_PermissionFlags |= PERMISSION_IO;
-			else if(str_comp_nocase("debug", p) == 0)
+			else if(str_comp_nocase_num("debug", p, 5) == 0)
 				m_PermissionFlags |= PERMISSION_DEBUG;
-			else if(str_comp_nocase("ffi", p) == 0)
+			else if(str_comp_nocase_num("ffi", p, 3) == 0)
 				m_PermissionFlags |= PERMISSION_FFI;
-			else if(str_comp_nocase("os", p) == 0)
+			else if(str_comp_nocase_num("os", p, 2) == 0)
 				m_PermissionFlags |= PERMISSION_OS;
-			else if(str_comp_nocase("package", p) == 0)
+			else if(str_comp_nocase_num("package", p, 7) == 0)
 				m_PermissionFlags |= PERMISSION_PACKAGE;
 		}
 		else if(TypeIndicator == '$')
