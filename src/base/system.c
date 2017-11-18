@@ -2699,6 +2699,13 @@ void str_timestamp_ex(time_t time_data, char *buffer, unsigned int buffer_size, 
 	buffer[buffer_size-1] = 0;	/* assure null termination */
 }
 
+void str_timestamp_format(char *buffer, int buffer_size, const char *format)
+{
+	time_t time_data;
+	time(&time_data);
+	str_timestamp_ex(time_data, buffer, buffer_size, format);
+}
+
 void str_timestamp(char *buffer, unsigned int buffer_size)
 {
 	time_t time_data;
@@ -2753,6 +2760,29 @@ void str_escape(char **dst, const char *src, const char *end)
 		*(*dst)++ = *src++;
 	}
 	**dst = 0;
+}
+
+void str_strip_path_and_extension(const char *filename, char *dst, int dst_size)
+{
+	const char *pFilenameEnd = filename + str_length(filename);
+	const char *pExtractedName = filename;
+	const char *pEnd = pFilenameEnd;
+	for(const char *pIter = filename; *pIter; pIter++)
+	{
+		if(*pIter == '/' || *pIter == '\\')
+		{
+			pExtractedName = pIter + 1;
+			pEnd = pFilenameEnd;
+		}
+		else if(*pIter == '.')
+		{
+			pEnd = pIter;
+		}
+	}
+
+	int Length = (int)(pEnd - pExtractedName + 1);
+	if(Length > dst_size) Length = dst_size;
+	str_copy(dst, pExtractedName, Length);
 }
 
 

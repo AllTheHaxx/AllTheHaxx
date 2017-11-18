@@ -1150,6 +1150,7 @@ int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
 void str_timestamp(char *buffer, unsigned int buffer_size);
 void str_timestamp_ex(time_t time, char *buffer, unsigned int buffer_size, const char *format);
 #define str_timestampb(BUF) str_timestamp(BUF, sizeof(BUF))
+void str_timestamp_format(char *buffer, int buffer_size, const char *format);
 
 void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char *pLocalizeDay, const char *pLocalizeDays);
 #define str_clock_sec(buffer, buffer_size, time) str_clock_sec_impl(buffer, buffer_size, time, Localize("day"), Localize("days"))
@@ -1166,6 +1167,8 @@ void str_clock_sec_impl(char *buffer, unsigned buffer_size, int time, const char
 		end - End of destination array
 */
 void str_escape(char **dst, const char *src, const char *end);
+
+void str_strip_path_and_extension(const char *filename, char *dst, int dst_size);
 
 /* Group: Filesystem */
 
