@@ -22,10 +22,22 @@ for arg in args:
         print("No such argument '"+arg+"'.")
         sys.exit()
 
-content = open(infile).readlines()
-trans = twlang.translations(infile)
+try:
+    content = open(infile).readlines()
+except IOError as e:
+    print "!! " + str(e)
+    sys.exit()
+try:
+    trans = twlang.translations(infile)
+except twlang.LanguageDecodeError as e:
+    print "!! " + str(e)
+    sys.exit()
+
 if delete_unused or append_missing:
-    local = twlang.localizes()
+    try:
+        local = twlang.localizes()
+    except twlang.LanguageDecodeError as e:
+        print "!! " + str(e)
 if append_missing:
     supported = []
 for tran, (start, expr, end) in trans.iteritems():

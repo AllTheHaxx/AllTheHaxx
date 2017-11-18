@@ -9,7 +9,11 @@ else:
 local = twlang.localizes()
 table = []
 for lang in langs:
-    trans = twlang.translations(lang)
+    try:
+        trans = twlang.translations(lang)
+    except (twlang.LanguageDecodeError, IOError) as e:
+        print "!! " + str(e)
+        continue
     empty = 0
     supported = 0
     unused = 0

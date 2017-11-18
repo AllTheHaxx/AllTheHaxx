@@ -641,9 +641,6 @@ Types
 
 ##### needs translation #####
 
-Borderless window
-== Оконный режим
-
 Demo
 == Демо
 
@@ -658,12 +655,6 @@ Join
 
 Laser
 == Лазер
-
-Reset
-== Сброс
-
-Respawn
-== Респаун
 
 Save
 == Сохр.
