@@ -24,6 +24,8 @@ public:
 	const CCountryFlag *GetByCountryCode(int CountryCode) const;
 	const CCountryFlag *GetByIndex(int Index) const;
 	void Render(int CountryCode, const vec4 &Color, float x, float y, float w, float h);
+	void Render(int CountryCode, const vec4 &Color, const vec2& Pos, float w);
+	void Render(int CountryCode, const vec4 &Color, const class CUIRect& Rect);
 
 private:
 	enum

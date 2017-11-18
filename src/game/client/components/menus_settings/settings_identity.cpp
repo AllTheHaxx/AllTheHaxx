@@ -167,14 +167,16 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			mem_free(pIdentJson);
 		}
 
+		const bool IsLastEntry = i == numID-1;
+
 		CUIRect ButtonBar;
 		Button.VSplitRight(Button.h * 3.0f, 0, &ButtonBar);
 		ButtonBar.Margin(4.0f, &ButtonBar);
 
-		ButtonBar.VSplitRight(Button.h, &ButtonBar, &Temp);
+		ButtonBar.VSplitRight(15.0f, &ButtonBar, &Temp);
 		if(m_pClient->m_pIdentity->NumIdents() > 1)
 		{
-			if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (i < numID - 1 && AllShown ? CUI::CORNER_NONE : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
+			if(DoButton_Menu(&s_aDeleteIDs[i], "×", 0, &Temp, 0, CUI::CORNER_R | (AllShown ? CUI::CORNER_NONE : CUI::CORNER_L), vec4(0.7f, 0.2f, 0.2f, 0.9f)))
 			{
 				m_pClient->m_pIdentity->DeleteIdent(i);
 				if(i < Page)
@@ -184,13 +186,13 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 		if(AllShown)
 		{
-			if(i < numID-1)
+			if(!IsLastEntry)
 			{
-				ButtonBar.VSplitRight(Button.h, &ButtonBar, &Temp);
+				ButtonBar.VSplitRight(15.0f, &ButtonBar, &Temp);
 				if(DoButton_Menu(&s_aDownIDs[i], "↓", 0, &Temp, 0, i >= 1 ? 0 : CUI::CORNER_L))
 				{
 					m_pClient->m_pIdentity->SwapIdent(i, 1);
-					m_MousePos.y += 36.0f;
+					m_MousePos.y += 36.0f * UI()->Scale();
 					if(Page == i)
 						Page++;
 					else if(i == Page-1)
@@ -200,11 +202,11 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 
 			if(i >= 1)
 			{
-				ButtonBar.VSplitRight(Button.h, &ButtonBar, &Temp);
-				if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, 0, i < numID-1 ? CUI::CORNER_L : CUI::CORNER_ALL))
+				ButtonBar.VSplitRight(15.0f, &ButtonBar, &Temp);
+				if(DoButton_Menu(&s_aUpIDs[i], "↑", 0, &Temp, 0, CUI::CORNER_L))
 				{
-					m_MousePos.y -= 36.0f;
 					m_pClient->m_pIdentity->SwapIdent(i, -1);
+					m_MousePos.y -= 36.0f * UI()->Scale();
 					if(i == Page)
 						Page--;
 					else if(i == Page+1)
@@ -237,10 +239,18 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 			OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
-		OwnSkinInfo.m_Size = 26.0f*UI()->Scale();
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x + OwnSkinInfo.m_Size/2.0f, Button.y + Button.h*0.55f));
+		OwnSkinInfo.m_Size = 26.0f * UI()->Scale();
+
+		CUIRect Icons = Button;
+		// tee
+		Icons.VSplitLeft(OwnSkinInfo.m_Size/UI()->Scale(), &Temp, &Icons);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Temp.x, Temp.y), false, 1.0f, true);
+
+		// flag
+		Icons.VSplitLeft(25.0f, &Temp, &Icons);
 		const CCountryFlags::CCountryFlag *pFlag = m_pClient->m_pCountryFlags->GetByCountryCode(pEntry->m_Country);
-		m_pClient->m_pCountryFlags->Render(pFlag->m_CountryCode, vec4(1), Button.x + OwnSkinInfo.m_Size/2.0f + (25.0f/2.0f)*UI()->Scale(), Button.y + Button.h/2.0f-13.0f/2.0f, 25.0f, 13.0f);
+		m_pClient->m_pCountryFlags->Render(pFlag->m_CountryCode, vec4(1), Temp);
+
 		Button.HMargin(2.0f, &Button);
 		Button.HSplitBottom(16.0f, 0, &Button);
 		const bool IsMain = m_pClient->m_pIdentity->UsingIdent(i, false);

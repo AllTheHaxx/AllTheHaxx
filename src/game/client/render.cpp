@@ -209,23 +209,22 @@ void CRenderTools::RenderTeeLua(int Emote, CTeeRenderInfo *pInfo, const vec2& Di
 	RenderTee(CAnimState::GetIdle(), pInfo, Emote, Dir, Pos, UseTeeAlpha, AlphaLimit);
 }
 
-void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha, float AlphaLimit)
+void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha, float AlphaLimit, bool TL)
 {
-	vec2 Direction = Dir;
 	vec2 Position = Pos;
+	if(TL)
+	{
+		Position += vec2(pInfo->m_Size/2.0f);
+	}
 
-	//Graphics()->TextureSet(data->images[IMAGE_CHAR_DEFAULT].id);
 	Graphics()->TextureSet(pInfo->m_Texture);
-
-	// TODO: FIX ME
 	Graphics()->QuadsBegin();
-	//Graphics()->QuadsDraw(pos.x, pos.y-128, 128, 128);
 
 	// first pass we draw the outline
 	// second pass we draw the filling
 	for(int p = 0; p < 2; p++)
 	{
-		int OutLine = p==0 ? 1 : 0;
+		bool OutLine = p == 0;
 
 		for(int f = 0; f < 2; f++)
 		{
@@ -242,7 +241,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, 1.0f);
 
 				vec2 BodyPos = Position + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y)*AnimScale;
-				SelectSprite(OutLine?SPRITE_TEE_BODY_OUTLINE:SPRITE_TEE_BODY, 0, 0, 0);
+				SelectSprite(OutLine ? SPRITE_TEE_BODY_OUTLINE : SPRITE_TEE_BODY, 0, 0, 0);
 				IGraphics::CQuadItem QuadItem(BodyPos.x, BodyPos.y, BaseSize, BaseSize);
 				Graphics()->QuadsDraw(&QuadItem, 1);
 
@@ -270,11 +269,12 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 
 					float EyeScale = BaseSize*0.40f;
 					float h = Emote == EMOTE_BLINK ? BaseSize*0.15f : EyeScale;
-					float EyeSeparation = (0.075f - 0.010f*absolute(Direction.x))*BaseSize;
-					vec2 Offset = vec2(Direction.x*0.125f, -0.05f+Direction.y*0.10f)*BaseSize;
+					float EyeSeparation = (0.075f - 0.010f*absolute(Dir.x))*BaseSize;
+					vec2 Offset = vec2(Dir.x*0.125f, -0.05f+Dir.y*0.10f)*BaseSize;
 					IGraphics::CQuadItem Array[2] = {
 						IGraphics::CQuadItem(BodyPos.x-EyeSeparation+Offset.x, BodyPos.y+Offset.y, EyeScale, h),
-						IGraphics::CQuadItem(BodyPos.x+EyeSeparation+Offset.x, BodyPos.y+Offset.y, -EyeScale, h)};
+						IGraphics::CQuadItem(BodyPos.x+EyeSeparation+Offset.x, BodyPos.y+Offset.y, -EyeScale, h)
+					};
 					Graphics()->QuadsDraw(Array, 2);
 				}
 			}
@@ -310,7 +310,6 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 	}
 
 	Graphics()->QuadsEnd();
-
 
 }
 

@@ -142,6 +142,20 @@ const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(int Index) const
 	return &m_aCountryFlags[max(0, Index%m_aCountryFlags.size())];
 }
 
+void CCountryFlags::Render(int CountryCode, const vec4 &Color, const CUIRect& Rect)
+{
+	float h = Rect.w / 2.0f;
+	float y = Rect.y + h/2.0f;
+	float x = Rect.x;
+	Render(CountryCode, Color, vec2(x, y), Rect.w);
+}
+
+void CCountryFlags::Render(int CountryCode, const vec4 &Color, const vec2& Pos, float w)
+{
+	CUIRect Rect = CUIRect(Pos.x, Pos.y, w, w/2.0f);
+	Render(CountryCode, Color, Rect.x, Rect.y, Rect.w, Rect.h);
+}
+
 void CCountryFlags::Render(int CountryCode, const vec4 &Color, float x, float y, float w, float h)
 {
 	const CCountryFlag *pFlag = GetByCountryCode(CountryCode);
