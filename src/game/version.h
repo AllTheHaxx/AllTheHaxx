@@ -4,7 +4,7 @@
 #define GAME_VERSION_H
 #include "generated/nethash.cpp"
 
-#define GAME_VERSION "0.6.3"
+#define GAME_VERSION "0.6.4"
 #define ATH_VERSION "0.34"
 #define DDNET_VERSION "10.7.1"
 #define BUILD_DATE __DATE__ ", " __TIME__
