@@ -536,7 +536,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		float w = TextRender()->TextWidth(0, 12.0f, pLabel, -1);
 		QuickSearch.VSplitLeft(w, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button);
+		QuickSearch.VSplitRight(15.0f, &QuickSearch, &Button);
 		static float Offset = 0.0f;
 		CPointerContainer s_FilterStringEditbox(&g_Config.m_BrFilterString);
 		if(DoEditBox(&s_FilterStringEditbox, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
@@ -560,7 +560,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		float w = TextRender()->TextWidth(0, 12.0f, "✗", -1);
 		QuickExclude.VSplitLeft(w, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
-		QuickExclude.VSplitLeft(QuickExclude.w-15.0f, &QuickExclude, &Button);
+		QuickExclude.VSplitRight(15.0f, &QuickExclude, &Button);
 		static float Offset = 0.0f;
 		CPointerContainer s_ExcludeStringEditbox(&g_Config.m_BrExcludeString);
 		if(DoEditBox(&s_ExcludeStringEditbox, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_L, Localize("Exclude")))
@@ -886,8 +886,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		{
 			ServerFilter.HSplitTop(17.0f, &ServerFilter, &ServerFilter);
 
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-
 			const float FlagWidth = 40.0f;
 			const float FlagHeight = 20.0f;
 
@@ -988,7 +986,6 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	ServerDetails.HSplitBottom(2.5f, &ServerDetails, 0x0);
 
 	// server details
-	CTextCursor Cursor;
 	const float FontSize = 12.0f;
 	ServerDetails.HSplitTop(ms_ListheaderHeight, &ServerHeader, &ServerDetails);
 	RenderTools()->DrawUIRect(&ServerHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
@@ -1034,21 +1031,15 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = Row.w;
-		TextRender()->TextEx(&Cursor, pSelectedServer->m_aVersion, -1);
+		UI()->DoLabelScaled(&Row, pSelectedServer->m_aVersion, FontSize, CUI::ALIGN_LEFT);
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = Row.w;
-		TextRender()->TextEx(&Cursor, pSelectedServer->m_aGameType, -1);
+		UI()->DoLabelScaled(&Row, pSelectedServer->m_aGameType, FontSize, CUI::ALIGN_LEFT);
 
-		char aTemp[16];
-		str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_Latency);
+		char aLatency[16];
+		str_format(aLatency, sizeof(aLatency), "%d", pSelectedServer->m_Latency);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = Row.w;
-		TextRender()->TextEx(&Cursor, aTemp, -1);
+		UI()->DoLabelScaled(&Row, aLatency, FontSize, CUI::ALIGN_LEFT);
 
 	}
 
@@ -1102,59 +1093,23 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				else
 				{
 					int Time = abs(pSelectedServer->m_aClients[i].m_Score);
-					str_format(aTemp, sizeof(aTemp), "%02d:%02d", Time/60, Time%60);
+					str_clock_secb(aTemp, Time);
 				}
 			}
 			else
 				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
 
-			TextRender()->SetCursor(&Cursor, Score.x, Score.y+(Score.h-FontSize)/4.0f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-			Cursor.m_LineWidth = Score.w;
-			TextRender()->TextEx(&Cursor, aTemp, -1);
+			UI()->DoLabelScaled(&Score, aTemp, FontSize, CUI::ALIGN_LEFT);
 
 			// name
-			TextRender()->SetCursor(&Cursor, Name.x, Name.y, FontSize-2, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-			Cursor.m_LineWidth = Name.w;
 			const char *pName = pSelectedServer->m_aClients[i].m_aName;
-			if(g_Config.m_BrFilterString[0])
-			{
-				// highlight the parts that matches
-				const char *s = str_find_nocase(pName, g_Config.m_BrFilterString);
-				if(s)
-				{
-					TextRender()->TextEx(&Cursor, pName, (int)(s-pName));
-					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s, str_length(g_Config.m_BrFilterString));
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s+str_length(g_Config.m_BrFilterString), -1);
-				}
-				else
-					TextRender()->TextEx(&Cursor, pName, -1);
-			}
-			else
-				TextRender()->TextEx(&Cursor, pName, -1);
+			UI()->DoLabelScaled(&Name, pName, FontSize, CUI::ALIGN_RIGHT, -1, g_Config.m_BrFilterString);
 
 			// clan
-			TextRender()->SetCursor(&Cursor, Clan.x, Clan.y, FontSize-2, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-			Cursor.m_LineWidth = Clan.w;
 			const char *pClan = pSelectedServer->m_aClients[i].m_aClan;
-			if(g_Config.m_BrFilterString[0])
-			{
-				// highlight the parts that matches
-				const char *s = str_find_nocase(pClan, g_Config.m_BrFilterString);
-				if(s)
-				{
-					TextRender()->TextEx(&Cursor, pClan, (int)(s-pClan));
-					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s, str_length(g_Config.m_BrFilterString));
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s+str_length(g_Config.m_BrFilterString), -1);
-				}
-				else
-					TextRender()->TextEx(&Cursor, pClan, -1);
-			}
-			else
-				TextRender()->TextEx(&Cursor, pClan, -1);
+			TextRender()->TextColor(0.6f, 0.6f, 0.6f, 0.8f);
+			UI()->DoLabelScaled(&Clan, pClan, FontSize-2, CUI::ALIGN_RIGHT, -1, g_Config.m_BrFilterString);
+			TextRender()->TextColor(1,1,1,1);
 
 			// flag
 			vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);

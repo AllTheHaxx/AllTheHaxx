@@ -438,8 +438,8 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 
 		CUIRect Background;
 		Left.HSplitTop(7.5f, 0, &Background);
-		Background.h = 23.0f*10+2.0f;
-		RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
+		Background.h = (23.0f*10.0f + 2.0f) * UI()->Scale();
+		RenderTools()->DrawUIRect(&Background, vec4(mix((vec3)ms_GuiColor*0.65f, vec3(1), 0.10f), 0.68f) /*vec4(0.2f, 0.5f, 0.2f, 0.68f)*/, CUI::CORNER_ALL, 4.0f);
 		Left.HSplitTop(7.0f, 0, &Left);
 		Left.VMargin(10.0f, &Left);
 		Left.HSplitTop(5.0f, 0, &Left);

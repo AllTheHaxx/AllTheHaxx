@@ -678,8 +678,8 @@ void CMenus::RenderSettingsIRC(CUIRect MainView)
 
 	CUIRect Background;
 	MainView.HSplitTop(7.5f, 0, &Background);
-	Background.h = 25.0f*(sizeof(s_apLabels)/sizeof(s_apLabels[0]))+7.5f;
-	RenderTools()->DrawUIRect(&Background, vec4(0.2f, 0.5f, 0.2f, 0.68f), CUI::CORNER_ALL, 4.0f);
+	Background.h = (25.0f*(sizeof(s_apLabels)/sizeof(s_apLabels[0]))+7.5f) * UI()->Scale();
+	RenderTools()->DrawUIRect(&Background, vec4(mix((vec3)ms_GuiColor*0.65f, vec3(1), 0.10f), 0.68f)/*vec4(0.2f, 0.5f, 0.2f, 0.68f)*/, CUI::CORNER_ALL, 4.0f);
 
 	CUIRect Label;
 	int LabelIndex = 0;

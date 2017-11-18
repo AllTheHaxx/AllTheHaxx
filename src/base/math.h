@@ -51,7 +51,7 @@ inline int round_to_int(float f)
 }
 
 template<typename T, typename TB>
-inline T mix(const T a, const T b, TB amount)
+inline T mix(const T& a, const T& b, TB amount)
 {
 	return a + (b-a)*amount;
 }

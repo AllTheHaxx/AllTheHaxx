@@ -137,7 +137,7 @@ void CMenusTooltip::OnRender()
 	if(m_aTooltip[0] == '\0')
 		return;
 
-	const float FONT_SIZE = 13.0f;
+	const float FONT_SIZE = 13.0f * UI()->Scale();
 	const float LINE_WIDTH = 300.0f * UI()->Scale();
 	const int LineCount = TextRender()->TextLineCount(0, FONT_SIZE, m_aTooltip, LINE_WIDTH);
 
@@ -1132,14 +1132,14 @@ int CMenus::DoColorPicker(const CButtonContainer *pBC1, const CButtonContainer *
 
 	// marker
 	Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
-	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - hsv.x) * HuePicker.h * UI()->Scale(), HuePicker.w, UI()->PixelSize());
+	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - hsv.x) * HuePicker.h, HuePicker.w, UI()->PixelSize());
 	Graphics()->QuadsDrawTL(&QuadItemMarker, 1);
 
 	Graphics()->QuadsEnd();
 
 	if(UI()->DoPickerLogic(pBC2->GetID(), &HuePicker, &X, &Y))
 	{
-		hsv.x = 1.0f - Y/HuePicker.h;
+		hsv.h = 1.0f - Y/HuePicker.h*UI()->Scale();
 	}
 
 	int Changed = hsv != *pColorHSV;

@@ -477,7 +477,7 @@ void CMenus::RenderServerConfigCreator(CUIRect MainView)
 			s_HasChanged = true;
 
 		CPointerContainer RemoveContainer(&s_Items[i].m_aCommand[2]);
-		if(DoButton_Menu(&RemoveContainer, "×", 0, &RemoveButton, "Remove", 0))
+		if(DoButton_Menu(&RemoveContainer, "×", 0, &RemoveButton, Localize("Remove"), 0))
 		{
 			s_Items.remove_index(i);
 			s_HasChanged = true;
@@ -1104,14 +1104,14 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// tab bar
 	{
-		TabBar.VSplitLeft(TabBar.w/2, &Button, &TabBar);
+		TabBar.VSplitMid(&Button, &TabBar);
+
 		static CButtonContainer s_Button0;
 		if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, 0))
 			s_ControlPage = 0;
 
-		TabBar.VSplitRight(0, &Button, &TabBar);
 		static CButtonContainer s_Button1;
-		if(DoButton_MenuTab(&s_Button1, Localize("Player related"), s_ControlPage == 1, &Button, 0))
+		if(DoButton_MenuTab(&s_Button1, Localize("Player related"), s_ControlPage == 1, &TabBar, 0))
 			s_ControlPage = 1;
 	}
 
@@ -1137,7 +1137,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-			QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button2);
+			QuickSearch.VSplitRight(15.0f, &QuickSearch, &Button2);
 			static float Offset = 0.0f;
 			static CButtonContainer s_FilterStringEditbox;
 			if(DoEditBox(&s_FilterStringEditbox, &QuickSearch, m_aCallvoteFilterString, sizeof(m_aCallvoteFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
@@ -1223,7 +1223,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
 			float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1);
 			Reason.VSplitLeft(w+10.0f, 0, &Reason);
-			Reason.VSplitLeft(Reason.w-15.0f, &Reason, &ClearButton);
+			Reason.VSplitRight(15.0f, &Reason, &ClearButton);
 			static float s_Offset = 0.0f;
 			static CButtonContainer s_CallvoteReasonEditbox;
 			DoEditBox(&s_CallvoteReasonEditbox, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_L);

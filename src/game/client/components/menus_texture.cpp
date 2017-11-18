@@ -24,17 +24,17 @@ void CMenus::RenderSettingsTexture(CUIRect MainView)
 
 	// tab bar
 	{
-		TabBar.VSplitLeft(TabBar.w/5, &Button, &TabBar);
+		TabBar.VSplitLeft(TabBar.w/5.0f / UI()->Scale(), &Button, &TabBar);
 		static CButtonContainer s_Button0;
 		if(DoButton_MenuTab(&s_Button0, Localize("Gameskin"), s_ControlPage == 0, &Button, CUI::CORNER_L))
 			s_ControlPage = 0;
 
-		TabBar.VSplitLeft(TabBar.w/4, &Button, &TabBar);
+		TabBar.VSplitLeft(TabBar.w/4.0f / UI()->Scale(), &Button, &TabBar);
 		static CButtonContainer s_Button1;
 		if(DoButton_MenuTab(&s_Button1, Localize("Particles"), s_ControlPage == 1, &Button, 0))
 			s_ControlPage = 1;
 
-		TabBar.VSplitLeft(TabBar.w/3, &Button, &TabBar);
+		TabBar.VSplitLeft(TabBar.w/3.0f / UI()->Scale(), &Button, &TabBar);
 		static CButtonContainer s_Button2;
 		if(DoButton_MenuTab(&s_Button2, Localize("Emoticons"), s_ControlPage == 2, &Button, 0))
 			s_ControlPage = 2;

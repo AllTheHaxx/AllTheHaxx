@@ -481,7 +481,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		float wSearch = TextRender()->TextWidth(0, 14.0f, "⚲", -1);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
+		QuickSearch.VSplitRight(15.0f, &QuickSearch, &QuickSearchClearButton);
 		static float Offset = 0.0f;
 		static CButtonContainer s_LuaFilterStringEditbox;
 		DoEditBox(&s_LuaFilterStringEditbox, &QuickSearch, g_Config.m_ClLuaFilterString, sizeof(g_Config.m_ClLuaFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search"));
@@ -489,7 +489,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		// clear button
 		{
 			static CButtonContainer s_ClearButton;
-			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, "clear", CUI::CORNER_R, vec4(1,1,1,0.33f)))
+			if(DoButton_Menu(&s_ClearButton, "×", 0, &QuickSearchClearButton, Localize("clear"), CUI::CORNER_R, vec4(1,1,1,0.33f)))
 			{
 				g_Config.m_ClLuaFilterString[0] = 0;
 				UI()->SetActiveItem(s_LuaFilterStringEditbox.GetID());
