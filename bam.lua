@@ -213,6 +213,9 @@ end
 function Intermediate_Output(settings, input)
 	return "objs/" .. sysconf .. "/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
 end
+function Intermediate_Output_Tools(settings, input)
+	return "objs/objs_tools" .. sysconf .. "/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
+end
 
 function build(settings)
 	-- apply compiler settings
@@ -410,9 +413,16 @@ function build(settings)
 		launcher_settings.link.libs:Add("dl")
 	end
 
-	engine = Compile(engine_settings, Collect("src/engine/shared/*.cpp", "src/base/*.c", "src/base/system++/*.cpp"))
+	engine_collection = Collect("src/engine/shared/*.cpp", "src/base/*.c", "src/base/system++/*.cpp")
+	engine = Compile(engine_settings, engine_collection)
 	client = Compile(client_settings, Collect("src/engine/client/*.cpp"))
 	server = Compile(server_settings, Collect("src/engine/server/*.cpp"))
+
+	-- compile a seperate engine for the tools
+	tools_settings = engine_settings:Copy()
+	tools_settings.cc.Output = Intermediate_Output_Tools
+	tools_settings.cc.defines:Add("BUILD_TOOLS")
+	tools_engine = Compile(tools_settings, engine_collection)
 
 	versionserver = Compile(settings, Collect("src/versionsrv/*.cpp"))
 	masterserver = Compile(settings, Collect("src/mastersrv/*.cpp"))
@@ -434,7 +444,6 @@ function build(settings)
 	end
 
 	-- build tools (TODO: fix this so we don't get double _d_d stuff)
-	tools_settings = engine_settings:Copy()
 	tools_settings.link.libs:Add("ssl")
 	tools_settings.link.libs:Add("crypto")
 	tools_src = Collect("src/tools/*.cpp", "src/tools/*.c")
@@ -443,7 +452,7 @@ function build(settings)
 	for i,v in ipairs(tools_src) do
 		toolname = PathFilename(PathBase(v))
 		tools[i] = Link(tools_settings, toolname, Compile(tools_settings, v), 
-						engine, zlib, pnglite, md5, game_shared, aes128)
+						tools_engine, zlib, pnglite, md5, game_shared, aes128)
 	end
 
 	-- build tests

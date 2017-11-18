@@ -45,6 +45,7 @@ set(SOURCE_FILES
         src/tools/confusables.cpp
         src/tools/dilate.cpp
         src/tools/map_version.cpp
+        src/tools/colorcode.c
         src/base/system.c
         src/base/confusables_data.h
         src/base/confusables.c

@@ -529,6 +529,7 @@ public:
 		return !fs_makedir(GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer)));
 	}
 
+#if !defined(BUILD_TOOLS)
 	virtual bool CreateFolderLua(const char *pFoldername, lua_State *L)
 	{
 		if(g_StealthMode)
@@ -543,6 +544,7 @@ public:
 		str_appendb(aFullPath, "/file"); // dummy file to satisfy fs_makedir_rec_for
 		return fs_makedir_rec_for(aFullPath) == 0;
 	}
+#endif
 
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
 	{
