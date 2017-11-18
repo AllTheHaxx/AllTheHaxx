@@ -478,6 +478,7 @@ void CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPoss
 	{
 		if(pCommand->m_Flags&FlagMask && pCommand->m_Temp == Temp)
 		{
+			for(; *pStr == ' '; pStr++);;
 			if(str_find_nocase(pCommand->m_pName, pStr))
 				pfnCallback(pCommand->m_pName, pUser);
 		}
@@ -670,6 +671,13 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments())
 	{
+		// check for valid arguments
+		{
+			const char *pStr = pResult->GetString(0);
+			if(pStr && !str_isdigit(pStr[0]))
+				return;
+		}
+
 		int Val = pResult->GetInteger(0);
 
 		// do clamping
@@ -865,6 +873,7 @@ CConsole::CConsole(int FlagMask)
 	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
 	Register("+toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
 	Register("default", "s[config-option]", CFGFLAG_CLIENT, ConDefault, this, "Reset a config value to it's default value");
+	Register("reset", "s[config-option]", CFGFLAG_CLIENT, ConDefault, this, "Reset a config value to it's default value"); // alias
 
 	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");

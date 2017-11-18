@@ -714,13 +714,19 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			char aBuf[64] = {0};
 			const char *pSrc = GetString();
-			int i = 0;
-			for(; i < (int)sizeof(aBuf)-1 && *pSrc && *pSrc != ' '; i++, pSrc++)
-				aBuf[i] = *pSrc;
-			aBuf[i] = 0;
+			for(; *pSrc == ' '; pSrc++);; // skip to the first non-whitespace letter
 
-			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
-																								m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
+			// copy *pSrc into aBuf until we hit the first whitespace
+			int i = 0;
+			for(; i < (int)sizeof(aBuf) - 1 && *pSrc && *pSrc != ' '; i++, pSrc++)
+				aBuf[i] = *pSrc;
+			aBuf[i] = '\0';
+
+			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(
+					aBuf, m_CompletionFlagmask,
+					m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands()
+			);
+
 			if(pCommand)
 			{
 				m_IsCommand = true;
@@ -853,12 +859,13 @@ void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
 
 	CRenderInfo *pInfo = static_cast<CRenderInfo *>(pUser);
 
+	// draw a nice background for the selected command
 	if(pInfo->m_EnumCount == pInfo->m_WantedCompletion)
 	{
 		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1);
 		pInfo->m_pSelf->Graphics()->TextureSet(-1);
 		pInfo->m_pSelf->Graphics()->QuadsBegin();
-		pInfo->m_pSelf->Graphics()->SetColor(229.0f/255.0f,185.0f/255.0f,4.0f/255.0f,0.85f);
+		pInfo->m_pSelf->Graphics()->SetColor(229.0f/255.0f, 185.0f/255.0f, 4.0f/255.0f, 0.85f);
 		pInfo->m_pSelf->RenderTools()->DrawRoundRect(pInfo->m_Cursor.m_X-3, pInfo->m_Cursor.m_Y, tw+5, pInfo->m_Cursor.m_FontSize+4, pInfo->m_Cursor.m_FontSize/3);
 		pInfo->m_pSelf->Graphics()->QuadsEnd();
 
@@ -873,6 +880,7 @@ void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
 	}
 	else
 	{
+		for(; pInfo->m_pCurrentCmd[0] == ' '; pInfo->m_pCurrentCmd++);;
 		const char *pMatchStart = str_find_nocase(pStr, pInfo->m_pCurrentCmd);
 
 		if(pMatchStart)
@@ -1173,8 +1181,10 @@ void CGameConsole::OnRender()
 		{
 			if(pConsole->m_Input.GetString()[0] != 0)
 			{
-				m_pConsole->PossibleCommands(pConsole->m_aCompletionBuffer, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL &&
-					Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
+				m_pConsole->PossibleCommands(
+						pConsole->m_aCompletionBuffer, pConsole->m_CompletionFlagmask,
+						m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(),
+						PossibleCommandsRenderCallback, &Info);
 				pConsole->m_CompletionRenderOffset = Info.m_Offset;
 
 				if(Info.m_EnumCount <= 0)
