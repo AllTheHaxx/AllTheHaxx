@@ -26,34 +26,33 @@ public:
 
 void dbg_break();
 
-
+template <class TFN>
 class CDeferHandler
 {
 public:
-	typedef void (*DEFER_FUNCTION)(void *pData);
+//	typedef void (*DEFER_FUNCTION)();
 
 private:
-	DEFER_FUNCTION m_pFnDeferFunc;
-	void *m_pData;
+	const TFN m_pFnDeferFunc;
 
 public:
-	CDeferHandler(DEFER_FUNCTION pFnDeferFunc, void *pData)
+	explicit CDeferHandler(TFN pFnDeferFunc) : m_pFnDeferFunc(pFnDeferFunc)
 	{
-		m_pFnDeferFunc = pFnDeferFunc;
-		m_pData = pData;
 	}
 
 	~CDeferHandler()
 	{
-		m_pFnDeferFunc(m_pData);
+		m_pFnDeferFunc();
 	}
 };
 
-
 /**
- * The given function FUNC will automatically be executed with DATA as argument right before the current function returns
+ * The given function FUNC will automatically be executed with DATA as argument when the current scope dies
  */
-#define DEFER(DATA, FUNC) CDeferHandler __DeferHandler(FUNC, DATA);
+template <class TFN>
+CDeferHandler<TFN> CreateDeferHandler(TFN pFnDeferFunc) { return CDeferHandler<TFN>(pFnDeferFunc); }
+
+#define DEFER(FUNC) auto __DeferHandler = CreateDeferHandler(FUNC);
 
 
 void StringSplit(const char *pString, const char *pDelim, std::vector<std::string> *pDest);

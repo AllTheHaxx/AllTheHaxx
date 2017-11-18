@@ -318,8 +318,8 @@ void CAStar::BuildPath(void *pData)
 	const vec2 Finish = pParams->m_To;
 	delete pParams;
 
-	DEFER(pSelf, [](void *pUser){
-		((CAStar*)pUser)->m_pBuilderThread = NULL;
+	DEFER([pSelf](){
+		pSelf->m_pBuilderThread = NULL;
 	})
 
 	if(!g_Config.m_ClPathFinding)
@@ -460,8 +460,8 @@ void CAStar::CalcScoreThreadProxy(void *pUser)
 
 void CAStar::CalcScoreThread()
 {
-	DEFER(this, [](void *pUser){
-		((CAStar*)pUser)->m_pScoreThread = NULL;
+	DEFER([this](){
+		m_pScoreThread = NULL;
 	})
 
 	// fitness calculation
