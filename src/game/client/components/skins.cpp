@@ -43,6 +43,9 @@ int CSkins::CSkin::GetOrgTexture() const
 
 void CSkins::LoadTexturesImpl(CSkin *pSkin)
 {
+	if(g_Config.m_Debug)
+		dbg_msg("skins", "loading texture for skin '%s' from '%s'", pSkin->GetName(), pSkin->m_FileInfo.m_aFullPath);
+
 	CImageInfo Info;
 	if(!Graphics()->LoadPNG(&Info, pSkin->m_FileInfo.m_aFullPath, pSkin->m_FileInfo.m_DirType))
 	{
@@ -179,9 +182,17 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	Skin.m_FileInfo.m_DirType = DirType;
 	str_formatb(Skin.m_FileInfo.m_aFullPath, "%s/%s", pLoadHelper->pFullDir, pName);
 
-	// textures are being loaded on-demand; later when skin is needed
-	Skin.m_OrgTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
-	Skin.m_ColorTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
+	if(g_Config.m_ClThreadskinloading)
+	{
+		// textures are being loaded on-demand; later when skin is needed
+		Skin.m_OrgTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
+		Skin.m_ColorTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
+	}
+	else
+	{
+		// textures are loaded right away at client start
+		pSelf->LoadTexturesImpl(&Skin);
+	}
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, min((int)sizeof(Skin.m_aName),l-3));
