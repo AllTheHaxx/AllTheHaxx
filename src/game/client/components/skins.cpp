@@ -53,7 +53,7 @@ void CSkins::LoadTexturesImpl(CSkin *pSkin)
 		pSkin->m_OrgTexture = m_DefaultSkinOrgTexture;//CSkin::SKIN_TEXTURE_NOT_FOUND;
 		Console()->Printf(IConsole::OUTPUT_LEVEL_ADDINFO, "game", "failed to load skin from %s", pSkin->m_FileInfo.m_aFullPath);
 		// rename invalid downloaded skins so we don't try to load them again
-		if(str_comp_nocase_num(pSkin->m_FileInfo.m_aFullPath, "downloadedskins", 15) == 0);
+		if(str_comp_nocase_num(pSkin->m_FileInfo.m_aFullPath, "downloadedskins", 15) == 0)
 		{
 			char aBuf[512];
 			str_formatb(aBuf, "%s.FAIL", pSkin->m_FileInfo.m_aFullPath);
