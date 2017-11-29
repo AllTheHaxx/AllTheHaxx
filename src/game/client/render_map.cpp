@@ -320,11 +320,12 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 			}
 
 			int c = mx + my*w;
+			const CTile& Tile = pTiles[c];
 
-			unsigned char Index = pTiles[c].m_Index;
+			unsigned char Index = Tile.m_Index;
 			if(Index)
 			{
-				unsigned char Flags = pTiles[c].m_Flags;
+				unsigned char Flags = Tile.m_Flags;
 
 				bool Render = false;
 				if(Flags&TILEFLAG_OPAQUE && Color.a*a > 254.0f/255.0f)
@@ -391,7 +392,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 					Graphics()->QuadsDrawTL(&QuadItem, 1);
 				}
 			}
-			x += pTiles[c].m_Skip;
+			x += Tile.m_Skip;
 		}
 	}
 

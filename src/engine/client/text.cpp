@@ -410,7 +410,7 @@ class CTextRender : public IEngineTextRender
 		return SlotID;
 	}
 
-	CFontChar *GetChar(CFont *pFont, CFontSizeData *pSizeData, FT_ULong Chr)
+	const CFontChar *GetChar(CFont *pFont, CFontSizeData *pSizeData, FT_ULong Chr)
 	{
 		CFontChar *pFontchr = NULL;
 
@@ -864,7 +864,7 @@ public:
 						continue;
 					}
 
-					CFontChar *pChr = GetChar(pFont, pSizeData, Character);
+					const CFontChar *pChr = GetChar(pFont, pSizeData, Character);
 					if(pChr)
 					{
 						float Advance = pChr->m_AdvanceX + Kerning(pFont, Character, NextCharacter)*Scale;

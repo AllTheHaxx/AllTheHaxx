@@ -2,6 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_SHARED_JOBS_H
 #define ENGINE_SHARED_JOBS_H
+
+#include <mutex>
+#include <atomic>
+#include <base/tl/array.h>
+
 typedef int (*JOBFUNC)(void *pData);
 
 class CJobPool;
@@ -38,7 +43,9 @@ public:
 
 class CJobPool
 {
-	LOCK m_Lock;
+	std::mutex m_Lock;
+	std::atomic<bool> m_Running;
+	std::vector<void *> m_apThreads;
 	CJob *m_pFirstJob;
 	CJob *m_pLastJob;
 
@@ -46,6 +53,7 @@ class CJobPool
 
 public:
 	CJobPool();
+	~CJobPool();
 
 	int Init(int NumThreads);
 	int Add(CJob *pJob, JOBFUNC pfnFunc, void *pData);
