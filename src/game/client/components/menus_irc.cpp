@@ -309,10 +309,15 @@ void CMenus::RenderIRC(CUIRect MainView)
 					m_pClient->IRC()->ExecuteCommand(aCmd, aCmdParams);
 			}
 			else
-				m_pClient->IRC()->SendMsg(0x0, aEntryText);
-
-			if(str_length(aEntryText) > 0)
-				m_aIRCBacklog.add(std::string(aEntryText));
+			{
+				std::vector<std::string> Parts;
+				StringSplit(aEntryText, "\n", &Parts);
+				for(std::vector<std::string>::iterator it = Parts.begin(); it != Parts.end(); it++)
+				{
+					m_pClient->IRC()->SendMsg(0x0, it->c_str());
+					m_aIRCBacklog.add(*it);
+				}
+			}
 			s_CurrBacklogIndex = -1;
 			aEntryText[0] = 0;
 			UI()->SetActiveItem(s_EditboxInput.GetID());
@@ -393,7 +398,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				ButtonQS.Margin(2.0f, &ButtonQS);
 				if(!pUser->IsVoice() && !pUser->IsAdmin() && str_comp(pUser->m_Nick.c_str(), m_pClient->IRC()->GetNick()) != 0)
 					if(DoButton_Menu(&s_JoinButton, "→", 0, &ButtonQS, Localize("Join"), CUI::CORNER_ALL, vec4(0, 0, 1, 0.7f)))
-					//if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
+						//if(UI()->DoButtonLogic(&Item.m_Visible, "", Selected, &ButtonQS))
 					{
 						m_pClient->IRC()->SendGetServer(Name.c_str());
 						UI()->SetActiveItem(&m_IRCActive);
@@ -430,8 +435,8 @@ void CMenus::RenderIRC(CUIRect MainView)
 				s_ChatScrollValue = clamp(s_ChatScrollValue, 0.0f, 1.0f);
 			}*/
 			UiDoListboxStart(&s_Chat, &Chat, 12.0f,
-					pChan->m_Topic.c_str()[0] ? pChan->m_Topic.c_str() : "", "",
-					(int)pChan->m_Buffer.size(), 1, -1, s_ChatScrollValue, CUI::CORNER_TL);
+							 pChan->m_Topic.c_str()[0] ? pChan->m_Topic.c_str() : "", "",
+							 (int)pChan->m_Buffer.size(), 1, -1, s_ChatScrollValue, CUI::CORNER_TL);
 			for(size_t i = 0; i < pChan->m_Buffer.size(); i++)
 			{
 				CPointerContainer Container(&pChan->m_Buffer[i]);
@@ -502,10 +507,10 @@ void CMenus::RenderIRC(CUIRect MainView)
 
 			// the join button
 			if(str_comp_nocase(pQuery->User(), "@status") != 0 && str_comp(pQuery->User(), m_pClient->IRC()->GetNick()) != 0 &&
-					((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User())) && // this is kinda inefficient but whatever...
-					!((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsVoice() &&
-					!((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsAdmin()
-				)
+			   ((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User())) && // this is kinda inefficient but whatever...
+			   !((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsVoice() &&
+			   !((CComChan*)m_pClient->IRC()->GetCom(1))->GetUser(std::string(pQuery->User()))->IsAdmin()
+					)
 			{
 				CUIRect ButtonQS;
 				Chat.VSplitRight(32.0f, 0x0, &ButtonQS);
@@ -513,7 +518,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				ButtonQS.x -= 20.0f;
 				ButtonQS.y += 25.0f;
 				RenderTools()->DrawUIRect(&ButtonQS, vec4(0.2f, 0.6f, 0.4f, UI()->MouseInside(&ButtonQS) ? 1.0f : 0.6f),
-						CUI::CORNER_ALL, 15.0f);
+										  CUI::CORNER_ALL, 15.0f);
 				ButtonQS.x += 5.0f;
 				ButtonQS.y += 7.0f;
 				UI()->DoLabelScaled(&ButtonQS, Localize("Join"), 11.0f, -1);
