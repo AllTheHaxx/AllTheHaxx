@@ -418,6 +418,8 @@ void CMenus::RenderIRC(CUIRect MainView)
 					TextRender()->TextColor(0.886f, 0.0f, 0.455f, 1); // b1tch3s in pink
 				else if(pUser->m_Nick == "PanDii")
 					TextRender()->TextColor(1.0f, 0.0f, 1.0f, 1);
+				else if(pUser->m_Nick == "YoungFlyme")
+					TextRender()->TextColor(0.0f, 1.0f, 1.0f, 1);
 
 				UI()->DoLabelScaled(&Item.m_Rect, Name.c_str(), 12.0f, -1);
 				TextRender()->TextColor(1,1,1,1);

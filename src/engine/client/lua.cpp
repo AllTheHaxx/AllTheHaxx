@@ -397,10 +397,10 @@ int CLua::ErrorFunc(lua_State *L) // low level error handling (errors not thrown
 	if (!lua_isstring(L, -1))
 		CLuaBinding::GetLuaFile(L)->Lua()->HandleException(": unknown error", L);
 	else
+	{
 		CLuaBinding::GetLuaFile(L)->Lua()->HandleException(lua_tostring(L, -1), L);
-
-	lua_pop(L, 1); // remove error message
-	lua_gc(L, LUA_GCCOLLECT, 0);
+		lua_pop(L, 1); // remove error message
+	}
 
 	return 0;
 }

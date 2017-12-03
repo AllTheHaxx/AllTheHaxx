@@ -477,11 +477,43 @@ class CTextRender : public IEngineTextRender
 
 		const char *pNextInterestingSectionStart = NULL;
 
+		// check for url
+		{
+			const char *pUrlStart = NULL;
+			const char *pUrlStartHttp = str_find_nocase(pStr, "http://");
+			const char *pUrlStartHttps = str_find_nocase(pStr, "https://");
+			if(pUrlStartHttp == NULL) // if A is null, ..
+				pUrlStart = pUrlStartHttps; // ..take B
+			else if(pUrlStartHttps == NULL) // if A is present but B is null, ..
+				pUrlStart = pUrlStartHttp; // ..take A
+			else // if both are present, ..
+				pUrlStart = min(pUrlStartHttp, pUrlStartHttps); // ..take the left one
+
+			// check if we are right on the url
+			if(pUrlStart > pStr)
+				pNextInterestingSectionStart = pUrlStart;
+			else if(pUrlStart == pStr) // only render it from its start, thus when we are right on it
+			{
+				// find the end of the url
+				const char *pUrlEnd = str_find_nocase(pUrlStart, " "); // pUrlEnd points to the first character *not* in the url
+				if(!pUrlEnd) pUrlEnd = pUrlStart + str_length(pUrlStart);
+				int UrlLen = (int)(pUrlEnd-pUrlStart);
+				pOut->m_pStart = pUrlStart;
+				pOut->m_ColorR = 0.15f;
+				pOut->m_ColorG = 0.48f;
+				pOut->m_ColorB = 0.87f;
+				pOut->m_Length = UrlLen;
+				pOut->m_OverrideColor = true;
+
+				return true;
+			}
+		}
+
 		// check for highlight
 		if(pHighlight && pHighlight[0] != '\0')
 		{
 			const char *pHightlightFound = str_find_nocase(pStr, pHighlight);
-			if(pHightlightFound > pStr)
+			if(!pNextInterestingSectionStart && pHightlightFound > pStr)
 				pNextInterestingSectionStart = pHightlightFound;
 			else if(pHightlightFound == pStr) // only render it from its start, thus when we are right on it
 			{
@@ -496,7 +528,7 @@ class CTextRender : public IEngineTextRender
 			}
 		}
 
-		// find color code, e.g. §AJ9hey there§$
+		// find color code, e.g. $$AJ9hey there
 		if(!NoColorCodes)
 		{
 			// check how far we are allowed to render
