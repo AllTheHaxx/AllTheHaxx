@@ -194,15 +194,13 @@ bool CMenus::KeyEvent(int Key, int FlagMask)
 
 bool CMenus::KeyMods(int Keymod)
 {
-	switch(Keymod)
-	{
-		case KEYMOD_CTRL:
-			return Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
-		case KEYMOD_SHIFT:
-			return Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-		default:
-			return false;
-	}
+	bool Pressed = true;
+	if(Keymod & KEYMOD_CTRL)
+		Pressed &= Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+	if(Keymod & KEYMOD_SHIFT)
+		Pressed &= Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+
+	return Pressed;
 }
 
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)

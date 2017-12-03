@@ -1109,7 +1109,8 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 
 void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
 {
-	RequestImpl(Addr, 0);
+	RequestImpl(Addr, NULL);
+	RequestImpl64(Addr, NULL);
 }
 
 void CServerBrowser::RequestServerCount()

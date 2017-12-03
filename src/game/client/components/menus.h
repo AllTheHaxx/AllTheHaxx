@@ -100,8 +100,8 @@ private:
 
 	enum
 	{
-		KEYMOD_CTRL,
-		KEYMOD_SHIFT
+		KEYMOD_CTRL  = 1 << 0,
+		KEYMOD_SHIFT = 1 << 1
 	};
 	bool KeyEvent(int Key, int FlagMask = IInput::FLAG_PRESS);
 	bool KeyMods(int Keymod);

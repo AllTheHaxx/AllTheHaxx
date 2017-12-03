@@ -158,6 +158,8 @@ public:
 	virtual void DDNetFilterRem(char *pFilter, const char *pName) = 0;
 	virtual bool DDNetFiltered(char *pFilter, const char *pName) = 0;
 	virtual int GetCurrentType() = 0;
+
+	virtual void RequestCurrentServer(const NETADDR &Addr) const = 0;
 };
 
 #endif

@@ -1572,6 +1572,13 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			Client()->Connect(g_Config.m_UiServerAddress);
 		}
 
+		if(KeyMods(KEYMOD_CTRL|KEYMOD_SHIFT) && KeyEvent(KEY_I))
+		{
+			NETADDR Addr;
+			net_addr_from_str(&Addr, g_Config.m_UiServerAddress);
+			ServerBrowser()->RequestCurrentServer(Addr);
+		}
+
 	/*	if(g_Config.m_BrAutoRefresh)
 		{
 			ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);
