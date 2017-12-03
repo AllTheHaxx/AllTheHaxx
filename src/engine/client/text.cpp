@@ -470,7 +470,7 @@ class CTextRender : public IEngineTextRender
 				(pText[COLOR_CODE_LEN+2] >= 'a' && pText[COLOR_CODE_LEN+2] <= 'z') );
 	}
 
-	bool ProcessStringPart(const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes)
+	bool ProcessStringPart(CTextCursor *pCursor, const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes)
 	{
 		if(!pStr || *pStr == '\0')
 			return false;
@@ -478,6 +478,7 @@ class CTextRender : public IEngineTextRender
 		const char *pNextInterestingSectionStart = NULL;
 
 		// check for url
+		if(pCursor->m_Flags&TEXTFLAG_RENDER)
 		{
 			const char *pUrlStart = NULL;
 			const char *pUrlStartHttp = str_find_nocase(pStr, "http://");
@@ -499,18 +500,16 @@ class CTextRender : public IEngineTextRender
 				if(!pUrlEnd) pUrlEnd = pUrlStart + str_length(pUrlStart);
 				int UrlLen = (int)(pUrlEnd-pUrlStart);
 				pOut->m_pStart = pUrlStart;
-				pOut->m_ColorR = 0.15f;
-				pOut->m_ColorG = 0.48f;
-				pOut->m_ColorB = 0.87f;
 				pOut->m_Length = UrlLen;
 				pOut->m_OverrideColor = true;
+				HandleURL(pCursor, pOut);
 
 				return true;
 			}
 		}
 
 		// check for highlight
-		if(pHighlight && pHighlight[0] != '\0')
+		if((pCursor->m_Flags&TEXTFLAG_RENDER) && pHighlight && pHighlight[0] != '\0')
 		{
 			const char *pHightlightFound = str_find_nocase(pStr, pHighlight);
 			if(!pNextInterestingSectionStart && pHightlightFound > pStr)
@@ -560,7 +559,7 @@ class CTextRender : public IEngineTextRender
 					 * thus the color tag should just be ignored.
 					 * instead, just hand over to the metioned section.
 					 */
-					return ProcessStringPart(pNextInterestingSectionStart, pHighlight, pOut, NoColorCodes);
+					return ProcessStringPart(pCursor, pNextInterestingSectionStart, pHighlight, pOut, NoColorCodes);
 				}
 
 				pOut->m_Length = MaxLen;
@@ -582,6 +581,53 @@ class CTextRender : public IEngineTextRender
 		pOut->m_OverrideColor = false;
 
 		return true;
+	}
+
+	void HandleURL(CTextCursor *pCursor, CTextRenderSection *pOut)
+	{
+		float tw = TextWidth(pCursor->m_pFont, pCursor->m_FontSize, pOut->m_pStart, pOut->m_Length);
+		IInput *pInput = Kernel()->RequestInterface<IInput>();
+
+		float x1 = pCursor->m_X;
+		float y1 = pCursor->m_Y;
+		float x2 = x1+tw;
+		float y2 = y1+pCursor->m_FontSize;
+
+		int mx, my;
+		pInput->CurrentMousePos(&mx, &my);
+
+		bool DoubleClicked = pInput->MouseDoubleClickCurrent() != 0;
+
+		if(mx >= x1 && mx <= x2 && my >= y1 && my <= y2)
+		{
+			if(pInput->NativeMousePressed(1))
+			{
+				// mouse clicked on the link
+				pOut->m_ColorR = 0.0f;
+				pOut->m_ColorG = 1.0f;
+				pOut->m_ColorB = 0.39f;
+			}
+			else
+			{
+				// mouse pointing at the link
+				pOut->m_ColorR = 0.8f;
+				pOut->m_ColorG = 0.0f;
+				pOut->m_ColorB = 0.39f;
+			}
+
+			if(DoubleClicked)
+			{
+				open_default_browser(pOut->m_pStart);
+			}
+
+		}
+		else
+		{
+			// mouse leaving the link alone
+			pOut->m_ColorR = 0.15f;
+			pOut->m_ColorG = 0.48f;
+			pOut->m_ColorB = 0.87f;
+		}
 	}
 
 
@@ -726,8 +772,9 @@ public:
 		CTextRenderSection Section;
 		vec4 Color(m_TextR, m_TextG, m_TextB, m_TextA);
 		float ret = 0.0f;
-		while(ProcessStringPart(pText, pHighlight, &Section, IgnoreColorCodes))
+		while(ProcessStringPart(pCursor, pText, pHighlight, &Section, IgnoreColorCodes))
 		{
+
 			if(Section.m_OverrideColor)
 				TextColor(Section.m_ColorR, Section.m_ColorG, Section.m_ColorB, Color.a);
 			else

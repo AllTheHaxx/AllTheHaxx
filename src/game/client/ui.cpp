@@ -607,3 +607,8 @@ void CUI::DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, 
 {
 	DoLabelScaled(pRect, pText, Size, Align, MaxWidth, pHighlight);
 }
+
+void CUI::HookRelativeMouse(IInput *pInput)
+{
+	pInput->HookRelativeMouse(&m_MouseX, &m_MouseY);
+}

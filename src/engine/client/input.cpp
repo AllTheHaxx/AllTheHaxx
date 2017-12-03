@@ -110,7 +110,20 @@ void CInput::MouseModeRelative()
 	Graphics()->SetWindowGrab(true);
 }
 
-void CInput::NativeMousePos(int *x, int *y)
+void CInput::CurrentMousePos(int *pOutX, int *pOutY) const
+{
+	if(m_InputGrabbed)
+	{
+		*pOutX = m_pRelativeMouseX != NULL ? (int)*m_pRelativeMouseX : -1;
+		*pOutY = m_pRelativeMouseY != NULL ? (int)*m_pRelativeMouseY : -1;
+	}
+	else
+	{
+		NativeMousePos(pOutX, pOutY);
+	}
+}
+
+void CInput::NativeMousePos(int *x, int *y) const
 {
     int nx = 0, ny = 0;
     SDL_GetMouseState(&nx,&ny);
@@ -126,30 +139,40 @@ bool CInput::NativeMousePressed(int index)
 }
 
 
-int CInput::MouseDoubleClick()
+int64 CInput::MouseDoubleClick()
 {
 	CALLSTACK_ADD();
 
 	if(m_ReleaseDelta >= 0 && m_ReleaseDelta < (time_freq() / 3))
 	{
+		int64 LastRelease = m_LastRelease;
 		m_LastRelease = 0;
 		m_ReleaseDelta = -1;
-		return 1;
+		return LastRelease;
 	}
 	return 0;
 }
 
-int CInput::MouseDoubleClickNative()
+int64 CInput::MouseDoubleClickNative()
 {
 	CALLSTACK_ADD();
 
 	if(m_ReleaseDeltaNative >= 0 && m_ReleaseDeltaNative < (time_freq() / 3))
 	{
+		int64 LastRelease = m_LastReleaseNative;
 		m_LastReleaseNative = 0;
 		m_ReleaseDeltaNative = -1;
-		return 1;
+		return LastRelease;
 	}
 	return 0;
+}
+
+int64 CInput::MouseDoubleClickCurrent()
+{
+	if(m_InputGrabbed)
+		return MouseDoubleClick();
+	else
+		return MouseDoubleClickNative();
 }
 
 const char* CInput::GetClipboardText()

@@ -84,6 +84,8 @@ public:
 	int MouseButton(int Index) const { return (m_MouseButtons>>Index)&1; }
 	int MouseButtonClicked(int Index) { return MouseButton(Index) && !((m_LastMouseButtons>>Index)&1) ; }
 
+	void HookRelativeMouse(class IInput* pInput);
+
 	void SetHotItem(const void *pID) { m_pBecommingHotItem = pID; }
 	void SetActiveItem(const void *pID) { m_pActiveItem = pID; if (pID) m_pLastActiveItem = pID; }
 	void ClearLastActiveItem() { m_pLastActiveItem = 0; }

@@ -195,6 +195,8 @@ void CGameClient::OnConsoleInit()
 	m_pIRC = Kernel()->RequestInterface<IIRC>();
 	m_pCurlWrapper = Kernel()->RequestInterface<ICurlWrapper>();
 
+	m_UI.HookRelativeMouse(m_pInput);
+
 	// setup pointers
 	m_pBinds = &::gs_Binds;
 	m_pGameConsole = &::gs_GameConsole;

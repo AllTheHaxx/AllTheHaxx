@@ -3305,7 +3305,7 @@ char *str_aes128_decrypt(uint8_t *data, unsigned data_size, const AES128_KEY *ke
 
 void open_default_browser(const char *url)
 {
-	char aUrl[255] = {0};
+	char aUrl[256] = {0};
 
 	if (!url || url[0] == 0)
 		return;

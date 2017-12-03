@@ -87,10 +87,11 @@ public:
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual bool InputGrabbed() const = 0;
-	virtual void NativeMousePos(int *x, int *y) = 0;
+	virtual void NativeMousePos(int *x, int *y) const = 0;
 	virtual bool NativeMousePressed(int index) = 0;
-	virtual int MouseDoubleClick() = 0;
-	virtual int MouseDoubleClickNative() = 0;
+	virtual int64 MouseDoubleClick() = 0;
+	virtual int64 MouseDoubleClickNative() = 0;
+	virtual int64 MouseDoubleClickCurrent() = 0;
 
 	virtual const char* GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *Text) = 0;
@@ -109,6 +110,9 @@ public:
 	virtual void SetIMEState(bool Activate) = 0;
 	virtual const char* GetIMECandidate() = 0;
 	virtual int GetEditingCursor() = 0;
+
+	virtual void HookRelativeMouse(const float *x, const float *y) = 0;
+	virtual void CurrentMousePos(int *pOutX, int *pOutY) const = 0;
 };
 
 

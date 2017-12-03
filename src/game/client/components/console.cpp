@@ -1449,11 +1449,12 @@ void CGameConsole::OnRender()
 					// set the color and check if pressed
 					if(g_Config.m_Debug)
 						RenderTools()->DrawUIRect(&TextRect, vec4(1,0,1,0.4f), 0, 0);
+					bool DoubleClicked = Input()->MouseDoubleClickNative() != 0;
 					if(UI()->MouseInsideNative(mx, my, &TextRect))
 					{
 						TextRender()->TextColor(0.0f, 1.0f, 0.39f, 1.0f);
 						static float s_LastClicked = 0.0f;
-						if(Input()->MouseDoubleClickNative() && Client()->SteadyTimer() > s_LastClicked + 1.0f)
+						if(DoubleClicked && Client()->SteadyTimer() > s_LastClicked + 1.0f)
 						{
 							TextRender()->TextColor(1.0f, 0.0f, 0.39f, 1.0f);
 							s_LastClicked = Client()->SteadyTimer();

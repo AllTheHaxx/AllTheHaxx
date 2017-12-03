@@ -27,6 +27,9 @@ class CInput : public IEngineInput
 	unsigned char m_aInputState[g_MaxKeys];	// SDL_SCANCODE
 	int m_InputCounter;
 
+	const float *m_pRelativeMouseX;
+	const float *m_pRelativeMouseY;
+
 	//ime support
 	int m_CountEditingText;
 	char m_aEditingText[32];
@@ -48,10 +51,11 @@ public:
 	virtual void MouseModeAbsolute();
 	virtual void MouseModeRelative();
 	virtual bool InputGrabbed() const { return m_InputGrabbed != 0; }
-	virtual void NativeMousePos(int *x, int *y);
+	virtual void NativeMousePos(int *x, int *y) const;
 	virtual bool NativeMousePressed(int index);
-	virtual int MouseDoubleClick();
-	virtual int MouseDoubleClickNative();
+	virtual int64 MouseDoubleClick();
+	virtual int64 MouseDoubleClickNative();
+	virtual int64 MouseDoubleClickCurrent();
 	virtual const char* GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
 
@@ -69,6 +73,9 @@ public:
 	virtual void SetIMEState(bool Activate);
 	virtual const char* GetIMECandidate();
 	virtual int GetEditingCursor();
+
+	virtual void HookRelativeMouse(const float *x, const float *y) { m_pRelativeMouseX = x; m_pRelativeMouseY = y; }
+	virtual void CurrentMousePos(int *pOutX, int *pOutY) const;
 };
 
 #endif
