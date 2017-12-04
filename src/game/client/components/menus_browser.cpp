@@ -514,11 +514,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
 		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 #if defined(__ANDROID__)
-		if(DoubleClicked)
+		if(DoubleClicked){
 #else
-		if(Input()->MouseDoubleClickReset() && !m_MouseUnlocked && DoubleClicked)
+		if(Input()->MouseDoubleClick() && !m_MouseUnlocked && DoubleClicked)
+		{
+			Input()->MouseDoubleClickReset();
 #endif
 			Client()->Connect(g_Config.m_UiServerAddress);
+		}
 	}
 
 	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);

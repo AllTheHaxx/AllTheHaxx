@@ -2247,8 +2247,9 @@ void CMenus::RenderGhost(CUIRect MainView)
 		const char *pText = pGhost->m_Active ? "Deactivate" : "Activate";
 
 		static CButtonContainer s_GhostButton;
-		if(DoButton_Menu(&s_GhostButton, Localize(pText), 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClickReset()))
+		if(DoButton_Menu(&s_GhostButton, Localize(pText), 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClick()))
 		{
+			Input()->MouseDoubleClickReset();
 			if(pGhost->m_Active)
 				m_pClient->m_pGhost->Unload(pGhost->m_ID);
 			else

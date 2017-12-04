@@ -2989,8 +2989,11 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 					if(Result == 2)
 						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 230, PopupGroup);
 
-					if(m_Map.m_lGroups[g]->m_lLayers.size() && Input()->MouseDoubleClickReset())
+					if(m_Map.m_lGroups[g]->m_lLayers.size() && Input()->MouseDoubleClick())
+					{
+						Input()->MouseDoubleClickReset();
 						m_Map.m_lGroups[g]->m_Collapse ^= 1;
+					}
 				}
 				LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
 			}
