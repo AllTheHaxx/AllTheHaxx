@@ -3312,7 +3312,7 @@ void open_default_browser(const char *url)
 
 	// only read the first string before whitespace for prevent injection
 	str_copy(aUrl, url, sizeof(aUrl));
-	str_skip_to_whitespace(aUrl);
+	str_replace_char_num(aUrl, 1, ' ', '\0');
 
 	// make sure the string is sane
 	{

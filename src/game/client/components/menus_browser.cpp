@@ -516,7 +516,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 #if defined(__ANDROID__)
 		if(DoubleClicked)
 #else
-		if(Input()->MouseDoubleClick() && !m_MouseUnlocked && DoubleClicked)
+		if(Input()->MouseDoubleClickReset() && !m_MouseUnlocked && DoubleClicked)
 #endif
 			Client()->Connect(g_Config.m_UiServerAddress);
 	}

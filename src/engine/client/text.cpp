@@ -502,6 +502,7 @@ class CTextRender : public IEngineTextRender
 				pOut->m_pStart = pUrlStart;
 				pOut->m_Length = UrlLen;
 				pOut->m_OverrideColor = true;
+
 				HandleURL(pCursor, pOut);
 
 				return true;
@@ -595,6 +596,19 @@ class CTextRender : public IEngineTextRender
 
 		int mx, my;
 		pInput->CurrentMousePos(&mx, &my);
+		if(!pInput->InputGrabbed()) // if using the native mouse
+		{
+			my -= 5.0f; // magic correction
+
+			// retranslate the coordinates to the mapped screen
+			float MappedW, MappedH;
+			Graphics()->GetScreen(NULL, NULL, &MappedW, &MappedH);
+			float TrueW, TrueH;
+			TrueW = Graphics()->ScreenWidth();
+			TrueH = Graphics()->ScreenHeight();
+			mx *= MappedW / TrueW;
+			my *= MappedH / TrueH;
+		}
 
 		bool DoubleClicked = pInput->MouseDoubleClickCurrent() != 0;
 
@@ -618,6 +632,7 @@ class CTextRender : public IEngineTextRender
 			if(DoubleClicked)
 			{
 				open_default_browser(pOut->m_pStart);
+				pInput->MouseDoubleClickCurrentReset();
 			}
 
 		}

@@ -162,6 +162,7 @@ void CMenus::RenderSettingsIdent(CUIRect MainView)
 		// copy identity
 		if(UI()->MouseInside(&Button) && Input()->MouseDoubleClick())
 		{
+			Input()->MouseDoubleClickReset();
 			char *pIdentJson = m_pClient->m_pIdentity->GetIdentAsJsonStr(i);
 			Input()->SetClipboardText(pIdentJson);
 			mem_free(pIdentJson);

@@ -224,7 +224,7 @@ CUIRect *CUI::Screen()
 	float Aspect = Graphics()->ScreenAspect();
 	float w, h;
 
-	h = 600;
+	h = 600; // magical value for screen mapping
 	w = Aspect*h;
 
 	m_Screen.w = w;

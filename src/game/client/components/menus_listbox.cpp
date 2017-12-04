@@ -186,7 +186,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(CButtonContainer *pBC, bool Sel
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (UI()->ActiveItem() == pBC->GetID() && Input()->MouseDoubleClick()))
+			if(m_EnterPressed || (UI()->ActiveItem() == pBC->GetID() && Input()->MouseDoubleClickReset()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);

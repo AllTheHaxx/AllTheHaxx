@@ -241,10 +241,10 @@ void CGraphics_Threaded::MapScreen(float TopLeftX, float TopLeftY, float BottomR
 
 void CGraphics_Threaded::GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY)
 {
-	*pTopLeftX = m_State.m_ScreenTL.x;
-	*pTopLeftY = m_State.m_ScreenTL.y;
-	*pBottomRightX = m_State.m_ScreenBR.x;
-	*pBottomRightY = m_State.m_ScreenBR.y;
+	if(pTopLeftX) *pTopLeftX = m_State.m_ScreenTL.x;
+	if(pTopLeftY) *pTopLeftY = m_State.m_ScreenTL.y;
+	if(pBottomRightX) *pBottomRightX = m_State.m_ScreenBR.x;
+	if(pBottomRightY) *pBottomRightY = m_State.m_ScreenBR.y;
 }
 
 void CGraphics_Threaded::LinesBegin()

@@ -47,7 +47,6 @@ CInput::CInput()
 
 	m_LastRelease = 0;
 	m_ReleaseDelta = -1;
-
 	m_LastReleaseNative = 0;
 	m_ReleaseDeltaNative = -1;
 
@@ -138,41 +137,61 @@ bool CInput::NativeMousePressed(int index)
     return (i&SDL_BUTTON(index)) != 0;
 }
 
-
-int64 CInput::MouseDoubleClick()
+// relative
+int64 CInput::MouseDoubleClick() const
 {
 	CALLSTACK_ADD();
 
 	if(m_ReleaseDelta >= 0 && m_ReleaseDelta < (time_freq() / 3))
 	{
-		int64 LastRelease = m_LastRelease;
-		m_LastRelease = 0;
-		m_ReleaseDelta = -1;
-		return LastRelease;
+		return m_LastRelease;
 	}
 	return 0;
 }
 
-int64 CInput::MouseDoubleClickNative()
+int64 CInput::MouseDoubleClickReset()
+{
+	int64 Result = MouseDoubleClick();
+	m_LastRelease = 0;
+	m_ReleaseDelta = -1;
+	return Result;
+}
+
+// native
+int64 CInput::MouseDoubleClickNative() const
 {
 	CALLSTACK_ADD();
 
 	if(m_ReleaseDeltaNative >= 0 && m_ReleaseDeltaNative < (time_freq() / 3))
 	{
-		int64 LastRelease = m_LastReleaseNative;
-		m_LastReleaseNative = 0;
-		m_ReleaseDeltaNative = -1;
-		return LastRelease;
+		return m_LastReleaseNative;
 	}
 	return 0;
 }
 
-int64 CInput::MouseDoubleClickCurrent()
+int64 CInput::MouseDoubleClickNativeReset()
+{
+	int64 Result = MouseDoubleClickNative();
+	m_LastReleaseNative = 0;
+	m_ReleaseDeltaNative = -1;
+	return Result;
+}
+
+// current (proxies to the right one for the current mouse-mode)
+int64 CInput::MouseDoubleClickCurrent() const
 {
 	if(m_InputGrabbed)
 		return MouseDoubleClick();
 	else
 		return MouseDoubleClickNative();
+}
+
+int64 CInput::MouseDoubleClickCurrentReset()
+{
+	if(m_InputGrabbed)
+		return MouseDoubleClickReset();
+	else
+		return MouseDoubleClickNativeReset();
 }
 
 const char* CInput::GetClipboardText()

@@ -53,9 +53,12 @@ public:
 	virtual bool InputGrabbed() const { return m_InputGrabbed != 0; }
 	virtual void NativeMousePos(int *x, int *y) const;
 	virtual bool NativeMousePressed(int index);
-	virtual int64 MouseDoubleClick();
-	virtual int64 MouseDoubleClickNative();
-	virtual int64 MouseDoubleClickCurrent();
+	virtual int64 MouseDoubleClick() const;
+	virtual int64 MouseDoubleClickReset();
+	virtual int64 MouseDoubleClickNative() const;
+	virtual int64 MouseDoubleClickNativeReset();
+	virtual int64 MouseDoubleClickCurrent() const;
+	virtual int64 MouseDoubleClickCurrentReset();
 	virtual const char* GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
 
