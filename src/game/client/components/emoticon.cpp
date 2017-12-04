@@ -208,9 +208,9 @@ void CEmoticon::OnRender()
 		DrawCircle(Screen.w/2, Screen.h/2, min(s_Val*190.0f, 100.0f), 64);
 		Graphics()->QuadsEnd();
 
-		CTeeRenderInfo *pTeeInfo;
-		pTeeInfo = &m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
-		Graphics()->TextureSet(pTeeInfo->m_Texture);
+		CTeeRenderInfo TeeInfo;
+		TeeInfo = m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
+		Graphics()->TextureSet(TeeInfo.m_Texture);
 
 		// draw the eyeemotes in a circle
 		for (int i = 0; i < NUM_EMOTES; i++)
@@ -221,14 +221,14 @@ void CEmoticon::OnRender()
 
 			bool Selected = m_SelectedEyeEmote == i;
 
-			pTeeInfo->m_Size = Selected ? 64.0f : 48.0f;
-			pTeeInfo->m_Size *= s_PopVal;
+			TeeInfo.m_Size = Selected ? 64.0f : 48.0f;
+			TeeInfo.m_Size *= s_PopVal;
 
 			float NudgeX = s_PopVal*70.0f * cosf(Angle);
 			float NudgeY = s_PopVal*70.0f * sinf(Angle);
-			pTeeInfo->m_ColorBody.a = s_PopVal;
-			pTeeInfo->m_ColorFeet.a = s_PopVal;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1,0), vec2(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY), true);
+			TeeInfo.m_ColorBody.a = s_PopVal;
+			TeeInfo.m_ColorFeet.a = s_PopVal;
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, i, vec2(-1,0), vec2(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY), true);
 		}
 
 		Graphics()->TextureSet(-1);

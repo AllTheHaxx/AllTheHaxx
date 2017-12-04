@@ -209,7 +209,7 @@ void CRenderTools::RenderTeeLua(int Emote, CTeeRenderInfo *pInfo, const vec2& Di
 	RenderTee(CAnimState::GetIdle(), pInfo, Emote, Dir, Pos, UseTeeAlpha, AlphaLimit);
 }
 
-void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha, float AlphaLimit, bool TL)
+void CRenderTools::RenderTee(CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, const vec2& Dir, const vec2& Pos, bool UseTeeAlpha, float AlphaLimit, bool TL)
 {
 	vec2 Position = Pos;
 	if(TL)
