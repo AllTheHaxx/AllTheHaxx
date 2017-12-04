@@ -4,6 +4,7 @@
 #include <engine/storage.h>
 #include <engine/serverbrowser.h>
 #include <engine/client/serverbrowser.h>
+#include <engine/shared/network.h>
 
 
 // vars
@@ -49,7 +50,7 @@ int PrintUsage(const char *argv0)
 
 	Print("----------------------------------------------");
 	Print("-    AllTheHaxx serverlist cache unpacker    -");
-	Print("-        (c) 2016 The AllTheHaxx Team        -");
+	Print("-        (c) 2017 The AllTheHaxx Team        -");
 	Print("-             Author: Henritees              -");
 	Print("----------------------------------------------\n");
 	Print("This tool will unpack the contents of the serverlist cache file into");
@@ -127,6 +128,7 @@ int ParseArgs(int argc, const char **argv)
 int main(int argc, const char **argv)
 {
 	/* dbg_logger_stdout(); */
+	CNetBase::Init();
 	s_pStorage = CreateStorage("Teeworlds", IStorageTW::STORAGETYPE_CLIENT, argc, argv);
 	Print("");
 
@@ -150,25 +152,82 @@ int main(int argc, const char **argv)
 	// get version
 	{
 		char v; io_read(File, &v, 1);
-		if(as_pOut)
-			Print("loading serverlist from cache...");
 		if(v != IServerBrowser::CACHE_VERSION)
-			if(as_pOut)
-				Print("file version doesn't match, we may fail! (%i != %i)", v, IServerBrowser::CACHE_VERSION);
+		{
+			dbg_msg("browser", "couldn't load cache: file version doesn't match! (%i != %i)", v, IServerBrowser::CACHE_VERSION);
+			return 1;
+		}
 	}
 
 	// get number of servers
-	int NumServers = 0;
+	int NumServers;
 	io_read(File, &NumServers, sizeof(NumServers));
-	Print("serverlist cache entries: %i", NumServers);
+	//dbg_msg("browser", "serverlist cache entries: %i", NumServers);
 
-	// get length of array - only needed to get the format of the file correctly
-	{int NumServerCapacity = 0;
-	io_read(File, &NumServerCapacity, sizeof(NumServerCapacity));}
+	CServerInfo *pServerInfos = mem_allocb(CServerInfo, NumServers);
+	int CurrentIndex = 0;
 
-	// read the data from the file
-	CServerInfo *pServerInfos = (CServerInfo*)mem_alloc(sizeof(CServerInfo)*NumServers, 0);
-	io_read(File, pServerInfos, sizeof(CServerInfo)*NumServers);
+	// get length of array
+	int NumServerCapacity;
+	io_read(File, &NumServerCapacity, sizeof(NumServerCapacity));
+
+	// read the compressed size data
+	int CompressedSize;
+	io_read(File, &CompressedSize, sizeof(CompressedSize));
+
+	// read the data from the file into the serverlist
+	if(CompressedSize == -1)
+	{
+		// if the data is not compressed, read the entries as they are
+		for(int i = 0; i < NumServers; i++)
+		{
+			CServerInfo Info;
+			io_read(File, &Info, sizeof(CServerInfo));
+
+			NETADDR Addr;
+			net_addr_from_str(&Addr, Info.m_aAddress);
+			//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
+			pServerInfos[CurrentIndex++] = Info;
+		}
+	}
+	else
+	{
+		// allocate some memory
+		const unsigned int SIZE = sizeof(CServerInfo)*NumServers;
+		CServerInfo *aAllInfos = mem_allocb(CServerInfo, NumServers);
+		unsigned char *pCompressed = (unsigned char *)mem_alloc((unsigned int)CompressedSize, 0);
+
+		// read the data from the file and try to decompress it
+		io_read(File, pCompressed, (unsigned int)CompressedSize);
+		int DecompressedSize = CNetBase::Decompress(pCompressed, CompressedSize, aAllInfos, SIZE);
+		mem_free(pCompressed);
+
+		// process the data
+		if(DecompressedSize == -1)
+		{
+			// if decompression failed, return with no serverlist
+			dbg_msg("browser", "failed to decompress the serverlist cache");
+			io_close(File);
+			mem_free(aAllInfos);
+			return 2;
+		}
+		else
+		{
+			// process all the entries
+			dbg_msg("browser", "decompressed serverlist cache %i -> %i", CompressedSize, DecompressedSize);
+			for(int i = 0; i < NumServers; i++)
+			{
+				CServerInfo Info;
+				mem_copy(&Info, &aAllInfos[i], sizeof(CServerInfo));
+				NETADDR Addr;
+				net_addr_from_str(&Addr, Info.m_aAddress);
+				//dbg_msg("browser", "loading %i %s %s", i, Info.m_aAddress, Info.m_aName);
+				pServerInfos[CurrentIndex++] = Info;
+			}
+		}
+		mem_free(aAllInfos);
+	}
+
 	io_close(File);
 
 	if(as_pOut)
