@@ -91,6 +91,9 @@ public:
 
 	void OnPlayerDeath();
 
+	int LuaGetNumNodes() const { return m_Path.size(); }
+	vec2 LuaGetNode(int i, lua_State *L) const;
+
 private:
 	static void ConPathToMouse(IConsole::IResult *pResult, void *pUserData);
 };

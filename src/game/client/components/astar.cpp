@@ -536,3 +536,11 @@ void CAStar::InitPathBuilder(const vec2& From, const vec2& To)
 	CPathBuilderParams *pParams = new CPathBuilderParams(this, From, To);
 	m_pBuilderThread = thread_init_named(BuildPath, pParams, "A* path finder");
 }
+
+
+vec2 CAStar::LuaGetNode(int i, lua_State *L) const
+{
+	if(i < 0 || i >= m_Path.size())
+		luaL_error(L, "invalid node ID %d", i);
+	return m_Path[i].m_Pos;
+}

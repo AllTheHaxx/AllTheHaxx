@@ -4,6 +4,7 @@
 #include <base/math.h>
 #include <game/collision.h>
 //#include <game/client/gameclient.h>
+#include <game/client/components/astar.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/emoticon.h>
 #include <game/client/components/controls.h>
@@ -271,6 +272,12 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("JoinTo", &IIRC::JoinTo)
 			.addFunction("GetNick", &IIRC::GetNickStd)
 		/*	.addFunction("GetUserlist", &CLuaBinding::LuaGetIrcUserlist) */
+		.endClass()
+
+		/// Game.AStar
+		.beginClass<CAStar>("CAStar")
+			.addProperty("NumNodes", &CAStar::LuaGetNumNodes)
+			.addFunction("GetNode", &CAStar::LuaGetNode)
 		.endClass()
 
 		/// Game.Sound
@@ -625,6 +632,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Emote", &CLua::m_pCGameClient->m_pEmoticon, false)
 			.addVariable("HUD", &CLua::m_pCGameClient->m_pHud, false)
 			.addVariable("IRC", &CLua::m_pCGameClient->m_pIRC, false)
+			.addVariable("AStar", &CLua::m_pCGameClient->m_pAStar, false)
 			.addVariable("Sound", &CLua::m_pCGameClient->m_pSound, false)
 			.addVariable("Menus", &CLua::m_pCGameClient->m_pMenus, false)
 			.addVariable("Voting", &CLua::m_pCGameClient->m_pVoting, false)
