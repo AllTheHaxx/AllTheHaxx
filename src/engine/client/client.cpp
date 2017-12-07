@@ -3382,7 +3382,7 @@ void CClient::Run()
 			}
 		}
 
-		if(time_get() > LastTick+time_freq()*(1.0f/50.0f))
+		if((double)time_get() >= (double)LastTick+(double)time_freq()*(1.0/50.0))
 		{
 			LastTick = time_get();
 			LUA_FIRE_EVENT("OnTick");
@@ -3472,7 +3472,7 @@ void CClient::Run()
 		if(CtrlShiftKey(KEY_Q, LastQ))
 		{
 			Quit();
-			break;
+			//break;
 		}
 
 		if(CtrlShiftKey(KEY_D, LastD))
