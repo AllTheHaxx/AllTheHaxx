@@ -404,7 +404,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 						UI()->SetActiveItem(&m_IRCActive);
 					}
 
-				// colors for admin and voice
+				// colors for admin and voice ... and everyone else who wants to be colored...
 				if(pUser->IsAdmin())
 				{
 					if(pUser->m_Nick == "ATHmin" || pUser->m_Nick == "Q")
@@ -415,7 +415,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				else if(pUser->IsVoice())
 					TextRender()->TextColor(0.2f, 0.2f, 0.7f, 1);
 				else if(pUser->m_Nick == "Tinlex")
-					TextRender()->TextColor(0.886f, 0.0f, 0.455f, 1); // b1tch3s in pink
+					TextRender()->TextColor(0.886f, 0.0f, 0.455f, 1); // b1tch3s in magenta
 				else if(pUser->m_Nick == "PanDii")
 					TextRender()->TextColor(1.0f, 0.0f, 1.0f, 1);
 				else if(pUser->m_Nick == "YoungFlyme")
@@ -446,6 +446,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 
 				if(Item.m_Visible)
 				{
+					// render the lines (channel)
 					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;
 					const char *pSearchFrom = str_find(pChan->m_Buffer[i].c_str(), ">");
 					if(!pSearchFrom)
@@ -463,7 +464,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 		}
 		else if(pCom->GetType() == CIRCCom::TYPE_QUERY)
 		{
-			CComQuery *pQuery = static_cast<CComQuery*>(pCom);
+			CComQuery *pQuery = dynamic_cast<CComQuery*>(pCom);
 			CUIRect Chat, HorizScrollBar;
 			EntryBox.Margin(5.0f, &Chat);
 			Chat.HSplitBottom(15.0f, &Chat, &HorizScrollBar);
@@ -497,6 +498,7 @@ void CMenus::RenderIRC(CUIRect MainView)
 				CPointerContainer Container(&pQuery->m_Buffer[i]);
 				CListboxItem Item = UiDoListboxNextItem(&Container, false, !Input()->KeyIsPressed(KEY_LSHIFT) && UI()->MouseInside(&Chat));
 
+				// render the lines (query aka private chat)
 				if(Item.m_Visible)
 				{
 					Item.m_Rect.x -= 1.7f*Item.m_Rect.w * s_HScrollbarVal;

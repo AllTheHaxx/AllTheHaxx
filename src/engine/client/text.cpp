@@ -600,7 +600,7 @@ class CTextRender : public IEngineTextRender
 		{
 			my -= 5.0f; // magic correction
 
-			// retranslate the coordinates to the mapped screen
+			// re-translate the coordinates to the mapped screen
 			float MappedW, MappedH;
 			Graphics()->GetScreen(NULL, NULL, &MappedW, &MappedH);
 			float TrueW, TrueH;
@@ -631,8 +631,8 @@ class CTextRender : public IEngineTextRender
 
 			if(DoubleClicked)
 			{
-				open_default_browser(pOut->m_pStart);
 				pInput->MouseDoubleClickCurrentReset();
+				open_default_browser(pOut->m_pStart);
 			}
 
 		}

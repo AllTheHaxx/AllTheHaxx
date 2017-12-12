@@ -261,6 +261,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	int DoubleClicked = 0;
 	int NumPlayers = 0;
 
+	int OldSelected = m_SelectedIndex;
 	m_SelectedIndex = -1;
 
 	// reset friend counter
@@ -343,12 +344,18 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			else if(SelectHitBox.y+SelectHitBox.h > OriginalView.y+OriginalView.h) // bottom
 				SelectHitBox.h = OriginalView.y+OriginalView.h-SelectHitBox.y;
 
+			if(g_Config.m_Debug == 3)
+				RenderTools()->DrawUIRect(&SelectHitBox, vec4(1,0,0,0.5f), CUI::CORNER_ALL, 5.0f);
+
+			if(OldSelected == i && Input()->MouseDoubleClick() && UI()->MouseInside(&SelectHitBox))
+			{
+				DoubleClicked = i;
+				Input()->MouseDoubleClickReset();
+			}
+
 			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox) && !m_MouseUnlocked)
 			{
 				NewSelected = ItemIndex;
-				if(NewSelected == m_DoubleClickIndex)
-					DoubleClicked = 1;
-				m_DoubleClickIndex = NewSelected;
 			}
 
 			if(g_Config.m_Debug && UI()->MouseInside(&SelectHitBox))
@@ -508,11 +515,20 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	UI()->ClipDisable();
 
+
 	if(NewSelected != -1)
 	{
 		// select the new server
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
 		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+	}
+
+	if(DoubleClicked)
+		Client()->Connect(g_Config.m_UiServerAddress);
+
+	/*
+	if(m_SelectedIndex != -1 && NewSelected == -1)
+	{
 #if defined(__ANDROID__)
 		if(DoubleClicked){
 #else
@@ -522,7 +538,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 #endif
 			Client()->Connect(g_Config.m_UiServerAddress);
 		}
-	}
+	}*/
 
 	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);

@@ -250,7 +250,7 @@ int CControls::SnapInput(int *pData)
 	#if defined(FEATURE_DENNIS)
 	if(!g_Config.m_ClUndercover)
 	#endif
-	if(((!g_StealthMode && g_Config.m_ClNamePlatesBroadcastATH) || (g_StealthMode && g_Config.m_ClStealthForceATHBroadcast)) || m_pClient->Client()->Lua()->NumActiveScripts() > 0)
+	if(((!g_StealthMode && g_Config.m_ClNamePlatesBroadcastATH) || (g_StealthMode && g_Config.m_ClStealthForceATHBroadcast)) || m_pClient->Client()->Lua()->NumActiveScripts() > 0 || m_pClient->m_pCamera->m_Zoom > 1.0f)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
 
 	if(!m_pClient->m_pChat->m_CryptSendQueue.empty())

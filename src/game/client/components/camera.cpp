@@ -37,7 +37,7 @@ void CCamera::OnRender()
 		if(!ZoomAllowed() && !(m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 		{
 			m_ZoomSet = false;
-			m_Zoom = 1.0;
+			m_Zoom = 1.0f;
 		}
 		else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
 		{

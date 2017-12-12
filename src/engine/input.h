@@ -87,14 +87,15 @@ public:
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual bool InputGrabbed() const = 0;
-	virtual void NativeMousePos(int *x, int *y) const = 0;
+	virtual void ConvertMousePos(float *x, float *y) const = 0;
+	virtual void NativeMousePos(int *mx, int *my) const = 0;
 	virtual bool NativeMousePressed(int index) = 0;
-	virtual int64 MouseDoubleClick() const = 0;
-	virtual int64 MouseDoubleClickReset() = 0;
-	virtual int64 MouseDoubleClickNative() const = 0;
-	virtual int64 MouseDoubleClickNativeReset() = 0;
-	virtual int64 MouseDoubleClickCurrent() const = 0;
-	virtual int64 MouseDoubleClickCurrentReset() = 0;
+	virtual int64 MouseDoubleClick(float tl=-1, float tr=-1, float bl=-1, float br=-1) const = 0;
+	virtual int64 MouseDoubleClickReset(float tl=-1, float tr=-1, float bl=-1, float br=-1) = 0;
+	virtual int64 MouseDoubleClickNative(float tl=-1, float tr=-1, float bl=-1, float br=-1) const = 0;
+	virtual int64 MouseDoubleClickNativeReset(float tl=-1, float tr=-1, float bl=-1, float br=-1) = 0;
+	virtual int64 MouseDoubleClickCurrent(float tl=-1, float tr=-1, float bl=-1, float br=-1) const = 0;
+	virtual int64 MouseDoubleClickCurrentReset(float tl=-1, float tr=-1, float bl=-1, float br=-1) = 0;
 
 	virtual const char* GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *Text) = 0;

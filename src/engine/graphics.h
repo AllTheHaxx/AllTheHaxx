@@ -85,7 +85,7 @@ public:
 	virtual void ClipDisable() = 0;
 
 	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) = 0;
-	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) = 0;
+	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) const = 0;
 
 	// TODO: These should perhaps not be virtuals
 	virtual void BlendNone() = 0;

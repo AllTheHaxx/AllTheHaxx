@@ -122,6 +122,23 @@ void CInput::CurrentMousePos(int *pOutX, int *pOutY) const
 	}
 }
 
+void CInput::ConvertMousePos(float *mx, float *my) const
+{
+	if(!InputGrabbed()) // if using the native mouse
+	{
+		*my -= 5.0f; // magic correction
+
+		// re-translate the coordinates to the mapped screen
+		float MappedW, MappedH;
+		Graphics()->GetScreen(NULL, NULL, &MappedW, &MappedH);
+		float TrueW, TrueH;
+		TrueW = Graphics()->ScreenWidth();
+		TrueH = Graphics()->ScreenHeight();
+		*mx *= MappedW / TrueW;
+		*my *= MappedH / TrueH;
+	}
+}
+
 void CInput::NativeMousePos(int *x, int *y) const
 {
     int nx = 0, ny = 0;
@@ -138,7 +155,7 @@ bool CInput::NativeMousePressed(int index)
 }
 
 // relative
-int64 CInput::MouseDoubleClick() const
+int64 CInput::MouseDoubleClick(float tl, float tr, float bl, float br) const // TODO
 {
 	CALLSTACK_ADD();
 
@@ -149,16 +166,16 @@ int64 CInput::MouseDoubleClick() const
 	return 0;
 }
 
-int64 CInput::MouseDoubleClickReset()
+int64 CInput::MouseDoubleClickReset(float tl, float tr, float bl, float br)
 {
-	int64 Result = MouseDoubleClick();
+	int64 Result = MouseDoubleClick(tl, tr, bl, br);
 	m_LastRelease = 0;
 	m_ReleaseDelta = -1;
 	return Result;
 }
 
 // native
-int64 CInput::MouseDoubleClickNative() const
+int64 CInput::MouseDoubleClickNative(float tl, float tr, float bl, float br) const
 {
 	CALLSTACK_ADD();
 
@@ -169,29 +186,29 @@ int64 CInput::MouseDoubleClickNative() const
 	return 0;
 }
 
-int64 CInput::MouseDoubleClickNativeReset()
+int64 CInput::MouseDoubleClickNativeReset(float tl, float tr, float bl, float br)
 {
-	int64 Result = MouseDoubleClickNative();
+	int64 Result = MouseDoubleClickNative(tl, tr, bl, br);
 	m_LastReleaseNative = 0;
 	m_ReleaseDeltaNative = -1;
 	return Result;
 }
 
 // current (proxies to the right one for the current mouse-mode)
-int64 CInput::MouseDoubleClickCurrent() const
+int64 CInput::MouseDoubleClickCurrent(float tl, float tr, float bl, float br) const
 {
 	if(m_InputGrabbed)
-		return MouseDoubleClick();
+		return MouseDoubleClick(tl, tr, bl, br);
 	else
-		return MouseDoubleClickNative();
+		return MouseDoubleClickNative(tl, tr, bl, br);
 }
 
-int64 CInput::MouseDoubleClickCurrentReset()
+int64 CInput::MouseDoubleClickCurrentReset(float tl, float tr, float bl, float br)
 {
 	if(m_InputGrabbed)
-		return MouseDoubleClickReset();
+		return MouseDoubleClickReset(tl, tr, bl, br);
 	else
-		return MouseDoubleClickNativeReset();
+		return MouseDoubleClickNativeReset(tl, tr, bl, br);
 }
 
 const char* CInput::GetClipboardText()
@@ -238,6 +255,12 @@ void CInput::NextFrame()
 	if(i >= KEY_LAST)
 		i = KEY_LAST-1;
 	mem_copy(m_aInputState, pState, i);
+
+	// if there was a double-click in the previous frame, reset it TODO DENNIS: FIX DOUBLECLICK!!
+	if(MouseDoubleClick())
+		MouseDoubleClickReset();
+	if(MouseDoubleClickNative())
+		MouseDoubleClickNativeReset();
 }
 
 bool CInput::GetIMEState()

@@ -12,8 +12,10 @@ class CInput : public IEngineInput
 
 	int64 m_LastRelease;
 	int64 m_ReleaseDelta;
+	float m_LastClickX, m_LastClickY;
 	int64 m_LastReleaseNative;
 	int64 m_ReleaseDeltaNative;
+	float m_LastClickNativeX, m_LastClickNativeY;
 
 	bool m_MouseFocus;
 	int m_VideoRestartNeeded;
@@ -37,7 +39,7 @@ class CInput : public IEngineInput
 
 	bool KeyState(int Key) const;
 
-	IEngineGraphics *Graphics() { return m_pGraphics; }
+	IEngineGraphics *Graphics() const { return m_pGraphics; }
 
 public:
 	CInput();
@@ -51,14 +53,15 @@ public:
 	virtual void MouseModeAbsolute();
 	virtual void MouseModeRelative();
 	virtual bool InputGrabbed() const { return m_InputGrabbed != 0; }
+	virtual void ConvertMousePos(float *mx, float *my) const;
 	virtual void NativeMousePos(int *x, int *y) const;
 	virtual bool NativeMousePressed(int index);
-	virtual int64 MouseDoubleClick() const;
-	virtual int64 MouseDoubleClickReset();
-	virtual int64 MouseDoubleClickNative() const;
-	virtual int64 MouseDoubleClickNativeReset();
-	virtual int64 MouseDoubleClickCurrent() const;
-	virtual int64 MouseDoubleClickCurrentReset();
+	virtual int64 MouseDoubleClick(float tl=-1, float tr=-1, float bl=-1, float br=-1) const;
+	virtual int64 MouseDoubleClickReset(float tl=-1, float tr=-1, float bl=-1, float br=-1);
+	virtual int64 MouseDoubleClickNative(float tl=-1, float tr=-1, float bl=-1, float br=-1) const;
+	virtual int64 MouseDoubleClickNativeReset(float tl=-1, float tr=-1, float bl=-1, float br=-1);
+	virtual int64 MouseDoubleClickCurrent(float tl=-1, float tr=-1, float bl=-1, float br=-1) const;
+	virtual int64 MouseDoubleClickCurrentReset(float tl=-1, float tr=-1, float bl=-1, float br=-1);
 	virtual const char* GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
 

@@ -298,7 +298,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						del = NetData.find_first_of(':', 1);
 						std::string aMsgTopic = NetData.substr(del+1, NetData.length()-del-1);
 
-						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
+						CComChan *pChan = dynamic_cast<CComChan*>(GetCom(aMsgChan));
 						if (pChan)
 							pChan->m_Topic = aMsgTopic;
 
@@ -314,7 +314,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						del = NetData.find_first_of(':',1);
 						std::string aMsgUsers = NetData.substr(del+1, NetData.length()-del-1);
 
-						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
+						CComChan *pChan = dynamic_cast<CComChan*>(GetCom(aMsgChan));
 						if(pChan)
 						{
 							size_t del=0, ldel=0;
@@ -352,7 +352,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						ldel = NetData.find_first_of(' ',del+1);
 						std::string aMsgChan = NetData.substr(del+1,ldel-del-1);
 
-						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
+						CComChan *pChan = dynamic_cast<CComChan*>(GetCom(aMsgChan));
 						if(pChan)
 							pChan->m_Users.sort_range();
 
@@ -408,7 +408,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						}
 						else if(MsgFrom != "circleci-bot") // ignore the ci bot
 						{
-							CComChan *pChan = static_cast<CComChan*>(GetCom(MsgChannel));
+							CComChan *pChan = dynamic_cast<CComChan*>(GetCom(MsgChannel));
 							if(pChan)
 							{
 								pChan->m_Users.add(CComChan::CUser(MsgFrom));
@@ -441,7 +441,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							const char *pReason = str_find(aChanName, ":")+1;
 							if(str_replace_char(aChanName, ':', '\0'))
 								aChanName[str_length(aChanName)-1] = '\0';
-							CComChan *pChan = static_cast<CComChan*>(GetCom(std::string(aChanName)));
+							CComChan *pChan = dynamic_cast<CComChan*>(GetCom(std::string(aChanName)));
 							if(pChan)
 							{
 								pChan->RemoveUserFromList(MsgFrom.c_str());
@@ -478,7 +478,7 @@ void CIRC::StartConnection() // call this from a thread only!
 								if(pCom->GetType() != CIRCCom::TYPE_CHANNEL)
 									continue;
 
-								CComChan *pChan = static_cast<CComChan*>(pCom);
+								CComChan *pChan = dynamic_cast<CComChan*>(pCom);
 								dbg_assert(pChan != NULL, "failed casting pCom to CComChan*");
 
 								pChan->RemoveUserFromList(aMsgFrom.c_str());
@@ -501,7 +501,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						del = MsgFServer.find_first_of('!');
 						std::string aMsgFrom = MsgFServer.substr(0,del);
 
-						CComChan *pChan = static_cast<CComChan*>(GetCom(aMsgChan));
+						CComChan *pChan = dynamic_cast<CComChan*>(GetCom(aMsgChan));
 						if (pChan)
 						{
 							pChan->m_Topic = aMsgText;
@@ -808,7 +808,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							CIRCCom *pCom = m_apIRCComs[c];
 							if (pCom->GetType() == CIRCCom::TYPE_QUERY)
 							{
-								CComQuery *pQuery = static_cast<CComQuery*>(pCom);
+								CComQuery *pQuery = dynamic_cast<CComQuery*>(pCom);
 								if (str_comp_nocase(pQuery->m_aName, aMsgOldNick.c_str()) == 0)
 								{
 									str_copy(pQuery->m_aName, aMsgNewNick.c_str(), sizeof(pQuery->m_aName));
@@ -817,7 +817,7 @@ void CIRC::StartConnection() // call this from a thread only!
 							}
 							else if (pCom->GetType() == CIRCCom::TYPE_CHANNEL)
 							{
-								CComChan *pChan = static_cast<CComChan*>(pCom);
+								CComChan *pChan = dynamic_cast<CComChan*>(pCom);
 								for(int u = 0; u < pChan->m_Users.size(); u++)
 								{
 									std::string& User = pChan->m_Users[u].m_Nick;
@@ -857,7 +857,7 @@ void CIRC::StartConnection() // call this from a thread only!
 						CIRCCom *pCom = GetCom(aChannel);
 						if (pCom && pCom->GetType() == CIRCCom::TYPE_CHANNEL)
 						{
-							CComChan *pChan = static_cast<CComChan*>(pCom);
+							CComChan *pChan = dynamic_cast<CComChan*>(pCom);
 							if (pChan)
 							{
 								char aGenericTerm[32] = {0};
@@ -920,9 +920,9 @@ void CIRC::StartConnection() // call this from a thread only!
 							}
 							else
 							{
-								CComChan *pChan = static_cast<CComChan*>(pCom);
+								CComChan *pChan = dynamic_cast<CComChan*>(pCom);
 
-								if(g_Config.m_ClIRCShowJoins)
+								if(g_Config.m_ClIRCShowJoins && aKickReason != "Deprecated version")
 									pChan->AddMessage("*** '%s' kicked '%s' (Reason: %s)", aNickFrom.c_str(), aNickTo.c_str(), aKickReason.c_str());
 
 								pChan->RemoveUserFromList(aNickTo.c_str());
@@ -1087,7 +1087,7 @@ void CIRC::SetMode(const char *mode, const char *to)
 	if (!pCom || pCom->GetType() == CIRCCom::TYPE_QUERY)
 		return;
 
-	CComChan *pChan = static_cast<CComChan*>(pCom);
+	CComChan *pChan = dynamic_cast<CComChan*>(pCom);
 	if (!pChan)
 		return;
 
@@ -1103,7 +1103,7 @@ void CIRC::SetTopic(const char *topic)
 	if (!pCom || pCom->GetType() != CIRCCom::TYPE_CHANNEL)
 		return;
 
-	CComChan *pChan = static_cast<CComChan*>(pCom);
+	CComChan *pChan = dynamic_cast<CComChan*>(pCom);
 	SendRaw("TOPIC %s :%s", pChan->m_aName, topic);
 }
 
@@ -1167,12 +1167,12 @@ void CIRC::SendMsg(const char *to, const char *msg, int type)
 		CIRCCom *pCom = GetActiveCom();
 		if (pCom->GetType() == CIRCCom::TYPE_CHANNEL)
 		{
-			CComChan *pChan = static_cast<CComChan*>(pCom);
+			CComChan *pChan = dynamic_cast<CComChan*>(pCom);
 			str_copy(aDest, pChan->m_aName, sizeof(aDest));
 		}
 		else if (pCom->GetType() == CIRCCom::TYPE_QUERY)
 		{
-			CComQuery *pQuery = static_cast<CComQuery*>(pCom);
+			CComQuery *pQuery = dynamic_cast<CComQuery*>(pCom);
 			if (str_comp_nocase(pQuery->m_aName, "@Status") == 0)
 			{
 				pQuery->AddMessage_nofmt("*** You can't send messages to '@Status'!");
