@@ -11,6 +11,7 @@
 #include <game/generated/protocol.h>
 #include <game/layers.h>
 #include <base/system++/system++.h>
+#include <engine/storage.h>
 #include "animstate.h"
 #include "render.h"
 
@@ -248,7 +249,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, const CTeeRenderInfo *pInfo, int
 				// draw eyes
 				if(p == 1)
 				{
-					switch (Emote)
+					switch(Emote)
 					{
 						case EMOTE_PAIN:
 							SelectSprite(SPRITE_TEE_EYE_PAIN, 0, 0, 0);
@@ -267,15 +268,66 @@ void CRenderTools::RenderTee(CAnimState *pAnim, const CTeeRenderInfo *pInfo, int
 							break;
 					}
 
-					float EyeScale = BaseSize*0.40f;
-					float h = Emote == EMOTE_BLINK ? BaseSize*0.15f : EyeScale;
-					float EyeSeparation = (0.075f - 0.010f*absolute(Dir.x))*BaseSize;
-					vec2 Offset = vec2(Dir.x*0.125f, -0.05f+Dir.y*0.10f)*BaseSize;
+					float EyeScale = BaseSize * 0.40f;
+					float h = Emote == EMOTE_BLINK ? BaseSize * 0.15f : EyeScale;
+					float EyeSeparation = (0.075f - 0.010f * absolute(Dir.x)) * BaseSize;
+					vec2 Offset = vec2(Dir.x * 0.125f, -0.05f + Dir.y * 0.10f) * BaseSize;
 					IGraphics::CQuadItem Array[2] = {
-						IGraphics::CQuadItem(BodyPos.x-EyeSeparation+Offset.x, BodyPos.y+Offset.y, EyeScale, h),
-						IGraphics::CQuadItem(BodyPos.x+EyeSeparation+Offset.x, BodyPos.y+Offset.y, -EyeScale, h)
+							IGraphics::CQuadItem(BodyPos.x - EyeSeparation + Offset.x, BodyPos.y + Offset.y, EyeScale, h),
+							IGraphics::CQuadItem(BodyPos.x + EyeSeparation + Offset.x, BodyPos.y + Offset.y, -EyeScale, h)
 					};
 					Graphics()->QuadsDraw(Array, 2);
+
+					// christmas special
+					{
+						time_t rawtime;
+						struct tm* timeinfo;
+
+						time ( &rawtime );
+						timeinfo = localtime ( &rawtime );
+
+						#define ISDATE(D, M) (timeinfo->tm_mday == (D) && timeinfo->tm_mon == ((M)-1))
+						if(ISDATE(23, 12) || ISDATE(24, 12) || ISDATE(25, 12))
+						{
+							static int s_aHats[] = {
+									Graphics()->LoadTexture("santa-hat1.png", IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0),
+									Graphics()->LoadTexture("santa-hat2.png", IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0),
+									Graphics()->LoadTexture("santa-hat3.png", IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0)
+							};
+
+							int Hat = pInfo->m_Texture % 3;
+							float xOffset = 0;
+							float yOffset = 0;
+							if(Hat == 0) // stern
+							{
+								xOffset = 4;
+								yOffset = -5;
+							}
+							else if(Hat == 1) // bommel
+							{
+								xOffset = 5;
+								yOffset = -3.5f;
+							}
+							else if(Hat == 2) // schepps
+							{
+								yOffset = -3;
+								xOffset = 1;
+							}
+
+							Graphics()->QuadsEnd();
+
+							Graphics()->TextureSet(s_aHats[Hat]);
+							Graphics()->QuadsBegin();
+							Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
+
+							IGraphics::CQuadItem HatQuad(Position.x + xOffset * (BaseSize / 64.0f), Position.y - 3 + yOffset * (BaseSize / 64.0f), BaseSize, BaseSize);
+							Graphics()->QuadsDraw(&HatQuad, 1);
+							Graphics()->QuadsEnd();
+
+							Graphics()->TextureSet(pInfo->m_Texture);
+							Graphics()->QuadsBegin();
+						}
+					}
 				}
 			}
 
