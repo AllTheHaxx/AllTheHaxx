@@ -11,6 +11,8 @@
 #include <base/system++/threading.h>
 #include <engine/external/sqlite3/sqlite3.h>
 #include <engine/server.h>
+#include <mutex>
+#include <atomic>
 
 class CQuery
 {
@@ -46,9 +48,9 @@ class CSql
 	MACRO_ALLOC_HEAP()
 private:
 	sqlite3 *m_pDB;
-	LOCK_SMART m_Lock;
-	bool m_Running;
-	void *m_pThread;
+	std::mutex m_Mutex;
+	std::atomic_bool m_Running;
+	void * volatile m_pThread;
 	std::queue<CQuery *>m_lpQueries;
 	bool m_Flush;
 

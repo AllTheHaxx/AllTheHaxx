@@ -6,16 +6,18 @@
 #include "curl/easy.h"
 #include <base/system++/threading.h>
 #include <engine/fetcher.h>
+#include <mutex>
+#include <atomic>
 
 class CFetcher : public IFetcher
 {
 private:
 	CURL *m_pHandle;
 
-	void *m_pThread;
-	bool m_Shutdown;
+	void * volatile m_pThread;
+	std::atomic_bool m_Shutdown;
 
-	LOCK_SMART m_Lock;
+	std::mutex m_Mutex;
 	CFetchTask *m_pFirst;
 	CFetchTask *m_pLast;
 	class IStorageTW *m_pStorage;

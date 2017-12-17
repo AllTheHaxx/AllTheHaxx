@@ -84,14 +84,14 @@ class CGameClient : public IGameClient
 
 		IRCMessage() { }
 
-		IRCMessage(const std::string From, const std::string User, const std::string Text) :
+		IRCMessage(const std::string& From, const std::string& User, const std::string& Text) :
 				m_From(From), m_User(User), m_Text(Text)
 		{
 		}
 	};
 
-	array<IRCMessage> m_IRCMessageEventQueue;
-	LOCK_SMART m_IRCMessageEventQueueLock;
+	std::vector<IRCMessage> m_IRCMessageEventQueue;
+	std::mutex m_IRCMessageEventQueueMutex;
 
 
 protected:

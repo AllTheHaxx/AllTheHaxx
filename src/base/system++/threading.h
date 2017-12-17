@@ -120,13 +120,18 @@ public:
 };
 
 
-#define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&(LOCKVAR), false, __FILE__, __LINE__); __SectionLock.WaitAndLock()
-#define UNLOCK_SECTION() __SectionLock.Unlock()
-#define LOCK_SECTION_LAZY_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&(LOCKVAR), false, __FILE__, __LINE__)
+//#define LOCK_SECTION_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&(LOCKVAR), false, __FILE__, __LINE__); __SectionLock.WaitAndLock()
+//#define UNLOCK_SECTION() __SectionLock.Unlock()
+//#define LOCK_SECTION_LAZY_DBG(LOCKVAR) LOCK_SECTION_SMART __SectionLock(&(LOCKVAR), false, __FILE__, __LINE__)
 #define LOCK_SECTION_MUTEX(LOCKVAR) std::lock_guard<std::mutex> __SectionMutex(LOCKVAR);
 #define LOCK_SECTION_MUTEX_OPT(LOCKVAR, EXECUTE_ON_FAIL) std::unique_lock<std::mutex> __SectionMutex(LOCKVAR, std::defer_lock); if(!__SectionMutex.try_lock()) { EXECUTE_ON_FAIL; }
+#define LOCK_SECTION_RECURSIVE_MUTEX(LOCKVAR) std::lock_guard<std::recursive_mutex> __SectionMutex(LOCKVAR);
+#define LOCK_SECTION_RECURSIVE_MUTEX_OPT(LOCKVAR, EXECUTE_ON_FAIL) std::unique_lock<std::recursive_mutex> __SectionMutex(LOCKVAR, std::defer_lock); if(!__SectionMutex.try_lock()) { EXECUTE_ON_FAIL; }
 
 
+/**
+ * @deprecated use c++11 mutexes instead!
+ */
 class LOCK_SMART
 {
 	LOCK m_Lock;

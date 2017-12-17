@@ -22,16 +22,18 @@ CFetcher::CFetcher()
 
 CFetcher::~CFetcher()
 {
+	LOCK_SECTION_MUTEX(m_Mutex);
+
 	m_Shutdown = true;
 	if(m_pThread)
 	{
 		if(m_pFirst)
 			dbg_msg("fetcher", "waiting for thread %p to finish...", m_pThread);
+
+		m_Mutex.unlock(); // unlock the mutex so that the thread can finish
 		thread_wait(m_pThread);
-		m_pThread = NULL;
 
 		// clear the queue
-		LOCK_SECTION_DBG(m_Lock);
 		while(m_pFirst)
 		{
 			CFetchTask *pNext = m_pFirst->m_pNext;
@@ -75,7 +77,7 @@ CFetchTask* CFetcher::QueueAdd(bool CanTimeout, const char *pUrl, const char *pD
 	pTask->m_Size = pTask->m_Progress = 0;
 	pTask->m_Abort = false;
 
-	LOCK_SECTION_DBG(m_Lock);
+	LOCK_SECTION_MUTEX(m_Mutex);
 	if(!m_pThread)
 		m_pThread = thread_init_named(&FetcherThread, this, "fetcher");
 
@@ -90,7 +92,6 @@ CFetchTask* CFetcher::QueueAdd(bool CanTimeout, const char *pUrl, const char *pD
 		m_pLast = pTask;
 	}
 	pTask->m_State = CFetchTask::STATE_QUEUED;
-	UNLOCK_SECTION();
 
 	return pTask;
 }
@@ -109,18 +110,26 @@ void CFetcher::FetcherThread(void *pUser)
 	CALLSTACK_ADD();
 
 	CFetcher *pFetcher = (CFetcher *)pUser;
-	{
-		LOCK_SECTION_DBG(pFetcher->m_Lock);
-		dbg_msg("fetcher", "thread %p started...", pFetcher->m_pThread);
-	}
 
-	while(1)
+	DEFER([&pFetcher](){
+		dbg_msg("fetcher", "thread %p stopped", pFetcher->m_pThread);
+		pFetcher->m_pThread = NULL;
+	})
+
+
+	dbg_msg("fetcher", "thread %p started...", pFetcher->m_pThread);
+
+	while(true)
 	{
-		LOCK_SECTION_DBG(pFetcher->m_Lock);
-		CFetchTask *pTask = pFetcher->m_pFirst;
-		if(pTask)
-			pFetcher->m_pFirst = pTask->m_pNext;
-		UNLOCK_SECTION();
+		CFetchTask *pTask;
+		// take a task from the beginning of the queue
+		{
+			LOCK_SECTION_MUTEX(pFetcher->m_Mutex);
+			pTask = pFetcher->m_pFirst;
+			if(pTask)
+				pFetcher->m_pFirst = pTask->m_pNext;
+		}
+
 		if(pTask)
 		{
 			if(!pFetcher->m_Shutdown)
@@ -141,7 +150,6 @@ void CFetcher::FetcherThread(void *pUser)
 			thread_sleep(10);
 		}
 	}
-	dbg_msg("fetcher", "thread %p stopped", pFetcher->m_pThread);
 }
 
 void CFetcher::FetchFile(CFetchTask *pTask)

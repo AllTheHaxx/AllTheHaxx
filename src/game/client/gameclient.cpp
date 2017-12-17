@@ -642,13 +642,18 @@ void CGameClient::OnUpdate()
 {
 	// process pending irc message events
 	{
-		LOCK_SECTION_DBG(m_IRCMessageEventQueueLock);
+		LOCK_SECTION_MUTEX(m_IRCMessageEventQueueMutex);
 
-		for(int m = 0; m < m_IRCMessageEventQueue.size(); m++)
+		unsigned int NumMessages = (unsigned int)m_IRCMessageEventQueue.size();
+		for(unsigned int m = 0; m < NumMessages; m++)
+		{
 			for(int i = 0; i < m_All.m_Num; i++)
+			{
 				m_All.m_paComponents[i]->OnMessageIRC(m_IRCMessageEventQueue[m].m_From.c_str(),
 													  m_IRCMessageEventQueue[m].m_User.c_str(),
 													  m_IRCMessageEventQueue[m].m_Text.c_str());
+			}
+		}
 		m_IRCMessageEventQueue.clear();
 	}
 
@@ -957,8 +962,8 @@ void CGameClient::OnRelease()
 // this function will only be called from the IRC thread (async!)
 void CGameClient::OnMessageIRC(const std::string& From, const std::string& User, const std::string& Text)
 {
-	LOCK_SECTION_DBG(m_IRCMessageEventQueueLock);
-	m_IRCMessageEventQueue.add(IRCMessage(From, User, Text));
+	LOCK_SECTION_MUTEX(m_IRCMessageEventQueueMutex);
+	m_IRCMessageEventQueue.emplace_back(IRCMessage(From, User, Text));
 }
 
 void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)

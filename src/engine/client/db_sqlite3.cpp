@@ -56,17 +56,18 @@ CSql::~CSql()
 	m_Running = false;
 	if(m_pThread)
 	{
-		LOCK_SECTION_DBG(m_Lock);
-		if(m_lpQueries.size())
-			dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", sqlite3_db_filename(m_pDB, "main"), (unsigned long)m_lpQueries.size());
-		__SectionLock.Unlock();
+		{
+			LOCK_SECTION_MUTEX(m_Mutex);
+			if(!m_lpQueries.empty())
+				dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", sqlite3_db_filename(m_pDB, "main"), (unsigned long)m_lpQueries.size());
+		}
 		thread_wait(m_pThread);
 	}
 }
 
 void CSql::InsertQuery(CQuery *pQuery)
 {
-	LOCK_SECTION_DBG(m_Lock);
+	LOCK_SECTION_MUTEX(m_Mutex);
 	m_lpQueries.push(pQuery);
 }
 
@@ -78,12 +79,14 @@ void CSql::InitWorker(void *pUser)
 
 void CSql::WorkerThread()
 {
-	while(1)
+	while(true)
 	{
 		if(m_Running)
-			thread_sleep(500);
+			thread_sleep(250);
 
-		if(Work() == 0 && !m_Running)
+		unsigned int QueriesLeft = Work();
+
+		if(QueriesLeft == 0 && !m_Running)
 			return;
 	}
 }
@@ -106,19 +109,19 @@ void CSql::ExecuteQuery(CQuery *pQuery)
 
 unsigned int CSql::Work()
 {
-	LOCK_SECTION_DBG(m_Lock);
-	if (m_lpQueries.size() > 0)
+	m_Mutex.lock();
+	if (!m_lpQueries.empty())
 	{
 		// do 250 queries per transaction - cache them so we can release the lock as early as possible
 		enum { QUERIES_PER_TRANSACTION = 250 };
 		CQuery *apQueries[QUERIES_PER_TRANSACTION];
 		int NumQueries = 0;
-		for(int i = 0; i < QUERIES_PER_TRANSACTION && m_lpQueries.size() > 0; i++)
+		for(int i = 0; i < QUERIES_PER_TRANSACTION && !m_lpQueries.empty(); i++)
 		{
 			apQueries[NumQueries++] = m_lpQueries.front();
 			m_lpQueries.pop();
 		}
-		__SectionLock.Unlock();
+		m_Mutex.unlock();
 
 		// begin transaction
 		{
@@ -142,8 +145,12 @@ unsigned int CSql::Work()
 			ExecuteQuery(&End);
 		}
 	}
+	else
+		m_Mutex.unlock();
 
-	return (unsigned int)m_lpQueries.size();
+	LOCK_SECTION_MUTEX(m_Mutex);
+	unsigned int NewSize = (unsigned int)m_lpQueries.size();
+	return NewSize;
 }
 
 void CSql::Flush()

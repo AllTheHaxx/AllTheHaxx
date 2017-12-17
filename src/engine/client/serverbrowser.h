@@ -205,7 +205,8 @@ private:
 	int64 m_BroadcastTime;
 	int m_BroadcastExtraToken;
 
-	LOCK_SMART m_Lock;
+	void *m_pThread;
+	std::recursive_mutex m_Mutex;
 
 	// sorting criteria
 	bool SortCompareName(int Index1, int Index2) const;

@@ -157,23 +157,19 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 
 const CServerInfo *CServerBrowser::SortedGet(int Index)// const
 {
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return 0;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return NULL)
 
 	if(Index < 0 || Index >= m_NumSortedServers)
-		return 0;
+		return NULL;
 	return &m_ppServerlist[m_pSortedServerlist[Index]]->m_Info;
 }
 
 const CServerInfo *CServerBrowser::Get(int Index)// const
 {
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return 0;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return NULL)
 
 	if(Index < 0 || Index >= m_NumSortedServers)
-		return 0;
+		return NULL;
 	return &m_ppServerlist[Index]->m_Info;
 }
 
@@ -277,9 +273,7 @@ bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 
 void CServerBrowser::Filter()
 {
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return)
 
 	int i = 0, p = 0;
 	m_NumSortedServers = 0;
@@ -464,6 +458,8 @@ int64 CServerBrowser::SortHash() const
 
 void CServerBrowser::Sort()
 {
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return)
+
 	int i;
 
 	// create filtered list
@@ -513,18 +509,15 @@ void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
 
 CServerBrowser::CServerEntry *CServerBrowser::Find(const NETADDR &Addr)
 {
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return (CServerEntry*)0;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return NULL)
 
 	CServerEntry *pEntry = m_aServerlistIp[Addr.ip[0]];
-
 	for(; pEntry; pEntry = pEntry->m_pNextIp)
 	{
 		if(net_addr_comp(&pEntry->m_Addr, &Addr) == 0)
 			return pEntry;
 	}
-	return (CServerEntry*)0;
+	return NULL;
 }
 
 void CServerBrowser::QueueRequest(CServerEntry *pEntry)
@@ -729,10 +722,7 @@ void CServerBrowser::Refresh(int Type)
 		return;
 
 	{ // BEGIN LOCKED SECTION
-		LOCK_SECTION_LAZY_DBG(m_Lock);
-
-		if(!__SectionLock.TryToLock())
-			return;
+		LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return)
 
 		// clear out everything
 		m_ServerlistHeap.Reset();
@@ -823,9 +813,7 @@ void CServerBrowser::Refresh(int Type)
 
 void CServerBrowser::RefreshQuick()
 {
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return)
 
 	if(IsRefreshing())
 		AbortRefresh();
@@ -851,9 +839,7 @@ void CServerBrowser::RefreshQuick()
 
 void CServerBrowser::SaveCache()
 {
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return)
 
 	// nothing to save
 	if(m_NumServers < 1)
@@ -908,15 +894,13 @@ void CServerBrowser::SaveCache()
 void CServerBrowser::LoadCache()
 {
 	m_ServerlistType = TYPE_INTERNET;
-	void *pThread = thread_init(LoadCacheThread, this);
-	thread_detach(pThread);
+	m_pThread = thread_init(LoadCacheThread, this);
 }
 
 void CServerBrowser::LoadCacheWait()
 {
 	LoadCache();
-	LOCK_SECTION_SMART LockHandler(&m_Lock);
-	LockHandler.WaitAndLock();
+	LOCK_SECTION_RECURSIVE_MUTEX(m_Mutex);
 }
 
 void CServerBrowser::LoadCacheThread(void *pUser)
@@ -926,7 +910,7 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 
 	int64 StartTime = time_get();
 
-	LOCK_SECTION_DBG(pSelf->m_Lock);
+	LOCK_SECTION_RECURSIVE_MUTEX(pSelf->m_Mutex);
 
 	// clear out everything
 	pSelf->m_ServerlistHeap.Reset();
@@ -1034,12 +1018,9 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 
 	io_close(File);
 
-	__SectionLock.Unlock(); // Sort() wants the lock too, so release it manually here
-
 	if(g_Config.m_Debug)
 		dbg_msg("browser", "successfully loaded serverlist cache with %i entries (total %i), took %.2fms", pSelf->m_NumServers, NumServers, ((time_get()-StartTime)*1000)/(float)time_freq()); // TODO: check if saving actually succeeded
 	pSelf->Sort();
-	return;// true;
 }
 
 void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const
@@ -1272,13 +1253,9 @@ void CServerBrowser::Update(bool ForceResort)
 		return; // wait for more packets
 	}
 
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	if(!__SectionLock.TryToLock())
-		return;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return)
 
 	ProcessServerList();
-
-	UNLOCK_SECTION();
 
 	// check if we need to resort
 //	if(!(g_Config.m_BrLazySorting && IsRefreshing() && LoadingProgression() < 90))
@@ -1650,7 +1627,5 @@ void CServerBrowser::DDNetTypeFilterClean()
 
 bool CServerBrowser::IsLocked()
 {
-	LOCK_SECTION_LAZY_DBG(m_Lock);
-	bool WasLocked = !__SectionLock.TryToLock();
-	return WasLocked;
+	LOCK_SECTION_RECURSIVE_MUTEX_OPT(m_Mutex, return true) else return false;
 }
