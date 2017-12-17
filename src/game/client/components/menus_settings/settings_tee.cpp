@@ -228,17 +228,18 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static float s_ScrollValue = 0.0f;
 	int OldSelected = -1;
 	static CButtonContainer s_Listbox;
-	UiDoListboxStart(&s_Listbox, &SkinList, 50.0f, Localize("Skins"), "", m_apSkinList.size(), 4, OldSelected, s_ScrollValue);
-	for(int i = 0; i < m_apSkinList.size(); ++i)
+	const int NumSkins = GetSkinList().size();
+	UiDoListboxStart(&s_Listbox, &SkinList, 50.0f, Localize("Skins"), "", NumSkins, 4, OldSelected, s_ScrollValue);
+	for(int i = 0; i < NumSkins; ++i)
 	{
-		const CSkins::CSkin *s = m_apSkinList[i];
+		const CSkins::CSkin *s = GetSkinList()[i];
 		if(s == 0)
 			continue;
 
 		if(str_comp(s->GetName(), Skin) == 0)
 			OldSelected = i;
 
-		CPointerContainer Container(&m_apSkinList[i]);
+		CPointerContainer Container(&GetSkinList()[i]);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		char aBuf[128];
 		if(Item.m_Visible)
@@ -282,7 +283,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(Skin, m_apSkinList[NewSelected]->GetName(), sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(Skin, GetSkinList()[NewSelected]->GetName(), sizeof(g_Config.m_ClPlayerSkin));
 		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else

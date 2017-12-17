@@ -56,6 +56,31 @@ R partition_binary(R range, T value)
 }
 
 template<class R, class T>
+R partition_binary_ptr(R range, T value)
+{
+	concept_empty::check(range);
+	concept_index::check(range);
+	concept_size::check(range);
+	concept_slice::check(range);
+	concept_sorted::check(range);
+
+	if(range.empty())
+		return range;
+	if(*(range.back()) < *value)
+		return R();
+
+	while(range.size() > 1)
+	{
+		unsigned pivot = (range.size()-1)/2;
+		if(*(range.index(pivot)) < *value)
+			range = range.slice(pivot+1, range.size()-1);
+		else
+			range = range.slice(0, pivot+1);
+	}
+	return range;
+}
+
+template<class R, class T>
 R find_linear(R range, T value)
 {
 	concept_empty::check(range);
@@ -99,6 +124,29 @@ void sort_bubble(R range)
 	}
 }
 
+template<class R>
+void sort_bubble_ptr(R range)
+{
+	concept_empty::check(range);
+	concept_forwarditeration::check(range);
+	concept_backwarditeration::check(range);
+
+	// slow bubblesort :/
+	for(; !range.empty(); range.pop_back())
+	{
+		R section = range;
+		typename R::type *prev = &section.front();
+		section.pop_front();
+		for(; !section.empty(); section.pop_front())
+		{
+			typename R::type *cur = &section.front();
+			if(*(*cur) < *(*prev))
+				swap(*cur, *prev);
+			prev = cur;
+		}
+	}
+}
+
 /*
 template<class R>
 void sort_quick(R range)
@@ -111,6 +159,12 @@ template<class R>
 void sort(R range)
 {
 	sort_bubble(range);
+}
+
+template<class R>
+void sort_ptr(R range)
+{
+	sort_bubble_ptr(range);
 }
 
 

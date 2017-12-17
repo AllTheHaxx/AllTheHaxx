@@ -364,8 +364,10 @@ public:	int m_LoadTotal;
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// found in menus_settings.cpp
-	int m_InitSkinlist;
-	sorted_array<const CSkins::CSkin *> m_apSkinList;
+	bool m_InitSkinlist;
+	sorted_ptr_array<const CSkins::CSkin *> m_apSkinList;
+	inline const sorted_ptr_array<const CSkins::CSkin *> & GetSkinList() { if(m_InitSkinlist) InitSkinList(); return m_apSkinList; }
+	void InitSkinList();
 	void (CMenus::*m_pfnAppearanceSubpage)(CUIRect MainView);
 	void RenderLanguageSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);

@@ -28,6 +28,7 @@
 
 #include <game/localization.h>
 #include <game/version.h>
+#include <engine/config.h>
 #include "render.h"
 
 #include "gameclient.h"
@@ -597,11 +598,16 @@ void CGameClient::OnInit()
 		g_Config.m_ClChatDennisProtection = 0;
 		g_Config.m_BrAutoCache = 1;
 	}
+	if(g_Config.m_ClConfigVersion < 3500)
+	{
+		g_Config.m_ClThreadskinloading = 0;
+	}
 
 	if(g_Config.m_ClConfigVersion != GAME_ATH_VERSION_NUMERIC)
 	{
 		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "update-cfg", "%i -> %i", g_Config.m_ClConfigVersion, GAME_ATH_VERSION_NUMERIC);
 		g_Config.m_ClConfigVersion = GAME_ATH_VERSION_NUMERIC;
+		Kernel()->RequestInterface<IConfig>()->Save(true);
 	}
 
 

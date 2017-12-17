@@ -288,7 +288,10 @@ public:
 		// allocate and copy the command into the buffer
 		SCommand *pCmd = (SCommand *)m_CmdBuffer.Alloc(sizeof(Command));
 		if(!pCmd)
+		{
+			dbg_msg("graphics/warning", "failed to add command: buffer is full");
 			return false;
+		}
 		mem_copy(pCmd, &Command, sizeof(Command));
 		pCmd->m_Size = sizeof(Command);
 		return true;

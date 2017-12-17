@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
+#include <mutex>
+#include <atomic>
 #include <base/vmath.h>
 #include <base/tl/sorted_array.h>
 #include <game/client/component.h>
@@ -18,7 +20,6 @@ public:
 		{
 			SKIN_TEXTURE_NOT_LOADED = -3,
 			SKIN_TEXTURE_LOADING = -2,
-			SKIN_TEXTURE_NOT_FOUND = -1
 		};
 
 	private:
@@ -44,7 +45,12 @@ public:
 		const vec3& GetBloodColor() const { return m_BloodColor; }
 		bool IsVanilla() const { return m_IsVanilla; }
 
-		bool operator<(const CSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
+		bool operator<(const CSkin &Other) const
+		{
+			if(m_IsVanilla != Other.m_IsVanilla)
+				return m_IsVanilla > Other.m_IsVanilla;
+			return str_comp(m_aName, Other.m_aName) < 0;
+		}
 	};
 
 	void OnInit();
@@ -52,21 +58,31 @@ public:
 
 	vec3 GetColorV3(int v);
 	vec4 GetColorV4(int v);
-	int Num();
-	const CSkin *Get(int Index);
-	int GetDefaultSkinColorTexture() const { return m_DefaultSkinColorTexture; }
-	int GetDefaultSkinOrgTexture() const { return m_DefaultSkinOrgTexture; }
+	inline int Num() { LOCK_SECTION_MUTEX(m_SkinsLock); return (int)m_apSkins.size(); }
+	inline const CSkin *Get(int Index)
+	{
+		if(Index < 0 || Index >= Num())
+			return m_pDefaultSkin;
+		return m_apSkins[Index];
+	}
+
+	int GetDefaultSkinColorTexture() { LOCK_SECTION_MUTEX(m_SkinsLock); return m_apSkins[0]->m_ColorTexture;/*m_DefaultSkinColorTexture*/; }
+	int GetDefaultSkinOrgTexture() { LOCK_SECTION_MUTEX(m_SkinsLock); return m_apSkins[0]->m_OrgTexture;/*m_DefaultSkinOrgTexture*/; }
 	int Find(const char *pName);
 	void Clear();
 
 
 private:
-	int m_DefaultSkinColorTexture;
-	int m_DefaultSkinOrgTexture;
-	sorted_array<CSkin> m_aSkins;
+	const CSkin *m_pDefaultSkin;
+//	int m_DefaultSkinColorTexture;
+//	int m_DefaultSkinOrgTexture;
+	sorted_ptr_array<CSkin *> m_apSkins;
+	std::mutex m_SkinsLock;
 
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 
+	void *m_pThread;
+	std::atomic<bool> m_ThreadRunning;
 	void LoadTexturesImpl(CSkin *pSkin);
 	void LoadTexturesThreaded(CSkin *pSkin);
 	static void LoadTexturesThreadProxy(void *pUser);

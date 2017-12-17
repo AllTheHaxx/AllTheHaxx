@@ -330,7 +330,8 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 			s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
 	}
 
-	if(IsDDNet(Client()->GetServerInfo(0)) || IsDDRace(Client()->GetServerInfo(0)))
+	if(Client()->State() == IClient::STATE_ONLINE &&
+			   (IsDDNet(Client()->GetServerInfo(0)) || IsDDRace(Client()->GetServerInfo(0))))
 	{
 		ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(140.0f, &Button, &ButtonBar);

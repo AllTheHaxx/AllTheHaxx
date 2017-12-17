@@ -2106,6 +2106,34 @@ void CMenus::OnStateChange(int NewState, int OldState)
 
 extern "C" void font_debug_render();
 
+void CMenus::InitSkinList()
+{
+	if(m_InitSkinlist)
+	{
+		m_apSkinList.clear();
+		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
+		{
+			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
+			const char *pSkinName = s->GetName();
+
+			// filter quick search
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(pSkinName, g_Config.m_ClSkinFilterString))
+				continue;
+
+			// filter vanilla
+			if((g_Config.m_ClSkinFilterAdvanced == 1 && !s->IsVanilla()) || (g_Config.m_ClSkinFilterAdvanced == 2 && s->IsVanilla()))
+				continue;
+
+			// no special skins
+			if((pSkinName[0] == 'x' && pSkinName[1] == '_'))
+				continue;
+
+			m_apSkinList.add(s);
+		}
+		m_InitSkinlist = false;
+	}
+}
+
 void CMenus::OnRender()
 {
 	CALLSTACK_ADD();
@@ -2138,32 +2166,6 @@ void CMenus::OnRender()
 		}
 	}
 #endif
-
-
-	if(m_InitSkinlist)
-	{
-		m_apSkinList.clear();
-		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
-		{
-			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
-			const char *pSkinName = s->GetName();
-
-			// filter quick search
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(pSkinName, g_Config.m_ClSkinFilterString))
-				continue;
-
-			// filter vanilla
-			if((g_Config.m_ClSkinFilterAdvanced == 1 && !s->IsVanilla()) || (g_Config.m_ClSkinFilterAdvanced == 2 && s->IsVanilla()))
-				continue;
-
-			// no special skins
-			if((pSkinName[0] == 'x' && pSkinName[1] == '_'))
-				continue;
-
-			m_apSkinList.add(s);
-		}
-		m_InitSkinlist = false;
-	}
 
 	if(!IsActive())
 	{

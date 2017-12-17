@@ -554,17 +554,18 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	View.HSplitBottom(25.0f, &Button, &View);
 
 	// do skinlist
-	UiDoListboxStart(&s_Listbox, &Button, 50.0f, Localize("Skins"), "", m_apSkinList.size(), 8, OldSelected, s_ScrollValue);
-	for(int i = 0; i < m_apSkinList.size(); i++)
+	const int NumSkins = GetSkinList().size();
+	UiDoListboxStart(&s_Listbox, &Button, 50.0f, Localize("Skins"), "", NumSkins, 8, OldSelected, s_ScrollValue);
+	for(int i = 0; i < NumSkins; i++)
 	{
-		const CSkins::CSkin *s = m_apSkinList[i];
+		const CSkins::CSkin *s = GetSkinList()[i];
 		if(!s)
 			continue;
 
 		if(str_comp(s->GetName(), pEntry->m_aSkin) == 0)
 			OldSelected = i;
 
-		CPointerContainer Container(&m_apSkinList[i]);
+		CPointerContainer Container(&GetSkinList()[i]);
 		CListboxItem Item = UiDoListboxNextItem(&Container, OldSelected == i);
 		if(Item.m_Visible)
 		{
@@ -609,7 +610,7 @@ void CMenus::RenderSettingsIdentTee(CUIRect MainView, int Page)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		str_copyb(pEntry->m_aSkin, m_apSkinList[NewSelected]->GetName());
+		str_copyb(pEntry->m_aSkin, GetSkinList()[NewSelected]->GetName());
 		m_NeedSendinfo = true;
 	}
 
