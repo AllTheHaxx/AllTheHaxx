@@ -897,8 +897,12 @@ public:
 					Graphics()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
 			}
 
+			int debug = 1;
 			while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
 			{
+				if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
+					break;
+
 				int NewLine = 0;
 				const char *pBatchEnd = pEnd;
 				if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags&TEXTFLAG_STOP_AT_END))
@@ -941,6 +945,8 @@ public:
 				FT_UInt NextCharacter = (FT_UInt)str_utf8_decode(&pTmp);
 				while(pCurrent < pBatchEnd)
 				{
+					debug++;
+
 					FT_UInt Character = NextCharacter;
 					pCurrent = pTmp;
 					NextCharacter = (FT_UInt)str_utf8_decode(&pTmp);
@@ -982,6 +988,9 @@ public:
 					}
 				}
 
+				if (pBatchEnd == pCurrent && debug == 1)
+					break;
+
 				if(NewLine)
 				{
 					DrawX = pCursor->m_StartX;
@@ -992,6 +1001,8 @@ public:
 					++LineCount;
 					MaxLineWidth = max(MaxLineWidth, DrawX);
 				}
+
+				debug++;
 			}
 
 			if(pCursor->m_Flags&TEXTFLAG_RENDER)
