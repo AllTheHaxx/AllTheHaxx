@@ -92,8 +92,9 @@ int CMapImages::GetEntities()
 {
 	static char s_aEntitiesGameType[32] = {0};
 
+	// auto-select xray entites based on gametype
 	const CServerInfo *pInfo = Client()->GetServerInfo();
-	if(str_comp(s_aEntitiesGameType, pInfo->m_aGameType) != 0)
+	if(g_Config.m_TexEntitiesAutoSelect && str_comp(s_aEntitiesGameType, pInfo->m_aGameType) != 0)
 	{
 		const char *pFile = 0;
 		if(IsDDNet(pInfo))
