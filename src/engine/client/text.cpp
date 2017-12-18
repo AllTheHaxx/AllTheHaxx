@@ -496,7 +496,15 @@ class CTextRender : public IEngineTextRender
 			else if(pUrlStart == pStr) // only render it from its start, thus when we are right on it
 			{
 				// find the end of the url
-				const char *pUrlEnd = str_find_nocase(pUrlStart, " "); // pUrlEnd points to the first character *not* in the url
+				const char *pUrlEnd = NULL;
+				const char *pUrlEndSpace = str_find_nocase(pUrlStart, " "); // pUrlEnd points to the first character *not* in the url
+				const char *pUrlEndColor = str_find_nocase(pUrlStart, "$$"); // pUrlEnd points to the first character *not* in the url
+				if(pUrlEndSpace == NULL)
+					pUrlEnd = pUrlEndColor;
+				else if(pUrlEndColor == NULL)
+					pUrlEnd = pUrlEndSpace;
+				else
+					pUrlEnd = min(pUrlEndSpace, pUrlEndColor);
 				if(!pUrlEnd) pUrlEnd = pUrlStart + str_length(pUrlStart);
 				int UrlLen = (int)(pUrlEnd-pUrlStart);
 				pOut->m_pStart = pUrlStart;
@@ -789,7 +797,6 @@ public:
 		float ret = 0.0f;
 		while(ProcessStringPart(pCursor, pText, pHighlight, &Section, IgnoreColorCodes))
 		{
-
 			if(Section.m_OverrideColor)
 				TextColor(Section.m_ColorR, Section.m_ColorG, Section.m_ColorB, Color.a);
 			else
@@ -806,7 +813,7 @@ public:
 	virtual float TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
 		if(!pText)
-			return -1.0f;
+			return 0.0f;
 
 		if(str_length(pText) == 0)
 			return 0.0f;
@@ -855,7 +862,7 @@ public:
 			pFont = m_pDefaultFont;
 
 		if(!pFont)
-			return -1;
+			return 0.0f;
 
 		pSizeData = GetSize(pFont, ActualSize);
 		RenderSetup(pFont, ActualSize);

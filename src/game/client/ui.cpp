@@ -576,12 +576,20 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 
 	if(Align == CUI::ALIGN_CENTER)
 	{
-		float tw = TextRender()->TextWidthParse(0, Size, pText, MaxWidth, pHighlight);
+		float tw;
+		if(IgnoreColorCodes)
+			tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
+		else
+			tw = TextRender()->TextWidthParse(0, Size, pText, MaxWidth, pHighlight);
 		xOffset = r->w/2.0f - tw/2.0f;
 	}
 	else if(Align == CUI::ALIGN_RIGHT)
 	{
-		float tw = TextRender()->TextWidthParse(0, Size, pText, MaxWidth, pHighlight);
+		float tw;
+		if(IgnoreColorCodes)
+			tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
+		else
+			tw = TextRender()->TextWidthParse(0, Size, pText, MaxWidth, pHighlight);
 		xOffset = r->w - tw;
 	}
 

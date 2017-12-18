@@ -668,7 +668,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *pOffset;
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, Align);
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, Align, -1, 0, 0, true);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
@@ -685,7 +685,7 @@ int CMenus::DoEditBox(CButtonContainer *pBC, const CUIRect *pRect, char *pStr, u
 			Textbox.VSplitLeft(2.0f, 0, &Textbox);
 			Textbox.x += (w-*pOffset-cw);
 
-			UI()->DoLabel(&Textbox, "|", FontSize, CUI::ALIGN_LEFT); // TODO: the alignment here might not be correct (like this entire block ._.)
+			UI()->DoLabel(&Textbox, "|", FontSize, CUI::ALIGN_LEFT);
 		}
 
 		const float tw = TextRender()->TextWidth(0, FontSize, pDisplayStr);
