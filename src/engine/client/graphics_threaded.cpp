@@ -316,13 +316,14 @@ int CGraphics_Threaded::LinesDrawLua(lua_State *L)
 	if(!v.isTable()) // this case should never actually happen
 		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
 
-	CLineItem *aLineItems = (CLineItem *)mem_alloc(NUM*sizeof(CLineItem), 0);
+	CLineItem aLineItems[MAX_VERTICES];
 	for(int i = 1; i <= NUM; i++)
 	{
+		if(!v[i].isUserdata())
+			luaL_error(L, "elements in array for LinesDraw must be LineItem (got %s @ %d)", luaL_typename(L, v[i].type()), i);
 		aLineItems[i-1] = v[i].cast<CLineItem>();
 	}
 	LinesDraw(aLineItems, NUM);
-	mem_free(aLineItems);
 	return 0;
 }
 
@@ -697,13 +698,14 @@ int CGraphics_Threaded::QuadsDrawLua(lua_State *L)
 	if(!v.isTable()) // this case should never actually happen
 		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
 
-	CQuadItem *aQuadItems = (CQuadItem *)mem_alloc(NUM*sizeof(CQuadItem), 0);
+	CQuadItem aQuadItems[MAX_VERTICES];
 	for(int i = 1; i <= NUM; i++)
 	{
+		if(!v[i].isUserdata())
+			luaL_error(L, "elements in array for QuadsDraw must be QuadItem (got %s @ %d)", luaL_typename(L, v[i].type()), i);
 		aQuadItems[i-1] = v[i].cast<CQuadItem>();
 	}
 	QuadsDraw(aQuadItems, NUM);
-	mem_free(aQuadItems);
 	return 0;
 }
 
@@ -728,13 +730,14 @@ int CGraphics_Threaded::QuadsDrawTLLua(lua_State *L)
 	if(!v.isTable()) // this case should never actually happen
 		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
 
-	CQuadItem *aQuadItems = (CQuadItem *)mem_alloc(NUM*sizeof(CQuadItem), 0);
+	CQuadItem aQuadItems[MAX_VERTICES];
 	for(int i = 1; i <= NUM; i++)
 	{
+		if(!v[i].isUserdata())
+			luaL_error(L, "elements in array for QuadsDrawTL must be QuadItem (got %s @ %d)", luaL_typename(L, v[i].type()), i);
 		aQuadItems[i-1] = v[i].cast<CQuadItem>();
 	}
 	QuadsDrawTL(aQuadItems, NUM);
-	mem_free(aQuadItems);
 	return 0;
 }
 
