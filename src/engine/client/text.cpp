@@ -470,7 +470,7 @@ class CTextRender : public IEngineTextRender
 				(pText[COLOR_CODE_LEN+2] >= 'a' && pText[COLOR_CODE_LEN+2] <= 'z') );
 	}
 
-	bool ProcessStringPart(CTextCursor *pCursor, const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes)
+	bool ProcessStringPart(const CTextCursor *pCursor, const char *pStr, const char *pHighlight, CTextRenderSection *pOut, bool NoColorCodes)
 	{
 		if(!pStr || *pStr == '\0')
 			return false;
@@ -565,7 +565,7 @@ class CTextRender : public IEngineTextRender
 				if(MaxLen < 0)
 				{
 					/* in this case the next interesting section (most likely highlight) begins within our color tag,
-					 * thus the color tag should just be ignored.
+					 * thus the color tag should be ignored.
 					 * instead, just hand over to the metioned section.
 					 */
 					return ProcessStringPart(pCursor, pNextInterestingSectionStart, pHighlight, pOut, NoColorCodes);
@@ -582,17 +582,14 @@ class CTextRender : public IEngineTextRender
 			}
 		}
 
-		pOut->m_ColorR = 1.0f;
-		pOut->m_ColorG = 1.0f;
-		pOut->m_ColorB = 1.0f;
+		pOut->m_OverrideColor = false;
 		pOut->m_pStart = pStr;
 		pOut->m_Length = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStr) : str_length(pStr); // don't render into the next section
-		pOut->m_OverrideColor = false;
 
 		return true;
 	}
 
-	void HandleURL(CTextCursor *pCursor, CTextRenderSection *pOut)
+	void HandleURL(const CTextCursor *pCursor, CTextRenderSection *pOut)
 	{
 		float tw = TextWidth(pCursor->m_pFont, pCursor->m_FontSize, pOut->m_pStart, pOut->m_Length);
 		IInput *pInput = Kernel()->RequestInterface<IInput>();
@@ -793,19 +790,19 @@ public:
 	virtual float TextExParse(CTextCursor *pCursor, const char *pText, bool IgnoreColorCodes = false, const char *pHighlight = 0)
 	{
 		CTextRenderSection Section;
-		vec4 Color(m_TextR, m_TextG, m_TextB, m_TextA);
+		const vec4 PrevColor(m_TextR, m_TextG, m_TextB, m_TextA);
 		float ret = 0.0f;
 		while(ProcessStringPart(pCursor, pText, pHighlight, &Section, IgnoreColorCodes))
 		{
 			if(Section.m_OverrideColor)
-				TextColor(Section.m_ColorR, Section.m_ColorG, Section.m_ColorB, Color.a);
+				TextColor(Section.m_ColorR, Section.m_ColorG, Section.m_ColorB, PrevColor.a);
 			else
-				TextColor(Color.r, Color.g, Color.b, Color.a);
+				TextColor(PrevColor.r, PrevColor.g, PrevColor.b, PrevColor.a);
 			ret += TextEx(pCursor, Section.m_pStart, Section.m_Length);
 
 			pText = Section.GetEnd();
 		}
-		TextColor(Color.r, Color.g, Color.b, Color.a);
+		TextColor(PrevColor.r, PrevColor.g, PrevColor.b, PrevColor.a);
 
 		return ret;
 	}
@@ -813,6 +810,9 @@ public:
 	virtual float TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
 		if(!pText)
+			return 0.0f;
+
+		if(Length == 0)
 			return 0.0f;
 
 		if(str_length(pText) == 0)
@@ -848,7 +848,7 @@ public:
 		FakeToScreenX = (((float)Graphics()->ScreenWidth())/(ScreenX1-ScreenX0));
 		FakeToScreenY = (((float)Graphics()->ScreenHeight())/(ScreenY1-ScreenY0));
 		ActualX = (int)(pCursor->m_X * FakeToScreenX);
-		ActualY = (int)(pCursor->m_Y * FakeToScreenY); // XXX: NOTE: maybe properly round this...? OR why even round it at all??
+		ActualY = (int)(pCursor->m_Y * FakeToScreenY);
 
 		CursorX = ((float)ActualX) / FakeToScreenX;
 		CursorY = ((float)ActualY) / FakeToScreenY;
@@ -872,8 +872,6 @@ public:
 		// set length
 		if(Length < 0)
 			Length = str_length(pText);
-		if(Length == 0)
-			return 0.0f;
 
 		float MaxLineWidth = 0.0f;
 
@@ -904,7 +902,7 @@ public:
 					Graphics()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
 			}
 
-			int debug = 1;
+			int debug = 1; // TODO: XXX: come up with a better solution against softlocking!
 			while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
 			{
 				if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
