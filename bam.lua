@@ -258,6 +258,7 @@ function build(settings)
 		settings.cc.defines:Add("FEATURE_DEBUGGER")
 	end
 
+	-- set compiler flags
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
@@ -287,6 +288,13 @@ function build(settings)
 		elseif config.stackprotector.value == 1 then
 			settings.cc.flags:Add("-fstack-protector", "-fstack-protector-all")
 			settings.link.flags:Add("-fstack-protector", "-fstack-protector-all")
+		end
+
+		-- enable appropriate optimization
+		if settings.config_name == "release" then
+			settings.cc.flags:Add("-O2 -ftree-vectorize -ftree-vectorizer-verbose=7") --add '-fopt-info-vec -fopt-info -fdump-tree-vect -g' for debugging
+		elseif settings.config_name == "debug" then
+			settings.cc.flags:Add("-Og")
 		end
 	end
 

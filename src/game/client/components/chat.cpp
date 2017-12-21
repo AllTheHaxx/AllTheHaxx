@@ -1248,7 +1248,8 @@ bool CChat::HandleTCommands(const char *pMsg)
 	if(!TranslatorAvailable() || !g_Config.m_ClTransChatCmds || !(pMsg[0] == '$' && pMsg[1] == '$'))
 		return false;
 
-	char aCmd[512][256] = {{0}};
+	char aCmd[512][256];
+	mem_zerob(aCmd);
 
 	int Cmd = 0;
 	int Char = 0;

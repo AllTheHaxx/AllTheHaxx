@@ -198,14 +198,13 @@ void CEmoticon::OnRender()
 
 	Graphics()->QuadsEnd();
 
-	CServerInfo pServerInfo;
-	Client()->GetServerInfo(&pServerInfo);
-	if((IsDDRace(&pServerInfo) || IsDDNet(&pServerInfo) || IsBWMod(&pServerInfo) || IsPlus(&pServerInfo)) && g_Config.m_ClEyeWheel)
+	const CServerInfo *pServerInfo = Client()->GetServerInfo();
+	if((IsDDRace(pServerInfo) || IsDDNet(pServerInfo) || IsBWMod(pServerInfo) || IsPlus(pServerInfo)) && g_Config.m_ClEyeWheel)
 	{
 		Graphics()->TextureSet(-1);
 		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0,1.0,1.0,s_PopVal*0.3f);
-		DrawCircle(Screen.w/2, Screen.h/2, min(s_Val*190.0f, 100.0f), 64);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, s_PopVal*0.3f);
+		DrawCircle(Screen.w/2.0f, Screen.h/2.0f, min(s_Val*190.0f, 100.0f), 64);
 		Graphics()->QuadsEnd();
 
 		CTeeRenderInfo TeeInfo;
@@ -215,7 +214,7 @@ void CEmoticon::OnRender()
 		// draw the eyeemotes in a circle
 		for (int i = 0; i < NUM_EMOTES; i++)
 		{
-			float Angle = 2*pi*i/NUM_EMOTES;
+			float Angle = 2*pi*(float)i/(float)NUM_EMOTES;
 			if (Angle > pi)
 				Angle -= 2*pi;
 
@@ -234,7 +233,7 @@ void CEmoticon::OnRender()
 		Graphics()->TextureSet(-1);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0,0,0,s_PopVal*0.3f);
-		DrawCircle(Screen.w/2, Screen.h/2, min(s_Val*190.0f, 30.0f), 64);
+		DrawCircle(Screen.w/2.0f, Screen.h/2.0f, min(s_Val*190.0f, 30.0f), 64);
 		Graphics()->QuadsEnd();
 	}
 	else

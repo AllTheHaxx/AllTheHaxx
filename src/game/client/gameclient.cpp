@@ -2710,7 +2710,8 @@ CWeaponData *CGameClient::FindWeaponData(int TargetTick)
 void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 {
 	// attempts to detect strong/weak against the player we are hooking
-	static int DirAccumulated[2][MAX_CLIENTS] = {{0}};
+	static int s_aaDirAccumulated[2][MAX_CLIENTS];
+	STATIC_INIT_ZERO(s_aaDirAccumulated);
 	if(!m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Active || !m_Snap.m_paPlayerInfos[m_Snap.m_LocalClientID])
 		return;
 	int HookedPlayer = m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev.m_HookedPlayer;
@@ -2755,9 +2756,9 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 		}
 		const float Low = 0.0001, High = 0.07;
 		if(PredictErr[1] < Low && PredictErr[0] > High)
-			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], 1);
+			s_aaDirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, s_aaDirAccumulated[g_Config.m_ClDummy][HookedPlayer], 1);
 		else if(PredictErr[0] < Low && PredictErr[1] > High)
-			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], -1);
-		IsWeaker[g_Config.m_ClDummy][HookedPlayer] = (DirAccumulated[g_Config.m_ClDummy][HookedPlayer] > 0);
+			s_aaDirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, s_aaDirAccumulated[g_Config.m_ClDummy][HookedPlayer], -1);
+		IsWeaker[g_Config.m_ClDummy][HookedPlayer] = (s_aaDirAccumulated[g_Config.m_ClDummy][HookedPlayer] > 0);
 	}
 }

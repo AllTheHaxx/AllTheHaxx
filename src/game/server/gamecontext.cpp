@@ -631,11 +631,15 @@ void CGameContext::OnTick()
 			if(m_VoteUpdate)
 			{
 				// count votes
-				char aaBuf[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}};
+				char aaBuf[MAX_CLIENTS][NETADDR_MAXSTRSIZE];
+				mem_zerob(aaBuf);
+
 				for(int i = 0; i < MAX_CLIENTS; i++)
 					if(m_apPlayers[i])
 						Server()->GetClientAddr(i, aaBuf[i], NETADDR_MAXSTRSIZE);
-				bool aVoteChecked[MAX_CLIENTS] = {0};
+
+				bool aVoteChecked[MAX_CLIENTS];
+				mem_zerob(aVoteChecked);
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
 					//if(!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i])	// don't count in votes by spectators

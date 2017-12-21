@@ -11,7 +11,8 @@
 #define LUA_FIRE_EVENT(EVENTNAME, ...) \
 	if(!g_StealthMode && g_Config.m_ClLua) \
 	{ \
-		for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetActiveLuaFiles().size(); ijdfg++) \
+		const int __NumLuaFiles = CLua::Client()->Lua()->GetActiveLuaFiles().size(); \
+		for(int ijdfg = 0; ijdfg < __NumLuaFiles; ijdfg++) \
 		{ \
 			CLuaFile *pLF = CLua::Client()->Lua()->GetActiveLuaFiles()[ijdfg]; \
 			if(pLF->State() != CLuaFile::STATE_LOADED) \

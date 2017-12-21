@@ -184,6 +184,7 @@ void mem_move(void *dest, const void *source, unsigned size);
 */
 void mem_zero(void *block, unsigned size);
 #define mem_zerob(BUF) mem_zero(BUF, sizeof(BUF))
+#define STATIC_INIT_ZERO(VAR) { static bool s_##VAR##Inited = false; if(!s_##VAR##Inited) { mem_zero(VAR, sizeof(VAR)); s_##VAR##Inited = true; } }
 
 void mem_set(void *block, int value, unsigned size);
 

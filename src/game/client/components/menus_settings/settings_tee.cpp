@@ -185,7 +185,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			Localize("Hue"),
 			Localize("Sat."),
 			Localize("Lht.")};
-		static int s_aColorSlider[2][3] = {{0}};
+		static int s_aColorSlider[2][3];
+		STATIC_INIT_ZERO(s_aColorSlider)
 
 		for(int i = 0; i < 2; i++)
 		{

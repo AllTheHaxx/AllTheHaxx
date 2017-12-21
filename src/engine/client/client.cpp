@@ -3320,7 +3320,7 @@ void CClient::Run()
 	int64 ConsoleModeEmote = 0, LastTick = 0;  //timestamps
 
 
-	while (1)
+	while(true)
 	{
 		set_new_tick();
 

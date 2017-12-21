@@ -127,15 +127,13 @@ void CGraphics_Threaded::AddVertices(int Count)
 
 void CGraphics_Threaded::Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints, int NumPoints)
 {
-	float c = cosf(m_Rotation);
-	float s = sinf(m_Rotation);
-	float x, y;
-	int i;
+	const float c = cosf(m_Rotation);
+	const float s = sinf(m_Rotation);
 
-	for(i = 0; i < NumPoints; i++)
+	for(int i = 0; i < NumPoints; i++)
 	{
-		x = pPoints[i].m_Pos.x - rCenter.x;
-		y = pPoints[i].m_Pos.y - rCenter.y;
+		float x = pPoints[i].m_Pos.x - rCenter.x;
+		float y = pPoints[i].m_Pos.y - rCenter.y;
 		pPoints[i].m_Pos.x = x * c - y * s + rCenter.x;
 		pPoints[i].m_Pos.y = x * s + y * c + rCenter.y;
 	}

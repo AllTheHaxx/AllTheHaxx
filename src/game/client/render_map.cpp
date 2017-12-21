@@ -24,14 +24,12 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 
 	if(NumPoints == 1)
 	{
-		pResult[0] = fx2f(pPoints[0].m_aValues[0]);
-		pResult[1] = fx2f(pPoints[0].m_aValues[1]);
-		pResult[2] = fx2f(pPoints[0].m_aValues[2]);
-		pResult[3] = fx2f(pPoints[0].m_aValues[3]);
+		for(int i = 0; i < 4; i++)
+			pResult[i] = fx2f(pPoints[0].m_aValues[i]);
 		return;
 	}
 
-	Time = fmod(Time, pPoints[NumPoints-1].m_Time/1000.0f)*1000.0f;
+	Time = fmodf(Time, pPoints[NumPoints-1].m_Time/1000.0f)*1000.0f;
 	for(int i = 0; i < NumPoints-1; i++)
 	{
 		if(Time >= pPoints[i].m_Time && Time <= pPoints[i+1].m_Time)
@@ -67,11 +65,8 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 		}
 	}
 
-	pResult[0] = fx2f(pPoints[NumPoints-1].m_aValues[0]);
-	pResult[1] = fx2f(pPoints[NumPoints-1].m_aValues[1]);
-	pResult[2] = fx2f(pPoints[NumPoints-1].m_aValues[2]);
-	pResult[3] = fx2f(pPoints[NumPoints-1].m_aValues[3]);
-	return;
+	for(int i = 0; i < 4; i++)
+		pResult[i] = fx2f(pPoints[NumPoints-1].m_aValues[i]);
 }
 
 
@@ -254,16 +249,16 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags,
+void CRenderTools::RenderTilemap(const CTile *pTiles, int w, int h, const float Scale, vec4 Color, const int RenderFlags,
                                  ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 	// calculate the final pixelsize for the tiles
-	float TilePixelSize = 1024/32.0f;
-	float FinalTileSize = Scale/(ScreenX1-ScreenX0) * Graphics()->ScreenWidth();
-	float FinalTilesetScale = FinalTileSize/TilePixelSize;
+	const float TilePixelSize = 1024/32.0f;
+	const float FinalTileSize = Scale/(ScreenX1-ScreenX0) * Graphics()->ScreenWidth();
+	const float FinalTilesetScale = FinalTileSize/TilePixelSize;
 
 	float r=1, g=1, b=1, a=1;
 	if(ColorEnv >= 0)
@@ -279,15 +274,12 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color.r*r, Color.g*g, Color.b*b, Color.a*a);
 
+	const bool ColorOpaque = Color.a*a > 254.0f/255.0f;
+
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;
 	int EndY = (int)(ScreenY1/Scale)+1;
 	int EndX = (int)(ScreenX1/Scale)+1;
-
-	// adjust the texture shift according to mipmap level
-	float TexSize = 1024.0f;
-	float Frac = (1.25f/TexSize) * (1/FinalTilesetScale);
-	float Nudge = (0.5f/TexSize) * (1/FinalTilesetScale);
 
 	for(int y = StartY; y < EndY; y++)
 	{
@@ -298,98 +290,28 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 
 			if(RenderFlags&TILERENDERFLAG_EXTEND)
 			{
-				if(mx<0)
-					mx = 0;
-				if(mx>=w)
-					mx = w-1;
-				if(my<0)
-					my = 0;
-				if(my>=h)
-					my = h-1;
+				if(mx < 0)  mx = 0;
+				if(mx >= w) mx = w-1;
+				if(my < 0)  my = 0;
+				if(my >= h) my = h-1;
 			}
 			else
 			{
-				if(mx<0)
-					continue; // mx = 0;
-				if(mx>=w)
-					continue; // mx = w-1;
-				if(my<0)
-					continue; // my = 0;
-				if(my>=h)
-					continue; // my = h-1;
+				if(mx < 0 || mx >= w || my < 0 || my >= h)
+					continue;
 			}
 
-			int c = mx + my*w;
-			const CTile& Tile = pTiles[c];
+			const CTile& Tile = pTiles[mx + my*w];
 
-			unsigned char Index = Tile.m_Index;
+			int Index = Tile.m_Index;
 			if(Index)
 			{
-				unsigned char Flags = Tile.m_Flags;
+				int Flags = Tile.m_Flags;
 
-				bool Render = false;
-				if(Flags&TILEFLAG_OPAQUE && Color.a*a > 254.0f/255.0f)
+				if((RenderFlags&LAYERRENDERFLAG_TRANSPARENT)
+				   || ((Flags&TILEFLAG_OPAQUE && ColorOpaque) && (RenderFlags&LAYERRENDERFLAG_OPAQUE)))
 				{
-					if(RenderFlags&LAYERRENDERFLAG_OPAQUE)
-						Render = true;
-				}
-				else
-				{
-					if(RenderFlags&LAYERRENDERFLAG_TRANSPARENT)
-						Render = true;
-				}
-
-				if(Render)
-				{
-					int tx = Index%16;
-					int ty = Index/16;
-					int Px0 = tx*(1024/16);
-					int Py0 = ty*(1024/16);
-					int Px1 = Px0+(1024/16)-1;
-					int Py1 = Py0+(1024/16)-1;
-
-					float x0 = Nudge + Px0/TexSize+Frac;
-					float y0 = Nudge + Py0/TexSize+Frac;
-					float x1 = Nudge + Px1/TexSize-Frac;
-					float y1 = Nudge + Py0/TexSize+Frac;
-					float x2 = Nudge + Px1/TexSize-Frac;
-					float y2 = Nudge + Py1/TexSize-Frac;
-					float x3 = Nudge + Px0/TexSize+Frac;
-					float y3 = Nudge + Py1/TexSize-Frac;
-
-					if(Flags&TILEFLAG_VFLIP)
-					{
-						x0 = x2;
-						x1 = x3;
-						x2 = x3;
-						x3 = x0;
-					}
-
-					if(Flags&TILEFLAG_HFLIP)
-					{
-						y0 = y3;
-						y2 = y1;
-						y3 = y1;
-						y1 = y0;
-					}
-
-					if(Flags&TILEFLAG_ROTATE)
-					{
-						float Tmp = x0;
-						x0 = x3;
-						x3 = x2;
-						x2 = x1;
-						x1 = Tmp;
-						Tmp = y0;
-						y0 = y3;
-						y3 = y2;
-						y2 = y1;
-						y1 = Tmp;
-					}
-
-					Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
-					IGraphics::CQuadItem QuadItem(x*Scale, y*Scale, Scale, Scale);
-					Graphics()->QuadsDrawTL(&QuadItem, 1);
+					RenderTilemapPutTile(Tile, x, y, Scale, FinalTilesetScale, Index);
 				}
 			}
 			x += Tile.m_Skip;
@@ -398,6 +320,66 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 
 	Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderTools::RenderTilemapPutTile(const CTile& Tile, int x, int y, float Scale, float FinalTilesetScale, int Index)
+{
+	// adjust the texture shift according to mipmap level
+	const float TexSize = 1024.0f;
+	const float Frac = (1.25f/TexSize) * (1/FinalTilesetScale);
+	const float Nudge = (0.5f/TexSize) * (1/FinalTilesetScale);
+
+	int Flags = Tile.m_Flags;
+
+	int tx = Index%16;
+	int ty = Index/16;
+	float Px0 = tx*(1024/16);
+	float Py0 = ty*(1024/16);
+	float Px1 = Px0+(1024/16)-1;
+	float Py1 = Py0+(1024/16)-1;
+
+	float x0 = Nudge + Px0/TexSize+Frac;
+	float y0 = Nudge + Py0/TexSize+Frac;
+	float x1 = Nudge + Px1/TexSize-Frac;
+	float y1 = Nudge + Py0/TexSize+Frac;
+	float x2 = Nudge + Px1/TexSize-Frac;
+	float y2 = Nudge + Py1/TexSize-Frac;
+	float x3 = Nudge + Px0/TexSize+Frac;
+	float y3 = Nudge + Py1/TexSize-Frac;
+
+	if(Flags&TILEFLAG_VFLIP)
+	{
+		x0 = x2;
+		x1 = x3;
+		x2 = x3;
+		x3 = x0;
+	}
+
+	if(Flags&TILEFLAG_HFLIP)
+	{
+		y0 = y3;
+		y2 = y1;
+		y3 = y1;
+		y1 = y0;
+	}
+
+	if(Flags&TILEFLAG_ROTATE)
+	{
+		float Tmp = x0;
+		x0 = x3;
+		x3 = x2;
+		x2 = x1;
+		x1 = Tmp;
+		Tmp = y0;
+		y0 = y3;
+		y3 = y2;
+		y2 = y1;
+		y1 = Tmp;
+	}
+
+	Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
+	IGraphics::CQuadItem QuadItem(x*Scale, y*Scale, Scale, Scale);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
 }
 
 void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha)
