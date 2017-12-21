@@ -959,7 +959,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	TextRender()->Text(0, Motd.x+x, Motd.y+y, 16, m_pClient->m_pMotd->m_aServerMotd, (int)Motd.w);
 }
 
-void CMenus::RenderServerControlServer(CUIRect MainView)
+bool CMenus::RenderServerControlServer(CUIRect MainView)
 {
 	CALLSTACK_ADD();
 
@@ -1003,12 +1003,15 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 		NumVoteOptions++;
 	}
 
-	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, 0);
+	bool Call;
+	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, &Call);
 	if(s_CurVoteOption < Total)
 		m_CallvoteSelectedOption = aIndices[s_CurVoteOption];
+
+	return Call;
 }
 
-void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
+bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 {
 	CALLSTACK_ADD();
 
@@ -1057,8 +1060,11 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		}
 	}
 
-	Selected = UiDoListboxEnd(&s_ScrollValue, 0);
+	bool Call;
+	Selected = UiDoListboxEnd(&s_ScrollValue, &Call);
 	m_CallvoteSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
+
+	return Call;
 }
 
 void CMenus::OnMessage(int Msg, void *pRawMsg)
@@ -1120,10 +1126,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	MainView.HSplitBottom(ms_ButtonHeight + 5*2, &MainView, &Bottom);
 	Bottom.HMargin(5.0f, &Bottom);
 
+	bool Call = false;
 	if(s_ControlPage == 0)
-		RenderServerControlServer(MainView);
+		Call = RenderServerControlServer(MainView);
 	else if(s_ControlPage == 1)
-		RenderServerControlKick(MainView, m_FilterSpectators);
+		Call = RenderServerControlKick(MainView, m_FilterSpectators);
 
 	// vote menu
 	{
@@ -1153,7 +1160,6 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				{
 					m_aCallvoteFilterString[0] = 0;
 					UI()->SetActiveItem(s_FilterStringEditbox.GetID());
-					Client()->ServerBrowserUpdate();
 				}
 			}
 		}
@@ -1176,13 +1182,16 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
-		bool EnterPressed = false;
-		for(int i = 0; i < m_NumInputEvents; i++)
+		bool EnterPressed = Call;
+		if(!EnterPressed)
 		{
-			if(m_aInputEvents[i].m_Key == KEY_RETURN)
+			for(int i = 0; i < m_NumInputEvents; i++)
 			{
-				EnterPressed = true;
-				break;
+				if(m_aInputEvents[i].m_Key == KEY_RETURN)
+				{
+					EnterPressed = true;
+					break;
+				}
 			}
 		}
 

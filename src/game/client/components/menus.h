@@ -343,8 +343,8 @@ public:	int m_LoadTotal;
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerControl(CUIRect MainView);
-	void RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
-	void RenderServerControlServer(CUIRect MainView);
+	bool RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
+	bool RenderServerControlServer(CUIRect MainView);
 
 	void RenderSpoofing(CUIRect MainView);
 	void RenderSpoofingGeneral(CUIRect MainView);

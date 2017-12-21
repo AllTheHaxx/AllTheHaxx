@@ -258,7 +258,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	View.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
-	int DoubleClicked = 0;
+	bool DoubleClicked = false;
 	int NumPlayers = 0;
 
 	int OldSelected = m_SelectedIndex;
@@ -349,7 +349,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 			if(OldSelected == i && Input()->MouseDoubleClick() && UI()->MouseInside(&SelectHitBox))
 			{
-				DoubleClicked = i;
+				DoubleClicked = true;
 				Input()->MouseDoubleClickReset();
 			}
 
