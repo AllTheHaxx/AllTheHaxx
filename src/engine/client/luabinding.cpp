@@ -196,7 +196,9 @@ int CLuaBinding::LuaListdir(lua_State *L)
 		argcheck(lua_isfunction(L, -1), 2, "function name (does the given function exist?)");
 	}
 
-	const char *pDir = lua_tostring(L, 1); // arg1
+	char aSandboxedPath[512];
+	str_copyb(aSandboxedPath, lua_tostring(L, 1)); // arg1
+	const char *pDir = SandboxPath(aSandboxedPath, sizeof(aSandboxedPath), pLF);
 	lua_Number ret = (lua_Number)fs_listdir_verbose(pDir, LuaListdirCallback, IStorageTW::TYPE_ALL, L);
 	lua_pushnumber(L, ret);
 	return 1;
