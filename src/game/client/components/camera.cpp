@@ -20,7 +20,7 @@ CCamera::CCamera()
 {
 	m_CamType = CAMTYPE_UNDEFINED;
 	m_ZoomSet = false;
-	m_Zoom = 1.0;
+	m_Zoom = 1.0f;
 	m_WantedZoom = 1.0f;
 	m_WantedCenter = vec2(0.0f, 0.0f);
 	m_RotationCenter = vec2(500.0f, 500.0f);
@@ -60,7 +60,7 @@ void CCamera::OnRender()
 				(g_Config.m_ClSmartZoom == 2 && ZoomAllowed()))
 		{
 			float ExtraZoom = (length(Vel) / 24000.0f) * ((float)g_Config.m_ClSmartZoomVal/100.0f);
-			TotalZoom += ExtraZoom;
+			TotalZoom = min(20.0f, TotalZoom+ExtraZoom); // don't go nuts
 		}
 	}
 

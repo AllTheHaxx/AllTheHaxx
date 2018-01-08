@@ -374,11 +374,20 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&s_ButtonPathFinding, Localize("A* Pathfinding"), g_Config.m_ClPathFinding, &Button, Localize("Find and visualize the shortest path to the finish on Race Maps")))
 		g_Config.m_ClPathFinding ^= 1;
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	static CButtonContainer s_ButtonSmartZoom;
-	if(DoButton_CheckBox(&s_ButtonSmartZoom, Localize("Smart zoom"), g_Config.m_ClSmartZoom, &Button, Localize("Smart zoom on race gametypes")))
-		g_Config.m_ClSmartZoom ^= 1;
+	{
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		char aBuf[128];
+		str_formatb(aBuf, "Smart zoom: %s", g_Config.m_ClSmartZoom == 0 ? Localize("Off") :
+											g_Config.m_ClSmartZoom == 1 ? Localize("Race servers only") :
+											g_Config.m_ClSmartZoom == 2 ? Localize("Everywhere") : "bugged.");
+		static CButtonContainer s_ButtonSmartZoom;
+		int MouseButton = DoButton_CheckBox_Number(&s_ButtonSmartZoom, aBuf, g_Config.m_ClSmartZoom, &Button, Localize("Smart zoom on race gametypes"));
+		if(MouseButton == 1)
+			g_Config.m_ClSmartZoom = (g_Config.m_ClSmartZoom + 1) % 3;
+		else if(MouseButton == 2)
+			g_Config.m_ClSmartZoom = (g_Config.m_ClSmartZoom + 3 - 1) % 3;
+	}
 
 	Left.HSplitTop(5.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
