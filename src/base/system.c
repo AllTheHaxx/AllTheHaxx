@@ -963,6 +963,15 @@ int64 time_freq()
 #endif
 }
 
+double time_to_millis(int64 time)
+{
+	return (double)time/((double)time_freq()/1000);
+}
+double time_to_nanos(int64 time)
+{
+	return (double)time/((double)time_freq()/1000000);
+}
+
 /* -----  network ----- */
 static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 {

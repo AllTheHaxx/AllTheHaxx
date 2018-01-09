@@ -534,6 +534,8 @@ int64 time_get_raw();
 		Returns the frequency of the high resolution timer.
 */
 int64 time_freq();
+double time_to_millis(int64 time);
+double time_to_nanos(int64 time);
 
 /*
 	Function: time_timestamp

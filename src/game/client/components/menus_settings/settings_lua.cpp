@@ -367,20 +367,22 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			std::vector< std::pair<std::string, CLuaFile::CProfilingData> > ProfList;
 			L->GetProfilingResults(&ProfList);
 			// draw headline
-			UI()->DoLabelScaled(&Label, "Event                Avg    Calls        Total", 9.0f, CUI::ALIGN_LEFT, -1, 0, m_pClient->m_pFontMgrMono->GetSelectedFont());
+			char aBuf[256];
+			str_formatb(aBuf, "Event             Avg ns     Calls     Total ms    %6.2f", L->GetScriptAliveTime());
+			UI()->DoLabelScaled(&Label, aBuf, 9.0f, CUI::ALIGN_LEFT, -1, 0, m_pClient->m_pFontMgrMono->GetSelectedFont());
 			for(auto it = ProfList.begin(); it != ProfList.end(); it++)
 			{
 				View.HSplitTop(5.0f, 0, &View);
 				View.HSplitTop(10.0f, &Label, &View);
 
-				enum { ALIGNMENT = 20 };
+				enum { ALIGNMENT = 17 };
 				const std::string& EventName = it->first;
 				char aSpaces[ALIGNMENT];
 				mem_set(aSpaces, ' ', sizeof(aSpaces));
 				aSpaces[max(0, ALIGNMENT-1-(int)EventName.length())] = '\0';
 
-				char aBuf[256];
-				str_formatb(aBuf,"%s%s%4.3f %8i %12.2Lf", EventName.c_str(), aSpaces, it->second.Average(), it->second.NumSamples(), it->second.TotalTime());
+				str_formatb(aBuf,"%s%s%8.3f %9i %12.2f %9.1f%%", EventName.c_str(), aSpaces, it->second.Average(), it->second.NumSamples(), it->second.TotalTime(),
+							(it->second.TotalTime()/L->GetScriptAliveTime())*100.0);
 				UI()->DoLabelScaled(&Label, aBuf, 9.0f, CUI::ALIGN_LEFT, -1, 0, m_pClient->m_pFontMgrMono->GetSelectedFont());
 			}
 		}

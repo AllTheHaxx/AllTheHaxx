@@ -47,7 +47,7 @@ public:
 
 	class CProfilingData
 	{
-		long double m_Sum;
+		int64 m_Sum;
 		unsigned m_NumSamples;
 
 	public:
@@ -59,12 +59,12 @@ public:
 
 		void AddSample(int64 Time)
 		{
-			m_Sum += (double)Time/((double)time_freq()/1000000.0f);
+			m_Sum += Time; // TODO: can the time_freq() fluctuate on some systems? if so, gotta add it here
 			m_NumSamples++;
 		}
 
-		double Average() const { return (double)m_Sum/(double)m_NumSamples; }
-		long double TotalTime() const { return m_Sum; }
+		double Average() const { return time_to_nanos(m_Sum)/(double)m_NumSamples; } // TODO XXX: bad average. we have to get rid of old values over time!
+		double TotalTime() const { return time_to_millis(m_Sum); }
 		unsigned NumSamples() const { return m_NumSamples; }
 
 		bool operator<(const CProfilingData& other) const { return m_Sum < other.m_Sum; }
@@ -91,6 +91,7 @@ private:
 
 	std::map<std::string, CProfilingData> m_ProfilingResults;
 	bool m_ProfilingActive;
+	int64 m_ScriptStartTime;
 
 	void Init(); // starts the script
 	void Unload(bool error = false, bool CalledFromExceptionHandler = false); // stops the script
@@ -121,6 +122,7 @@ public:
 	bool ProfilingActive() { return m_ProfilingActive; }
 	void ProfilingDoSample(const char *pEventName, int64 Time);
 	void GetProfilingResults(std::vector< std::pair<std::string, CProfilingData> > *pOut) const;
+	double GetScriptAliveTime() const { return time_to_millis(time_get_raw()-m_ScriptStartTime); }
 
 	CLua *Lua() const { return m_pLua; }
 

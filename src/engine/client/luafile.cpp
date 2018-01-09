@@ -33,7 +33,10 @@ void CLuaFile::Reset(bool error)
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 	m_ScriptHidden = false;
+
 	m_ProfilingActive = false;
+	m_ProfilingResults.clear();
+	m_ScriptStartTime = 0;
 
 	if(!error)
 		m_pErrorStr = NULL;
@@ -248,6 +251,8 @@ void CLuaFile::Init()
 		Unload(true); // after OpenLua() has been called, Unload() must be used instead of Reset()!
 		return;
 	}
+
+	m_ScriptStartTime = time_get_raw();
 
 	// gather basic global infos from the script
 	lua_getglobal(m_pLuaState, "g_ScriptTitle");
