@@ -37,6 +37,7 @@ public:
 
 	virtual int GetNumFonts() const = 0;
 	virtual int GetSelectedFontIndex() const = 0;
+	virtual CFont *GetSelectedFont() = 0;
 	virtual const char *GetFontPath(int ListIndex) const = 0;
 	virtual CFont *GetFont(int FontFace) = 0;
 };
@@ -64,8 +65,9 @@ public:
 	void ReloadFontlist();
 	bool ActivateFont(int ListIndex);
 
-	int GetNumFonts() const { return m_lFontFiles.size(); }
-	int GetSelectedFontIndex() const { return m_ActiveFontIndex; }
+	inline int GetNumFonts() const { return m_lFontFiles.size(); }
+	inline int GetSelectedFontIndex() const { return m_ActiveFontIndex; }
+	CFont *GetSelectedFont() { return GetFont(m_ActiveFontIndex); }
 	const char *GetFontPath(int i) const { if(i >= 0 && i < m_lFontFiles.size()) return m_lFontFiles[i].m_Name.c_str(); return ""; }
 	CFont *GetFont(int FontFace)
 	{

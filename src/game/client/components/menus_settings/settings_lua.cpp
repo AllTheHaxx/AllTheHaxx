@@ -3,6 +3,8 @@
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 #include <engine/keys.h>
+#include <game/generated/client_data.h>
+#include <game/client/components/fontmgr.h>
 #include "../console.h"
 
 
@@ -354,6 +356,34 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Label, &MainView);
 		UI()->DoLabelScaled(&Label, L->GetScriptInfo(), 14.0f, 0, Label.w);
 
+		// render profiler in the worst place possible
+		if(L->ProfilingActive())
+		{
+			CUIRect View = MainView;
+			View.HSplitTop(10.0f, 0, &View);
+			View.HSplitTop(20.0f, &Label, &View);
+
+			// render everything
+			std::vector< std::pair<std::string, CLuaFile::CProfilingData> > ProfList;
+			L->GetProfilingResults(&ProfList);
+			// draw headline
+			UI()->DoLabelScaled(&Label, "Event                Avg    Calls        Total", 9.0f, CUI::ALIGN_LEFT, -1, 0, m_pClient->m_pFontMgrMono->GetSelectedFont());
+			for(auto it = ProfList.begin(); it != ProfList.end(); it++)
+			{
+				View.HSplitTop(5.0f, 0, &View);
+				View.HSplitTop(10.0f, &Label, &View);
+
+				enum { ALIGNMENT = 20 };
+				const std::string& EventName = it->first;
+				char aSpaces[ALIGNMENT];
+				mem_set(aSpaces, ' ', sizeof(aSpaces));
+				aSpaces[max(0, ALIGNMENT-1-(int)EventName.length())] = '\0';
+
+				char aBuf[256];
+				str_formatb(aBuf,"%s%s%4.3f %8i %12.2Lf", EventName.c_str(), aSpaces, it->second.Average(), it->second.NumSamples(), it->second.TotalTime());
+				UI()->DoLabelScaled(&Label, aBuf, 9.0f, CUI::ALIGN_LEFT, -1, 0, m_pClient->m_pFontMgrMono->GetSelectedFont());
+			}
+		}
 
 		// button bar at the bottom right
 		CUIRect Button, Bar;
@@ -428,16 +458,29 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		}
 
 
-		if(L->State() == CLuaFile::STATE_LOADED && m_pClient->m_pGameConsole->GetDebuggerChild() != L->L())
+		if(L->State() == CLuaFile::STATE_LOADED)
 		{
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s", Localize("Debug"));
-			Bar.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Bar.h*ms_FontmodHeight, aBuf, -1)), &Bar, &Button);
+			// debugger button
+			Bar.VSplitRight(Bar.h, &Bar, &Button);
 			static CButtonContainer s_ButtonDebug;
-			if(DoButton_Menu(&s_ButtonDebug, aBuf, 0, &Button, "Attach the lua console as a debugger to this script"))
+			if(DoButton_Menu(&s_ButtonDebug, "", m_pClient->m_pGameConsole->GetDebuggerChild() == L->L(), &Button, "Attach the lua console as a debugger to this script"))
 			{
-				m_pClient->m_pGameConsole->AttachLuaDebugger(L);
+				if(m_pClient->m_pGameConsole->GetDebuggerChild() != L->L())
+					m_pClient->m_pGameConsole->AttachLuaDebugger(L);
+				else
+					m_pClient->m_pGameConsole->AttachLuaDebugger(NULL);
 			}
+			DoButton_Icon(IMAGE_LUAICONS, SPRITE_LUA_DEBUG, &Button);
+
+			// profiler button
+			Bar.VSplitRight(5.0f, &Bar, 0);
+			Bar.VSplitRight(Bar.h, &Bar, &Button);
+			static CButtonContainer s_ButtonProfile;
+			if(DoButton_Menu(&s_ButtonProfile, "", L->ProfilingActive(), &Button, "Activate the lua profiler for this script (may impact client's overall performance)"))
+			{
+				L->ToggleProfiler();
+			}
+			DoButton_Icon(IMAGE_LUAICONS, SPRITE_LUA_PROFILER, &Button);
 		}
 		else if(L->State() == CLuaFile::STATE_ERROR)
 		{

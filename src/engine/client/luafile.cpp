@@ -33,6 +33,7 @@ void CLuaFile::Reset(bool error)
 	mem_zero(m_aScriptTitle, sizeof(m_aScriptTitle));
 	mem_zero(m_aScriptInfo, sizeof(m_aScriptInfo));
 	m_ScriptHidden = false;
+	m_ProfilingActive = false;
 
 	if(!error)
 		m_pErrorStr = NULL;
@@ -501,6 +502,23 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 	return true;
+}
+
+void CLuaFile::ProfilingDoSample(const char *pEventName, int64 Time)
+{
+	CProfilingData &Data = m_ProfilingResults[std::string(pEventName)]; // auto-constructs item if key not present
+	Data.AddSample(Time);
+}
+
+void CLuaFile::GetProfilingResults(std::vector< std::pair<std::string, CProfilingData> > *pOut) const
+{
+	for(auto it = m_ProfilingResults.begin(); it != m_ProfilingResults.end(); it++)
+		pOut->push_back(*it);
+
+	std::sort(pOut->begin(), pOut->end(), [](const std::pair<std::string, CProfilingData>& a, const std::pair<std::string, CProfilingData>& b){
+		// primarily sort by value, for equal values sort by key
+		return !(a.second != b.second ? a.second < b.second : a.first < b.first);
+	});
 }
 
 bool CLuaFile::ScriptHasSettingsPage()

@@ -1622,6 +1622,12 @@ void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
 	if(g_StealthMode)
 		return;
 
+	if(!pLF)
+	{
+		m_LuaConsole.m_LuaHandler.m_pDebugChild = NULL;
+		return;
+	}
+
 	//m_LuaConsole.ClearBacklog();
 	for(int i = 0; i < 27-10; i++)
 		m_LuaConsole.PrintLine("");

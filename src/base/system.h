@@ -35,6 +35,20 @@ extern "C" {
 	private:
 #endif
 
+#ifndef MACRO_ALLOC_HEAP_NO_INIT
+#define MACRO_ALLOC_HEAP_NO_INIT() \
+	public: \
+	void *operator new(size_t Size) \
+	{ \
+		return mem_alloc(Size, 1); \
+	} \
+	void operator delete(void *pPtr) \
+	{ \
+		mem_free(pPtr); \
+	} \
+	private:
+#endif
+
 /* Group: Debug */
 /*
 	Function: dbg_assert

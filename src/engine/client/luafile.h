@@ -1,6 +1,8 @@
 #ifndef ENGINE_CLIENT_LUAFILE_H
 #define ENGINE_CLIENT_LUAFILE_H
 
+#include <map>
+#include <vector>
 #include <string>
 #include <base/system.h>
 #include <base/tl/array.h>
@@ -16,7 +18,7 @@ class CLua;
 
 class CLuaFile
 {
-	MACRO_ALLOC_HEAP()
+	MACRO_ALLOC_HEAP_NO_INIT()
 
 	friend class CLua;
 	friend class CLuaBinding;
@@ -43,6 +45,32 @@ public:
 
 	#define LUA_REGINDEX_IO_OPEN "ATH_Backup:io.open"
 
+	class CProfilingData
+	{
+		long double m_Sum;
+		unsigned m_NumSamples;
+
+	public:
+		CProfilingData()
+		{
+			m_Sum = 0;
+			m_NumSamples = 0;
+		}
+
+		void AddSample(int64 Time)
+		{
+			m_Sum += (double)Time/((double)time_freq()/1000000.0f);
+			m_NumSamples++;
+		}
+
+		double Average() const { return (double)m_Sum/(double)m_NumSamples; }
+		long double TotalTime() const { return m_Sum; }
+		unsigned NumSamples() const { return m_NumSamples; }
+
+		bool operator<(const CProfilingData& other) const { return m_Sum < other.m_Sum; }
+		bool operator!=(const CProfilingData& other) const { return m_Sum != other.m_Sum; }
+	};
+
 	const char *m_pErrorStr;
 	array<std::string> m_Exceptions;
 
@@ -61,6 +89,9 @@ private:
 	bool m_ScriptHasSettingsPage;
 	bool m_ScriptAutoload;
 
+	std::map<std::string, CProfilingData> m_ProfilingResults;
+	bool m_ProfilingActive;
+
 	void Init(); // starts the script
 	void Unload(bool error = false, bool CalledFromExceptionHandler = false); // stops the script
 
@@ -75,6 +106,7 @@ public:
 	luabridge::LuaRef GetFunc(const char *pFuncName) const;
 	template<class T> T CallFunc(const char *pFuncName, T def, bool *err=0);
 
+	inline lua_State *L() const { return m_pLuaState; }
 	int State() const { return m_State; }
 	int GetPermissionFlags() const { return m_PermissionFlags; }
 	const char* GetFilename() const { return m_Filename.c_str(); }
@@ -84,7 +116,11 @@ public:
 	bool GetScriptIsHidden() const { return m_ScriptHidden; }
 	bool GetScriptIsAutoload() const { return m_ScriptAutoload; }
 	bool SetScriptIsAutoload(bool NewVal) { bool ret = m_ScriptAutoload; m_ScriptAutoload = NewVal; return ret; }
-	inline lua_State *L() const { return m_pLuaState; }
+
+	void ToggleProfiler() { m_ProfilingActive ^= true; }
+	bool ProfilingActive() { return m_ProfilingActive; }
+	void ProfilingDoSample(const char *pEventName, int64 Time);
+	void GetProfilingResults(std::vector< std::pair<std::string, CProfilingData> > *pOut) const;
 
 	CLua *Lua() const { return m_pLua; }
 
