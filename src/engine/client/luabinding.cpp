@@ -502,3 +502,56 @@ const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CL
 	return pInOutBuffer;
 
 }
+
+/**
+ * opens all given libraries
+ */
+void luaX_openlibs(lua_State *L, const luaL_Reg *lualibs)
+{
+	/* (following code copied from https://www.lua.org/source/5.1/linit.c.html)
+	 * This is the only correct way to load standard libs!
+	 * For everything non-standard (custom) use luaL_register.
+	 */
+	const luaL_Reg *lib = lualibs;
+	for (; lib->func; lib++) {
+		lua_pushcfunction(L, lib->func);
+		lua_pushstring(L, lib->name);
+		lua_call(L, 1, 0);
+	}
+}
+
+/**
+ * opens a single library
+ */
+void luaX_openlib(lua_State *L, const char *name, lua_CFunction func)
+{
+	const luaL_Reg single_lib[] = {
+			{name, func},
+			{NULL, NULL}
+	};
+	luaX_openlibs(L, single_lib);
+}
+
+/**
+ * Publishes the module with given name in the global scope under the same name
+ */
+void luaX_register_module(lua_State *L, const char *name)
+{
+	/* adapted from https://www.lua.org/source/5.1/loadlib.c.html function ll_require */
+	lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+	lua_getfield(L, -1, name);
+	if(!dbg_assert_strict(lua_toboolean(L, -1), "trying to register a lib that has not been opened yet!")) {  /* is it there? */
+		// got whatever 'require' would return on top of the stack now
+		lua_setglobal(L, name);
+	}
+}
+
+void luaXopen_io(lua_State *L) { luaX_openlib(L, LUA_IOLIBNAME, luaopen_io); }
+
+void luaXopen_os(lua_State *L) { luaX_openlib(L, LUA_OSLIBNAME, luaopen_os); }
+
+void luaXopen_package(lua_State *L) { luaX_openlib(L, LUA_LOADLIBNAME, luaopen_package); }
+
+void luaXopen_debug(lua_State *L) { luaX_openlib(L, LUA_DBLIBNAME, luaopen_debug); }
+
+void luaXopen_ffi(lua_State *L) { luaX_openlib(L, LUA_FFILIBNAME, luaopen_ffi); luaX_register_module(L, "ffi"); }

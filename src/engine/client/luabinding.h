@@ -62,6 +62,20 @@ public:
 	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF);
 };
 
+
+// lua api additions
+
+void luaX_openlibs(lua_State *L, const luaL_Reg *lualibs);
+void luaX_openlib(lua_State *L, const char *name, lua_CFunction func);
+void luaX_register_module(lua_State *L, const char *name);
+// courtesy
+void luaXopen_io(lua_State *L);
+void luaXopen_os(lua_State *L);
+void luaXopen_package(lua_State *L);
+void luaXopen_debug(lua_State *L);
+void luaXopen_ffi(lua_State *L);
+
+
 struct CConfigProperties
 {
 #define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) \

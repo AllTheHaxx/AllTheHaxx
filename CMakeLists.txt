@@ -21,7 +21,16 @@ include_directories(
         src
 )
 
-set(SOURCE_FILES
+set(EXTERNAL_SOURCES
+        other/luajit/include/lualib.h
+        other/luajit/include/lauxlib.h
+        other/luajit/include/lua.h
+        other/luajit/include/lua.hpp
+        other/luajit/include/luaconf.h
+        other/luajit/include/luajit.h
+        )
+
+set(SOURCE_FILES ${EXTERNAL_SOURCES}
         src/game/generated/protocol.cpp
         src/game/generated/protocol.h
         src/game/generated/client_data.cpp

@@ -183,12 +183,18 @@ void CLuaFile::OpenLua()
 
 	//luaL_openlibs(m_pLuaState);  // we don't need certain libs -> open them all manually
 
-	luaopen_base(m_pLuaState);	// base
-	luaopen_math(m_pLuaState);	// math.* functions
-	luaopen_string(m_pLuaState);// string.* functions
-	luaopen_table(m_pLuaState);	// table operations
-	luaopen_bit(m_pLuaState);	// bit operations
-	//luaopen_jit(m_pLuaState);	// control the jit-compiler [not needed]
+	// see https://www.lua.org/source/5.1/linit.c.html
+	const luaL_Reg basic_libs[] = {
+			{"", luaopen_base},               // base
+			{LUA_TABLIBNAME, luaopen_table},  // table.* operations
+			{LUA_STRLIBNAME, luaopen_string}, // string.* functions
+			{LUA_MATHLIBNAME, luaopen_math},  // math.* functions
+			{LUA_BITLIBNAME, luaopen_bit},    // bit.* operations
+			{NULL, NULL}
+	};
+
+	luaX_openlibs(m_pLuaState, basic_libs);
+	// note: calling the luaopen_* functions directly is WRONG and may lead to unexpected behavior!
 }
 
 void CLuaFile::ApplyPermissions(int Flags)
@@ -198,24 +204,19 @@ void CLuaFile::ApplyPermissions(int Flags)
 
 	if(Flags&PERMISSION_GODMODE)
 	{
-		//luaL_openlibs(m_pLuaState); // calling this after RegisterLuaCallbacks discards our overrides again
 		Flags = 0x7fffffff;
 	}
-	//else
-	{
-		Flags &= ~PERMISSION_PACKAGE; // buggy (crashs the client on script load)
 
-		if(Flags & PERMISSION_IO)
-			luaopen_io(m_pLuaState); // input/output of files
-		if(Flags&PERMISSION_DEBUG)
-			luaopen_debug(m_pLuaState); // debug stuff
-		if(Flags & PERMISSION_FFI)
-			luaopen_ffi(m_pLuaState); // register and write own C-Functions and call them in lua (whoever may need that...)
-		if(Flags&PERMISSION_OS)
-			luaopen_os(m_pLuaState); // access to various operating system function
-		if(Flags & PERMISSION_PACKAGE)
-			luaopen_package(m_pLuaState); // used for modules etc... not sure whether we should load this
-	}
+	if(Flags & PERMISSION_PACKAGE) // gives access to the package system (bad!) + contains 'require'
+		luaXopen_package(m_pLuaState);
+	if(Flags & PERMISSION_IO)
+		luaXopen_io(m_pLuaState); // input/output of files
+	if(Flags & PERMISSION_OS)
+		luaXopen_os(m_pLuaState); // access to various operating system function
+	if(Flags & PERMISSION_DEBUG)
+		luaXopen_debug(m_pLuaState); // debug stuff
+	if(Flags & PERMISSION_FFI)
+		luaXopen_ffi(m_pLuaState); // register and write own C-Functions and call them in lua (whoever may need that...)
 }
 
 
