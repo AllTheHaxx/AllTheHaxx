@@ -6,6 +6,7 @@
 #include <string>
 #include <base/system.h>
 #include <base/tl/array.h>
+#include <base/math.h>
 // lua
 #include <lua.hpp>
 #include <engine/external/luabridge/LuaBridge.h>
@@ -47,28 +48,35 @@ public:
 
 	class CProfilingData
 	{
-		int64 m_Sum;
+		double m_TotalTime;
 		unsigned m_NumSamples;
 
 	public:
 		CProfilingData()
 		{
-			m_Sum = 0;
+			m_TotalTime = 0;
 			m_NumSamples = 0;
 		}
 
-		void AddSample(int64 Time)
+		void AddSample(double DeltaTime)
 		{
-			m_Sum += Time; // TODO: can the time_freq() fluctuate on some systems? if so, gotta add it here
+			m_TotalTime += DeltaTime;
 			m_NumSamples++;
 		}
 
-		double Average() const { return time_to_nanos(m_Sum)/(double)m_NumSamples; } // TODO XXX: bad average. we have to get rid of old values over time!
-		double TotalTime() const { return time_to_millis(m_Sum); }
+		double Average() const { return m_TotalTime/(double)m_NumSamples; }
+		double TotalTimeNanos() const { return m_TotalTime; }
+		double TotalTimeMillis() const { return m_TotalTime/1000.0; }
 		unsigned NumSamples() const { return m_NumSamples; }
 
-		bool operator<(const CProfilingData& other) const { return m_Sum < other.m_Sum; }
-		bool operator!=(const CProfilingData& other) const { return m_Sum != other.m_Sum; }
+		bool operator<(const CProfilingData& other) const { return m_TotalTime < other.m_TotalTime; }
+		bool operator!=(const CProfilingData& other) const { return m_TotalTime != other.m_TotalTime; }
+		CProfilingData& operator+=(const CProfilingData& other)
+		{
+			m_TotalTime += other.m_TotalTime;
+			m_NumSamples += other.m_NumSamples;
+			return *this;
+		}
 	};
 
 	const char *m_pErrorStr;
@@ -119,7 +127,7 @@ public:
 	bool SetScriptIsAutoload(bool NewVal) { bool ret = m_ScriptAutoload; m_ScriptAutoload = NewVal; return ret; }
 
 	void ToggleProfiler() { m_ProfilingActive ^= true; }
-	bool ProfilingActive() { return m_ProfilingActive; }
+	inline bool ProfilingActive() { return m_ProfilingActive; }
 	void ProfilingDoSample(const char *pEventName, int64 Time);
 	void GetProfilingResults(std::vector< std::pair<std::string, CProfilingData> > *pOut) const;
 	double GetScriptAliveTime() const { return time_to_millis(time_get_raw()-m_ScriptStartTime); }

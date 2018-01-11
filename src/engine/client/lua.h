@@ -18,13 +18,15 @@
 			if(pLF->State() != CLuaFile::STATE_LOADED) \
 				continue; \
 			LuaRef lfunc = pLF->GetFunc(EVENTNAME); \
-			int64 StartTime=0; \
-			if(pLF->ProfilingActive()) \
-				StartTime = time_get_raw(); \
 			if(lfunc) try { \
-				lfunc(__VA_ARGS__); \
-				if(pLF->ProfilingActive()) \
-					pLF->ProfilingDoSample(EVENTNAME, time_get_raw()-StartTime); \
+				if(pLF->ProfilingActive()) { \
+                    int64 StartTime = time_get_raw(); \
+					lfunc(__VA_ARGS__); \
+                    int64 TimeTaken = time_get_raw()-StartTime; \
+                    pLF->ProfilingDoSample(EVENTNAME, time_to_nanos(TimeTaken)); \
+                } \
+				else \
+					lfunc(__VA_ARGS__); /* worse code, but better performance/reliability on the profiling (it's about fractions of microseconds there!) */ \
 				CLua::Client()->LuaCheckDrawingState(pLF->L(), EVENTNAME); \
 			} catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); } \
 		} \

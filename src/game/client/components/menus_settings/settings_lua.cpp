@@ -366,23 +366,42 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 			// render everything
 			std::vector< std::pair<std::string, CLuaFile::CProfilingData> > ProfList;
 			L->GetProfilingResults(&ProfList);
+
+			// prefetch some data for the headline
+			double MaxFps = INFINITY;
+			CLuaFile::CProfilingData SummedEntry;
+			for(auto it = ProfList.begin(); it != ProfList.end(); it++)
+			{
+				SummedEntry += it->second;
+				MaxFps = min(MaxFps, 1.0/(it->second.Average()/1000/1000));
+			}
+			ProfList.insert(ProfList.begin(), std::make_pair(std::string("[Total]"), SummedEntry));
+
 			// draw headline
 			char aBuf[256];
-			str_formatb(aBuf, "Event             Avg ns     Calls     Total ms    %6.2f", L->GetScriptAliveTime());
+			str_formatb(aBuf, "Event                  Avg µs     Calls     Total ms     %6.2f    %6.0f", L->GetScriptAliveTime()/1000.0f, MaxFps);
 			UI()->DoLabelScaled(&Label, aBuf, 9.0f, CUI::ALIGN_LEFT, -1, 0, m_pClient->m_pFontMgrMono->GetSelectedFont());
+
+			// draw everything
 			for(auto it = ProfList.begin(); it != ProfList.end(); it++)
 			{
 				View.HSplitTop(5.0f, 0, &View);
 				View.HSplitTop(10.0f, &Label, &View);
 
-				enum { ALIGNMENT = 17 };
+				enum { ALIGNMENT = 20 };
 				const std::string& EventName = it->first;
 				char aSpaces[ALIGNMENT];
 				mem_set(aSpaces, ' ', sizeof(aSpaces));
 				aSpaces[max(0, ALIGNMENT-1-(int)EventName.length())] = '\0';
 
-				str_formatb(aBuf,"%s%s%8.3f %9i %12.2f %9.1f%%", EventName.c_str(), aSpaces, it->second.Average(), it->second.NumSamples(), it->second.TotalTime(),
-							(it->second.TotalTime()/L->GetScriptAliveTime())*100.0);
+				const CLuaFile::CProfilingData &PD = it->second;
+				// title - spaces - average - calls - time - percentage
+				double Avg = PD.Average();
+				const bool AvgCut = Avg >= 100000.0;
+				str_formatb(aBuf,"%s%s%s%9.3f%s %9i %12.2f %9.1f%% %9.0f", EventName.c_str(), aSpaces, AvgCut ? "" : " ",
+							AvgCut ? Avg/1000.0 : Avg, AvgCut ? "k" : "",
+							PD.NumSamples(), PD.TotalTimeMillis(),
+							(PD.TotalTimeNanos()/SummedEntry.TotalTimeNanos())*100.0, 1.0/(Avg/1000/1000));
 				UI()->DoLabelScaled(&Label, aBuf, 9.0f, CUI::ALIGN_LEFT, -1, 0, m_pClient->m_pFontMgrMono->GetSelectedFont());
 			}
 		}
