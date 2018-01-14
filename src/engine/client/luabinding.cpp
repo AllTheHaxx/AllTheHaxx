@@ -102,15 +102,7 @@ int CLuaBinding::LuaImport(lua_State *L)
 		if(tmp)
 			io_close(tmp);
 		else
-		{
-			str_copy(aBuf, aFilename, sizeof(aBuf));
-			SandboxPath(aBuf, sizeof(aBuf), pLF);
-			tmp = CLua::m_pCGameClient->Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath));
-			if(tmp)
-				io_close(tmp);
-			else
-				str_copy(aFullPath, aBuf, sizeof(aFullPath)); // fall back to lua folder if it fails
-		}
+			str_copy(aFullPath, aBuf, sizeof(aFullPath)); // fall back to lua folder if it fails
 
 		ret = pLF->LoadFile(aFullPath, true);
 
