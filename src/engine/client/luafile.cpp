@@ -446,6 +446,9 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 				,"loadstring"
 				,"collectgarbage"
 				,"io.popen"
+				,"io.input"
+				,"io.output"
+				,"io.stdin"
 				,"debug.getregistry"
 		};
 		for(unsigned i = 0; i < sizeof(s_apBlacklist)/sizeof(s_apBlacklist[0]); i++)
