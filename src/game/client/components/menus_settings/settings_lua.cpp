@@ -285,7 +285,6 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 #define PERM_STR(TYPE, STR) if(PermissionFlags&CLuaFile::PERMISSION_##TYPE) { str_append(aTooltip, "\n\n- ", sizeof(aTooltip)); str_append(aTooltip, STR, sizeof(aTooltip)); }
 						PERM_STR(IO, Localize("IO (Write and read files)"))
 						PERM_STR(DEBUG, Localize("DEBUG (WARNING: if you are not currently debugging this script, DO NOT TO USE IT!! It may cause security and performance problems!)"))
-						PERM_STR(FFI, Localize("FFI (Execution of native C code from within Lua - please be sure that this code is not malicious, as the ATH API cannot control it"))
 						PERM_STR(OS, Localize("OS (Access to various operation system functionalities such as time and date"))
 						PERM_STR(PACKAGE, Localize("PACKAGE (Modules - currently not available; might cause script errors)"))
 #undef PERM_STR

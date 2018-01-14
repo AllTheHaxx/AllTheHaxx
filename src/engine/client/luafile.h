@@ -37,7 +37,7 @@ public:
 	{
 		PERMISSION_IO         = 1 << 0,
 		PERMISSION_DEBUG      = 1 << 1,
-		PERMISSION_FFI        = 1 << 2,
+		XPERM_UNUSED_FIELD    = 1 << 2,
 		PERMISSION_OS         = 1 << 3,
 		PERMISSION_PACKAGE    = 1 << 4,
 		PERMISSION_FILESYSTEM = 1 << 5,

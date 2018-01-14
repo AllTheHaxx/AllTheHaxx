@@ -97,8 +97,6 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 				m_PermissionFlags |= PERMISSION_IO;
 			else if(str_comp_nocase_num("debug", p, 5) == 0)
 				m_PermissionFlags |= PERMISSION_DEBUG;
-			else if(str_comp_nocase_num("ffi", p, 3) == 0)
-				m_PermissionFlags |= PERMISSION_FFI;
 			else if(str_comp_nocase_num("os", p, 2) == 0)
 				m_PermissionFlags |= PERMISSION_OS;
 			else if(str_comp_nocase_num("package", p, 7) == 0)
@@ -215,8 +213,6 @@ void CLuaFile::ApplyPermissions(int Flags)
 		luaXopen_os(m_pLuaState); // access to various operating system function
 	if(Flags & PERMISSION_DEBUG)
 		luaXopen_debug(m_pLuaState); // debug stuff
-	if(Flags & PERMISSION_FFI)
-		luaXopen_ffi(m_pLuaState); // register and write own C-Functions and call them in lua (whoever may need that...)
 }
 
 
