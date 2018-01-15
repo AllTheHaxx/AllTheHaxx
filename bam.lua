@@ -423,7 +423,7 @@ function build(settings)
 
 	engine_collection = Collect("src/engine/shared/*.cpp", "src/base/*.c", "src/base/system++/*.cpp")
 	engine = Compile(engine_settings, engine_collection)
-	client = Compile(client_settings, Collect("src/engine/client/*.cpp"))
+	client = Compile(client_settings, Collect("src/engine/client/*.cpp", "src/engine/client/lua/*.cpp"))
 	server = Compile(server_settings, Collect("src/engine/server/*.cpp"))
 
 	-- compile a seperate engine for the tools

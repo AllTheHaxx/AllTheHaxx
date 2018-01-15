@@ -16,6 +16,8 @@ public:
 		m_pValue = NULL;
 	}
 
+	~CJsonValue();
+
 	std::string GetType(lua_State *L) const;
 
 	std::string ToString(lua_State *L) const
@@ -56,6 +58,7 @@ class CLuaJson
 {
 public:
 	static CJsonValue Parse(const char *pJsonString, lua_State *L);
+	static std::string Serialize(const CJsonValue& json_value, bool shorten);
 };
 
 #endif

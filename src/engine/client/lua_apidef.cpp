@@ -200,6 +200,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginNamespace("json")
 			.addFunction("Parse", &CLuaJson::Parse)
+			.addFunction("Serialize", &CLuaJson::Serialize)
 		.endNamespace()
 
 

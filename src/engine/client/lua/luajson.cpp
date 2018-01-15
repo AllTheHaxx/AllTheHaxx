@@ -1,17 +1,61 @@
 #include <base/system.h>
 #include <engine/client/luabinding.h>
 #include <json-parser/json.hpp>
+#include <json-builder/json-builder.h>
 #include "luajson.h"
+
+static const json_serialize_opts json_opts_common = {
+		json_serialize_mode_multiline,
+		0,
+		2
+};
+static const json_serialize_opts json_opts_packed = {
+		json_serialize_mode_packed,
+		json_serialize_opt_no_space_after_colon|json_serialize_opt_no_space_after_comma|json_serialize_opt_pack_brackets,
+		0
+};
+
+
+CJsonValue::~CJsonValue()
+{
+	//if(m_pValue)
+	//	json_value_free(m_pValue);
+}
 
 CJsonValue CLuaJson::Parse(const char *pJsonString, lua_State *L)
 {
-	json_value *pJson = json_parse(pJsonString, (size_t)str_length(pJsonString));
+	json_settings settings = {};
+	settings.value_extra = json_builder_extra; // space for json-builder state
+	settings.mem_alloc = [](size_t size, int zero, void * user_data) -> void* {
+		void *p = mem_alloc((unsigned)size, 0);
+		if(zero)
+			mem_zero(p, (unsigned)size);
+		return p;
+	};
+	settings.mem_free = [](void *p, void * user_data) {
+		mem_free(p);
+	};
+
+	char aErrorBuf[json_error_max];
+	aErrorBuf[0] = '\0';
+	json_value *pJson = json_parse_ex(&settings, pJsonString, (size_t)str_length(pJsonString), aErrorBuf);
 	if(pJson == NULL)
-		luaL_error(L, "error parsing json string");
+		luaL_error(L, "json parsing error: %s", aErrorBuf);
 
 	CJsonValue Wrapper;
 	Wrapper.m_pValue = pJson;
 	return Wrapper;
+}
+
+std::string CLuaJson::Serialize(const CJsonValue& json_value, bool shorten)
+{
+	const json_serialize_opts& opts = shorten ? json_opts_packed : json_opts_common;
+
+	char *pJsonBuf = mem_allocb(char, json_measure_ex(json_value.m_pValue, opts));
+	json_serialize_ex(pJsonBuf, json_value.m_pValue, opts);
+	std::string Result(pJsonBuf);
+	mem_free(pJsonBuf);
+	return Result;
 }
 
 std::string CJsonValue::GetType(lua_State *L) const
