@@ -21,6 +21,7 @@
 #include <engine/curlwrapper.h>
 #include <engine/textrender.h>
 //#include <engine/client/client.h>
+#include "lua/luajson.h"
 
 
 void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
@@ -181,6 +182,26 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass< ISound::CVoiceHandle >("VoiceHandle")
 			.addConstructor <void (*) ()> ()
 		.endClass()
+
+
+		.beginClass< CJsonValue >("JsonValue")
+			//.addFunction("__tostring", &CJsonValue::ToString) TODO: serialize
+			//.addFunction("__tonumber", &CJsonValue::ToNumber)
+			.addFunction("GetType", &CJsonValue::GetType)
+			.addFunction("ToString", &CJsonValue::ToString)
+			.addFunction("ToNumber", &CJsonValue::ToNumber)
+			.addFunction("ToBoolean", &CJsonValue::ToBoolean)
+			.addFunction("ToTable", &CJsonValue::ToTable)
+			.addFunction("ToObject", &CJsonValue::ToObject)
+		.endClass()
+
+		.beginClass< CLuaJson >("CLuaJson")
+		.endClass()
+
+		.beginNamespace("json")
+			.addFunction("Parse", &CLuaJson::Parse)
+		.endNamespace()
+
 
 
 		// ------------------------------ ICLIENT ------------------------------

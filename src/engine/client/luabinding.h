@@ -15,6 +15,16 @@
 			return luaL_argerror(L, (narg), (buf)); \
 		}
 
+#define argcheck2(cond, narg, expected) \
+		if(!(cond)) \
+		{ \
+			if(g_Config.m_Debug) \
+				dbg_msg("Lua/debug", "%s: argcheck: narg=%i expected='%s'", __FUNCTION__, narg, expected); \
+			char buf[64]; \
+			str_format(buf, sizeof(buf), "expected a %s value, got %s", expected, lua_typename(L, lua_type(L, narg))); \
+			luaL_argerror(L, (narg), (buf)); \
+		}
+
 
 class CLuaBinding
 {
