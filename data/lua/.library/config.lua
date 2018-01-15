@@ -8,7 +8,8 @@ if Import("general") ~= true then error("The 'general' library is needed to use 
 
 
 g_ScriptConfig = {}
-g_ScriptConfigFile = "autoconfig.conf.lua" --ScriptPath():sub(1, -5) .. ".conf.lua"
+g_ScriptConfigFileOld = "autoconfig.json"
+g_ScriptConfigFile = "autoconfig.json"
 
 function _ConfigSet(varname, value)
 	if varname == nil then return end
@@ -21,32 +22,59 @@ function _ConfigGet(varname)
 end
 
 function _ConfigLoad() -- call this in OnScriptInit()
-	local ConfFile = g_ScriptConfigFile--g_ScriptConfigFile:sub(-g_ScriptConfigFile:reverse():find('/')+1, -1)
-	if Config.debug == 1 then print("[config] Loading settings from '" .. ConfFile .. "'") end
-	local ret, path = Import(ConfFile)
-	if Config.debug == 1 then
-		if ret == true then
-			print("[config] Done! Loaded settings from '" .. path .. "'")
-		else
+	local ConfFile = g_ScriptConfigFile
+	if Config.debug > 0 then print("[config] Loading settings from '" .. ConfFile .. "'") end
+
+	local f,path = io.open(g_ScriptConfigFile)
+
+	if f == nil then
+		-- try alternative
+		f,path = io.open(g_ScriptConfigFileOld)
+	end
+
+	if f == nil then
+		if Config.debug > 0 then
 			print("[config] Failed. No settings file found.")
 		end
+		return false, path
 	end
-	return ret, path
+
+	local json_string = f:read("*a")
+	local success, result = pcall(json.Parse, json_string) -- lua style try-catch - result is either our json_value or an error message
+	f:close()
+
+	-- json parsing error
+	if not success then
+		throw("[config] Failed to load config! " .. result)
+		return false, path
+	end
+
+	success, result = pcall(result.ToObject, result)
+	if not success then
+		throw("[config] Failed to load config! " .. result)
+		return false, path
+	end
+
+	g_ScriptConfig = result
+
+	if Config.debug > 0 then
+		print("[config] Done! Loaded settings from '" .. path .. "'")
+	end
+	return true, path
 end
 
 function _ConfigSave() -- call this in OnScriptUnload()
 	local file = io.open(g_ScriptConfigFile, "w+")
 	if file == nil then error("Failed to save config to " .. g_ScriptConfigFile) end
 
-	for k, v in next, g_ScriptConfig do
-		if(type(k) == "string") then k = '"' .. k .. '"' end
-		if(type(v) == "string") then v = '"' .. v .. '"'
-        elseif type(v) == "number" then v = string.gsub(tostring(v), ",", ".") end
-		file:write("g_ScriptConfig[" .. k .. "] = " .. tostring(v) .. "\n")
-	end
+	local json_value = json.Convert(g_ScriptConfig)
+	local json_string = json.Serialize(json_value)
+	json_value:Destroy()
+
+	file:write(json_string)
 	file:flush()
 	file:close()
-	if Config.debug == 1 then print("[config] Saved settings to '" .. g_ScriptConfigFile .. "'") end
+	if Config.debug > 0 then print("[config] Saved settings to '" .. g_ScriptConfigFile .. "'") end
 end
 
 function OnScriptRenderSettings(MainView) -- some default page to inform the user

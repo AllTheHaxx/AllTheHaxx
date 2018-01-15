@@ -187,6 +187,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass< CJsonValue >("JsonValue")
 			//.addFunction("__tostring", &CJsonValue::ToString) TODO: serialize
 			//.addFunction("__tonumber", &CJsonValue::ToNumber)
+			.addFunction("Destroy", &CJsonValue::Destroy)
 			.addFunction("GetType", &CJsonValue::GetType)
 			.addFunction("ToString", &CJsonValue::ToString)
 			.addFunction("ToNumber", &CJsonValue::ToNumber)
@@ -200,6 +201,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		.beginNamespace("json")
 			.addFunction("Parse", &CLuaJson::Parse)
+			.addFunction("Convert", &CLuaJson::Convert)
 			.addFunction("Serialize", &CLuaJson::Serialize)
 		.endNamespace()
 

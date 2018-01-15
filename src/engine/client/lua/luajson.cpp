@@ -16,10 +16,13 @@ static const json_serialize_opts json_opts_packed = {
 };
 
 
-CJsonValue::~CJsonValue()
+void CJsonValue::Destroy(lua_State *L)
 {
-	//if(m_pValue)
-	//	json_value_free(m_pValue);
+	CheckValid(L);
+
+	if(m_pValue)
+		json_value_free(m_pValue);
+	m_pValue = NULL;
 }
 
 CJsonValue CLuaJson::Parse(const char *pJsonString, lua_State *L)
@@ -47,8 +50,10 @@ CJsonValue CLuaJson::Parse(const char *pJsonString, lua_State *L)
 	return Wrapper;
 }
 
-std::string CLuaJson::Serialize(const CJsonValue& json_value, bool shorten)
+std::string CLuaJson::Serialize(const CJsonValue& json_value, bool shorten, lua_State *L)
 {
+	json_value.CheckValid(L);
+
 	const json_serialize_opts& opts = shorten ? json_opts_packed : json_opts_common;
 
 	char *pJsonBuf = mem_allocb(char, json_measure_ex(json_value.m_pValue, opts));
@@ -60,6 +65,7 @@ std::string CLuaJson::Serialize(const CJsonValue& json_value, bool shorten)
 
 std::string CJsonValue::GetType(lua_State *L) const
 {
+	CheckValid(L);
 	switch(m_pValue->type)
 	{
 		case json_object:
@@ -142,6 +148,7 @@ void CJsonValue::PushJsonArray(lua_State *L, const json_value& array)
 
 luabridge::LuaRef CJsonValue::ToTable(lua_State *L)
 {
+	CheckValid(L);
 	if(m_pValue->type != json_array)
 		luaL_error(L, "json value is not an array");
 
@@ -155,6 +162,7 @@ luabridge::LuaRef CJsonValue::ToTable(lua_State *L)
 
 luabridge::LuaRef CJsonValue::ToObject(lua_State *L)
 {
+	CheckValid(L);
 	if(m_pValue->type != json_object)
 		luaL_error(L, "json value is not an object");
 
@@ -163,5 +171,76 @@ luabridge::LuaRef CJsonValue::ToObject(lua_State *L)
 	PushJsonObject(L, obj);
 	luabridge::LuaRef Result = luabridge::Stack<LuaRef>::get(L, -1);
 	lua_pop(L, 1);
+	return Result;
+}
+
+static json_value *ConvertSomething(const LuaRef& data)
+{
+	json_value *value = NULL;
+	switch(data.type())
+	{
+		case LUA_TNONE:
+		case LUA_TNIL:
+			value = json_null_new();
+			break;
+		case LUA_TNUMBER:
+			value = json_double_new(data.cast<double>());
+			break;
+		case LUA_TBOOLEAN:
+			value = json_boolean_new(data.cast<bool>());
+			break;
+		case LUA_TSTRING:
+			value = json_string_new(data.cast<const char*>());
+			break;
+		case LUA_TTABLE:
+			// find out whether table is ipairs-iteratable (yes: array, no: object)
+		{
+			bool IsArray = true;
+			lua_State *L = data.state();
+			lua_pushnil(L);
+			while(lua_next(L, -2) != 0)
+			{
+				DEFER([L](){ lua_pop(L, 1); });
+
+				// uses 'key' (at index -2) and 'value' (at index -1)
+				if(lua_type(L, -2) != LUA_TNUMBER)
+				{
+					IsArray = false;
+					break;
+				}
+			}
+			lua_pop(L, 1);
+
+			if(IsArray)
+				value = json_array_new((size_t)data.length());
+			else
+				value = json_object_new((size_t)data.length());
+
+			// add everything to the json data structure
+			for(luabridge::Iterator it(data); !it.isNil(); ++it)
+			{
+				json_value *entry = ConvertSomething(*it);
+				if(IsArray)
+					json_array_push(value, entry);
+				else
+					json_object_push(value, it.key(), entry);
+			}
+		} break;
+		default:
+		{
+			// handles function, userdata, thread
+			lua_State *L = data.state();
+			luaL_error(L, "value of type %s cannot be converted to json", lua_typename(L, data.type()));
+			break;
+		}
+	}
+
+	return value;
+}
+
+CJsonValue CLuaJson::Convert(LuaRef data)
+{
+	CJsonValue Result;
+	Result.m_pValue = ConvertSomething(data);
 	return Result;
 }
