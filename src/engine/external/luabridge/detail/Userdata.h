@@ -186,7 +186,10 @@ private:
     char const* got = 0;
 
     lua_rawgetp (L, LUA_REGISTRYINDEX, baseClassKey);
-    assert (lua_istable (L, -1));
+
+    //assert (lua_istable (L, -1));
+    if(!lua_istable(L, -1))
+      luaL_error(L, "invalid class mapping or unknown type used");
 
     // Make sure we have a userdata.
     if (lua_isuserdata (L, index))
