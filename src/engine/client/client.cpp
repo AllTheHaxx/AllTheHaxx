@@ -2391,10 +2391,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_SnapshotStorage[g_Config.m_ClDummy].m_pFirst;
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = m_SnapshotStorage[g_Config.m_ClDummy].m_pLast;
 						m_LocalStartTime = time_get();
-						if(m_MapdownloadTotalsize > -1)
+						if(m_MapdownloadTotalsize > 0)
 						{
 							m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "!! THE SERVER TRIED TO CONNECT YOU WITHOUT MAP WHICH WOULD CRASH THE CLIENT !!", true);
 							m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "!! If you think that this was not intended, please contact the server owner !!", true);
+							m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "client", "!! Map='%s' Source='%s' Totalsize=%i Amount=%i Chunk=%i !!", m_aMapdownloadFilename, m_pMapdownloadSource, m_MapdownloadTotalsize, m_MapdownloadAmount, m_MapdownloadChunk);
 							DisconnectWithReason("[[ Disconnected to prevent a client crash; see F1 for more info ]]");
 							return;
 						}
