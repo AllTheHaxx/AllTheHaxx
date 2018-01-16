@@ -4369,6 +4369,7 @@ static void ParseArgumentsForSwitches(int NumArgs, const char **ppArguments)
 		}
 		else if(!str_comp("-A", ppArguments[i]) || !str_comp("--enable-assert", ppArguments[i]))
 		{
+			dbg_msg("main", "+++ ENABLED ABORT-ON-ASSERT, ON ERRORS THE CLIENT WILL CRASH FOR DEBUGGING +++");
 			set_abort_on_assert(1);
 		}
 		else if(!str_comp("-u", ppArguments[i]) || !str_comp("--stealth", ppArguments[i]) || !str_comp("--stealth-mode", ppArguments[i]))
