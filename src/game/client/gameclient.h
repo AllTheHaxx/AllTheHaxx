@@ -421,9 +421,9 @@ public:
 	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
-	int IntersectCharacterLua(vec2 Pos0, vec2 Pos1, vec2& NewPos, int ownID) { return IntersectCharacter(Pos0, Pos1, NewPos, ownID); }
-	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2& NewPos, int ownID);
-	int IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2* NewPos2, int ownID, CWorldCore *World);
+	int IntersectCharacterLua(const vec2& Pos0, const vec2& Pos1, vec2 *pOutNewPos, int OwnID) { return IntersectCharacter(Pos0, Pos1, pOutNewPos, OwnID); }
+	int IntersectCharacter(const vec2& Pos0, const vec2& Pos1, vec2 *pOutNewPos, int OwnID);
+	int IntersectCharacter(const vec2& OldPos, const vec2& NewPos, float Radius, vec2* NewPos2, int OwnID, CWorldCore *pWorld);
 
 	CWeaponData m_aWeaponData[150];
 	CWeaponData *GetWeaponData(int Tick) { return &m_aWeaponData[((Tick%150)+150)%150]; }

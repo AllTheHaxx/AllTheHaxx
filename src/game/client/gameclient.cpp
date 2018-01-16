@@ -2453,7 +2453,7 @@ IGameClient *CreateGameClient()
 	return &g_GameClient;
 }
 
-int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, int ownID)
+int CGameClient::IntersectCharacter(const vec2& HookPos, const vec2& NewPos, vec2 *pOutNewPos, int ownID)
 {
 	float PhysSize = 28.0f;
 	float Distance = 0.0f;
@@ -2478,7 +2478,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 		{
 			if(ClosestID == -1 || distance(HookPos, Position) < Distance)
 			{
-				NewPos2 = ClosestPoint;
+				if(pOutNewPos) *pOutNewPos = ClosestPoint;
 				ClosestID = i;
 				Distance = distance(HookPos, Position);
 			}
@@ -2489,7 +2489,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 }
 
 
-int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2 *NewPos2, int ownID, CWorldCore *World)
+int CGameClient::IntersectCharacter(const vec2& OldPos, const vec2& NewPos, float Radius, vec2 *pOutNewPos, int OwnID, CWorldCore *World)
 {
 	float PhysSize = 28.0f;
 	float Distance = 0.0f;
@@ -2504,7 +2504,7 @@ int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2
 			continue;
 		CClientData cData = m_aClients[i];
 
-		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID))
+		if(!cData.m_Active || i == OwnID || !m_Teams.CanCollide(i, OwnID))
 			continue;
 		vec2 Position = World->m_apCharacters[i]->m_Pos;
 		vec2 ClosestPoint = closest_point_on_line(OldPos, NewPos, Position);
@@ -2512,7 +2512,7 @@ int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2
 		{
 			if(ClosestID == -1 || distance(OldPos, Position) < Distance)
 			{
-				*NewPos2 = ClosestPoint;
+				if(pOutNewPos) *pOutNewPos = ClosestPoint;
 				ClosestID = i;
 				Distance = distance(OldPos, Position);
 			}
@@ -2531,7 +2531,7 @@ void CLocalProjectile::Init(CGameClient *pGameClient, CWorldCore *pWorld, CColli
 	m_Type = pProj->m_WeaponType;
 	m_Weapon = m_Type;
 
-	ExtractInfo(pProj, &m_Pos, &m_Direction, 1);
+	ExtractInfo(pProj, &m_Pos, &m_Direction, true);
 
 	if(UseExtraInfo(pProj))
 	{
