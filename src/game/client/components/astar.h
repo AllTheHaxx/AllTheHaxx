@@ -61,7 +61,6 @@ class CAStar : public CComponent
 	class CAStarWorldMap* FillGrid(class CAStarWorldMap *pMap);
 
 	static void BuildPath(void *pParam);
-	void InitPathBuilder(const vec2& From, const vec2& To);
 	void BuildPathRace();
 	bool PathFound()
 	{
@@ -80,6 +79,7 @@ class CAStar : public CComponent
 
 public:
 	CAStar();
+	void InitPathBuilder(const vec2& From, const vec2& To);
 
 	virtual void OnConsoleInit();
 

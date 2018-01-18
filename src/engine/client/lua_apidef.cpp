@@ -302,6 +302,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<CAStar>("CAStar")
 			.addProperty("NumNodes", &CAStar::LuaGetNumNodes)
 			.addFunction("GetNode", &CAStar::LuaGetNode)
+			.addFunction("InitPathBuilder", &CAStar::InitPathBuilder)
 		.endClass()
 
 		/// Game.Sound
