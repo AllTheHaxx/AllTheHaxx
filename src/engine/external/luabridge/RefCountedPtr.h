@@ -201,7 +201,7 @@ public:
 
       @return The number of active references.
   */
-  long use_count () const
+  long use_count ()
   {
     return getRefCounts () [m_p];
   }
