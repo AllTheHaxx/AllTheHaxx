@@ -558,7 +558,7 @@ class CTextRender : public IEngineTextRender
 				const char *pStrBegin = pStr+COLOR_CODE_LEN+3;
 
 				// color code at string end? Don't render it.
-				if(pStrBegin == '\0')
+				if(pStrBegin == NULL)
 					return false; // no need to process the string once more
 
 				int MaxLen = pNextInterestingSectionStart ? (int)(pNextInterestingSectionStart-pStrBegin) : str_length(pStrBegin);
