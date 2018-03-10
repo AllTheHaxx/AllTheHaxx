@@ -31,7 +31,7 @@ CAStar::CAStar()
 	m_pBuilderThread = NULL;
 	m_pScoreThread = NULL;
 	m_pCurrentMapGrid = NULL;
-        m_FinishedSearch = false;
+	m_FinishedSearch = false;
 	OnReset();
 }
 
@@ -450,7 +450,7 @@ void CAStar::BuildPath(void *pData)
 	}
 	else
 		pSelf->m_pClient->m_pHud->PushNotification("No possible path found.");
-        pSelf->m_FinishedSearch = true;
+	pSelf->m_FinishedSearch = true;
 
 }
 
@@ -534,7 +534,7 @@ void CAStar::ConPathToMouse(IConsole::IResult *pResult, void *pUserData)
 void CAStar::InitPathBuilder(const vec2& From, const vec2& To)
 {
 	StopThreads();
-        m_FinishedSearch = false;
+	m_FinishedSearch = false;
 
 	CPathBuilderParams *pParams = new CPathBuilderParams(this, From, To);
 	m_pBuilderThread = thread_init_named(BuildPath, pParams, "A* path finder");

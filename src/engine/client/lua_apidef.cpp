@@ -301,11 +301,11 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		/// Game.AStar
 		.beginClass<CAStar>("CAStar")
 			.addProperty("NumNodes", &CAStar::LuaGetNumNodes)
-                        .addProperty("FinishedSearch", &CAStar::FinishedSearch)
+			.addProperty("FinishedSearch", &CAStar::FinishedSearch)
 			.addFunction("GetNode", &CAStar::LuaGetNode)
 			.addFunction("InitPathBuilder", &CAStar::InitPathBuilder)
-                        .addFunction("GetRaceStart", &CAStar::LuaGetStart)
-                        .addFunction("GetRaceFinish", &CAStar::LuaGetFinish)
+			.addFunction("GetRaceStart", &CAStar::LuaGetStart)
+			.addFunction("GetRaceFinish", &CAStar::LuaGetFinish)
 		.endClass()
 
 		/// Game.Sound

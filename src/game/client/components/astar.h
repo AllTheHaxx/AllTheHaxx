@@ -48,7 +48,7 @@ class CAStar : public CComponent
 	std::atomic_bool m_ThreadsShouldExit;
 	std::mutex m_Mutex;
 
-        std::atomic_bool m_FinishedSearch;
+	std::atomic_bool m_FinishedSearch;
 
 	char m_aCurrentMap[64];
 	class CAStarWorldMap *m_pCurrentMapGrid;
@@ -95,9 +95,9 @@ public:
 
 	int LuaGetNumNodes() const { return m_Path.size(); }
 	vec2 LuaGetNode(int i, lua_State *L) const;
-        vec2 LuaGetStart() { vec2 start; GetStart(&start); return start; }
-        vec2 LuaGetFinish() { vec2 finish; GetFinish(&finish); return finish; }
-        bool FinishedSearch() const { return m_FinishedSearch; }
+	vec2 LuaGetStart() { vec2 start; GetStart(&start); return start; }
+	vec2 LuaGetFinish() { vec2 finish; GetFinish(&finish); return finish; }
+	bool FinishedSearch() const { return m_FinishedSearch; }
 
 
 private:
