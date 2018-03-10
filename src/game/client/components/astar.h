@@ -48,8 +48,6 @@ class CAStar : public CComponent
 	std::atomic_bool m_ThreadsShouldExit;
 	std::mutex m_Mutex;
 
-	std::atomic_bool m_FinishedSearch;
-
 	char m_aCurrentMap[64];
 	class CAStarWorldMap *m_pCurrentMapGrid;
 	int m_LastClosestNode; // death position
@@ -97,7 +95,7 @@ public:
 	vec2 LuaGetNode(int i, lua_State *L) const;
 	vec2 LuaGetStart() { vec2 start; GetStart(&start); return start; }
 	vec2 LuaGetFinish() { vec2 finish; GetFinish(&finish); return finish; }
-	bool FinishedSearch() const { return m_FinishedSearch; }
+	bool SearchingPath() const { return m_pBuilderThread != NULL; }
 
 
 private:

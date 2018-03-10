@@ -301,7 +301,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		/// Game.AStar
 		.beginClass<CAStar>("CAStar")
 			.addProperty("NumNodes", &CAStar::LuaGetNumNodes)
-			.addProperty("FinishedSearch", &CAStar::FinishedSearch)
+			.addProperty("SearchingPath", &CAStar::SearchingPath)
 			.addFunction("GetNode", &CAStar::LuaGetNode)
 			.addFunction("InitPathBuilder", &CAStar::InitPathBuilder)
 			.addFunction("GetRaceStart", &CAStar::LuaGetStart)
