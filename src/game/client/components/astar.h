@@ -93,6 +93,9 @@ public:
 
 	int LuaGetNumNodes() const { return m_Path.size(); }
 	vec2 LuaGetNode(int i, lua_State *L) const;
+        vec2 LuaGetStart() { vec2 start; GetStart(&start); return start; }
+        vec2 LuaGetFinish() { vec2 finish; GetFinish(&finish); return finish; }
+
 
 private:
 	static void ConPathToMouse(IConsole::IResult *pResult, void *pUserData);
