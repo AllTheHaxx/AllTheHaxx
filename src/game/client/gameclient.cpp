@@ -945,11 +945,11 @@ void CGameClient::OnRender()
 	}
 }
 
-void CGameClient::OnDummyDisconnect()
+void CGameClient::OnDummyDisconnect(int VClient)
 {
-	m_DDRaceMsgSent[1] = false;
-	m_ShowOthers[1] = -1;
-	m_LastNewPredictedTick[1] = -1;
+	m_DDRaceMsgSent[VClient] = false;
+	m_ShowOthers[VClient] = -1;
+	m_LastNewPredictedTick[VClient] = -1;
 }
 
 void CGameClient::OnRelease()

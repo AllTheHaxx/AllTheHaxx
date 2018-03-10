@@ -1064,24 +1064,28 @@ void CClient::TimeMeOut()
 {
 	CALLSTACK_ADD();
 
-	if(m_DummyConnected)
-		DummyDisconnect("timemeout");
+	if(m_DummiesConnected)
+	{
+		for(int i = 0; i < NUM_DUMMIES; i++)
+			DummyDisconnect("timemeout", i+1);
+	}
+
 	if(m_State != IClient::STATE_OFFLINE)
 		DisconnectWithReason("timemeout");
 }
 
-bool CClient::DummyConnected()
+int CClient::DummiesConnected()
 {
 	CALLSTACK_ADD();
 
-	return m_DummyConnected;
+	return m_DummiesConnected;
 }
 
 bool CClient::DummyConnecting()
 {
 	CALLSTACK_ADD();
 
-	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 1 > GameTick();
+	return !m_DummiesConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 1 > GameTick();
 }
 
 void CClient::DummyConnect()
@@ -1094,34 +1098,36 @@ void CClient::DummyConnect()
 	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
 		return;
 
-	if(m_DummyConnected)
+	if(m_DummiesConnected == NUM_DUMMIES)
 		return;
 
+	int VClient = ++m_DummiesConnected;
+
 	m_LastDummyConnectTime = GameTick();
-
-	m_RconAuthed[1] = 0;
-
+	m_RconAuthed[VClient] = 0;
 	m_DummySendConnInfo = true;
 
 	g_Config.m_ClDummyCopyMoves = 0;
 	g_Config.m_ClDummyHammer = 0;
 
 	//connecting to the server
-	m_NetClient[1].Connect(&m_ServerAddress);
+	m_NetClient[VClient].Connect(&m_ServerAddress);
 }
 
-void CClient::DummyDisconnect(const char *pReason)
+void CClient::DummyDisconnect(const char *pReason, int VClient)
 {
 	CALLSTACK_ADD();
 
-	if(!m_DummyConnected)
+	if(!m_DummiesConnected)
 		return;
 
-	m_NetClient[1].Disconnect(pReason);
-	g_Config.m_ClDummy = 0;
-	m_RconAuthed[1] = 0;
-	m_DummyConnected = false;
-	GameClient()->OnDummyDisconnect();
+	m_NetClient[VClient].Disconnect(pReason);
+	m_RconAuthed[VClient] = 0;
+
+	g_Config.m_ClDummy--;
+	m_DummiesConnected--;
+
+	GameClient()->OnDummyDisconnect(VClient);
 }
 
 int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
@@ -2740,7 +2746,7 @@ void CClient::PumpNetwork()
 {
 	CALLSTACK_ADD();
 
-	for(int i=0; i<3; i++)
+	for(int i = 0; i < NUM_NETCLIENTS; i++)
 	{
 		m_NetClient[i].Update();
 	}
@@ -2748,12 +2754,12 @@ void CClient::PumpNetwork()
 	if(State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// check for errors
-		if(State() != IClient::STATE_OFFLINE && State() != IClient::STATE_QUITING && m_NetClient[0].State() == NETSTATE_OFFLINE)
+		if(State() != IClient::STATE_OFFLINE && State() != IClient::STATE_QUITING && m_NetClient[NETCLIENT_MAINTEE].State() == NETSTATE_OFFLINE)
 		{
 			SetState(IClient::STATE_OFFLINE);
 			Disconnect();
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[0].ErrorString());
+			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_NetClient[NETCLIENT_MAINTEE].ErrorString());
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		}
 
@@ -2769,27 +2775,20 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i=0; i < 3; i++)
+	for(int i = 0; i < NUM_NETCLIENTS; i++)
 	{
 		while(m_NetClient[i].Recv(&Packet))
 		{
-			if(Packet.m_ClientID == -1 || i > 1)
+			if(Packet.m_ClientID == -1 || i == NETCLIENT_SYS)
 			{
 				ProcessConnlessPacket(&Packet);
 			}
-			else if(i > 0 && i < 2)
-			{
-				if(g_Config.m_ClDummy)
-					ProcessServerPacket(&Packet); //self
-				else
-					ProcessServerPacketDummy(&Packet); //multiclient
-			}
 			else
 			{
-				if(g_Config.m_ClDummy)
-					ProcessServerPacketDummy(&Packet); //multiclient
+				if(i == g_Config.m_ClDummy)
+					ProcessServerPacket(&Packet); // process on current
 				else
-					ProcessServerPacket(&Packet); //self
+					ProcessServerPacketDummy(&Packet); // process on other
 			}
 		}
 	}

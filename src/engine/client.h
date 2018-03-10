@@ -26,6 +26,8 @@ enum
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
+#define NUM_VCLIENTS 2
+
 extern CCallstack gDebugInfo;
 class IClient : public IInterface
 {
@@ -35,16 +37,16 @@ protected:
 	int m_State;
 
 	// quick access to time variables
-	int m_PrevGameTick[2];
-	int m_CurGameTick[2];
-	float m_GameIntraTick[2];
-	float m_GameTickTime[2];
+	int m_PrevGameTick[NUM_VCLIENTS];
+	int m_CurGameTick[NUM_VCLIENTS];
+	float m_GameIntraTick[NUM_VCLIENTS];
+	float m_GameTickTime[NUM_VCLIENTS];
 
 	int m_CurMenuTick;
 	int64 m_MenuStartTime;
 
-	int m_PredTick[2];
-	float m_PredIntraTick[2];
+	int m_PredTick[NUM_VCLIENTS];
+	float m_PredIntraTick[NUM_VCLIENTS];
 
 	float m_LocalTime;
 	float m_SteadyTimer;
@@ -57,7 +59,7 @@ protected:
 public:
 	bool m_Restarting; // set this to make the client restart on the next quit
 
-	int m_LocalIDs[2];
+	int m_LocalIDs[NUM_VCLIENTS];
 	//char m_aNews[NEWS_SIZE]; // ATH NEWS ARE IN CUpdater!!
 	char m_aNewsDDNet[NEWS_SIZE];
 	int64 m_ReconnectTime;
@@ -121,7 +123,7 @@ public:
 	// dummy
 	virtual void DummyDisconnect(const char *pReason) = 0;
 	virtual void DummyConnect() = 0;
-	virtual bool DummyConnected() = 0;
+	virtual int DummiesConnected() = 0;
 	virtual bool DummyConnecting() = 0;
 
 	virtual void Restart() = 0;
@@ -272,7 +274,7 @@ public:
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
 
-	virtual void OnDummyDisconnect() = 0;
+	virtual void OnDummyDisconnect(int VClient) = 0;
 };
 
 extern IGameClient *CreateGameClient();

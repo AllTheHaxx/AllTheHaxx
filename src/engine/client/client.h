@@ -76,9 +76,14 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	{
 		NUM_SNAPSHOT_TYPES=2,
 		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
+
+		NUM_DUMMIES = NUM_VCLIENTS-1,
+		NETCLIENT_MAINTEE = 0,
+		NETCLIENT_SYS = NUM_VCLIENTS, // the one used for schtuff
+		NUM_NETCLIENTS,
 	};
 
-	class CNetClient m_NetClient[3];
+	class CNetClient m_NetClient[NUM_VCLIENTS + 1];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
@@ -113,9 +118,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
 
-	int m_AckGameTick[2];
-	int m_CurrentRecvTick[2];
-	int m_RconAuthed[2];
+	int m_AckGameTick[NUM_VCLIENTS];
+	int m_CurrentRecvTick[NUM_VCLIENTS];
+	int m_RconAuthed[NUM_VCLIENTS];
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
 
@@ -128,10 +133,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMap[256];
 	char m_aCurrentMapPath[CEditor::MAX_PATH_LENGTH];
 
-	char m_aTimeoutCodes[2][32];
-	bool m_aTimeoutCodeSent[2];
+	char m_aTimeoutCodes[NUM_VCLIENTS][32];
+	bool m_aTimeoutCodeSent[NUM_VCLIENTS];
 	bool m_GenerateTimeoutSeed;
-	bool m_IsATHMsgSent[2];
+	bool m_IsATHMsgSent[NUM_VCLIENTS];
 
 	//
 	char m_aCmdConnect[256];
@@ -158,7 +163,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadTotalsize;
 
 	// time
-	CSmoothTime m_GameTime[2];
+	CSmoothTime m_GameTime[NUM_VCLIENTS];
 	CSmoothTime m_PredictedTime;
 
 	// input
@@ -168,9 +173,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int m_Tick; // the tick that the input is for
 		int64 m_PredictedTime; // prediction latency when we sent this input
 		int64 m_Time;
-	} m_aInputs[2][200];
+	} m_aInputs[NUM_VCLIENTS][200];
 
-	int m_CurrentInput[2];
+	int m_CurrentInput[NUM_VCLIENTS];
 	bool m_LastDummy;
 	bool m_LastDummy2;
 	CNetObj_PlayerInput HammerInput;
@@ -181,14 +186,14 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CGraph m_FpsGraph;
 
 	// the game snapshots are modifiable by the game
-	class CSnapshotStorage m_SnapshotStorage[2];
-	CSnapshotStorage::CHolder *m_aSnapshots[2][NUM_SNAPSHOT_TYPES];
+	class CSnapshotStorage m_SnapshotStorage[NUM_VCLIENTS];
+	CSnapshotStorage::CHolder *m_aSnapshots[NUM_VCLIENTS][NUM_SNAPSHOT_TYPES];
 
-	int m_ReceivedSnapshots[2];
+	int m_ReceivedSnapshots[NUM_VCLIENTS];
 	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE];
 
 	class CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][NUM_VCLIENTS][CSnapshot::MAX_SIZE];
 
 	class CSnapshotDelta m_SnapshotDelta;
 
@@ -288,12 +293,12 @@ public:
 	virtual void Disconnect();
 	virtual void TimeMeOut();
 
-	virtual void DummyDisconnect(const char *pReason);
+	virtual void DummyDisconnect(const char *pReason, int VClient);
 	virtual void DummyConnect();
-	virtual bool DummyConnected();
+	virtual int DummiesConnected();
 	virtual bool DummyConnecting();
 	void DummyInfo();
-	int m_DummyConnected;
+	int m_DummiesConnected;
 	int m_LastDummyConnectTime;
 	int m_Fire;
 

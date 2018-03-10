@@ -124,14 +124,14 @@ protected:
 	void UpdatePositions();
 
 	int m_PredictedTick;
-	int m_LastNewPredictedTick[2];
+	int m_LastNewPredictedTick[NUM_VCLIENTS];
 
 	int m_LastRoundStartTick;
 
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
 
-	int m_CheckInfo[2];
+	int m_CheckInfo[NUM_VCLIENTS];
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
@@ -172,10 +172,10 @@ public:
 	bool m_SuppressEvents;
 	bool m_NewTick;
 	bool m_NewPredictedTick;
-	int m_FlagDropTick[2];
+	int m_FlagDropTick[NUM_VCLIENTS];
 
 	// TODO: move this
-	CTuningParams m_Tuning[2];
+	CTuningParams m_Tuning[NUM_VCLIENTS];
 
 	enum
 	{
@@ -201,7 +201,7 @@ public:
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
-		const CNetObj_Flag *m_paFlags[2];
+		const CNetObj_Flag *m_paFlags[NUM_VCLIENTS];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
 		int m_GameDataSnapID;
@@ -219,7 +219,7 @@ public:
 
 		int m_LocalClientID;
 		int m_NumPlayers;
-		int m_aTeamSize[2];
+		int m_aTeamSize[NUM_VCLIENTS];
 
 		// spectate data
 		struct CSpectateInfo
@@ -335,7 +335,7 @@ public:
 	virtual void OnConnected();
 	virtual void OnRender();
 	virtual void OnUpdate();
-	virtual void OnDummyDisconnect();
+	virtual void OnDummyDisconnect(int VClient);
 	virtual void OnRelease();
 	virtual void OnInit();
 	virtual void OnConsoleInit();
@@ -429,7 +429,7 @@ public:
 	CWeaponData *GetWeaponData(int Tick) { return &m_aWeaponData[((Tick%150)+150)%150]; }
 	CWeaponData *FindWeaponData(int TargetTick);
 
-	void FindWeaker(bool IsWeaker[2][MAX_CLIENTS]);
+	void FindWeaker(bool IsWeaker[NUM_VCLIENTS][MAX_CLIENTS]);
 
 	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking); }
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
@@ -443,8 +443,8 @@ public:
 	static CTuningParams * LuaGetTuning() { return &CLua::m_pCGameClient->m_Tuning[g_Config.m_ClDummy]; }
 	
 private:
-	bool m_DDRaceMsgSent[2];
-	int m_ShowOthers[2];
+	bool m_DDRaceMsgSent[NUM_VCLIENTS];
+	int m_ShowOthers[NUM_VCLIENTS];
 
 	bool m_ResetConfig;
 	
