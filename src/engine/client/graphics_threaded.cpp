@@ -983,7 +983,8 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 	if(g_Config.m_GfxHighdpi) Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
 
-	return m_pBackend->Init("Teeworlds AllTheHaxx - The client with the keck!", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
+	return m_pBackend->Init(g_Config.m_GfxSimpleWindowTitle ? "Teeworlds AllTheHaxx" : "Teeworlds AllTheHaxx - The client with the keck!",
+							&g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
 }
 
 int CGraphics_Threaded::InitWindow()

@@ -122,6 +122,7 @@ MACRO_CONFIG_INT(SndHighlightVanilla, snd_highlight_vanilla, 1, 0, 1, CFGFLAG_SA
 MACRO_CONFIG_INT(GfxScreen, gfx_screen, 0, 0, 15, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Screen index")
 MACRO_CONFIG_INT(GfxScreenWidth, gfx_screen_width, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Screen resolution width")
 MACRO_CONFIG_INT(GfxScreenHeight, gfx_screen_height, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Screen resolution height")
+MACRO_CONFIG_INT(GfxSimpleWindowTitle, gfx_simple_window_title, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Force window title to always be 'Teeworlds AllTheHaxx'")
 #if defined(__ANDROID__)
 MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
 MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Fullscreen")
