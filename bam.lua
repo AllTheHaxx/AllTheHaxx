@@ -318,6 +318,7 @@ function build(settings)
 
 		if platform == "linux" then
 			settings.link.libs:Add("rt") -- clock_gettime for glibc < 2.17
+			settings.link.flags:Add("-no-pie")
 		end
 	elseif family == "windows" then
 		settings.link.libs:Add("gdi32")
