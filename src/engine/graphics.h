@@ -99,9 +99,12 @@ public:
 	virtual int UnloadTexture(int Index) = 0;
 	virtual int LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags) = 0;
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
+	virtual int LoadTextureLua(const char *pFilename) = 0;
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
+
 	virtual void TextureSet(int TextureID) = 0;
 	virtual void TextureSetLua(int TextureID, lua_State *L) = 0;
+	virtual int GetInvalidTexture() const = 0;
 
 	struct CLineItem
 	{

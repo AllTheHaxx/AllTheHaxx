@@ -452,6 +452,11 @@ int CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int 
 	return m_InvalidTexture;
 }
 
+int CGraphics_Threaded::LoadTextureLua(const char *pFilename)
+{
+	return LoadTexture(pFilename, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, TEXLOAD_NORESAMPLE);
+}
+
 int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
 {
 	char aCompleteFilename[512];

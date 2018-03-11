@@ -599,6 +599,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
 
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
+			.addFunction("LoadTextureSimple", &IGraphics::LoadTextureLua)
 			.addFunction("UnloadTexture", &IGraphics::UnloadTexture)
 			.addFunction("TextureSet", &IGraphics::TextureSetLua)
 
@@ -610,6 +611,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			
 			.addFunction("ClipEnable", &IGraphics::ClipEnable)
 			.addFunction("ClipDisable", &IGraphics::ClipDisable)
+
+			.addProperty("InvalidTexture", &IGraphics::GetInvalidTexture)
 		.endClass()
 
 		/// Engine.TextRender
