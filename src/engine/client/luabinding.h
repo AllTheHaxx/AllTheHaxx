@@ -60,13 +60,6 @@ public:
 	// external info
 	static int LuaGetPlayerScore(int ClientID);
 
-	// graphics namespace
-	static void LuaRenderTexture(int ID, float x, float y, float w, float h, float rot);
-	static void LuaRenderQuadRaw(int x, int y, int w, int h);
-
-	// irc namespace
-	static int LuaGetIrcUserlist(lua_State *L);
-
 	// helper functions
 	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L);
 	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF);

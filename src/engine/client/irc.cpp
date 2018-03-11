@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "irc.h"
+#include "luabinding.h"
 
 static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 
@@ -1494,4 +1495,25 @@ int CIRC::NumUnreadMessages(int *pArray)
 	}
 
 	return NumChan + NumQuery;
+}
+
+LuaRef CIRC::LuaGetUserlist(const char *pChannel, lua_State *L)
+{
+	CIRCCom *pCom = CLua::m_pCGameClient->m_pIRC->GetCom(std::string(pChannel));
+	LuaRef Result(L); // initialises with nil
+	if(pCom)
+	{
+		if(pCom->GetType() == CIRCCom::TYPE_CHANNEL)
+		{
+			CComChan *pChan = static_cast<CComChan*>(pCom);
+			const sorted_array<CComChan::CUser>& Userlist = pChan->m_Users;
+			Result = luabridge::newTable(L);
+			for(int u = 0; u < Userlist.size(); u++)
+				Result.append(Userlist[u].m_Nick);
+		}
+		else
+			Result = pChannel;
+	}
+
+	return Result;
 }

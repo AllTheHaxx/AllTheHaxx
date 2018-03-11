@@ -40,7 +40,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	lua_register(L, "ExitFullscreen", CLuaBinding::LuaExitFullscreen);
 	lua_register(L, "ScriptPath", CLuaBinding::LuaScriptPath);
 	lua_register(L, "StrIsNetAddr", CLuaBinding::LuaStrIsNetAddr);
-	lua_register(L, "GetIRCUserlist", CLuaBinding::LuaGetIrcUserlist);
 
 	// re-bind common functions
 	luaL_dostring(L, "dofile = Import");
@@ -57,12 +56,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginNamespace("_client")
 			// external info
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
-		.endNamespace()
-
-		// graphics namespace XXX: cleanup
-		.beginNamespace("_graphics")
-			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
-			.addFunction("RenderQuad", &CLuaBinding::LuaRenderQuadRaw)
 		.endNamespace()
 
 		// global types
@@ -295,7 +288,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SendMsg", &IIRC::SendMsgLua)
 			.addFunction("JoinTo", &IIRC::JoinTo)
 			.addFunction("GetNick", &IIRC::GetNickStd)
-		/*	.addFunction("GetUserlist", &CLuaBinding::LuaGetIrcUserlist) */
+			.addFunction("GetUserlist", &IIRC::LuaGetUserlist)
 		.endClass()
 
 		/// Game.AStar
