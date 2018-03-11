@@ -652,7 +652,17 @@ void CMenus::RenderPlayers(CUIRect MainView)
 #endif
 
 	// options
-	static CButtonContainer s_Buttons[MAX_CLIENTS][3];
+	enum
+	{
+		PLBUTTON_IGNORE,
+		PLBUTTON_FRIEND,
+		PLBUTTON_IDENT,
+		PLBUTTON_KICK,
+		PLBUTTON_BAN,
+		PLBUTTON_MUTE,
+		NUM_PL_BUTTONS
+	};
+	static CButtonContainer s_Buttons[MAX_CLIENTS][NUM_PL_BUTTONS];
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -684,18 +694,20 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Info.m_Size = Button.h;
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Button.x+Button.h/2, Button.y+Button.h/2));
 
+		// render name
 		Player.HSplitTop(1.5f, 0, &Player);
-		Player.VSplitMid(&Player, &Button);
+		Player.VSplitLeft(Player.w*0.37f, &Player, &Button);
 		Item.m_Rect.VSplitRight(200.0f, &Button2, &Item.m_Rect);
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, Player.x, Player.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, Player.x, Player.y, 14.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
 		if(pCurrClient->m_Friend)
 			TextRender()->TextColor(0.2f, 0.7f, 0.2f, 1); // TODO: settings plx
 		TextRender()->TextEx(&Cursor, pCurrClient->m_aName, -1);
 		TextRender()->TextColor(1,1,1,1);
 
-		TextRender()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		// render clan
+		TextRender()->SetCursor(&Cursor, Button.x, Button.y, 14.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
 		if(str_comp(pCurrClient->m_aClan, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aClan) == 0)
 			TextRender()->TextColor(0.2f, 0.7f, 0.2f, 1); // TODO: settings plx
@@ -712,24 +724,72 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		// ignore button
 		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
+		Button.VSplitLeft((Width-Button.h)/4.0f/UI()->Scale(), 0, &Button);
+		Button.VSplitLeft(Button.h/UI()->Scale(), &Button, 0);
 		if(g_Config.m_ClShowChatFriends && !pCurrClient->m_Friend)
 		{
-			DoButton_Toggle(&(s_Buttons[Index][0]), 1, &Button, false, Localize("Disable 'Show Chat from Friends only' to use this button!"));
+			DoButton_Toggle(&(s_Buttons[Index][PLBUTTON_IGNORE]), 1, &Button, false, Localize("Disable 'Show Chat from Friends only' to use this button!"));
 		}
 		else
 		{
-			if(DoButton_Toggle(&(s_Buttons[Index][0]), pCurrClient->m_ChatIgnore, &Button, true))
+			if(DoButton_Toggle(&(s_Buttons[Index][PLBUTTON_IGNORE]), pCurrClient->m_ChatIgnore, &Button, true))
 				pCurrClient->m_ChatIgnore ^= 1;
+		}
+
+		// admin buttons
+		if(Client()->RconAuthed())
+		{
+			CUIRect AdminButton(Button.x - 350.0f * UI()->Scale(), Button.y, 350 * UI()->Scale(), Item.m_Rect.h - 3.0f);
+
+			// kick
+			{
+				float tw = TextRender()->TextWidth(0, Item.m_Rect.h - 2.0f, Localize("Kick"));
+				CUIRect KickButtonRect;
+				AdminButton.VSplitLeft(tw, &KickButtonRect, &AdminButton);
+				AdminButton.VSplitLeft(5.0f, 0, &AdminButton);
+				if(DoButton_Menu(&s_Buttons[i][PLBUTTON_KICK], Localize("Kick"), 0, &KickButtonRect))
+				{
+					char aBuf[64];
+					str_formatb(aBuf, "kick %i", m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID);
+					Client()->Rcon(aBuf);
+				}
+			}
+
+			// ban
+			{
+				float tw = TextRender()->TextWidth(0, Item.m_Rect.h-2.0f, Localize("Ban"));
+				CUIRect BanButtonRect;
+				AdminButton.VSplitLeft(tw, &BanButtonRect, &AdminButton);
+				AdminButton.VSplitLeft(5.0f, 0, &AdminButton);
+				if(DoButton_Menu(&s_Buttons[i][PLBUTTON_BAN], Localize("Ban"), 0, &BanButtonRect))
+				{
+					char aBuf[64];
+					str_formatb(aBuf, "ban %i", m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID);
+					Client()->Rcon(aBuf);
+				}
+			}
+
+			// mute
+			{
+				float tw = TextRender()->TextWidth(0, Item.m_Rect.h-2.0f, Localize("Mute"));
+				CUIRect MuteButtonRect;
+				AdminButton.VSplitLeft(tw, &MuteButtonRect, &AdminButton);
+				AdminButton.VSplitLeft(5.0f, 0, &AdminButton);
+				if(DoButton_Menu(&s_Buttons[i][PLBUTTON_MUTE], Localize("Mute"), 0, &MuteButtonRect))
+				{
+					char aBuf[64];
+					str_formatb(aBuf, "muteid %i 999", m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID);
+					Client()->Rcon(aBuf);
+				}
+			}
 		}
 
 		// friend button
 		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
 		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
-		if(DoButton_Toggle(&(s_Buttons[Index][1]), pCurrClient->m_Friend, &Button, true))
+		Button.VSplitLeft((Width-Button.h)/4.0f/UI()->Scale(), 0, &Button);
+		Button.VSplitLeft(Button.h/UI()->Scale(), &Button, 0);
+		if(DoButton_Toggle(&(s_Buttons[Index][PLBUTTON_FRIEND]), pCurrClient->m_Friend, &Button, true))
 		{
 			if(pCurrClient->m_Friend)
 				m_pClient->Friends()->RemoveFriend(pCurrClient->m_aName, pCurrClient->m_aClan);
@@ -757,7 +817,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		// only render the ID button if we don't have him already
 		if(GameClient()->m_pIdentity->GetIdentID(s_CmpIdents[Index]) == -1) // this costs so much D:
 		{
-			if(DoButton_Menu(&(s_Buttons[Index][2]), "ID", 0, &Button, Localize("Add as new identity")))
+			if(DoButton_Menu(&(s_Buttons[Index][PLBUTTON_IDENT]), "ID", 0, &Button, Localize("Add as new identity")))
 			{
 				CIdentity::CIdentEntry Entry;
 				mem_zero(&Entry, sizeof(Entry));
