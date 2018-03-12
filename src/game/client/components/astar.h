@@ -53,8 +53,6 @@ class CAStar : public CComponent
 	int m_LastClosestNode; // death position
 
 	bool GetTileAreaCenter(vec2 *pResult, int TileID, int x = 0, int y = 0, int w = -1, int h = -1);
-	bool GetStart(vec2 *pStart) { return GetTileAreaCenter(pStart, TILE_BEGIN); }
-	bool GetFinish(vec2 *pFinish) { return GetTileAreaCenter(pFinish, TILE_END); }
 
 	void ScanMap();
 	unsigned short CountTilesAround(int TileID, int x, int y);
@@ -91,8 +89,13 @@ public:
 
 	void OnPlayerDeath();
 
+	bool GetStart(vec2 *pStart) { return GetTileAreaCenter(pStart, TILE_BEGIN); }
+	bool GetFinish(vec2 *pFinish) { return GetTileAreaCenter(pFinish, TILE_END); }
+
 	int LuaGetNumNodes() const { return m_Path.size(); }
 	vec2 LuaGetNode(int i, lua_State *L) const;
+	bool SearchingPath() const { return m_pBuilderThread != NULL; }
+
 
 private:
 	static void ConPathToMouse(IConsole::IResult *pResult, void *pUserData);

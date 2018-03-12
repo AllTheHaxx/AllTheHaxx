@@ -269,6 +269,7 @@ function build(settings)
 		settings.cc.flags:Add("-Wall")
 		settings.cc.flags:Add("-Wno-deprecated", "-Werror=format")
 		settings.cc.flags_cxx:Add("-std=c++0x")
+		settings.cc.defines:Add("_GNU_SOURCE")
 		if family == "windows" then
 			if config.compiler.driver == "gcc" then
 				settings.link.flags:Add("-static-libgcc")
@@ -318,6 +319,7 @@ function build(settings)
 
 		if platform == "linux" then
 			settings.link.libs:Add("rt") -- clock_gettime for glibc < 2.17
+			settings.link.flags:Add("-no-pie")
 		end
 	elseif family == "windows" then
 		settings.link.libs:Add("gdi32")

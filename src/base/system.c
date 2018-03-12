@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -37,19 +38,19 @@
 	#include <dirent.h>
 
 #if defined(CONF_PLATFORM_MACOSX)
-		// some lock and pthread functions are already defined in headers
-		// included from Carbon.h
-		// this prevents having duplicate definitions of those
-		#define _lock_set_user_
-		#define _task_user_
+	// some lock and pthread functions are already defined in headers
+	// included from Carbon.h
+	// this prevents having duplicate definitions of those
+	#define _lock_set_user_
+	#define _task_user_
 
-		#include <Carbon/Carbon.h>
-		#include <mach/mach_time.h>
-	#endif
+	#include <Carbon/Carbon.h>
+	#include <mach/mach_time.h>
+#endif
 
-	#if defined(__ANDROID__)
-		#include <android/log.h>
-	#endif
+#if defined(__ANDROID__)
+	#include <android/log.h>
+#endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -472,7 +473,6 @@ typedef struct MEMTAIL
 	int guard;
 } MEMTAIL;
 
-static struct MEMHEADER *first = 0;
 static const int MEM_GUARD_VAL = 0xbaadc0de;
 
 #endif
@@ -500,11 +500,11 @@ void* mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 
 	tail->guard = MEM_GUARD_VAL;
 
+	// put the new header at the start
 	header->prev = (MEMHEADER *)0;
-	header->next = first;
-	if(first)
-		first->prev = header;
-	first = header;
+	header->next = memory_stats.first;
+	if(memory_stats.first)
+		memory_stats.first->prev = header;
 	memory_stats.first = header;
 
 	/*dbg_msg("mem", "++ %p", header+1); */
@@ -535,13 +535,18 @@ void mem_free(void *p)
 			memory_stats.first = 0x0;
 		}
 
-		if(header->prev)
-			header->prev->next = header->next;
-		else
-			first = header->next;
+		if(header->prev) // this on is in the middle somewhere
+			header->prev->next = header->next; // rip it out
+		else // this header is at the beginning
+		{
+			dbg_assert_legacy(!memory_stats.first || memory_stats.first == header, "memory corruption detected");
+			memory_stats.first = header->next;
+		}
 		if(header->next)
 			header->next->prev = header->prev;
 
+		// clear it out for debugging purposes
+		header->filename = "XXXXXXX\0";
 		header->next = 0;
 		header->prev = 0;
 		header->checksum = 0xBAADC0DE;
@@ -558,7 +563,7 @@ void mem_debug_dump(IOHANDLE file)
 {
 #if defined(CONF_DEBUG)
 	char buf[1024];
-	MEMHEADER *header = first;
+	MEMHEADER *header = memory_stats.first;
 	if(!file)
 		file = io_open("memory.txt", IOFLAG_WRITE);
 
@@ -567,7 +572,7 @@ void mem_debug_dump(IOHANDLE file)
 		while(header)
 		{
 			str_format(buf, sizeof(buf), "%s(%d): %d", header->filename, header->line, header->size);
-			io_write(file, buf, strlen(buf));
+			io_write(file, buf, (unsigned)str_length(buf));
 			io_write_newline(file);
 			header = header->next;
 		}
@@ -601,7 +606,7 @@ void mem_set(void *block, int value, unsigned size)
 int mem_check_imp()
 {
 #if defined(CONF_DEBUG)
-	MEMHEADER *header = first;
+	MEMHEADER *header = memory_stats.first;
 	while(header)
 	{
 		MEMTAIL *tail = (MEMTAIL *)(((char*)(header+1))+header->size);

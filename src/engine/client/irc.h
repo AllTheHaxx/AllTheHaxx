@@ -55,6 +55,7 @@ public:
 	void SetNick(const char *pNick);
 	const char* GetNick() { return m_Nick.c_str(); }
 	const std::string &GetNickStd() const { return m_Nick; }
+	luabridge::LuaRef LuaGetUserlist(const char *pChannel, lua_State *L);
 	int NumUnreadMessages(int *pArray = 0);
 	int GetMsgType(const char *msg);
 

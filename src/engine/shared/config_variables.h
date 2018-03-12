@@ -122,6 +122,7 @@ MACRO_CONFIG_INT(SndHighlightVanilla, snd_highlight_vanilla, 1, 0, 1, CFGFLAG_SA
 MACRO_CONFIG_INT(GfxScreen, gfx_screen, 0, 0, 15, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Screen index")
 MACRO_CONFIG_INT(GfxScreenWidth, gfx_screen_width, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Screen resolution width")
 MACRO_CONFIG_INT(GfxScreenHeight, gfx_screen_height, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Screen resolution height")
+MACRO_CONFIG_INT(GfxSimpleWindowTitle, gfx_simple_window_title, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Force window title to always be 'Teeworlds AllTheHaxx'")
 #if defined(__ANDROID__)
 MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
 MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Fullscreen")
@@ -195,7 +196,6 @@ MACRO_CONFIG_STR(SvDnsblHost, sv_dnsbl_host, 128, "", CFGFLAG_SERVER, "Hostname 
 MACRO_CONFIG_STR(SvDnsblKey, sv_dnsbl_key, 128, "", CFGFLAG_SERVER, "Optional Authentification Key for the specified DNSBL provider")
 MACRO_CONFIG_INT(SvDnsblVote, sv_dnsbl_vote, 0, 0, 1, CFGFLAG_SERVER, "Block votes by blacklisted addresses")
 MACRO_CONFIG_INT(SvDnsblBan, sv_dnsbl_ban, 0, 0, 1, CFGFLAG_SERVER, "Automatically ban blacklisted addresses")
-MACRO_CONFIG_INT(ClDennisDennisDennis, cl_ddddd, 200, 1, 999999, CFGFLAG_CLIENT, "dennis dennis dennis") /// DENNIS XXX TODO REMOVE
 
 
 MACRO_CONFIG_INT(SvPlayerDemoRecord, sv_player_demo_record, 0, 0, 1, CFGFLAG_SERVER, "Automatically record demos for each player")
@@ -209,6 +209,8 @@ MACRO_CONFIG_STR(EcPassword, ec_password, 32, "", CFGFLAG_ECON, "External consol
 MACRO_CONFIG_INT(EcBantime, ec_bantime, 0, 0, 1440, CFGFLAG_ECON, "The time a client gets banned if econ authentication fails. 0 just closes the connection")
 MACRO_CONFIG_INT(EcAuthTimeout, ec_auth_timeout, 30, 1, 120, CFGFLAG_ECON, "Time in seconds before the the econ authentification times out")
 MACRO_CONFIG_INT(EcOutputLevel, ec_output_level, 1, 0, 2, CFGFLAG_ECON, "Adjusts the amount of information in the external console")
+
+MACRO_CONFIG_INT(Failsafe, failsafe, 0, 0, 1, CFGFLAG_CLIENT, "Start in failsafe mode")
 
 MACRO_CONFIG_INT(Debug, debug, 0, 0, 3, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Debug mode")
 MACRO_CONFIG_INT(DbgDirections, dbg_directions, 0, 0, 1, CFGFLAG_CLIENT, "Debug player aiming directions")

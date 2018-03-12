@@ -29,6 +29,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	if(g_StealthMode)
 		return;
 
+	lua_register(L, "SetScriptTitle", CLuaBinding::LuaSetScriptTitle);
+	lua_register(L, "SetScriptInfo", CLuaBinding::LuaSetScriptInfo);
+	lua_register(L, "CheckVersion", CLuaBinding::LuaCheckVersion);
 	lua_register(L, "print", CLuaBinding::LuaPrintOverride);
 	lua_register(L, "_io_open", CLuaBinding::LuaIO_Open);
 	lua_register(L, "throw", CLuaBinding::LuaThrow); // adds an exception, but doesn't jump out like 'error' does
@@ -40,7 +43,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	lua_register(L, "ExitFullscreen", CLuaBinding::LuaExitFullscreen);
 	lua_register(L, "ScriptPath", CLuaBinding::LuaScriptPath);
 	lua_register(L, "StrIsNetAddr", CLuaBinding::LuaStrIsNetAddr);
-	lua_register(L, "GetIRCUserlist", CLuaBinding::LuaGetIrcUserlist);
 
 	// re-bind common functions
 	luaL_dostring(L, "dofile = Import");
@@ -57,12 +59,6 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginNamespace("_client")
 			// external info
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
-		.endNamespace()
-
-		// graphics namespace XXX: cleanup
-		.beginNamespace("_graphics")
-			.addFunction("RenderTexture", &CLuaBinding::LuaRenderTexture)
-			.addFunction("RenderQuad", &CLuaBinding::LuaRenderQuadRaw)
 		.endNamespace()
 
 		// global types
@@ -295,14 +291,17 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("SendMsg", &IIRC::SendMsgLua)
 			.addFunction("JoinTo", &IIRC::JoinTo)
 			.addFunction("GetNick", &IIRC::GetNickStd)
-		/*	.addFunction("GetUserlist", &CLuaBinding::LuaGetIrcUserlist) */
+			.addFunction("GetUserlist", &IIRC::LuaGetUserlist)
 		.endClass()
 
 		/// Game.AStar
 		.beginClass<CAStar>("CAStar")
 			.addProperty("NumNodes", &CAStar::LuaGetNumNodes)
+			.addProperty("SearchingPath", &CAStar::SearchingPath)
 			.addFunction("GetNode", &CAStar::LuaGetNode)
 			.addFunction("InitPathBuilder", &CAStar::InitPathBuilder)
+			.addFunction("GetRaceStart", &CAStar::GetStart)
+			.addFunction("GetRaceFinish", &CAStar::GetFinish)
 		.endClass()
 
 		/// Game.Sound
@@ -596,6 +595,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("BlendAdditive", &IGraphics::BlendAdditive)
 
 			.addFunction("LoadTexture", &IGraphics::LoadTexture)
+			.addFunction("LoadTextureSimple", &IGraphics::LoadTextureLua)
 			.addFunction("UnloadTexture", &IGraphics::UnloadTexture)
 			.addFunction("TextureSet", &IGraphics::TextureSetLua)
 
@@ -607,6 +607,8 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			
 			.addFunction("ClipEnable", &IGraphics::ClipEnable)
 			.addFunction("ClipDisable", &IGraphics::ClipDisable)
+
+			.addProperty("InvalidTexture", &IGraphics::GetInvalidTexture)
 		.endClass()
 
 		/// Engine.TextRender

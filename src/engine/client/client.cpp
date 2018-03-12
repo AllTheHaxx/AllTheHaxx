@@ -1468,6 +1468,22 @@ bool CClient::LoadBackgroundMap()
 	if(g_Config.m_ClMenuBackgroundMap[0] == '\0')
 		str_copyb(g_Config.m_ClMenuBackgroundMap, "ui/menu_day.map");
 
+	// get the current time to decide whether to use nightmap instead
+	time_t rawtime;
+	struct tm* timeinfo;
+	time ( &rawtime );
+	timeinfo = localtime ( &rawtime );
+	if(timeinfo->tm_hour >= 20 || timeinfo->tm_hour < 6) // at night
+	{
+		if(str_comp(g_Config.m_ClMenuBackgroundMap, "ui/menu_day.map") == 0)
+			str_copyb(g_Config.m_ClMenuBackgroundMap, "ui/menu_night.map");
+	}
+	else if(timeinfo->tm_hour >= 6 && timeinfo->tm_hour < 20) // day time
+	{
+		if(str_comp(g_Config.m_ClMenuBackgroundMap, "ui/menu_night.map") == 0)
+			str_copyb(g_Config.m_ClMenuBackgroundMap, "ui/menu_day.map");
+	}
+
 	if(m_pMap->IsLoaded())
 		m_pMap->Unload();
 
@@ -3667,7 +3683,10 @@ void CClient::Run()
 	{
 		// do cleanups - much hack.
 #if defined(CONF_FAMILY_UNIX)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wunused-result"
 		system("rm -rf update");
+		#pragma GCC diagnostic pop
 #elif defined(CONF_FAMILY_WINDOWS)
 		system("if exist update rd update /S /Q");
 #endif
@@ -4740,7 +4759,8 @@ void CClient::InputThread(void *pUser)
 		}
 
 		mem_zerob(aInput);
-		fgets(aInput, sizeof(aInput), stdin);
+		if(fgets(aInput, sizeof(aInput), stdin) == NULL)
+			dbg_msg("client", "input thread: fgets error");
 		aInput[str_length(aInput)-1] = '\0';
 
 #if defined(CONF_FAMILY_WINDOWS)

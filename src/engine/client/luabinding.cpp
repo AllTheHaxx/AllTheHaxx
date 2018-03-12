@@ -5,10 +5,18 @@
 #include <engine/graphics.h>
 #include <engine/irc.h>
 #include <game/client/gameclient.h>
+#include <game/version.h>
 #include <game/client/components/console.h>
 #include <game/client/components/menus.h>
 
 #include "luabinding.h"
+
+
+#define MACRO_L_TO_LF \
+		CLuaFile *pLF = GetLuaFile(L); \
+		if(!pLF) \
+			return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
 
 
 int CLuaBinding::LuaListdirCallback(const char *name, const char *full_path, int is_dir, int dir_type, void *user)
@@ -53,9 +61,7 @@ CLuaFile* CLuaBinding::GetLuaFile(lua_State *L)
 // global namespace
 int CLuaBinding::LuaImport(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	int n = lua_gettop(L);
 	if(n != 1)
@@ -126,9 +132,7 @@ int CLuaBinding::LuaImport(lua_State *L)
 
 int CLuaBinding::LuaExec(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	int n = lua_gettop(L);
 	if(n != 1)
@@ -170,9 +174,7 @@ int CLuaBinding::LuaExec(lua_State *L)
 /* lua call: Listdir(<string> foldername, <string/function> callback) */
 int CLuaBinding::LuaListdir(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	int nargs = lua_gettop(L);
 	if(nargs != 2)
@@ -198,9 +200,7 @@ int CLuaBinding::LuaListdir(lua_State *L)
 
 int CLuaBinding::LuaKillScript(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	pLF->Unload();
 	return 0;
@@ -208,9 +208,7 @@ int CLuaBinding::LuaKillScript(lua_State *L)
 
 int CLuaBinding::LuaEnterFullscreen(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	CLua::m_pCGameClient->m_pMenus->LuaRequestFullscreen(pLF);
 	return 0;
@@ -218,9 +216,7 @@ int CLuaBinding::LuaEnterFullscreen(lua_State *L)
 
 int CLuaBinding::LuaExitFullscreen(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	if(pLF != CLua::m_pClient->Lua()->GetFullscreenedScript())
 		return luaL_error(L, "This script is not currently in fullscreen mode");
@@ -231,9 +227,7 @@ int CLuaBinding::LuaExitFullscreen(lua_State *L)
 
 int CLuaBinding::LuaScriptPath(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	lua_pushstring(L, pLF->GetFilename());
 	return 1;
@@ -256,11 +250,57 @@ int CLuaBinding::LuaStrIsNetAddr(lua_State *L)
 }
 
 
+int CLuaBinding::LuaSetScriptTitle(lua_State *L)
+{
+	MACRO_L_TO_LF
+
+	argcheck(lua_isstring(L, 1), 1, "string")
+	str_copyb(pLF->m_aScriptTitle, lua_tostring(L, 1));
+
+	return 0;
+}
+
+int CLuaBinding::LuaSetScriptInfo(lua_State *L)
+{
+	MACRO_L_TO_LF
+
+	argcheck(lua_isstring(L, 1), 1, "string")
+	str_copyb(pLF->m_aScriptInfo, lua_tostring(L, 1));
+
+	return 0;
+}
+
+int CLuaBinding::LuaCheckVersion(lua_State *L)
+{
+	MACRO_L_TO_LF
+
+	int nargs = lua_gettop(L);
+	if(nargs != 1 && nargs != 2)
+		return luaL_error(L, "CheckVersion expects 1 or 2 arguments");
+
+	// min version
+	argcheck(lua_isnumber(L, 1), 1, "integer")
+	int MinVer = (int)lua_tointeger(L, 1);
+	if(GAME_ATH_VERSION_NUMERIC < MinVer)
+		luaL_error(L, "This script requires ATH >= %d, you are running %d", MinVer, GAME_ATH_VERSION_NUMERIC);
+
+	if(nargs == 2)
+	{
+		// max version
+		argcheck(lua_isnumber(L, 2), 2, "integer")
+		int MaxVer = (int)lua_tointeger(L, 2);
+		if(GAME_ATH_VERSION_NUMERIC > MaxVer)
+			luaL_error(L, "This script was made for ATH <= %d, you are running %d", MaxVer, GAME_ATH_VERSION_NUMERIC);
+	}
+
+	return 0;
+}
+
+
+
 int CLuaBinding::LuaPrintOverride(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	int nargs = lua_gettop(L);
 	if(nargs < 1)
@@ -293,9 +333,7 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 
 int CLuaBinding::LuaThrow(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	int nargs = lua_gettop(L);
 	if(nargs != 1)
@@ -341,9 +379,7 @@ int CLuaBinding::LuaGetPlayerScore(int ClientID)
 // io stuff
 int CLuaBinding::LuaIO_Open(lua_State *L)
 {
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+	MACRO_L_TO_LF
 
 	int nargs = lua_gettop(L);
 	if(nargs < 1 || nargs > 3)
@@ -399,79 +435,6 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	// push an additional argument for the scripter
 	lua_pushstring(L, aFilename);
 	return 2; // we'll leave cleaning the stack up to lua
-}
-
-void CLuaBinding::LuaRenderTexture(int ID, float x, float y, float w, float h, float rot) // depreciated
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	IGraphics *pGraphics = pGameClient->Kernel()->RequestInterface<IGraphics>();
-
-	//pGraphics->MapScreen(0, 0, pGameClient->UI()->Screen()->w, pGameClient->UI()->Screen()->h);
-	pGraphics->TextureSet(ID);
-	pGraphics->QuadsBegin();
-	IGraphics::CQuadItem Item;
-	Item.m_X = x; Item.m_Y = y;
-	Item.m_Width = w; Item.m_Height = h;
-	pGraphics->QuadsSetRotation(rot);
-	pGraphics->QuadsDraw(&Item, 1);
-	pGraphics->QuadsEnd();
-
-	//float Width = 400*3.0f*pGraphics->ScreenAspect();
-	//float Height = 400*3.0f;
-	//pGraphics->MapScreen(0, 0, Width, Height);
-}
-
-void CLuaBinding::LuaRenderQuadRaw(int x, int y, int w, int h)
-{
-	CGameClient *pGameClient = (CGameClient *)CLua::GameClient();
-	IGraphics *pGraphics = pGameClient->Kernel()->RequestInterface<IGraphics>();
-
-	IGraphics::CQuadItem Item;
-	Item.m_X = x; Item.m_Y = y;
-	Item.m_Width = w; Item.m_Height = h;
-	pGraphics->QuadsDraw(&Item, 1);
-}
-
-// irc namespace
-int CLuaBinding::LuaGetIrcUserlist(lua_State *L)
-{
-	CLuaFile *pLF = GetLuaFile(L);
-	if(!pLF)
-		return luaL_error(L, "FATAL: got no lua file handler for this script?!");
-
-	int nargs = lua_gettop(L);
-	if(nargs == 0)
-		return luaL_error(L, "Game.IRC:GetUserlist expects at least one argument");
-
-	for(int i = 1; i <= nargs; i++)
-	{
-		argcheck(lua_isstring(L, i), i, "string");
-		const char *pChanName = lua_tostring(L, i);
-
-		CIRCCom *pCom = CLua::m_pCGameClient->m_pIRC->GetCom(std::string(pChanName));
-		if(pCom)
-		{
-			if(pCom->GetType() == CIRCCom::TYPE_CHANNEL)
-			{
-				CComChan *pChan = static_cast<CComChan*>(pCom);
-				const sorted_array<CComChan::CUser>& Userlist = pChan->m_Users;
-				lua_createtable(L, 0, Userlist.size());
-				int TableIndex = lua_gettop(L);
-				for(int u = 0; u < Userlist.size(); u++)
-				{
-					lua_pushinteger(L, u+1); // lua is 1-based
-					lua_pushstring(L, Userlist[u].c_str());
-					lua_settable(L, TableIndex);
-				}
-			}
-			else
-				lua_pushstring(L, pChanName);
-		}
-		else
-			lua_pushnil(L);
-	}
-
-	return nargs;
 }
 
 const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L)

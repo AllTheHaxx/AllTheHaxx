@@ -150,7 +150,7 @@ void CLua::AddUserscript(const char *pFilename)
 		dbg_msg("Lua", "adding script '%s' to the list", file.c_str());
 
 	int index = m_apLuaFiles.add(new CLuaFile(this, file, Autoload));
-	if(Autoload)
+	if(Autoload && !g_Config.m_Failsafe)
 		m_apLuaFiles[index]->Activate();
 }
 

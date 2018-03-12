@@ -438,7 +438,10 @@ public:
 
 	// simple uncompressed RGBA loaders
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags);
+	virtual int LoadTextureLua(const char *pFilename);
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
+
+	virtual int GetInvalidTexture() const { return m_InvalidTexture; }
 
 	void ScreenshotDirect();
 

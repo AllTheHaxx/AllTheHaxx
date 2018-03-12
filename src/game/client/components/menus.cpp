@@ -115,7 +115,6 @@ CMenus::CMenus()
 
 	m_LoadCurrent = 0;
 	m_LoadTotal = 100; // some approx number so that we don't divide m_LoadCurrent by zero
-
 }
 
 float CMenus::ButtonFade(CButtonContainer *pBC, float Seconds, int Checked)
@@ -2197,8 +2196,33 @@ void CMenus::OnRender()
 	vec3 Rgb = HsvToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorVal/255.0f));
 	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
 
-	ms_ColorTabbarInactiveOutgame = vec4(0,0,0,0.25f);
-	ms_ColorTabbarActiveOutgame = vec4(0,0,0,0.5f);
+	static int s_IsNightTime = 0;
+	if(s_IsNightTime == 0)
+	{
+		time_t rawtime;
+		struct tm *timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		if(timeinfo->tm_hour >= 20 || timeinfo->tm_hour < 6) // at night
+		{
+			s_IsNightTime = 1;
+		}
+		else if(timeinfo->tm_hour >= 6 && timeinfo->tm_hour < 20) // day time
+		{
+			s_IsNightTime = -1;
+		}
+	}
+
+	if(!s_IsNightTime)
+	{
+		ms_ColorTabbarInactiveOutgame = vec4(0, 0, 0, 0.25f);
+		ms_ColorTabbarActiveOutgame = vec4(0, 0, 0, 0.5f);
+	}
+	else
+	{
+		ms_ColorTabbarInactiveOutgame = vec4(0.8f, 0.8f, 0.8f, 0.15f);
+		ms_ColorTabbarActiveOutgame = vec4(0.8f, 0.8f, 0.8f, 0.25f);
+	}
 
 	float ColorIngameScaleI = 0.5f;
 	float ColorIngameAcaleA = 0.2f;

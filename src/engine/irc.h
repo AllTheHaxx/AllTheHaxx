@@ -3,6 +3,9 @@
 #ifndef ENGINE_IRC_H
 #define ENGINE_IRC_H
 
+#include <lua.hpp>
+#include <engine/external/luabridge/LuaBridge.h>
+
 #include "kernel.h"
 #include <vector>
 #include <string>
@@ -186,6 +189,7 @@ public:
     virtual void SetNick(const char *nick) = 0;
     virtual const char* GetNick() = 0;
 	virtual const std::string &GetNickStd() const = 0;
+	virtual luabridge::LuaRef LuaGetUserlist(const char *pChannelName, lua_State *L) = 0;
 	virtual int NumUnreadMessages(int *pArray = 0) = 0;
     virtual int GetMsgType(const char *msg) = 0;
 
