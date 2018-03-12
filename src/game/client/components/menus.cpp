@@ -2213,7 +2213,7 @@ void CMenus::OnRender()
 		}
 	}
 
-	if(s_IsNightTime == -1)
+	if(s_IsNightTime == -1 || !g_Config.m_ClMenuBackground)
 	{
 		ms_ColorTabbarInactiveOutgame = vec4(0, 0, 0, 0.25f);
 		ms_ColorTabbarActiveOutgame = vec4(0, 0, 0, 0.5f);
