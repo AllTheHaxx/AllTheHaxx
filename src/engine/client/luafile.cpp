@@ -254,12 +254,18 @@ void CLuaFile::Init()
 	// gather basic global infos from the script
 	lua_getglobal(m_pLuaState, "g_ScriptTitle");
 	if(lua_isstring(m_pLuaState, -1))
+	{
 		str_copy(m_aScriptTitle, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptTitle));
+		dbg_msg(m_Filename.c_str(), "Warning: g_ScriptTitle is deprecated. Use 'SetScriptTitle()' instead.");
+	}
 	lua_pop(m_pLuaState, 1);
 
 	lua_getglobal(m_pLuaState, "g_ScriptInfo");
 	if(lua_isstring(m_pLuaState, -1))
+	{
 		str_copy(m_aScriptInfo, lua_tostring(m_pLuaState, -1), sizeof(m_aScriptInfo));
+		dbg_msg(m_Filename.c_str(), "Warning: g_ScriptInfo is deprecated. Use 'SetScriptInfo()' instead.");
+	}
 	lua_pop(m_pLuaState, 1);
 
 	if(str_find_nocase(m_aScriptTitle, " b| ") || str_find_nocase(m_aScriptInfo, " b | ")) { Unload(false); return; }

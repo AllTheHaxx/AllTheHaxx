@@ -29,6 +29,9 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 	if(g_StealthMode)
 		return;
 
+	lua_register(L, "SetScriptTitle", CLuaBinding::LuaSetScriptTitle);
+	lua_register(L, "SetScriptInfo", CLuaBinding::LuaSetScriptInfo);
+	lua_register(L, "CheckVersion", CLuaBinding::LuaCheckVersion);
 	lua_register(L, "print", CLuaBinding::LuaPrintOverride);
 	lua_register(L, "_io_open", CLuaBinding::LuaIO_Open);
 	lua_register(L, "throw", CLuaBinding::LuaThrow); // adds an exception, but doesn't jump out like 'error' does

@@ -15,16 +15,6 @@
 			return luaL_argerror(L, (narg), (buf)); \
 		}
 
-#define argcheck2(cond, narg, expected) \
-		if(!(cond)) \
-		{ \
-			if(g_Config.m_Debug) \
-				dbg_msg("Lua/debug", "%s: argcheck: narg=%i expected='%s'", __FUNCTION__, narg, expected); \
-			char buf[64]; \
-			str_format(buf, sizeof(buf), "expected a %s value, got %s", expected, lua_typename(L, lua_type(L, narg))); \
-			luaL_argerror(L, (narg), (buf)); \
-		}
-
 
 class CLuaBinding
 {
@@ -33,6 +23,9 @@ public:
 	static int LuaListdirCallback(const char *name, const char *full_path, int is_dir, int dir_type, void *user);
 
 	// global namespace
+	static int LuaSetScriptTitle(lua_State *L);
+	static int LuaSetScriptInfo(lua_State *L);
+	static int LuaCheckVersion(lua_State *L);
 	static int LuaPrintOverride(lua_State *L);
 	static int LuaThrow(lua_State *L);
 	static int LuaStrIsNetAddr(lua_State *L);
