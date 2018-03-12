@@ -185,23 +185,14 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(BUTTON_WIDTH(DummyConnecting ? Localize("Connecting dummy") : Localize("Connect dummy")), &Button, &ButtonBar);
 
-	static CButtonContainer s_DummyButton;
+	static CButtonContainer s_DummyConnectButton;
 	if(DummyConnecting)
-		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
-	else if(DoButton_Menu(&s_DummyButton, Localize("Connect dummy"), 0, &Button, 0, CUI::CORNER_L))
+		DoButton_Menu(&s_DummyConnectButton, Localize("Connecting dummy"), 1, &Button);
+	else if(DoButton_Menu(&s_DummyConnectButton, Localize("Connect dummy"), 0, &Button, 0, CUI::CORNER_L))
 	{
 		Client()->DummyConnect();
 	}
 
-	if(Client()->DummiesConnected())
-	{
-		ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-		ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Disconnect dummy")), &Button, &ButtonBar);
-		if(DoButton_Menu(&s_DummyButton, Localize("Disconnect dummy"), 0, &Button, 0, CUI::CORNER_ALL))
-			Client()->DummyDisconnect(0, Client()->DummiesConnected());
-	}
-
-#undef BUTTON_WIDTH
 	ButtonBar.VSplitLeft(30.0f, &Button, &ButtonBar);
 
 	const CSkins::CSkin *pDummySkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(g_Config.m_ClDummySkin));
@@ -222,11 +213,21 @@ void CMenus::RenderGame(CUIRect MainView)
 
 	// skin view (fake the button)
 	float Seconds = 0.6f; //  0.6 seconds for fade
-	float Fade = ButtonFade(&s_DummyButton, Seconds, 0);
+	float Fade = ButtonFade(&s_DummyConnectButton, Seconds, 0);
 	float FadeVal = Fade/Seconds;
 	vec4 FinalColor = mix(vec4(0.0f, 0.0f, 0.0f, 0.25f), vec4(1,1,1,0.5f), FadeVal);
 	RenderTools()->DrawUIRect(&Button, FinalColor, CUI::CORNER_R, 10.0f);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Button.x+Button.w/2, Button.y+Button.h/2+2.0f));
+
+	if(Client()->DummiesConnected())
+	{
+		ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+		ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Disconnect dummy")), &Button, &ButtonBar);
+		static CButtonContainer s_DummyDisconnectButton;
+		if(DoButton_Menu(&s_DummyDisconnectButton, Localize("Disconnect dummy"), 0, &Button, 0, CUI::CORNER_ALL))
+			Client()->DummyDisconnect(0, Client()->DummiesConnected());
+	}
+#undef BUTTON_WIDTH
 }
 
 void CMenus::RenderGameExtra(CUIRect ButtonBar)

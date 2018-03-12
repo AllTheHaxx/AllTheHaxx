@@ -392,8 +392,8 @@ void CPlayers::RenderPlayer(
 	Prev = *pPrevChar;
 	Player = *pPlayerChar;
 
-	CNetObj_PlayerInfo pInfo = *pPlayerInfo;
-	CTeeRenderInfo RenderInfo = m_aRenderInfo[pInfo.m_ClientID];
+	CNetObj_PlayerInfo Info = *pPlayerInfo;
+	CTeeRenderInfo RenderInfo = m_aRenderInfo[Info.m_ClientID];
 
 	bool NewTick = m_pClient->m_NewTick;
 
@@ -402,9 +402,9 @@ void CPlayers::RenderPlayer(
 	if (m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 		OtherTeam = false;
 	else if (m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
-		OtherTeam = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
+		OtherTeam = m_pClient->m_Teams.Team(Info.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
 	else
-		OtherTeam = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+		OtherTeam = m_pClient->m_Teams.Team(Info.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
@@ -412,7 +412,7 @@ void CPlayers::RenderPlayer(
 	float IntraTick = Client()->IntraGameTick();
 
 	float Angle;
-	if(pInfo.m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(Info.m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
 		Angle = GetAngle(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
@@ -443,7 +443,7 @@ void CPlayers::RenderPlayer(
 	// use preditect players if needed
 	if (!m_pClient->AntiPingPlayers())
 	{
-		if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		if(Info.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
 			if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 			{
@@ -465,8 +465,8 @@ void CPlayers::RenderPlayer(
 			if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 			{
 				// apply predicted results
-				m_pClient->m_aClients[pInfo.m_ClientID].m_Predicted.Write(&Player);
-				m_pClient->m_aClients[pInfo.m_ClientID].m_PrevPredicted.Write(&Prev);
+				m_pClient->m_aClients[Info.m_ClientID].m_Predicted.Write(&Player);
+				m_pClient->m_aClients[Info.m_ClientID].m_PrevPredicted.Write(&Prev);
 
 				IntraTick = Client()->PredIntraGameTick();
 				NewTick = m_pClient->m_NewPredictedTick;
@@ -777,7 +777,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// render the "shadow" tee
-	if(pInfo.m_Local && (g_Config.m_Debug || g_Config.m_ClUnpredictedShadow))
+	if(Info.m_Local && (g_Config.m_Debug || g_Config.m_ClUnpredictedShadow))
 	{
 		vec2 GhostPosition = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
 		CTeeRenderInfo Ghost = RenderInfo;
@@ -794,7 +794,7 @@ void CPlayers::RenderPlayer(
 		RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
-	if (g_Config.m_ClShowDirection && (!pInfo.m_Local || DemoPlayer()->IsPlaying()))
+	if (g_Config.m_ClShowDirection && (!Info.m_Local || DemoPlayer()->IsPlaying()))
 	{
 		if (Player.m_Direction == -1)
 		{
@@ -830,13 +830,13 @@ void CPlayers::RenderPlayer(
 		}
 	}
 
-	LUA_FIRE_EVENT("PreRenderPlayer", pInfo.m_ClientID, Position.x, Position.y, Direction.x, Direction.y, OtherTeam);
+	LUA_FIRE_EVENT("PreRenderPlayer", Info.m_ClientID, Position.x, Position.y, Direction.x, Direction.y, OtherTeam);
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, OtherTeam);
-	LUA_FIRE_EVENT("PostRenderPlayer", pInfo.m_ClientID, Position.x, Position.y, Direction.x, Direction.y, OtherTeam);
+	LUA_FIRE_EVENT("PostRenderPlayer", Info.m_ClientID, Position.x, Position.y, Direction.x, Direction.y, OtherTeam);
 
-	m_pClient->m_aClients[pInfo.m_ClientID].m_ATH |=
-			   (m_pClient->m_Snap.m_aCharacters[pInfo.m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH1) &&
-			   (m_pClient->m_Snap.m_aCharacters[pInfo.m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH2);
+	m_pClient->m_aClients[Info.m_ClientID].m_ATH |=
+			   (m_pClient->m_Snap.m_aCharacters[Info.m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH1) &&
+			   (m_pClient->m_Snap.m_aCharacters[Info.m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH2);
 
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
@@ -859,13 +859,13 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsEnd();
 	}
 
-	if (m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick())
+	if (m_pClient->m_aClients[Info.m_ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[Info.m_ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick())
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 		Graphics()->QuadsBegin();
 
-		int SinceStart = Client()->GameTick() - m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart;
-		int FromEnd = m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - Client()->GameTick();
+		int SinceStart = Client()->GameTick() - m_pClient->m_aClients[Info.m_ClientID].m_EmoticonStart;
+		int FromEnd = m_pClient->m_aClients[Info.m_ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - Client()->GameTick();
 
 		float a = 1;
 
@@ -888,7 +888,7 @@ void CPlayers::RenderPlayer(
 		if (OtherTeam)
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * (float) g_Config.m_ClShowOthersAlpha / 100.0f);
 		// client_datas::emoticon is an offset from the first emoticon
-		RenderTools()->SelectSprite(SPRITE_OOP + m_pClient->m_aClients[pInfo.m_ClientID].m_Emoticon);
+		RenderTools()->SelectSprite(SPRITE_OOP + m_pClient->m_aClients[Info.m_ClientID].m_Emoticon);
 		IGraphics::CQuadItem QuadItem(Position.x, Position.y - 23 - 32*h, 64, 64*h);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 		Graphics()->QuadsEnd();
