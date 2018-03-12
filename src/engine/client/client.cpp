@@ -1462,6 +1462,22 @@ bool CClient::LoadBackgroundMap()
 	if(g_Config.m_ClMenuBackgroundMap[0] == '\0')
 		str_copyb(g_Config.m_ClMenuBackgroundMap, "ui/menu_day.map");
 
+	// get the current time to decide whether to use nightmap instead
+	time_t rawtime;
+	struct tm* timeinfo;
+	time ( &rawtime );
+	timeinfo = localtime ( &rawtime );
+	if(timeinfo->tm_hour >= 20 || timeinfo->tm_hour < 6) // at night
+	{
+		if(str_comp(g_Config.m_ClMenuBackgroundMap, "ui/menu_day.map") == 0)
+			str_copyb(g_Config.m_ClMenuBackgroundMap, "ui/menu_night.map");
+	}
+	else if(timeinfo->tm_hour >= 6 && timeinfo->tm_hour < 20) // day time
+	{
+		if(str_comp(g_Config.m_ClMenuBackgroundMap, "ui/menu_night.map") == 0)
+			str_copyb(g_Config.m_ClMenuBackgroundMap, "ui/menu_day.map");
+	}
+
 	if(m_pMap->IsLoaded())
 		m_pMap->Unload();
 
