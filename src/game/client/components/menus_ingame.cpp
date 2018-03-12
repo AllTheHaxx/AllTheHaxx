@@ -106,7 +106,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Spectate")), &Button, &ButtonBar);
 			if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
-				if(g_Config.m_ClDummy == 0 || m_pClient->Client()->DummyConnected())
+				if(g_Config.m_ClDummy == 0 || m_pClient->Client()->DummiesConnected())
 				{
 					m_pClient->SendSwitchTeam(TEAM_SPECTATORS);
 					SetActive(false);
@@ -183,18 +183,24 @@ void CMenus::RenderGame(CUIRect MainView)
 
 
 	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(BUTTON_WIDTH(DummyConnecting ? Localize("Connecting dummy") : Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy")), &Button, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(DummyConnecting ? Localize("Connecting dummy") : Localize("Connect dummy")), &Button, &ButtonBar);
 
 	static CButtonContainer s_DummyButton;
 	if(DummyConnecting)
 		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
-	else if(DoButton_Menu(&s_DummyButton, Client()->DummyConnected() ? Localize("Disconnect dummy") : Localize("Connect dummy"), 0, &Button, 0, CUI::CORNER_L))
+	else if(DoButton_Menu(&s_DummyButton, Localize("Connect dummy"), 0, &Button, 0, CUI::CORNER_L))
 	{
-		if(!Client()->DummyConnected())
-			Client()->DummyConnect();
-		else
-			Client()->DummyDisconnect(0);
+		Client()->DummyConnect();
 	}
+
+	if(Client()->DummiesConnected())
+	{
+		ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+		ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Disconnect dummy")), &Button, &ButtonBar);
+		if(DoButton_Menu(&s_DummyButton, Localize("Disconnect dummy"), 0, &Button, 0, CUI::CORNER_ALL))
+			Client()->DummyDisconnect(0, Client()->DummiesConnected());
+	}
+
 #undef BUTTON_WIDTH
 	ButtonBar.VSplitLeft(30.0f, &Button, &ButtonBar);
 

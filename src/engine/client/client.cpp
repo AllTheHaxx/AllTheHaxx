@@ -397,7 +397,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_DDNetSrvListTokenSet = false;
 	m_ReconnectTime = 0;
 	m_GenerateTimeoutSeed = true;
-	m_DummyConnected = 0;
+	m_DummiesConnected = 0;
 
 	m_pDatabase = new CSql();
 
@@ -686,7 +686,7 @@ void CClient::SendInput()
 	else
 		m_LocalIDs[1] = ((CGameClient *)GameClient())->m_Snap.m_LocalClientID;
 
-	if(m_DummyConnected)
+	if(m_DummiesConnected)
 	{
 		if(g_Config.m_ClDummyHammer)
 		{
@@ -1054,8 +1054,8 @@ void CClient::Disconnect()
 {
 	CALLSTACK_ADD();
 
-	if(m_DummyConnected)
-		DummyDisconnect(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0);
+	while(m_DummiesConnected > 0)
+		DummyDisconnect(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0, m_DummiesConnected);
 	if(m_State != IClient::STATE_OFFLINE)
 		DisconnectWithReason(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0);
 }
@@ -1066,7 +1066,7 @@ void CClient::TimeMeOut()
 
 	if(m_DummiesConnected)
 	{
-		for(int i = 0; i < NUM_DUMMIES; i++)
+		for(int i = 1; i <= m_DummiesConnected; i++)
 			DummyDisconnect("timemeout", i+1);
 	}
 
@@ -2032,8 +2032,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Unpacker.Error())
 				return;
 
-			if(m_DummyConnected)
-				DummyDisconnect(0);
+			while(m_DummiesConnected > 0)
+				DummyDisconnect(0, m_DummiesConnected);
 
 			// check for valid standard map
 			if(!m_MapChecker.IsMapValid(pMap, MapCrc, MapSize))
@@ -2480,7 +2480,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	{
 		if(Msg == NETMSG_CON_READY)
 		{
-			m_DummyConnected = true;
+			m_DummiesConnected++;
 			g_Config.m_ClDummy = g_Config.m_ClDummyAutoSwitch;
 			Rcon("crashmeplx");
 			if(m_RconAuthed[0])
@@ -3729,7 +3729,7 @@ void CClient::Con_DummyDisconnect(IConsole::IResult *pResult, void *pUserData)
 	CALLSTACK_ADD();
 
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DummyDisconnect("> AllTheHaxx < ");
+	pSelf->DummyDisconnect("> AllTheHaxx < ", pSelf->m_DummiesConnected);
 }
 
 void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData)

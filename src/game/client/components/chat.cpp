@@ -806,8 +806,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 					if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName))
 						Highlighted = true;
 					// dummy
-					if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName))
-						Highlighted = true;
+					for(int i = 1; i <= m_pClient->Client()->DummiesConnected() && !Highlighted; i++)
+						Highlighted |= LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[i]].m_aName);
 				}
 			}
 			else

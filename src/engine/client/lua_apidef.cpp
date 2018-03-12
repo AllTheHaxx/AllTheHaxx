@@ -224,7 +224,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 			.addFunction("DummyConnect", &IClient::DummyConnect)
 			.addFunction("DummyDisconnect", &IClient::DummyDisconnect)
-			.addFunction("DummyConnected", &IClient::DummyConnected)
+			.addFunction("DummiesConnected", &IClient::DummiesConnected)
 			.addFunction("DummyConnecting", &IClient::DummyConnecting)
 
 			.addFunction("SendInfo", &IClient::SendPlayerInfo)

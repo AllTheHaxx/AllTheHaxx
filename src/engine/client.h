@@ -121,7 +121,7 @@ public:
 	virtual void Disconnect() = 0;
 
 	// dummy
-	virtual void DummyDisconnect(const char *pReason) = 0;
+	virtual void DummyDisconnect(const char *pReason, int VClient) = 0;
 	virtual void DummyConnect() = 0;
 	virtual int DummiesConnected() = 0;
 	virtual bool DummyConnecting() = 0;
