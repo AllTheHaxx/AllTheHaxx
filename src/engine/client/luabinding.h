@@ -54,8 +54,8 @@ public:
 	static int LuaGetPlayerScore(int ClientID);
 
 	// helper functions
-	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L);
-	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF);
+	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L, bool MakeFullPath = false);
+	static const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF, bool MakeFullPath = false);
 };
 
 

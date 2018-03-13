@@ -52,6 +52,7 @@ public:
 	virtual const char* GetExecutableName() const = 0;
 
 	virtual const char *SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend = 0, bool ForcePrepend = false) const = 0;
+	virtual const char *MakeFullPath(char *pBuffer, unsigned BufferSize, int StorageType) const = 0;
 };
 
 extern IStorageTW *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);

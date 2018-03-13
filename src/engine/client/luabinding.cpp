@@ -26,7 +26,7 @@ int CLuaBinding::LuaListdirCallback(const char *name, const char *full_path, int
 	lua_pushstring(L, name); // push arg 1 (element name)
 	lua_pushstring(L, full_path); // push arg 2 (element path)
 	lua_pushboolean(L, is_dir); // push arg 3 (bool indicating whether element is a folder)
-	lua_pcall(L, 3, 1, 0);
+	lua_call(L, 3, 1); // no pcall so that errors get propagated upwards
 	int ret = 0;
 	if(lua_isnumber(L, -1))
 		ret = round_to_int((float)lua_tonumber(L, -1));
@@ -192,8 +192,8 @@ int CLuaBinding::LuaListdir(lua_State *L)
 
 	char aSandboxedPath[512];
 	str_copyb(aSandboxedPath, lua_tostring(L, 1)); // arg1
-	const char *pDir = SandboxPath(aSandboxedPath, sizeof(aSandboxedPath), pLF);
-	lua_Number ret = (lua_Number)fs_listdir_verbose(pDir, LuaListdirCallback, IStorageTW::TYPE_ALL, L);
+	const char *pDir = SandboxPath(aSandboxedPath, sizeof(aSandboxedPath), pLF, true);
+	lua_Number ret = (lua_Number)fs_listdir_verbose(pDir, LuaListdirCallback, IStorageTW::TYPE_SAVE, L);
 	lua_pushnumber(L, ret);
 	return 1;
 }
@@ -437,14 +437,14 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	return 2; // we'll leave cleaning the stack up to lua
 }
 
-const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L)
+const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L, bool MakeFullPath)
 {
 	CLuaFile *pLF = GetLuaFile(L);
-	dbg_assert_strict(pLF != NULL, "FATAL: got no lua file handler for this script?!");
-	return SandboxPath(pInOutBuffer, BufferSize, pLF);
+	dbg_assert_lua(pLF != NULL, "FATAL: got no lua file handler for this script?!");
+	return SandboxPath(pInOutBuffer, BufferSize, pLF, MakeFullPath);
 }
 
-const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF)
+const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF, bool MakeFullPath)
 {
 	const char *pSubdir = "_shared";
 	if(pLF)
@@ -452,6 +452,8 @@ const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CL
 
 	char aFullPath[512];
 	str_formatb(aFullPath, "lua_sandbox/%s/%s", pSubdir, CLua::m_pCGameClient->Storage()->SandboxPath(pInOutBuffer, BufferSize));
+	if(MakeFullPath)
+		CLua::m_pCGameClient->Storage()->MakeFullPath(aFullPath, sizeof(aFullPath), IStorageTW::TYPE_SAVE);
 	str_copy(pInOutBuffer, aFullPath, BufferSize);
 
 	return pInOutBuffer;

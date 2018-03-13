@@ -344,7 +344,7 @@ public:
 		return result;
 	}
 
-	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) const
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aaStoragePaths[Type], !m_aaStoragePaths[Type][0] ? "" : "/", pDir);
 		return pBuffer;
@@ -680,6 +680,14 @@ public:
 			str_append(pBuffer, (*it + std::string("/")).c_str(), BufferSize);
 		pBuffer[str_length(pBuffer)-1] = '\0'; // remove the trailing slash
 
+		return pBuffer;
+	}
+
+	const char *MakeFullPath(char *pBuffer, unsigned BufferSize, int StorageType) const
+	{
+		char aBuf[768];
+		str_copyb(aBuf, pBuffer); // make a copy because we can read and write to the same buffer at the same time
+		GetPath(StorageType, aBuf, pBuffer, BufferSize);
 		return pBuffer;
 	}
 
