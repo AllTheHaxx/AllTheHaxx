@@ -501,6 +501,17 @@ set(SOURCE_FILES ${EXTERNAL_SOURCES}
         src/game/client/components/menus_settings/settings_appearance.cpp
         src/game/client/components/menus_settings/settings_hud.cpp
         src/game/client/components/menus_listbox.cpp
-        src/game/client/components/menus_popups.cpp src/base/system++/linked_list.h src/tools/lad_maker.cpp src/testing/test_pool.cpp src/engine/client/lua/luajson.cpp src/engine/client/lua/luajson.h src/engine/client/lua/luasql.cpp src/engine/client/lua/luasql.h)
+        src/game/client/components/menus_popups.cpp
+        src/base/system++/linked_list.h
+        src/tools/lad_maker.cpp
+        src/testing/test_pool.cpp
+        src/engine/client/lua/luajson.cpp
+        src/engine/client/lua/luajson.h
+        src/engine/client/lua/luasql.cpp
+        src/engine/client/lua/luasql.h
+        src/engine/client/luaresman.cpp
+        src/engine/client/luaresman.h
+        src/engine/client/luaresmandef.h
+        )
 
 add_executable(AllTheHaxx ${SOURCE_FILES})

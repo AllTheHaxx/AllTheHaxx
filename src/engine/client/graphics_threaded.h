@@ -433,12 +433,14 @@ public:
 	virtual int LinesDrawLua(lua_State *L);
 
 	virtual int UnloadTexture(int Index);
+	virtual int UnloadTextureLua(int Index, lua_State *L);
 	virtual int LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags);
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData);
 
 	// simple uncompressed RGBA loaders
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags);
-	virtual int LoadTextureLua(const char *pFilename);
+	virtual int LoadTextureLua(const char *pFilename, int StorageType, int StoreFormat, int Flags, lua_State *L);
+	virtual int LoadTextureLuaSimple(const char *pFilename, lua_State *L);
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
 
 	virtual int GetInvalidTexture() const { return m_InvalidTexture; }

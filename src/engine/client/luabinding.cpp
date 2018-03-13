@@ -282,7 +282,12 @@ int CLuaBinding::LuaCheckVersion(lua_State *L)
 	argcheck(lua_isnumber(L, 1), 1, "integer")
 	int MinVer = (int)lua_tointeger(L, 1);
 	if(GAME_ATH_VERSION_NUMERIC < MinVer)
-		luaL_error(L, "This script requires ATH >= %d, you are running %d", MinVer, GAME_ATH_VERSION_NUMERIC);
+	{
+		char aBuf[128];
+		str_formatb(aBuf, "WARNING: This script requires ATH >= %d, you are running %d", MinVer, GAME_ATH_VERSION_NUMERIC);
+		pLF->Lua()->HandleException(aBuf, pLF);
+		pLF->Lua()->HandleException("WARNING: errors might occur or the script might not work at all.", pLF);
+	}
 
 	if(nargs == 2)
 	{
@@ -290,7 +295,12 @@ int CLuaBinding::LuaCheckVersion(lua_State *L)
 		argcheck(lua_isnumber(L, 2), 2, "integer")
 		int MaxVer = (int)lua_tointeger(L, 2);
 		if(GAME_ATH_VERSION_NUMERIC > MaxVer)
-			luaL_error(L, "This script was made for ATH <= %d, you are running %d", MaxVer, GAME_ATH_VERSION_NUMERIC);
+		{
+			char aBuf[128];
+			str_formatb(aBuf, "WARNING: This script was made for ATH <= %d, you are running %d", MaxVer, GAME_ATH_VERSION_NUMERIC);
+			pLF->Lua()->HandleException(aBuf, pLF);
+			pLF->Lua()->HandleException("WARNING: errors might occur or the script might not work at all.", pLF);
+		}
 	}
 
 	return 0;

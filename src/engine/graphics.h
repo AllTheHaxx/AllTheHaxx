@@ -97,9 +97,11 @@ public:
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 	virtual int UnloadTexture(int Index) = 0;
+	virtual int UnloadTextureLua(int Index, lua_State *L) = 0;
 	virtual int LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags) = 0;
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
-	virtual int LoadTextureLua(const char *pFilename) = 0;
+	virtual int LoadTextureLua(const char *pFilename, int StorageType, int StoreFormat, int Flags, lua_State *L) = 0;
+	virtual int LoadTextureLuaSimple(const char *pFilename, lua_State *L) = 0;
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 
 	virtual void TextureSet(int TextureID) = 0;

@@ -342,6 +342,13 @@ int CGraphics_Threaded::UnloadTexture(int Index)
 	return 0;
 }
 
+int CGraphics_Threaded::UnloadTextureLua(int Index, lua_State *L)
+{
+	if(Index >= 0 && Index != m_InvalidTexture)
+		CLuaBinding::GetLuaFile(L)->GetResMan()->DeregisterTexture(Index);
+	return UnloadTexture(Index);
+}
+
 static int ImageFormatToTexFormat(int Format)
 {
 	if(Format == CImageInfo::FORMAT_RGB) return CCommandBuffer::TEXFORMAT_RGB;
@@ -452,9 +459,20 @@ int CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int 
 	return m_InvalidTexture;
 }
 
-int CGraphics_Threaded::LoadTextureLua(const char *pFilename)
+int CGraphics_Threaded::LoadTextureLua(const char *pFilename, int StorageType, int StoreFormat, int Flags, lua_State *L)
 {
-	return LoadTexture(pFilename, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, TEXLOAD_NORESAMPLE);
+	int TexID = LoadTexture(pFilename, StorageType, StoreFormat, Flags);
+	if(TexID >= 0 && TexID != m_InvalidTexture)
+		CLuaBinding::GetLuaFile(L)->GetResMan()->RegisterTexture(TexID);
+	return TexID;
+}
+
+int CGraphics_Threaded::LoadTextureLuaSimple(const char *pFilename, lua_State *L)
+{
+	int TexID = LoadTexture(pFilename, IStorageTW::TYPE_ALL, CImageInfo::FORMAT_AUTO, TEXLOAD_NORESAMPLE);
+	if(TexID >= 0 && TexID != m_InvalidTexture)
+		CLuaBinding::GetLuaFile(L)->GetResMan()->RegisterTexture(TexID);
+	return TexID;
 }
 
 int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)

@@ -149,6 +149,7 @@ void CLuaFile::Unload(bool error, bool CalledFromExceptionHandler)
 		CLua::m_pCGameClient->OnLuaScriptUnload(this);
 
 		lua_gc(m_pLuaState, LUA_GCCOLLECT, 0);
+		m_ResMan.FreeAll(CLua::m_pCGameClient->Kernel());
 	}
 	else if(m_State == STATE_IDLE)
 	{

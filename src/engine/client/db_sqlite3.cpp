@@ -32,7 +32,7 @@ int CQuery::GetID(const char *pName)
 }
 
 
-CSql::CSql(const char *pFilename)
+CSql::CSql(const char *pFilename, bool Threaded)
 {
 	char aFilePath[768], aFullPath[1024];
 	fs_storage_path("Teeworlds", aFilePath, sizeof(aFilePath));
@@ -42,7 +42,6 @@ CSql::CSql(const char *pFilename)
 
 	fs_makedir_rec_for(aFullPath);
 
-	dbg_msg("DENNIS", "opening DB %s", aFullPath); // DENNIS
 	int rc = sqlite3_open(aFullPath, &m_pDB);
 	if (rc)
 	{
@@ -51,11 +50,10 @@ CSql::CSql(const char *pFilename)
 	}
 
 	m_Running = true;
-
-			int64 start = time_get_raw(); // DENNIS
-	m_pThread = thread_init_named(InitWorker, this, "sqlite");
-			int64 finished = time_get_raw(); // DENNIS
-			dbg_msg("DENNIS", "## took %lli (%.4f)", finished-start, (double)(finished-start)/(double)time_freq()); // DENNIS
+	if(Threaded)
+		m_pThread = thread_init_named(InitWorker, this, "sqlite");
+	else
+		m_pThread = NULL;
 }
 
 CSql::~CSql()
@@ -73,6 +71,8 @@ CSql::~CSql()
 		thread_wait(m_pThread);
 		m_pThread = NULL;
 	}
+	else
+		Flush();
 }
 
 void CSql::InsertQuery(CQuery *pQuery)

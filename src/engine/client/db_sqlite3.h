@@ -62,7 +62,7 @@ private:
 	std::queue<CQuery *> m_lpQueries;
 
 public:
-	CSql(const char *pFilename = "ath_data.db");
+	CSql(const char *pFilename = "ath_data.db", bool Threaded = true);
 	~CSql();
 
 	/**
@@ -74,8 +74,15 @@ public:
 	/**
 	 * Synchronously flushes the query queue (i.e. circumvents the thread!)
 	 * This forces immediate execution of all remaining queries and waits for their completion.
+	 * Note: this function is defined as as a simple `while(Work());`
 	 */
 	void Flush();
+
+	/**
+	 * Synchronously executes one round of queries (i.e. circumvents the thread!)
+	 * By default this means that 250 queries from the queue will be executed and waited for their completion.
+	 */
+	unsigned int Work();
 
 	/**
 	 * Discards all left queries
@@ -87,7 +94,6 @@ public:
 private:
 	void ExecuteQuery(CQuery *pQuery);
 	void WorkerThread();
-	unsigned int Work();
 	static void InitWorker(void *pSelf);
 };
 

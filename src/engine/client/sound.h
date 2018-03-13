@@ -36,6 +36,11 @@ public:
 	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor);
 	virtual void UnloadSample(int SampleID);
 
+	// for lua
+	virtual int LoadWVLua(const char *pFilename, lua_State *L);
+	virtual int LoadOpusLua(const char *pFilename, lua_State *L);
+	virtual void UnloadSampleLua(int SampleID, lua_State *L);
+
 	virtual float GetSampleDuration(int SampleID); // in s
 
 	virtual void SetListenerPos(float x, float y);

@@ -3,6 +3,7 @@
 #ifndef ENGINE_SOUND_H
 #define ENGINE_SOUND_H
 
+#include <lua.hpp>
 #include "kernel.h"
 
 class ISound : public IInterface
@@ -59,6 +60,11 @@ public:
 	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual void UnloadSample(int SampleID) = 0;
+
+	// for lua
+	virtual int LoadWVLua(const char *pFilename, lua_State *L) = 0;
+	virtual int LoadOpusLua(const char *pFilename, lua_State *L) = 0;
+	virtual void UnloadSampleLua(int SampleID, lua_State *L) = 0;
 
 	virtual float GetSampleDuration(int SampleID) = 0; // in s
 

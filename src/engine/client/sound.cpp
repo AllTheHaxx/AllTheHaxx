@@ -11,6 +11,7 @@
 #include "SDL.h"
 
 #include "sound.h"
+#include "luabinding.h"
 
 extern "C" { // wavpack
 	#include <engine/external/wavpack/wavpack.h>
@@ -584,6 +585,13 @@ int CSound::LoadOpus(const char *pFilename)
 	return SampleID;
 }
 
+int CSound::LoadOpusLua(const char *pFilename, lua_State *L)
+{
+	int SampleID = LoadOpus(pFilename);
+	CLuaBinding::GetLuaFile(L)->GetResMan()->RegisterSound(SampleID);
+	return SampleID;
+}
+
 
 int CSound::LoadWV(const char *pFilename)
 {
@@ -631,6 +639,13 @@ int CSound::LoadWV(const char *pFilename)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
 
 	RateConvert(SampleID);
+	return SampleID;
+}
+
+int CSound::LoadWVLua(const char *pFilename, lua_State *L)
+{
+	int SampleID = LoadWV(pFilename);
+	CLuaBinding::GetLuaFile(L)->GetResMan()->RegisterSound(SampleID);
 	return SampleID;
 }
 
@@ -694,6 +709,12 @@ void CSound::UnloadSample(int SampleID)
 		mem_free(m_aSamples[SampleID].m_pData);
 
 	m_aSamples[SampleID].m_pData = 0x0;
+}
+
+void CSound::UnloadSampleLua(int SampleID, lua_State *L)
+{
+	CLuaBinding::GetLuaFile(L)->GetResMan()->DeregisterSound(SampleID);
+	UnloadSample(SampleID);
 }
 
 float CSound::GetSampleDuration(int SampleID)

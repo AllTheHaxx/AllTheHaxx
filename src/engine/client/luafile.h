@@ -12,6 +12,8 @@
 #include <engine/external/luabridge/LuaBridge.h>
 #include <engine/external/luabridge/RefCountedPtr.h>
 
+#include "luaresman.h"
+
 
 class IClient;
 class IStorageTW;
@@ -97,6 +99,8 @@ private:
 	bool m_ScriptHasSettingsPage;
 	bool m_ScriptAutoload;
 
+	CLuaRessourceMgr m_ResMan;
+
 	std::map<std::string, CProfilingData> m_ProfilingResults;
 	bool m_ProfilingActive;
 	int64 m_ScriptStartTime;
@@ -131,6 +135,8 @@ public:
 	void ProfilingDoSample(const char *pEventName, int64 Time);
 	void GetProfilingResults(std::vector< std::pair<std::string, CProfilingData> > *pOut) const;
 	double GetScriptAliveTime() const { return time_to_millis(time_get_raw()-m_ScriptStartTime); }
+
+	CLuaRessourceMgr *GetResMan() { return &m_ResMan; }
 
 	CLua *Lua() const { return m_pLua; }
 

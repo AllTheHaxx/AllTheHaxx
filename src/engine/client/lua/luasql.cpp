@@ -25,7 +25,7 @@
  * ```
  */
 
-CLuaSqlConn CLuaSql::Open(const char *pFilename, lua_State *L)
+CLuaSqlConn *CLuaSql::Open(const char *pFilename, lua_State *L)
 {
 	char aBuf[512];
 	str_copyb(aBuf, pFilename);
@@ -33,8 +33,16 @@ CLuaSqlConn CLuaSql::Open(const char *pFilename, lua_State *L)
 
 	dbg_msg("lua/sql/debug", "opening db '%s'", pFilename);
 
-	CLuaSqlConn Db(pFilename);
-	return Db;
+	CLuaFile *pLF = CLuaBinding::GetLuaFile(L);
+	CLuaSqlConn *pConn = new CLuaSqlConn(pFilename, pLF);
+	pLF->GetResMan()->RegisterLuaSqlConn(pConn);
+	return pConn;
+}
+
+CLuaSqlConn::~CLuaSqlConn()
+{
+	Flush();
+	m_pLuaFile->GetResMan()->DeregisterLuaSqlConn(this);
 }
 
 void CLuaSqlConn::Execute(const char *pStatement, LuaRef Callback, lua_State *L)
