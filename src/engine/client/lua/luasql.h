@@ -13,6 +13,7 @@ class CLuaSqlConn
 public:
 	CLuaSqlConn(const char *pFilename) : m_Db(pFilename) { str_copyb(m_aPath, pFilename); }
 	CLuaSqlConn(const CLuaSqlConn& other) : m_Db(other.m_aPath) { str_copyb(m_aPath, other.m_aPath); }
+	~CLuaSqlConn() { Flush(); }
 	void Execute(const char *pStatement, LuaRef Callback, lua_State *L);
 	void Flush() { m_Db.Flush(); }
 	void Clear() { m_Db.Clear(); }

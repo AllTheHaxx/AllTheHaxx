@@ -29,7 +29,7 @@ CLuaSqlConn CLuaSql::Open(const char *pFilename, lua_State *L)
 {
 	char aBuf[512];
 	str_copyb(aBuf, pFilename);
-	pFilename = CLuaBinding::SandboxPath(aBuf, sizeof(aBuf), L, true);
+	pFilename = CLuaBinding::SandboxPath(aBuf, sizeof(aBuf), L, false);
 
 	dbg_msg("lua/sql/debug", "opening db '%s'", pFilename);
 

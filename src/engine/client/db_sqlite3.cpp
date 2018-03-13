@@ -1,5 +1,6 @@
 
 #include <base/system++/threading.h>
+#include <base/system.h>
 #include "db_sqlite3.h"
 
 
@@ -41,8 +42,7 @@ CSql::CSql(const char *pFilename)
 
 	fs_makedir_rec_for(aFullPath);
 
-	dbg_msg("DENNIS", "opening DB %s", aFullPath);
-
+	dbg_msg("DENNIS", "opening DB %s", aFullPath); // DENNIS
 	int rc = sqlite3_open(aFullPath, &m_pDB);
 	if (rc)
 	{
@@ -51,7 +51,11 @@ CSql::CSql(const char *pFilename)
 	}
 
 	m_Running = true;
+
+			int64 start = time_get_raw(); // DENNIS
 	m_pThread = thread_init_named(InitWorker, this, "sqlite");
+			int64 finished = time_get_raw(); // DENNIS
+			dbg_msg("DENNIS", "## took %lli (%.4f)", finished-start, (double)(finished-start)/(double)time_freq()); // DENNIS
 }
 
 CSql::~CSql()
@@ -166,6 +170,7 @@ void CSql::Flush()
 
 void CSql::Clear()
 {
+	LOCK_SECTION_MUTEX(m_Mutex);
 	while(!m_lpQueries.empty())
 	{
 		delete m_lpQueries.front();

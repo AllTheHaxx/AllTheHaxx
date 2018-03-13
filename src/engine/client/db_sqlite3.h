@@ -72,7 +72,7 @@ public:
 	void InsertQuery(CQuery *pQuery);
 
 	/**
-	 * Synchronously flushes the query queue.
+	 * Synchronously flushes the query queue (i.e. circumvents the thread!)
 	 * This forces immediate execution of all remaining queries and waits for their completion.
 	 */
 	void Flush();
