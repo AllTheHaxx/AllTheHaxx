@@ -22,6 +22,7 @@
 #include <engine/textrender.h>
 //#include <engine/client/client.h>
 #include "lua/luajson.h"
+#include "lua/luasql.h"
 
 
 void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
@@ -180,6 +181,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 
+		// json
 		.beginClass< CJsonValue >("JsonValue")
 			//.addFunction("__tostring", &CJsonValue::ToString) TODO: serialize
 			//.addFunction("__tonumber", &CJsonValue::ToNumber)
@@ -199,6 +201,45 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("Parse", &CLuaJson::Parse)
 			.addFunction("Convert", &CLuaJson::Convert)
 			.addFunction("Serialize", &CLuaJson::Serialize)
+		.endNamespace()
+
+		// sql
+		.beginClass< CQuery >("CQuery")
+			.addFunction("GetColumnCount", &CQuery::GetColumnCount)
+			.addFunction("GetName", &CQuery::GetName)
+			.addFunction("GetType", &CQuery::GetType)
+			.addFunction("GetID", &CQuery::GetID)
+
+			.addFunction("GetInt", &CQuery::GetInt)
+			.addFunction("GetFloat", &CQuery::GetFloat)
+			.addFunction("GetText", &CQuery::GetText)
+			.addFunction("GetStr", &CQuery::GetText) // alias
+			.addFunction("GetBlob", &CQuery::GetBlob)
+			.addFunction("GetSize", &CQuery::GetSize)
+
+			.addFunction("GetIntN", &CQuery::GetIntN)
+			.addFunction("GetFloatN", &CQuery::GetFloatN)
+			.addFunction("GetTextN", &CQuery::GetTextN)
+			.addFunction("GetStrN", &CQuery::GetTextN) // alias
+			.addFunction("GetBlobN", &CQuery::GetBlobN)
+			.addFunction("GetSizeN", &CQuery::GetSizeN)
+		.endClass()
+
+		.beginClass< CLuaSqlConn >("CLuaSqlConn")
+			.addConstructor <void (*) (const char *)> ()
+			.addFunction("Execute", &CLuaSqlConn::Execute)
+			.addFunction("Flush", &CLuaSqlConn::Flush)
+			.addFunction("Clear", &CLuaSqlConn::Clear)
+			.addFunction("GetDatabasePath", &CLuaSqlConn::GetDatabasePath)
+		.endClass()
+
+		.beginClass< CLuaSql >("CLuaSql")
+		.endClass()
+
+		.beginNamespace("sql")
+			.addFunction("Open", &CLuaSql::Open)
+			.addFunction("Flush", &CLuaSql::Flush)
+			.addFunction("Clear", &CLuaSql::Clear)
 		.endNamespace()
 
 

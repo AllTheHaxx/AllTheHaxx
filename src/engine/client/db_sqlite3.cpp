@@ -39,29 +39,35 @@ CSql::CSql(const char *pFilename)
 	if(str_comp_nocase_num(aFullPath + str_length(aFullPath)-3, ".db", 3) != 0)
 		str_append(aFullPath, ".db", sizeof(aFullPath));
 
+	fs_makedir_rec_for(aFullPath);
+
+	dbg_msg("DENNIS", "opening DB %s", aFullPath);
+
 	int rc = sqlite3_open(aFullPath, &m_pDB);
 	if (rc)
 	{
-		dbg_msg("SQLite", "Can't open database");
+		dbg_msg("SQLite", "Can't open database '%s' (%s)", pFilename, aFullPath);
 		sqlite3_close(m_pDB);
 	}
 
 	m_Running = true;
-	m_Flush = false;
 	m_pThread = thread_init_named(InitWorker, this, "sqlite");
 }
 
 CSql::~CSql()
 {
+	dbg_msg("DENNIS", "stopiing DB %s", GetDatabasePath());
+
 	m_Running = false;
 	if(m_pThread)
 	{
 		{
 			LOCK_SECTION_MUTEX(m_Mutex);
 			if(!m_lpQueries.empty())
-				dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", sqlite3_db_filename(m_pDB, "main"), (unsigned long)m_lpQueries.size());
+				dbg_msg("sqlite", "[%s] waiting for worker thread to finish, %lu queries left", GetDatabasePath(), (unsigned long)m_lpQueries.size());
 		}
 		thread_wait(m_pThread);
+		m_pThread = NULL;
 	}
 }
 
@@ -156,4 +162,18 @@ unsigned int CSql::Work()
 void CSql::Flush()
 {
 	while(Work());;
+}
+
+void CSql::Clear()
+{
+	while(!m_lpQueries.empty())
+	{
+		delete m_lpQueries.front();
+		m_lpQueries.pop();
+	}
+}
+
+const char *CSql::GetDatabasePath() const
+{
+	return sqlite3_db_filename(m_pDB, "main");
 }

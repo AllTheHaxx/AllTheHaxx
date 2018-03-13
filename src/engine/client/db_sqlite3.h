@@ -26,8 +26,10 @@ private:
 protected:
 	virtual void OnData();
 	bool Next();
+	const char *GetQueryString() const { return (const char *)m_pQueryStr; }
 
 public:
+	CQuery(){};
 	CQuery(char *pQueryBuf) : m_pQueryStr(pQueryBuf) {}
 	virtual ~CQuery();
 
@@ -41,6 +43,12 @@ public:
 	const char *GetText(int i) { return (const char *)sqlite3_column_text(m_pStatement, i); }
 	const void *GetBlob(int i) { return sqlite3_column_blob(m_pStatement, i); }
 	int GetSize(int i) { return sqlite3_column_bytes(m_pStatement, i); }
+
+	int GetIntN(const char *pName) { return GetInt(GetID(pName)); }
+	float GetFloatN(const char *pName) { return GetFloat(GetID(pName)); }
+	const char *GetTextN(const char *pName) { return GetText(GetID(pName)); }
+	const void *GetBlobN(const char *pName) { return GetBlob(GetID(pName)); }
+	int GetSizeN(const char *pName) { return GetSize(GetID(pName)); }
 };
 
 class CSql
@@ -51,8 +59,7 @@ private:
 	std::mutex m_Mutex;
 	std::atomic_bool m_Running;
 	void * volatile m_pThread;
-	std::queue<CQuery *>m_lpQueries;
-	bool m_Flush;
+	std::queue<CQuery *> m_lpQueries;
 
 public:
 	CSql(const char *pFilename = "ath_data.db");
@@ -69,6 +76,13 @@ public:
 	 * This forces immediate execution of all remaining queries and waits for their completion.
 	 */
 	void Flush();
+
+	/**
+	 * Discards all left queries
+	 */
+	void Clear();
+
+	inline const char *GetDatabasePath() const;
 
 private:
 	void ExecuteQuery(CQuery *pQuery);
