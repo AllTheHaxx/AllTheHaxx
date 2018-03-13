@@ -19,7 +19,6 @@ public:
 			{ \
 				for(std::vector<TYPE>::iterator it = m_##VARNAME.begin(); it != m_##VARNAME.end(); ++it) \
 					dbg_assert_strict(*it != (VARNAME), "[LuaResMan] registered duplicate of '" #TYPE " " #VARNAME "'"); \
-				dbg_msg("DENNIS", "[LuaResMan] successfully registered object of '" #TYPE " " #VARNAME "'"); \
 				m_##VARNAME.push_back(VARNAME); \
 			} \
 			\
@@ -30,7 +29,6 @@ public:
                     if(*it == (VARNAME)) \
                     { \
                         m_##VARNAME.erase(it); \
-						dbg_msg("DENNIS", "[LuaResMan] successfully DEregistered object of '" #TYPE " " #VARNAME "'"); \
                         return; \
                     } \
                 } \
