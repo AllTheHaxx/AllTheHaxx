@@ -16,7 +16,7 @@ int CTeamsCore::Team(int ClientID)
 	return m_Team[ClientID];
 }
 
-void CTeamsCore::Team(int ClientID, int Team)
+void CTeamsCore::SetTeam(int ClientID, int Team)
 {
 	m_Team[ClientID] = Team;
 }

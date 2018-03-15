@@ -16,7 +16,7 @@ class CTeamsCore
 public:
 	bool m_IsDDRace16;
 
-	CTeamsCore(void);
+	CTeamsCore();
 
 	bool SameTeam(int ClientID1, int ClientID2);
 
@@ -24,7 +24,7 @@ public:
 	bool CanCollide(int ClientID1, int ClientID2);
 
 	int Team(int ClientID);
-	void Team(int ClientID, int Team);
+	void SetTeam(int ClientID, int Team);
 
 	void Reset();
 	void SetSolo(int ClientID, bool Value)
@@ -36,7 +36,6 @@ public:
 	{
 		return m_IsSolo[ClientID];
 	}
-	;
 };
 
 #endif

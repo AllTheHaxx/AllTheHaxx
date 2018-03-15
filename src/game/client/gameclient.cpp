@@ -1115,13 +1115,13 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 				WentWrong = true;
 
 			if(!WentWrong && Team >= 0 && Team < MAX_CLIENTS)
-				m_Teams.Team(i, Team);
+				m_Teams.SetTeam(i, Team);
 			else if (Team != MAX_CLIENTS)
 				WentWrong = true;
 
 			if(WentWrong)
 			{
-				m_Teams.Team(i, 0);
+				m_Teams.SetTeam(i, 0);
 				break;
 			}
 		}

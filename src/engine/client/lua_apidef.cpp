@@ -599,6 +599,15 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addData("Position", &CGameClient::CSnapState::CSpectateInfo::m_Position)
 		.endClass()
 
+		/// Game.Teams
+		.beginClass<CTeamsCore>("CCharacterInfo")
+			.addFunction("Team", &CTeamsCore::Team)
+			.addFunction("SameTeam", &CTeamsCore::SameTeam)
+			.addFunction("CanCollide", &CTeamsCore::CanCollide)
+			.addFunction("CanKeepHook", &CTeamsCore::CanKeepHook)
+			.addFunction("IsSolo", &CTeamsCore::GetSolo)
+		.endClass()
+
 		/// Game.Players(ID)
 		.beginClass<CGameClient::CClientData>("CClientData")
 			.addData("Active", &CGameClient::CClientData::m_Active)
@@ -706,6 +715,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addVariable("Menus", &CLua::m_pCGameClient->m_pMenus, false)
 			.addVariable("Voting", &CLua::m_pCGameClient->m_pVoting, false)
 			.addVariable("SpecInfo", &CLua::m_pCGameClient->m_Snap.m_SpecInfo, false)
+			.addVariable("Teams", &CLua::m_pCGameClient->m_Teams, false)
 			//.addData("Client", &CGameClient::m_pClient, false)   // "Game" resembles GameClient, Game.Client => Client
 			.addVariable("Input", &CLua::m_pCGameClient->m_pControls, false)
 			.addVariable("Collision", &CLua::m_pCGameClient->m_pCollision, false)
