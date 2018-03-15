@@ -2781,7 +2781,8 @@ void str_strip_path_and_extension(const char *filename, char *dst, int dst_size)
 	const char *pFilenameEnd = filename + str_length(filename);
 	const char *pExtractedName = filename;
 	const char *pEnd = pFilenameEnd;
-	for(const char *pIter = filename; *pIter; pIter++)
+	const char *pIter;
+	for(pIter = filename; *pIter; pIter++)
 	{
 		if(*pIter == '/' || *pIter == '\\')
 		{

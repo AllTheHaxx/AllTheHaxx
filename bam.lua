@@ -293,7 +293,7 @@ function build(settings)
 
 		-- enable appropriate optimization
 		if settings.config_name == "release" then
-			settings.cc.flags:Add("-O2 -ftree-vectorize -ftree-vectorizer-verbose=7") --add '-fopt-info-vec -fopt-info -fdump-tree-vect -g' for debugging
+			settings.cc.flags:Add("-O2 -ftree-vectorize") --add ' -ftree-vectorizer-verbose=7 -fopt-info-vec -fopt-info -fdump-tree-vect -g' for debugging
 		elseif settings.config_name == "debug" then
 			settings.cc.flags:Add("-Og")
 		end

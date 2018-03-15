@@ -1,7 +1,7 @@
 dependencies:
   pre:
     - |
-        sudo add-apt-repository 'deb http://us-east-1.ec2.archive.ubuntu.com/ubuntu precise main restricted universe multiverse'
+        sudo add-apt-repository 'deb http://us-east-1.ec2.archive.ubuntu.com/ubuntu trusty main restricted universe multiverse'
         sudo add-apt-repository -y ppa:zoogie/sdl2-snapshots
         sudo apt-get update
         sudo apt-get build-dep teeworlds
@@ -57,7 +57,7 @@ test:
           DST=win32
         fi;
         
-        ~/bam/bam -j 20 client_release;
+        ~/bam/bam client_release;
         RETVAL=$?;
         if [ ! $RETVAL -eq 0 ]; then
           exit $RETVAL
