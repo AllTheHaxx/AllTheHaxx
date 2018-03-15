@@ -600,7 +600,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.endClass()
 
 		/// Game.Teams
-		.beginClass<CTeamsCore>("CCharacterInfo")
+		.beginClass<CTeamsCore>("CTeamsCore")
 			.addFunction("Team", &CTeamsCore::Team)
 			.addFunction("SameTeam", &CTeamsCore::SameTeam)
 			.addFunction("CanCollide", &CTeamsCore::CanCollide)
