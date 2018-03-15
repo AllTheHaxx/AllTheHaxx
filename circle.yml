@@ -2,6 +2,7 @@ dependencies:
   pre:
     - |
         sudo add-apt-repository 'deb http://us-east-1.ec2.archive.ubuntu.com/ubuntu trusty main restricted universe multiverse'
+        sudo add-apt-repository 'deb-src http://us-east-1.ec2.archive.ubuntu.com/ubuntu trusty main restricted universe multiverse'
         sudo add-apt-repository -y ppa:zoogie/sdl2-snapshots
         sudo apt-get update
         sudo apt-get build-dep teeworlds
@@ -12,6 +13,10 @@ dependencies:
           sudo apt-get install mingw-w64 mingw-w64-common
           sudo apt-get install mingw-w64-i686-dev mingw-w64-x86-64-dev
           sudo apt-get install gcc-mingw-w64-base gcc-mingw-w64 g++-mingw-w64
+        else
+          sudo add-apt-repository 'deb http://us-east-1.ec2.archive.ubuntu.com/ubuntu artful main restricted universe multiverse'
+          sudo apt update
+          sudo apt install gcc g\+\+
         fi
 
         if [ ! -x ~/bam/bam ]; then
@@ -46,6 +51,9 @@ test:
           ~/bam/bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false;
           EXT=.exe
         fi;
+
+        $CC --version
+        $CXX --version
         
         
         DST=linux;
