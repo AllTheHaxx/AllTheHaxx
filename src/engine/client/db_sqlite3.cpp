@@ -58,8 +58,6 @@ CSql::CSql(const char *pFilename, bool Threaded)
 
 CSql::~CSql()
 {
-	dbg_msg("DENNIS", "stopiing DB %s", GetDatabasePath());
-
 	m_Running = false;
 	if(m_pThread)
 	{
@@ -79,6 +77,14 @@ void CSql::InsertQuery(CQuery *pQuery)
 {
 	LOCK_SECTION_MUTEX(m_Mutex);
 	m_lpQueries.push(pQuery);
+}
+
+void CSql::InsertQuerySync(CQuery *pQuery)
+{
+	Flush();
+	LOCK_SECTION_MUTEX(m_Mutex);
+	ExecuteQuery(pQuery);
+	delete pQuery;
 }
 
 void CSql::InitWorker(void *pUser)

@@ -10,18 +10,22 @@ using luabridge::LuaRef;
 // passed to lua, handles the db (essentially a wrapper for CSql)
 class CLuaSqlConn
 {
-	CSql m_Db;
+	CSql *m_pDb;
 	char m_aPath[512];
 	class CLuaFile *m_pLuaFile;
 
 public:
-	CLuaSqlConn(const char *pFilename, CLuaFile *pLuaFile) : m_Db(pFilename, false), m_pLuaFile(pLuaFile) { str_copyb(m_aPath, pFilename); }
-	CLuaSqlConn(const CLuaSqlConn& other) : m_Db(other.m_aPath, false) { str_copyb(m_aPath, other.m_aPath); dbg_assert_strict(false, "shouldn't be running this"); }
+	CLuaSqlConn(const char *pFilename, CLuaFile *pLuaFile) : m_pLuaFile(pLuaFile)
+	{
+		m_pDb = new CSql(pFilename, false);
+		str_copyb(m_aPath, pFilename);
+	}
+
 	~CLuaSqlConn();
 	void Execute(const char *pStatement, LuaRef Callback, lua_State *L);
-	unsigned int Work() { return m_Db.Work(); }
-	void Flush() { m_Db.Flush(); }
-	void Clear() { m_Db.Clear(); }
+	unsigned int Work() { return m_pDb->Work(); }
+	void Flush() { m_pDb->Flush(); }
+	void Clear() { m_pDb->Clear(); }
 
 	const char *GetDatabasePath() const { return m_aPath; }
 };
@@ -29,10 +33,16 @@ public:
 // invisible to lua
 class CLuaSqlQuery : public CQuery
 {
-	luabridge::LuaRef m_CbFunc;
+	const luabridge::LuaRef m_CbFunc;
+	const bool m_GotCb;
 
 public:
-	CLuaSqlQuery(char *pQueryBuf, const LuaRef& CbFunc) : CQuery(pQueryBuf), m_CbFunc(CbFunc){}
+	CLuaSqlQuery(char *pQueryBuf, const LuaRef& CbFunc)
+			: CQuery(pQueryBuf),
+			  m_CbFunc(CbFunc),
+			  m_GotCb(CbFunc.isFunction())
+	{
+	}
 
 private:
 	void OnData();

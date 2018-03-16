@@ -18,7 +18,7 @@ CLuaSqlConn *CLuaSql::Open(const char *pFilename, lua_State *L)
 
 CLuaSqlConn::~CLuaSqlConn()
 {
-	Flush();
+	delete m_pDb;
 	m_pLuaFile->GetResMan()->DeregisterLuaSqlConn(this);
 }
 
@@ -31,12 +31,22 @@ void CLuaSqlConn::Execute(const char *pStatement, LuaRef Callback, lua_State *L)
 		Callback = Func;
 	}
 
-	if(!Callback.isFunction() && !Callback.isNil())
-		luaL_error(L, "SetCallback expects a string, a function or nil as first parameter (got %s)", lua_typename(L, Callback.type()));
+	bool CallbackIsFunc = Callback.isFunction();
+	if(!CallbackIsFunc && !Callback.isNil())
+		luaL_error(L, "Execute expects a string, a function or nil as second parameter (got %s)", lua_typename(L, Callback.type()));
 
-	char *pQueryBuf = sqlite3_mprintf(pStatement);
+	int len = str_length(pStatement);
+	if(len == 0)
+		luaL_error(L, "Empty statement");
+
+	char *pQueryBuf = (char*)sqlite3_malloc(len+1);
+	str_copy(pQueryBuf, pStatement, len+1);
 	CLuaSqlQuery *pQuery = new CLuaSqlQuery(pQueryBuf, Callback);
-	m_Db.InsertQuery(pQuery);
+
+	if(CallbackIsFunc)
+		m_pDb->InsertQuerySync(pQuery); // when there's a callback we have to use the main thread else it would damage lua
+	else
+		m_pDb->InsertQuery(pQuery); // but when there's no callback we can happily send it off to the separate thread
 }
 
 void CLuaSqlQuery::OnData()
@@ -44,15 +54,15 @@ void CLuaSqlQuery::OnData()
 	int i = 0;
 	while(Next())
 	{
+		if(!m_GotCb) // it's down in here because we have to call Next() at least once
+			return;
+
 		// call lua
-		if(m_CbFunc.isFunction())
+		try
 		{
-			try
-			{
-				m_CbFunc((CQuery *)this, GetQueryString(), i); // need to downcast as lua only knows the base class
-			} catch(luabridge::LuaException &e) {
-				CLua::m_pClient->Lua()->HandleException(e, m_CbFunc.state());
-			}
+			m_CbFunc((CQuery *)this, GetQueryString(), i); // need to downcast as lua only knows the base class
+		} catch(luabridge::LuaException &e) {
+			CLua::m_pClient->Lua()->HandleException(e, m_CbFunc.state());
 		}
 		i++;
 	};

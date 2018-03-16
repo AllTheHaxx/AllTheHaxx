@@ -16,7 +16,7 @@
 
 class CQuery
 {
-	MACRO_ALLOC_HEAP()
+	MACRO_ALLOC_HEAP_NO_INIT()
 	friend class CSql;
 private:
 	char *m_pQueryStr;
@@ -29,8 +29,8 @@ protected:
 	const char *GetQueryString() const { return (const char *)m_pQueryStr; }
 
 public:
-	CQuery(){};
-	CQuery(char *pQueryBuf) : m_pQueryStr(pQueryBuf) {}
+	CQuery() : m_pQueryStr(NULL), m_pStatement(NULL) {};
+	CQuery(char *pQueryBuf) : m_pQueryStr(pQueryBuf), m_pStatement(NULL) {}
 	virtual ~CQuery();
 
 	int GetColumnCount() { return sqlite3_column_count(m_pStatement); }
@@ -53,7 +53,7 @@ public:
 
 class CSql
 {
-	MACRO_ALLOC_HEAP()
+	MACRO_ALLOC_HEAP_NO_INIT()
 private:
 	sqlite3 *m_pDB;
 	std::mutex m_Mutex;
@@ -70,6 +70,13 @@ public:
 	 * @param pQuery pointer to the query object
 	 */
 	void InsertQuery(CQuery *pQuery);
+
+	/**
+	 * Flushes the threaded query queue to retain order and then executes
+	 * the given query in the calling thread instead of a different one
+	 * @param pQuery pointer to the query to execute
+	 */
+	void InsertQuerySync(CQuery *pQuery);
 
 	/**
 	 * Synchronously flushes the query queue (i.e. circumvents the thread!)
