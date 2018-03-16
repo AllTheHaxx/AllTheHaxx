@@ -645,7 +645,7 @@ void CScoreboard::OnRender()
 			if(m_FadeVal > 0.95f)
 				m_FadeVal = 1.0f;
 			else
-				m_FadeVal += (1.0f-m_FadeVal)/((float)g_Config.m_ClScoreboardFadeTime/100.0f);
+				m_FadeVal += ( (1.0f-m_FadeVal)/((float)g_Config.m_ClScoreboardFadeTime/100.0f) ) / ((1.0f/Client()->RenderFrameTime()) / 60.0f);
 		}
 	}
 	else
@@ -657,7 +657,7 @@ void CScoreboard::OnRender()
 			if(m_FadeVal < 0.1f)
 				m_FadeVal = 0.0f;
 			else
-				m_FadeVal -= m_FadeVal/((float)g_Config.m_ClScoreboardFadeTime/100.0f);
+				m_FadeVal -= ( m_FadeVal/((float)g_Config.m_ClScoreboardFadeTime/100.0f) ) / ((1.0f/Client()->RenderFrameTime()) / 60.0f);
 		}
 	}
 
