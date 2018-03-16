@@ -559,7 +559,7 @@ void mem_free(void *p)
 	}
 }
 
-void mem_debug_dump(IOHANDLE file)
+void mem_debug_dump_legacy(IOHANDLE file)
 {
 #if defined(CONF_DEBUG)
 	char buf[1024];

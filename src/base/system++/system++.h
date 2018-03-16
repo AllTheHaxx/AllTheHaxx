@@ -25,6 +25,7 @@ public:
 };
 
 void dbg_break();
+void mem_debug_dump(struct IOINTERNAL *file); // means IOHANDLE but I don't want to include system.h here...
 
 template <class TFN>
 class CDeferHandler

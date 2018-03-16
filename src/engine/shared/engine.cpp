@@ -30,7 +30,9 @@ public:
 		str_timestamp(aBuf, sizeof(aBuf));
 		char aFilename[128];
 		str_format(aFilename, sizeof(aFilename), "dumps/memory/%s.txt", aBuf);
-		mem_debug_dump(pEngine->m_pStorage->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE));
+		char aFullPath[512];
+		mem_debug_dump(pEngine->m_pStorage->OpenFile(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE, aFullPath, sizeof(aFullPath)));
+		pEngine->m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "engine", "allocation dump written to %s", aFullPath);
 	}
 
 	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
