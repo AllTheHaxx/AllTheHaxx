@@ -606,13 +606,17 @@ void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Ali
 	DoLabel(r, pText, Size*Scale(), Align, MaxWidth, pHighlight, pFont, IgnoreColor);
 }
 
-void CUI::DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
+void CUI::DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, lua_State *L)
 {
+	if(!pRect)
+		luaL_error(L, "bad argument #1 to DoLabel (expected UIRect, got nil)");
 	DoLabel(pRect, pText, Size, Align, MaxWidth, pHighlight);
 }
 
-void CUI::DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight)
+void CUI::DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, lua_State *L)
 {
+	if(!pRect)
+		luaL_error(L, "bad argument #1 to DoLabelScaled (expected UIRect, got nil)");
 	DoLabelScaled(pRect, pText, Size, Align, MaxWidth, pHighlight);
 }
 

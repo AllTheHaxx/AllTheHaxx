@@ -1540,6 +1540,7 @@ static const char *s_apSayings[] = {
 		,"Remember: the Weighted Companion Cube cannot talk!"
 		,"We are here to drink your beer!"
 		,"If it ain't broken, break it!"
+		,"The higher you will go, the deeper you can fall"
 };
 
 void CMenus::RenderLoading()

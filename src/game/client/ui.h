@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include <lua.hpp>
 #include <base/tl/array.h>
 
 class CUIRect
@@ -118,8 +119,8 @@ public:
 	// TODO: Refactor: Remove this?
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0, bool IgnoreColorCodes = false);
 	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0, class CFont *pFont = 0, bool IgnoreColor = false);
-	void DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
-	void DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1.0f, const char *pHighlight = 0);
+	void DoLabelLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, lua_State *L);
+	void DoLabelScaledLua(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, const char *pHighlight, lua_State *L);
 
 	void AndroidShowScreenKeys(bool shown);
 	void AndroidShowTextInput(const char *text, const char *hintText);
