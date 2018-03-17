@@ -1438,7 +1438,7 @@ static const char *s_apSayings[] = {
 		,"You can click links!"
 		,"Keep it up-to-date all the time"
 		,"Join the chat!"
-		,"No forum"
+		,"No forum no more! ;)"
 		,"It has to be teeish"
 		,"Don't quote liars!"
 		,"(4N Y0U R34D 7H15??"
