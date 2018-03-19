@@ -377,6 +377,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("ClosestPointOnLine", &CCollision::ClosestPointOnLine)
 
 			.addFunction("GetTile", &CCollision::GetTileRaw)
+			.addFunction("GetTileFront", &CCollision::GetFTile)
 			.addFunction("CheckPoint", &CCollision::CheckPointLua)
 
 			.addFunction("IntersectLine", &CCollision::IntersectLine)
@@ -384,6 +385,12 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 			.addFunction("MovePoint", &CCollision::MovePoint)
 			.addFunction("MoveBox", &CCollision::MoveBox)
 			.addFunction("TestBox", &CCollision::TestBox)
+
+			.addFunction("IsSolid", &CCollision::IsSolid)
+			.addFunction("IsThrough", &CCollision::IsThrough)
+			.addFunction("IsHookBlocker", &CCollision::IsHookBlocker)
+			.addFunction("IsNoLaser", &CCollision::IsNoLaser)
+			.addFunction("IsNoLaserFront", &CCollision::IsFNoLaser)
 		.endClass()
 
 		/// Game.HUD

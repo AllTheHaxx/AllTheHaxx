@@ -118,6 +118,10 @@ int CLuaBinding::LuaImport(lua_State *L)
 			if(str_comp_num(aFilename, "lua/", 4) != 0)
 				str_format(aBuf, sizeof(aBuf), "lua/%s", aFilename);
 			ret = pLF->LoadFile(aBuf, true);
+			if(ret)
+				str_copyb(aFullPath, aBuf);
+			else
+				aFullPath[0] = '\0';
 		}
 	}
 
@@ -393,21 +397,21 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 
 	int nargs = lua_gettop(L);
 	if(nargs < 1 || nargs > 3)
-		return luaL_error(L, "io.open expects between 1 to 3 arguments");
+		return luaL_error(L, "io.open expects between 1 and 3 arguments");
 
 	argcheck(lua_isstring(L, 1), 1, "string"); // path
 	if(nargs >= 2)
 		argcheck(lua_isstring(L, 2), 2, "string"); // mode
 	if(nargs == 3)
-		argcheck(lua_isstring(L, 3) && str_comp_nocase(lua_tostring(L, 3), "shared") == 0, 3, "literally \"shared\""); // shared flag
+		argcheck(lua_isboolean(L, 3), 3, "bool"); // 'shared' flag
 
 	const char *pFilename = lua_tostring(L, 1);
 	const char *pOpenMode = luaL_optstring(L, 2, "r");
-	bool Shared = nargs == 3;
-	if(str_comp_nocase(pOpenMode, "shared") == 0)
+	bool Shared = false;
+	if(nargs == 3)
 	{
-		Shared = true;
-		pOpenMode = "r";
+		if(lua_toboolean(L, 3))
+			Shared = true;
 	}
 
 	char aFilename[512];
@@ -419,9 +423,12 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 
 
 	char aFullPath[512];
-	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, aFilename, aFullPath, sizeof(aFullPath));
-	if(fs_makedir_rec_for(aFullPath) != 0)
-		return luaL_error(L, "Failed to create path for file '%s'", aFullPath);
+	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, pFilename, aFullPath, sizeof(aFullPath));
+	if(str_find_nocase(pOpenMode, "w"))
+	{
+		if(fs_makedir_rec_for(aFullPath) != 0)
+			return luaL_error(L, "Failed to create path for file '%s'", aFullPath);
+	}
 
 	// now we make a call to the builtin function 'io.open'
 	lua_pop(L, nargs); // pop our args
@@ -436,14 +443,10 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 
 	// fire it off
 	// this pops 3 things (function + args) and pushes 1 (resulting file handle)
-	if(lua_pcall(L, 2, 1, 0) != 0)
-	{
-		const char *pErrorMsg = lua_isstring(L, -1) ? lua_tostring(L, -1) : "unknown";
-		return luaL_error(L, "internal error: %s", pErrorMsg);
-	}
+	lua_call(L, 2, 1);
 
 	// push an additional argument for the scripter
-	lua_pushstring(L, aFilename);
+	lua_pushstring(L, pFilename);
 	return 2; // we'll leave cleaning the stack up to lua
 }
 

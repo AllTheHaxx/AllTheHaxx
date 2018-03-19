@@ -686,7 +686,7 @@ public:
 	const char *MakeFullPath(char *pBuffer, unsigned BufferSize, int StorageType) const
 	{
 		char aBuf[768];
-		str_copyb(aBuf, pBuffer); // make a copy because we can read and write to the same buffer at the same time
+		str_copyb(aBuf, pBuffer); // make a copy because we can't read and write to the same buffer at the same time
 		GetPath(StorageType, aBuf, pBuffer, BufferSize);
 		return pBuffer;
 	}
