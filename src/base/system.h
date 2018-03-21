@@ -1366,6 +1366,8 @@ int net_set_blocking(NETSOCKET sock);
 */
 int net_errno();
 
+char *net_err_str(char *buf, unsigned size, int error);
+
 /*
 	Function: net_would_block
 

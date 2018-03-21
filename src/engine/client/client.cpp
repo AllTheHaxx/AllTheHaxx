@@ -980,6 +980,30 @@ void CClient::ConnectImpl()
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
+	m_NetClient[0].Close();
+
+	NETADDR BindAddr;
+	mem_zero(&BindAddr, sizeof(BindAddr));
+	BindAddr.type = NETTYPE_ALL;
+	if(g_Config.m_ClOutgoingPort)
+	{
+		BindAddr.port = g_Config.m_ClOutgoingPort;
+		bool Success = m_NetClient[0].Open(BindAddr, 0);
+		if(!Success)
+		{
+			m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "client", "failed to connect: can't bind to port %i: %s", BindAddr.port, net_err_str(aBuf, sizeof(aBuf), net_errno()));
+			return;
+		}
+	}
+	else
+	{
+		do
+		{
+			BindAddr.port = (secure_rand() % 64511) + 1024;
+		}
+		while(!m_NetClient[0].Open(BindAddr, 0));
+	}
+
 	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[0].NetType()) != 0)
 	{
 		char aBufMsg[256];
@@ -1023,6 +1047,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
 	m_NetClient[0].Disconnect(pReason);
+	g_Config.m_ClOutgoingPort = 0;
 	SetState(IClient::STATE_OFFLINE);
 	UnloadCurrentMap();
 
@@ -1105,6 +1130,31 @@ void CClient::DummyConnect()
 
 	g_Config.m_ClDummyCopyMoves = 0;
 	g_Config.m_ClDummyHammer = 0;
+
+	m_NetClient[1].Close();
+
+	NETADDR BindAddr;
+	mem_zero(&BindAddr, sizeof(BindAddr));
+	BindAddr.type = NETTYPE_ALL;
+	if(g_Config.m_ClOutgoingPort)
+	{
+		BindAddr.port = g_Config.m_ClOutgoingPort + 1;
+		bool Success = m_NetClient[1].Open(BindAddr, 0);
+		if(!Success)
+		{
+			char aBuf[512];
+			m_pConsole->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "client", "failed to connect dummy: can't bind to port %i: %s", BindAddr.port, net_err_str(aBuf, sizeof(aBuf), net_errno()));
+			return;
+		}
+	}
+	else
+	{
+		do
+		{
+			BindAddr.port = (secure_rand() % 64511) + 1024;
+		}
+		while(!m_NetClient[1].Open(BindAddr, 0));
+	}
 
 	//connecting to the server
 	m_NetClient[1].Connect(&m_ServerAddress);

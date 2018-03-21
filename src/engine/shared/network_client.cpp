@@ -23,7 +23,11 @@ bool CNetClient::Open(NETADDR BindAddr, int Flags)
 
 int CNetClient::Close()
 {
-	// TODO: implement me
+	net_udp_close(m_Socket);
+
+	// clean it
+	mem_zero(this, sizeof(*this));
+
 	return 0;
 }
 

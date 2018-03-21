@@ -1829,6 +1829,19 @@ int net_errno()
 #endif
 }
 
+char *net_err_str(char *result, unsigned size, int error)
+{
+	char buf[256];
+#if defined(CONF_FAMILY_WINDOWS)
+	if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, buf, sizeof(buf), 0) == 0)
+		str_copy(buf, "<no message>", size);
+#else
+	str_copyb(buf, strerror(error));
+#endif
+	str_format(result, size, "error %i (%s)", error, buf);
+	return result;
+}
+
 int net_would_block()
 {
 #if defined(CONF_FAMILY_WINDOWS)
