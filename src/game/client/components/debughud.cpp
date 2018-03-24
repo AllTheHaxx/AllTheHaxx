@@ -39,6 +39,9 @@ void CDebugHud::RenderNetCorrections()
 			,"Pos"
 			," x:"
 			," y:"
+			,"Vel"
+			," (x|y)/32:"
+			," (x|y):"
 			,"Mouse"
 			," x:"
 			," y:"
@@ -77,6 +80,11 @@ void CDebugHud::RenderNetCorrections()
 	PUT_STRING("%.2f / %i", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f, m_pClient->m_Snap.m_pLocalCharacter->m_X);
 	PUT_LINEBREAK();
 	PUT_STRING("%.2f / %i", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
+	PUT_LINEBREAK();
+	PUT_LINEBREAK();
+	PUT_STRING("%.2f | %.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_VelX)/32.0f, static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_VelY)/32.0f);
+	PUT_LINEBREAK();
+	PUT_STRING("%i | %i", m_pClient->m_Snap.m_pLocalCharacter->m_VelX, m_pClient->m_Snap.m_pLocalCharacter->m_VelY);
 	PUT_LINEBREAK();
 	PUT_LINEBREAK();
 	PUT_STRING("%.2f / %i", (m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x+m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f, round_to_int(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x+(float)m_pClient->m_Snap.m_pLocalCharacter->m_X));
