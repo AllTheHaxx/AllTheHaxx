@@ -441,9 +441,11 @@ void CGameClient::OnInit()
 	if(!g_Config.m_ClThreadsoundloading)
 		g_GameClient.m_pMenus->m_LoadTotal += g_pData->m_NumSounds;
 	int CurrentIndex = 0;
-#define SET_LOAD_LABEL(TEXT) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT); if(g_Config.m_Debug) dbg_msg("loading/debug", "[%.2f%%] %s", ((float)CurrentIndex / (float)g_GameClient.m_pMenus->m_LoadTotal)*100.0f, g_GameClient.m_pMenus->m_aLoadLabel)
-#define SET_LOAD_LABEL_V(TEXT, ...) str_format(g_GameClient.m_pMenus->m_aLoadLabel, sizeof(g_GameClient.m_pMenus->m_aLoadLabel), TEXT, __VA_ARGS__); if(g_Config.m_Debug) dbg_msg("loading/debug", "[%.2f%%] %s", ((float)CurrentIndex / (float)g_GameClient.m_pMenus->m_LoadTotal)*100.0f, g_GameClient.m_pMenus->m_aLoadLabel)
-#define LOAD_STUFF(ITERATIONS) for(int i = 0; i < (ITERATIONS); i++, CurrentIndex++, g_GameClient.m_pMenus->RenderLoading())
+#define PRINT_DBG() if(g_Config.m_Debug) dbg_msg("loading/debug", "[%.2f%%] %s", ((float)CurrentIndex / (float)g_GameClient.m_pMenus->m_LoadTotal)*100.0f, g_GameClient.m_pMenus->m_aLoadLabel)
+#define RENDER_LOADING() g_GameClient.m_pMenus->RenderLoading()
+#define SET_LOAD_LABEL(TEXT) str_copyb(g_GameClient.m_pMenus->m_aLoadLabel, TEXT); RENDER_LOADING(); PRINT_DBG()
+#define SET_LOAD_LABEL_V(TEXT, ...) str_formatb(g_GameClient.m_pMenus->m_aLoadLabel, TEXT, __VA_ARGS__); RENDER_LOADING(); PRINT_DBG()
+#define LOAD_STUFF(ITERATIONS) for(int i = 0; i < (ITERATIONS); i++, CurrentIndex++)
 
 	// load textures
 	LOAD_STUFF(g_pData->m_NumImages)
