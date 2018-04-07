@@ -1406,9 +1406,9 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 	}
 	else if (str_comp_nocase(cmd, "msg") == 0)
 	{
-		char aBuf[1024] = {0};
 		if (CmdListParams.size() >= 2)
 		{
+			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :%s",
 					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
 			CmdListParams.remove_index(0); // pop twice
@@ -1424,9 +1424,9 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 	}
 	else if (str_comp_nocase(cmd, "ctcp") == 0)
 	{
-		char aBuf[1024] = {0};
 		if (CmdListParams.size() >= 2)
 		{
+			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1%s",
 					CmdListParams[0].c_str(), CmdListParams[1].c_str()); // to & what
 			CmdListParams.remove_index(0); // pop twice
@@ -1443,10 +1443,9 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 	}
 	else if(str_comp_nocase(cmd, "me") == 0)
 	{
-		char aBuf[1024] = {0};
-		char aMsg[768] = {0};
 		if (!CmdListParams.empty())
 		{
+			char aMsg[768];
 			str_format(aMsg, sizeof(aMsg), "%s", CmdListParams[0].c_str()); // first word
 			CmdListParams.remove_index(0); // pop
 			while(!CmdListParams.empty()) // add all other arguments to the message
@@ -1456,6 +1455,7 @@ void CIRC::ExecuteCommand(const char *cmd, char *params)
 				CmdListParams.remove_index(0);
 			}
 
+			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "PRIVMSG %s :\1ACTION %s",
 					GetActiveCom()->GetType() == CIRCCom::TYPE_QUERY ?
 							((CComQuery*)GetActiveCom())->m_aName : ((CComChan*)GetActiveCom())->m_aName,

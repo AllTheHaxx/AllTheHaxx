@@ -244,7 +244,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 
 			if(RealEnd)
 			{
-				char aBuf[512] = { 0 };
+				char aBuf[512]; aBuf[0] = '\0';
 				if(m_LuaHandler.m_ScopeCount > 0)
 				{
 					int RemoveElseScope = 0;
@@ -362,7 +362,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 
 		if(ScopeIncreased || m_LuaHandler.m_ScopeCount > 0)   //bigger 0
 		{
-			char aBuf[512] = { 0 };
+			char aBuf[512]; aBuf[0] = '\0';
 
 			int Limit = ScopeIncreased ? m_LuaHandler.m_ScopeCount-1 : m_LuaHandler.m_ScopeCount;
 
@@ -1594,7 +1594,7 @@ int CGameConsole::PrintLuaLine(lua_State *L)
 		return luaL_error(L, "print expects 1 argument or more");
 
 	// construct the message from all arguments
-	char aLine[512] = {0};
+	char aLine[512]; aLine[0] = '\0';
 	for(int i = 1; i <= nargs; i++)
 	{
 		if(lua_isnil(L, i)) // allow nil

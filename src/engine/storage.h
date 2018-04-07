@@ -43,7 +43,7 @@ public:
 	#if !defined(BUILD_TOOLS)
 	virtual bool CreateFolderLua(const char *pFoldername, lua_State *L) = 0;
 	#endif
-	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
+	virtual const char *GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
 
 	virtual bool RemoveBinaryFile(const char *pFilename) = 0;
 	virtual bool RenameBinaryFile(const char* pOldFilename, const char* pNewFilename) = 0;
@@ -52,7 +52,7 @@ public:
 	virtual const char* GetExecutableName() const = 0;
 
 	virtual const char *SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend = 0, bool ForcePrepend = false) const = 0;
-	virtual const char *MakeFullPath(char *pBuffer, unsigned BufferSize, int StorageType) const = 0;
+	virtual const char *MakeFullPath(char *pInOutBuffer, unsigned BufferSize, int StorageType) const = 0;
 };
 
 extern IStorageTW *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);

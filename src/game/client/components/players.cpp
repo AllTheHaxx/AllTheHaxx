@@ -934,10 +934,22 @@ void CPlayers::OnRender()
 		}
 	}
 
-	static vec2 PrevPos[MAX_CLIENTS];
-	static vec2 SmoothPos[MAX_CLIENTS];
-	static int MoveCnt[MAX_CLIENTS] = {0};
-	static vec2 PredictedPos[MAX_CLIENTS];
+	static vec2 s_aPrevPos[MAX_CLIENTS];
+	static vec2 s_aSmoothPos[MAX_CLIENTS];
+	static int s_aMoveCnt[MAX_CLIENTS];
+	static vec2 s_aPredictedPos[MAX_CLIENTS];
+
+	{
+		static bool s_Inited = false;
+		if(!s_Inited)
+		{
+			s_Inited = true;
+			mem_zerob(s_aPrevPos);
+			mem_zerob(s_aSmoothPos);
+			mem_zerob(s_aMoveCnt);
+			mem_zerob(s_aPredictedPos);
+		}
+	}
 
 	static int predcnt = 0;
 
@@ -960,10 +972,10 @@ void CPlayers::OnRender()
 						&CurChar,
 						(const CNetObj_PlayerInfo *)pPrevInfo,
 						(const CNetObj_PlayerInfo *)pInfo,
-						PrevPos[i],
-						SmoothPos[i],
-						MoveCnt[i],
-						PredictedPos[i]
+						s_aPrevPos[i],
+						s_aSmoothPos[i],
+						s_aMoveCnt[i],
+						s_aPredictedPos[i]
 					);
 			}
 		}
@@ -1015,8 +1027,8 @@ void CPlayers::OnRender()
 								&CurChar,
 								(const CNetObj_PlayerInfo *)pPrevInfo,
 								(const CNetObj_PlayerInfo *)pInfo,
-								PredictedPos[i],
-								PredictedPos[PrevChar.m_HookedPlayer]
+								s_aPredictedPos[i],
+								s_aPredictedPos[PrevChar.m_HookedPlayer]
 							);
 					else
 						RenderHook(
@@ -1024,8 +1036,8 @@ void CPlayers::OnRender()
 								&CurChar,
 								(const CNetObj_PlayerInfo *)pPrevInfo,
 								(const CNetObj_PlayerInfo *)pInfo,
-								PredictedPos[i],
-								PredictedPos[i]
+								s_aPredictedPos[i],
+								s_aPredictedPos[i]
 							);
 				}
 				else
@@ -1035,7 +1047,7 @@ void CPlayers::OnRender()
 							&CurChar,
 							(const CNetObj_PlayerInfo *)pPrevInfo,
 							(const CNetObj_PlayerInfo *)pInfo,
-							PredictedPos[i]
+							s_aPredictedPos[i]
 						);
 				}
 			}

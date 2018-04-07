@@ -324,7 +324,7 @@ int CLuaBinding::LuaPrintOverride(lua_State *L)
 	str_format(aSys, sizeof(aSys), "LUA|%s", pLF->GetFilename());
 
 	// construct the message from all arguments
-	char aMsg[512] = {0};
+	char aMsg[512]; aMsg[0] = '\0';
 	for(int i = 1; i <= nargs; i++)
 	{
 		argcheck(lua_isstring(L, i) || lua_isnumber(L, i), i, "string or number");

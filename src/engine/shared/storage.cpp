@@ -546,13 +546,13 @@ public:
 	}
 #endif
 
-	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	virtual const char *GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 		{
 			if(BufferSize > 0)
 				pBuffer[0] = 0;
-			return;
+			return pBuffer;
 		}
 
 		GetPath(Type, pDir, pBuffer, BufferSize);
@@ -685,7 +685,7 @@ public:
 
 	const char *MakeFullPath(char *pBuffer, unsigned BufferSize, int StorageType) const
 	{
-		char aBuf[768];
+		char aBuf[MAX_PATH_LENGTH];
 		str_copyb(aBuf, pBuffer); // make a copy because we can't read and write to the same buffer at the same time
 		GetPath(StorageType, aBuf, pBuffer, BufferSize);
 		return pBuffer;
