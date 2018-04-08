@@ -2148,7 +2148,7 @@ void CMenus::OnRender()
 		RenderDemoPlayer(Screen);
 	}
 
-	if(/*XXX !g_Config.m_ClAllowPuremod && */Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
+	if(!g_Config.m_BrAllowPureMod && Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
 	{
 		Client()->Disconnect();
 		SetActive(true);
@@ -2156,7 +2156,7 @@ void CMenus::OnRender()
 	}
 
 	// show update popup once at client startup
-#if !defined(CONF_SPOOFING)
+#if !defined(CONF_SPOOFING) && !defined(CONF_FAMILY_UNIX)
 	{
 		static bool s_WarnedUpdate = false;
 		if(!s_WarnedUpdate && Updater()->State() == IUpdater::STATE_CLEAN && str_comp(Client()->LatestVersion(), "0"))

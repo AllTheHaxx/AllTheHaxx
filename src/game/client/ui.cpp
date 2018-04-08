@@ -574,28 +574,25 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, fl
 {
 	float xOffset = 0.0f;
 
-	if(Align == CUI::ALIGN_CENTER)
+	if(Align != CUI::ALIGN_LEFT)
 	{
+		// move the text to the right according to the alignment
+
 		float tw;
 		if(IgnoreColorCodes)
 			tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
 		else
 			tw = TextRender()->TextWidthParse(0, Size, pText, MaxWidth, pHighlight);
-		xOffset = r->w/2.0f - tw/2.0f;
-	}
-	else if(Align == CUI::ALIGN_RIGHT)
-	{
-		float tw;
-		if(IgnoreColorCodes)
-			tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth);
-		else
-			tw = TextRender()->TextWidthParse(0, Size, pText, MaxWidth, pHighlight);
-		xOffset = r->w - tw;
+
+		if(Align == CUI::ALIGN_CENTER)
+			xOffset = r->w/2.0f - tw/2.0f;
+		else if(Align == CUI::ALIGN_RIGHT)
+			xOffset = r->w - tw;
 	}
 
 	const char *pStr = pText;
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, r->x + xOffset, r->y - Size/10, Size, TEXTFLAG_RENDER | (MaxWidth > 0.0f ? TEXTFLAG_STOP_AT_END : 0), pFont);
+	TextRender()->SetCursor(&Cursor, r->x + xOffset, r->y - Size/10.0f, Size, TEXTFLAG_RENDER | (Align != CUI::ALIGN_LEFT && MaxWidth > 0.0f ? TEXTFLAG_STOP_AT_END : 0), pFont);
 	if(MaxWidth > 0.0f)
 		Cursor.m_LineWidth = MaxWidth;
 	TextRender()->TextExParse(&Cursor, pStr, IgnoreColorCodes, pHighlight);

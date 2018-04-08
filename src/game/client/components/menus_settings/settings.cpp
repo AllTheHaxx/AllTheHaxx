@@ -565,9 +565,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), Localize("New Client Version '%s' is available!"), Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(TextRender()->TextWidth(0, Button.h*ms_FontmodHeight, Localize("Update now"), -1), &Button, 0);
+#if defined(CONF_FAMILY_WINDOWS)
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
 				Updater()->PerformUpdate();
+#else
+
+#endif
 		}
 		else if(State >= IUpdater::STATE_GETTING_MANIFEST && State <= IUpdater::STATE_DOWNLOADING)
 			str_copyb(aBuf, Localize("Downloading update..."));
@@ -585,7 +589,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
-				Client()->CheckVersionUpdate(false);
+				Client()->CheckVersionUpdate(true);
 			}
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);

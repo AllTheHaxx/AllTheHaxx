@@ -209,26 +209,23 @@ void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, cons
 	// render the box
 	RenderTools()->DrawUIRect(&Box, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
 
-	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(20.f, 0, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
 	if(TextRender()->TextWidth(0, 24.f, pTitle, -1) > Part.w)
-		UI()->DoLabelScaled(&Part, pTitle, 24.f, -1, (int)Part.w);
+		UI()->DoLabelScaled(&Part, pTitle, 24.f, CUI::ALIGN_LEFT, Part.w);
 	else
-		UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
-	Box.HSplitTop(20.f, &Part, &Box);
+		UI()->DoLabelScaled(&Part, pTitle, 24.f, CUI::ALIGN_CENTER);
+	Box.HSplitTop(20.f, 0, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
 
-	if(ExtraAlign == -1)
-		UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
-	else
-	{
-		if(TextRender()->TextWidth(0, 20.f, pExtraText, -1) > Part.w)
-			UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
-		else
-			UI()->DoLabelScaled(&Part, pExtraText, 20.f, 0, -1);
-	}
+	// force left align if line wrapping is required to fit the text
+	if(TextRender()->TextWidth(0, 20.f, pExtraText, -1) > Part.w)
+		ExtraAlign = CUI::ALIGN_LEFT;
+
+	UI()->DoLabelScaled(&Part, pExtraText, 20.f, ExtraAlign, Part.w);
+
 
 	if(m_Popup == POPUP_QUIT)
 	{

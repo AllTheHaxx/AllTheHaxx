@@ -1388,7 +1388,11 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 #endif
 		if(State == IUpdater::STATE_CLEAN && NeedUpdate)
 		{
+#if defined(CONF_FAMILY_WINDOWS)
 			str_format(aBuf, sizeof(aBuf), "New Version '%s' is out!", Client()->LatestVersion());
+#elif defined(CONF_FAMILY_UNIX)
+			str_formatb(aBuf, "New Version '%s' is out! Use your package manager to update ATH :)", Updater()->GetLatestVersion());
+#endif
 			float fade = sinf(Client()->LocalTime()*3.1415f)*0.2f;
 			TextRender()->TextColor(1.0f, 0.4f+fade, 0.4f+fade, 1.0f+fade/2.0f-0.1f);
 		}
@@ -1424,6 +1428,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 		if(State == IUpdater::STATE_CLEAN && NeedUpdate)
 		{
+#if defined(CONF_FAMILY_WINDOWS)
 			CUIRect Update;
 			Part.VSplitLeft(100.0f, &Update, NULL);
 
@@ -1432,6 +1437,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			{
 				Updater()->PerformUpdate();
 			}
+#endif
 		}
 		else if(State == IUpdater::STATE_NEED_RESTART)
 		{
