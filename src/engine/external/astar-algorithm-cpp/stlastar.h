@@ -557,24 +557,19 @@ private: // methods
 	void FreeAllNodes()
 	{
 		// iterate open list and delete all nodes
-		typename vector< Node * >::iterator iterOpen = m_OpenList.begin();
-
-		while( iterOpen != m_OpenList.end() )
+		for(typename vector< Node * >::iterator it = m_OpenList.begin(); it != m_OpenList.end(); ++it)
 		{
-			Node *n = (*iterOpen);
+			Node *n = (*it);
 			FreeNode( &n );
-
-			iterOpen ++;
 		}
 
 		m_OpenList.clear();
 		m_OpenListMap.clear();
 
 		// iterate closed list and delete unused nodes
-		typename map<AStarNodeUID, Node *>::iterator iterClosed;
-		for( iterClosed = m_ClosedListMap.begin(); iterClosed != m_ClosedListMap.end(); iterClosed++ )
+		for(typename map<AStarNodeUID, Node *>::iterator it = m_ClosedListMap.begin(); it != m_ClosedListMap.end(); ++it)
 		{
-			Node *n = iterClosed->second;
+			Node *n = it->second;
 			FreeNode( &n );
 		}
 
@@ -592,32 +587,54 @@ private: // methods
 	void FreeUnusedNodes()
 	{
 		// iterate open list and delete unused nodes
-		typename vector< Node * >::iterator iterOpen;
-		for( iterOpen = m_OpenList.begin(); iterOpen != m_OpenList.end(); iterOpen++ )
 		{
-			Node *n = (*iterOpen);
-
-			if( !n->child )
+			int i = 0;
+			vector<int> RemoveList;
+			for(typename vector< Node * >::iterator it = m_OpenList.begin(); it != m_OpenList.end(); ++it, ++i)
 			{
-				FreeNode( &n );
+				Node *n = (*it);
+
+				if( !n->child )
+				{
+					FreeNode( &n );
+					RemoveList.push_back(i);
+				}
 			}
+
+			// remove the deleted nodes (and only those!) from our memories
+			for(typename vector<int>::iterator vecIt = RemoveList.begin(); vecIt != RemoveList.end(); ++vecIt)
+			{
+				int index = *vecIt;
+
+				// delete all occurences in the map
+				for(typename std::map<AStarNodeUID, Node *>::iterator mapIt = m_OpenListMap.begin(); mapIt != m_OpenListMap.end(); /* noop */)
+				{
+					if(mapIt->second == m_OpenList[index])
+						mapIt = m_OpenListMap.erase(mapIt);
+					else
+						++mapIt;
+				}
+
+				// remove it from our list
+				m_OpenList.erase(m_OpenList.begin() + index);
+			}
+
 		}
-		m_OpenList.clear();
-		m_OpenListMap.clear();
 
 		// iterate closed list and delete unused nodes
 		typename map<AStarNodeUID, Node *>::iterator iterClosed;
-		for( iterClosed = m_ClosedListMap.begin(); iterClosed != m_ClosedListMap.end(); iterClosed ++ )
+		for( iterClosed = m_ClosedListMap.begin(); iterClosed != m_ClosedListMap.end(); /* noop */ )
 		{
 			Node *n = iterClosed->second;
 
 			if( !n->child )
 			{
 				FreeNode( &n );
+				iterClosed = m_ClosedListMap.erase(iterClosed);
 			}
+			else
+				++iterClosed;
 		}
-		m_ClosedListMap.clear();
-
 	}
 
 	// Node memory management
