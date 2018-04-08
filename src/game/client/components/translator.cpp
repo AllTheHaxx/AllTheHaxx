@@ -83,11 +83,18 @@ void CTranslator::TranslationWorker()
 		}
 
 		// parse response
-		json_value &jsonValue = *json_parse(Response.c_str(), Response.length());
+		json_value *pJsonValue = json_parse(Response.c_str(), Response.length());
+		if(!pJsonValue)
+		{
+			dbg_msg("trans/warn", "failed to parse response\n%s", Response.c_str());
+			continue;
+		}
+
+		json_value& jsonValue = *pJsonValue;
 		const char *pResult = jsonValue["responseData"]["translatedText"];
 		if(str_length(pResult) == 0)
 		{
-			dbg_msg("trans/warn", "failed to parse response\n%s", Response.c_str());
+			dbg_msg("trans/warn", "translatedText is empty\n%s", Response.c_str());
 			continue;
 		}
 
