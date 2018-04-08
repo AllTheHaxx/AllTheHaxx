@@ -78,7 +78,7 @@ class CUpdater : public IUpdater
 	int NumFileDownloadRepos() const { return (int)m_FileDownloadJobs.size(); }
 
 	void AddFileRemoveJob(const char *pFile);
-	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0); // files from repos
+	void FetchFile(const char *pSource, const char *pFile, const char *pDestPath = 0, bool DestPathIsAbsolute = false); // files from repos
 	void FetchExecutable(const char *pFile, const char *pDestPath); // executables from release sections
 	void InstallFile(const char *pFile);
 

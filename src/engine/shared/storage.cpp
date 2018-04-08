@@ -555,7 +555,7 @@ public:
 			return pBuffer;
 		}
 
-		GetPath(Type, pDir, pBuffer, BufferSize);
+		return GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
 	virtual const char* GetBinaryPath(const char *pDir, char *pBuffer, unsigned BufferSize)

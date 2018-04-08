@@ -93,10 +93,12 @@ void CUpdater::CheckForUpdates(bool ForceRefresh)
 	// get the version info if we don't have any yet
 	if((GetLatestVersion()[0] == '0' && GetLatestVersion()[1] == '\0') || ForceRefresh)
 	{
+		char aDstPath[512];
+		m_pStorage->GetCompletePath(IStorageTW::TYPE_SAVE, "tmp/", aDstPath, sizeof(aDstPath));
 		SetState(STATE_SYNC_REFRESH);
 		dbg_msg("updater", "refreshing version info and news");
-		FetchFile("stuffility/master", "ath-news.txt");
-		FetchFile("stuffility/master", LATEST_VERSION_FILE);
+		FetchFile("stuffility/master", "ath-news.txt", aDstPath, true);
+		FetchFile("stuffility/master", LATEST_VERSION_FILE, aDstPath, true);
 	}
 	else
 		dbg_msg("updater", "skipping version check, already did it");
@@ -135,47 +137,47 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 	const bool IS_ERROR = pTask->State() == (const int)CFetchTask::STATE_ERROR;
 
-	const char *a = 0; // a is full path
+	const char *full_path = 0; // a is full path
 	for(const char *c = pTask->Dest(); *c; c++)
 		if(*c == '/')
-			{ a = c + 1; break; }
-	a = a ? a : pTask->Dest();
+			{ full_path = c + 1; break; }
+	full_path = full_path ? full_path : pTask->Dest();
 
-		const char *b = 0; // b is just the filename
+		const char *filename = 0; // b is just the filename
 	for(const char *c = pTask->Dest(); *c; c++)
 		if(*c == '/')
-			b = c + 1;
-	b = b ? b : pTask->Dest();
+			filename = c + 1;
+	filename = filename ? filename : pTask->Dest();
 
-	const char * const pFailedNewsMsg = Localize(
-			"|<<< Failed to download news >>>|\n"
-			"News will automatically be refreshed on next client start if available\n"
-			"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+	const char * const pFailedNewsMsg = \
+			"|$$GGGFailed to refresh news|\n"
+			"$$GGGNews will automatically be refreshed on next client start if available\n"
+			"$$JJJ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 	if(IS_ERROR)
 	{
-		if(str_comp(b, "ath-news.txt") == 0) // news are allowed to fail...
+		if(str_comp(filename, "ath-news.txt") == 0) // news are allowed to fail...
 			str_copy(pSelf->m_aNews, pFailedNewsMsg, sizeof(pSelf->m_aNews));
-		else if(str_comp(b, LATEST_VERSION_FILE) == 0) // version check is definitely allowed to fail
-			dbg_msg("updater/warning", "version check failed: couldn't download '%s'", b);
-		else if(str_comp(b, UPDATE_MANIFEST) == 0) // update manifest is optional, thus allowewd to fail
+		else if(str_comp(filename, LATEST_VERSION_FILE) == 0) // version check is definitely allowed to fail
+			dbg_msg("updater/warning", "version check failed: couldn't download '%s'", filename);
+		else if(str_comp(filename, UPDATE_MANIFEST) == 0) // update manifest is optional, thus allowewd to fail
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);
 			dbg_msg("updater/warning", "getting manifest failed! waiting for github-compare to finish...");
 		}
 		else
 		{
-			if(str_comp_nocase_num(a, "lua/", 4) != 0) // example scripts are allowed to fail, too
+			if(str_comp_nocase_num(full_path, "lua/", 4) != 0) // example scripts are allowed to fail, too
 			{
 				pSelf->SetState(STATE_FAIL);
-				str_format(pSelf->m_aError, sizeof(pSelf->m_aError), "'%s'", a);
+				str_format(pSelf->m_aError, sizeof(pSelf->m_aError), "'%s'", full_path);
 			}
-			dbg_msg("update", "failed to download '%s'", a);
+			dbg_msg("update", "failed to download '%s'", full_path);
 		}
 		fs_remove(pTask->Dest()); // delete the empty file dummy
 	}
 
 	// handle the news
-	if(str_comp(b, "ath-news.txt") == 0)
+	if(str_comp(filename, "ath-news.txt") == 0)
 	{
 		// dig out whether ATH news have been updated
 
@@ -193,7 +195,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		// read the new news
 		if(!IS_ERROR)
 		{
-			f = io_open("update/ath-news.txt", IOFLAG_READ);
+			f = pSelf->m_pStorage->OpenFile("tmp/ath-news.txt", IOFLAG_READ, IStorageTW::TYPE_SAVE);
 			if(f)
 			{
 				io_read(f, pSelf->m_aNews, NEWS_LENGTH);
@@ -223,10 +225,10 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	}
 	else if(pTask->State() == CFetchTask::STATE_DONE)
 	{
-		if(pSelf->State() == STATE_SYNC_REFRESH && str_comp(b, LATEST_VERSION_FILE) == 0)
+		if(pSelf->State() == STATE_SYNC_REFRESH && str_comp(filename, LATEST_VERSION_FILE) == 0)
 		{
 			bool NeedCheck = false;
-			IOHANDLE f = io_open("update/" LATEST_VERSION_FILE, IOFLAG_READ);
+			IOHANDLE f = pSelf->m_pStorage->OpenFile("tmp/" LATEST_VERSION_FILE, IOFLAG_READ, IStorageTW::TYPE_SAVE);
 			if(f)
 			{
 				char aBuf[16];
@@ -247,12 +249,12 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			if(NeedCheck)
 				pSelf->m_GitHubAPI.CheckVersion();
 		}
-		else if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(b, UPDATE_MANIFEST) == 0)
+		else if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(filename, UPDATE_MANIFEST) == 0)
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);
 			dbg_msg("updater", "got manifest, waiting for github-compare to finish...");
 		}
-		else if(pSelf->State() == STATE_DOWNLOADING && str_comp(a, pSelf->m_aLastFile) == 0)
+		else if(pSelf->State() == STATE_DOWNLOADING && str_comp(full_path, pSelf->m_aLastFile) == 0)
 		{
 			dbg_msg("updater", "finished downloading, installing update");
 			pSelf->InstallUpdate(); // sets state
@@ -492,44 +494,51 @@ void CUpdater::InstallUpdate()
 	}
 }
 
-void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath) // if pDestPath is an empty string (""), the file will go to "./*"
+void CUpdater::FetchFile(const char *pSource, const char *pFile, const char *pDestPath, bool DestPathIsAbsolute) // if pDestPath is an empty string (""), the file will go to "./*"
 {
 	CALLSTACK_ADD();
 
-	char aBuf[256], aDestPath[512] = {0};
-	str_format(aBuf, sizeof(aBuf), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource, pFile);
+	char aUrl[256];
+	str_format(aUrl, sizeof(aUrl), "https://raw.githubusercontent.com/AllTheHaxx/%s/%s", pSource, pFile);
 
-	//dbg_msg("updater", "fetching file from '%s'", aBuf);
+	//dbg_msg("updater", "fetching file from '%s'", aUrl);
 	if(!pDestPath)
 		pDestPath = pFile;
-	str_format(aDestPath, sizeof(aDestPath), "update/%s", pDestPath);
+
+	char aDestPath[512];
+	if(!DestPathIsAbsolute)
+		str_formatb(aDestPath, "update/%s", pDestPath);
+	else
+		str_copyb(aDestPath, pDestPath);
 	if(aDestPath[str_length(aDestPath)-1] == '/' || aDestPath[str_length(aDestPath)-1] == '\\')
 	{
-		fs_makedir(aDestPath);
 		str_append(aDestPath, pFile, sizeof(aDestPath));
+		fs_makedir_rec_for(aDestPath);
 	}
 
-	m_pFetcher->QueueAdd(false, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->QueueAdd(false, aUrl, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::FetchExecutable(const char *pFile, const char *pDestPath)
 {
 	CALLSTACK_ADD();
 
-	char aBuf[256], aDestPath[512] = {0};
-	str_format(aBuf, sizeof(aBuf), "https://github.com/AllTheHaxx/AllTheHaxx/releases/download/%s/%s", GetLatestVersion(), pFile);
+	char aUrl[256];
+	str_format(aUrl, sizeof(aUrl), "https://github.com/AllTheHaxx/AllTheHaxx/releases/download/%s/%s", GetLatestVersion(), pFile);
 
-	//dbg_msg("updater", "fetching file from '%s'", aBuf);
+	//dbg_msg("updater", "fetching file from '%s'", aUrl);
 	if(!pDestPath)
 		pDestPath = pFile;
+
+	char aDestPath[512];
 	str_format(aDestPath, sizeof(aDestPath), "update/%s", pDestPath);
 	if(aDestPath[str_length(aDestPath)-1] == '/' || aDestPath[str_length(aDestPath)-1] == '\\')
 	{
-		fs_makedir(aDestPath);
 		str_append(aDestPath, pFile, sizeof(aDestPath));
+		fs_makedir_rec_for(aDestPath);
 	}
 
-	m_pFetcher->QueueAdd(false, aBuf, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->QueueAdd(false, aUrl, aDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::InstallFile(const char *pFile)
