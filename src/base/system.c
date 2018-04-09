@@ -219,8 +219,18 @@ void dbg_enable_threaded()
 }
 #endif
 
+static int s_DbgMsgDisabled = 0;
+
+void set_dbg_msg_enabled(int enabled)
+{
+	s_DbgMsgDisabled = !enabled;
+}
+
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
+	if(s_DbgMsgDisabled)
+		return;
+
 	va_list args;
 	char *msg;
 	int len;
@@ -269,13 +279,26 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #else
 		// colored output
 		if(str_comp(sys, "chat") == 0)
-			printf("\033[0;%im", 36);
+			printf("\033[0;%im", 36); // Cyan
 		else if(str_comp(sys, "teamchat") == 0)
-			printf("\033[0;%im", 32);
+			printf("\033[0;%im", 32); // Green
 		else if(str_comp(sys, "serv") == 0)
-			printf("\033[0;%im", 33);
+			printf("\033[0;%im", 33); // Yellow
+		else if(str_find_nocase(sys, "warn"))
+			printf("\033[0;%im", 93); // Bright Yellow
+		else if(str_find_nocase(sys, "error"))
+			printf("\033[0;%im", 91); // Bright Red
+		else if(str_find_nocase(sys, ".lua"))
+			printf("\033[0;%im", 37); // Bright White
 		else
+		{
+#ifdef CONF_DEBUG
 			printf("\033[0;%im", 0);
+#else
+			printf("\033[0;%im", 90); // Bright Black
+#endif
+		}
+
 		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #endif
 		va_end(args);

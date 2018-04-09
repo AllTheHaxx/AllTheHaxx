@@ -37,7 +37,7 @@ void CMenus::RenderSettingsLuaExceptions(CUIRect MainView, CLuaFile *L)
 	char aBuf[256];
 	char aTitle[256];
 	char aBottomText[32];
-	str_format(aTitle, sizeof(aTitle), Localize("Exceptions thrown by script '%s'"), L->GetFilename());
+	str_format(aTitle, sizeof(aTitle), Localize("Exceptions thrown by script '%s'"), L->GetDisplayedFilename());
 	if(L->State() == CLuaFile::STATE_LOADED)
 	{
 		str_format(aBuf, sizeof(aBuf), " [%s]", Localize("Running"));
@@ -273,7 +273,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					Item.m_Rect.VSplitRight(Item.m_Rect.h/2.0f, &Item.m_Rect, &Buttons);
 					Buttons.HSplitMid(&Buttons, &Button); // top: permission indicator, bottom: autoload checkbox
 
-					int PermissionFlags = L->GetPermissionFlags();
+					unsigned PermissionFlags = L->GetPermissionFlags();
 					char aTooltip[2048] = {0};
 					if(PermissionFlags == 0)
 						str_copyb(aTooltip, Localize("This script has no additional permissions and is thus considered safe."));
@@ -293,7 +293,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 									 PermissionFlags == CLuaFile::PERMISSION_GODMODE ? vec4(0.2f, 0.7f, 0.2f, 0.8f) :
 									 PermissionFlags == 0 ? vec4(0.7f, 0.7f, 0.2f, 0.8f) :
 									 vec4(0.7f, 0.2f, 0.2f, 0.8f)))
-						dbg_msg("lua/permissions", "'%s' | %i (%i)", L->GetFilename(), PermissionFlags, L->GetPermissionFlags());
+						dbg_msg("lua/permissions", "'%s' | %x (%x)", L->GetFilename(), PermissionFlags, L->GetPermissionFlags());
 
 
 					// autoload button
@@ -319,7 +319,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 					RenderTools()->DrawUIRect(&Item.m_Rect, Color, 0, 0);
 
 					// script filename
-					UI()->DoLabelScaled(&Label, L->GetFilename()+4, 14.0f, -1, -1/*Buttons.w-5.0f*/, g_Config.m_ClLuaFilterString);
+					UI()->DoLabelScaled(&Label, L->GetDisplayedFilename(), 14.0f, -1, -1/*Buttons.w-5.0f*/, g_Config.m_ClLuaFilterString);
 
 				}
 
@@ -349,7 +349,7 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		if (L->GetScriptTitle()[0] != '\0')
 			UI()->DoLabelScaled(&Label, L->GetScriptTitle(), 18.0f, 0, Label.w, g_Config.m_ClLuaFilterString);
 		else
-			UI()->DoLabelScaled(&Label, L->GetFilename()+4, 18.0f, 0, Label.w, g_Config.m_ClLuaFilterString);
+			UI()->DoLabelScaled(&Label, L->GetDisplayedFilename(), 18.0f, 0, Label.w, g_Config.m_ClLuaFilterString);
 
 		MainView.HSplitTop(10.0f, 0, &MainView);
 		MainView.HSplitTop(20.0f, &Label, &MainView);

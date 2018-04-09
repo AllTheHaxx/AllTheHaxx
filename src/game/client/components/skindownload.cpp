@@ -282,8 +282,10 @@ void CSkinDownload::LoadUrls()
 {
 	ms_aSkinDbUrls.clear();
 
+	const char * const pSkinDbFile = STORAGE_EDTC_DIR "/skindbs.cfg";
+
 	std::string line;
-	std::ifstream file(g_Config.m_ClSkinDbFile);
+	std::ifstream file(pSkinDbFile);
 	if(file.is_open())
 	{
 		while(std::getline(file, line))
@@ -297,14 +299,14 @@ void CSkinDownload::LoadUrls()
 		}
 		file.close();
 
-		dbg_msg("skinfetcher", "loaded %i url%s from file '%s'", NumURLs(), NumURLs() > 1 ? "s" : "", g_Config.m_ClSkinDbFile);
+		dbg_msg("skinfetcher", "loaded %i url%s from file '%s'", NumURLs(), NumURLs() > 1 ? "s" : "", pSkinDbFile);
 #if defined(CONF_DEBUG)
 		for(int i = 0; i < NumURLs(); i++)
 			dbg_msg("skinfecher/debug", "  > %i:'%s'", i, GetURL(i));
 #endif
 	}
 	else
-		dbg_msg("skinfetcher/error", "failed to open url file '%s', using ddnet's database only", g_Config.m_ClSkinDbFile);
+		dbg_msg("skinfetcher/error", "failed to open url file '%s', using ddnet's database only", pSkinDbFile);
 
 	if(NumURLs() == 0)
 	{

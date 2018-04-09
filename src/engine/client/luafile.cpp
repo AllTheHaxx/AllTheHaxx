@@ -15,11 +15,24 @@
 #include "luabinding.h"
 
 
-CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload) : m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
+CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload)
+		: m_pLua(pLua), m_Filename(Filename), m_ScriptAutoload(Autoload)
 {
 	m_pLuaState = NULL;
 	m_pLuaStateContainer = NULL;
 	m_State = STATE_IDLE;
+
+	// work out a short but unique filename to be displayed
+	const char *pFilename = Filename.c_str();
+	const char *pAppdataPath = CLua::m_pCGameClient->Storage()->GetAppdataPath();
+	if(str_comp_nocase_num(pFilename, pAppdataPath, str_length(pAppdataPath)) == 0)
+		str_formatb(m_aDisplayedFilename, "/Appdata/%s", pFilename+4 + str_length(pAppdataPath));
+	else if(str_comp_nocase_num(pFilename, STORAGE_DATA_DIR"/", str_length(STORAGE_DATA_DIR"/")) == 0
+			|| str_comp_nocase_num(pFilename, "data/", str_length("data/")) == 0)
+		str_copyb(m_aDisplayedFilename, pFilename+4+4);
+	else
+		str_copyb(m_aDisplayedFilename, pFilename+4);
+
 	Reset();
 }
 
@@ -196,7 +209,7 @@ void CLuaFile::OpenLua()
 	// note: calling the luaopen_* functions directly is WRONG and may lead to unexpected behavior!
 }
 
-void CLuaFile::ApplyPermissions(int Flags)
+void CLuaFile::ApplyPermissions(unsigned Flags)
 {
 	if(g_StealthMode)
 		return;
@@ -415,9 +428,9 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 	// some security steps right here...
-	int BeforePermissions = Import ? m_PermissionFlags : 0;
+	unsigned BeforePermissions = Import ? m_PermissionFlags : 0;
 	LoadPermissionFlags(pFilename);
-	int NewFlags = m_PermissionFlags & ~BeforePermissions;
+	unsigned NewFlags = m_PermissionFlags & ~BeforePermissions;
 	ApplyPermissions(NewFlags); // only apply those that are new
 
 	// inject our complicated overrides
@@ -470,7 +483,7 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 
 
 	if(g_Config.m_Debug)
-		dbg_msg("lua/debug", "loading '%s' with flags %i", pFilename, m_PermissionFlags);
+		dbg_msg("lua/debug", "loading '%s' with flags %x", pFilename, m_PermissionFlags);
 
 	// make sure that source code scripts are what they're supposed to be
 	char aData[sizeof(LUA_SIGNATURE)] = {0};

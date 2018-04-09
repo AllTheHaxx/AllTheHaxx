@@ -133,9 +133,9 @@ void CMenus::RenderPopups()
 			pTitle = Localize("Lua Script wants to go fullscreen");
 			char aScriptName[64];
 			if(str_length(m_pLuaFSModeRequester->GetScriptTitle()) > 0)
-				str_formatb(aScriptName, "'%s' (\"%s\")", m_pLuaFSModeRequester->GetFilename(), m_pLuaFSModeRequester->GetScriptTitle());
+				str_formatb(aScriptName, "'%s' (\"%s\")", m_pLuaFSModeRequester->GetDisplayedFilename(), m_pLuaFSModeRequester->GetScriptTitle());
 			else
-				str_formatb(aScriptName, "'%s'", m_pLuaFSModeRequester->GetFilename());
+				str_formatb(aScriptName, "'%s'", m_pLuaFSModeRequester->GetDisplayedFilename());
 			str_formatb(aExtraText, "The script %s wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", aScriptName);
 			pExtraText = aExtraText;
 			ExtraAlign = CUI::ALIGN_LEFT;

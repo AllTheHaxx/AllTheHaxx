@@ -49,9 +49,13 @@ function NewConfig(on_configured_callback)
 	end
 
 	config.Save = function(self, filename)
-		print("saved configuration to '"..filename.."'")
 		local file = io.open(filename, "w")
+		if file == nil then
+			print("could not save configuration to '" .. filename .. "'")
+			return
+		end
 
+		print("saved configuration to '"..filename.."'")
 		-- Define a little helper function to save options
 		local saver = {}
 		saver.file = file

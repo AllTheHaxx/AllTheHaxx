@@ -9,6 +9,8 @@ add_definitions("-DFEATURE_LUA")
 add_definitions("-DDO_NOT_COMPILE_THIS_CODE")
 add_definitions("-D_GNU_SOURCE")
 add_definitions("-DSDL_VIDEO_DRIVER_X11")
+#add_definitions("-DCONF_INSTALL_ROOT=\"\\\"/\\\"\"")
+add_definitions('-DCONF_INSTALL_ROOT="/"')
 
 include_directories(
         other/sdl/include

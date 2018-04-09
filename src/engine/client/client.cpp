@@ -427,9 +427,11 @@ void CClient::LoadMapDatabaseUrls()
 {
 	m_MapDbUrls.clear();
 
+	const char * const pMapDbFile = STORAGE_EDTC_DIR "/mapdbs.cfg";
+
 	int prior = 0;
 	std::string line;
-	std::ifstream file(g_Config.m_ClMapDbFile);
+	std::ifstream file(pMapDbFile);
 	if(file.is_open())
 	{
 		while(std::getline(file, line))
@@ -446,10 +448,10 @@ void CClient::LoadMapDatabaseUrls()
 		file.close();
 
 		m_MapDbUrls.sort_range();
-		dbg_msg("mapfetcher", "loaded %i url%s from file '%s'", prior, prior > 1 ? "s" : "", g_Config.m_ClMapDbFile);
+		dbg_msg("mapfetcher", "loaded %i url%s from file '%s'", prior, prior > 1 ? "s" : "", pMapDbFile);
 	}
 	else
-		dbg_msg("mapfetcher/error", "failed to open url file '%s', using ddnet's database only", g_Config.m_ClMapDbFile);
+		dbg_msg("mapfetcher/error", "failed to open url file '%s', using ddnet's database only", pMapDbFile);
 
 	if(m_MapDbUrls.size() == 0)
 	{
@@ -4433,8 +4435,12 @@ static void ParseArgumentsForSwitches(int NumArgs, const char **ppArguments)
 	{
 		if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
 		{
-			// skip silent param
+#if defined(CONF_FAMILY_WINDOWS)
+			// skip silent param on windows
 			continue;
+#else
+			set_dbg_msg_enabled(false);
+#endif
 		}
 		else if(!str_comp("-A", ppArguments[i]) || !str_comp("--enable-assert", ppArguments[i]))
 		{
@@ -4506,9 +4512,14 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->RegisterInterfaces();
 
 	// create the components
-	IEngine *pEngine = CreateEngine("Teeworlds");
+#if defined(CONF_INSTALL_ROOT)
+	const char *pAppName = "AllTheHaxx";
+#else
+	const char *pAppName = "Teeworlds";
+#endif
+	IEngine *pEngine = CreateEngine(pAppName);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorageTW *pStorage = CreateStorage("Teeworlds", IStorageTW::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
+	IStorageTW *pStorage = CreateStorage(pAppName, IStorageTW::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();

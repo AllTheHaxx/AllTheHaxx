@@ -7,8 +7,6 @@
 //#include <engine/client/luabinding.h>
 #include "linereader.h"
 
-// compiled-in data-dir path
-#define DATA_DIR "data"
 
 class CStorage : public IStorageTW
 {
@@ -100,32 +98,43 @@ public:
 		IOHANDLE File = io_open("storage.cfg", IOFLAG_READ);
 		if(!File)
 		{
-			// check usable path in argv[0]
-			unsigned int Pos = ~0U;
-			for(unsigned i = 0; pArgv0[i]; i++)
-				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
-					Pos = i;
-			if(Pos < MAX_PATH_LENGTH)
+			// check ATH root
+			File = io_open(STORAGE_ATH_ROOT"/storage.cfg", IOFLAG_READ);
+			if(!File)
 			{
-				char aBuffer[MAX_PATH_LENGTH];
-				str_copy(aBuffer, pArgv0, Pos+1);
-				str_append(aBuffer, "/storage.cfg", sizeof(aBuffer));
-				File = io_open(aBuffer, IOFLAG_READ);
-			}
-
-			if(Pos >= MAX_PATH_LENGTH || !File)
-			{
-				dbg_msg("storage", "couldn't open storage.cfg, generating one");
-				if(!GenerateStorageCfg())
+				// check usable path in argv[0]
+				unsigned int Pos = ~0U;
+				for(unsigned i = 0; pArgv0[i]; i++)
+					if(pArgv0[i] == '/' || pArgv0[i] == '\\')
+						Pos = i;
+				if(Pos < MAX_PATH_LENGTH)
 				{
-					dbg_msg("storage", "failed to generate storage.cfg");
-					return;
+					char aBuffer[MAX_PATH_LENGTH];
+					str_copy(aBuffer, pArgv0, Pos+1);
+					str_append(aBuffer, "/storage.cfg", sizeof(aBuffer));
+					File = io_open(aBuffer, IOFLAG_READ);
 				}
-				File = io_open("storage.cfg", IOFLAG_READ);
-				if(!File)
+
+				if(Pos >= MAX_PATH_LENGTH || !File)
 				{
-					dbg_msg("storage", "couldn't open storage.cfg after generating it");
-					return;
+					// check in edct dir
+					File = io_open(STORAGE_EDTC_DIR"/storage.cfg", IOFLAG_READ);
+					if(!File)
+					{
+						// couldn't find it anywhere, try to generate one
+						dbg_msg("storage", "couldn't open storage.cfg, generating one");
+						if(!GenerateStorageCfg())
+						{
+							dbg_msg("storage", "failed to generate storage.cfg");
+							return;
+						}
+						File = io_open("storage.cfg", IOFLAG_READ);
+						if(!File)
+						{
+							dbg_msg("storage", "couldn't open storage.cfg after generating it");
+							return;
+						}
+					}
 				}
 			}
 		}
@@ -163,13 +172,17 @@ public:
 			dbg_msg("storage/error", "checking if argv[0] IS executable name...");
 			if(str_comp_nocase_num(&pArgv0[str_length(pArgv0)-4], ".exe", 4) == 0)
 			{
-				dbg_msg("storage", "yap, that worked!");
+				dbg_msg("storage", "...yap, that worked!");
 				str_copy(m_aExecutableName, pArgv0, sizeof(m_aExecutableName));
 			}
 			else
 			{
-				dbg_msg("storage", "no, seems not like. Defaulting to 'AllTheHaxx.exe'");
-				str_copy(m_aExecutableName, "AllTheHaxx.exe", sizeof(m_aExecutableName));
+				dbg_msg("storage", "...no, doesn't seem like. Defaulting to 'AllTheHaxx.exe'");
+				str_copy(m_aExecutableName, "AllTheHaxx"
+											#if defined(CONF_FAMILY_WINDOWS)
+														".exe"
+											#endif
+											, sizeof(m_aExecutableName));
 			}
 		}
 	}
@@ -228,9 +241,9 @@ public:
 		}
 
 		// 2) use compiled-in data-dir if present
-		if(fs_is_dir(DATA_DIR "/mapres"))
+		if(fs_is_dir(STORAGE_DATA_DIR "/mapres"))
 		{
-			str_copy(m_aDatadir, DATA_DIR, sizeof(m_aDatadir));
+			str_copy(m_aDatadir, STORAGE_DATA_DIR, sizeof(m_aDatadir));
 			str_copy(m_aBinarydir, "", sizeof(m_aBinarydir));
 			return;
 		}
@@ -261,13 +274,13 @@ public:
 		// 4) check for all default locations
 		{
 			const char *aDirs[] = {
-				"/usr/share/teeworlds/data",
-				"/usr/share/games/teeworlds/data",
-				"/usr/local/share/teeworlds/data",
-				"/usr/local/share/games/teeworlds/data",
-				"/usr/pkg/share/teeworlds/data",
-				"/usr/pkg/share/games/teeworlds/data",
-				"/opt/teeworlds/data"
+				"/usr/share/allthehaxx/data",
+				"/usr/share/games/allthehaxx/data",
+				"/usr/local/share/allthehaxx/data",
+				"/usr/local/share/games/allthehaxx/data",
+				"/usr/pkg/share/allthehaxx/data",
+				"/usr/pkg/share/games/allthehaxx/data",
+				"/opt/allthehaxx/data"
 			};
 			const int DirsCount = sizeof(aDirs) / sizeof(aDirs[0]);
 
@@ -287,7 +300,7 @@ public:
 	#endif
 
 		// no data-dir found
-		dbg_msg("storage", "warning no data directory found");
+		dbg_msg("storage", "WARNING: no data directory found");
 	}
 
 
@@ -567,6 +580,14 @@ public:
 	const char* GetExecutableName() const
 	{
 		return m_aExecutableName;
+	}
+
+	virtual const char *GetAppdataPath()
+	{
+		static char aAppdataPath[512] = {0};
+		if(aAppdataPath[0] == '\0')
+			GetCompletePath(IStorageTW::TYPE_SAVE, "", aAppdataPath, sizeof(aAppdataPath));
+		return aAppdataPath;
 	}
 
 	bool GenerateStorageCfg() const

@@ -3,10 +3,17 @@
 #ifndef ENGINE_SHARED_CONFIG_H
 #define ENGINE_SHARED_CONFIG_H
 
+#include <engine/storage.h>
+
 #define CONFIG_FILE "settings_allthehaxx.cfg"
-#define AUTOEXEC_FILE "autoexec.cfg"
 #define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
 #define AUTOEXEC_SERVER_FILE "autoexec_server.cfg"
+#if defined(CONF_INSTALL_ROOT)
+	#define AUTOEXEC_FILE STORAGE_EDTC_DIR"/autoexec.cfg"
+#else
+	#define AUTOEXEC_FILE "autoexec.cfg"
+#endif
+
 
 struct CConfiguration
 {

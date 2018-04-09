@@ -117,7 +117,10 @@ void CFetcher::FetcherThread(void *pUser)
 	})
 
 
-	dbg_msg("fetcher", "thread %p started...", pFetcher->m_pThread);
+	{
+		LOCK_SECTION_MUTEX(pFetcher->m_Mutex)
+		dbg_msg("fetcher", "thread %p started...", pFetcher->m_pThread);
+	}
 
 	while(true)
 	{

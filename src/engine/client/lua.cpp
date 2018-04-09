@@ -82,10 +82,20 @@ void CLua::SortLuaFiles()
 		int minIndex = curr;
 		for(int i = curr + 1; i < NUM; i++)
 		{
-			int c = 4;
-			for(; str_uppercase(m_apLuaFiles[i]->GetFilename()[c]) == str_uppercase(m_apLuaFiles[minIndex]->GetFilename()[c]); c++);
-			if(str_uppercase(m_apLuaFiles[i]->GetFilename()[c]) < str_uppercase(m_apLuaFiles[minIndex]->GetFilename()[c]))
-				minIndex = i;
+			unsigned GodmodeI = m_apLuaFiles[i]->GetPermissionFlags()&CLuaFile::PERMISSION_GODMODE;
+			unsigned GodmodeMin = m_apLuaFiles[minIndex]->GetPermissionFlags()&CLuaFile::PERMISSION_GODMODE;
+			if(GodmodeI != GodmodeMin)
+			{
+				if(!GodmodeMin)
+					minIndex = i;
+			}
+			else
+			{
+				int c = 0;
+				for(; str_uppercase(m_apLuaFiles[i]->GetDisplayedFilename()[c]) == str_uppercase(m_apLuaFiles[minIndex]->GetDisplayedFilename()[c]); c++);
+				if(str_uppercase(m_apLuaFiles[i]->GetDisplayedFilename()[c]) < str_uppercase(m_apLuaFiles[minIndex]->GetDisplayedFilename()[c]))
+					minIndex = i;
+			}
 		}
 
 		if(minIndex != curr)

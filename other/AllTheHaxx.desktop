@@ -1,0 +1,24 @@
+[Desktop Action failsafe]
+Exec=AllTheHaxx 'failsafe 1'
+Name[de_DE]=Abgesicherter Modus
+Name=Start Failsafe
+
+[Desktop Action stealth-mode]
+Exec=AllTheHaxx --stealth-mode
+Name[de_DE]=Im StealthMode starten
+Name=Start in stealth mode
+
+[Desktop Entry]
+Actions=stealth-mode;failsafe;
+Categories=Game;ArcadeGame;
+Comment[de_DE]=AllTernative Teeworlds Client
+Comment=AllTernative Teeworlds Client
+Encoding=UTF-8
+Exec=AllTheHaxx --silent
+GenericName[de_DE]=featuring a Lua API and many more cool features!
+GenericName=featuring a Lua API and many more cool features!
+Icon=AllTheHaxx
+Name=AllTheHaxx
+StartupNotify=false
+Terminal=false
+Type=Application

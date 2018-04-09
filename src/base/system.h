@@ -112,6 +112,8 @@ __attribute__ ((format (printf, 2, 3))) /* Warn if you specify wrong arguments i
 #endif
 ;
 
+void set_dbg_msg_enabled(int enabled);
+
 /* Group: Memory */
 
 /*

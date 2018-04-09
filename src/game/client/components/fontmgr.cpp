@@ -50,9 +50,9 @@ void CFontMgr::Init()
 
 bool CFontMgr::ActivateFont(int ListIndex)
 {
-	if(ListIndex > m_lFontFiles.size())
+	if(ListIndex >= m_lFontFiles.size())
 	{
-		dbg_msg("fontmgr/error", "tried to load font that doesn't exist (%i > %i)", ListIndex, m_lFontFiles.size());
+		dbg_msg("fontmgr/error", "tried to load font that doesn't exist (%i >= %i)", ListIndex, m_lFontFiles.size());
 		return false;
 	}
 
@@ -126,7 +126,6 @@ bool CFontMgr::InitFont_impl(CFontFile *f, int Type, const char *pTypeStr)
 		str_formatb(aPath, "fonts/%s/%s/%s.ttf", s_apFontFolders[m_Type], f->m_Name.c_str(), pTypeStr);
 
 	char aFullPath[512];
-	mem_zerob(aFullPath);
 	IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath));
 	if(File)
 	{
@@ -134,8 +133,31 @@ bool CFontMgr::InitFont_impl(CFontFile *f, int Type, const char *pTypeStr)
 		f->m_apFonts[Type] = TextRender()->LoadFont(aFullPath);
 		return true;
 	}
-	else if(g_Config.m_Debug)
-		dbg_msg("fontmgr/debug", "failed trying to load '%s'", aPath);
+	else
+	{
+#if defined(CONF_FAMILY_UNIX)
+		// search system fonts directories
+		str_formatb(aFullPath, "/usr/local/share/%s", aPath);
+		File = io_open(aFullPath, IOFLAG_READ);
+		if(File)
+		{
+			io_close(File);
+			f->m_apFonts[Type] = TextRender()->LoadFont(aFullPath);
+			return true;
+		}
+
+		str_formatb(aFullPath, "/usr/share/%s", aPath);
+		File = io_open(aFullPath, IOFLAG_READ);
+		if(File)
+		{
+			io_close(File);
+			f->m_apFonts[Type] = TextRender()->LoadFont(aFullPath);
+			return true;
+		}
+#endif
+		if(g_Config.m_Debug)
+			dbg_msg("fontmgr/debug", "failed trying to load '%s'", aPath);
+	}
 	return false;
 }
 

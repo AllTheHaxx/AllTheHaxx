@@ -7,6 +7,18 @@
 
 struct lua_State;
 
+// compiled in paths
+#ifndef CONF_INSTALL_ROOT
+	#define STORAGE_ATH_ROOT "."
+	#define STORAGE_EDTC_DIR STORAGE_DATA_DIR "/edtc"
+#else
+	#define STORAGE_ATH_ROOT CONF_INSTALL_ROOT"/usr/share/allthehaxx"
+	#define STORAGE_EDTC_DIR CONF_INSTALL_ROOT"/etc/allthehaxx"
+#endif
+
+#define STORAGE_DATA_DIR STORAGE_ATH_ROOT "/data"
+
+
 class IStorageTW : public IInterface
 {
 	MACRO_INTERFACE("storage", 0)
@@ -50,6 +62,7 @@ public:
 	virtual const char* GetBinaryPath(const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
 
 	virtual const char* GetExecutableName() const = 0;
+	virtual const char *GetAppdataPath() = 0;
 
 	virtual const char *SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend = 0, bool ForcePrepend = false) const = 0;
 	virtual const char *MakeFullPath(char *pInOutBuffer, unsigned BufferSize, int StorageType) const = 0;

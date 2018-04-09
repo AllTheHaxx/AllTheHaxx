@@ -53,6 +53,7 @@ config:Add(OptString("debugger", false))
 config:Add(OptString("spoofing", false))
 config:Add(OptString("unstable", false))
 config:Add(OptString("verification", false))
+config:Add(OptString("installation_root", false))
 config:Finalize("config_" .. sysconf .. ".lua")
 
 print("System Configurations: " .. sysconf)
@@ -252,6 +253,10 @@ function build(settings)
 
 	if config.verification.value and type(config.verification.value) == "string" then
 		settings.cc.defines:Add('CLIENT_VERIFICATION_KEY="' .. config.verification.value .. '"')
+	end
+
+	if config.installation_root.value and type(config.installation_root.value) == "string" then
+		settings.cc.defines:Add('CONF_INSTALL_ROOT="\\"' .. config.installation_root.value .. '\\""')
 	end
 
 	if config.debugger.value then

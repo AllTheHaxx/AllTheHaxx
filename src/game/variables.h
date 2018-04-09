@@ -97,7 +97,6 @@ MACRO_CONFIG_INT(ClMotdTime, cl_motd_time, 10, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SA
 
 MACRO_CONFIG_STR(ClDDNetVersionServer, cl_ddnet_version_server, 100, "version.ddnet.tw", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Server to use to check for ddnet version (needed for DDNet-Serverlist)")
 MACRO_CONFIG_STR(ClDDNetUpdate2Server, cl_ddnet_update2_server, 100, "update2.ddnet.tw", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Server to use to update new ddnet versions")
-MACRO_CONFIG_STR(ClMapDbFile, cl_mapdb_file, 128, "data/maps/urls.cfg", CFGFLAG_CLIENT|CFGFLAG_SAVE, "File to load the mapserver addresses from")
 
 MACRO_CONFIG_STR(ClLanguagefile, cl_languagefile, 255, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "What language file to use")
 MACRO_CONFIG_INT(ClVanillaSkinsOnly, cl_vanilla_skins_only, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Only show skins available in Vanilla Teeworlds")
@@ -201,7 +200,6 @@ MACRO_CONFIG_INT(ClSmoothEmoteWheelDelay, cl_smooth_emotewheel_delay, 10, 10, 10
 MACRO_CONFIG_INT(ClConsoleModeEmotes, cl_console_mode_emotes, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send \"Zzz\" emotes while being in console mode")
 MACRO_CONFIG_INT(ClResetServerCfgOnDc, cl_reset_server_cfg_on_disconnect, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Discard config changes when disconnecting, use 'config_save' if you want to keep them")
 MACRO_CONFIG_INT(ClSendHookline, cl_send_hookline, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send the hookline (forced-off on stitch-* gamemodes)")
-MACRO_CONFIG_STR(ClSkinDbFile, cl_skin_db_file, 128, "data/skins/urls.cfg", CFGFLAG_CLIENT|CFGFLAG_SAVE, "File which holds the skin database urls")
 MACRO_CONFIG_INT(ClSkinFetcher, cl_skin_fetcher, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Fetch skins from public skin databases automatically as they are needed  (→ see cl_skin_db_file)")
 MACRO_CONFIG_INT(ClSkinFetcherUi, cl_skin_fetcher_ui, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show a little UI at the bottom of your screen when downloading skins")
 MACRO_CONFIG_INT(ClChatbubble, cl_chatbubble, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Notifiy others that you are typing")

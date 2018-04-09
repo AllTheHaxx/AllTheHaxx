@@ -90,8 +90,9 @@ private:
 	lua_State *m_pLuaStateContainer;
 	int m_State;
 	const std::string m_Filename;
+	char m_aDisplayedFilename[96];
 
-	int m_PermissionFlags;
+	unsigned int m_PermissionFlags;
 
 	char m_aScriptTitle[64];
 	char m_aScriptInfo[128];
@@ -121,8 +122,9 @@ public:
 
 	inline lua_State *L() const { return m_pLuaState; }
 	int State() const { return m_State; }
-	int GetPermissionFlags() const { return m_PermissionFlags; }
+	unsigned GetPermissionFlags() const { return m_PermissionFlags; }
 	const char* GetFilename() const { return m_Filename.c_str(); }
+	const char* GetDisplayedFilename() const { return m_aDisplayedFilename; }
 	const char* GetScriptTitle() const { return m_aScriptTitle; }
 	const char* GetScriptInfo() const { return m_aScriptInfo; }
 	bool GetScriptHasSettings() const { return m_ScriptHasSettingsPage; }
@@ -146,7 +148,7 @@ private:
 	void Reset(bool error = false);
 	void OpenLua();
 	void LoadPermissionFlags(const char *pFilename);
-	void ApplyPermissions(int Flags);
+	void ApplyPermissions(unsigned Flags);
 	bool LoadFile(const char *pFilename, bool Import);
 	bool CheckFile(const char *pFilename);
 
