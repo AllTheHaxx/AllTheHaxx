@@ -25,6 +25,9 @@ class CLuaFile
 
 	friend class CLua;
 	friend class CLuaBinding;
+
+	IStorageTW *Storage();
+
 public:
 	enum
 	{

@@ -598,11 +598,10 @@ void CControls::ClampMousePos()
 	}
 	else
 	{
-		float CameraMaxDistance = g_Config.m_ClCameraMaxDistance;
 		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
 		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		float MouseMax = min(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
+		float MouseMax = min((float)g_Config.m_ClCameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
 
 		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax && !m_SuperDyncam[g_Config.m_ClDummy])
 			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;

@@ -24,10 +24,10 @@ CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload)
 
 	// work out a short but unique filename to be displayed
 	const char *pFilename = Filename.c_str();
-	const char *pAppdataPath = CLua::m_pCGameClient->Storage()->GetAppdataPath();
+	const char *pAppdataPath = Storage()->GetAppdataPath();
 	if(str_comp_nocase_num(pFilename, pAppdataPath, str_length(pAppdataPath)) == 0)
 		str_formatb(m_aDisplayedFilename, "/Appdata/%s", pFilename+4 + str_length(pAppdataPath));
-	else if(str_comp_nocase_num(pFilename, STORAGE_DATA_DIR"/", str_length(STORAGE_DATA_DIR"/")) == 0
+	else if(str_comp_nocase_num(pFilename, STORAGE_DATA_DIR, str_length(STORAGE_DATA_DIR)) == 0
 			|| str_comp_nocase_num(pFilename, "data/", str_length("data/")) == 0)
 		str_copyb(m_aDisplayedFilename, pFilename+4+4);
 	else
@@ -70,7 +70,7 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0 || str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0) // clc's and config files won't have permission flags!
 		return;
 
-	if(str_comp_num(pFilename, "data/lua/Official/", 18) == 0)
+	if(str_comp_num(pFilename, "data/lua/Official/", 18) == 0 || str_comp_num(pFilename, STORAGE_DATA_DIR"/lua/Official/", str_length(STORAGE_DATA_DIR"/lua/Official/")) == 0)
 	{
 		m_PermissionFlags |= PERMISSION_GODMODE;
 	}
@@ -104,7 +104,7 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 			p++;
 
 		char TypeIndicator = p++[0];
-		if(TypeIndicator == '#')
+		if(TypeIndicator == '#' && !(m_PermissionFlags&PERMISSION_GODMODE))
 		{
 			if(str_comp_nocase_num("io", p, 2) == 0)
 				m_PermissionFlags |= PERMISSION_IO;
@@ -242,10 +242,10 @@ void CLuaFile::Init()
 
 	OpenLua(); // create the state, open basic libraries
 
-	if(!LoadFile("data/luabase/events.lua", false)) // load all default event callbacks
+	if(!LoadFile(STORAGE_DATA_DIR"/luabase/events.lua", false)) // load all default event callbacks
 	{
 		m_State = STATE_ERROR;
-		m_pErrorStr = Localize("Failed to load 'data/luabase/events.lua'");
+		m_pErrorStr = Localize("Failed to load resource file 'events.lua'");
 	}
 	else // if successful
 	{
@@ -553,4 +553,9 @@ bool CLuaFile::ScriptHasSettingsPage()
 	if(func1.cast<bool>() && func2.cast<bool>())
 		return true;
 	return false;
+}
+
+IStorageTW *CLuaFile::Storage()
+{
+	return CLua::m_pCGameClient->Storage();
 }

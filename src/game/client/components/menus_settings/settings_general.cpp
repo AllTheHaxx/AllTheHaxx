@@ -23,20 +23,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		// dynamic camera
 		Left.HSplitTop(20.0f, &Button, &Left);
 		static CButtonContainer s_DynamicCameraButton;
-		if(DoButton_CheckBox(&s_DynamicCameraButton, Localize("Dynamic Camera"), g_Config.m_ClMouseDeadzone != 0, &Button))
+		if(DoButton_CheckBox(&s_DynamicCameraButton, Localize("Dynamic Camera"), g_Config.m_ClDyncam, &Button))
 		{
-			if(g_Config.m_ClMouseDeadzone)
-			{
-				g_Config.m_ClMouseFollowfactor = 0;
-				g_Config.m_ClMouseMaxDistance = 400;
-				g_Config.m_ClMouseDeadzone = 0;
-			}
-			else
-			{
-				g_Config.m_ClMouseFollowfactor = 60;
-				g_Config.m_ClMouseMaxDistance = 1000;
-				g_Config.m_ClMouseDeadzone = 300;
-			}
+			g_Config.m_ClDyncam ^= 1;
 		}
 
 		// weapon pickup
