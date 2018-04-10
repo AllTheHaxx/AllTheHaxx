@@ -27,8 +27,9 @@ CLuaFile::CLuaFile(CLua *pLua, const std::string& Filename, bool Autoload)
 	const char *pAppdataPath = Storage()->GetAppdataPath();
 	if(str_comp_nocase_num(pFilename, pAppdataPath, str_length(pAppdataPath)) == 0)
 		str_formatb(m_aDisplayedFilename, "/Appdata/%s", pFilename+4 + str_length(pAppdataPath));
-	else if(str_comp_nocase_num(pFilename, STORAGE_DATA_DIR, str_length(STORAGE_DATA_DIR)) == 0
-			|| str_comp_nocase_num(pFilename, "data/", str_length("data/")) == 0)
+	else if(str_comp_nocase_num(pFilename, STORAGE_DATA_DIR, str_length(STORAGE_DATA_DIR)) == 0)
+		str_copyb(m_aDisplayedFilename, pFilename+4+str_length(STORAGE_DATA_DIR));
+	else if(str_comp_nocase_num(pFilename, "data/", str_length("data/")) == 0)
 		str_copyb(m_aDisplayedFilename, pFilename+4+4);
 	else
 		str_copyb(m_aDisplayedFilename, pFilename+4);

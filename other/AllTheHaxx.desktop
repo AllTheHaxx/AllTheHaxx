@@ -11,12 +11,10 @@ Name=Start in stealth mode
 [Desktop Entry]
 Actions=stealth-mode;failsafe;
 Categories=Game;ArcadeGame;
-Comment[de_DE]=AllTernative Teeworlds Client
-Comment=AllTernative Teeworlds Client
+GenericName=AllTernative Teeworlds Client
 Encoding=UTF-8
 Exec=AllTheHaxx --silent
-GenericName[de_DE]=featuring a Lua API and many more cool features!
-GenericName=featuring a Lua API and many more cool features!
+Comment=featuring a Lua API and many more cool features!
 Icon=AllTheHaxx
 Name=AllTheHaxx
 StartupNotify=false
