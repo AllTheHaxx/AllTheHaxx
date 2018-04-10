@@ -32,6 +32,8 @@ CFetcher::~CFetcher()
 
 		m_Mutex.unlock(); // unlock the mutex so that the thread can finish
 		thread_wait(m_pThread);
+		m_pThread = NULL;
+		m_Mutex.lock(); // re-lock so we don't get undefined behavior when the section ends
 
 		// clear the queue
 		while(m_pFirst)
@@ -112,8 +114,9 @@ void CFetcher::FetcherThread(void *pUser)
 	CFetcher *pFetcher = (CFetcher *)pUser;
 
 	DEFER([&pFetcher](){
+		LOCK_SECTION_MUTEX(pFetcher->m_Mutex)
 		dbg_msg("fetcher", "thread %p stopped", pFetcher->m_pThread);
-		pFetcher->m_pThread = NULL;
+		//pFetcher->m_pThread = NULL;
 	})
 
 
