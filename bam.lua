@@ -388,8 +388,6 @@ function build(settings)
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
-			client_settings.link.libs:Add("ssl")
-			client_settings.link.libs:Add("crypto")
 		end
 
 	elseif family == "windows" then
@@ -422,7 +420,6 @@ function build(settings)
 	config.opusfile:Apply(client_settings)
 
 	if family == "unix" and (platform == "macosx" or platform == "linux") then
-		engine_settings.link.libs:Add("dl")
 		server_settings.link.libs:Add("dl")
 		client_settings.link.libs:Add("dl")
 		launcher_settings.link.libs:Add("dl")
@@ -459,8 +456,6 @@ function build(settings)
 	end
 
 	-- build tools (TODO: fix this so we don't get double _d_d stuff)
-	tools_settings.link.libs:Add("ssl")
-	tools_settings.link.libs:Add("crypto")
 	tools_src = Collect("src/tools/*.cpp", "src/tools/*.c")
 
 	tools = {}
