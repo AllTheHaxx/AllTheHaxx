@@ -60,8 +60,11 @@ Curl = {
 				elseif platform == "macosx" and string.find(settings.config_name, "64") then
 					settings.link.libpath:Add("other/curl/mac/lib64")
 				elseif platform == "linux" then
-					settings.link.libpath:Add("other/curl/linux/lib64")
-					settings.link.libpath:Add("other/curl/linux/lib32")
+					if arch == "amd64" then
+						settings.link.libpath:Add("other/curl/linux/lib64")
+					elseif arch == "ia32" then
+						settings.link.libpath:Add("other/curl/linux/lib32")
+					end
 				end
 			end
 		end
