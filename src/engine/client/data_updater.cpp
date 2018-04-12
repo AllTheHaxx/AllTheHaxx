@@ -267,6 +267,7 @@ const std::string CGitHubAPI::SimpleGET(const char *pUrl)
 	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(m_pHandle, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, &Result);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CCurlWrapper::CurlCallback_WriteToStdString);
