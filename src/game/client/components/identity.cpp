@@ -183,11 +183,12 @@ void CIdentity::SaveIdents()
 	json_serialize_ex(pJsonBuf, arr, json_opts_common);
 	json_value_free(arr);
 
+	// use safe write; back up the old file before writing the new one
+	Storage()->RenameFile(ALL_IDS_JSON_FILE, ALL_IDS_JSON_FILE ".bak", IStorageTW::TYPE_SAVE);
 	IOHANDLE_SMART File = Storage()->OpenFileSmart(ALL_IDS_JSON_FILE, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(File.IsOpen())
 	{
-		if(g_Config.m_Debug)
-			dbg_msg("ident", "saving %i identities to file '%s'", NumIdents(), File.GetPath());
+		dbg_msg("ident", "saving %i identities to file '%s'", NumIdents(), File.GetPath());
 
 		unsigned int Size = File.WriteLine(pJsonBuf);
 
