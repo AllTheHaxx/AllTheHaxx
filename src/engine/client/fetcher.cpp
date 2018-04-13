@@ -211,7 +211,8 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSFUNCTION, &CFetcher::ProgressCallback);
 	curl_easy_setopt(m_pHandle, CURLOPT_NOSIGNAL, 1L);
 
-	dbg_msg("fetcher", "downloading to '%s'", pTask->m_aDest);
+	if(g_Config.m_Debug)
+		dbg_msg("fetcher", "downloading to '%s'", pTask->m_aDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;
 	int ret = curl_easy_perform(m_pHandle);
 	io_close(File);
