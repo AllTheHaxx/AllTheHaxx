@@ -560,6 +560,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CPointerContainer s_FilterStringEditbox(&g_Config.m_BrFilterString);
 		if(DoEditBox(&s_FilterStringEditbox, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
 			Client()->ServerBrowserUpdate();
+
+		if(KeyMods(KEYMOD_CTRL) && KeyEvent(KEY_F))
+			UI()->SetActiveItem(s_FilterStringEditbox.GetID());
 	}
 
 	// clear button
@@ -584,6 +587,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CPointerContainer s_ExcludeStringEditbox(&g_Config.m_BrExcludeString);
 		if(DoEditBox(&s_ExcludeStringEditbox, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_L, Localize("Exclude")))
 			Client()->ServerBrowserUpdate();
+
+		if(KeyMods(KEYMOD_CTRL) && KeyEvent(KEY_E))
+			UI()->SetActiveItem(s_ExcludeStringEditbox.GetID());
 	}
 
 	// clear button
@@ -1424,7 +1430,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 #if defined(CONF_FAMILY_WINDOWS)
 			str_format(aBuf, sizeof(aBuf), "New Version '%s' is out!", Client()->LatestVersion());
 #elif defined(CONF_FAMILY_UNIX)
-			str_formatb(aBuf, "New Version '%s' is out! Use your package manager to update ATH :)", Updater()->GetLatestVersion());
+			str_formatb(aBuf, "New Version '%s' is out! Use your package manager to get it :)", Updater()->GetLatestVersion());
 #endif
 			float fade = sinf(Client()->LocalTime()*3.1415f)*0.2f;
 			TextRender()->TextColor(1.0f, 0.4f+fade, 0.4f+fade, 1.0f+fade/2.0f-0.1f);
@@ -1532,7 +1538,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
 		static CButtonContainer s_RefreshButton;
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely"), ServerBrowser()->IsRefreshing() ? CUI::CORNER_L : CUI::CORNER_ALL) || (KeyMods(KEYMOD_CTRL) && KeyEvent(KEY_R)))
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button, Localize("Refresh the serverlist completely"), ServerBrowser()->IsRefreshing() ? CUI::CORNER_L : CUI::CORNER_ALL)
+		   || (KeyMods(KEYMOD_CTRL) && KeyEvent(KEY_R)))
 		{
 			if(g_Config.m_UiBrowserPage == PAGE_BROWSER_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

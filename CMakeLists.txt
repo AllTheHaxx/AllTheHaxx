@@ -491,7 +491,6 @@ set(SOURCE_FILES ${EXTERNAL_SOURCES}
         src/mastersrv/mastersrv.h
         src/osx/notification.h
         src/versionsrv/mapversions.h
-        src/versionsrv/versionsrv.cpp
         src/versionsrv/versionsrv.h
         src/game/client/components/menus_settings/settings_general.cpp
         src/game/client/components/menus_settings/settings_player.cpp
