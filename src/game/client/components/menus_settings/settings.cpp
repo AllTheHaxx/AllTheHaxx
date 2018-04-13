@@ -589,7 +589,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
-				Client()->CheckVersionUpdate(true);
+				Client()->CheckVersionUpdate();
 			}
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);

@@ -87,6 +87,22 @@ public:
 		MAX_DDNET_TYPES=32,
 	};
 
+private:
+	IMasterServer *m_pMasterServer;
+	class IClient *m_pClient;
+	class IConsole *m_pConsole;
+	class IFriends *m_pFriends;
+	class IFetcher *m_pFetcher;
+	class IStorageTW *m_pStorage;
+
+protected:
+	IClient *Client() { return m_pClient; }
+	IConsole *Console() { return m_pConsole; }
+	IFriends *Friends() { return m_pFriends; }
+	IFetcher *Fetcher() { return m_pFetcher; }
+	IStorageTW *Storage() { return m_pStorage; }
+
+public:
 	CServerBrowser();
 	~CServerBrowser();
 
@@ -120,7 +136,6 @@ public:
 	void RemoveRecent(const NETADDR& Addr);
 	void ClearRecent();
 
-	void LoadDDNet();
 	int NumDDNetCountries() { return m_NumDDNetCountries; }
 	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; }
 	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; }
@@ -153,9 +168,6 @@ public:
 private:
 
 	CNetClient *m_pNetClient;
-	IMasterServer *m_pMasterServer;
-	class IConsole *m_pConsole;
-	class IFriends *m_pFriends;
 	char m_aNetVersion[128];
 
 	CHeap m_ServerlistHeap;
@@ -205,8 +217,14 @@ private:
 	int64 m_BroadcastTime;
 	int m_BroadcastExtraToken;
 
-	void *m_pThread;
+	// serverlist cache
 	std::recursive_mutex m_Mutex;
+
+	// ddnet info
+	std::atomic_bool m_DDNetInfoRefreshing;
+	void LoadDDNetInfoFile();
+	static void DDNetInfoRefreshCompletionCallback(class CFetchTask *pTask, void *pUser);
+	void DDNetInfoRefreshCompletionCallbackImpl(class CFetchTask *pTask);
 
 	// sorting criteria
 	bool SortCompareName(int Index1, int Index2) const;

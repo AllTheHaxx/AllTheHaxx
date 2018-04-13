@@ -197,20 +197,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64 m_CurrentServerInfoRequestTime; // >= 0 has requested
 	bool m_GotServerInfo;
 
-	// version info
-	struct CVersionInfo
-	{
-		enum
-		{
-			STATE_INIT=0,
-			STATE_START,
-			STATE_READY,
-		};
-
-		int m_State;
-		class CHostLookup m_VersionServeraddr;
-	} m_VersionInfo; // NEEDED FOR DDNET SERVER LIST, DON'T REMOVE!
-
 	int64 TickStartTime(int Tick);
 
 	void ConnectImpl(); // hide this
@@ -273,8 +259,7 @@ public:
 
 	const char *News() { return m_Updater.GetNews(); }
 	const char *LatestVersion();
-	void VersionUpdate();
-	void CheckVersionUpdate(bool Force);
+	void CheckVersionUpdate();
 
 	// ------ state handling -----
 	void SetState(int NewState);
@@ -438,7 +423,6 @@ public:
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 
-	void RequestDDNetSrvList();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	static void InputThread(void *pUser);

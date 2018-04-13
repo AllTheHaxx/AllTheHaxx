@@ -172,7 +172,7 @@ public:
 	// server info
 	virtual const class CServerInfo *GetServerInfo(class CServerInfo *pServerInfo = 0) const = 0;
 
-	virtual void CheckVersionUpdate(bool Force) = 0;
+	virtual void CheckVersionUpdate() = 0;
 
 	virtual int GetPredictionTime() = 0;
 
@@ -228,7 +228,6 @@ public:
 	virtual void DemoSliceEnd() = 0;
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
-	virtual void RequestDDNetSrvList() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
 
 	virtual void GenerateTimeoutSeed() = 0;

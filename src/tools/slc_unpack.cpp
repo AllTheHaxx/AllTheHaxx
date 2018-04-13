@@ -11,7 +11,7 @@
 IStorageTW *s_pStorage = 0;
 
 // arguments
-static const char *as_pIn = "tmp/cache/serverlist";
+static const char *as_pIn = SERVERLIST_CACHE_FILE;
 static const char *as_pOut = 0;
 namespace TYPE
 {
@@ -46,7 +46,7 @@ static void Print(const char *fmt, ...)
 int PrintUsage(const char *argv0)
 {
 	char aDefaultCachePath[512] = {0};
-	s_pStorage->GetCompletePath(IStorageTW::TYPE_SAVE, "tmp/cache/serverlist", aDefaultCachePath, sizeof(aDefaultCachePath));
+	s_pStorage->GetCompletePath(IStorageTW::TYPE_SAVE, SERVERLIST_CACHE_FILE, aDefaultCachePath, sizeof(aDefaultCachePath));
 
 	Print("----------------------------------------------");
 	Print("-    AllTheHaxx serverlist cache unpacker    -");

@@ -321,9 +321,13 @@ void CSkinDownload::ConFetchSkin(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "skinfetcher", "You must turn on cl_skin_fetcher to use this command");
 	else
 	{
+		const char *pSkinName = pResult->GetString(0);
 		int SkinID;
-		pSelf->RequestSkin(&SkinID, pResult->GetString(0));
-		// TODO: add some kind of f1 output message here if the task couldn't be created
+		pSelf->RequestSkin(&SkinID, pSkinName);
+		if(SkinID != pSelf->m_DefaultSkin && SkinID >= 0)
+			pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "skinfetcher", "already got the skin '%s'", pSkinName);
+		else
+			pSelf->Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "skinfetcher", "trying to fetch '%s'", pSkinName);
 	}
 }
 

@@ -1512,7 +1512,6 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			else if(g_Config.m_UiBrowserPage == PAGE_BROWSER_DDNET)
 			{
 				// start a new serverlist request
-				Client()->RequestDDNetSrvList();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 			}
 			m_DoubleClickIndex = -1;

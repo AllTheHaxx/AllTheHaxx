@@ -7,8 +7,6 @@ enum
 {
 	NEWS_SIZE = 4096,
 	NEWS_LENGTH = NEWS_SIZE-1,
-
-	DDNETLIST_SIZE = 1380,
 };
 
 struct CMapVersion
@@ -18,15 +16,4 @@ struct CMapVersion
 	unsigned char m_aSize[4];
 };
 
-static const unsigned char VERSIONSRV_GETVERSION[] = {255, 255, 255, 255, 'v', 'e', 'r', 'g'};
-static const unsigned char VERSIONSRV_VERSION[] = {255, 255, 255, 255, 'v', 'e', 'r', 's'};
-
-static const unsigned char VERSIONSRV_GETMAPLIST[] = {255, 255, 255, 255, 'v', 'm', 'l', 'g'};
-static const unsigned char VERSIONSRV_MAPLIST[] = {255, 255, 255, 255, 'v', 'm', 'l', 's'};
-
-static const unsigned char VERSIONSRV_GETNEWS[] = {255, 255, 255, 255, 'n', 'e', 'w', 'g'};
-static const unsigned char VERSIONSRV_NEWS[] = {255, 255, 255, 255, 'n', 'e', 'w', 's'};
-
-static const unsigned char VERSIONSRV_GETDDNETLIST[] = {255, 255, 255, 255, 'e', 'a', 's', 't'};
-static const unsigned char VERSIONSRV_DDNETLIST[] = {255, 255, 255, 255, 't', 's', 'a', 'e'};
 #endif

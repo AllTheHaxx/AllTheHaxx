@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <cstdio> // file io  TODO: remove this, use tw's own storage system instead
-#include <algorithm> // sort  TODO: remove this
+#include <algorithm> // sort
 
 #include <base/math.h>
 #include <base/system.h>
@@ -13,6 +12,7 @@
 
 #include <engine/config.h>
 #include <engine/console.h>
+#include <engine/fetcher.h>
 #include <engine/friends.h>
 #include <engine/masterserver.h>
 #include <engine/storage.h>
@@ -26,6 +26,8 @@
 #include <base/system++/threading.h>
 
 #include "serverbrowser.h"
+
+
 class SortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -63,10 +65,12 @@ void CQueryRecent::OnData()
 CServerBrowser::CServerBrowser()
 {
 	m_pMasterServer = 0;
-	m_ppServerlist = 0;
-	m_pSortedServerlist = 0;
 	m_pConsole = 0;
 	m_pFriends = 0;
+	m_pFetcher = 0;
+
+	m_ppServerlist = 0;
+	m_pSortedServerlist = 0;
 	m_pNetClient = 0;
 
 	m_NumFavoriteServers = 0;
@@ -103,6 +107,8 @@ CServerBrowser::CServerBrowser()
 	m_BroadcastTime = 0;
 	m_BroadcastExtraToken = -1;
 
+	m_DDNetInfoRefreshing = false;
+
 	m_pRecentDB = new CSql("ath_recent.db");
 
 	// make sure the "recent"-table exists
@@ -133,19 +139,31 @@ CServerBrowser::~CServerBrowser()
 		delete m_pRecentDB;
 }
 
-void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
+void CServerBrowser::SetBaseInfo(CNetClient *pClient, const char *pNetVersion)
 {
 	m_pNetClient = pClient;
 	str_copy(m_aNetVersion, pNetVersion, sizeof(m_aNetVersion));
+
 	m_pMasterServer = Kernel()->RequestInterface<IMasterServer>();
+	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
+	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
+
+	// load ddnet info and start refreshing it as early as possible
+	if(g_Config.m_BrShowDDNet)
+	{
+		LoadDDNetInfoFile(); // load the cached file if we've got one
+		Refresh(TYPE_DDNET); // then start refreshing
+	}
+
 	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
 	if(pConfig)
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
 
-	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
-	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorageTW::TYPE_SAVE);
+	// load the serverlist cache
+	IOHANDLE File = Storage()->OpenFile(SERVERLIST_CACHE_FILE, IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	m_CacheExists = true;
 	if(!File)
 	{
@@ -762,14 +780,14 @@ void CServerBrowser::Refresh(int Type)
 		Packet.m_aExtraData[1] = (unsigned char)(m_BroadcastExtraToken & 0xff);
 		m_BroadcastTime = time_get();
 
-		for(unsigned short i = g_Config.m_BrLanScanStart; i <= min(65535, g_Config.m_BrLanScanStart+g_Config.m_BrLanScanRange); i++)
+		for(unsigned short i = (unsigned short)g_Config.m_BrLanScanStart; i <= (unsigned)min(65535, g_Config.m_BrLanScanStart+g_Config.m_BrLanScanRange); i++)
 		{
 			Packet.m_Address.port = i;
 			m_pNetClient->Send(&Packet);
 		}
 
 		if(g_Config.m_Debug)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "broadcasting for servers");
+			m_pConsole->Printf(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "broadcasting for servers on ports %i through %i", g_Config.m_BrLanScanStart, g_Config.m_BrLanScanRange);
 	}
 	else if(Type == IServerBrowser::TYPE_INTERNET)
 	{
@@ -789,24 +807,10 @@ void CServerBrowser::Refresh(int Type)
 	}
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
-		LoadDDNet();
-
-		// remove unknown elements of exclude list
-		DDNetCountryFilterClean();
-		DDNetTypeFilterClean();
-
-		for(int i = 0; i < m_NumDDNetCountries; i++)
+		if(!m_DDNetInfoRefreshing)
 		{
-			CDDNetCountry *pCntr = &m_aDDNetCountries[i];
-
-			// check for filter
-			if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pCntr->m_aName))
-				continue;
-
-			for(int g = 0; g < pCntr->m_NumServers; g++)
-				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pCntr->m_aTypes[g]))
-					Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0, true);
-			Sort();
+			m_DDNetInfoRefreshing = true;
+			Fetcher()->QueueAdd(true, DDNET_INFO_URL, DDNET_INFO_FILE, IStorageTW::TYPE_SAVE, this, CServerBrowser::DDNetInfoRefreshCompletionCallback);
 		}
 	}
 }
@@ -848,7 +852,7 @@ void CServerBrowser::SaveCache()
 	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
 
 	// open file
-	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+	IOHANDLE File = pStorage->OpenFile(SERVERLIST_CACHE_FILE, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 	if(!File)
 	{
 		dbg_msg("browser", "failed to open cache file for writing");
@@ -894,7 +898,7 @@ void CServerBrowser::SaveCache()
 void CServerBrowser::LoadCache()
 {
 	m_ServerlistType = TYPE_INTERNET;
-	m_pThread = thread_init(LoadCacheThread, this);
+	thread_init(LoadCacheThread, this);
 }
 
 void CServerBrowser::LoadCacheWait()
@@ -925,7 +929,7 @@ void CServerBrowser::LoadCacheThread(void *pUser)
 	pSelf->m_ServerlistType = IServerBrowser::TYPE_INTERNET;
 
 	// open file
-	IOHANDLE File = pStorage->OpenFile("tmp/cache/serverlist", IOFLAG_READ, IStorageTW::TYPE_SAVE);
+	IOHANDLE File = pStorage->OpenFile(SERVERLIST_CACHE_FILE, IOFLAG_READ, IStorageTW::TYPE_SAVE);
 	if(!File)
 	{
 		dbg_msg("browser", "opening cache file failed.");
@@ -1406,35 +1410,80 @@ void CServerBrowser::ClearRecent()
 
 }
 
+void CServerBrowser::DDNetInfoRefreshCompletionCallback(class CFetchTask *pTask, void *pUser)
+{
+	CServerBrowser *pSelf = reinterpret_cast<CServerBrowser *>(pUser);
+	pSelf->DDNetInfoRefreshCompletionCallbackImpl(pTask);
+}
 
-void CServerBrowser::LoadDDNet()
+void CServerBrowser::DDNetInfoRefreshCompletionCallbackImpl(CFetchTask *pTask)
+{
+	LoadDDNetInfoFile();
+
+	// remove unknown elements of exclude list
+	DDNetCountryFilterClean();
+	DDNetTypeFilterClean();
+
+	for(int i = 0; i < m_NumDDNetCountries; i++)
+	{
+		CDDNetCountry *pCntr = &m_aDDNetCountries[i];
+
+		// check for filter
+		if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pCntr->m_aName))
+			continue;
+
+		for(int g = 0; g < pCntr->m_NumServers; g++)
+			if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pCntr->m_aTypes[g]))
+				Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0, true);
+		Sort();
+	}
+
+	m_DDNetInfoRefreshing = false;
+}
+
+
+void CServerBrowser::LoadDDNetInfoFile()
 {
 	// reset servers / countries
 	m_NumDDNetCountries = 0;
 	m_NumDDNetTypes = 0;
 
 	// load ddnet server list
-	IStorageTW *pStorage = Kernel()->RequestInterface<IStorageTW>();
-	IOHANDLE File = pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_ALL);
-
-	if(!File)
-		return;
-
 	char aBuf[4096*4];
-	mem_zero(aBuf, sizeof(aBuf));
+	{
+		IOHANDLE File = Storage()->OpenFile(DDNET_INFO_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
+		if(!File)
+			return;
 
-	io_read(File, aBuf, sizeof(aBuf));
-	io_close(File);
+		mem_zero(aBuf, sizeof(aBuf));
+		io_read(File, aBuf, sizeof(aBuf));
+		io_close(File);
+	}
 
 	// parse JSON
-	json_value *pJsonCountries = json_parse(aBuf, (size_t)str_length(aBuf));
-
-	if(pJsonCountries && pJsonCountries->type == json_array)
+	int InfoLen = str_length(aBuf);
+	json_value *pJson = json_parse(aBuf, (size_t)InfoLen);
+	if(!pJson)
 	{
-		for(unsigned int i = 0; i < pJsonCountries->u.array.length && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "srvbrowse/error", "failed to parse ddnet info of length %i (no server can be shown)", InfoLen);
+		return;
+	}
+
+	// extract everything
+	json_value &json = *pJson;
+
+	// news
+	str_copyb(Client()->m_aNewsDDNet, json["news"]);
+
+	// serverlist
+	json_value jsonCountries = json["servers"];
+
+	if(jsonCountries.type == json_array)
+	{
+		for(unsigned int i = 0; i < jsonCountries.u.array.length && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
 		{
 			// pSrv - { name, flagId, servers }
-			const json_value &jsonSrv = (*pJsonCountries)[i];
+			const json_value &jsonSrv = jsonCountries[i];
 			const json_value &jsonTypes = jsonSrv["servers"];
 			const json_value &jsonName = jsonSrv["name"];
 			const json_value &jsonFlagID = jsonSrv["flagId"];
@@ -1475,23 +1524,24 @@ void CServerBrowser::LoadDDNet()
 					}
 				}
 
-					// add addresses
-					for (unsigned int g = 0; g < jsonAddrs.u.array.length; g++, pCntr->m_NumServers++)
-					{
-						const json_value &jsonAddr = jsonAddrs[ g];
+				// add addresses
+				for (unsigned int g = 0; g < jsonAddrs.u.array.length; g++, pCntr->m_NumServers++)
+				{
+					const json_value &jsonAddr = jsonAddrs[g];
 
-						net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], (const char *)jsonAddr);
-						str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
-					}
+					net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], (const char *)jsonAddr);
+					str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
 				}
+			}
 
 			m_NumDDNetCountries++;
 		}
 	}
+	else
+		Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "srvbrowse/error", "failed to parse SERVERS from ddnet info of length %i (no server will be shown)", InfoLen);
 
-	if(pJsonCountries)
-		json_value_free(pJsonCountries);
 
+	json_value_free(pJson);
 }
 
 bool CServerBrowser::IsRefreshing() const

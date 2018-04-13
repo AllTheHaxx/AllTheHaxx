@@ -389,8 +389,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_UseTempRconCommands = 0;
 	m_ResortServerBrowser = false;
 
-	m_VersionInfo.m_State = CVersionInfo::STATE_INIT;
-
 	if (g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
 
@@ -1646,111 +1644,6 @@ int CClient::PlayerScoreNameComp(const void *a, const void *b)
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 {
 	CALLSTACK_ADD();
-
-	// version server
-	if(m_VersionInfo.m_State == CVersionInfo::STATE_READY && net_addr_comp(&pPacket->m_Address, &m_VersionInfo.m_VersionServeraddr.m_Addr) == 0)
-	{
-		// version info - depreciated
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_VERSION, sizeof(VERSIONSRV_VERSION)) == 0)
-		{
-			// request the ddnet news
-			CNetChunk Packet;
-			mem_zero(&Packet, sizeof(Packet));
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETNEWS;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETNEWS);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
-
-			RequestDDNetSrvList();
-
-			// request the map version list
-			mem_zero(&Packet, sizeof(Packet));
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETMAPLIST;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETMAPLIST);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
-		}
-
-		// news
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
-		{
-			if(mem_comp(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
-				g_Config.m_UiPage = CMenus::PAGE_NEWS_DDNET;
-
-			mem_copy(m_aNewsDDNet, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
-
-			IOHANDLE newsFile = m_pStorage->OpenFile("tmp/cache/ddnet-news.txt", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
-			if(newsFile)
-			{
-				io_write(newsFile, m_aNewsDDNet, sizeof(m_aNewsDDNet));
-				io_close(newsFile);
-			}
-		}
-
-		// ddnet server list
-		// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length]
-		if(pPacket->m_DataSize >= (int)(sizeof(VERSIONSRV_DDNETLIST) + 8) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0 &&
-			mem_comp((char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST), m_aDDNetSrvListToken, 4) == 0)
-		{
-			// reset random token
-			m_DDNetSrvListTokenSet = false;
-			int CompLength = *(short*)((char*)pPacket->m_pData+(sizeof(VERSIONSRV_DDNETLIST)+4));
-			int PlainLength = *(short*)((char*)pPacket->m_pData+(sizeof(VERSIONSRV_DDNETLIST)+6));
-
-			if (pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + 8 + CompLength))
-			{
-				char aBuf[16384];
-				uLongf DstLen = sizeof(aBuf);
-				const char *pComp = (char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST)+8;
-
-				// do decompression of serverlist
-				if(uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
-				{
-					aBuf[DstLen] = '\0';
-					bool ListChanged = true;
-
-					IOHANDLE File = m_pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_READ, IStorageTW::TYPE_SAVE);
-					if(File)
-					{
-						char aBuf2[16384];
-						io_read(File, aBuf2, sizeof(aBuf2));
-						io_close(File);
-						if (str_comp(aBuf, aBuf2) == 0)
-							ListChanged = false;
-					}
-
-					// decompression successful, write plain file
-					if(ListChanged)
-					{
-						IOHANDLE File = m_pStorage->OpenFile("tmp/cache/ddnet-servers.json", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
-						if(File)
-						{
-							io_write(File, aBuf, PlainLength);
-							io_close(File);
-						}
-						if(g_Config.m_UiPage == CMenus::PAGE_BROWSER && g_Config.m_UiBrowserPage == CMenus::PAGE_BROWSER_DDNET)
-							m_ServerBrowser.Refresh(IServerBrowser::TYPE_DDNET);
-					}
-				}
-			}
-		}
-
-		// map version list
-		if(pPacket->m_DataSize >= (int)sizeof(VERSIONSRV_MAPLIST) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_MAPLIST, sizeof(VERSIONSRV_MAPLIST)) == 0)
-		{
-			int Size = pPacket->m_DataSize-sizeof(VERSIONSRV_MAPLIST);
-			int Num = Size/sizeof(CMapVersion);
-			m_MapChecker.AddMaplist((CMapVersion *)((char*)pPacket->m_pData+sizeof(VERSIONSRV_MAPLIST)), Num);
-		}
-	}
 
 	// server count from master server
 	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
@@ -3154,43 +3047,11 @@ void CClient::Update()
 	}
 }
 
-void CClient::VersionUpdate()
+void CClient::CheckVersionUpdate()
 {
 	CALLSTACK_ADD();
 
-	if(m_VersionInfo.m_State == CVersionInfo::STATE_INIT)
-	{
-		Engine()->HostLookup(&m_VersionInfo.m_VersionServeraddr, g_Config.m_ClDDNetVersionServer, m_NetClient[0].NetType());
-		m_VersionInfo.m_State = CVersionInfo::STATE_START;
-	}
-	else if(m_VersionInfo.m_State == CVersionInfo::STATE_START)
-	{
-		if(m_VersionInfo.m_VersionServeraddr.m_Job.Status() == CJob::STATE_DONE)
-		{
-			CNetChunk Packet;
-
-			mem_zero(&Packet, sizeof(Packet));
-
-			m_VersionInfo.m_VersionServeraddr.m_Addr.port = VERSIONSRV_PORT;
-
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETVERSION;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETVERSION);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-
-			m_NetClient[0].Send(&Packet);
-			m_VersionInfo.m_State = CVersionInfo::STATE_READY;
-		}
-	}
-}
-
-void CClient::CheckVersionUpdate(bool Force)
-{
-	CALLSTACK_ADD();
-
-	m_VersionInfo.m_State = CVersionInfo::STATE_START;
-	m_Updater.CheckForUpdates(Force);
+	m_Updater.CheckForUpdates(true);
 }
 
 void CClient::RegisterInterfaces()
@@ -3456,10 +3317,6 @@ void CClient::Run()
 			LastTick = time_get();
 			LUA_FIRE_EVENT("OnTick");
 		}
-
-		//
-
-		VersionUpdate();
 
 		// handle pending connects
 		if(m_aCmdConnect[0])
@@ -4751,30 +4608,6 @@ bool CClient::RaceRecordIsRecording()
 	CALLSTACK_ADD();
 
 	return m_DemoRecorder[RECORDER_RACE].IsRecording();
-}
-
-void CClient::RequestDDNetSrvList()
-{
-	CALLSTACK_ADD();
-
-	// request ddnet server list
-	// generate new token
-	for (int i = 0; i < 4; i++)
-		m_aDDNetSrvListToken[i] = rand()&0xff;
-	m_DDNetSrvListTokenSet = true;
-
-	char aData[sizeof(VERSIONSRV_GETDDNETLIST)+4];
-	mem_copy(aData, VERSIONSRV_GETDDNETLIST, sizeof(VERSIONSRV_GETDDNETLIST));
-	mem_copy(aData+sizeof(VERSIONSRV_GETDDNETLIST), m_aDDNetSrvListToken, 4); // add token
-
-	CNetChunk Packet;
-	mem_zero(&Packet, sizeof(Packet));
-	Packet.m_ClientID = -1;
-	Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-	Packet.m_pData = aData;
-	Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST)+4;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS;
-	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 }
 
 int CClient::GetPredictionTime()
