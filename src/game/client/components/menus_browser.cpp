@@ -687,29 +687,62 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if (DoButton_CheckBox(&s_BrFilterFriendsCheckbox, Localize("Show friends only"), g_Config.m_BrFilterFriends, &Button))
 		g_Config.m_BrFilterFriends ^= 1;
 
-	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	static CButtonContainer s_BrFilterPwCheckbox;
-	if (DoButton_CheckBox(&s_BrFilterPwCheckbox, Localize("No password"), g_Config.m_BrFilterPw, &Button))
-		g_Config.m_BrFilterPw ^= 1;
+	static int s_PrevFilterPw = g_Config.m_BrFilterPw;
+	static int s_PrevFilterCompatversion = g_Config.m_BrFilterCompatversion;
+	static int s_PrevFilterPure = g_Config.m_BrFilterPure;
+	static int s_PrevFilterPureMap = g_Config.m_BrFilterPureMap;
+	static int s_PrevActivePage = -1;
+	if(g_Config.m_UiBrowserPage == PAGE_BROWSER_DDNET)
+	{
+		if(s_PrevActivePage != PAGE_BROWSER_DDNET)
+		{
+			s_PrevFilterPw = g_Config.m_BrFilterPw;
+			s_PrevFilterCompatversion = g_Config.m_BrFilterCompatversion;
+			s_PrevFilterPure = g_Config.m_BrFilterPure;
+			s_PrevFilterPureMap = g_Config.m_BrFilterPureMap;
+		}
 
-	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	static CButtonContainer s_BrFilterCompatversionCheckbox;
-	if (DoButton_CheckBox(&s_BrFilterCompatversionCheckbox, Localize("Compatible version"), g_Config.m_BrFilterCompatversion, &Button))
-		g_Config.m_BrFilterCompatversion ^= 1;
+		g_Config.m_BrFilterPw = 0;
+		g_Config.m_BrFilterCompatversion = 0;
+		g_Config.m_BrFilterPure = 0;
+		g_Config.m_BrFilterPureMap = 0;
+	}
+	else
+	{
+		// reset
+		if(s_PrevActivePage == PAGE_BROWSER_DDNET)
+		{
+			g_Config.m_BrFilterPw = s_PrevFilterPw;
+			g_Config.m_BrFilterCompatversion = s_PrevFilterCompatversion;
+			g_Config.m_BrFilterPure = s_PrevFilterPure;
+			g_Config.m_BrFilterPureMap = s_PrevFilterPureMap;
+		}
 
-	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	static CButtonContainer s_BrFilterPureCheckbox;
-	if (DoButton_CheckBox(&s_BrFilterPureCheckbox, Localize("Standard gametype"), g_Config.m_BrFilterPure, &Button))
-		g_Config.m_BrFilterPure ^= 1;
+		ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+		static CButtonContainer s_BrFilterPwCheckbox;
+		if (DoButton_CheckBox(&s_BrFilterPwCheckbox, Localize("No password"), g_Config.m_BrFilterPw, &Button))
+			g_Config.m_BrFilterPw ^= 1;
 
-	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	static CButtonContainer s_BrFilterCheckbox;
-	if (DoButton_CheckBox(&s_BrFilterCheckbox, Localize("Standard map"), g_Config.m_BrFilterPureMap, &Button))
-		g_Config.m_BrFilterPureMap ^= 1;
+		ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+		static CButtonContainer s_BrFilterCompatversionCheckbox;
+		if (DoButton_CheckBox(&s_BrFilterCompatversionCheckbox, Localize("Compatible version"), g_Config.m_BrFilterCompatversion, &Button))
+			g_Config.m_BrFilterCompatversion ^= 1;
+
+		ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+		static CButtonContainer s_BrFilterPureCheckbox;
+		if (DoButton_CheckBox(&s_BrFilterPureCheckbox, Localize("Standard gametype"), g_Config.m_BrFilterPure, &Button))
+			g_Config.m_BrFilterPure ^= 1;
+
+		ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+		static CButtonContainer s_BrFilterCheckbox;
+		if (DoButton_CheckBox(&s_BrFilterCheckbox, Localize("Standard map"), g_Config.m_BrFilterPureMap, &Button))
+			g_Config.m_BrFilterPureMap ^= 1;
+	}
+	s_PrevActivePage = g_Config.m_UiBrowserPage;
 
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
@@ -1018,9 +1051,9 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 		CUIRect Row;
 		static CLocConstString s_aLabels[] = {
-			"Version",	// Localize - these strings are localized within CLocConstString
-			"Game type",
-			"Ping"};
+				"Version",	// Localize - these strings are localized within CLocConstString
+				"Game type",
+				"Ping"};
 
 		CUIRect LeftColumn;
 		CUIRect RightColumn;
@@ -1092,7 +1125,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			}
 
 			vec4 Colour = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ? vec4(1.0f, 1.0f, 1.0f, (i%2+1)*0.05f) :
-																								vec4(0.5f, 1.0f, 0.5f, 0.15f+(i%2+1)*0.05f);
+						  vec4(0.5f, 1.0f, 0.5f, 0.15f+(i%2+1)*0.05f);
 			RenderTools()->DrawUIRect(&Name, Colour, CUI::CORNER_ALL, 4.0f);
 			Name.VSplitLeft(5.0f, 0, &Name);
 			Name.VSplitLeft(34.0f, &Score, &Name);
@@ -1234,8 +1267,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				for(int j = 0; j < pItem->m_NumReceivedClients && !Found; ++j)
 				{
 					if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO &&
-						((g_Config.m_ClFriendsIgnoreClan && m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
-						(!m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
+					   ((g_Config.m_ClFriendsIgnoreClan && m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
+					   (!m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
 						str_quickhash(pItem->m_aClients[j].m_aName) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
 					{
 						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
