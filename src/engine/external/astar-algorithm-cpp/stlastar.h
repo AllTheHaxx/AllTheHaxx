@@ -588,35 +588,28 @@ private: // methods
 	{
 		// iterate open list and delete unused nodes
 		{
-			int i = 0;
-			vector<int> RemoveList;
-			for(typename vector< Node * >::iterator it = m_OpenList.begin(); it != m_OpenList.end(); ++it, ++i)
+			for(typename vector< Node * >::iterator it = m_OpenList.begin(); it != m_OpenList.end();)
 			{
 				Node *n = (*it);
 
 				if( !n->child )
 				{
+					// delete all occurences in the map
+					for(typename std::map<AStarNodeUID, Node *>::iterator mapIt = m_OpenListMap.begin(); mapIt != m_OpenListMap.end(); /* noop */)
+					{
+						if(mapIt->second == n)
+							mapIt = m_OpenListMap.erase(mapIt);
+						else
+							++mapIt;
+					}
+
 					FreeNode( &n );
-					RemoveList.push_back(i);
+
+					// remove it from our list
+					it = m_OpenList.erase(it);
 				}
-			}
-
-			// remove the deleted nodes (and only those!) from our memories
-			for(typename vector<int>::iterator vecIt = RemoveList.begin(); vecIt != RemoveList.end(); ++vecIt)
-			{
-				int index = *vecIt;
-
-				// delete all occurences in the map
-				for(typename std::map<AStarNodeUID, Node *>::iterator mapIt = m_OpenListMap.begin(); mapIt != m_OpenListMap.end(); /* noop */)
-				{
-					if(mapIt->second == m_OpenList[index])
-						mapIt = m_OpenListMap.erase(mapIt);
-					else
-						++mapIt;
-				}
-
-				// remove it from our list
-				m_OpenList.erase(m_OpenList.begin() + index);
+				else
+					++it;
 			}
 
 		}
