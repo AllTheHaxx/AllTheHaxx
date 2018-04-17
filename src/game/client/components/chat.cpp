@@ -607,6 +607,8 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			"Timer is displayed in game/round timer.",
 			"Timer is displayed in broadcast.",
 			"Timer is displayed in both game/round timer and broadcast.",
+			"You will now see all tees on this server, no matter the distance",
+			"You will no longer see all tees on this server",
 	};
 
 	if(MsgType == NETMSGTYPE_SV_CHAT)
