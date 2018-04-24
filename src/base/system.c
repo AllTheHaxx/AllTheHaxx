@@ -7,6 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <signal.h>
 
 #include "system.h"
 
@@ -98,7 +99,7 @@ static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 #define AF_WEBSOCKET_INET (0xee)
 
 static int abort_on_assert = 0;
-static void dbg_break();
+static void dbg_abort();
 void set_abort_on_assert(int enabled)
 {
 	abort_on_assert = enabled;
@@ -109,6 +110,8 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	{
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
 		if(abort_on_assert)
+			dbg_abort();
+		else
 			dbg_break();
 	}
 }
@@ -137,7 +140,7 @@ static Queue log_queue;
 int queue_empty(Queue *q);
 #endif
 
-static void dbg_break()
+static void dbg_abort()
 {
 	//*((volatile unsigned*)0) = 0x0;
 
@@ -147,6 +150,15 @@ static void dbg_break()
 	*((volatile unsigned*)0) = 0x0;
 #else
 	abort();
+#endif
+}
+
+void dbg_break()
+{
+	wait_log_queue();
+	io_flush(io_stdout());
+#if defined(CONF_DEBUG)
+	raise(SIGTRAP);
 #endif
 }
 
@@ -2879,10 +2891,11 @@ void gui_messagebox(const char *title, const char *message)
 	static char cmd[1024];
 	int err;
 	/* use xmessage which is available on nearly every X11 system */
-	snprintf(cmd, sizeof(cmd), "xmessage -center -title '%s' '%s'",
+	snprintf(cmd, sizeof(cmd), "xmessage -center -title \"%s\" \"%s\"",
 		title,
 		message);
 
+//	dbg_msg("gui/msgbox", "command> %s", cmd);
 	err = system(cmd);
 	dbg_msg("gui/msgbox", "result = %i", err);
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -3246,7 +3259,7 @@ void secure_random_fill(void *bytes, unsigned length)
 	if(!secure_random_data.initialized)
 	{
 		dbg_msg("secure", "called secure_random_fill before secure_random_init");
-		dbg_break();
+		dbg_abort();
 	}
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, bytes))

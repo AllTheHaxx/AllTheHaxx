@@ -1,12 +1,17 @@
 #ifndef BASE_SYSTEMPP_SYSTEMPP_H
 #define BASE_SYSTEMPP_SYSTEMPP_H
 
+#include <csignal>
 #include <exception>
 #include <vector>
 #include <string>
 
-
-#define dbg_assert(test,msg) if(!(test)) throw CTWException(__FILE__, __LINE__, #test, msg)
+#define dbg_assert_critical(test,msg) if(!(test)) throw CTWException(__FILE__, __LINE__, #test, msg)
+#if defined(CONF_DEBUG)
+	#define dbg_assert(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
+#else
+	#define dbg_assert(test,msg) dbg_assert_critical(test,msg)
+#endif
 
 #define SELF_FROM_USER(TYPE) TYPE *pSelf = (TYPE*)pUser;
 #define SELF_FROM_USERDATA(TYPE) TYPE *pSelf = (TYPE*)pUserData;
@@ -24,7 +29,7 @@ public:
 	virtual const char *what() const throw ();
 };
 
-void dbg_break();
+void dbg_abort();
 void mem_debug_dump(struct IOINTERNAL *file); // means IOHANDLE but I don't want to include system.h here...
 
 template <class TFN>

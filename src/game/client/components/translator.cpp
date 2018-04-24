@@ -21,7 +21,8 @@ CTranslator::~CTranslator()
 	{
 		m_ThreadRunning = false;
 		thread_wait(m_pThread);
-		m_pThread = 0;
+		m_pThread = NULL;
+
 		curl_easy_cleanup(m_pHandle);
 		m_pHandle = NULL;
 	}

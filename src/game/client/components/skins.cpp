@@ -28,7 +28,7 @@ int CSkins::CSkin::GetColorTexture() const
 	else if(m_ColorTexture > 0) // loaded
 		return m_ColorTexture;
 
-	dbg_assert(false, "shit happened");
+	dbg_assert_critical(false, "shit happened");
 }
 
 int CSkins::CSkin::GetOrgTexture() const
@@ -43,7 +43,7 @@ int CSkins::CSkin::GetOrgTexture() const
 	else if(m_OrgTexture > 0)// loaded
 		return m_OrgTexture;
 
-	dbg_assert(false, "shit happened");
+	dbg_assert_critical(false, "shit happened");
 }
 
 

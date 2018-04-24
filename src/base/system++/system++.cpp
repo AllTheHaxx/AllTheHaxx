@@ -35,7 +35,7 @@ const char *CTWException::what() const throw ()
 }
 
 
-void dbg_break()
+void dbg_abort()
 {
 	wait_log_queue();
 	throw CTWException("dbg_break");

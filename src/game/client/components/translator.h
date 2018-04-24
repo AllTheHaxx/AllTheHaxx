@@ -66,8 +66,8 @@ public:
 	}
 
 private:
-	void *m_pThread;
-	CURL *m_pHandle;
+	void * volatile m_pThread;
+	CURL * volatile m_pHandle;
 
 	std::atomic_bool m_ThreadRunning;
 	std::mutex m_ThreadMutex;
