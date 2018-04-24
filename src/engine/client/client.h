@@ -340,6 +340,10 @@ public:
 	void InitInterfaces();
 
 	void Run();
+private:
+	void RunMainloop();
+	void RunTeardown();
+public:
 
 	bool CtrlShiftKey(int Key, bool &Last);
 

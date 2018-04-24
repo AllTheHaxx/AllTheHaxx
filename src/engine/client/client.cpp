@@ -17,6 +17,7 @@
 #include <base/math.h>
 #include <base/vmath.h>
 #include <base/system.h>
+#include <base/system++/io.h>
 
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
@@ -485,7 +486,10 @@ int CClient::SendMsgEx(CMsgPacker *pMsg, int Flags, bool System)
 
 	// HACK: modify the message id in the packet and store the system flag
 	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
+	{
 		dbg_break();
+		return 0;
+	}
 
 	*((unsigned char*)Packet.m_pData) <<= 1;
 	if(System)
@@ -1188,7 +1192,10 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 
 	// HACK: modify the message id in the packet and store the system flag
 	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
+	{
 		dbg_break();
+		return 0;
+	}
 
 	*((unsigned char*)Packet.m_pData) <<= 1;
 	if(System)
@@ -3240,6 +3247,99 @@ void CClient::Run()
 	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 #endif
 
+	try {
+		RunMainloop();
+	} catch(std::exception& e) {
+		// treat any exception that escaped out of the main loop as an unwanted crash
+
+		// write a note to the disk first
+		char aTimestamp[64];
+		str_timestampb(aTimestamp);
+
+		char aFilename[128];
+		str_formatb(aFilename, "crashlogs/crash_%s.log", aTimestamp);
+		IOHANDLE_SMART File = m_pStorage->OpenFileSmart(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+		if(File.IsOpen())
+		{
+			File.WriteLine(aFilename);
+			File.WriteNewline();
+			File.WriteLine(e.what());
+		}
+		else
+			dbg_msg("crashhandler/error", "failed to save crashlog to '$USERDIR/%s' (full path='%s')", aFilename, File.GetPath());
+
+		// try to properly shut down the client to not cause problems
+		RunTeardown();
+
+		// show a nice message to the user
+		char aBuf[512];
+		str_formatb(aBuf, "How embarrassing, ATH encountered a fatal error and crashed :(\n"
+					"But the good news is, I can tell you why this happened (please show this to the devs!):"
+	 				"\n\n%s\n\nAnother popup box with more details will appear now.", e.what());
+		gui_messagebox("Ouh shoot!", aBuf);
+
+		// save a stacktrace
+#if defined(FEATURE_DEBUGGER)
+		char aFullPath[512];
+		str_formatb(aFilename, "crashlogs/report_%s.log", aTimestamp);
+		m_pStorage->GetCompletePath(IStorageTW::TYPE_SAVE, aFilename, aFullPath, sizeof(aFilename));
+		char aTitle[64], aText[512];
+		CDebugger::make_crashreport(SIGABRT, aFullPath, aTitle, sizeof(aTitle), aText, sizeof(aText));
+		gui_messagebox(aTitle, aText);
+#endif
+		return;
+	}
+
+	// do cleanups
+	RunTeardown();
+
+}
+
+void CClient::RunTeardown()
+{
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Shutdown();
+#endif
+
+	GameClient()->OnShutdown();
+	Disconnect();
+
+	m_Lua.Shutdown();
+	m_pGraphics->Shutdown();
+	m_pSound->Shutdown();
+
+	// shutdown SDL
+	{
+		SDL_Quit();
+	}
+
+	if(m_pInputThread)
+	{
+		//thread_wait(m_pInputThread);
+		m_pInputThread = 0;
+#if defined(CONF_FAMILY_WINDOWS)
+		//FreeConsole();
+#else
+		//thread_destroy(m_pInputThread); // this tends to cause segfaults sometimes, dunno why :o
+#endif
+	}
+
+	if(m_Updater.State() == IUpdater::STATE_CLEAN)
+	{
+		// do cleanups - much hack.
+#if defined(CONF_FAMILY_UNIX)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wunused-result"
+		system("rm -rf update");
+		#pragma GCC diagnostic pop
+#elif defined(CONF_FAMILY_WINDOWS)
+		system("if exist update rd update /S /Q");
+#endif
+	}
+}
+
+void CClient::RunMainloop()
+{
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
@@ -3248,7 +3348,6 @@ void CClient::Run()
 
 	int LastConsoleMode = g_Config.m_ClConsoleMode;
 	int64 ConsoleModeEmote = 0, LastTick = 0;  //timestamps
-
 
 	while(true)
 	{
@@ -3559,46 +3658,6 @@ void CClient::Run()
 			mem_check();
 			LastCheck = m_SteadyTimer;
 		}
-#endif
-	}
-
-#if defined(CONF_FAMILY_UNIX)
-	m_Fifo.Shutdown();
-#endif
-
-	GameClient()->OnShutdown();
-	Disconnect();
-
-	m_Lua.Shutdown();
-	m_pGraphics->Shutdown();
-	m_pSound->Shutdown();
-
-	// shutdown SDL
-	{
-		SDL_Quit();
-	}
-
-	if(m_pInputThread)
-	{
-		//thread_wait(m_pInputThread);
-		m_pInputThread = 0;
-#if defined(CONF_FAMILY_WINDOWS)
-		//FreeConsole();
-#else
-		//thread_destroy(m_pInputThread); // this tends to cause segfaults sometimes, dunno why :o
-#endif
-	}
-
-	if(m_Updater.State() == IUpdater::STATE_CLEAN)
-	{
-		// do cleanups - much hack.
-#if defined(CONF_FAMILY_UNIX)
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wunused-result"
-		system("rm -rf update");
-		#pragma GCC diagnostic pop
-#elif defined(CONF_FAMILY_WINDOWS)
-		system("if exist update rd update /S /Q");
 #endif
 	}
 }
@@ -4299,7 +4358,7 @@ static void ParseArgumentsForSwitches(int NumArgs, const char **ppArguments)
 			set_dbg_msg_enabled(false);
 #endif
 		}
-		else if(!str_comp("-A", ppArguments[i]) || !str_comp("--enable-assert", ppArguments[i]))
+		else if(!str_comp("-A", ppArguments[i]) || !str_comp("--abort-on-assert", ppArguments[i]))
 		{
 			dbg_msg("main", "+++ ENABLED ABORT-ON-ASSERT, ON ERRORS THE CLIENT WILL CRASH FOR DEBUGGING +++");
 			set_abort_on_assert(1);

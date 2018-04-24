@@ -37,6 +37,7 @@ class CDebugger
 public:
 	CDebugger();
 	static void signalhandler_ex(int sig);
+	static void make_crashreport(int sig, const char *pFilePath, char *aOutMsgBoxTitle, unsigned TitleBufferSize, char *aOutMsgBoxMsg, unsigned MsgBufferSize);
 
 	static IStorageTW *m_pStorage;
 
