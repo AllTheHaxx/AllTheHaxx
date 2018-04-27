@@ -110,8 +110,8 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	{
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
 		if(abort_on_assert)
-			dbg_abort();
-		else
+//			dbg_abort();
+//		else
 			dbg_break();
 	}
 }
