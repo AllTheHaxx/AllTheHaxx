@@ -205,6 +205,7 @@ MACRO_CONFIG_INT(ClSendHookline, cl_send_hookline, 1, 0, 1, CFGFLAG_CLIENT|CFGFL
 MACRO_CONFIG_INT(ClSkinFetcher, cl_skin_fetcher, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Fetch skins from public skin databases automatically as they are needed  (→ see cl_skin_db_file)")
 MACRO_CONFIG_INT(ClSkinFetcherUi, cl_skin_fetcher_ui, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show a little UI at the bottom of your screen when downloading skins")
 MACRO_CONFIG_INT(ClChatbubble, cl_chatbubble, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Notifiy others that you are typing")
+MACRO_CONFIG_INT(ClMoonwalk, cl_moonwalk, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Moonwalk when walking left+right simultaneously")
 MACRO_CONFIG_STR(FtFont, ft_font_pack, 128, "DejaVuSansCJKName", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font to use")
 MACRO_CONFIG_STR(FtMonoFont, ft_mono_font_pack, 128, "UbuntuMono", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Monospace font to use")
 MACRO_CONFIG_INT(ClMonoFontSize, cl_monofont_size, 10, 6, 16, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Font size in Console and IRC")

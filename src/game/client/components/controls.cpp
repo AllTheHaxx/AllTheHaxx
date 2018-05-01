@@ -315,6 +315,7 @@ int CControls::SnapInput(int *pData)
 			m_InputData[g_Config.m_ClDummy].m_ViewDir = 1;
 
 		// moonwalk, bitch please!
+		if(g_Config.m_ClMoonwalk)
 		{
 			if(m_InputDirectionLeft[g_Config.m_ClDummy] && m_InputDirectionRight[g_Config.m_ClDummy])
 				m_InputData[g_Config.m_ClDummy].m_ViewDir = m_LastData[g_Config.m_ClDummy].m_ViewDir ? -m_LastData[g_Config.m_ClDummy].m_ViewDir : 1;
