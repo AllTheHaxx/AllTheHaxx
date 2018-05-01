@@ -761,29 +761,13 @@ void CServerBrowser::Refresh(int Type)
 
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
-		unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO)+1];
-		CNetChunk Packet;
-
-		mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-		Buffer[sizeof(SERVERBROWSE_GETINFO)] = (unsigned char)m_CurrentToken;
-
-		/* do the broadcast version */
-		Packet.m_ClientID = -1;
-		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_Address.type = (unsigned int)(m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST);
-		Packet.m_Flags = NETSENDFLAG_CONNLESS|NETSENDFLAG_EXTENDED;
-		Packet.m_DataSize = sizeof(Buffer);
-		Packet.m_pData = Buffer;
-		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
-		m_BroadcastExtraToken = rand() & 0xffff;
-		Packet.m_aExtraData[0] = (unsigned char)(m_BroadcastExtraToken >> 8);
-		Packet.m_aExtraData[1] = (unsigned char)(m_BroadcastExtraToken & 0xff);
-		m_BroadcastTime = time_get();
-
 		for(unsigned short i = (unsigned short)g_Config.m_BrLanScanStart; i <= (unsigned)min(65535, g_Config.m_BrLanScanStart+g_Config.m_BrLanScanRange); i++)
 		{
-			Packet.m_Address.port = i;
-			m_pNetClient->Send(&Packet);
+			char aBuf[64];
+			str_formatb(aBuf, "127.0.0.1:%i", i);
+			NETADDR Addr;
+			net_addr_from_str(&Addr, aBuf);
+			RequestCurrentServer(Addr);
 		}
 
 		if(g_Config.m_Debug)
