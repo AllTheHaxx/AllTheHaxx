@@ -353,21 +353,66 @@ void CHud::RenderTextInfo()
 {
 	CALLSTACK_ADD();
 
+	// render fps counter
 	if(g_Config.m_ClShowfps)
 	{
 		// calculate avg. fps
 		float FPS = 1.0f / Client()->RenderFrameTime();
 		m_AverageFPS = (m_AverageFPS*(1.0f-(1.0f/m_AverageFPS))) + (FPS*(1.0f/m_AverageFPS));
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "%d", (int)m_AverageFPS); //
-		TextRender()->Text(0, m_Width-5-TextRender()->TextWidth(0, 9, aBuf, -1), m_Height-14*UI()->Scale(), 9, aBuf, -1);
+		str_format(aBuf, sizeof(aBuf), "%d", (int)m_AverageFPS);
+
+		float x = m_Width-5-TextRender()->TextWidth(0, 9, aBuf, -1);
+		float y = m_Height-14*UI()->Scale();
+		switch(g_Config.m_ClShowfpsPos)
+		{
+			case 0: // BR
+				// default; set above
+				break;
+			case 1: // BL
+				x = 5;
+				// y remains the same
+				break;
+			case 2: // TL
+				x = 5;
+				y = 5 + (g_Config.m_ClShowhud && g_Config.m_ClShowhudHealthAmmo ? 30 : 0);
+				break;
+			case 3: // TR
+				// x remains the same
+				y = 5;
+				break;
+		}
+		TextRender()->Text(0, x, y, 9, aBuf, -1);
 	}
+
+	// render prediction time
 	if(g_Config.m_ClShowpred)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
 		TextRender()->TextColor(0.65f, 0.65f, 0.65f, 1);
-		TextRender()->Text(0, m_Width-5-TextRender()->TextWidth(0, 9, aBuf, -1), g_Config.m_ClShowfps ? m_Height-25*UI()->Scale() : m_Height-14*UI()->Scale(), 9, aBuf, -1);
+		bool MoveText = g_Config.m_ClShowfps && g_Config.m_ClShowfpsPos == g_Config.m_ClShowpredPos;
+		float x = m_Width-5-TextRender()->TextWidth(0, 9, aBuf, -1);
+		float y = MoveText ? m_Height-25*UI()->Scale() : m_Height-14*UI()->Scale();
+		switch(g_Config.m_ClShowpredPos)
+		{
+			case 0: // BR
+				// default; set above
+				break;
+			case 1: // BL
+				x = 5;
+				// y remains the same
+				break;
+			case 2: // TL
+				x = 5;
+				y = (MoveText ? 16 : 5) + (g_Config.m_ClShowhud && g_Config.m_ClShowhudHealthAmmo ? 30 : 0); // move it down for the health bars
+				break;
+			case 3: // TR
+				// x remains the same
+				y = MoveText ? 16 : 5;
+				break;
+		}
+		TextRender()->Text(0, x, y, 9, aBuf, -1);
 		TextRender()->TextColor(1,1,1,1);
 	}
 }
