@@ -1,5 +1,6 @@
 #include <base/system.h>
 #include <engine/storage.h>
+#include <engine/engine.h>
 #include <engine/shared/config.h>
 #include "debug.h"
 #include "fetcher.h"
@@ -52,10 +53,10 @@ bool CFetcher::Init(IStorageTW *pStorage)
 {
 	CALLSTACK_ADD();
 
-	if(pStorage)
-		m_pStorage = pStorage;
-	else
-		m_pStorage = Kernel()->RequestInterface<IStorageTW>();
+	if(pStorage) m_pStorage = pStorage;
+	else m_pStorage = Kernel()->RequestInterface<IStorageTW>();
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
+
 	return (m_pHandle = curl_easy_init()) != NULL;
 }
 
@@ -65,8 +66,8 @@ CFetchTask* CFetcher::QueueAdd(bool CanTimeout, const char *pUrl, const char *pD
 
 	if(m_Shutdown)
 	{
-		dbg_msg("fetcher/warning", "rejecting task '%s' due to shutdown!", pUrl);
-		return 0;
+		m_pEngine->WriteErrorLog("fetcher/warning", "rejecting task '%s' due to shutdown!", pUrl);
+		return NULL;
 	}
 
 	CFetchTask *pTask = new CFetchTask(CanTimeout);
@@ -218,7 +219,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	io_close(File);
 	if(ret != CURLE_OK)
 	{
-		dbg_msg("fetcher", "task failed. ('%s' -> '%s') libcurl error: %s", pTask->m_aUrl, pTask->m_aDest, aErr);
+		m_pEngine->WriteErrorLog("fetcher", "task failed. ('%s' -> '%s') libcurl error: %s", pTask->m_aUrl, pTask->m_aDest, aErr);
 		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? CFetchTask::STATE_ABORTED : CFetchTask::STATE_ERROR;
 	}
 	else

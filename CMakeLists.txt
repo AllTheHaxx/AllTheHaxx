@@ -74,6 +74,7 @@ set(SOURCE_FILES ${EXTERNAL_SOURCES}
         src/base/tl/sorted_array.h
         src/base/tl/string.h
         src/base/system++/io.h
+        src/base/system++/io.cpp
         src/base/system++/pool.h
         src/base/system++/threading.h
         src/base/system++/system++.h

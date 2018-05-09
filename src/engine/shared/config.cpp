@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/config.h>
+#include <engine/engine.h>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -64,7 +65,12 @@ public:
 		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 
 		if(!m_ConfigFile)
+		{
+			IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+			if(pEngine)
+				pEngine->WriteErrorLog("config", "failed to save config: file not accessible");
 			return false;
+		}
 
 		char aLineBuf[1024*2];
 		char aEscapeBuf[1024*2];

@@ -27,6 +27,12 @@ public:
 
 	virtual void Init() = 0;
 	virtual void InitLogfile() = 0;
+	virtual void WriteErrorLog(const char *pSys, const char *pFormat, ...)
+	#if defined(DO_NOT_COMPILE_THIS_CODE) && (defined(__GNUC__) || defined(__clang__)) // dunno why this gives weird errors all over the place if compiled
+	__attribute__ ((format (printf, 2, 3))) /* Warn if you specify wrong arguments in printf format string */
+	#endif
+	= 0;
+
 	virtual void HostLookup(CHostLookup *pLookup, const char *pHostname, int Nettype) = 0;
 	virtual void AddJob(CJob *pJob, JOBFUNC pfnFunc, void *pData) = 0;
 };

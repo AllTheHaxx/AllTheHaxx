@@ -16,8 +16,8 @@ public:
 	virtual void OnShutdown();
 
 	void SaveIdents();
-	void LoadIdents();
-	void LoadIdentsLegacy();
+	bool LoadIdents();
+	bool LoadIdentsLegacy();
 
 	class CIdentEntry
 	{

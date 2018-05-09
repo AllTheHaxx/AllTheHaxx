@@ -3251,13 +3251,14 @@ void CClient::Run()
 		RunMainloop();
 	} catch(std::exception& e) {
 		// treat any exception that escaped out of the main loop as an unwanted crash
+		Engine()->WriteErrorLog("client", "client crashed through uncaught exception");
 
 		// write a note to the disk first
 		char aTimestamp[64];
 		str_timestampb(aTimestamp);
 
 		char aFilename[128];
-		str_formatb(aFilename, "crashlogs/crash_%s.log", aTimestamp);
+		str_formatb(aFilename, "logs/ath_crashes/crash_%s.log", aTimestamp);
 		IOHANDLE_SMART File = m_pStorage->OpenFileSmart(aFilename, IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
 		if(File.IsOpen())
 		{
@@ -4474,6 +4475,34 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	pEngine->Init();
+
+	// check for clean exit
+	{
+		IOHANDLE_SMART File = pStorage->OpenFileSmart("tmp/ath.lock", IOFLAG_READ, IStorageTW::TYPE_SAVE);
+		if(File.IsOpen())
+		{
+			char aTimestampFromFile[256];
+			File.ReadNextLine(aTimestampFromFile, sizeof(aTimestampFromFile));
+			pEngine->WriteErrorLog("main", "Client didn't exit cleanly on %s", aTimestampFromFile);
+			File.Close();
+			pStorage->RemoveFile("tmp/ath.lock", IStorageTW::TYPE_SAVE);
+		}
+	}
+
+	// write clean exit file
+	{
+		IOHANDLE_SMART File = pStorage->OpenFileSmart("tmp/ath.lock", IOFLAG_WRITE, IStorageTW::TYPE_SAVE);
+		if(File.IsOpen())
+		{
+			char aTimestamp[256];
+			str_timestampb(aTimestamp);
+			File.WriteString(aTimestamp, false);
+		}
+		else
+			dbg_msg("main/error", "failed to write ath.lock file");
+	}
+
+
 	pConfig->Init();
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
@@ -4495,6 +4524,8 @@ int main(int argc, const char **argv) // ignore_convention
 		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
+	else
+		pEngine->WriteErrorLog("main", "[WARN] couldn't load config on startup; file doesn't exist or is not readable");
 	// Do not fallback to other configs to have our default values applied.
 	// Old configs can easily be loaded using "exec" in f1
 /*	else if((File = pStorage->OpenFile("settings_ddnet.cfg", IOFLAG_READ, IStorage::TYPE_ALL))) // fallback to ddnet
@@ -4565,7 +4596,6 @@ int main(int argc, const char **argv) // ignore_convention
 	// cleanup
 	delete pClient;
 	delete pEngine;
-	delete pStorage;
 	delete pConfig;
 	delete pEngineSound;
 	delete pEngineInput;
@@ -4577,9 +4607,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 	curl_global_cleanup();
 
-	if(Restart)
-		shell_execute(argv[0]);
-
+	pStorage->RemoveFile("tmp/ath.lock", IStorageTW::TYPE_SAVE);
+	delete pStorage;
 
 	bool WantReport = false;
 	for(int i = 1; i < argc; i++) // ignore_convention
@@ -4616,6 +4645,9 @@ int main(int argc, const char **argv) // ignore_convention
 			conductor = next;
 		}
 	}
+
+	if(Restart)
+		return replace_process(argv);
 
 	return 0;
 }

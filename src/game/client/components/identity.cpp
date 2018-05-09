@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/engine.h>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 #include <engine/external/json-builder/json-builder.h>
@@ -43,7 +44,13 @@ static const json_serialize_opts json_opts_packed = {
 
 void CIdentity::OnInit()
 {
-	LoadIdents();
+	if(!LoadIdents())
+	{
+		// back up the old file if there was any
+		char aNewFilename[256];
+		str_timestamp_format(aNewFilename, sizeof(aNewFilename), ALL_IDS_JSON_FILE ".FAILED_%Y%m%d-%H%M%S");
+		Storage()->RenameFile(ALL_IDS_JSON_FILE, aNewFilename, IStorageTW::TYPE_SAVE);
+	}
 }
 
 void CIdentity::OnShutdown()
@@ -51,7 +58,7 @@ void CIdentity::OnShutdown()
 	SaveIdents();
 }
 
-void CIdentity::LoadIdents()
+bool CIdentity::LoadIdents()
 {
 	m_aIdentities.clear();
 
@@ -59,6 +66,7 @@ void CIdentity::LoadIdents()
 	if(!File.IsOpen())
 	{
 		dbg_msg("ident", "failed to load identities from json file, trying legacy...");
+		m_pClient->Engine()->WriteErrorLog("identities", "failed to load identities from json file (file not accessible)");
 		return LoadIdentsLegacy();
 	}
 
@@ -68,16 +76,18 @@ void CIdentity::LoadIdents()
 	mem_free(pText); pText = NULL; Len = 0; // no more text
 	if(!pJson)
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident/ERROR", "error while parsing identities json file!");
-		return;
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident/ERROR", "failed to parse contents of json file!");
+		m_pClient->Engine()->WriteErrorLog("identities", "failed to parse contents of json file");
+		return false;
 	}
 
 	json_value& json = *pJson;
 	if(json.type != json_array)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident/ERROR", "invalid identity json contents (not an array)");
+		m_pClient->Engine()->WriteErrorLog("identities", "invalid identity json contents (not an array)");
 		json_value_free(pJson);
-		return;
+		return false;
 	}
 
 	for(unsigned int i = 0; i < json.u.array.length ; i++)
@@ -86,7 +96,8 @@ void CIdentity::LoadIdents()
 		const json_value &jsonInner = jsonOuter["identity"];
 		if(jsonInner.type != json_object)
 		{
-			Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "ident/WARM", "error while parsing identity #%i, skipping it", i);
+			Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "ident/WARN", "error while parsing identity #%i, skipping it", i+1);
+			m_pClient->Engine()->WriteErrorLog("identities", "error while parsing identity i=%i of %i total", i, json.u.array.length);
 			continue;
 		}
 
@@ -100,7 +111,7 @@ void CIdentity::LoadIdents()
 	m_aIdentities.sort_range();
 
 	json_value_free(pJson);
-
+	return true;
 }
 
 CIdentity::CIdentEntry CIdentity::SingleIdentFromJson(const json_value &jsonInner) const
@@ -119,14 +130,17 @@ CIdentity::CIdentEntry CIdentity::SingleIdentFromJson(const json_value &jsonInne
 	return Entry;
 }
 
-void CIdentity::LoadIdentsLegacy()
+bool CIdentity::LoadIdentsLegacy()
 {
 	m_aIdentities.clear();
 	Storage()->ListDirectory(IStorageTW::TYPE_SAVE, "identities", FindIDFiles, this);
 	if(!m_aIdentities.size())
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ident", "failed to load identities.");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "identities", "failed to load identities.");
+		m_pClient->Engine()->WriteErrorLog("identities", "failed to load identities (legacy)");
+		return false;
 	}
+	return true;
 }
 
 json_value *CIdentity::GetIdentAsJson(int i, bool Packed)
@@ -190,13 +204,16 @@ void CIdentity::SaveIdents()
 	{
 		dbg_msg("ident", "saving %i identities to file '%s'", NumIdents(), File.GetPath());
 
-		unsigned int Size = File.WriteLine(pJsonBuf);
+		unsigned int Size = File.WriteString(pJsonBuf, false);
+		unsigned int StrLen = (unsigned)str_length(pJsonBuf);
+		if(Size != StrLen)
+			m_pClient->Engine()->WriteErrorLog("identities", "Written size is not equal string length (written=%i, expected=%i)", Size, StrLen);
 
 		if(g_Config.m_Debug)
 			dbg_msg("ident", "done, %u bytes written.", Size);
 	}
 	else
-		dbg_msg("ident/ERROR", "failed to open file '%s' (%s) for writing; cannot save identities!", ALL_IDS_JSON_FILE, File.GetPath());
+		m_pClient->Engine()->WriteErrorLog("identities", "failed to open file '%s' (%s) for writing; cannot save identities!", ALL_IDS_JSON_FILE, File.GetPath());
 
 	mem_free(pJsonBuf);
 }

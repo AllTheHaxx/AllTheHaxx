@@ -4,6 +4,7 @@
 #include <base/system.h>
 #include <engine/storage.h>
 #include <engine/client.h>
+#include <engine/engine.h>
 #include <engine/external/json-parser/json.hpp>
 #include <game/version.h>
 #include <game/client/components/menus.h>
@@ -21,6 +22,7 @@ CUpdater::CUpdater()
 {
 	m_pClient = NULL;
 	m_pStorage = NULL;
+	m_pEngine = NULL;
 	m_pFetcher = NULL;
 	SetState(STATE_CLEAN);
 	str_copy(m_aError, "something", sizeof(m_aError));
@@ -47,7 +49,8 @@ void CUpdater::Init()
 
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
-	m_pFetcher = new CFetcher;
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
+	m_pFetcher = new CFetcher();
 	m_pFetcher->Init(m_pStorage);
 #if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5U, 1U) <= 0;
@@ -158,11 +161,11 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(str_comp(filename, "ath-news.txt") == 0) // news are allowed to fail...
 			str_copy(pSelf->m_aNews, pFailedNewsMsg, sizeof(pSelf->m_aNews));
 		else if(str_comp(filename, LATEST_VERSION_FILE) == 0) // version check is definitely allowed to fail
-			dbg_msg("updater/warning", "version check failed: couldn't download '%s'", filename);
+			pSelf->m_pEngine->WriteErrorLog("updater/warning", "version check failed: couldn't download '%s'", filename);
 		else if(str_comp(filename, UPDATE_MANIFEST) == 0) // update manifest is optional, thus allowewd to fail
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);
-			dbg_msg("updater/warning", "getting manifest failed! waiting for github-compare to finish...");
+			pSelf->m_pEngine->WriteErrorLog("updater", "[WARN] getting manifest failed! waiting for github-compare to finish...");
 		}
 		else
 		{
@@ -171,7 +174,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 				pSelf->SetState(STATE_FAIL);
 				str_format(pSelf->m_aError, sizeof(pSelf->m_aError), "'%s'", full_path);
 			}
-			dbg_msg("update", "failed to download '%s'", full_path);
+			pSelf->m_pEngine->WriteErrorLog("update", "failed to download '%s'", full_path);
 		}
 		fs_remove(pTask->Dest()); // delete the empty file dummy
 	}
@@ -589,8 +592,8 @@ void CUpdater::ReplaceClient()
 	m_pStorage->GetBinaryPath(CURR_FILE_NAME, aPath, sizeof aPath);
 	char aBuf[512];
 	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-	if(system(aBuf))
-		dbg_msg("updater", "ERROR: failed to set client executable bit");
+	if(system(aBuf) != 0)
+		m_pEngine->WriteErrorLog("updater", "failed to set client executable bit");
 #endif
 }
 

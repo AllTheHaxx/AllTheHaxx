@@ -21,6 +21,7 @@ private:
 	CFetchTask *m_pFirst;
 	CFetchTask *m_pLast;
 	class IStorageTW *m_pStorage;
+	class IEngine *m_pEngine;
 public:
 	CFetcher();
 	~CFetcher();

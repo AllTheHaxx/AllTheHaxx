@@ -1553,6 +1553,8 @@ int pid();
 */
 void shell_execute(const char *file);
 
+int replace_process(const char **argv);
+
 /*
 	Function: os_compare_version
 		Compares the OS version to a given major and minor.

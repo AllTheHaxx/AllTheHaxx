@@ -54,6 +54,7 @@ class CUpdater : public IUpdater
 {
 	class IClient *m_pClient;
 	class IStorageTW *m_pStorage;
+	class IEngine *m_pEngine;
 	class IFetcher *m_pFetcher;
 
 	CGitHubAPI m_GitHubAPI;

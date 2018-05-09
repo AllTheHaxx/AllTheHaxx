@@ -8,6 +8,8 @@
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
+#include <base/system++/io.h>
+#include <cstdarg>
 
 
 static int HostLookupThread(void *pUser)
@@ -99,6 +101,42 @@ public:
 		if(g_Config.m_Logfile[0])
 			dbg_logger_file(g_Config.m_Logfile);
 	}
+
+	void WriteErrorLog(const char *pSys, const char *pFormat, ...)
+	{
+		// perform string formatting
+		char aMessage[1024];
+#if defined(CONF_FAMILY_WINDOWS)
+		va_list ap;
+		va_start(ap, pFormat);
+		_vsnprintf(aMessage, sizeof(aMessage), pFormat, ap);
+		va_end(ap);
+#else
+		va_list ap;
+		va_start(ap, pFormat);
+		vsnprintf(aMessage, sizeof(aMessage), pFormat, ap);
+		va_end(ap);
+#endif
+		aMessage[sizeof(aMessage)-1] = 0; // null termination
+
+		// system part of the message
+		char aSys[64];
+		str_formatb(aSys, "%s/error", pSys);
+		dbg_msg(aSys, "%s", aMessage);
+
+		// write it to a file
+		IOHANDLE_SMART File = m_pStorage->OpenFileSmart("logs/ath_errors.log", IOFLAG_WRITE|IOFLAG_APPEND, IStorageTW::TYPE_SAVE);
+		if(!File.IsOpen())
+			return;
+
+		char aTimestamp[64];
+		str_timestampb(aTimestamp);
+		char aMsgHead[256];
+		str_formatb(aMsgHead, "[%s][%s] ", aTimestamp, pSys);
+		File.WriteString(aMsgHead, false);
+		File.WriteLine(aMessage);
+	}
+
 
 	void HostLookup(CHostLookup *pLookup, const char *pHostname, int Nettype)
 	{

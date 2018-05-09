@@ -74,7 +74,8 @@ public:
 				fs_makedir(GetPath(TYPE_SAVE, "configs", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "lua_sandbox", aPath, sizeof(aPath)));
 
-				fs_makedir(GetPath(TYPE_SAVE, "crashlogs", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "logs", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "logs/ath_crashes", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "tmp", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "tmp/cache", aPath, sizeof(aPath)));
 			}

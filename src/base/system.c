@@ -3158,6 +3158,17 @@ void shell_execute(const char *file)
 #endif
 }
 
+int replace_process(const char **argv)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return _execv(argv[0], (char**)argv);
+#elif defined(CONF_FAMILY_UNIX)
+	return execv(argv[0], (char**)argv);
+#else
+	#error not implemented
+#endif
+}
+
 int os_compare_version(unsigned int major, unsigned int minor)
 {
 #if defined(CONF_FAMILY_WINDOWS)

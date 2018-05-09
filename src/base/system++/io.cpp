@@ -89,7 +89,7 @@ bool IOHANDLE_SMART::ReadNextLine(char *pBuffer, unsigned BufferSize)
 {
 	RETURN_ON_NOT_OPEN(false)
 	mem_zero(pBuffer, BufferSize);
-	for(unsigned i = 0; i < BufferSize; i++)
+	for(unsigned i = 0; i < BufferSize-1; i++)
 	{
 		char c = '\0';
 		if(io_read(m_FileHandle, &c, 1U) != 1 || c == '\0')
