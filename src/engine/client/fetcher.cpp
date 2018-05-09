@@ -49,13 +49,21 @@ CFetcher::~CFetcher()
 		curl_easy_cleanup(m_pHandle);
 }
 
-bool CFetcher::Init(IStorageTW *pStorage)
+bool CFetcher::Init(IStorageTW *pStorage, IEngine *pEngine)
 {
 	CALLSTACK_ADD();
 
-	if(pStorage) m_pStorage = pStorage;
-	else m_pStorage = Kernel()->RequestInterface<IStorageTW>();
-	m_pEngine = Kernel()->RequestInterface<IEngine>();
+	// storage
+	if(pStorage)
+		m_pStorage = pStorage;
+	else
+		m_pStorage = Kernel()->RequestInterface<IStorageTW>();
+
+	// engine
+	if(pEngine)
+		m_pEngine = pEngine;
+	else
+		m_pEngine = Kernel()->RequestInterface<IEngine>();
 
 	return (m_pHandle = curl_easy_init()) != NULL;
 }

@@ -62,7 +62,7 @@ class IFetcher : public IInterface
 {
 	MACRO_INTERFACE("fetcher", 0)
 public:
-	virtual bool Init(class IStorageTW *pStorage = 0) = 0;
+	virtual bool Init(class IStorageTW *pStorage = 0, class IEngine *pEngine = 0) = 0;
 	virtual CFetchTask* QueueAdd(bool CanTimeout, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
 	virtual void Escape(char *pBud, size_t size, const char *pStr) = 0;
 };

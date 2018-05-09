@@ -51,7 +51,7 @@ void CUpdater::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorageTW>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pFetcher = new CFetcher();
-	m_pFetcher->Init(m_pStorage);
+	m_pFetcher->Init(m_pStorage, m_pEngine);
 #if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5U, 1U) <= 0;
 #endif
