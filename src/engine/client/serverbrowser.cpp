@@ -389,6 +389,13 @@ void CServerBrowser::Filter()
 					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
 				}
 
+				// match against server address
+				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aAddress, g_Config.m_BrFilterString))
+				{
+					MatchFound = 1;
+					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
+				}
+
 				// match against players
 				for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
 				{
