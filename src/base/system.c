@@ -100,6 +100,7 @@ static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 
 static int abort_on_assert = 0;
 static void dbg_abort();
+static void dbg_break();
 void set_abort_on_assert(int enabled)
 {
 	abort_on_assert = enabled;
@@ -153,12 +154,16 @@ static void dbg_abort()
 #endif
 }
 
-void dbg_break()
+static void dbg_break()
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	dbg_abort();
+#else
 	wait_log_queue();
 	io_flush(io_stdout());
-#if defined(CONF_DEBUG)
-	raise(SIGTRAP);
+	#if defined(CONF_DEBUG)
+		raise(SIGTRAP);
+	#endif
 #endif
 }
 

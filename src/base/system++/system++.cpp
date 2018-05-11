@@ -41,6 +41,16 @@ void dbg_abort()
 	throw CTWException("dbg_break");
 }
 
+void dbg_break()
+{
+	wait_log_queue();
+#if defined(CONF_FAMILY_WINDOWS)
+	DebugBreak();
+#else
+	raise(SIGTRAP);
+#endif
+}
+
 void mem_debug_dump(IOHANDLE file)
 {
 #if defined(CONF_DEBUG)

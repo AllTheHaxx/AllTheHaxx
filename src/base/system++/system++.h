@@ -6,6 +6,10 @@
 #include <vector>
 #include <string>
 
+#if defined(CONF_FAMILY_WINDOWS)
+#include <Windows.h> // for DebugBreak()
+#endif
+
 #define dbg_assert_critical(test,msg) if(!(test)) throw CTWException(__FILE__, __LINE__, #test, msg)
 #if defined(CONF_DEBUG)
 	#define dbg_assert(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
@@ -30,6 +34,7 @@ public:
 };
 
 void dbg_abort();
+void dbg_break();
 void mem_debug_dump(struct IOINTERNAL *file); // means IOHANDLE but I don't want to include system.h here...
 
 template <class TFN>

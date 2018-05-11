@@ -88,7 +88,7 @@ int dbg_assert_strict_imp(const char *filename, int line, int test, const char *
 	See Also:
 		<dbg_assert>
 */
-void dbg_break();
+//void dbg_break();
 //void dbg_abort();
 
 void wait_log_queue();
