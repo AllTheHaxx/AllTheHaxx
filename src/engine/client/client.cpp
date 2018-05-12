@@ -1467,7 +1467,7 @@ void CClient::Render()
 {
 	CALLSTACK_ADD();
 
-	if(State() != IClient::STATE_ONLINE)
+	if(!(m_State == IClient::STATE_ONLINE || m_State == IClient::STATE_DEMOPLAYBACK))
 		g_Config.m_ClOverlayEntities = 0; // uhm rather hacky but... too lazy right now
 
 	if(g_Config.m_ClOverlayEntities)
