@@ -815,7 +815,7 @@ void CClient::SetState(int NewState)
 {
 	CALLSTACK_ADD();
 
-	if(m_State == IClient::STATE_QUITING)
+	if(State() == IClient::STATE_QUITING)
 		return;
 
 	int OldState = m_State;
@@ -1095,7 +1095,7 @@ void CClient::TimeMeOut()
 
 	if(m_DummyConnected)
 		DummyDisconnect("timemeout");
-	if(m_State != IClient::STATE_OFFLINE)
+	if(State() != IClient::STATE_OFFLINE)
 		DisconnectWithReason("timemeout");
 }
 
@@ -1467,7 +1467,7 @@ void CClient::Render()
 {
 	CALLSTACK_ADD();
 
-	if(!(m_State == IClient::STATE_ONLINE || m_State == IClient::STATE_DEMOPLAYBACK))
+	if(!(State() == IClient::STATE_ONLINE || State() == IClient::STATE_DEMOPLAYBACK))
 		g_Config.m_ClOverlayEntities = 0; // uhm rather hacky but... too lazy right now
 
 	if(g_Config.m_ClOverlayEntities)
@@ -4737,7 +4737,7 @@ void CClient::InputThread(void *pUser)
 	while(1)
 	{
 		thread_sleep(100);
-		if(pSelf->m_State == IClient::STATE_QUITING || !g_Config.m_ClConsoleMode)
+		if(pSelf->State() == IClient::STATE_QUITING || !g_Config.m_ClConsoleMode)
 		{
 			//if(g_Config.m_Debug)
 			dbg_msg("client/dbg", "input thread stopped");
