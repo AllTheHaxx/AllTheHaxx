@@ -2161,7 +2161,10 @@ void CMenus::OnRender()
 		static bool s_WarnedUpdate = false;
 		if(!s_WarnedUpdate && Updater()->State() == IUpdater::STATE_CLEAN && str_comp(Client()->LatestVersion(), "0"))
 		{
-			m_Popup = POPUP_UPDATE;
+			if(g_Config.m_ClAutoUpdate)
+				Updater()->PerformUpdate();
+			else
+				m_Popup = POPUP_UPDATE;
 			s_WarnedUpdate = true;
 		}
 	}

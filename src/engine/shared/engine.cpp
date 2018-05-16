@@ -125,7 +125,7 @@ public:
 		dbg_msg(aSys, "%s", aMessage);
 
 		// write it to a file
-		IOHANDLE_SMART File = m_pStorage->OpenFileSmart("logs/ath_errors.log", IOFLAG_WRITE|IOFLAG_APPEND, IStorageTW::TYPE_SAVE);
+		IOHANDLE_SMART File = m_pStorage->OpenFileSmart("logs/ath_errors.log", IOFLAG_APPEND, IStorageTW::TYPE_SAVE);
 		if(!File.IsOpen())
 			return;
 
