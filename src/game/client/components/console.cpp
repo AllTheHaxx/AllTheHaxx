@@ -1416,7 +1416,10 @@ void CGameConsole::OnRender()
 		// render page
 		char aBuf[128];
 		TextRender()->TextColor(1,1,1,1);
-		str_format(aBuf, sizeof(aBuf), Localize("Page %i, Line %d"), pConsole->m_BacklogActLine/27+1, pConsole->m_BacklogActLine%27+1);
+		if(m_ConsoleType == CONSOLETYPE_REMOTE)
+			str_format(aBuf, sizeof(aBuf), Localize("Page %i, Line %d, %d Commands"), pConsole->m_BacklogActLine/27+1, pConsole->m_BacklogActLine%27+1, pConsole->m_pGameConsole->Console()->TempCommandsCount());
+		else
+			str_format(aBuf, sizeof(aBuf), Localize("Page %i, Line %d"), pConsole->m_BacklogActLine/27+1, pConsole->m_BacklogActLine%27+1);
 		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
 
 		// render version

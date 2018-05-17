@@ -85,6 +85,7 @@ public:
 	virtual void DeregisterTempAll() = 0;
 	virtual void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser) = 0;
 	virtual void StoreCommands(bool Store) = 0;
+	virtual int TempCommandsCount() const = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
 	virtual void ExecuteLine(const char *Sptr, int ClientID = -1) = 0;

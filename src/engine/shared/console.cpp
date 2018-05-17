@@ -860,6 +860,7 @@ CConsole::CConsole(int FlagMask)
 	m_paStrokeStr[1] = "1";
 	m_ExecutionQueue.Reset();
 	m_pFirstCommand = 0;
+	m_TempCommandsCount = 0;
 	m_pFirstExec = 0;
 	mem_zero(m_aPrintCB, sizeof(m_aPrintCB));
 	m_NumPrintCB = 0;
@@ -1022,6 +1023,7 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, c
 	pCommand->m_Temp = true;
 
 	AddCommandSorted(pCommand);
+	m_TempCommandsCount++;
 }
 
 void CConsole::DeregisterTemp(const char *pName)
@@ -1053,6 +1055,7 @@ void CConsole::DeregisterTemp(const char *pName)
 	{
 		pRemoved->m_pNext = m_pRecycleList;
 		m_pRecycleList = pRemoved;
+		m_TempCommandsCount--;
 	}
 }
 
@@ -1074,6 +1077,7 @@ void CConsole::DeregisterTempAll()
 
 	m_TempCommands.Reset();
 	m_pRecycleList = 0;
+	m_TempCommandsCount = 0;
 }
 
 void CConsole::Con_Chain(IResult *pResult, void *pUserData)

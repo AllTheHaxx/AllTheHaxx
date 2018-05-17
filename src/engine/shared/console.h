@@ -37,6 +37,7 @@ class CConsole : public IConsole
 	bool m_StoreCommands;
 	const char *m_paStrokeStr[2];
 	CCommand *m_pFirstCommand;
+	int m_TempCommandsCount;
 
 	class CExecFile
 	{
@@ -194,6 +195,7 @@ public:
 	virtual void DeregisterTempAll();
 	virtual void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser);
 	virtual void StoreCommands(bool Store);
+	virtual int TempCommandsCount() const { return m_TempCommandsCount; }
 
 	virtual bool LineIsValid(const char *pStr);
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1);
