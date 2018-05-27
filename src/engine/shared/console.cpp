@@ -11,6 +11,8 @@
 #include <engine/shared/protocol.h>
 #include <engine/client.h>
 
+#include <engine/client/luabinding.h>
+
 #include "config.h"
 #include "console.h"
 #include "linereader.h"
@@ -503,6 +505,19 @@ void CConsole::ExecuteLine(const char *pStr, int ClientID)
 {
 	CConsole::ExecuteLineStroked(1, pStr); // press it
 	CConsole::ExecuteLineStroked(0, pStr); // then release it
+}
+
+int CConsole::ExecuteLineLua(const char *pStr, lua_State *L)
+{
+	MACRO_L_TO_LF
+
+	if((pLF->GetPermissionFlags() & CLuaFile::PERMISSION_EXEC) || (pLF->GetPermissionFlags() & CLuaFile::PERMISSION_GODMODE))
+	{
+		ExecuteLine(pStr);
+		return 1;
+	}
+	else
+		return luaL_error(L, "attempt to call method 'ExecuteLine' (a nil value)"); // Keepo
 }
 
 void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID)

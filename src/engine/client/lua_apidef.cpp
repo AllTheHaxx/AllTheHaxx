@@ -325,7 +325,7 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginClass<IConsole>("IConsole")
 			.addFunction("Print", &IConsole::Print)
 			.addFunction("LineIsValid", &IConsole::LineIsValid)
-		//	.addFunction("ExecuteLine", &IConsole::ExecuteLine)
+			.addFunction("ExecuteLine", &IConsole::ExecuteLineLua)
 		.endClass()
 
 		/// Game.IRC

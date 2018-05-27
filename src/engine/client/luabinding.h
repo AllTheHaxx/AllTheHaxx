@@ -16,6 +16,12 @@
 		}
 
 
+#define MACRO_L_TO_LF \
+		CLuaFile *pLF = CLuaBinding::GetLuaFile(L); \
+		if(!pLF) \
+			return luaL_error(L, "FATAL: got no lua file handler for this script?!");
+
+
 class CLuaBinding
 {
 public:

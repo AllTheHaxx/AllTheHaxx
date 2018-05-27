@@ -113,8 +113,10 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 				m_PermissionFlags |= PERMISSION_DEBUG;
 			else if(str_comp_nocase_num("os", p, 2) == 0)
 				m_PermissionFlags |= PERMISSION_OS;
-			else if(str_comp_nocase_num("package", p, 7) == 0)
-				m_PermissionFlags |= PERMISSION_PACKAGE;
+			else if(str_comp_nocase_num("exec", p, 4) == 0)
+				m_PermissionFlags |= PERMISSION_EXEC;
+//			else if(str_comp_nocase_num("package", p, 7) == 0)
+//				m_PermissionFlags |= PERMISSION_PACKAGE;
 		}
 		else if(TypeIndicator == '$')
 		{
@@ -217,11 +219,11 @@ void CLuaFile::ApplyPermissions(unsigned Flags)
 
 	if(Flags&PERMISSION_GODMODE)
 	{
-		Flags = 0x7fffffff;
+		Flags = 0xffffffff;
 	}
 
-	if(Flags & PERMISSION_PACKAGE) // gives access to the package system (bad!) + contains 'require'
-		luaXopen_package(m_pLuaState);
+//	if(Flags & PERMISSION_PACKAGE) // gives access to the package system (bad!) + contains 'require'
+//		luaXopen_package(m_pLuaState);
 	if(Flags & PERMISSION_IO)
 		luaXopen_io(m_pLuaState); // input/output of files
 	if(Flags & PERMISSION_OS)
@@ -462,9 +464,9 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 				,"os.getenv"
 				,"require"
 				,"module"
-				,"load"
+//				,"load"
 				,"loadfile"
-				,"loadstring"
+//				,"loadstring"
 				,"collectgarbage"
 				,"io.popen"
 				,"io.input"
@@ -479,6 +481,12 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 			luaL_dostring(m_pLuaState, aCmd);
 			if(g_Config.m_Debug)
 				dbg_msg("lua", "disable: '%s'", aCmd);
+		}
+
+		if(!(m_PermissionFlags & PERMISSION_EXEC))
+		{
+			luaL_dostring(m_pLuaState, "load=nil");
+			luaL_dostring(m_pLuaState, "loadstring=nil");
 		}
 	}
 

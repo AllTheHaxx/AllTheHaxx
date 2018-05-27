@@ -286,7 +286,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 						PERM_STR(IO, Localize("IO (Write and read files)"))
 						PERM_STR(DEBUG, Localize("DEBUG (WARNING: if you are not currently debugging this script, DO NOT TO USE IT!! It may cause security and performance problems!)"))
 						PERM_STR(OS, Localize("OS (Access to various operation system functionalities such as time and date"))
-						PERM_STR(PACKAGE, Localize("PACKAGE (Modules - currently not available; might cause script errors)"))
+						//PERM_STR(PACKAGE, Localize("PACKAGE (Modules - currently not available; might cause script errors)"))
+						PERM_STR(EXEC, Localize("EXEC (DANGEROUS!! Enables your script to execute custom external code!)"))
 #undef PERM_STR
 					}
 					if(DoButton_Menu(&pIDButtonPermissions[i], "!", PermissionFlags, &Buttons, aTooltip, 0,

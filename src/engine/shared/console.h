@@ -199,6 +199,7 @@ public:
 
 	virtual bool LineIsValid(const char *pStr);
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1);
+	virtual int ExecuteLineLua(const char *pStr, lua_State *L);
 	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1);
 	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false);
 

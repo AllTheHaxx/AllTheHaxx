@@ -3,6 +3,7 @@
 #ifndef ENGINE_CONSOLE_H
 #define ENGINE_CONSOLE_H
 
+#include <lua.hpp>
 #include "kernel.h"
 
 class IConsole : public IInterface
@@ -88,8 +89,9 @@ public:
 	virtual int TempCommandsCount() const = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
-	virtual void ExecuteLine(const char *Sptr, int ClientID = -1) = 0;
-	virtual void ExecuteLineFlag(const char *Sptr, int FlasgMask, int ClientID = -1) = 0;
+	virtual void ExecuteLine(const char *pStr, int ClientID = -1) = 0;
+	virtual int ExecuteLineLua(const char *pStr, lua_State *L) = 0;
+	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1) = 0;
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1) = 0;
 	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false) = 0;
 

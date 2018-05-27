@@ -44,8 +44,9 @@ public:
 		PERMISSION_DEBUG      = 1 << 1,
 		XPERM_UNUSED_FIELD    = 1 << 2,
 		PERMISSION_OS         = 1 << 3,
-		PERMISSION_PACKAGE    = 1 << 4,
+		//PERMISSION_PACKAGE    = 1 << 4,
 		PERMISSION_FILESYSTEM = 1 << 5,
+		PERMISSION_EXEC       = 1 << 6,
 		PERMISSION_GODMODE    = 1 << 30
 	};
 

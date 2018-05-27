@@ -12,13 +12,6 @@
 #include "luabinding.h"
 
 
-#define MACRO_L_TO_LF \
-		CLuaFile *pLF = GetLuaFile(L); \
-		if(!pLF) \
-			return luaL_error(L, "FATAL: got no lua file handler for this script?!");
-
-
-
 int CLuaBinding::LuaListdirCallback(const char *name, const char *full_path, int is_dir, int dir_type, void *user)
 {
 	lua_State *L = (lua_State*)user;
@@ -107,9 +100,16 @@ int CLuaBinding::LuaImport(lua_State *L)
 		IOHANDLE tmp = CLua::m_pCGameClient->Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath));
 		if(tmp)
 			io_close(tmp);
-		else
-			str_copy(aFullPath, aBuf, sizeof(aFullPath)); // fall back to lua folder if it fails
-
+		else if((pLF->GetPermissionFlags() & CLuaFile::PERMISSION_EXEC) || (pLF->GetPermissionFlags() & CLuaFile::PERMISSION_GODMODE))
+		{
+			str_copy(aBuf, aFilename, sizeof(aBuf));
+			SandboxPath(aBuf, sizeof(aBuf), pLF);
+			tmp = CLua::m_pCGameClient->Storage()->OpenFile(aBuf, IOFLAG_READ, IStorageTW::TYPE_ALL, aFullPath, sizeof(aFullPath));
+			if(tmp)
+				io_close(tmp);
+			else
+				str_copy(aFullPath, aBuf, sizeof(aFullPath)); // fall back to lua folder if it fails
+		}
 		ret = pLF->LoadFile(aFullPath, true);
 
 		if(!ret)
