@@ -20,10 +20,10 @@
 
 // for updater
 static const char GAME_ATH_VERSION[10] = ATH_VERSION;
-#define GAME_ATH_VERSION_NUMERIC 3630
+#define GAME_ATH_VERSION_NUMERIC 3631
 
 // do not modify these, they belong to ddnet
 static const char GAME_RELEASE_VERSION[8] = DDNET_VERSION;
-#define CLIENT_VERSIONNR 10071
+#define CLIENT_VERSIONNR 10072
 
 #endif
