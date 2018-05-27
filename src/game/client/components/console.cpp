@@ -1307,7 +1307,7 @@ void CGameConsole::OnRender()
 					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0, pConFont);
 					Cursor.m_LineWidth = Screen.w-10;
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
-					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					TextRender()->TextExParse(&Cursor, pEntry->m_aText);
 					pEntry->m_YOffset = Cursor.m_Y+Cursor.m_FontSize+LineOffset;
 				}
 
@@ -1396,7 +1396,7 @@ void CGameConsole::OnRender()
 				//url highlighting
 				TextRender()->SetCursor(&Cursor, 0.0f, y-OffsetY, FontSize, TEXTFLAG_RENDER, pConFont);
 				Cursor.m_LineWidth = Screen.w-10.0f;
-				TextRender()->TextExParse(&Cursor, pEntry->m_aText, true, m_pSearchString);
+				TextRender()->TextExParse(&Cursor, pEntry->m_aText, false, m_pSearchString);
 
 				if(pEntry != pConsole->m_Backlog.First())
 					pEntry = pConsole->m_Backlog.Prev(pEntry);
