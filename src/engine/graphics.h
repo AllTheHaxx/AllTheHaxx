@@ -149,6 +149,7 @@ public:
 			: m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
 	};
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) = 0;
+	virtual int QuadsDrawFreeformLua(lua_State *L) = 0;
 	virtual void QuadsText(float x, float y, float Size, const char *pText) = 0;
 
 	struct CColorVertex
@@ -159,6 +160,7 @@ public:
 		CColorVertex(int i, float r, float g, float b, float a) : m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}
 	};
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
+	virtual int SetColorVertexLua(lua_State *L) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
 	virtual void SetColorLua(float r, float g, float b, float a, lua_State *L) = 0;
 

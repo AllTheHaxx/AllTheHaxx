@@ -3294,7 +3294,7 @@ void secure_random_fill(void *bytes, unsigned length)
 MD5_HASH md5_simple(unsigned char *data, unsigned data_size)
 {
 	MD5_HASH result;
-	mem_zerob(&result);
+	mem_zero(&result, sizeof(result));
 
 	md5_state_t md;
 

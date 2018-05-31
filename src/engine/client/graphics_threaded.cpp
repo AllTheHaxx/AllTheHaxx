@@ -649,6 +649,39 @@ void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, int Num)
 	}
 }
 
+int CGraphics_Threaded::SetColorVertexLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua != 0, "called Graphics()->SetColorVertex without begin");
+
+	int n = lua_gettop(L)-1; // REMEMBER THE 'self'!!
+	if(n != 1 && n != 2)
+		return luaL_error(L, "Engine.Graphics:SetColorVertex expects 1 or 2 arguments, got %d", n);
+
+	argcheck(lua_istable(L, 2), 2, "table");
+	int MaxNum = (int)luaL_optinteger(L, 3, (MAX_VERTICES-m_NumVertices)/(3*2));
+
+	size_t len = lua_objlen(L, 2);
+	if(len == 0)
+		return 0;//luaL_error(L, "the given table doesn't contain any elements!");
+
+	const int NUM = min((int)len, MaxNum);
+
+	LuaRef v = LuaRef::fromStack(L, 2);
+	if(!v.isTable()) // this case should never actually happen
+		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
+
+	CColorVertex aColorItems[MAX_VERTICES];
+	for(int i = 1; i <= NUM; i++)
+	{
+		if(!v[i].isUserdata())
+			luaL_error(L, "elements in array for SetColorVertex must be ColorVertex (got %s @ %d)", luaL_typename(L, v[i].type()), i);
+		aColorItems[i-1] = v[i].cast<CColorVertex>();
+	}
+	SetColorVertex(aColorItems, NUM);
+	return 0;
+}
+
+
 void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 {
 	dbg_assert(m_Drawing != 0, "called Graphics()->SetColor without begin");
@@ -759,6 +792,38 @@ int CGraphics_Threaded::QuadsDrawTLLua(lua_State *L)
 		aQuadItems[i-1] = v[i].cast<CQuadItem>();
 	}
 	QuadsDrawTL(aQuadItems, NUM);
+	return 0;
+}
+
+int CGraphics_Threaded::QuadsDrawFreeformLua(lua_State *L)
+{
+	dbg_assert_lua(m_DrawingLua == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
+
+	int n = lua_gettop(L)-1; // REMEMBER THE 'self'!!
+	if(n != 1 && n != 2)
+		return luaL_error(L, "Engine.Graphics:QuadsDrawFreeform expects 1 or 2 arguments, got %d", n);
+
+	argcheck(lua_istable(L, 2), 2, "table");
+	int MaxNum = (int)luaL_optinteger(L, 3, (MAX_VERTICES-m_NumVertices)/(3*2));
+
+	size_t len = lua_objlen(L, 2);
+	if(len == 0)
+		return 0;//luaL_error(L, "the given table doesn't contain any elements!");
+
+	const int NUM = min((int)len, MaxNum);
+
+	LuaRef v = LuaRef::fromStack(L, 2);
+	if(!v.isTable()) // this case should never actually happen
+		return luaL_error(L, "something bad happened while getting a LuaRef to your table");
+
+	CFreeformItem aQuadItems[MAX_VERTICES];
+	for(int i = 1; i <= NUM; i++)
+	{
+		if(!v[i].isUserdata())
+			luaL_error(L, "elements in array for QuadsDrawFreeform must be FreeformItem (got %s @ %d)", luaL_typename(L, v[i].type()), i);
+		aQuadItems[i-1] = v[i].cast<CFreeformItem>();
+	}
+	QuadsDrawFreeform(aQuadItems, NUM);
 	return 0;
 }
 

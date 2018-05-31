@@ -460,6 +460,7 @@ public:
 	virtual void QuadsSetRotationLua(float Angle, lua_State *L);
 
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
+	virtual int SetColorVertexLua(lua_State *L);
 	virtual void SetColor(float r, float g, float b, float a);
 	virtual void SetColorLua(float r, float g, float b, float a, lua_State *L);
 
@@ -473,6 +474,7 @@ public:
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num);
 	virtual int QuadsDrawTLLua(lua_State *L);
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
+	virtual int QuadsDrawFreeformLua(lua_State *L);
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
 
 	virtual int GetNumScreens() const;
