@@ -513,6 +513,6 @@ set(SOURCE_FILES ${EXTERNAL_SOURCES}
         src/engine/client/luaresman.cpp
         src/engine/client/luaresman.h
         src/engine/client/luaresmandef.h
-        )
+        src/engine/client/lua/luacolor.cpp src/engine/client/lua/luacolor.h)
 
 add_executable(AllTheHaxx ${SOURCE_FILES})

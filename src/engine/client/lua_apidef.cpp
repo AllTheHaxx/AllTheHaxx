@@ -23,6 +23,7 @@
 //#include <engine/client/client.h>
 #include "lua/luajson.h"
 #include "lua/luasql.h"
+#include "lua/luacolor.h"
 
 
 void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
@@ -60,6 +61,20 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 		.beginNamespace("_client")
 			// external info
 			.addFunction("GetPlayerScore", &CLuaBinding::LuaGetPlayerScore)
+		.endNamespace()
+
+		// color namespace
+		.beginNamespace("_color")
+			.addFunction("HueToRgb", &CLuaColor::HueToRgbLua)
+			.addFunction("RgbToHue", &CLuaColor::RgbToHueLua)
+			.addFunction("HslToRgb", &CLuaColor::HslToRgbLua)
+			.addFunction("HsvToRgb", &CLuaColor::HsvToRgbLua)
+			.addFunction("RgbToHsv", &CLuaColor::RgbToHsvLua)
+			.addFunction("HexToRgba", &CLuaColor::HexToRgbaLua)
+			.addFunction("RgbToHsl", &CLuaColor::RgbToHslLua)
+			.addFunction("GetColorV3", &CLuaColor::GetColorV3Lua)
+			.addFunction("HslToHsv", &CLuaColor::HslToHsvLua)
+			.addFunction("HsvToHsl", &CLuaColor::HsvToHslLua)
 		.endNamespace()
 
 		// global types
