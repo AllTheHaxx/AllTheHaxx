@@ -726,9 +726,19 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 	{
 		int Length = str_length(pName);
 
-		if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
-			return true;
+		if((pLine == pHL || pHL[-1] == ' ') &&
+				(pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
+		{
+			// DEBUGGING CHECK to catch invalid highlights
+			if(str_comp_nocase(pName, g_Config.m_PlayerName) != 0 && str_comp_nocase(pName, g_Config.m_ClDummyName) != 0)
+			{
+				// if the name is neither the player name nor the dummy name, something might be fishy (or the server force-changed our name)
+				Console()->Printf(IConsole::OUTPUT_LEVEL_STANDARD, "POSSIBLE BUG",
+								  "CChat::LineShouldHighlight | player_name='%s' dummy_name='%s' pName='%s' offset=%i in_len=%i", g_Config.m_PlayerName, g_Config.m_ClDummyName, pName, (int)(pHL - pLine), Length);
+			}
 
+			return true;
+		}
 	}
 
 	return false;
