@@ -41,6 +41,9 @@ bool CMenus::ToggleIRC()
 			UI()->SetActiveItem(&m_IRCActive);
 		}
 	}
+	else
+		UI()->SetActiveItem(0);
+
 	RenderIRC(*UI()->Screen());
 
 	Input()->SetIMEState(m_IRCActive || m_MenuActive || m_pClient->m_pChat->IsActive());

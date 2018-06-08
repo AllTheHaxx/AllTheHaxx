@@ -200,6 +200,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
 		else
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
+		UI()->SetActiveItem(0);
 	}
 	if(m_SelectedIndex > -1)
 	{
