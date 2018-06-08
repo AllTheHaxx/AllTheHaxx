@@ -151,12 +151,14 @@ public:
 private:
 	void Reset(bool error = false);
 	void OpenLua();
-	void LoadPermissionFlags(const char *pFilename);
+	unsigned int LoadPermissionFlags(const char *pFilename, bool Imported);
 	void ApplyPermissions(unsigned Flags);
 	bool LoadFile(const char *pFilename, bool Import);
 	bool CheckFile(const char *pFilename);
 
 	bool ScriptHasSettingsPage();
+
+	static const char *PermissionsName(unsigned int PermissionFlags);
 };
 
 #endif

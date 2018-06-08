@@ -639,41 +639,41 @@ public:
 		return true;
 	}
 
-	const char *SandboxPath(char *pBuffer, unsigned BufferSize, const char *pPrepend, bool ForcePrepend) const
+	const char *SandboxPath(char *pInOutBuffer, unsigned BufferSize, const char *pPrepend, bool ForcePrepend) const
 	{
 		if(dbg_assert_strict(BufferSize > 0, "SandboxPath: zero-size buffer?!"))
 			return NULL;
 
 		// replace all backslashes with forward slashes
-		for(char *p = pBuffer; p < pBuffer+BufferSize && *p; p++)
+		for(char *p = pInOutBuffer; p < pInOutBuffer+BufferSize && *p; p++)
 			if(*p == '\\')
 				*p = '/';
 
 		// don't allow entering the root directory / another partition
 		{
 			#if defined(CONF_FAMILY_UNIX)
-			char *p = pBuffer;
+			char *p = pInOutBuffer;
 			while(p[0] == '/') p++;
-			if(p != pBuffer)
+			if(p != pInOutBuffer)
 			{
 				char aTmp[512];
 				str_copyb(aTmp, p);
-				str_copy(pBuffer, aTmp, (int)BufferSize);
+				str_copy(pInOutBuffer, aTmp, (int)BufferSize);
 			}
 			#elif defined(CONF_FAMILY_WINDOWS)
-			const char *p = str_find_rev(pBuffer, ":");
+			const char *p = str_find_rev(pInOutBuffer, ":");
 		if(p)
 		{
 			char aTmp[512];
 			str_copyb(aTmp, p+1);
-			str_copy(pBuffer, aTmp, (int)BufferSize);
+			str_copy(pInOutBuffer, aTmp, (int)BufferSize);
 		}
 			#endif
 		}
 
 		// split it into pieces
 		std::vector<std::string> PathStack;
-		StringSplit(pBuffer, "/", &PathStack);
+		StringSplit(pInOutBuffer, "/", &PathStack);
 
 		// reassemble and prettify it
 		std::vector<std::string> FinalResult;
@@ -688,29 +688,46 @@ public:
 				FinalResult.push_back(*it);
 		}
 
-		pBuffer[0] = '\0';
+		pInOutBuffer[0] = '\0';
 		if(pPrepend)
 		{
 			if(ForcePrepend || fs_compare(FinalResult[0].c_str(), pPrepend) != 0)
 			{
-				str_copy(pBuffer, pPrepend, BufferSize);
+				str_copy(pInOutBuffer, pPrepend, BufferSize);
 				if(pPrepend[str_length(pPrepend)-1] != '/')
-					str_append(pBuffer, "/", BufferSize);
+					str_append(pInOutBuffer, "/", BufferSize);
 			}
 		}
 
 		for(std::vector<std::string>::iterator it = FinalResult.begin(); it != FinalResult.end(); it++)
-			str_append(pBuffer, (*it + std::string("/")).c_str(), BufferSize);
-		pBuffer[str_length(pBuffer)-1] = '\0'; // remove the trailing slash
+			str_append(pInOutBuffer, (*it + std::string("/")).c_str(), BufferSize);
+		pInOutBuffer[str_length(pInOutBuffer)-1] = '\0'; // remove the trailing slash
 
-		return pBuffer;
+		return pInOutBuffer;
 	}
 
-	const char *MakeFullPath(char *pBuffer, unsigned BufferSize, int StorageType) const
+	const char *GetFullPath(const char *pFilename, int Type, char *pBuffer, unsigned BufferSize) const
 	{
-		char aBuf[MAX_PATH_LENGTH];
-		str_copyb(aBuf, pBuffer); // make a copy because we can't read and write to the same buffer at the same time
-		GetPath(StorageType, aBuf, pBuffer, BufferSize);
+		if(Type <= TYPE_ALL)
+		{
+			// check all available directories
+			for(int i = 0; i < m_NumPaths; ++i)
+			{
+				GetPath(i, pFilename, pBuffer, BufferSize);
+				if(fs_exists(pBuffer))
+					return pBuffer;
+			}
+		}
+		else if(Type >= 0 && Type < m_NumPaths)
+		{
+			// check wanted directory
+			char aBuf[MAX_PATH_LENGTH];
+			str_copyb(aBuf, pBuffer); // make a copy because we can't read and write to the same buffer at the same time
+			GetPath(Type, aBuf, pBuffer, BufferSize);
+			return pBuffer;
+		}
+
+		pBuffer[0] = '\0';
 		return pBuffer;
 	}
 

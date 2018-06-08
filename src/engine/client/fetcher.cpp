@@ -175,7 +175,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	if(pTask->m_StorageType == -2)
 		m_pStorage->GetBinaryPath(pTask->m_aDest, aPath, sizeof(aPath));
 	else
-		m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_aDest, aPath, sizeof(aPath));
+		m_pStorage->GetFullPath(pTask->m_aDest, pTask->m_StorageType, aPath, sizeof(aPath));
 
 	if(fs_makedir_rec_for(aPath) < 0)
 		dbg_msg("fetcher", "i/o error, cannot create folder for: '%s'", aPath);

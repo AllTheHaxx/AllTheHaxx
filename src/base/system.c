@@ -2153,6 +2153,12 @@ int fs_is_dir(const char *path)
 #endif
 }
 
+int fs_exists(const char *path)
+{
+	struct stat sb;
+	return stat(path, &sb) == 0;
+}
+
 time_t fs_getmtime(const char *path)
 {
 	struct stat sb;

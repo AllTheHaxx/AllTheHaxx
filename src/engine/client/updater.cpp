@@ -97,7 +97,7 @@ void CUpdater::CheckForUpdates(bool ForceRefresh)
 	if((GetLatestVersion()[0] == '0' && GetLatestVersion()[1] == '\0') || ForceRefresh)
 	{
 		char aDstPath[512];
-		m_pStorage->GetCompletePath(IStorageTW::TYPE_SAVE, "tmp/", aDstPath, sizeof(aDstPath));
+		m_pStorage->GetFullPath("tmp/", IStorageTW::TYPE_SAVE, aDstPath, sizeof(aDstPath));
 		SetState(STATE_SYNC_REFRESH);
 		dbg_msg("updater", "refreshing version info and news");
 		FetchFile("stuffility/master", "ath-news.txt", aDstPath, true);

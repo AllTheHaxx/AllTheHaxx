@@ -196,8 +196,8 @@ int CLuaBinding::LuaListdir(lua_State *L)
 
 	char aSandboxedPath[512];
 	str_copyb(aSandboxedPath, lua_tostring(L, 1)); // arg1
-	const char *pDir = SandboxPath(aSandboxedPath, sizeof(aSandboxedPath), pLF, true);
-	lua_Number ret = (lua_Number)fs_listdir_verbose(pDir, LuaListdirCallback, IStorageTW::TYPE_SAVE, L);
+	const char *pDir = SandboxPath(aSandboxedPath, sizeof(aSandboxedPath), pLF, true, true);
+	lua_Number ret = (lua_Number)fs_listdir_verbose(pDir, LuaListdirCallback, 0 /* unused */, L);
 	lua_pushnumber(L, ret);
 	return 1;
 }
@@ -423,7 +423,7 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 
 
 	char aFullPath[512];
-	CLua::m_pCGameClient->Storage()->GetCompletePath(IStorageTW::TYPE_SAVE, pFilename, aFullPath, sizeof(aFullPath));
+	CLua::m_pCGameClient->Storage()->GetFullPath(pFilename, IStorageTW::TYPE_SAVE, aFullPath, sizeof(aFullPath));
 	if(str_find_nocase(pOpenMode, "w"))
 	{
 		if(fs_makedir_rec_for(aFullPath) != 0)
@@ -450,27 +450,40 @@ int CLuaBinding::LuaIO_Open(lua_State *L)
 	return 2; // we'll leave cleaning the stack up to lua
 }
 
-const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L, bool MakeFullPath)
+const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, lua_State *L, bool MakeFullPath, bool AllowLuaRoot)
 {
 	CLuaFile *pLF = GetLuaFile(L);
 	dbg_assert_lua(pLF != NULL, "FATAL: got no lua file handler for this script?!");
-	return SandboxPath(pInOutBuffer, BufferSize, pLF, MakeFullPath);
+	return SandboxPath(pInOutBuffer, BufferSize, pLF, MakeFullPath, AllowLuaRoot);
 }
 
-const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF, bool MakeFullPath)
+const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CLuaFile *pLF, bool MakeFullPath, bool AllowLuaRoot)
 {
+	if(AllowLuaRoot)
+	{
+		char aRelPath[512];
+		if(str_comp_nocase_num(pInOutBuffer, "/lua", 4) == 0 || str_comp_nocase_num(pInOutBuffer, "$lua", 4) == 0)
+		{
+			str_formatb(aRelPath, "lua/%s", CLua::m_pCGameClient->Storage()->SandboxPath(pInOutBuffer+4, BufferSize));
+			if(MakeFullPath)
+				CLua::m_pCGameClient->Storage()->GetFullPath(aRelPath, IStorageTW::TYPE_ALL, pInOutBuffer, BufferSize);
+
+			str_copy(pInOutBuffer, aRelPath, BufferSize);
+			return pInOutBuffer;
+		}
+	}
+
 	const char *pSubdir = "_shared";
 	if(pLF)
 		pSubdir = pLF->GetFilename();
 
-	char aFullPath[512];
-	str_formatb(aFullPath, "lua_sandbox/%s/%s", pSubdir, CLua::m_pCGameClient->Storage()->SandboxPath(pInOutBuffer, BufferSize));
+	char aRelPath[512];
+	str_formatb(aRelPath, "lua_sandbox/%s/%s", pSubdir, CLua::m_pCGameClient->Storage()->SandboxPath(pInOutBuffer, BufferSize));
 	if(MakeFullPath)
-		CLua::m_pCGameClient->Storage()->MakeFullPath(aFullPath, sizeof(aFullPath), IStorageTW::TYPE_SAVE);
-	str_copy(pInOutBuffer, aFullPath, BufferSize);
+		CLua::m_pCGameClient->Storage()->GetFullPath(aRelPath, IStorageTW::TYPE_SAVE, pInOutBuffer, BufferSize);
 
+	str_copy(pInOutBuffer, aRelPath, BufferSize);
 	return pInOutBuffer;
-
 }
 
 /**

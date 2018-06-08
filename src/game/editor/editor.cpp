@@ -3810,7 +3810,7 @@ void CEditor::RenderFileDialog()
 	// pathbox
 	char aPath[128], aBuf[128];
 	if(m_FilesSelectedIndex != -1)
-		Storage()->GetCompletePath(m_FileList[m_FilesSelectedIndex].m_StorageType, m_pFileDialogPath, aPath, sizeof(aPath));
+		Storage()->GetFullPath(m_pFileDialogPath, m_FileList[m_FilesSelectedIndex].m_StorageType, aPath, sizeof(aPath));
 	else
 		aPath[0] = 0;
 	str_format(aBuf, sizeof(aBuf), "Current path: %s", aPath);
@@ -5293,7 +5293,7 @@ static int UndoStepsListdirCallback(const char *pName, int IsDir, int StorageTyp
 	if (str_comp_nocase_num(pName, "undo_", 5) == 0)
 	{
 		char aBuffer[1024];
-		pStorage->GetCompletePath(IStorageTW::TYPE_SAVE, "editor/", aBuffer, sizeof(aBuffer));
+		pStorage->GetFullPath("editor/", IStorageTW::TYPE_SAVE, aBuffer, sizeof(aBuffer));
 		str_append(aBuffer, pName, sizeof(aBuffer));
 		fs_remove(aBuffer);
 	}
@@ -5306,7 +5306,7 @@ void CEditor::Reset(bool CreateDefault)
 
 	//delete undo file
 	char aBuffer[1024];
-	m_pStorage->GetCompletePath(IStorageTW::TYPE_SAVE, "editor/", aBuffer, sizeof(aBuffer));
+	m_pStorage->GetFullPath("editor/", IStorageTW::TYPE_SAVE, aBuffer, sizeof(aBuffer));
 	fs_listdir(aBuffer, UndoStepsListdirCallback, 0, m_pStorage);
 	m_lUndoSteps.clear();
 

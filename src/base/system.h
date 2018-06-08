@@ -1264,6 +1264,8 @@ int fs_storage_path(const char *appname, char *path, int max);
 */
 int fs_is_dir(const char *path);
 
+int fs_exists(const char *path);
+
 /*
 	Function: fs_getmtime
 		Gets the modification time of a file

@@ -56,24 +56,25 @@ void CLuaFile::Reset(bool error)
 		m_pErrorStr = NULL;
 
 	m_PermissionFlags = 0;
-	LoadPermissionFlags(m_Filename.c_str());
+	LoadPermissionFlags(m_Filename.c_str(), false);
 
 	m_ScriptHasSettingsPage = false;
 
 	m_State = error ? STATE_ERROR : STATE_IDLE;
 }
 
-void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interface for non-compiled scripts
+unsigned int CLuaFile::LoadPermissionFlags(const char *pFilename, bool Imported) // this is the interface for non-compiled scripts
 {
 	if(g_StealthMode)
-		return;
+		return 0;
 
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0 || str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0) // clc's and config files won't have permission flags!
-		return;
+		return 0;
 
+	unsigned int PermissionFlags = 0;
 	if(str_comp_num(pFilename, "data/lua/Official/", 18) == 0 || str_comp_num(pFilename, STORAGE_DATA_DIR"/lua/Official/", str_length(STORAGE_DATA_DIR"/lua/Official/")) == 0)
 	{
-		m_PermissionFlags |= PERMISSION_GODMODE;
+		PermissionFlags |= PERMISSION_GODMODE;
 	}
 
 	std::ifstream f(pFilename);
@@ -108,17 +109,17 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 		if(TypeIndicator == '#' && !(m_PermissionFlags&PERMISSION_GODMODE))
 		{
 			if(str_comp_nocase_num("io", p, 2) == 0)
-				m_PermissionFlags |= PERMISSION_IO;
+				PermissionFlags |= PERMISSION_IO;
 			else if(str_comp_nocase_num("debug", p, 5) == 0)
-				m_PermissionFlags |= PERMISSION_DEBUG;
+				PermissionFlags |= PERMISSION_DEBUG;
 			else if(str_comp_nocase_num("os", p, 2) == 0)
-				m_PermissionFlags |= PERMISSION_OS;
+				PermissionFlags |= PERMISSION_OS;
 			else if(str_comp_nocase_num("exec", p, 4) == 0)
-				m_PermissionFlags |= PERMISSION_EXEC;
+				PermissionFlags |= PERMISSION_EXEC;
 //			else if(str_comp_nocase_num("package", p, 7) == 0)
 //				m_PermissionFlags |= PERMISSION_PACKAGE;
 		}
-		else if(TypeIndicator == '$')
+		else if(TypeIndicator == '$' && !Imported)
 		{
 			if(str_comp_nocase("hidden", p) == 0)
 				m_ScriptHidden = true;
@@ -126,6 +127,11 @@ void CLuaFile::LoadPermissionFlags(const char *pFilename) // this is the interfa
 				str_copyb(m_aScriptInfo, p+5);
 		}
 	}
+
+	if(!Imported)
+		m_PermissionFlags = PermissionFlags;
+
+	return PermissionFlags;
 }
 
 void CLuaFile::Unload(bool error, bool CalledFromExceptionHandler)
@@ -431,10 +437,19 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 	// some security steps right here...
-	unsigned BeforePermissions = Import ? m_PermissionFlags : 0;
-	LoadPermissionFlags(pFilename);
-	unsigned NewFlags = m_PermissionFlags & ~BeforePermissions;
-	ApplyPermissions(NewFlags); // only apply those that are new
+	unsigned int NewFlags = (LoadPermissionFlags(pFilename, Import) & ~m_PermissionFlags);
+	if(Import)
+	{
+		if(NewFlags != 0)
+		{
+			luaL_error(m_pLuaState, "imported script '%s' needs permissions for '%s'!", pFilename, PermissionsName(NewFlags));
+			return false;
+		}
+	}
+	else
+	{
+		ApplyPermissions(NewFlags); // only apply those that are new
+	}
 
 	// inject our complicated overrides
 	if(NewFlags & PERMISSION_IO)
@@ -562,6 +577,26 @@ bool CLuaFile::ScriptHasSettingsPage()
 	if(func1.cast<bool>() && func2.cast<bool>())
 		return true;
 	return false;
+}
+
+const char *CLuaFile::PermissionsName(unsigned int PermissionFlags)
+{
+	static char s_aResult[128];
+	s_aResult[0] = '\0';
+
+	if(PermissionFlags&PERMISSION_EXEC)
+		str_append(s_aResult, "EXEC, ", sizeof(s_aResult));
+	if(PermissionFlags&PERMISSION_IO)
+		str_append(s_aResult, "IO, ", sizeof(s_aResult));
+	if(PermissionFlags&PERMISSION_DEBUG)
+		str_append(s_aResult, "DEBUG, ", sizeof(s_aResult));
+	if(PermissionFlags&PERMISSION_OS)
+		str_append(s_aResult, "OS, ", sizeof(s_aResult));
+	if(PermissionFlags&PERMISSION_FILESYSTEM)
+		str_append(s_aResult, "FILESYSTEM, ", sizeof(s_aResult));
+
+	s_aResult[str_length(s_aResult)-1 - 2] = '\0';
+	return s_aResult;
 }
 
 IStorageTW *CLuaFile::Storage()
