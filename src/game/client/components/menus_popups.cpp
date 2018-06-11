@@ -22,9 +22,16 @@ void CMenus::RenderPopups()
 	}
 	else if(m_Popup == POPUP_CONNECTING)
 	{
-		pTitle = Localize("Connecting to");
-		pExtraText = Client()->GetCurrentServerAddress();
+		str_format(aTitle, sizeof(aTitle), "%s %s", Localize("Connecting to"), Client()->GetCurrentServerAddress());
+		pTitle = aTitle;
+		switch(Client()->State())
+		{
+			case IClient::STATE_CONNECTING: pExtraText = Localize("waiting for server..."); break;
+			case IClient::STATE_LOADING: pExtraText = Localize("connection established, loading map..."); break;
+			case IClient::STATE_OFFLINE: case IClient::STATE_QUITING: pExtraText = Localize("abort"); break;
+		}
 		pButtonText = Localize("Abort");
+
 		if(Client()->MapDownloadTotalsize() > 0)
 		{
 			str_format(aTitle, sizeof(aTitle), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
