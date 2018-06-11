@@ -63,71 +63,41 @@ public:
 	};
 
 private:
-	class IFetcher *m_pFetcher;
-	class IStorageTW *m_pStorage;
-
-	int m_DefaultSkin;
-
 	enum
 	{
 		MAX_FETCHTASKS = 4,
 	};
 
-	static array<std::string> ms_aSkinDbUrls;
-	static const char *GetURL(int i)
-	{
-		dbg_assert(i >= 0 && i < ms_aSkinDbUrls.size(), "GetURL called with index out of range");
-		return ms_aSkinDbUrls[i].c_str();
-	}
-	static int NumURLs() { return ms_aSkinDbUrls.size(); }
-	static CSkinFetchTask *ms_apFetchTasks[MAX_FETCHTASKS];
-	static array<std::string> ms_FailedTasks;
+	class IFetcher *m_pFetcher;
+	class IStorageTW *m_pStorage;
 
+	int m_DefaultSkin;
 
-	/**
-	 * @threadsafety DOESN'T lock, but accesses the critical array
-	 * @return The number of tasks
-	 */
-	static int NumTasks(bool ActiveOnly=false)
-	{
-		int ret = 0;
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i] != NULL)
-				if(!ActiveOnly || ms_apFetchTasks[i]->FinishTime() < 0)
-					ret++;
-		return ret;
-	}
+	array<std::string> m_aSkinDbUrls;
+	CSkinFetchTask *m_apFetchTasks[MAX_FETCHTASKS];
+	array<std::string> m_FailedTasks;
 
-	static CSkinFetchTask *FindTask(const CFetchTask* pTask)
-	{
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i] != NULL)
-				if(ms_apFetchTasks[i]->Task() == pTask)
-					return ms_apFetchTasks[i];
-		return NULL;
-	}
+	std::mutex m_FetchTasksLock;
+	std::mutex m_FailedTasksLock;
 
-	static CSkinFetchTask **FindFreeSlot()
+	const char *GetURL(int i) const
 	{
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i] == NULL)
-				return &(ms_apFetchTasks[i]);
-		return NULL;
+		dbg_assert(i >= 0 && i < m_aSkinDbUrls.size(), "GetURL called with index out of range");
+		return m_aSkinDbUrls[i].c_str();
 	}
+	inline int NumURLs() const { return m_aSkinDbUrls.size(); }
+	int NumTasks();
+	CSkinFetchTask *FindTask(const CFetchTask* pTask);
+	CSkinFetchTask **FindFreeSlot();
 
 	void LoadUrls();
 
-	void Fail(const char *pSkinName) { ms_FailedTasks.add(std::string(pSkinName)); }
+	void Fail(const char *pSkinName);
 	bool FetchNext(CSkinFetchTask *pTaskHandler);
 	void FetchSkin(CSkinFetchTask *pTaskHandler);
 
 public:
-	~CSkinDownload()
-	{
-		for(int i = 0; i < MAX_FETCHTASKS; i++)
-			if(ms_apFetchTasks[i])
-				delete ms_apFetchTasks[i];
-	}
+	~CSkinDownload();
 
 	void OnConsoleInit();
 	void OnInit();
