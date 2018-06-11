@@ -466,13 +466,13 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		MainView.HSplitBottom(20.0f, &MainView, &Bar);
 		Bar.VMargin(7.5f+5.0f, &Bar);
 
-		if(L->m_Exceptions.size() > 0)
+		if(!L->m_Exceptions.empty())
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), Localize("Exceptions (%i)"), L->m_Exceptions.size());
 			Bar.VSplitRight(max(100.0f, TextRender()->TextWidth(0, Bar.h*ms_FontmodHeight, aBuf, -1)), &Bar, &Button);
 			static CButtonContainer s_ButtonExceptions;
-			if(DoButton_Menu(&s_ButtonExceptions, aBuf, 0, &Button, "", CUI::CORNER_ALL, mix(vec4(0,1,0,0.5f), vec4(1,0,0,0.5f), (float)L->m_Exceptions.size()/100.0f)))
+			if(DoButton_Menu(&s_ButtonExceptions, aBuf, round_to_int(Client()->SteadyTimer()*2.0f) % 8 == 0, &Button, "", CUI::CORNER_ALL, mix(vec4(1,0.5f,0.1f,0.5f), vec4(1,0,0,0.5f), (float)L->m_Exceptions.size()/100.0f)))
 			{
 				s_ActiveLuaExceptions = s_SelectedScript;
 			}
@@ -482,6 +482,8 @@ void CMenus::RenderSettingsLua(CUIRect MainView)
 		if(L->State() == CLuaFile::STATE_LOADED)
 		{
 			// debugger button
+			if(!L->m_Exceptions.empty())
+				Bar.VSplitRight(5.0f, &Bar, 0);
 			Bar.VSplitRight(Bar.h, &Bar, &Button);
 			static CButtonContainer s_ButtonDebug;
 			if(DoButton_Menu(&s_ButtonDebug, "", m_pClient->m_pGameConsole->GetDebuggerChild() == L->L(), &Button, "Attach the lua console as a debugger to this script"))
