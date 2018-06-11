@@ -603,6 +603,10 @@ void CGameClient::OnInit()
 	{
 		g_Config.m_ClThreadskinloading = 0;
 	}
+	if(g_Config.m_ClConfigVersion < 3700)
+	{
+		g_Config.m_ClStealthSendDDNetVersion = 0;
+	}
 
 	if(g_Config.m_ClConfigVersion != GAME_ATH_VERSION_NUMERIC)
 	{
@@ -1687,17 +1691,14 @@ void CGameClient::OnNewSnapshot()
 			Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 0);
 			m_DDRaceMsgSent[0] = true;
 		}
-	}
 
-	#if defined(FEATURE_DENNIS)
-	if(!g_Config.m_ClUndercover)
-	#endif
-	if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
-	{
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
-		Msg.AddInt(CLIENT_VERSIONNR);
-		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
-		m_DDRaceMsgSent[1] = true;
+		if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
+		{
+			CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+			Msg.AddInt(CLIENT_VERSIONNR);
+			Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
+			m_DDRaceMsgSent[1] = true;
+		}
 	}
 
 	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
