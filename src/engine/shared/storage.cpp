@@ -721,9 +721,7 @@ public:
 		else if(Type >= 0 && Type < m_NumPaths)
 		{
 			// check wanted directory
-			char aBuf[MAX_PATH_LENGTH];
-			str_copyb(aBuf, pBuffer); // make a copy because we can't read and write to the same buffer at the same time
-			GetPath(Type, aBuf, pBuffer, BufferSize);
+			GetPath(Type, pFilename, pBuffer, BufferSize);
 			return pBuffer;
 		}
 

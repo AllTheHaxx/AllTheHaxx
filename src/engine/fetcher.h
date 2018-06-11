@@ -18,7 +18,7 @@ class CFetchTask
 	CFetchTask *m_pNext;
 
 	char m_aUrl[256];
-	char m_aDest[128];
+	char m_aDest[256];
 	PROGFUNC m_pfnProgressCallback;
 	COMPFUNC m_pfnCompCallback;
 	void *m_pUser;
