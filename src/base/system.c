@@ -2624,6 +2624,9 @@ int str_comp_filenames(const char *a, const char *b)
 
 const char *str_find_nocase(const char *haystack, const char *needle)
 {
+	if(!haystack || !needle || needle[0] == '\0')
+		return 0;
+
 	while(*haystack) /* native implementation */
 	{
 		const char *a = haystack;

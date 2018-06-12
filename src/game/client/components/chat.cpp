@@ -354,7 +354,18 @@ bool CChat::OnInput(IInput::CEvent Event)
 				if(m_LastChatSend+time_freq() < time_get())
 				{
 					if(m_Mode == MODE_HIDDEN)
-						m_CryptSendQueue = std::string(m_Input.GetString());
+					{
+						if(g_Config.m_ClFlagChat)
+							m_CryptSendQueue = std::string(m_Input.GetString());
+						else
+						{
+							const char *pMsg = Localize("You need to enable 'Hidden Chat' before you can send hidden messages!");
+							if(g_Config.m_ClNotifications)
+								m_pClient->m_pHud->PushNotification(pMsg);
+							else
+								AddLine(m_pClient->m_Snap.m_LocalClientID, 0, pMsg, true);
+						}
+					}
 					else if(m_Mode == MODE_CRYPT)
 					{
 						char aBuf[512];

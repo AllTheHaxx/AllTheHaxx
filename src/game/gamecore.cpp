@@ -104,6 +104,7 @@ void CCharacterCore::Reset()
 	m_TriggeredEvents = 0;
 	m_Hook = true;
 	m_Collision = true;
+	m_pGametype = "";
 }
 
 void CCharacterCore::Tick(bool UseInput, bool IsClient, const char *pGametype)

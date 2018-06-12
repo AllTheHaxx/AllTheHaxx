@@ -753,6 +753,13 @@ void CGameClient::OnReset()
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
 
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_HiddenMessages[i].clear();
+		m_aHiddenMsgSpamScores[i] = 0;
+	}
+	m_LastHiddenCountsUpdate = 0;
+
 	if(m_ResetConfig && g_Config.m_ClResetServerCfgOnDc)
 	{
 		IOHANDLE File = Storage()->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorageTW::TYPE_ALL);
@@ -905,6 +912,17 @@ void CGameClient::OnRender()
 	// clear new tick flags
 	m_NewTick = false;
 	m_NewPredictedTick = false;
+
+	// do hidden-chat spam protection
+	if(time_get() > m_LastHiddenCountsUpdate + time_freq())
+	{
+		m_LastHiddenCountsUpdate = time_get();
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_aHiddenMsgSpamScores[i] >= 4*2)
+				m_aHiddenMsgSpamScores[i] -= 4*2; // allow 4 messages per second on average
+		}
+	}
 
 	if(g_Config.m_ClDummy && !Client()->DummyConnected())
 		g_Config.m_ClDummy = 0;
@@ -1456,9 +1474,10 @@ void CGameClient::OnNewSnapshot()
 							m_HiddenMessages[Item.m_ID] += msg;
 						else if(serial > (int)m_HiddenMessages[Item.m_ID].size())
 						{// correct errors D:
-							for(int s = 0; s < serial - (int)m_HiddenMessages[Item.m_ID].size(); s++)
+							if(m_HiddenMessages[Item.m_ID].size() > 0)
 							{
-								m_HiddenMessages[Item.m_ID] += '_';
+								for(int s = 0; s < serial - (int)m_HiddenMessages[Item.m_ID].size(); s++)
+									m_HiddenMessages[Item.m_ID] += '_';
 							}
 							m_HiddenMessages[Item.m_ID] += msg;
 						}
@@ -1467,9 +1486,15 @@ void CGameClient::OnNewSnapshot()
 					{
 						if(m_HiddenMessages[Item.m_ID].size())
 						{
-							//dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
-							m_pChat->AddLine(Item.m_ID, 0, m_HiddenMessages[Item.m_ID].c_str(), true);
-							m_HiddenMessages[Item.m_ID].clear();
+							m_aHiddenMsgSpamScores[Item.m_ID]++; // always increase to eventually ignore it completely if it keeps on going
+							if(!m_aClients[Item.m_ID].m_Foe &&
+									(!g_Config.m_ClFlagChatSpamProtection || m_aHiddenMsgSpamScores[Item.m_ID] < 7*2 - 1))
+							{
+								m_aHiddenMsgSpamScores[Item.m_ID]++; // shown messages count twice (actually non-shown messages count 0.5 but that not possible)
+								//dbg_msg("Dennis", "Got a message from %d : %s", Item.m_ID, m_HiddenMessages[Item.m_ID].c_str());
+								m_pChat->AddLine(Item.m_ID, 0, m_HiddenMessages[Item.m_ID].c_str(), true);
+								m_HiddenMessages[Item.m_ID].clear();
+							}
 						}
 					}
 				}

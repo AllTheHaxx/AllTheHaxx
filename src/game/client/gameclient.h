@@ -449,6 +449,8 @@ private:
 	bool m_ResetConfig;
 	
 	std::string m_HiddenMessages[MAX_CLIENTS];
+	unsigned int m_aHiddenMsgSpamScores[MAX_CLIENTS];
+	int64 m_LastHiddenCountsUpdate;
 };
 
 

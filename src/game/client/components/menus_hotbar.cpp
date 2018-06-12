@@ -226,7 +226,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	// flagchat enable checkbox
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	static CButtonContainer s_FlagChat;
-	if(DoButton_CheckBox(&s_FlagChat, Localize("Receive hidden chat"), g_Config.m_ClFlagChat, &Button))
+	if(DoButton_CheckBox(&s_FlagChat, Localize("Receive hidden chat"), g_Config.m_ClFlagChat, &Button, Localize("Hidden-chat messages are displayed in yellow")))
 		g_Config.m_ClFlagChat ^= 1;
 
 	// label
@@ -279,7 +279,7 @@ void CMenus::RenderCrypt(CUIRect MainView)
 	else if(str_length(s_aPlainTextPassword) > 0)
 	{
 		TextRender()->TextColor(0.7f, 0.1f, 0.1f, 1.0f);
-		UI()->DoLabelScaled(&Button, Localize("Passwords to not match!"), 12.0f, CUI::ALIGN_CENTER);
+		UI()->DoLabelScaled(&Button, Localize("Passwords do not match!"), 12.0f, CUI::ALIGN_CENTER);
 		TextRender()->TextColor(1,1,1,1);
 	}
 

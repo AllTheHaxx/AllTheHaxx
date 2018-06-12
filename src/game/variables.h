@@ -252,6 +252,7 @@ MACRO_CONFIG_STR(ClTransOutDst, cl_trans_out_dest, 4, "ru", CFGFLAG_CLIENT|CFGFL
 
 // chatcrypt
 MACRO_CONFIG_INT(ClFlagChat, cl_flag_chat, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Receive flagchat (anti-logging-admin), players must be nearby")
+MACRO_CONFIG_INT(ClFlagChatSpamProtection, cl_flag_chat_spamprotection, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Limit the number of incoming hidden messages per player")
 MACRO_CONFIG_INT(ClFlagChatPause, cl_flag_chat_pause, 3, 1, 10, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Speed of the flagchat; 1=high, 10=low; the faster the more errors will occur")
 
 //
