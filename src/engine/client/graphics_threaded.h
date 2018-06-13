@@ -142,7 +142,7 @@ public:
 	{
 	public:
 		SCommand(unsigned Cmd) : m_Cmd(Cmd), m_Size(0) {}
-		unsigned m_Cmd;
+		const unsigned m_Cmd;
 		unsigned m_Size;
 	};
 

@@ -539,6 +539,7 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 
 void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 {
+	static int s_ErrorCount = 0;
 	unsigned CmdIndex = 0;
 	while(1)
 	{
@@ -555,7 +556,12 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 		if(m_General.RunCommand(pBaseCommand))
 			continue;
 
-		dbg_msg("graphics", "unknown command %u", pBaseCommand->m_Cmd);
+		dbg_msg("graphics", "unknown command %u next_index=%u", pBaseCommand->m_Cmd, CmdIndex);
+		if(++s_ErrorCount > 50)
+		{
+			mem_check();
+			dbg_break();
+		}
 	}
 }
 
