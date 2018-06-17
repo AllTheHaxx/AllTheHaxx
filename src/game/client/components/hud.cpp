@@ -359,6 +359,8 @@ void CHud::RenderTextInfo()
 		// calculate avg. fps
 		float FPS = 1.0f / Client()->RenderFrameTime();
 		m_AverageFPS = (m_AverageFPS*(1.0f-(1.0f/m_AverageFPS))) + (FPS*(1.0f/m_AverageFPS));
+		if(m_AverageFPS <= 0)
+			m_AverageFPS = FPS;
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%d", (int)m_AverageFPS);
 
