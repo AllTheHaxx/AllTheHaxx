@@ -6,12 +6,14 @@
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <engine/client/lua.h>
 
 #include <game/layers.h>
 #include <game/client/gameclient.h>
 #include <game/client/component.h>
 #include <game/client/render.h>
 
+#include <game/client/components/console.h>
 #include <game/client/components/camera.h>
 #include <game/client/components/mapimages.h>
 
@@ -226,6 +228,19 @@ void CMapLayers::OnRender()
 				if(PassedGameLayer && !IsGameLayer)
 					Render = true;
 			}
+
+			LUA_FIRE_EVENT_RES({
+								   if(_LuaEventResult.isBool())
+									   Render = Render && _LuaEventResult.cast<bool>();
+							   }, "OnRenderLayer",
+							   g, l,
+							   IsGameLayer,
+							   IsFrontLayer,
+							   IsTeleLayer,
+							   IsSpeedupLayer,
+							   IsTuneLayer,
+							   PassedGameLayer)
+
 
 			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && Input()->KeyPress(KEY_KP_0))
 			{

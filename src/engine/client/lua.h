@@ -8,7 +8,7 @@
 #include "luafile.h"
 #include "db_sqlite3.h"
 
-#define LUA_FIRE_EVENT(EVENTNAME, ...) \
+#define LUA_FIRE_EVENT_RES(RESPROC, EVENTNAME, ...) \
 	if(!g_StealthMode && g_Config.m_ClLua) \
 	{ \
 		const int __NumLuaFiles = CLua::Client()->Lua()->GetActiveLuaFiles().size(); \
@@ -21,12 +21,15 @@
 			if(lfunc) try { \
 				if(pLF->ProfilingActive()) { \
                     int64 StartTime = time_get_raw(); \
-					lfunc(__VA_ARGS__); \
+					LuaRef _LuaEventResult = lfunc(__VA_ARGS__); \
                     int64 TimeTaken = time_get_raw()-StartTime; \
                     pLF->ProfilingDoSample(EVENTNAME, time_to_nanos(TimeTaken)); \
+					{RESPROC} \
                 } \
-				else \
-					lfunc(__VA_ARGS__); /* worse code, but better performance/reliability on the profiling (it's about fractions of microseconds there!) */ \
+				else { \
+                    LuaRef _LuaEventResult = lfunc(__VA_ARGS__); /* worse code, but better performance/reliability on the profiling (it's about fractions of microseconds there!) */ \
+					{RESPROC} \
+                } \
 				CLua::Client()->LuaCheckDrawingState(pLF->L(), EVENTNAME); \
 			} catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); } \
 		} \
@@ -36,6 +39,8 @@
 			if(confunc) try { confunc(__VA_ARGS__); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState); } \
 		} \
 	}
+
+#define LUA_FIRE_EVENT(EVENTNAME, ...) LUA_FIRE_EVENT_RES(, EVENTNAME, __VA_ARGS__)
 
 
 class IClient;

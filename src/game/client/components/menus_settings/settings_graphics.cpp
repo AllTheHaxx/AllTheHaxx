@@ -303,7 +303,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	Right.HSplitTop(3.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Button, &Right);
 	static CButtonContainer s_CheckboxNoclip;
-	if(DoButton_CheckBox(&s_CheckboxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button, Localize("May kill any performance teeworlds could have. Be careful with it.\n~ Info for nerds: GL_SCISSOR_TEST will be disabled and thus EVERYTHING will be rendered = hard laggs.")))
+	if(DoButton_CheckBox(&s_CheckboxNoclip, Localize("Disable clipping"), g_Config.m_GfxNoclip, &Button, Localize("Ignore clipping attribute of map layers")))
 		g_Config.m_GfxNoclip ^= 1;
 
 	Right.HSplitTop(3.0f, 0, &Right);

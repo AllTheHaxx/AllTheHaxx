@@ -644,19 +644,10 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			return;
 
 		// EVENT CALL
-		if(!g_StealthMode && g_Config.m_ClLua)
-		{
-			for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
-			{
-				CLuaFile *pLF = CLua::Client()->Lua()->GetLuaFiles()[ijdfg];
-				if(pLF->State() != CLuaFile::STATE_LOADED)
-					continue;
-				LuaRef lfunc = pLF->GetFunc("OnChat");
-				if(lfunc) try { HideChat |= lfunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)).cast<bool>(); CLua::Client()->LuaCheckDrawingState(pLF->L(), "OnChat"); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); }
-			}
-			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChat");
-			if(confunc) try { HideChat |= confunc(pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage)).cast<bool>(); } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
-		}
+		LUA_FIRE_EVENT_RES({
+			if(_LuaEventResult.isBool())
+				HideChat |= _LuaEventResult.cast<bool>();
+						   }, "OnChat", pMsg->m_ClientID, pMsg->m_Team, std::string(pMsg->m_pMessage))
 
 		// some dennis (you can never have enough)
 		if(pMsg->m_ClientID == -1)
@@ -1375,17 +1366,12 @@ void CChat::Say(int Team, const char *pLine, bool NoTrans, bool CalledByLua)
 
 	int DiscardChat = false;
 	//LUA_FIRE_EVENT("OnChatSend", Team, pLine);
-	if(!g_StealthMode && !CalledByLua)
+	if(!CalledByLua)
 	{
-		for(int ijdfg = 0; ijdfg < Client()->Lua()->GetLuaFiles().size(); ijdfg++)
-		{
-			if(Client()->Lua()->GetLuaFiles()[ijdfg]->State() != CLuaFile::STATE_LOADED)
-				continue;
-			LuaRef lfunc = Client()->Lua()->GetLuaFiles()[ijdfg]->GetFunc("OnChatSend");
-			if(lfunc) try { if(lfunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { Client()->Lua()->HandleException(e, Client()->Lua()->GetLuaFiles()[ijdfg]); }
-		}
-		LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnChatSend");
-		if(confunc) try { if(confunc(Team, pLine)) DiscardChat = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
+		LUA_FIRE_EVENT_RES({
+			if(_LuaEventResult.isBool())
+				DiscardChat |= _LuaEventResult.cast<bool>();
+						   }, "OnChatSend", Team, pLine)
 	}
 
 	if(!g_Config.m_ClChat || DiscardChat)
