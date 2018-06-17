@@ -36,6 +36,7 @@ Import("other/mysql/mysql.lua")
 
 --- Setup Config -------
 config = NewConfig()
+config:Add(OptString("objdir", "objs"))
 config:Add(OptCCompiler("compiler"))
 config:Add(OptTestCompileC("stackprotector", "int main(){return 0;}", "-fstack-protector -fstack-protector-all"))
 config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-version-min=10.7 -isysroot /Developer/SDKs/MacOSX10.7.sdk"))
@@ -57,6 +58,12 @@ config:Add(OptString("installation_root", false))
 config:Finalize("config_" .. sysconf .. ".lua")
 
 print("System Configurations: " .. sysconf)
+
+if type(config.objdir.value) ~= "string" or string.len(config.objdir.value) == 0 then
+	print("WARN: invalid config.objdir.value '" .. tostring(config.objdir.value) .. "' of type " .. type(config.objdir.value) .. ", defaulting to 'objs'")
+	config.objdir.value = "objs"
+end
+config.objdir.value = config.objdir.value .. "/"
 
 -- data compiler
 function Script(name)
@@ -106,10 +113,10 @@ function ResCompile(scriptfile)
 
 	scriptfile = Path(scriptfile)
 	if config.compiler.driver == "cl" then
-		output = PathJoin("objs/" .. sysconf, PathBase(scriptfile) .. ".res")
+		output = PathJoin(config.objdir.value .. sysconf, PathBase(scriptfile) .. ".res")
 		AddJob(output, "rc " .. scriptfile, "rc /fo " .. output .. " " .. scriptfile)
 	elseif config.compiler.driver == "gcc" then
-		output = PathJoin("objs/" .. sysconf, PathBase(scriptfile) .. ".coff")
+		output = PathJoin(config.objdir.value .. sysconf, PathBase(scriptfile) .. ".coff")
 		AddJob(output, windres .. " " .. scriptfile, windres .. " -i " .. scriptfile .. " -o " .. output)
 	end
 
@@ -212,10 +219,10 @@ if family == "windows" then
 end
 
 function Intermediate_Output(settings, input)
-	return "objs/" .. sysconf .. "/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
+	return config.objdir.value .. sysconf .. "/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
 end
 function Intermediate_Output_Tools(settings, input)
-	return "objs/objs_tools" .. sysconf .. "/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
+	return config.objdir.value .. "objs_tools" .. sysconf .. "/" .. string.sub(PathBase(input), string.len("src/")+1) .. settings.config_ext
 end
 
 function build(settings)
