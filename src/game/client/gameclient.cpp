@@ -603,7 +603,7 @@ void CGameClient::OnInit()
 	{
 		g_Config.m_ClThreadskinloading = 0;
 	}
-	if(g_Config.m_ClConfigVersion < 3700)
+	if(g_Config.m_ClConfigVersion < 3640)
 	{
 		g_Config.m_ClStealthSendDDNetVersion = 0;
 		g_Config.m_ConnTimeout = 15;

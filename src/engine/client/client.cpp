@@ -2116,7 +2116,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						dbg_msg("verify/debug", "got client verification challenge %i, responding with %i", X, G);
 				#endif
 				Msg.AddInt(G);
-				SendMsgEx(&Msg, MSGFLAG_VITAL);
+				if((!g_StealthMode
+				#if defined(FEATURE_DENNIS)
+				&& !g_Config.m_ClUndercover
+				#endif
+				   ) || IsBWMod(GetServerInfo()))
+					SendMsgEx(&Msg, MSGFLAG_VITAL);
 			}
 		}
 		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
