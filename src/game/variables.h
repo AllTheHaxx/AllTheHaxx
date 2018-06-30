@@ -164,7 +164,7 @@ MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFL
 MACRO_CONFIG_INT(ClOutgoingPort, cl_outgoing_port, 0, 0, 65535, CFGFLAG_CLIENT, "Force the client to use this port for the next connection to a server")
 
 // haxx
-MACRO_CONFIG_INT(BrAutoRefresh, br_auto_refresh, 0, 0, 3600, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Time in secs to refresh the serverbrowser when active (0 disables)")
+MACRO_CONFIG_INT(BrAutoRefresh, br_auto_refresh, 60, 0, 3600, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Time in secs to refresh the serverbrowser when active (0 disables)")
 MACRO_CONFIG_INT(BrAutoCache, br_auto_cache, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable automatic serverlist cache management (recommended)")
 MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "0: Show in serverlist (hide Tab) | 1: Move servers to DDNet Tab | 2: Show in both")
 MACRO_CONFIG_INT(BrAllowPureMod, br_allow_pure_mod, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow joining modded pure server")

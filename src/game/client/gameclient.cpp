@@ -608,6 +608,10 @@ void CGameClient::OnInit()
 		g_Config.m_ClStealthSendDDNetVersion = 0;
 		g_Config.m_ConnTimeout = 15;
 	}
+	if(g_Config.m_ClConfigVersion < 3641)
+	{
+		g_Config.m_BrAutoRefresh = 60;
+	}
 
 	if(g_Config.m_ClConfigVersion != GAME_ATH_VERSION_NUMERIC)
 	{
