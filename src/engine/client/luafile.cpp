@@ -437,9 +437,10 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 	// some security steps right here...
-	unsigned int NewFlags = (LoadPermissionFlags(pFilename, Import) & ~m_PermissionFlags);
+	unsigned int NewFlags = LoadPermissionFlags(pFilename, Import);
 	if(Import)
 	{
+		NewFlags = (NewFlags & ~m_PermissionFlags);
 		if(NewFlags != 0)
 		{
 			luaL_error(m_pLuaState, "imported script '%s' needs permissions for '%s'!", pFilename, PermissionsName(NewFlags));
@@ -595,7 +596,7 @@ const char *CLuaFile::PermissionsName(unsigned int PermissionFlags)
 	if(PermissionFlags&PERMISSION_FILESYSTEM)
 		str_append(s_aResult, "FILESYSTEM, ", sizeof(s_aResult));
 
-	s_aResult[str_length(s_aResult)-1 - 2] = '\0';
+	s_aResult[str_length(s_aResult)-1 - 1] = '\0';
 	return s_aResult;
 }
 
