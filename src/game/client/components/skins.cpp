@@ -255,12 +255,16 @@ void CSkins::RefreshSkinList(bool clear)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin *pDummySkin = new CSkin();
-		pDummySkin->m_OrgTexture = -1;
-		pDummySkin->m_ColorTexture = -1;
+		pDummySkin->m_OrgTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
+		pDummySkin->m_ColorTexture = CSkin::SKIN_TEXTURE_NOT_LOADED;
 		str_copy(pDummySkin->m_aName, "dummy", sizeof(pDummySkin->m_aName));
 		pDummySkin->m_BloodColor = vec3(1.0f, 1.0f, 1.0f);
+
 		m_apSkins.add(pDummySkin);
 	}
+
+	if(!m_pDefaultSkin)
+		m_pDefaultSkin = m_apSkins[0];
 
 	delete pLoadHelper;
 }
