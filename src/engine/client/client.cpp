@@ -3281,7 +3281,11 @@ void CClient::Run()
 		char aBuf[512];
 		str_formatb(aBuf, "How embarrassing, ATH encountered a fatal error and crashed :(\n"
 					"But the good news is, I can tell you why this happened (please show this to the devs!):"
-	 				"\n\n%s\n\nAnother popup box with more details will appear now.", e.what());
+	 				"\n\n%s"
+#if defined(FEATURE_DEBUGGER)
+				"\n\nAnother popup box with more details will appear now."
+#endif
+		, e.what());
 		gui_messagebox("Ouh shoot!", aBuf);
 
 		// save a stacktrace
