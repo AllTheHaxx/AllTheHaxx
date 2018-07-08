@@ -55,8 +55,7 @@ void CLuaFile::Reset(bool error)
 	if(!error)
 		m_pErrorStr = NULL;
 
-	m_PermissionFlags = 0;
-	LoadPermissionFlags(m_Filename.c_str(), false);
+	m_PermissionFlags = LoadPermissionFlags(m_Filename.c_str(), false);
 
 	m_ScriptHasSettingsPage = false;
 
@@ -127,9 +126,6 @@ unsigned int CLuaFile::LoadPermissionFlags(const char *pFilename, bool Imported)
 				str_copyb(m_aScriptInfo, p+5);
 		}
 	}
-
-	if(!Imported)
-		m_PermissionFlags = PermissionFlags;
 
 	return PermissionFlags;
 }
@@ -437,9 +433,16 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 
 	// some security steps right here...
-	unsigned int NewFlags = (LoadPermissionFlags(pFilename, Import) & ~m_PermissionFlags);
+	unsigned int Requested = LoadPermissionFlags(pFilename, Import);
 	if(Import)
 	{
+		if(Requested & PERMISSION_GODMODE)
+		{
+			luaL_error(m_pLuaState, "official scripts are not meant to be imported");
+			return false;
+		}
+
+		unsigned int NewFlags = Requested & ~m_PermissionFlags;
 		if(NewFlags != 0)
 		{
 			luaL_error(m_pLuaState, "imported script '%s' needs permissions for '%s'!", pFilename, PermissionsName(NewFlags));
@@ -448,63 +451,64 @@ bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 	}
 	else
 	{
-		ApplyPermissions(NewFlags); // only apply those that are new
-	}
+		// only the root script may get permissions
+		ApplyPermissions(Requested);
 
-	// inject our complicated overrides
-	if(NewFlags & PERMISSION_IO)
-	{
-		// store the original io.open function somewhere secretly
-		// we must store it IN lua, otherwise it won't work anymore :/
-		lua_getregistry(m_pLuaState);                           // STACK: +1
-		lua_getglobal(m_pLuaState, "io");                       // STACK: 2+
-		lua_getfield(m_pLuaState, -1, "open");                  // STACK: 3+
-		lua_setfield(m_pLuaState, -3, LUA_REGINDEX_IO_OPEN);    // STACK: 2-
-		lua_pop(m_pLuaState, 2);                                // STACK: 0-
-
-		// now override it with our own function
-		luaL_dostring(m_pLuaState, "io.open = _io_open");
-	}
-
-	// now cut down the current environment for safety
-	if(!Import && !(m_PermissionFlags & PERMISSION_GODMODE))
-	{
-		// kill everything malicious
-		const char *const s_apBlacklist[] = {
-				"os.exit"
-				,"os.execute"
-				,"os.rename"
-				,"os.remove"
-				,"os.setlocale"
-				,"os.getenv"
-				,"require"
-				,"module"
-//				,"load"
-				,"loadfile"
-//				,"loadstring"
-				,"collectgarbage"
-				,"io.popen"
-				,"io.input"
-				,"io.output"
-				,"io.stdin"
-				,"debug.getregistry"
-		};
-		for(unsigned i = 0; i < sizeof(s_apBlacklist)/sizeof(s_apBlacklist[0]); i++)
+		// inject our complicated overrides
+		if(Requested & PERMISSION_IO)
 		{
-			char aCmd[128];
-			str_format(aCmd, sizeof(aCmd), "%s=nil", s_apBlacklist[i]);
-			luaL_dostring(m_pLuaState, aCmd);
-			if(g_Config.m_Debug)
-				dbg_msg("lua", "disable: '%s'", aCmd);
+			// store the original io.open function somewhere secretly
+			// we must store it IN lua, otherwise it won't work anymore :/
+			lua_getregistry(m_pLuaState);                           // STACK: +1
+			lua_getglobal(m_pLuaState, "io");                       // STACK: 2+
+			lua_getfield(m_pLuaState, -1, "open");                  // STACK: 3+
+			lua_setfield(m_pLuaState, -3, LUA_REGINDEX_IO_OPEN);    // STACK: 2-
+			lua_pop(m_pLuaState, 2);                                // STACK: 0-
+
+			// now override it with our own function
+			luaL_dostring(m_pLuaState, "io.open = _io_open");
 		}
 
-		if(!(m_PermissionFlags & PERMISSION_EXEC))
+		// now cut down the current environment for safety
+		if(!(m_PermissionFlags & PERMISSION_GODMODE))
 		{
-			luaL_dostring(m_pLuaState, "load=nil");
-			luaL_dostring(m_pLuaState, "loadstring=nil");
-		}
-	}
+			// kill everything malicious
+			const char *const s_apBlacklist[] = {
+					"os.exit"
+					,"os.execute"
+					,"os.rename"
+					,"os.remove"
+					,"os.setlocale"
+					,"os.getenv"
+					,"require"
+					,"module"
+	//				,"load"
+					,"loadfile"
+	//				,"loadstring"
+					,"collectgarbage"
+					,"io.popen"
+					,"io.input"
+					,"io.output"
+					,"io.stdin"
+					,"debug.getregistry"
+			};
+			for(unsigned i = 0; i < sizeof(s_apBlacklist)/sizeof(s_apBlacklist[0]); i++)
+			{
+				char aCmd[128];
+				str_format(aCmd, sizeof(aCmd), "%s=nil", s_apBlacklist[i]);
+				luaL_dostring(m_pLuaState, aCmd);
+				if(g_Config.m_Debug)
+					dbg_msg("lua", "disable: '%s'", aCmd);
+			}
 
+			if(!(m_PermissionFlags & PERMISSION_EXEC))
+			{
+				luaL_dostring(m_pLuaState, "load=nil");
+				luaL_dostring(m_pLuaState, "loadstring=nil");
+			}
+		}
+
+	}
 
 	if(g_Config.m_Debug)
 		dbg_msg("lua/debug", "loading '%s' with flags %x", pFilename, m_PermissionFlags);
@@ -595,7 +599,7 @@ const char *CLuaFile::PermissionsName(unsigned int PermissionFlags)
 	if(PermissionFlags&PERMISSION_FILESYSTEM)
 		str_append(s_aResult, "FILESYSTEM, ", sizeof(s_aResult));
 
-	s_aResult[str_length(s_aResult)-1 - 2] = '\0';
+	s_aResult[str_length(s_aResult)-1 - 1] = '\0';
 	return s_aResult;
 }
 
