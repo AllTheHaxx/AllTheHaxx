@@ -135,6 +135,7 @@ protected:
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConKillDummy(IConsole::IResult *pResult, void *pUserData);
 	static void ConLuafile(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -370,6 +371,7 @@ public:
 	void SendInfo(bool Start);
 	virtual void SendDummyInfo(bool Start);
 	void SendKill();
+	void SendKillDummy();
 
 	// pointers to all systems
 	class CGameConsole *m_pGameConsole;

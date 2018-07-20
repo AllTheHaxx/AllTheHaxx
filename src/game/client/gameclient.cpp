@@ -353,6 +353,7 @@ void CGameClient::OnConsoleInit()
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
+	Console()->Register("kill_dummy", "", CFGFLAG_CLIENT, ConKillDummy, this, "Kill your dummy");
 	if(!g_StealthMode)
 		Console()->Register("luafile", "s[activate|deactivate|toggle] s[filepath]", CFGFLAG_CLIENT, ConLuafile, this, "Toggle Luafiles (use their path)");
 	// register server dummy commands for tab completion
@@ -2383,6 +2384,12 @@ void CGameClient::SendKill()
 	}
 }
 
+void CGameClient::SendKillDummy()
+{
+	CMsgPacker Msg(NETMSGTYPE_CL_KILL);
+	Client()->SendMsgExY(&Msg, MSGFLAG_VITAL, false, !g_Config.m_ClDummy);
+}
+
 void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameClient*)pUserData)->SendSwitchTeam(pResult->GetInteger(0));
@@ -2391,6 +2398,11 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameClient*)pUserData)->SendKill();
+}
+
+void CGameClient::ConKillDummy(IConsole::IResult *pResult, void *pUserData)
+{
+	((CGameClient*)pUserData)->SendKillDummy();
 }
 
 void CGameClient::ConLuafile(IConsole::IResult *pResult, void *pUserData)
