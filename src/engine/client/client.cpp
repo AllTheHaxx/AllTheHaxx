@@ -1864,6 +1864,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		Info.m_ReceivedPackets |= Flag;
 	}
 
+	// unpack the player list
 	bool IgnoreError = false;
 	for(int i = Offset; i < MAX_CLIENTS && Info.m_NumReceivedClients < MAX_CLIENTS && !Up.Error(); i++)
 	{
@@ -1884,6 +1885,10 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		{
 			Up.GetString(); // extra info, reserved
 		}
+
+		if(g_Config.m_BrIgnoreConnecting && str_comp(pClient->m_aName, "(connecting)") == 0)
+			continue;
+
 		if(!Up.Error())
 		{
 			if(SavedType == SERVERINFO_64_LEGACY)
