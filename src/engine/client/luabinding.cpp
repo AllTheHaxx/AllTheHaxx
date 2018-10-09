@@ -481,8 +481,9 @@ const char *CLuaBinding::SandboxPath(char *pInOutBuffer, unsigned BufferSize, CL
 	str_formatb(aRelPath, "lua_sandbox/%s/%s", pSubdir, CLua::m_pCGameClient->Storage()->SandboxPath(pInOutBuffer, BufferSize));
 	if(MakeFullPath)
 		CLua::m_pCGameClient->Storage()->GetFullPath(aRelPath, IStorageTW::TYPE_SAVE, pInOutBuffer, BufferSize);
+	else
+		str_copy(pInOutBuffer, aRelPath, BufferSize);
 
-	str_copy(pInOutBuffer, aRelPath, BufferSize);
 	return pInOutBuffer;
 }
 
