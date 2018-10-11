@@ -369,6 +369,7 @@ public:	int m_LoadTotal;
 	inline const sorted_ptr_array<const CSkins::CSkin *> & GetSkinList() { if(m_InitSkinlist) InitSkinList(); return m_apSkinList; }
 	void InitSkinList();
 	void (CMenus::*m_pfnAppearanceSubpage)(CUIRect MainView);
+	void RenderPresetSelection(CUIRect MainView);
 	void RenderLanguageSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);
 	void RenderSettingsPlayer(CUIRect MainView);
@@ -499,7 +500,8 @@ public:
 		PAGE_BROWSER_RECENT,
 		PAGE_BROWSER_DDNET,
 
-		PAGE_SETTINGS_LANGUAGE=0,
+		PAGE_SETTINGS_PRESETS=0,
+		PAGE_SETTINGS_LANGUAGE,
 		PAGE_SETTINGS_GENERAL,
 		PAGE_SETTINGS_IDENTITIES,
 		PAGE_SETTINGS_CONTROLS,

@@ -72,6 +72,7 @@ public:
 				fs_makedir(GetPath(TYPE_SAVE, "downloadedskins", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "identities", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "configs", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "presets", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "lua_sandbox", aPath, sizeof(aPath)));
 
 				fs_makedir(GetPath(TYPE_SAVE, "logs", aPath, sizeof(aPath)));

@@ -2622,6 +2622,16 @@ int str_comp_filenames(const char *a, const char *b)
 	return *a - *b;
 }
 
+int str_endswith(const char *str, const char *tail)
+{
+	return str_comp(str+str_length(str)-str_length(tail), tail) == 0;
+}
+
+int str_endswith_nocase(const char *str, const char *tail)
+{
+	return str_comp_nocase(str+str_length(str)-str_length(tail), tail) == 0;
+}
+
 const char *str_find_nocase(const char *haystack, const char *needle)
 {
 	while(*haystack) /* native implementation */
@@ -3408,16 +3418,19 @@ void open_default_browser(const char *url)
 				aUrl[i] = '\0';
 	}
 
+	open_system_resource(aUrl);
+}
+
+void open_system_resource(const char *what)
+{
 #if defined(CONF_FAMILY_WINDOWS)
-	ShellExecuteA(NULL, "open", aUrl, NULL, NULL, SW_SHOWNORMAL);
+	ShellExecuteA(NULL, "open", what, NULL, NULL, SW_SHOWNORMAL);
 #elif defined(CONF_PLATFORM_MACOSX)
-	CFURLRef cfurl = CFURLCreateWithBytes(NULL, (UInt8*)aUrl, str_length(aUrl), kCFStringEncodingASCII, NULL);
-	LSOpenCFURLRef(cfurl, 0);
-	CFRelease(cfurl);
+	#error not implemented
 #elif defined(CONF_PLATFORM_LINUX)
-	//g_app_info_launch_default_for_uri(url, NULL, NULL);
+	//g_app_info_launch_default_for_uri(what, NULL, NULL);
 	if (fork() == 0)
-		execlp("xdg-open", "xdg-open", aUrl, NULL); // FIXME: Really dangerous, can crash if xdg-open doesn't exists :S
+		execlp("xdg-open", "xdg-open", what, NULL); // FIXME: Really dangerous, can crash if xdg-open doesn't exists :S
 #endif
 }
 

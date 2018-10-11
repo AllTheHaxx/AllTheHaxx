@@ -35,8 +35,6 @@
 #include "../skins.h"
 #include "../console.h"
 
-
-
 /*	This is for scripts/update_localization.py to work, don't remove!
 	Localize("Move left");Localize("Move right");Localize("Jump");Localize("Fire");Localize("Hook");Localize("Hammer");
 	Localize("Pistol");Localize("Shotgun");Localize("Grenade");Localize("Rifle");Localize("Next weapon");Localize("Prev. weapon");
@@ -46,6 +44,141 @@
 	Localize("Zoom out");Localize("Toggle IRC");Localize("Toggle Lua Console");Localize("Toggle Hotbar");Localize("Unlock Mouse");
 */
 
+
+class CPreset
+{
+public:
+	CPreset(){}
+	CPreset(const char *pName, const char *pFullPath, bool IsInSaveDir) : m_Name(pName), m_FullPath(pFullPath), m_IsInSaveDir(IsInSaveDir){}
+
+	string m_Name;
+	string m_FullPath;
+	string m_Description; // TODO nice to have
+	bool m_IsInSaveDir;
+
+	bool operator<(const CPreset &Other) { return m_Name < Other.m_Name; }
+};
+
+static int PresetsListdirCallback(const char *name, const char *full_path, int is_dir, int dir_type, void *user)
+{
+	sorted_array<CPreset> *pPresets = (sorted_array<CPreset> *)user;
+
+	if(is_dir || name[0] == '\0' || name[0] == '.' || !str_endswith_nocase(name, ".cfg"))
+		return 0;
+
+	pPresets->add(CPreset(name, full_path, dir_type == 0));
+	return 0;
+}
+
+void CMenus::RenderPresetSelection(CUIRect MainView)
+{
+	static sorted_array<CPreset> s_Presets;
+	static CButtonContainer s_ListboxPreset;
+	static float s_ScrollValue = 0;
+	static int s_LastSelected = -1;
+
+	if(s_Presets.size() == 0)
+	{
+		Storage()->ListDirectoryVerbose(IStorageTW::TYPE_ALL, "presets", PresetsListdirCallback, &s_Presets);
+	}
+
+	CUIRect BottomLine, Button;
+	MainView.HSplitBottom(20.0f, &MainView, &BottomLine);
+
+	UiDoListboxStart(&s_ListboxPreset , &MainView, 24.0f, Localize("Preset"), "", s_Presets.size(), 2, s_LastSelected, s_ScrollValue, CUI::CORNER_T, CUI::CORNER_NONE);
+
+	for(sorted_array<CPreset>::range r = s_Presets.all(); !r.empty(); r.pop_front())
+	{
+		CPointerContainer Container(&r.front());
+		CListboxItem Item = UiDoListboxNextItem(&Container);
+
+		if(Item.m_Visible)
+		{
+			CUIRect Rect;
+			Item.m_Rect.VSplitLeft(Item.m_Rect.h*2.0f, &Rect, &Item.m_Rect);
+			Rect.VMargin(6.0f, &Rect);
+			Rect.HMargin(3.0f, &Rect);
+
+			Item.m_Rect.HSplitTop(2.0f, 0, &Item.m_Rect);
+			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name, 16.0f, -1);
+		}
+	}
+
+	s_LastSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+
+	if(s_LastSelected >= 0)
+	{
+		if(s_Presets[s_LastSelected].m_IsInSaveDir)
+		{
+			// draw the 'Delete' button
+			BottomLine.VSplitLeft(80.0f, &Button, &BottomLine);
+			static CButtonContainer s_ButtonDelete;
+			if(DoButton_Menu(&s_ButtonDelete, Localize("Delete"), 0, &Button, 0, CUI::CORNER_B))
+			{
+				// TODO open dialog for deletion confirmation
+			}
+
+			// draw the 'Rename' button
+			BottomLine.VSplitLeft(7.5f, 0, &BottomLine);
+			BottomLine.VSplitLeft(80.0f, &Button, &BottomLine);
+			static CButtonContainer s_ButtonRename;
+			if(DoButton_Menu(&s_ButtonRename, Localize("Rename"), 0, &Button, 0, CUI::CORNER_BL))
+			{
+				// TODO open dialog for renaming this file
+			}
+
+			// draw the 'Edit' button
+			BottomLine.VSplitLeft(80.0f, &Button, &BottomLine);
+			static CButtonContainer s_ButtonEdit;
+			if(DoButton_Menu(&s_ButtonEdit, Localize("Edit"), 0, &Button, 0, CUI::CORNER_BR))
+			{
+				open_system_resource(s_Presets[s_LastSelected].m_FullPath);
+			}
+		}
+
+		// draw the 'Use This' button
+		BottomLine.VSplitRight(100.0f, &BottomLine, &Button);
+		static CButtonContainer s_ButtonUse;
+		if(DoButton_Menu(&s_ButtonUse, Localize("Use this"), 0, &Button, 0, CUI::CORNER_B))
+		{
+			// TODO copy the current settings to "previous.cfg", exec the selected file
+		}
+
+		// draw the 'New' button
+		BottomLine.VSplitRight(7.5f, &BottomLine, 0);
+		BottomLine.VSplitRight(80.0f, &BottomLine, &Button);
+		static CButtonContainer s_ButtonNew;
+		if(DoButton_Menu(&s_ButtonNew, Localize("New"), 0, &Button, 0, CUI::CORNER_BR))
+		{
+			// TODO open dialog requesting the name of the new file
+		}
+
+		// draw the 'Duplicate' button
+		BottomLine.VSplitRight(80.0f, &BottomLine, &Button);
+		static CButtonContainer s_ButtonDuplicate;
+		if(DoButton_Menu(&s_ButtonDuplicate, Localize("Duplicate"), 0, &Button, 0, CUI::CORNER_BL))
+		{
+			// TODO open dialog requesting the name of the new file
+		}
+
+		// display the full path of this file
+		BottomLine.VSplitLeft(5.0f, 0, &BottomLine);
+		UI()->DoLabelScaled(&BottomLine, s_Presets[s_LastSelected].m_FullPath, 12.0f, CUI::ALIGN_LEFT);
+	}
+	else
+	{
+		// draw a single new button
+		BottomLine.VSplitRight(100.0f, &BottomLine, &Button);
+		BottomLine.VSplitRight(7.5f, &BottomLine, 0);
+		BottomLine.VSplitRight(80.0f, &BottomLine, &Button);
+		static CButtonContainer s_ButtonNew;
+		if(DoButton_Menu(&s_ButtonNew, Localize("New"), 0, &Button, 0, CUI::CORNER_B))
+		{
+			// TODO open dialog requesting the name of the new file
+		}
+	}
+
+}
 
 
 class CLanguage
@@ -211,6 +344,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	CUIRect Button;
 
 	const char * const aTabs[] = {
+		Localize("Presets"),
 		Localize("Language"),
 		Localize("General"),
 		Localize("Identities"),
@@ -261,7 +395,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	MainView.Margin(10.0f, &MainView);
 
-	if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_LANGUAGE)
+	if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_PRESETS)
+		RenderPresetSelection(MainView);
+	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_LANGUAGE)
 		RenderLanguageSelection(MainView);
 	else if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_GENERAL)
 		RenderSettingsGeneral(MainView);

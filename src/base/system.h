@@ -1083,6 +1083,9 @@ int str_comp_num(const char *a, const char *b, const int num);
 */
 int str_comp_filenames(const char *a, const char *b);
 
+int str_endswith(const char *str, const char *tail);
+int str_endswith_nocase(const char *str, const char *tail);
+
 /*
 	Function: str_find_nocase
 		Finds a string inside another string case insensitive.
@@ -1676,6 +1679,8 @@ MD5_HASH md5_simple(unsigned char *data, unsigned data_size);
 /* Group: miscellaneous */
 
 void open_default_browser(const char *url);
+
+void open_system_resource(const char *what);
 
 #ifdef __cplusplus
 }
