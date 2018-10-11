@@ -49,6 +49,7 @@ public:
 	int m_NumClients;
 	int m_MaxPlayers;
 	int m_NumPlayers;
+	int m_NumHiddenPlayers;
 	int m_Flags;
 	int m_Favorite;
 	int m_Latency; // in ms
@@ -96,7 +97,7 @@ public:
 		SORT_NUMPLAYERS - Sort after how many players there are on the server.
 	*/
 	enum{
-		CACHE_VERSION = 3,
+		CACHE_VERSION = 4,
 
 		SORT_NAME = 0,
 		SORT_PING,

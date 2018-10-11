@@ -1886,9 +1886,6 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			Up.GetString(); // extra info, reserved
 		}
 
-		if(g_Config.m_BrIgnoreConnecting && str_comp(pClient->m_aName, "(connecting)") == 0)
-			continue;
-
 		if(!Up.Error())
 		{
 			if(SavedType == SERVERINFO_64_LEGACY)
@@ -1904,6 +1901,13 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				Info.m_NumReceivedClients++;
 			}
+		}
+
+		if(g_Config.m_BrIgnoreConnecting && str_comp(pClient->m_aName, "(connecting)") == 0)
+		{
+			Info.m_NumHiddenPlayers++;
+			Info.m_NumReceivedClients--;
+			continue;
 		}
 
 		// add the name to the database
@@ -1922,6 +1926,12 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			m_pDatabase->InsertQuery(pQuery);
 		}
 	}
+
+	Info.m_NumClients -= Info.m_NumHiddenPlayers;
+	Info.m_NumPlayers -= Info.m_NumHiddenPlayers;
+	Info.m_MaxClients -= Info.m_NumHiddenPlayers;
+	Info.m_MaxPlayers -= Info.m_NumHiddenPlayers;
+
 
 	if(!Up.Error() || IgnoreError)
 	{
