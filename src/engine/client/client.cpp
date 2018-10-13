@@ -1903,10 +1903,11 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			}
 		}
 
-		if(g_Config.m_BrIgnoreConnecting && str_comp(pClient->m_aName, "(connecting)") == 0)
+		if(pClient->m_aName[0] == '\0' || str_comp(pClient->m_aName, "(connecting)") == 0 || str_comp(pClient->m_aName, "(connecting cli") == 0)
 		{
 			Info.m_NumHiddenPlayers++;
-			Info.m_NumReceivedClients--;
+			if(g_Config.m_BrIgnoreConnecting)
+				Info.m_NumReceivedClients--;
 			continue;
 		}
 
@@ -1926,12 +1927,6 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			m_pDatabase->InsertQuery(pQuery);
 		}
 	}
-
-	Info.m_NumClients -= Info.m_NumHiddenPlayers;
-	Info.m_NumPlayers -= Info.m_NumHiddenPlayers;
-	Info.m_MaxClients -= Info.m_NumHiddenPlayers;
-	Info.m_MaxPlayers -= Info.m_NumHiddenPlayers;
-
 
 	if(!Up.Error() || IgnoreError)
 	{

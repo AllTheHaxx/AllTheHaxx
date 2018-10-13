@@ -279,14 +279,28 @@ bool CServerBrowser::SortCompareNumPlayers(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return a->m_Info.m_NumPlayers < b->m_Info.m_NumPlayers;
+	int NumA = a->m_Info.m_NumPlayers;
+	int NumB = b->m_Info.m_NumPlayers;
+	if(g_Config.m_BrIgnoreConnecting)
+	{
+		NumA -= a->m_Info.m_NumHiddenPlayers;
+		NumB -= b->m_Info.m_NumHiddenPlayers;
+	}
+	return NumA < NumB;
 }
 
 bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return a->m_Info.m_NumClients < b->m_Info.m_NumClients;
+	int NumA = a->m_Info.m_NumClients;
+	int NumB = b->m_Info.m_NumClients;
+	if(g_Config.m_BrIgnoreConnecting)
+	{
+		NumA -= a->m_Info.m_NumHiddenPlayers;
+		NumB -= b->m_Info.m_NumHiddenPlayers;
+	}
+	return NumA < NumB;
 }
 
 void CServerBrowser::Filter()
@@ -309,13 +323,25 @@ void CServerBrowser::Filter()
 	for(i = 0; i < m_NumServers; i++)
 	{
 		int Filtered = 0;
+		int NumPlayers = m_ppServerlist[i]->m_Info.m_NumPlayers;
+		int MaxPlayers = m_ppServerlist[i]->m_Info.m_MaxPlayers;
+		int NumClients = m_ppServerlist[i]->m_Info.m_NumClients;
+		int MaxClients = m_ppServerlist[i]->m_Info.m_MaxClients;
 
-		if(g_Config.m_BrFilterEmpty && ((g_Config.m_BrFilterSpectators && m_ppServerlist[i]->m_Info.m_NumPlayers == 0) || m_ppServerlist[i]->m_Info.m_NumClients == 0))
+		if(g_Config.m_BrIgnoreConnecting)
+		{
+			NumPlayers -= m_ppServerlist[i]->m_Info.m_NumHiddenPlayers;
+			MaxPlayers -= m_ppServerlist[i]->m_Info.m_NumHiddenPlayers;
+			NumClients -= m_ppServerlist[i]->m_Info.m_NumHiddenPlayers;
+			MaxClients -= m_ppServerlist[i]->m_Info.m_NumHiddenPlayers;
+		}
+
+		if(g_Config.m_BrFilterEmpty && ((g_Config.m_BrFilterSpectators && NumPlayers == 0) || NumClients == 0))
 			Filtered = 1;
-		else if(g_Config.m_BrFilterNonEmpty && ((g_Config.m_BrFilterSpectators && m_ppServerlist[i]->m_Info.m_NumPlayers != 0) || m_ppServerlist[i]->m_Info.m_NumClients != 0))
+		else if(g_Config.m_BrFilterNonEmpty && ((g_Config.m_BrFilterSpectators && NumPlayers != 0) || NumClients != 0))
 			Filtered = 1;
-		else if(g_Config.m_BrFilterFull && ((g_Config.m_BrFilterSpectators && m_ppServerlist[i]->m_Info.m_NumPlayers == m_ppServerlist[i]->m_Info.m_MaxPlayers) ||
-				m_ppServerlist[i]->m_Info.m_NumClients == m_ppServerlist[i]->m_Info.m_MaxClients))
+		else if(g_Config.m_BrFilterFull && ((g_Config.m_BrFilterSpectators && NumPlayers == MaxPlayers) ||
+				NumClients == MaxClients))
 			Filtered = 1;
 		else if(g_Config.m_BrFilterPw && (m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PASSWORD))
 			Filtered = 1;
@@ -366,7 +392,7 @@ void CServerBrowser::Filter()
 			{
 				Filtered = 1;
 				// match against player country
-				for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
+				for(p = 0; p < NumClients; p++)
 				{
 					if(m_ppServerlist[i]->m_Info.m_aClients[p].m_Country == g_Config.m_BrFilterCountryIndex)
 					{
@@ -397,7 +423,7 @@ void CServerBrowser::Filter()
 				}
 
 				// match against players
-				for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
+				for(p = 0; p < NumClients; p++)
 				{
 					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, g_Config.m_BrFilterString) ||
 						str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, g_Config.m_BrFilterString))
@@ -444,7 +470,7 @@ void CServerBrowser::Filter()
 		{
 			// check for friend
 			m_ppServerlist[i]->m_Info.m_FriendState = IFriends::FRIEND_NO;
-			for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
+			for(p = 0; p < NumClients; p++)
 			{
 				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(
 						m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,

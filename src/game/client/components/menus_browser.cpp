@@ -275,6 +275,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		if(!pItem || pItem->m_NumClients > pItem->m_MaxClients) // make sure we have only sane entries
 			continue;
 		NumPlayers += g_Config.m_BrFilterSpectators ? pItem->m_NumPlayers : pItem->m_NumClients;
+		if(g_Config.m_BrIgnoreConnecting)
+			NumPlayers -= pItem->m_NumHiddenPlayers;
 		CUIRect Row;
 		CUIRect SelectHitBox;
 
@@ -453,9 +455,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				}
 
 				if(g_Config.m_BrFilterSpectators)
-					str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumPlayers, pItem->m_MaxPlayers);
+					str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumPlayers - (g_Config.m_BrIgnoreConnecting ? pItem->m_NumHiddenPlayers : 0), pItem->m_MaxPlayers - (g_Config.m_BrIgnoreConnecting ? pItem->m_NumHiddenPlayers : 0));
 				else
-					str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumClients, pItem->m_MaxClients);
+					str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumClients - (g_Config.m_BrIgnoreConnecting ? pItem->m_NumHiddenPlayers : 0), pItem->m_MaxClients - (g_Config.m_BrIgnoreConnecting ? pItem->m_NumHiddenPlayers : 0));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit&IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f,0.4f,1.0f,1);
 				UI()->DoLabelScaled(&Button, aTemp, 12.0f, 1);
