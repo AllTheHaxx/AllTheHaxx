@@ -205,7 +205,7 @@ public: // methods
 			for(typename std::vector<USER_TYPE **>::iterator user_variable_pp = refs.begin(); user_variable_pp != refs.end(); user_variable_pp++)
 				*(*user_variable_pp) = NULL;
 			m_References.erase(user_data);
-		} catch(std::out_of_range) {};
+		} catch(std::out_of_range&) {};
 
 	}
 

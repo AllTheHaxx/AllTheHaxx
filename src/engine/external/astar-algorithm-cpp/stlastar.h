@@ -330,7 +330,7 @@ public: // methods
 						FreeNode( &(*successor) );
 						continue;
 					}
-				} catch(std::out_of_range) {};
+				} catch(std::out_of_range&) {};
 
 				// search this node on the closed list
 				Node *closedlist_node = NULL;
@@ -345,7 +345,7 @@ public: // methods
 						FreeNode( &(*successor) );
 						continue;
 					}
-				} catch(std::out_of_range) {};
+				} catch(std::out_of_range&) {};
 
 				// This node is the best node so far with this particular state
 				// so lets keep it and set up its AStar specific data ...
