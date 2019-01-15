@@ -56,7 +56,7 @@ void CCamera::OnRender()
 
 	if(Client()->State() == IClient::STATE_ONLINE && Vel != vec2(0))
 	{
-		if((g_Config.m_ClSmartZoom == 1 && (IsRace(Client()->GetServerInfo(0)) || IsDDNet(Client()->GetServerInfo(0)))) ||
+		if((g_Config.m_ClSmartZoom == 1 && (IsRace(Client()->GetServerInfo()) || IsDDNet(Client()->GetServerInfo()))) ||
 				(g_Config.m_ClSmartZoom == 2 && ZoomAllowed()))
 		{
 			float ExtraZoom = (length(Vel) / 24000.0f) * ((float)g_Config.m_ClSmartZoomVal/100.0f);
@@ -300,6 +300,8 @@ void CCamera::ConToggleGodlikeSpec(IConsole::IResult *pResult, void *pUserData)
 bool CCamera::ZoomAllowed() const
 {
 	// forbid zoom on vanilla except for spec and demo of course
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		return true; else
 	if(
 	#if !defined(FEATURE_DENNIS)
 	!g_StealthMode
@@ -315,6 +317,6 @@ bool CCamera::ZoomAllowed() const
 	{
 		// actually give a shit about mods, to be nice...
 		const CServerInfo *pInfo = Client()->GetServerInfo();
-		return IsRace(pInfo) || IsDDNet(pInfo) || IsBWMod(pInfo);
+		return IsRace(pInfo) || IsDDRace(pInfo) || IsDDNet(pInfo) || IsBWMod(pInfo);
 	}
 }
