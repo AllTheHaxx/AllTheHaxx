@@ -247,12 +247,11 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
 
-	#if defined(FEATURE_DENNIS)
-	if(!g_Config.m_ClUndercover)
-	#endif
-		if(!IsDDNet(Client()->GetServerInfo()))
-	if(((!g_StealthMode && g_Config.m_ClNamePlatesBroadcastATH) || (g_StealthMode && g_Config.m_ClStealthForceATHBroadcast)) || m_pClient->Client()->Lua()->NumActiveScripts() > 0 || (!m_pClient->m_pCamera->ZoomAllowed() && m_pClient->m_pCamera->m_Zoom > 1.0f))
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
+	if(!g_Config.m_ClUndercover && !IsDDNet(Client()->GetServerInfo()))
+	{
+		if(((!g_StealthMode && g_Config.m_ClNamePlatesBroadcastATH) || (g_StealthMode && g_Config.m_ClStealthForceATHBroadcast)) || m_pClient->Client()->Lua()->NumActiveScripts() > 0 || (!m_pClient->m_pCamera->ZoomAllowed() && m_pClient->m_pCamera->m_Zoom > 1.0f))
+			m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
+	}
 
 	if(!m_pClient->m_pChat->m_CryptSendQueue.empty())
 	{
@@ -391,9 +390,7 @@ int CControls::SnapInput(int *pData)
 	// remove the hookline flag from the sent data
 	CServerInfo ServerInfo; Client()->GetServerInfo(&ServerInfo);
 	if((m_InputData[g_Config.m_ClDummy].m_PlayerFlags & PLAYERFLAG_AIM) && (!g_Config.m_ClSendHookline
-																			#if defined(FEATURE_DENNIS)
-																			|| str_find_nocase(ServerInfo.m_aGameType, "stitch") || str_find_nocase(ServerInfo.m_aGameType, "626")
-																			#endif
+																			|| str_find_nocase(ServerInfo.m_aGameType, "stitch") || str_find_nocase(ServerInfo.m_aGameType, "626") // Stitch is a known hookline hater :D
 																		   ))
 	{
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags ^= PLAYERFLAG_AIM;

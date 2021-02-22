@@ -169,9 +169,9 @@ MACRO_CONFIG_INT(BrAutoCache, br_auto_cache, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAV
 MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "0: Show in serverlist (hide Tab) | 1: Move servers to DDNet Tab | 2: Show in both")
 MACRO_CONFIG_INT(BrAllowPureMod, br_allow_pure_mod, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow joining modded pure server")
 MACRO_CONFIG_INT(BrIgnoreConnecting, br_ignore_connecting, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Ignore (connecting) clients on servers")
-#if defined(FEATURE_DENNIS)
-MACRO_CONFIG_INT(ClUndercover, cl_undercover, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "")
-#endif
+
+MACRO_CONFIG_INT(ClUndercover, cl_undercover, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Extra layer of dennis protection")
+
 MACRO_CONFIG_INT(ClStealthForceATHBroadcast, cl_stealth_force_ath_broadcast, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send the ATH sign to others even when in stealth mode")
 MACRO_CONFIG_INT(ClStealthSendDDNetVersion, cl_stealth_send_ddnet_version, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send the DDNet version to servers when in stealth mode (for compatibility)")
 //MACRO_CONFIG_INT(BrLazySorting, br_lazy_sorting, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Only sort the serverlist once when reloading has finished")

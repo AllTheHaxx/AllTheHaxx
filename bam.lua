@@ -531,9 +531,6 @@ debug_settings.config_ext = "_d"
 debug_settings.debug = 1
 debug_settings.optimize = 0
 debug_settings.cc.defines:Add("CONF_DEBUG")
-if config.unstable.value then
-	debug_settings.cc.defines:Add("FEATURE_DENNIS")
-end
 
 debug_sql_settings = NewSettings()
 debug_sql_settings.config_name = "sql_debug"

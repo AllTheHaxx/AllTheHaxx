@@ -595,9 +595,8 @@ void CIRC::StartConnection() // call this from a thread only!
 							str_copy(aBuf, aMsgText.c_str(), sizeof(aBuf));
 							Ptr = aBuf+1;
 							str_replace_char_rev_num(Ptr, 1, '\1', '\0');
-							#if !defined(FEATURE_DENNIS)
+
 							if(g_Config.m_Debug == 3 && m_Debug)
-							#endif
 								dbg_msg("IRC", "got a CTCP '%s' from '%s'", Ptr, MsgFrom.c_str());
 
 							for (char *p = strtok(Ptr, " "); p != NULL; p = strtok(NULL, " "))

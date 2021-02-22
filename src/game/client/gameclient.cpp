@@ -1710,25 +1710,25 @@ void CGameClient::OnNewSnapshot()
 		Client()->SendMsg(&Msg, MSGFLAG_RECORD|MSGFLAG_NOSEND);
 	}
 
-	#if defined(FEATURE_DENNIS)
 	if(!g_Config.m_ClUndercover)
-	#endif
-	if(!g_StealthMode || g_Config.m_ClStealthSendDDNetVersion)
 	{
-		if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
+		if(!g_StealthMode || g_Config.m_ClStealthSendDDNetVersion)
 		{
-			CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
-			Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
-			Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 0);
-			m_DDRaceMsgSent[0] = true;
-		}
+			if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
+			{
+				CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+				Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
+				Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 0);
+				m_DDRaceMsgSent[0] = true;
+			}
 
-		if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
-		{
-			CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
-			Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
-			Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
-			m_DDRaceMsgSent[1] = true;
+			if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
+			{
+				CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+				Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
+				Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
+				m_DDRaceMsgSent[1] = true;
+			}
 		}
 	}
 

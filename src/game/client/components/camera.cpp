@@ -301,22 +301,8 @@ bool CCamera::ZoomAllowed() const
 {
 	// forbid zoom on vanilla except for spec and demo of course
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		return true; else
-	if(
-	#if !defined(FEATURE_DENNIS)
-	!g_StealthMode
-	#else
-	true
-	#endif
-	)
-	{
-		// oy-approach: don't care about anything else than vanilla
-		return !IsVanilla(Client()->GetServerInfo());
-	}
-	else
-	{
-		// actually give a shit about mods, to be nice...
-		const CServerInfo *pInfo = Client()->GetServerInfo();
-		return IsRace(pInfo) || IsDDRace(pInfo) || IsDDNet(pInfo) || IsBWMod(pInfo);
-	}
+		return true;
+
+	// oy-approach: don't care about anything else than vanilla
+	return !IsVanilla(Client()->GetServerInfo());
 }

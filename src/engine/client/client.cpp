@@ -2124,16 +2124,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					#undef CLIENT_VERIFICATION_KEY
 					#undef WAS_LOCALLY_DEFINED
 				#endif
-				#if defined(CONF_DEBUG) && defined(FEATURE_DENNIS)
+				#if defined(CONF_DEBUG)
 					if(g_Config.m_Debug)
 						dbg_msg("verify/debug", "got client verification challenge %i, responding with %i", X, G);
 				#endif
 				Msg.AddInt(G);
-				if((!g_StealthMode
-				#if defined(FEATURE_DENNIS)
-				&& !g_Config.m_ClUndercover
-				#endif
-				   ) || IsBWMod(GetServerInfo()))
+				if((!g_StealthMode&& !g_Config.m_ClUndercover) || IsBWMod(GetServerInfo()))
 					SendMsgEx(&Msg, MSGFLAG_VITAL);
 			}
 		}
