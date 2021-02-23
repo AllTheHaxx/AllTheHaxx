@@ -2106,33 +2106,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			CMsgPacker Msg(NETMSG_PING_REPLY);
 			SendMsgEx(&Msg, MSGFLAG_FLUSH);
 		}
-		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CLIENT_VERIFICATION)
-		{
-			if(IsDDNet(GetServerInfo()))
-				return;
-
-			int X = Unpacker.GetInt();
-			if(!Unpacker.Error())
-			{
-				CMsgPacker Msg(NETMSG_CLIENT_VERIFICATION);
-				#ifndef CLIENT_VERIFICATION_KEY
-					#define CLIENT_VERIFICATION_KEY (-1)
-					#define WAS_LOCALLY_DEFINED
-				#endif
-				int G = X > 0 ? (CLIENT_VERIFICATION_KEY) : -2;
-				#ifdef WAS_LOCALLY_DEFINED
-					#undef CLIENT_VERIFICATION_KEY
-					#undef WAS_LOCALLY_DEFINED
-				#endif
-				#if defined(CONF_DEBUG)
-					if(g_Config.m_Debug)
-						dbg_msg("verify/debug", "got client verification challenge %i, responding with %i", X, G);
-				#endif
-				Msg.AddInt(G);
-				if(IsBWMod(GetServerInfo()))
-					SendMsgEx(&Msg, MSGFLAG_VITAL);
-			}
-		}
 		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
 			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
