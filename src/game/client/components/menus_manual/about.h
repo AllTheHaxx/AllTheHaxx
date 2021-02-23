@@ -12,7 +12,7 @@
 
 PUTLINE("|AllTheHaxx - Version " ATH_VERSION "|")
 PUTLINE("Exact version: 'ATH-" ALLTHEHAXX_VERSION "'  |  Build Date: " BUILD_DATE)
-PUTLINE("Teeworlds client modification by xush', FuroS, Henritees")
+PUTLINE("Teeworlds client modification by Meskalin ô.O, FuroS, Henritees")
 PUTLINE("Official Website: https://allthehaxx.github.io - ANYTHING ELSE IS SCAM!!")
 NEWLINE()
 PUTLINE("This client provides cool features like a full-featured Lua API, a special design with many colors and much smoothness an a built-in IRC client to get you chatting with each other ;)")

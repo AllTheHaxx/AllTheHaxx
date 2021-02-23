@@ -1483,7 +1483,7 @@ void CMenus::RenderLoading()
 		// for teh lulz
 		#define ISDATE(D, M) (timeinfo->tm_mday == (D) && timeinfo->tm_mon == (M-1))
 		if(ISDATE(20, 12))
-			pSaying = "Happy Birthday, xush' :D (December 20th)";
+			pSaying = "Happy Birthday, Meskalin ô.O :D (December 20th)";
 		else if(ISDATE(16, 10))
 			pSaying = "Happy Birthday, Henritees :D (October 16th)";
 		else if(ISDATE(24, 10))
