@@ -1,1 +1,0 @@
-@start AllTheHaxx.exe -u
