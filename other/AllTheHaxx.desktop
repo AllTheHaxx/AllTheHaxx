@@ -5,7 +5,6 @@ Name=Start Failsafe
 
 [Desktop Action stealth-mode]
 Exec=AllTheHaxx --stealth-mode
-Name[de_DE]=Im StealthMode starten
 Name=Start in stealth mode
 
 [Desktop Entry]

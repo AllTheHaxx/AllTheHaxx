@@ -79,9 +79,6 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 void CGameConsole::CInstance::InitLua()
 {
-	if(g_StealthMode)
-		return;
-
 	if(m_Type == CONSOLETYPE_LUA)
 	{
 		m_LuaHandler.m_pLuaState = luaL_newstate();
@@ -128,25 +125,23 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
 	{
-		if(!g_StealthMode)
+		bool DiscardCommand = false;
+		if(g_Config.m_ClLua)
 		{
-			bool DiscardCommand = false;
-			if(g_Config.m_ClLua)
+			for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
 			{
-				for(int ijdfg = 0; ijdfg < CLua::Client()->Lua()->GetLuaFiles().size(); ijdfg++)
-				{
-					CLuaFile *pLF = CLua::Client()->Lua()->GetLuaFiles()[ijdfg];
-					if(pLF->State() != CLuaFile::STATE_LOADED)
-						continue;
-					LuaRef lfunc = pLF->GetFunc("OnConsoleCommand");
-					if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; CLua::Client()->LuaCheckDrawingState(pLF->L(), "OnConsoleCommand"); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); }
-				}
-				LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
-				if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
+				CLuaFile *pLF = CLua::Client()->Lua()->GetLuaFiles()[ijdfg];
+				if(pLF->State() != CLuaFile::STATE_LOADED)
+					continue;
+				LuaRef lfunc = pLF->GetFunc("OnConsoleCommand");
+				if(lfunc) try { if(lfunc(pLine)) DiscardCommand = true; CLua::Client()->LuaCheckDrawingState(pLF->L(), "OnConsoleCommand"); } catch(std::exception &e) { CLua::Client()->Lua()->HandleException(e, pLF); }
 			}
-			if(DiscardCommand)
-				return;
+			LuaRef confunc = getGlobal(CGameConsole::m_pStatLuaConsole->m_LuaHandler.m_pLuaState, "OnConsoleCommand");
+			if(confunc) try { if(confunc(pLine)) DiscardCommand = true; } catch(std::exception &e) { printf("LUA EXCEPTION: console: %s\n", e.what()); }
 		}
+		if(DiscardCommand)
+			return;
+
 		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
 	}
 	else if(m_Type == CGameConsole::CONSOLETYPE_REMOTE)
@@ -170,7 +165,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			}
 		}
 	}
-	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && !g_StealthMode && g_Config.m_ClLua)
+	else if(m_Type == CGameConsole::CONSOLETYPE_LUA && g_Config.m_ClLua)
 	{
 		if(str_comp(pLine, "!help") == 0)
 		{
@@ -767,7 +762,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, bool Highlighted)
 
 bool CGameConsole::CInstance::LoadLuaFile(const char *pFile)  //this function is for LuaConsole
 {
-	if(g_StealthMode || m_Type != CONSOLETYPE_LUA)
+	if(m_Type != CONSOLETYPE_LUA)
 		return false;
 
 	if(!pFile || pFile[0] == '\0' || !m_LuaHandler.m_pLuaState)
@@ -1622,9 +1617,6 @@ int CGameConsole::PrintLuaLine(lua_State *L)
 
 void CGameConsole::AttachLuaDebugger(const CLuaFile *pLF)
 {
-	if(g_StealthMode)
-		return;
-
 	if(!pLF)
 	{
 		m_LuaConsole.m_LuaHandler.m_pDebugChild = NULL;
@@ -1675,11 +1667,8 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
 
-	if(!g_StealthMode)
-	{
-		Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
-		Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
-	}
+	Console()->Register("toggle_lua_console", "", CFGFLAG_CLIENT, ConToggleLuaConsole, this, "Toggle Lua console");
+	Console()->Register("lua", "r", CFGFLAG_CLIENT, Con_Lua, this, "Executes a lua line!");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 

@@ -9,7 +9,7 @@
 #include "db_sqlite3.h"
 
 #define LUA_FIRE_EVENT_RES(RESPROC, EVENTNAME, ...) \
-	if(!g_StealthMode && g_Config.m_ClLua) \
+	if(g_Config.m_ClLua) \
 	{ \
 		const int __NumLuaFiles = CLua::Client()->Lua()->GetActiveLuaFiles().size(); \
 		for(int ijdfg = 0; ijdfg < __NumLuaFiles; ijdfg++) \

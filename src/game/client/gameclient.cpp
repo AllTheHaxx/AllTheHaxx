@@ -77,7 +77,6 @@
 
 
 CGameClient g_GameClient;
-bool g_StealthMode = false;
 
 // instantiate the lua components
 static CLuaComponent gs_LuaComponent0(0);
@@ -262,7 +261,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pIdentity);
 	m_All.Add(m_pGameTextureManager);
 
-#define ADD_LUARENDER(I) if(!g_StealthMode) m_All.Add(&gs_LuaComponent##I) // lua
+#define ADD_LUARENDER(I) m_All.Add(&gs_LuaComponent##I) // lua
 
 	ADD_LUARENDER(0);
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
@@ -323,7 +322,7 @@ void CGameClient::OnConsoleInit()
 
 #undef ADD_LUAINPUT
 
-#define ADD_LUAINPUT(I) if(!g_StealthMode) m_Input.Add(&gs_LuaComponent##I) // lua
+#define ADD_LUAINPUT(I) m_Input.Add(&gs_LuaComponent##I) // lua
 
 	// build the input stack
 	ADD_LUAINPUT(0);
@@ -354,8 +353,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
 	Console()->Register("kill_dummy", "", CFGFLAG_CLIENT, ConKillDummy, this, "Kill your dummy");
-	if(!g_StealthMode)
-		Console()->Register("luafile", "s[activate|deactivate|toggle] s[filepath]", CFGFLAG_CLIENT, ConLuafile, this, "Toggle Luafiles (use their path)");
+	Console()->Register("luafile", "s[activate|deactivate|toggle] s[filepath]", CFGFLAG_CLIENT, ConLuafile, this, "Toggle Luafiles (use their path)");
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, 0, 0, "Reset tuning");
@@ -606,7 +604,7 @@ void CGameClient::OnInit()
 	}
 	if(g_Config.m_ClConfigVersion < 3640)
 	{
-		g_Config.m_ClStealthSendDDNetVersion = 0;
+
 		g_Config.m_ConnTimeout = 15;
 	}
 	if(g_Config.m_ClConfigVersion < 3641)
@@ -1710,26 +1708,20 @@ void CGameClient::OnNewSnapshot()
 		Client()->SendMsg(&Msg, MSGFLAG_RECORD|MSGFLAG_NOSEND);
 	}
 
-	if(!g_Config.m_ClUndercover)
+	if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
 	{
-		if(!g_StealthMode || g_Config.m_ClStealthSendDDNetVersion)
-		{
-			if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
-			{
-				CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
-				Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
-				Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 0);
-				m_DDRaceMsgSent[0] = true;
-			}
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+		Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
+		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 0);
+		m_DDRaceMsgSent[0] = true;
+	}
 
-			if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
-			{
-				CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
-				Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
-				Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
-				m_DDRaceMsgSent[1] = true;
-			}
-		}
+	if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
+	{
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+		Msg.AddInt(IsDDNet(Client()->GetServerInfo()) ? g_Config.m_ClDDNetFakeVersion : CLIENT_VERSIONNR);
+		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
+		m_DDRaceMsgSent[1] = true;
 	}
 
 	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))

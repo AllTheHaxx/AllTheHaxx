@@ -321,14 +321,11 @@ void CMenus::RenderGameExtra(CUIRect ButtonBar)
 		s_ExtrasPage = s_ExtrasPage == EXTRAS_SNIFFER_SETTINGS ? EXTRAS_NONE : EXTRAS_SNIFFER_SETTINGS;
 	#endif
 
-	if(!g_StealthMode)
-	{
-		ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
-		ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Lua QuickAccess")), &Button, &ButtonBar);
-		static CButtonContainer s_LuaQuickAccessButton;
-		if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "A list of all active lua scripts"))
-			s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
-	}
+	ButtonBar.VSplitLeft(3.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(BUTTON_WIDTH(Localize("Lua QuickAccess")), &Button, &ButtonBar);
+	static CButtonContainer s_LuaQuickAccessButton;
+	if(DoButton_Menu(&s_LuaQuickAccessButton, Localize("Lua QuickAccess"), s_ExtrasPage == EXTRAS_LUA_QUICKACCESS, &Button, "A list of all active lua scripts"))
+		s_ExtrasPage = s_ExtrasPage == EXTRAS_LUA_QUICKACCESS ? EXTRAS_NONE : EXTRAS_LUA_QUICKACCESS;
 
 	if(Client()->State() == IClient::STATE_ONLINE &&
 			   (IsDDNet(Client()->GetServerInfo(0)) || IsDDRace(Client()->GetServerInfo(0))))

@@ -1304,7 +1304,7 @@ void CIRC::SendGetServer(const char *to)
 void CIRC::SendVersion(const char *to)
 {
 	SendRaw("NOTICE %s :VERSION AllTheHaxx '%s%s' on %s-%s-%s; DDNet v%i; Teeworlds %s (%s); %s built on %s", to,
-			ALLTHEHAXX_VERSION, g_StealthMode ? "-stealth" : "",
+			ALLTHEHAXX_VERSION, "",
 			CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING,
 			CLIENT_VERSIONNR, GAME_VERSION, GAME_NETVERSION,
 	#if defined(CONF_DEBUG)

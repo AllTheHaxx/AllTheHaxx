@@ -548,9 +548,6 @@ public:
 #if !defined(BUILD_TOOLS)
 	virtual bool CreateFolderLua(const char *pFoldername, lua_State *L)
 	{
-		if(g_StealthMode)
-			return false;
-
 		char aBuf[MAX_PATH_LENGTH];
 		str_copyb(aBuf, pFoldername);
 		CLuaBinding::SandboxPath(aBuf, sizeof(aBuf), L);

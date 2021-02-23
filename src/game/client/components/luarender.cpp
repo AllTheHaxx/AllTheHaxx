@@ -9,7 +9,7 @@ void CLuaComponent::OnRender()
 
 bool CLuaComponent::OnInput(IInput::CEvent Event)
 {
-	if(g_StealthMode || !g_Config.m_ClLua)
+	if(!g_Config.m_ClLua)
 		return false;
 
 	bool result = false;

@@ -135,9 +135,6 @@ void CLua::AddUserscript(const char *pFilename)
 {
 	CALLSTACK_ADD();
 
-	if(g_StealthMode)
-		return;
-
 	if(!pFilename || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0 || // hide config files from the list
 			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0)
@@ -167,9 +164,6 @@ void CLua::AddUserscript(const char *pFilename)
 void CLua::LoadFolder()
 {
 	CALLSTACK_ADD();
-	if(g_StealthMode)
-		return;
-
 	// get the files which should be auto-loaded
 	{
 		m_aAutoloadFiles.clear();
@@ -188,8 +182,6 @@ void CLua::LoadFolder()
 void CLua::LoadFolder(const char *pFolder)
 {
 	CALLSTACK_ADD();
-	if(g_StealthMode)
-		return;
 
 	dbg_msg("Lua", "Loading Folder '%s'", pFolder);
 	m_pStorage->ListDirectoryVerbose(IStorageTW::TYPE_ALL, pFolder, LoadFolderCallback, this);
@@ -335,9 +327,6 @@ int CLua::HandleException(const char *pError, CLuaFile *pLF, bool CalledFromUnlo
 
 void CLua::ScriptEnterFullscreen(CLuaFile *pLF)
 {
-	if(g_StealthMode)
-		return;
-
 	m_pFullscreenedScript = pLF;
 	try
 	{

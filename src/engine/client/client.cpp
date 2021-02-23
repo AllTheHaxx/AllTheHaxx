@@ -2129,7 +2129,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						dbg_msg("verify/debug", "got client verification challenge %i, responding with %i", X, G);
 				#endif
 				Msg.AddInt(G);
-				if((!g_StealthMode&& !g_Config.m_ClUndercover) || IsBWMod(GetServerInfo()))
+				if(IsBWMod(GetServerInfo()))
 					SendMsgEx(&Msg, MSGFLAG_VITAL);
 			}
 		}
@@ -4253,22 +4253,15 @@ void CClient::ConchainLuaEnable(IConsole::IResult *pResult, void *pUserData, ICo
 
 	pfnCallback(pResult, pCallbackUserData);
 
-	if(g_StealthMode)
+	if(pResult->NumArguments() && pSelf->Lua()->Inited())
 	{
-		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client/lua", "NOTE: cl_lua has no effect in stealth mode as lua is not available at all.");
-	}
-	else
-	{
-		if(pResult->NumArguments() && pSelf->Lua()->Inited())
+		if(!g_Config.m_ClLua)
 		{
-			if(!g_Config.m_ClLua)
-			{
-				int Count = pSelf->Lua()->UnloadAll();
-				dbg_msg("client/lua", "unloaded all %i active scripts due to disabling lua", Count);
-			}
-			else
-				pSelf->Lua()->LoadFolder();
+			int Count = pSelf->Lua()->UnloadAll();
+			dbg_msg("client/lua", "unloaded all %i active scripts due to disabling lua", Count);
 		}
+		else
+			pSelf->Lua()->LoadFolder();
 	}
 }
 
@@ -4382,11 +4375,11 @@ static void ParseArgumentsForSwitches(int NumArgs, const char **ppArguments)
 			dbg_msg("main", "+++ ENABLED ABORT-ON-ASSERT, ON ERRORS THE CLIENT WILL CRASH FOR DEBUGGING +++");
 			set_abort_on_assert(1);
 		}
-		else if(!str_comp("-u", ppArguments[i]) || !str_comp("--stealth", ppArguments[i]) || !str_comp("--stealth-mode", ppArguments[i]))
+		/*else if(!str_comp("-u", ppArguments[i]) || !str_comp("--stealth", ppArguments[i]) || !str_comp("--stealth-mode", ppArguments[i]))
 		{
 			dbg_msg("main", "+++ RUNNING IN STEALTH MODE, ALL SHADY/GRAY-ZONE THINGS ARE DISABLED +++");
 			g_StealthMode = true;
-		}
+		}*/
 	}
 };
 

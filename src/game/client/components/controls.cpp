@@ -247,9 +247,9 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
 
-	if(!g_Config.m_ClUndercover && !IsDDNet(Client()->GetServerInfo()))
+	if(!IsDDNet(Client()->GetServerInfo()))
 	{
-		if(((!g_StealthMode && g_Config.m_ClNamePlatesBroadcastATH) || (g_StealthMode && g_Config.m_ClStealthForceATHBroadcast)) || m_pClient->Client()->Lua()->NumActiveScripts() > 0 || (!m_pClient->m_pCamera->ZoomAllowed() && m_pClient->m_pCamera->m_Zoom > 1.0f))
+		if((g_Config.m_ClNamePlatesBroadcastATH || g_Config.m_ClStealthForceATHBroadcast)) || m_pClient->Client()->Lua()->NumActiveScripts() > 0 || (!m_pClient->m_pCamera->ZoomAllowed() && m_pClient->m_pCamera->m_Zoom > 1.0f))
 			m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
 	}
 

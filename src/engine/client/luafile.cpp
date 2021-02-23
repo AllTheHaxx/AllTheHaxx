@@ -64,9 +64,6 @@ void CLuaFile::Reset(bool error)
 
 unsigned int CLuaFile::LoadPermissionFlags(const char *pFilename, bool Imported) // this is the interface for non-compiled scripts
 {
-	if(g_StealthMode)
-		return 0;
-
 	if(str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua") != 0 || str_comp_nocase(&pFilename[str_length(pFilename)]-9, ".conf.lua") == 0) // clc's and config files won't have permission flags!
 		return 0;
 
@@ -183,9 +180,6 @@ void CLuaFile::Unload(bool error, bool CalledFromExceptionHandler)
 
 void CLuaFile::OpenLua()
 {
-	if(g_StealthMode)
-		return;
-
 	dbg_assert_strict(m_pLuaState == NULL, "possibly leaking a lua_state");
 
 	// firstly, close a previous state if there is any
@@ -216,9 +210,6 @@ void CLuaFile::OpenLua()
 
 void CLuaFile::ApplyPermissions(unsigned Flags)
 {
-	if(g_StealthMode)
-		return;
-
 	if(Flags&PERMISSION_GODMODE)
 	{
 		Flags = 0xffffffff;
@@ -237,7 +228,7 @@ void CLuaFile::ApplyPermissions(unsigned Flags)
 
 void CLuaFile::Init()
 {
-	if(g_StealthMode || !g_Config.m_ClLua)
+	if(!g_Config.m_ClLua)
 		return;
 
 	Unload();
@@ -416,9 +407,6 @@ bool CLuaFile::CheckFile(const char *pFilename)
 
 bool CLuaFile::LoadFile(const char *pFilename, bool Import)
 {
-	if(g_StealthMode)
-		return false;
-
 	if(!pFilename || !m_pLuaState || pFilename[0] == '\0' || str_length(pFilename) <= 4 ||
 			str_comp_nocase(&pFilename[str_length(pFilename)]-4, ".lua"))
 		return false;

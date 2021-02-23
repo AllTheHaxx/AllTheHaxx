@@ -135,24 +135,15 @@ void CMenus::RenderPopups()
 	}
 	else if(m_Popup == POPUP_LUA_REQUEST_FULLSCREEN)
 	{
-		if(!g_StealthMode)
-		{
-			pTitle = Localize("Lua Script wants to go fullscreen");
-			char aScriptName[64];
-			if(str_length(m_pLuaFSModeRequester->GetScriptTitle()) > 0)
-				str_formatb(aScriptName, "'%s' (\"%s\")", m_pLuaFSModeRequester->GetDisplayedFilename(), m_pLuaFSModeRequester->GetScriptTitle());
-			else
-				str_formatb(aScriptName, "'%s'", m_pLuaFSModeRequester->GetDisplayedFilename());
-			str_formatb(aExtraText, "The script %s wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", aScriptName);
-			pExtraText = aExtraText;
-			ExtraAlign = CUI::ALIGN_LEFT;
-		}
+		pTitle = Localize("Lua Script wants to go fullscreen");
+		char aScriptName[64];
+		if(str_length(m_pLuaFSModeRequester->GetScriptTitle()) > 0)
+			str_formatb(aScriptName, "'%s' (\"%s\")", m_pLuaFSModeRequester->GetDisplayedFilename(), m_pLuaFSModeRequester->GetScriptTitle());
 		else
-		{
-			pTitle = "Whoups, you found a bug. Great!";
-			pExtraText = "This popup is not supposed to appear when in stealth mode!";
-			ExtraAlign = CUI::ALIGN_CENTER;
-		}
+			str_formatb(aScriptName, "'%s'", m_pLuaFSModeRequester->GetDisplayedFilename());
+		str_formatb(aExtraText, "The script %s wants to enter fullscreen mode. This will disable your UI. You can always exit it again by clicking the button at the top right.", aScriptName);
+		pExtraText = aExtraText;
+		ExtraAlign = CUI::ALIGN_LEFT;
 	}
 	else if(m_Popup == POPUP_UPDATE)
 	{
@@ -308,36 +299,26 @@ void CMenus::RenderCurrentPopup(const char *pTitle, const char *pExtraText, cons
 		// buttons
 		Part.VMargin(80.0f, &Part);
 
-		if(!g_StealthMode)
+		Part.VSplitMid(&No, &Yes);
+		Yes.VMargin(20.0f, &Yes);
+		No.VMargin(20.0f, &No);
+
+		bool Handled = false;
+
+		static CButtonContainer s_ButtonDeny;
+		if(DoButton_Menu(&s_ButtonDeny, Localize("Deny"), 0, &No) || m_EscapePressed)
+			Handled = true;
+		static CButtonContainer s_ButtonAllow;
+		if(DoButton_Menu(&s_ButtonAllow, Localize("Allow"), 0, &Yes))
 		{
-			Part.VSplitMid(&No, &Yes);
-			Yes.VMargin(20.0f, &Yes);
-			No.VMargin(20.0f, &No);
-
-			bool Handled = false;
-
-			static CButtonContainer s_ButtonDeny;
-			if(DoButton_Menu(&s_ButtonDeny, Localize("Deny"), 0, &No) || m_EscapePressed)
-				Handled = true;
-			static CButtonContainer s_ButtonAllow;
-			if(DoButton_Menu(&s_ButtonAllow, Localize("Allow"), 0, &Yes))
-			{
-				Client()->Lua()->ScriptEnterFullscreen(m_pLuaFSModeRequester);
-				Handled = true;
-			}
-
-			if(Handled)
-			{
-				m_pLuaFSModeRequester = 0;
-				m_Popup = POPUP_NONE;
-			}
+			Client()->Lua()->ScriptEnterFullscreen(m_pLuaFSModeRequester);
+			Handled = true;
 		}
-		else
+
+		if(Handled)
 		{
-			Part.VMargin(120.0f, &Part);
-			static CButtonContainer s_ButtonOk;
-			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Part) || m_EscapePressed || m_EnterPressed)
-				m_Popup = POPUP_NONE;
+			m_pLuaFSModeRequester = 0;
+			m_Popup = POPUP_NONE;
 		}
 	}
 	else if(m_Popup == POPUP_UPDATE)

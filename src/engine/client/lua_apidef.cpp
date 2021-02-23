@@ -28,9 +28,6 @@
 
 void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 {
-	if(g_StealthMode)
-		return;
-
 	lua_register(L, "SetScriptTitle", CLuaBinding::LuaSetScriptTitle);
 	lua_register(L, "SetScriptInfo", CLuaBinding::LuaSetScriptInfo);
 	lua_register(L, "CheckVersion", CLuaBinding::LuaCheckVersion);

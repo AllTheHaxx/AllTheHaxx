@@ -369,13 +369,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	for(int i = 0; i < NumTabs; i++)
 	{
-		if(g_StealthMode && i == PAGE_SETTINGS_LUA)
-		{
-			if(g_Config.m_UiSettingsPage == PAGE_SETTINGS_LUA)
-				g_Config.m_UiSettingsPage = PAGE_SETTINGS_GENERAL;
-			continue;
-		}
-
 		TabBar.HSplitTop(i == PAGE_SETTINGS_HAXX || i == PAGE_SETTINGS_LUA ? 24 : 10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
 		if(UI()->MouseInside(&Button))
