@@ -303,6 +303,5 @@ bool CCamera::ZoomAllowed() const
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return true;
 
-	// oy-approach: don't care about anything else than vanilla
-	return !IsVanilla(Client()->GetServerInfo());
+	return (!IsVanilla(Client()->GetServerInfo()) && !IsFNG(Client()->GetServerInfo()));
 }
