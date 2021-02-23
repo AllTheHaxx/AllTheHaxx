@@ -2958,18 +2958,6 @@ void CClient::Update()
 		{
 			ServerInfoRequest();
 		}
-		else
-		{
-			if(m_GotServerInfo && !m_IsATHMsgSent[g_Config.m_ClDummy])
-			{
-				// for compatibility with chosen gametypes
-				if(IsBWMod(&m_CurrentServerInfo))
-				{
-					Client()->Rcon("hithisisath");
-				}
-				m_IsATHMsgSent[g_Config.m_ClDummy] = true;
-			}
-		}
 	}
 
 	// STRESS TEST: join the server again

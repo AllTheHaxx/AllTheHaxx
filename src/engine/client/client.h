@@ -131,7 +131,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aTimeoutCodes[2][32];
 	bool m_aTimeoutCodeSent[2];
 	bool m_GenerateTimeoutSeed;
-	bool m_IsATHMsgSent[2];
 
 	//
 	char m_aCmdConnect[256];
