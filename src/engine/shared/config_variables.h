@@ -35,6 +35,8 @@ MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE
 MACRO_CONFIG_INT(ClSkinFilterAdvanced, cl_skin_filter_advanced, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "0: Show all | 1: Show Vanilla only | 3: Show non-vanilla only")
 MACRO_CONFIG_STR(ClLuaFilterString, cl_lua_filter_string, 32, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Lua filtering string")
 MACRO_CONFIG_INT(ClDDNetFakeVersion, cl_ddnet_fake_version, 11072, 0, 9999999, CFGFLAG_SAVE|CFGFLAG_CLIENT, "fuck ddnet")
+MACRO_CONFIG_INT(ClFetchDDNetFakeVersion, cl_fetch_ddnet_fake_version, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Disable this and set ddnet fake version manually if you have trouble connecting to servers.")
+
 
 MACRO_CONFIG_INT(ClAutoDemoRecord, cl_auto_demo_record, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Automatically record demos")
 MACRO_CONFIG_INT(ClAutoDemoMax, cl_auto_demo_max, 10, 0, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Maximum number of automatically recorded demos (0 = no limit)")
