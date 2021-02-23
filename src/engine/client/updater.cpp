@@ -245,10 +245,8 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 					io_close(f);
 					str_strip_right_whitespaces(aBuf);
 					int VersionID = str_toint(aBuf);
-					#ifdef DBG_FAKE_LATEST_VERSION
-					VersionID = FAKED_LATEST_VERSION_NUM;
-					#endif
 					dbg_msg("updater/debug", "latest version id: %i ('%s')", VersionID, aBuf);
+					
 					if(VersionID > GAME_ATH_VERSION_NUMERIC)
 						NeedCheck = true;
 				}

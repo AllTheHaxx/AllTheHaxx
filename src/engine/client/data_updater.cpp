@@ -96,9 +96,6 @@ void CGitHubAPI::UpdateCheckerThread(CGitHubAPI *pSelf)
 	// check if we have the latest version
 	{
 		const char *pLatestVersion = ParseReleases(Result.c_str()).c_str();
-		#ifdef DBG_FAKE_LATEST_VERSION
-		pLatestVersion = FAKED_LATEST_VERSION_STR;
-		#endif
 		if(str_length(pLatestVersion) == 0)
 		{
 			dbg_msg("github", "ERROR: failed to parse out the latest version");

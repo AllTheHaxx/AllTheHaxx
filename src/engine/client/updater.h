@@ -40,16 +40,6 @@
 //#define JOB_REMOVE false
 
 
-// for debugging
-#if defined(CONF_DEBUG)
-/*
-#define DBG_FAKE_LATEST_VERSION
-#define FAKED_LATEST_VERSION_STR "0.37"
-#define FAKED_LATEST_VERSION_NUM 3700
-*/
-#endif
-
-
 class CUpdater : public IUpdater
 {
 	class IClient *m_pClient;
