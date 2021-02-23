@@ -911,8 +911,6 @@ void CClient::EnterGame()
 	ServerInfoRequest(); // fresh one for timeout protection
 	m_aTimeoutCodeSent[0] = false;
 	m_aTimeoutCodeSent[1] = false;
-	m_IsATHMsgSent[0] = false;
-	m_IsATHMsgSent[1] = false;
 }
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
