@@ -401,12 +401,6 @@ void CMenus::RenderSettingsHaxx(CUIRect MainView)
 	if(DoButton_CheckBox(&s_ButtonChatbubble, Localize("Chatbubble"), g_Config.m_ClChatbubble, &Button, Localize("Send the chatbubble when you are typing")))
 		g_Config.m_ClChatbubble ^= 1;
 
-	Left.HSplitTop(5.0f, 0, &Left);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	static CButtonContainer s_ButtonBroadcastATH;
-	if(DoButton_CheckBox(&s_ButtonBroadcastATH, Localize("Show others which client you are using :3"), g_Config.m_ClNamePlatesBroadcastATH, &Button, Localize("Disabling it has only an effect as long as no lua script is active!")))
-		g_Config.m_ClNamePlatesBroadcastATH ^= 1;
-
 	{
 		CUIRect ClearCacheButton;
 		Left.HSplitTop(5.0f, 0, &Left);

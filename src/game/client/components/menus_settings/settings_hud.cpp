@@ -220,14 +220,6 @@ void CMenus::RenderSettingsHUDGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&s_CheckboxNameplatesClancolors, Localize("Highlight your clan"), g_Config.m_ClNameplatesClancolors, &Button, 0, CUI::CORNER_B))
 			g_Config.m_ClNameplatesClancolors ^= 1;
 	}
-
-	Right.HSplitTop(5.0f, 0, &Right);
-	Right.HSplitTop(20.0f, &Button, &Right);
-	static CButtonContainer s_CheckboxNamePlatesATH;
-	if(DoButton_CheckBox(&s_CheckboxNamePlatesATH, Localize("Show other ATH users"), g_Config.m_ClNamePlatesATH, &Button))
-		g_Config.m_ClNamePlatesATH ^= 1;
-
-
 }
 
 void CMenus::RenderSettingsHUDColors(CUIRect MainView)

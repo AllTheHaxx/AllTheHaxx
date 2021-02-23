@@ -1084,9 +1084,9 @@ void CClient::Disconnect()
 	CALLSTACK_ADD();
 
 	if(m_DummyConnected)
-		DummyDisconnect(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0);
+		DummyDisconnect("");
 	if(m_State != IClient::STATE_OFFLINE)
-		DisconnectWithReason(g_Config.m_ClNamePlatesBroadcastATH ? "> AllTheHaxx < " : 0);
+		DisconnectWithReason("");
 }
 
 void CClient::TimeMeOut()
