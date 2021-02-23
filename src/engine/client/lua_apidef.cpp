@@ -572,21 +572,22 @@ void CLuaFile::RegisterLuaCallbacks(lua_State *L) // LUABRIDGE!
 
 		/// Game.Input
 		.beginClass<CControls>("CControls")
-			.addProperty("Direction", &CControls::GetDirection, &CControls::SetDirection)
-			.addProperty("Fire", &CControls::GetFire, &CControls::SetFire)
-			.addProperty("Hook", &CControls::GetHook, &CControls::SetHook)
-			.addProperty("Jump", &CControls::GetJump, &CControls::SetJump)
-			.addProperty("WantedWeapon", &CControls::GetWantedWeapon, &CControls::SetWantedWeapon)
-			.addProperty("TargetX", &CControls::GetTargetX, &CControls::SetTargetX)
-			.addProperty("TargetY", &CControls::GetTargetY, &CControls::SetTargetY)
-			.addProperty("MouseX", &CControls::GetMouseX, &CControls::SetMouseX)
-			.addProperty("MouseY", &CControls::GetMouseY, &CControls::SetMouseY)
+			// sick and tired of cheaters. anything a script kid can do with this is detected anyways on most servers
+			.addProperty("Direction", &CControls::GetDirection) //, &CControls::SetDirection)
+			.addProperty("Fire", &CControls::GetFire) //, &CControls::SetFire)
+			.addProperty("Hook", &CControls::GetHook) //, &CControls::SetHook)
+			.addProperty("Jump", &CControls::GetJump) //, &CControls::SetJump)
+			.addProperty("WantedWeapon", &CControls::GetWantedWeapon) //, &CControls::SetWantedWeapon)
+			.addProperty("TargetX", &CControls::GetTargetX) //, &CControls::SetTargetX)
+			.addProperty("TargetY", &CControls::GetTargetY) //, &CControls::SetTargetY)
+			.addProperty("MouseX", &CControls::GetMouseX) //, &CControls::SetMouseX)
+			.addProperty("MouseY", &CControls::GetMouseY) //, &CControls::SetMouseY)
 			.addFunction("SetScoreboardFlag", &CControls::SetScoreboardFlag)
 		.endClass()
 
 		/// Engine.Input
 		.beginClass<IInput>("IInput")
-			.addFunction("KeyPress", &IInput::KeyPress)
+			//.addFunction("KeyPress", &IInput::KeyPress)
 			.addFunction("KeyIsPressed", &IInput::KeyIsPressedLua)
 			.addFunction("KeyName", &IInput::KeyNameSTD)
 			.addFunction("KeyID", &IInput::GetKeyID)
