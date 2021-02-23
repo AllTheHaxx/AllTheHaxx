@@ -34,6 +34,7 @@ lad_maker*
 /serverlaunch_*
 /colorcode*
 /test_*
+/_RELEASE*
 
 /*.dll
 /*.a
