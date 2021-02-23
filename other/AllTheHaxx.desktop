@@ -3,12 +3,8 @@ Exec=AllTheHaxx 'failsafe 1'
 Name[de_DE]=Abgesicherter Modus
 Name=Start Failsafe
 
-[Desktop Action stealth-mode]
-Exec=AllTheHaxx --stealth-mode
-Name=Start in stealth mode
-
 [Desktop Entry]
-Actions=stealth-mode;failsafe;
+Actions=failsafe;
 Categories=Game;ArcadeGame;
 GenericName=AllTernative Teeworlds Client
 Encoding=UTF-8

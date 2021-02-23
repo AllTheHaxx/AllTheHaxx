@@ -169,8 +169,6 @@ MACRO_CONFIG_INT(BrAutoCache, br_auto_cache, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAV
 MACRO_CONFIG_INT(BrShowDDNet, br_show_ddnet, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SAVE, "0: Show in serverlist (hide Tab) | 1: Move servers to DDNet Tab | 2: Show in both")
 MACRO_CONFIG_INT(BrAllowPureMod, br_allow_pure_mod, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow joining modded pure server")
 MACRO_CONFIG_INT(BrIgnoreConnecting, br_ignore_connecting, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Ignore (connecting) clients on servers")
-
-MACRO_CONFIG_INT(ClStealthForceATHBroadcast, cl_stealth_force_ath_broadcast, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Send the ATH sign to others even when in stealth mode")
 //MACRO_CONFIG_INT(BrLazySorting, br_lazy_sorting, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Only sort the serverlist once when reloading has finished")
 //
 MACRO_CONFIG_STR(ClSpoofSrvIP, cl_spoofsrv_ip, 32, "127.0.0.1", CFGFLAG_CLIENT|CFGFLAG_SAVE, "IP of the spoofing server")
@@ -227,7 +225,7 @@ MACRO_CONFIG_INT(ClIRCGetStartupMsgs, cl_irc_get_startup_msgs, 0, 0, 1, CFGFLAG_
 MACRO_CONFIG_INT(SndIRC, snd_irc, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Play a sound when an irc chat message arrives")
 MACRO_CONFIG_INT(ClIRCAllowJoin, cl_irc_allow_join, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Allow others to request the server you're playing on")
 //
-MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua (not available in stealth mode - disabling it will unload all active scripts)")
+MACRO_CONFIG_INT(ClLua, cl_lua, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Lua")
 //
 MACRO_CONFIG_INT(TexLazyLoading, tex_lazy_loading, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Don't load gametextures until needed (WARNING: disabling this takes up a HUGE amount of ram!!)")
 MACRO_CONFIG_STR(TexGame, tex_game, 128, "!default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Gameskin texture")
