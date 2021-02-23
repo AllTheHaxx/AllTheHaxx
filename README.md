@@ -15,7 +15,8 @@ Listen kid. We will __not__ show you how to compile this client so you can get y
 
 If you are an actual developer, just install the [Download MinGW-w64](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) compiler and if you know what you are doing, you will succeed (build process is basically the same as for DDNet). If you want to contribute (!) and need help compiling you may raise an issue or contact us.
 
-__OUTDATED / UNSUPPORTED__
+__OUTDATED / UNSUPPORTED INFORMATION BELOW__
+
 ~~To compile AllTheHaxx yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything).~~
 ~~Make sure you meet all requirements that are made by the DDNet client (listed below)~~
 
