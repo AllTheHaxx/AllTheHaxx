@@ -71,7 +71,7 @@ void CMenus::RenderPopups()
 		}
 		else if(str_find_nocase(pExtraText, "bot"))
 		{
-			str_format(aExtraText, sizeof(aExtraText), "%s\n\n\n%s", pExtraText, Localize("selber bot junge guck dich mal an"));
+			str_format(aExtraText, sizeof(aExtraText), "%s\n\n\n%s", pExtraText, "selber bot junge guck dich mal an");
 			pExtraText = aExtraText;
 		}
 		ExtraAlign = CUI::ALIGN_CENTER;
