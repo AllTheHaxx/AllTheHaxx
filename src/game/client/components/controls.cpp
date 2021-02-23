@@ -247,12 +247,6 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
 
-	if(!IsDDNet(Client()->GetServerInfo()))
-	{
-		if(g_Config.m_ClNamePlatesBroadcastATH) || m_pClient->Client()->Lua()->NumActiveScripts() > 0 || (!m_pClient->m_pCamera->ZoomAllowed() && m_pClient->m_pCamera->m_Zoom > 1.0f))
-			m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_ATH1 | PLAYERFLAG_ATH2;
-	}
-
 	if(!m_pClient->m_pChat->m_CryptSendQueue.empty())
 	{
 		int buf = m_pClient->m_pChat->m_CryptSendQueue[0] << 16;

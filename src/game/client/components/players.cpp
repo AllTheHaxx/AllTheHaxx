@@ -834,10 +834,6 @@ void CPlayers::RenderPlayer(
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, OtherTeam);
 	LUA_FIRE_EVENT("PostRenderPlayer", pInfo.m_ClientID, Position.x, Position.y, Direction.x, Direction.y, OtherTeam);
 
-	m_pClient->m_aClients[pInfo.m_ClientID].m_ATH |=
-			   (m_pClient->m_Snap.m_aCharacters[pInfo.m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH1) &&
-			   (m_pClient->m_Snap.m_aCharacters[pInfo.m_ClientID].m_Cur.m_PlayerFlags&PLAYERFLAG_ATH2);
-
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);

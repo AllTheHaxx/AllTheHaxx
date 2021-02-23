@@ -2280,7 +2280,6 @@ void CGameClient::CClientData::Reset()
 	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
 
 	// haxx
-	m_ATH = false;
 	m_Addr[0] = 0;
 	m_Spoofable = false;
 	UpdateRenderInfo();

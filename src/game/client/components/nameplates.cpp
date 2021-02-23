@@ -110,25 +110,6 @@ void CNamePlates::RenderNameplate(
 
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
-
-		// render ATH sign
-		if(g_Config.m_ClNamePlatesATH &&
-				(pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH1) && (pPlayerChar->m_PlayerFlags&PLAYERFLAG_ATH2))
-		{
-			const float Alpha = clamp((sinf((float)Client()->LocalTime()*3.141592f*((float)g_Config.m_ClNamePlatesATHBlinkTime/100.0f))+0.5f), 0.0f, 1.0f);
-			float PosY = Position.y - 65.0f;
-
-			PosY -= FontSizeName;  // take name into account
-			if(str_length(pClan) > 0 && g_Config.m_ClNameplatesClan)
-				PosY -= FontSizeClan-5.0f; // take clan into account
-
-			// do the actual thing
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ATH].m_Id);
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-			RenderTools()->DrawRoundRect(Position.x-30.f, PosY, 55.f, 25.f, 0.f);
-			Graphics()->QuadsEnd();
-		}
 	}
 }
 
