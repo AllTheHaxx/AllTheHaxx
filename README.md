@@ -5,7 +5,7 @@
 
 Our own flavor of the popular [DDNet](https://github.com/ddnet/ddnet) client modification for the 2D shooter [teeworlds](http://teeworlds.com). Take a look at our [homepage](https://AllTheHaxx.github.io/) for more information.
 
-Development discussions happen on #AllTheHaxx on ~~Quakenet ([»Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4))~~ Discord [»Invite](https://discord.gg/arJg6aKaaj).
+Development discussions happen on #AllTheHaxx on ~~Quakenet ([»Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4))~~ Discord ([»Invite](https://discord.gg/arJg6aKaaj)).
 
 You can get binary releases from [our website](https://AllTheHaxx.github.io/).
 

@@ -172,4 +172,6 @@ static const char *apSayings[] = {
 		,"Medskalin Ô.Ô"
 		,"Try Peyote cactus"
 		,"xush' == Meskalin ô.O"
+		,"Join our discord (link on website)!"
+		,"READ THE NEWS, FAM!"
 };
