@@ -5,7 +5,7 @@
 
 Our own flavor of the popular [DDNet](https://github.com/ddnet/ddnet) client modification for the 2D shooter [teeworlds](http://teeworlds.com). Take a look at our [homepage](https://AllTheHaxx.github.io/) for more information.
 
-Development discussions happen on #AllTheHaxx on Quakenet ([»Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4)).
+Development discussions happen on #AllTheHaxx on ~~Quakenet ([»Webchat](http://webchat.quakenet.org/?channels=AllTheHaxx&uio=d4))~~ Discord [»Invite](https://discord.gg/arJg6aKaaj).
 
 You can get binary releases from [our website](https://AllTheHaxx.github.io/).
 
@@ -13,7 +13,7 @@ Building
 --------
 Listen kid. We will __not__ show you how to compile this client so you can get your stupid lua scripts that require cheating features to work again.
 
-If you are an actual developer, just install the [Download MinGW-w64](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) compiler and if you know what you are doing, you will succeed (build process is basically the same as for DDNet). If you want to contribute (!) and need help compiling you may raise an issue or contact us.
+If you are an actual developer, just install the [MinGW-w64](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) compiler and if you know what you are doing, you will succeed (build process is basically the same as for DDNet). If you want to contribute (!) and need help compiling you may raise an issue or contact us.
 
 __OUTDATED / UNSUPPORTED INFORMATION BELOW__
 
