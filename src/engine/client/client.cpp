@@ -515,10 +515,29 @@ int CClient::SendMsgEx(CMsgPacker *pMsg, int Flags, bool System)
 	return 0;
 }
 
+void CClient::SendAllTheHaxx(bool Dummy)
+{
+	CALLSTACK_ADD();
+
+	CMsgPacker Msg(NETMSG_IAMALLTHEHAXX);
+	Msg.AddInt(GAME_ATH_VERSION_NUMERIC);
+	Msg.AddString(
+		"AllTheHaxx " ALLTHEHAXX_VERSION
+		" (Teeworlds " GAME_VERSION
+		", DDNet " DDNET_VERSION
+		", built on " BUILD_DATE
+		")",
+		0
+	);
+	Msg.AddInt(Dummy);
+	SendMsgExY(&Msg, MSGFLAG_VITAL, true, Dummy);
+}
+
 void CClient::SendInfo()
 {
 	CALLSTACK_ADD();
 
+	SendAllTheHaxx(false);
 	CMsgPacker Msg(NETMSG_INFO);
 	Msg.AddString(GameClient()->NetVersion(), 128);
 	Msg.AddString(g_Config.m_Password, 128);
@@ -3407,6 +3426,7 @@ void CClient::RunMainloop()
 			m_DummySendConnInfo = false;
 
 			// send client info
+			SendAllTheHaxx(true);
 			CMsgPacker MsgInfo(NETMSG_INFO);
 			MsgInfo.AddString(GameClient()->NetVersion(), 128);
 			MsgInfo.AddString(g_Config.m_Password, 128);

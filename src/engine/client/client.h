@@ -231,6 +231,7 @@ public:
 	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1);
 
 	int SendMsgEx(CMsgPacker *pMsg, int Flags, bool System=true);
+	void SendAllTheHaxx(bool Dummy);
 	void SendInfo();
 	void SendEnterGame();
 	void SendReady();

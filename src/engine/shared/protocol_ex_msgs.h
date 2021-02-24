@@ -20,3 +20,4 @@
 UUID(NETMSG_WHATIS,       "what-is@ddnet.tw")
 UUID(NETMSG_ITIS,         "it-is@ddnet.tw")
 UUID(NETMSG_IDONTKNOW,    "i-dont-know@ddnet.tw")
+UUID(NETMSG_IAMALLTHEHAXX, "i-am-allthehaxx@allthehaxx.github.io")
