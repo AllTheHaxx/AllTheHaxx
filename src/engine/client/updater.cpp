@@ -13,7 +13,6 @@
 #include "fetcher.h"
 
 #define LATEST_VERSION_FILE "latest"
-#define LATEST_DDNET_VERSION_FILE "latest_ddnet"
 #define UPDATE_MANIFEST "update30.json"
 
 using std::string;
@@ -103,8 +102,6 @@ void CUpdater::CheckForUpdates(bool ForceRefresh)
 		dbg_msg("updater", "refreshing version info and news");
 		FetchFile("stuffility/master", "ath-news.txt", aDstPath, true);
 		FetchFile("stuffility/master", LATEST_VERSION_FILE, aDstPath, true);
-		if(g_Config.m_ClFetchDDNetFakeVersion)
-			FetchFile("stuffility/master", LATEST_DDNET_VERSION_FILE, aDstPath, true);
 	}
 	else
 		dbg_msg("updater", "skipping version check, already did it");
@@ -163,8 +160,6 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	{
 		if(str_comp(filename, "ath-news.txt") == 0) // news are allowed to fail...
 			str_copy(pSelf->m_aNews, pFailedNewsMsg, sizeof(pSelf->m_aNews));
-		else if(str_comp(filename, LATEST_VERSION_FILE) == 0 || str_comp(filename, LATEST_DDNET_VERSION_FILE) == 0) // version check is definitely allowed to fail
-			pSelf->m_pEngine->WriteErrorLog("updater/warning", "version check failed: couldn't download '%s'", filename);
 		else if(str_comp(filename, UPDATE_MANIFEST) == 0) // update manifest is optional, thus allowewd to fail
 		{
 			pSelf->SetState(STATE_SYNC_POSTGETTING);
@@ -254,22 +249,6 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 					NeedCheck = true;
 				if(NeedCheck)
 					pSelf->m_GitHubAPI.CheckVersion();
-			}
-			else if(str_comp(filename, LATEST_DDNET_VERSION_FILE) == 0)
-			{
-				IOHANDLE f = pSelf->m_pStorage->OpenFile("tmp/" LATEST_DDNET_VERSION_FILE, IOFLAG_READ, IStorageTW::TYPE_SAVE);
-				if(f)
-				{
-					char aBuf[16];
-					mem_zerob(aBuf);
-					io_read(f, aBuf, sizeof(aBuf));
-					io_close(f);
-					str_strip_right_whitespaces(aBuf);
-					int VersionID = str_toint(aBuf);
-					dbg_msg("updater/debug", "latest ddnet version id: %i ('%s'), setting it as fake ddnet version", VersionID, aBuf);
-
-					g_Config.m_ClDDNetFakeVersion = VersionID;
-				}
 			}
 		}
 		else if(pSelf->State() == STATE_GETTING_MANIFEST && str_comp(filename, UPDATE_MANIFEST) == 0)
