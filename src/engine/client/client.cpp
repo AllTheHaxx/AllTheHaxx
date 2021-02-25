@@ -685,7 +685,8 @@ void CClient::SendInput()
 		m_CurrentInput[g_Config.m_ClDummy]++;
 		m_CurrentInput[g_Config.m_ClDummy]%=200;
 
-		SendMsgEx(&Msg, MSGFLAG_FLUSH);
+		if(!g_Config.m_ClPredictionPlay)
+			SendMsgEx(&Msg, MSGFLAG_FLUSH);
 	}
 
 	if(m_LastDummy != (bool)g_Config.m_ClDummy)
@@ -2946,10 +2947,13 @@ void CClient::Update()
 			PrevtickStart = PrevPredTick*time_freq()/50;
 			m_PredIntraTick[g_Config.m_ClDummy] = (PredNow - PrevtickStart) / (float)(CurtickStart-PrevtickStart);
 
-			if(NewPredTick < m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick-SERVER_TICK_SPEED || NewPredTick > m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick+SERVER_TICK_SPEED)
+			if(!g_Config.m_ClPredictionPlay)
 			{
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "prediction time reset!");
-				m_PredictedTime.Init(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick*time_freq()/50);
+				if(NewPredTick < m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick-SERVER_TICK_SPEED || NewPredTick > m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick+SERVER_TICK_SPEED)
+				{
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "prediction time reset!");
+					m_PredictedTime.Init(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick*time_freq()/50);
+				}
 			}
 
 			if(NewPredTick > m_PredTick[g_Config.m_ClDummy])

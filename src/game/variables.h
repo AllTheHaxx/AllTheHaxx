@@ -60,6 +60,8 @@ MACRO_CONFIG_INT(ClShowpredPos, cl_showpred_pos, 0, 0, 3, CFGFLAG_CLIENT|CFGFLAG
 MACRO_CONFIG_INT(ClEyeWheel, cl_eye_wheel, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show eye wheel along together with emotes")
 MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIENT|CFGFLAG_SAVE, "How long the eyes emotes last")
 
+MACRO_CONFIG_INT(ClPredictionPlay, cl_prediction_play, 0, 0, 1, CFGFLAG_CLIENT, "Play without sending any input to the server") // TODO: naming xd
+
 MACRO_CONFIG_INT(ClAirjumpindicator, cl_airjumpindicator, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "")
 MACRO_CONFIG_INT(ClThreadsoundloading, cl_threaded_soundloading, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Load sound files threaded to speed up client start")
 MACRO_CONFIG_INT(ClThreadskinloading, cl_threaded_skinloading, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "[BROKEN] Load skin textures threaded and on demand to speed up client start")
