@@ -129,6 +129,11 @@ void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang,
 
 	// prepare the entry
 	CTransEntry Entry;
+	/*mem_zero(Entry.m_aText, sizeof(Entry.m_aText));
+	mem_zero(Entry.m_aSrcLang, sizeof(Entry.m_aSrcLang));
+	mem_zero(Entry.m_aDstLang, sizeof(Entry.m_aDstLang));
+	mem_zero(Entry.m_aSaidBy, sizeof(Entry.m_aSaidBy));
+	mem_zero(Entry.m_aMentionedName, sizeof(Entry.m_aMentionedName));*/
 	str_copyb(Entry.m_aText, pText);
 	str_copyb(Entry.m_aSrcLang, pSrcLang);
 	str_copyb(Entry.m_aDstLang, pDstLang);

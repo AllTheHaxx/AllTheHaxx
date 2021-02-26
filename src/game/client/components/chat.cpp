@@ -846,6 +846,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 		else if(ClientID == FAKE_ID_TRANS)
 		{
 			//str_copy(m_aLines[m_CurrentLine].m_aName, "[*Translator*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
+			mem_zero(m_aLines[m_CurrentLine].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
 			m_aLines[m_CurrentLine].m_NameColor = FAKE_ID_TRANS;
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
 		}
