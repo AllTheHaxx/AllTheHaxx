@@ -1324,7 +1324,7 @@ void CGameClient::OnNewSnapshot()
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "invalidated index=%d type=%d (%s) size=%d id=%d", Index, Item.m_Type, m_NetObjHandler.GetObjName(Item.m_Type), Item.m_DataSize, Item.m_ID);
-					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+					//Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 				}
 				Client()->SnapInvalidateItem(IClient::SNAP_CURRENT, Index);
 			}
