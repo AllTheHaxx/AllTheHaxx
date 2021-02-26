@@ -14,7 +14,6 @@ class CChat : public CComponent
 	enum
 	{
 		MAX_LINES = 25,
-		FAKE_ID_TRANS = -1337,
 		FAKE_ID_LUA = -2,
 	};
 
@@ -43,6 +42,7 @@ class CChat : public CComponent
 		MODE_TEAM,
 		MODE_HIDDEN,
 		MODE_CRYPT,
+		MODE_TRANS,
 
 		CHAT_SERVER=0,
 		CHAT_HIGHLIGHT,

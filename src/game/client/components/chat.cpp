@@ -713,7 +713,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			const char *pTransStart = PrepareMsgForTrans(pDecrypted ? pDecrypted : pMsg->m_pMessage, aMentionedName);
 			if(str_length(pTransStart) > 1)
 				m_pTranslator->RequestTranslation(g_Config.m_ClTransInSrc, g_Config.m_ClTransInDst, pTransStart, true,
-												  aMentionedName, m_pClient->m_aClients[pMsg->m_ClientID].m_aName);
+												  aMentionedName, pMsg->m_ClientID);
 		}
 	}
 }
@@ -843,12 +843,12 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
 		}
-		else if(ClientID == FAKE_ID_TRANS)
+		else if(m_aLines[m_CurrentLine].m_Team == MODE_TRANS) // TODO: move xd
 		{
-			//str_copy(m_aLines[m_CurrentLine].m_aName, "[*Translator*]: ", sizeof(m_aLines[m_CurrentLine].m_aName));
-			mem_zero(m_aLines[m_CurrentLine].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
-			m_aLines[m_CurrentLine].m_NameColor = FAKE_ID_TRANS;
-			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
+			//mem_zero(m_aLines[m_CurrentLine].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
+			str_copy(m_aLines[m_CurrentLine].m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
+			m_aLines[m_CurrentLine].m_NameColor = MODE_TRANS;
+			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), ": %s", pLine);
 		}
 		else if(ClientID <= FAKE_ID_LUA)
 		{
@@ -894,7 +894,10 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine, bool Hidden)
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, ClientID == -1?"serv":Team >= 2?"whisper":(m_aLines[m_CurrentLine].m_Team?"teamchat":"chat"), aBuf, Highlighted);
+		if(m_aLines[m_CurrentLine].m_Team == MODE_TRANS)
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "trans", aBuf, Highlighted);
+		else
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, ClientID == -1?"serv":Team >= 2?"whisper":(m_aLines[m_CurrentLine].m_Team?"teamchat":"chat"), aBuf, Highlighted);
 	}
 
 	// play sound
@@ -954,11 +957,10 @@ void CChat::OnRender()
 			CTranslator::CTransEntry Entry = m_pTranslator->NextTranslation();
 			if(Entry.m_In)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s: '%s%s%s' (%s → %s)",
-						   Entry.m_aSaidBy,
+				str_format(aBuf, sizeof(aBuf), "'%s%s%s' (%s → %s)",
 						   Entry.m_aMentionedName, Entry.m_aMentionedName[0] != '\0' ? ": " : "", Entry.m_aText,
 						   Entry.m_aSrcLang, Entry.m_aDstLang);
-				AddLine(FAKE_ID_TRANS, 0, aBuf);
+				AddLine(Entry.m_SaidBy, MODE_TRANS, aBuf);
 			}
 			else
 			{
@@ -1157,7 +1159,7 @@ void CChat::OnRender()
 		// friends always in green // TODO: settings pls!
 		if(m_aLines[r].m_ClientID > 0 && m_aLines[r].m_ClientID < MAX_CLIENTS && g_Config.m_ClColorfulClient && m_pClient->Friends()->IsFriend(m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aName, m_pClient->m_aClients[m_aLines[r].m_ClientID].m_aClan, true))
 			TextRender()->TextColor(0,0.7f,0,Blend);
-		else if (m_aLines[r].m_ClientID == FAKE_ID_TRANS) // translator in blue
+		else if (m_aLines[r].m_Team == MODE_TRANS) // translator in blue
 			TextRender()->TextColor(0.2f,0.2f,0.7f,Blend);
 		else if (m_aLines[r].m_ClientID <= FAKE_ID_LUA) // lua in ReD
 			TextRender()->TextColor(0.7f,0.2f,0.2f,Blend);
@@ -1167,7 +1169,7 @@ void CChat::OnRender()
 		vec3 rgb;
 		if (m_aLines[r].m_ClientID == -1) // system message
 			rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
-		else if (m_aLines[r].m_ClientID == FAKE_ID_TRANS) // translator
+		else if (m_aLines[r].m_Team == MODE_TRANS) // translator
 			rgb = vec3(0.45f, 0.45f, 1.0f);
 		else if (m_aLines[r].m_ClientID <= FAKE_ID_LUA) // lua
 			rgb = vec3(1.0f, 0.45f, 0.45f);
@@ -1284,16 +1286,16 @@ bool CChat::HandleTCommands(const char *pMsg)
 
 	if(!str_comp_nocase(aCmd[0], "$cmdlist"))
 	{
-		AddLine(FAKE_ID_TRANS, 0, "~~~~ Commands ~~~~");
-		AddLine(FAKE_ID_TRANS, 0, "'$$tout <dst> <message>': Translate a message");
-		AddLine(FAKE_ID_TRANS, 0, "'$$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
+		AddLine(0, MODE_TRANS, "~~~~ Commands ~~~~");
+		AddLine(0, MODE_TRANS, "'$$tout <dst> <message>': Translate a message");
+		AddLine(0, MODE_TRANS, "'$$tin <src> <ID>': Translate message in the chat ($tin 0 to translate the last message)");
 		return true;
 	}
 	else if(!str_comp_nocase(aCmd[0], "$tout"))
 	{
 		if(!aCmd[1][0] || !aCmd[2][0])
 		{
-			AddLine(FAKE_ID_TRANS, 0, "Please use '$$tout <dst> <message>'");
+			AddLine(0, MODE_TRANS, "Please use '$$tout <dst> <message>'");
 			return true;
 		}
 
@@ -1319,7 +1321,7 @@ bool CChat::HandleTCommands(const char *pMsg)
 	{
 		if(!aCmd[1][0] || !aCmd[2][0])
 		{
-			AddLine(FAKE_ID_TRANS, 0, "Please use '$$tin <src> <ID>'");
+			AddLine(0, MODE_TRANS, "Please use '$$tin <src> <ID>'");
 			return true;
 		}
 
@@ -1329,7 +1331,7 @@ bool CChat::HandleTCommands(const char *pMsg)
 		char aMentionedName[MAX_NAME_LENGTH];
 		const char *pTransStart = PrepareMsgForTrans(m_aLines[m_CurrentLine-MsgID].m_aText, aMentionedName);
 		m_pTranslator->RequestTranslation(aCmd[1], g_Config.m_ClTransInDst, pTransStart, true,
-										  aMentionedName, m_pClient->m_aClients[m_aLines[m_CurrentLine-MsgID].m_ClientID].m_aName);
+										  aMentionedName, m_aLines[m_CurrentLine-MsgID].m_ClientID);
 		return true;
 	}
 

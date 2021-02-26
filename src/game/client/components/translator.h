@@ -27,7 +27,7 @@ public:
 			m_aSrcLang[0] = '\0';
 			m_aDstLang[0] = '\0';
 			m_In = true;
-			m_aSaidBy[0] = '\0';
+			m_SaidBy = -42;
 			m_aMentionedName[0] = '\0';
 		}
 
@@ -37,11 +37,11 @@ public:
 		char m_aDstLang[16];
 
 		bool m_In;
-		char m_aSaidBy[MAX_NAME_LENGTH];
+		int m_SaidBy;
 		char m_aMentionedName[MAX_NAME_LENGTH];
 	};
 
-	void RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In, const char *pMentionedName, const char *pSaidBy = "");
+	void RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In, const char *pMentionedName, int SaidBy = -42);
 	inline bool HasTranslation()
 	{
 		LOCK_SECTION_MUTEX_OPT(m_ThreadMutex, return false)

@@ -117,7 +117,7 @@ void CTranslator::TranslationWorker()
 	}
 }
 
-void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In, const char *pMentionedName, const char *pSaidBy)
+void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang, const char *pText, bool In, const char *pMentionedName, int SaidBy)
 {
 	CALLSTACK_ADD();
 
@@ -138,7 +138,7 @@ void CTranslator::RequestTranslation(const char *pSrcLang, const char *pDstLang,
 	str_copyb(Entry.m_aSrcLang, pSrcLang);
 	str_copyb(Entry.m_aDstLang, pDstLang);
 	Entry.m_In = In;
-	str_copyb(Entry.m_aSaidBy, pSaidBy);
+	Entry.m_SaidBy = SaidBy;
 	str_copyb(Entry.m_aMentionedName, pMentionedName);
 
 	// insert the entry
