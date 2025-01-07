@@ -1,4 +1,4 @@
-import os, imp, sys
+import os, sys
 from datatypes import *
 import content
 import network
