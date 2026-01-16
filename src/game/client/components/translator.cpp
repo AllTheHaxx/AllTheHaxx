@@ -71,6 +71,7 @@ void CTranslator::TranslationWorker()
 			char aPost[16*1024];
 
 			curl_easy_setopt(m_pHandle, CURLOPT_URL, "https://api.mymemory.translated.net/get");
+			curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 			char *pEscapedTest = curl_easy_escape(m_pHandle, Entry.m_aText, 0);
 			str_format(aPost, sizeof(aPost), "q=%s&langpair=%s|%s&de=associatingblog@gmail.com", pEscapedTest, Entry.m_aSrcLang, Entry.m_aDstLang);
 			curl_free(pEscapedTest);
