@@ -4,6 +4,7 @@
 #define GAME_VERSION_H
 #include "generated/nethash.cpp"
 
+#define GAME_NAME "AllTheHaxx"
 #define GAME_VERSION "0.6.4"
 #define ATH_VERSION "1.0.0"
 #define DDNET_VERSION "10.7.1+"

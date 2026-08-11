@@ -92,6 +92,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CIRC m_IRC;
 
 	char m_aServerAddressStr[256];
+	CUuid m_ConnectionId = UUID_ZEROED;
 
 	unsigned m_SnapshotParts;
 	int64 m_LocalStartTime;

@@ -133,6 +133,8 @@ protected:
 
 	int m_CheckInfo[2];
 
+	char m_aDDNetVersionStr[64];
+
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 	static void ConKillDummy(IConsole::IResult *pResult, void *pUserData);
@@ -360,6 +362,7 @@ public:
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
 	virtual const char *NetVersion();
+	virtual const char *DDNetVersionStr();
 
 	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy);
 
