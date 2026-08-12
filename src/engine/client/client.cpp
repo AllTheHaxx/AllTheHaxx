@@ -456,7 +456,7 @@ void CClient::LoadMapDatabaseUrls()
 	{
 		MapDbUrl e;
 		e.prior = 0;
-		e.url = std::string("http://maps.ddnet.tw");
+		e.url = std::string("http://maps.ddnet.org");
 		m_MapDbUrls.add(e);
 	}
 }
