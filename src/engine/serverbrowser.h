@@ -10,7 +10,7 @@
 
 #define SERVERLIST_CACHE_FILE "tmp/cache/serverlist.bin"
 #define DDNET_INFO_FILE "tmp/cache/ddnet-info.json"
-#define DDNET_INFO_URL "https://info.ddnet.tw/info"
+#define DDNET_INFO_URL "https://info.ddnet.org/info"
 
 /*
 	Structure: CServerInfo

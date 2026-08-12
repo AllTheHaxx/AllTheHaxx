@@ -334,7 +334,7 @@ void CSkinDownload::LoadUrls()
 
 	if(NumURLs() == 0)
 	{
-		m_aSkinDbUrls.add(std::string("https://ddnet.tw/skins/skin/"));
+		m_aSkinDbUrls.add(std::string("https://ddnet.org/skins/skin/"));
 	}
 }
 
