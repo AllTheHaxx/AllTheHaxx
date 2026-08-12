@@ -33,4 +33,4 @@ __OUTDATED / UNSUPPORTED INFORMATION BELOW__
 
 --------------------------
 
-[![ATH](https://ga-beacon.appspot.com/UA-81641724-2/AllTheHaxx/repo?pixel&autoReferer)](https://allthehaxx.github.com)
+[![ATH](https://ga-beacon.appspot.com/UA-81641724-2/AllTheHaxx/repo?pixel&autoReferer)](https://allthehaxx.github.io)
