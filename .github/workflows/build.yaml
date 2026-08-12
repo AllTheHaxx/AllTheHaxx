@@ -1,0 +1,56 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build-bam:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Checkout bam
+      uses: actions/checkout@v2
+      with:
+        repository: matricks/bam
+        ref: v0.4.0
+        path: ./bam
+
+    - name: Prepare Linux
+      if: contains(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install libfreetype6-dev libsdl2-dev libglew-dev libcurl4-openssl-dev curl -y
+        cd bam
+        ./make_unix.sh
+
+    - name: Prepare MacOS
+      if: contains(matrix.os, 'macOS')
+      run: |
+        brew update
+        brew install sdl2
+        cd bam
+        ./make_unix.sh
+
+    - name: Prepare Windows
+      if: contains(matrix.os, 'windows')
+      run: |
+        cd bam
+        ./make_win32_msvc.bat
+
+    - name: Build in debug mode
+      run: ./bam/bam client_debug
+
+    - name: Build in release mode
+      run: ./bam/bam client_release
+
+    - name: Create MacOS app using make_release.py
+      if: contains(matrix.os, 'macOS')
+      run: |
+        sudo python3 scripts/make_release.py master macos
