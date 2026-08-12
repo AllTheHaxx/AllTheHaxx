@@ -268,6 +268,7 @@ public:
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
+	virtual const char *DDNetVersionStr() = 0;
 
 	virtual void OnDummyDisconnect() = 0;
 };

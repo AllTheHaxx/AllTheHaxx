@@ -537,6 +537,12 @@ void CClient::SendInfo()
 {
 	CALLSTACK_ADD();
 
+	CMsgPacker MsgVer(NETMSG_CLIENTVER);
+	MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
+	MsgVer.AddInt(CLIENT_VERSIONNR);
+	MsgVer.AddString(GameClient()->DDNetVersionStr(), -1);
+	SendMsgEx(&MsgVer, MSGFLAG_VITAL);
+
 	SendAllTheHaxx(false);
 	CMsgPacker Msg(NETMSG_INFO);
 	Msg.AddString(GameClient()->NetVersion(), 128);
@@ -1032,6 +1038,7 @@ void CClient::ConnectImpl()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
 		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
+	m_ConnectionId = RandomUuid();
 	ServerInfoRequest();
 
 	m_RconAuthed[0] = 0;
@@ -3426,6 +3433,12 @@ void CClient::RunMainloop()
 			m_DummySendConnInfo = false;
 
 			// send client info
+			CMsgPacker MsgVer(NETMSG_CLIENTVER);
+			MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
+			MsgVer.AddInt(CLIENT_VERSIONNR);
+			MsgVer.AddString(GameClient()->DDNetVersionStr(), -1);
+			SendMsgExY(&MsgVer, MSGFLAG_VITAL, true, 1);
+
 			SendAllTheHaxx(true);
 			CMsgPacker MsgInfo(NETMSG_INFO);
 			MsgInfo.AddString(GameClient()->NetVersion(), 128);
