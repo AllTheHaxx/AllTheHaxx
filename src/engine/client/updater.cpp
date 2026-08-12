@@ -336,7 +336,7 @@ void CUpdater::ParseUpdate()
 						if(!pFileStr)
 						{
 							dbg_msg("updater/ERROR", "Failed to extract json data :");
-							dbg_msg("updater/ERROR", "k=%i file='%s' @ %p", k, pFileStr, (void *)pFileStr);
+							dbg_msg("updater/ERROR", "k=%i", k);
 							continue;
 						}
 						try {
